@@ -1,0 +1,160 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/MapPanel.gd" id="2_map"]
+[ext_resource type="Script" path="res://scripts/TextLog.gd" id="3_log"]
+[ext_resource type="Script" path="res://scripts/CharacterPanel.gd" id="4_character"]
+[ext_resource type="Script" path="res://scripts/InventoryPanel.gd" id="5_inventory"]
+[ext_resource type="Script" path="res://scripts/Hotbar.gd" id="6_hotbar"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="MapPanel" type="Control" parent="."]
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 0
+offset_left = 940.0
+offset_top = 20.0
+offset_right = 1260.0
+offset_bottom = 340.0
+script = ExtResource("2_map")
+
+[node name="Tooltip" type="Label" parent="MapPanel"]
+visible = false
+layout_mode = 0
+offset_right = 180.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="TextLog" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 20.0
+offset_right = 900.0
+offset_bottom = 660.0
+bbcode_enabled = true
+scroll_following = true
+script = ExtResource("3_log")
+
+[node name="CharacterPanel" type="Control" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 240.0
+offset_bottom = 420.0
+script = ExtResource("4_character")
+
+[node name="NameLabel" type="Label" parent="CharacterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 200.0
+offset_bottom = 32.0
+text = "Character"
+
+[node name="HPBar" type="ProgressBar" parent="CharacterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 48.0
+offset_right = 208.0
+offset_bottom = 76.0
+max_value = 100.0
+value = 100.0
+
+[node name="StaminaBar" type="ProgressBar" parent="CharacterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 92.0
+offset_right = 208.0
+offset_bottom = 120.0
+max_value = 100.0
+value = 100.0
+
+[node name="EquipmentTitle" type="Label" parent="CharacterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 140.0
+offset_right = 120.0
+offset_bottom = 160.0
+text = "Equipment"
+
+[node name="EquipmentList" type="VBoxContainer" parent="CharacterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 168.0
+offset_right = 208.0
+offset_bottom = 268.0
+
+[node name="StatusTitle" type="Label" parent="CharacterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 288.0
+offset_right = 120.0
+offset_bottom = 308.0
+text = "Status"
+
+[node name="StatusList" type="VBoxContainer" parent="CharacterPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 316.0
+offset_right = 208.0
+offset_bottom = 396.0
+
+[node name="InventoryPanel" type="Control" parent="."]
+layout_mode = 0
+offset_left = 940.0
+offset_top = 360.0
+offset_right = 1260.0
+offset_bottom = 660.0
+script = ExtResource("5_inventory")
+
+[node name="ItemList" type="ItemList" parent="InventoryPanel"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 312.0
+offset_bottom = 292.0
+
+[node name="CommandInput" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 680.0
+offset_right = 1260.0
+offset_bottom = 720.0
+placeholder_text = "Enter command and press Enter"
+
+[node name="Hotbar" type="Control" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 620.0
+offset_right = 240.0
+offset_bottom = 720.0
+script = ExtResource("6_hotbar")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Hotbar"]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 220.0
+offset_bottom = 40.0
+
+[node name="Button0" type="Button" parent="Hotbar/HBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(68, 36)
+text = "-"
+
+[node name="Button1" type="Button" parent="Hotbar/HBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(68, 36)
+text = "-"
+
+[node name="Button2" type="Button" parent="Hotbar/HBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(68, 36)
+text = "-"

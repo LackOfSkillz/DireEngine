@@ -1,0 +1,140 @@
+diff --git a/typeclasses/rooms.py b/typeclasses/rooms.py
+index 1111111..2222222 100644
+--- a/typeclasses/rooms.py
++++ b/typeclasses/rooms.py
+@@
+ """
+ Room
+ 
+ Rooms are simple containers that has no location of their own.
+ 
+ """
+ 
+ from django.utils.translation import gettext as _
+ from evennia.objects.objects import DefaultRoom
+ from evennia.utils.utils import iter_to_str
++from utils.room_prose import build_room_description
+ 
+ from .objects import ObjectParent
+ 
+ 
+ class Room(ObjectParent, DefaultRoom):
+@@
+     See mygame/typeclasses/objects.py for a list of
+     properties and methods available on all Objects.
+     """
++
++    def at_object_creation(self):
++        super().at_object_creation()
++
++        if not self.db.desc:
++            zone_name = self.tags.get(category="zone", return_list=False) or "the district"
++            seed_parts = [self.key or "room", zone_name]
++
++            for category in ("room_x_coordinate", "room_y_coordinate", "map_x", "map_y"):
++                value = self.tags.get(category=category, return_list=False)
++                if value is not None:
++                    seed_parts.append(str(value))
++
++            if len(seed_parts) == 2:
++                seed_parts.append(str(self.id))
++
++            self.db.desc = build_room_description(
++                room_key=self.key,
++                zone_name=zone_name,
++                seed_text="|".join(seed_parts),
++            )
+ 
+     def get_display_characters(self, looker, **kwargs):
+         visible = []
+         for obj in self.contents:
+             is_character = False
+diff --git a/utils/__init__.py b/utils/__init__.py
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/utils/__init__.py
+@@
++"""Utility helpers for the game directory."""
+diff --git a/utils/room_prose.py b/utils/room_prose.py
+new file mode 100644
+index 0000000..4444444
+--- /dev/null
++++ b/utils/room_prose.py
+@@
++import random
++
++
++PERIOD_MATERIALS = [
++    "timber-framed walls",
++    "lime-washed plaster",
++    "weathered stonework",
++    "oak beams darkened by smoke",
++    "patched masonry",
++]
++
++PERIOD_STREET_DETAILS = [
++    "cart-rutted earth lies underfoot",
++    "cobbles shine where generations of traffic have polished them smooth",
++    "rainwater gathers in shallow seams between worn stones",
++    "the lane narrows between close-built walls and jutting upper stories",
++]
++
++PERIOD_SOUNDS = [
++    "Distant trade calls drift through the air.",
++    "The creak of wagon wheels and the echo of footsteps carry down the street.",
++    "Muted voices leak from nearby doors and shuttered windows.",
++    "Somewhere nearby, iron strikes wood with a hollow working rhythm.",
++]
++
++PERIOD_MARKET_DETAILS = [
++    "Canvas awnings and crowded stalls suggest a district built around trade.",
++    "The smell of barter, produce, cloth, and dust hangs lightly in the air.",
++    "Nearby shopfronts and open counters make the street feel brisk and busy.",
++]
++
++PERIOD_DOCKSIDE_DETAILS = [
++    "Tar, rope, and damp timber suggest a quarter close to the water.",
++    "The stonework shows salt stains and hard use from labor near the docks.",
++    "Everything here feels a little wetter, older, and more hard-worked.",
++]
++
++PERIOD_CIVIC_DETAILS = [
++    "Cut stone facades and straighter lines give the place a more official character.",
++    "Posted notices, orderly walls, and better-kept paving hint at civic oversight.",
++    "The district feels more deliberate here, built to be seen and remembered.",
++]
++
++PERIOD_ALLEY_DETAILS = [
++    "The close press of walls and shadow makes the passage feel more private than public.",
++    "Narrow sightlines and back-door traffic give the place a furtive character.",
++    "The way feels tighter here, with sound carrying strangely between the walls.",
++]
++
++
++def _detail_bank_for_zone(zone_name):
++    lower = (zone_name or "").lower()
++    if any(token in lower for token in ("dock", "wharf", "harbor", "river")):
++        return PERIOD_DOCKSIDE_DETAILS
++    if any(token in lower for token in ("market", "bazaar", "trade", "merchant")):
++        return PERIOD_MARKET_DETAILS
++    if any(token in lower for token in ("civic", "court", "hall", "square", "temple")):
++        return PERIOD_CIVIC_DETAILS
++    if any(token in lower for token in ("alley", "lane", "crook", "cut")):
++        return PERIOD_ALLEY_DETAILS
++    return PERIOD_STREET_DETAILS
++
++
++def build_room_description(room_key, zone_name="the district", seed_text=""):
++    seed = f"{room_key}|{zone_name}|{seed_text}"
++    rng = random.Random(seed)
++
++    material = rng.choice(PERIOD_MATERIALS)
++    street = rng.choice(PERIOD_STREET_DETAILS)
++    sound = rng.choice(PERIOD_SOUNDS)
++    district_detail = rng.choice(_detail_bank_for_zone(zone_name))
++
++    return (
++        f"{room_key} lies within {zone_name}, marked by {material}. "
++        f"Here, {street}. {district_detail} {sound}"
++    )

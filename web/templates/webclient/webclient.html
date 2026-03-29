@@ -1,0 +1,187 @@
+{% extends "webclient/base.html" %}
+
+<!-- Django-template blocks available for overloading:
+    - connecting     - custom connect messages
+    - jquery_import  - for changing to a local jquery version
+    - guilib_import  - for using your own gui lib
+-->
+
+{% block guilib_import %}{% endblock %}
+
+{% block client %}
+
+<div id="dragonsire-shell">
+  <aside id="left-rail" class="panel parchment-panel">
+    <div class="portrait-frame">
+      <div class="portrait-placeholder">DS</div>
+    </div>
+    <div class="crest-banner">Wayfarer Interface</div>
+    <div id="character-card">
+      <h2 id="character-name">Adventurer</h2>
+      <div class="character-meta" id="character-hp-label">Health 100 / 100</div>
+      <div class="meter"><div id="hp-fill" class="meter-fill hp-fill"></div></div>
+      <div class="character-meta" id="character-stamina-label">Stamina 100 / 100</div>
+      <div class="meter"><div id="stamina-fill" class="meter-fill stamina-fill"></div></div>
+    </div>
+    <div class="subpanel">
+      <div class="subpanel-title">Status</div>
+      <div id="status-list" class="tag-list"></div>
+    </div>
+    <div class="subpanel">
+      <div class="subpanel-title">Hotbar</div>
+      <div id="hotbar" class="hotbar-row">
+        <button class="hotbar-button" data-index="0" data-command="look">Look</button>
+        <button class="hotbar-button" data-index="1" data-command="inventory">Inv</button>
+        <button class="hotbar-button" data-index="2" data-command="stats">Stats</button>
+      </div>
+    </div>
+    <div class="subpanel">
+      <div class="subpanel-title">Abilities</div>
+      <div id="ability-list" class="tag-list"></div>
+    </div>
+    <div class="subpanel">
+      <div class="subpanel-title">Session</div>
+      <div id="session-status" class="status-tag">Ready</div>
+      <div id="recent-characters" class="tag-list compact"></div>
+      <div id="session-actions" class="action-row action-row-2">
+        <button id="reconnect-button" type="button">Reconnect</button>
+        <button id="audio-toggle" type="button">Audio On</button>
+      </div>
+    </div>
+  </aside>
+
+  <main id="center-stage">
+    <div id="topbar" class="panel brass-panel">
+      <div id="title-cluster">
+        <div id="titlebar">Dragons Ire</div>
+        <div id="subtitlebar">Browser Adventurer Client</div>
+      </div>
+      <div id="topbar-tabs">
+        <button class="chrome-tab active" data-view="world">World</button>
+        <button class="chrome-tab" data-view="chat">Chat</button>
+        <button class="chrome-tab" data-view="map">Map</button>
+        <button class="chrome-tab" data-view="inventory">Inventory</button>
+      </div>
+      <div id="connection-indicator">Connecting</div>
+    </div>
+
+    <section id="console-panel" class="panel obsidian-panel">
+      <div class="panel-title-row console-header">
+        <div class="panel-title">Game Feed</div>
+        <div id="room-context">Live session</div>
+      </div>
+      <div id="feed-overlay"></div>
+      <div id="console-views">
+        <div id="feed-world" class="feed-view active">
+          <div id="feed-surface"></div>
+          <div id="messagewindow"></div>
+        </div>
+        <div id="feed-chat" class="feed-view">
+          <div id="chatwindow"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="input-panel" class="panel brass-panel" data-role-input data-update-append>
+      <div id="inputform">
+        <div id="prompt" class="prompt"></div>
+        <div id="inputcontrol">
+          <textarea id="inputfield"></textarea>
+          <button id="inputsend" type="button">&gt;</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resource-strip" class="panel brass-panel">
+      <div class="resource-block">
+        <span class="resource-label">Health</span>
+        <div class="meter slim-meter"><div id="hp-fill-footer" class="meter-fill hp-fill"></div></div>
+      </div>
+      <div class="resource-block">
+        <span class="resource-label">Stamina</span>
+        <div class="meter slim-meter"><div id="stamina-fill-footer" class="meter-fill stamina-fill"></div></div>
+      </div>
+      <div class="resource-block coin-block">
+        <span class="resource-label">Status</span>
+        <span id="footer-status">Standing by</span>
+      </div>
+    </section>
+  </main>
+
+  <aside id="right-rail">
+    <section id="map-panel" class="panel obsidian-panel rail-panel" data-panel-key="map" draggable="true">
+      <div class="panel-title-row">
+        <div class="panel-title">Local Map</div>
+        <div class="panel-title-actions">
+          <div id="map-room-name">Awaiting room data</div>
+          <button id="map-fit-toggle" class="chrome-tab" type="button">Fit</button>
+          <button id="map-center-toggle" class="chrome-tab" type="button">Center</button>
+          <button id="map-fullscreen-toggle" class="chrome-tab" type="button">⛶</button>
+        </div>
+      </div>
+      <div id="map-meta-row">
+        <span id="map-meta-rooms">Rooms 0</span>
+        <span id="map-meta-exits">Exits 0</span>
+        <span id="map-meta-zoom">Zoom 1.0x</span>
+      </div>
+      <canvas id="map-canvas" width="320" height="320"></canvas>
+      <div id="map-tooltip"></div>
+      <div id="exit-strip" class="list-panel compact"></div>
+      <div id="compass" class="compass-grid">
+        <button data-dir="northwest">NW</button>
+        <button data-dir="north">N</button>
+        <button data-dir="northeast">NE</button>
+        <button data-dir="west">W</button>
+        <button data-dir="look">•</button>
+        <button data-dir="east">E</button>
+        <button data-dir="southwest">SW</button>
+        <button data-dir="south">S</button>
+        <button data-dir="southeast">SE</button>
+      </div>
+    </section>
+
+    <section id="inventory-panel" class="panel obsidian-panel rail-panel" data-panel-key="inventory" draggable="true">
+      <div class="panel-title-row">
+        <div class="panel-title">Inventory</div>
+        <div class="panel-subtitle" id="inventory-mode">Click to inspect</div>
+      </div>
+      <div id="inventory-list" class="list-panel"></div>
+      <div id="inventory-actions" class="action-row">
+        <button data-action="look">Look</button>
+        <button data-action="get">Get</button>
+        <button data-action="drop">Drop</button>
+      </div>
+    </section>
+
+    <section id="equipment-panel" class="panel obsidian-panel rail-panel" data-panel-key="equipment" draggable="true">
+      <div class="panel-title-row">
+        <div class="panel-title">Equipment</div>
+        <div class="panel-subtitle">Drop item to equip</div>
+      </div>
+      <div id="equipment-list" class="list-panel compact"></div>
+    </section>
+
+    <section id="debug-panel" class="panel obsidian-panel collapsed rail-panel" data-panel-key="debug" draggable="true">
+      <div class="panel-title-row">
+        <div class="panel-title">Debug</div>
+        <button id="debug-toggle" class="chrome-tab active" type="button">Show</button>
+      </div>
+      <div id="debug-body">
+        <div id="debug-summary">
+          <span id="debug-last-cmd">Last cmd: none</span>
+          <span id="debug-last-room-count">Rooms: 0</span>
+          <span id="debug-last-character">Character: none</span>
+        </div>
+        <pre id="debug-log"></pre>
+      </div>
+    </section>
+  </aside>
+</div>
+<div id="toast-stack"></div>
+
+{% endblock %}
+{% block scripts %}
+<link rel="stylesheet" href="/static/webclient/css/dragonsire-browser.css?v=2">
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=3"></script>
+
+{% endblock %}

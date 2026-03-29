@@ -1,0 +1,18 @@
+from evennia import Command
+
+
+class CmdAppraise(Command):
+    key = "appraise"
+    locks = "cmd:all()"
+    help_category = "Lore"
+
+    def func(self):
+        if not self.args:
+            self.caller.msg("Appraise what?")
+            return
+
+        target = self.caller.search(self.args.strip())
+        if not target:
+            return
+
+        self.caller.appraise_target(target)

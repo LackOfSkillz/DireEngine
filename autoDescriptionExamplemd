@@ -1,0 +1,226 @@
+# Auto Description Example
+
+## Purpose
+
+This document is for a user who is new to Evennia and wants rooms created by the built-in batch area or grid builder to automatically get prose descriptions.
+
+This is not part of AreaForge. It is a standalone example pattern for extending base Evennia behavior.
+
+## Short Answer
+
+Evennia's built-in batch/grid room creation can create rooms and exits, but it does not automatically invent rich room descriptions for you.
+
+The usual solution is to do one of these:
+
+1. Use a custom room typeclass that sets `self.db.desc` when the room is created.
+2. Run a post-build script that walks the generated rooms and fills in descriptions.
+
+For most new users, the best starting point is a custom room typeclass plus a small deterministic prose generator.
+
+## Recommended Approach
+
+Use a custom room typeclass that:
+
+- checks whether the room already has a description
+- generates one if it does not
+- uses stable inputs such as room name, tags, coordinates, or zone name
+- uses seeded randomness so rebuilds stay reproducible
+
+This gives you variation without having descriptions change every time the area is rebuilt.
+
+## Why Seeded Randomness Matters
+
+If you use plain random generation, the same room may get a different description on every rebuild.
+
+That creates problems:
+
+- diffs become noisy
+- testing becomes harder
+- builders cannot tell whether something meaningful changed
+
+If you derive a seed from room identity, such as room key plus coordinates, then the room can still feel "random" while remaining stable across rebuilds.
+
+## Example File Layout
+
+One simple layout for a new Evennia project is:
+
+```text
+typeclasses/
+    rooms.py
+utils/
+    room_prose.py
+```
+
+The prose generator lives in `utils/room_prose.py` and the custom room class lives in `typeclasses/rooms.py`.
+
+## Example Prose Generator
+
+Create a helper like this in `utils/room_prose.py`:
+
+```python
+import random
+
+
+PERIOD_MATERIALS = [
+    "timber-framed walls",
+    "lime-washed plaster",
+    "weathered stonework",
+    "oak beams darkened by smoke",
+    "patched masonry",
+]
+
+PERIOD_STREET_DETAILS = [
+    "cart-rutted earth lies underfoot",
+    "cobbles shine where generations of traffic have polished them smooth",
+    "rainwater gathers in shallow seams between worn stones",
+    "the lane narrows between close-built walls and jutting upper stories",
+]
+
+PERIOD_SOUNDS = [
+    "Distant trade calls drift through the air.",
+    "The creak of wagon wheels and the echo of footsteps carry down the street.",
+    "Muted voices leak from nearby doors and shuttered windows.",
+    "Somewhere nearby, iron strikes wood with a hollow working rhythm.",
+]
+
+
+def build_room_description(room_key, zone_name="the district", seed_text=""):
+    seed = f"{room_key}|{zone_name}|{seed_text}"
+    rng = random.Random(seed)
+
+    material = rng.choice(PERIOD_MATERIALS)
+    street = rng.choice(PERIOD_STREET_DETAILS)
+    sound = rng.choice(PERIOD_SOUNDS)
+
+    return (
+        f"{room_key} sits within {zone_name}, marked by {material}. "
+        f"Here, {street}. {sound}"
+    )
+```
+
+This example is deliberately small. In a real project, you would usually split the prose into categories like:
+
+- market
+- dockside
+- noble quarter
+- temple ward
+- alleys
+- residential lanes
+
+## Example Room Typeclass
+
+Then in `typeclasses/rooms.py`, use the prose generator when the room is created:
+
+```python
+from evennia import DefaultRoom
+from utils.room_prose import build_room_description
+
+
+class ProseRoom(DefaultRoom):
+    def at_object_creation(self):
+        super().at_object_creation()
+
+        if not self.db.desc:
+            zone_name = self.tags.get(category="zone", return_list=False) or "the district"
+            self.db.desc = build_room_description(
+                room_key=self.key,
+                zone_name=zone_name,
+                seed_text=str(self.id),
+            )
+```
+
+If you use coordinates in your map/grid system, you can use those instead of `self.id` for the seed.
+
+## How To Use It With Batch/Grid Generation
+
+When rooms are created by the builder, make sure they use your custom room typeclass instead of the plain default room class.
+
+There are two common ways to do that:
+
+1. Configure the batch/grid builder to create your room typeclass.
+2. Let the builder create normal rooms, then run a post-processing script that typeclasses them or fills in missing descriptions.
+
+If the builder you are using already supports passing a room typeclass, that is the cleaner option.
+
+## Example Post-Build Script
+
+If the builder does not let you easily inject a custom room typeclass, you can fill descriptions after the area has been created.
+
+```python
+from evennia.objects.models import ObjectDB
+from utils.room_prose import build_room_description
+
+
+def fill_missing_room_descriptions(tag_key=None, tag_category=None):
+    rooms = ObjectDB.objects.all()
+
+    for room in rooms:
+        if getattr(room, "db_destination", None) is not None:
+            continue
+
+        if tag_key and tag_key not in (room.tags.get(category=tag_category, return_list=True) or []):
+            continue
+
+        if room.db.desc:
+            continue
+
+        zone_name = room.tags.get(category="zone", return_list=False) or "the district"
+        room.db.desc = build_room_description(room.key, zone_name=zone_name, seed_text=str(room.id))
+```
+
+This approach is often easier for beginners because it does not require changing the builder path first.
+
+## Making The Descriptions Feel Period Correct
+
+The biggest quality factor is not the code. It is the vocabulary.
+
+To make descriptions feel historically grounded instead of generic fantasy filler:
+
+- prefer materials like plaster, limewash, wattle, oak, slate, masonry, shutters, eaves, beams, cobbles, awnings, and ironwork
+- describe labor, trade, traffic, smoke, damp, mud, bells, hoofbeats, market calls, dock noise, and hearth smells
+- avoid modern phrasing and modern objects
+- keep district vocabularies separate so market streets do not read like noble quarters
+
+## A Better Second Step
+
+Once the basic version works, add district templates.
+
+For example:
+
+- dockside rooms emphasize tar, rope, salt, damp planks, and warehouse walls
+- market rooms emphasize awnings, barter, stalls, wheel-rattle, and crowded foot traffic
+- civic rooms emphasize stone facades, notice boards, formal paving, and official traffic
+- alleys emphasize closeness, shadow, drains, narrow walls, and back-door traffic
+
+That usually improves prose quality far more than adding more randomness.
+
+## A Note On AI Generation
+
+If a user wants AI-written room descriptions instead of template-driven prose, that can also work, but it should still follow the same architecture:
+
+- structural builder creates the rooms
+- a second pass writes descriptions
+- results are cached or saved so they do not change unpredictably on every rebuild
+
+For most base Evennia users, templated seeded prose is the safer place to start.
+
+## Minimal Workflow Summary
+
+1. Create a prose helper function.
+2. Create a custom room typeclass or post-build script.
+3. Generate descriptions only when `db.desc` is empty.
+4. Seed the generator from stable room identity.
+5. Expand vocabulary by district instead of relying on pure randomness.
+
+## Practical Recommendation
+
+If you are new to Evennia, start with the post-build approach first.
+
+Why:
+
+- it is easier to test
+- it does not require changing the builder internals immediately
+- you can rerun it safely on existing generated rooms
+- it makes it obvious that structure generation and prose generation are two separate steps
+
+Once that works, move the same logic into a custom room typeclass if you want room descriptions to appear automatically at creation time.
