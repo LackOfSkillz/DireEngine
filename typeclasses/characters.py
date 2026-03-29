@@ -14,6 +14,7 @@ import re
 import random
 import time
 
+from evennia import search_object
 from evennia.objects.objects import DefaultCharacter
 from evennia.utils.create import create_object
 
@@ -27,6 +28,19 @@ from utils.survival_loot import create_harvest_bundle, create_simple_item
 from utils.survival_messaging import msg_room
 from world.area_forge.character_api import send_character_update, send_subsystem_update
 from world.area_forge.map_api import send_map_update
+from utils.crime import check_liquidation, decay_warrants, release_from_stocks
+from world.professions import (
+    DEFAULT_PROFESSION,
+    PROFESSION_PROFILES,
+    PROFESSION_SKILL_WEIGHTS,
+    PROFESSION_TO_GUILD,
+    create_subsystem,
+    get_profession_display_name,
+    get_profession_profile,
+    get_profession_rank_label,
+    get_profession_social_standing,
+    resolve_profession_name,
+)
 
 from .objects import ObjectParent
 
@@ -43,50 +57,7 @@ DEFAULT_STATS = {
     "magic_resistance": 10,
 }
 
-VALID_GUILDS = (
-    "barbarian",
-    "bard",
-    "cleric",
-    "commoner",
-    "empath",
-    "moon_mage",
-    "necromancer",
-    "paladin",
-    "ranger",
-    "thief",
-    "trader",
-    "warrior_mage",
-)
-
-PROFESSION_TO_GUILD = {
-    "barbarian": "barbarian_guildhall",
-    "bard": "bard_guildhall",
-    "cleric": "cleric_guildhall",
-    "commoner": "commoner_guildhall",
-    "empath": "empath_guildhall",
-    "moon_mage": "moon_mage_guildhall",
-    "necromancer": "necromancer_guildhall",
-    "paladin": "paladin_guildhall",
-    "ranger": "ranger_guildhall",
-    "thief": "thief_guildhall",
-    "trader": "trader_guildhall",
-    "warrior_mage": "warrior_mage_guildhall",
-}
-
-PROFESSION_SKILL_WEIGHTS = {
-    "commoner": {},
-    "barbarian": {"weapons": 1.2, "armor": 1.15, "survival": 1.05, "lore": 0.95, "magic": 0.8},
-    "bard": {"lore": 1.2, "magic": 1.1, "weapons": 1.05, "armor": 0.95, "survival": 1.0},
-    "cleric": {"magic": 1.2, "lore": 1.1, "weapons": 1.0, "armor": 0.95, "survival": 0.95},
-    "empath": {"lore": 1.2, "survival": 1.1, "magic": 1.05, "weapons": 0.9, "armor": 0.85},
-    "moon_mage": {"magic": 1.2, "lore": 1.05, "survival": 0.95, "weapons": 0.9, "armor": 0.85},
-    "necromancer": {"magic": 1.2, "lore": 1.1, "survival": 1.0, "weapons": 0.9, "armor": 0.85},
-    "paladin": {"weapons": 1.15, "armor": 1.15, "magic": 1.05, "lore": 1.0, "survival": 0.95},
-    "ranger": {"survival": 1.2, "weapons": 1.1, "lore": 1.0, "armor": 0.95, "magic": 0.9},
-    "thief": {"survival": 1.2, "weapons": 1.05, "lore": 1.0, "armor": 0.9, "magic": 0.8},
-    "trader": {"lore": 1.2, "survival": 1.05, "armor": 1.0, "weapons": 0.95, "magic": 0.85},
-    "warrior_mage": {"magic": 1.15, "weapons": 1.1, "lore": 1.0, "armor": 0.95, "survival": 0.9},
-}
+VALID_GUILDS = tuple(PROFESSION_PROFILES.keys())
 
 SKILLSET_ALIASES = {
     "armor": "armor",
@@ -340,6 +311,22 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.crime_flag = False
         self.db.crime_severity = 0
         self.db.awareness_bonus = 0
+        self.db.is_captured = False
+        self.db.confiscated_items = []
+        self.db.fine_amount = 0
+        self.db.fine_due = 0
+        self.db.collateral_locked = False
+        self.db.fine_due_timestamp = None
+        self.db.sentence_type = None
+        self.db.jail_timer = 0
+        self.db.in_stocks = False
+        self.db.awaiting_plea = False
+        self.db.plea = None
+        self.db.surrendered = False
+        self.db.warrants = {}
+        self.db.active_bounty = None
+        self.db.last_known_region = None
+        self.db.is_hidden_from_tracking = False
         self.db.desc = "An unremarkable person."
         self.db.is_npc = False
         self.db.stats = DEFAULT_STATS.copy()
@@ -391,6 +378,26 @@ class Character(ObjectParent, DefaultCharacter):
         guild_tag = getattr(guild_tag, "guild_tag", None)
         if guild_tag:
             self.msg("You feel the presence of a guild here.")
+        if hasattr(self.location, "is_lawless"):
+            if self.location.is_lawless():
+                self.msg("You feel the absence of law here.")
+            else:
+                self.msg("The presence of law is felt here.")
+            if getattr(self.db, "debug_mode", False):
+                print(f"{self} entered {self.location} with law={self.location.get_law_type()}")
+        self.emit_profession_presence()
+        for obj in getattr(self.location, "contents", []):
+            if obj != self and hasattr(obj, "react_to"):
+                obj.react_to(self, context="presence")
+        if getattr(self.db, "warrants", None) and hasattr(self.location, "get_region"):
+            self.db.last_known_region = self.location.get_region()
+        if hasattr(self.location, "is_lawless"):
+            self.db.is_hidden_from_tracking = bool(self.location.is_lawless())
+        current_region = self.location.get_region() if hasattr(self.location, "get_region") else None
+        if not getattr(self.db, "is_captured", False) and current_region and (getattr(self.db, "warrants", None) or {}).get(current_region) and not self.location.is_lawless():
+            from utils.crime import call_guards
+
+            call_guards(self.location, self)
 
     def sync_client_state(self, include_map=False, session=None):
         sessions_attr = getattr(self, "sessions", None)
@@ -418,15 +425,51 @@ class Character(ObjectParent, DefaultCharacter):
         if self.db.guild is None:
             self.db.guild = None
         if self.db.profession is None:
-            self.db.profession = self.normalize_profession_name(getattr(self.db, "guild", None)) or "commoner"
+            self.db.profession = self.normalize_profession_name(getattr(self.db, "guild", None)) or DEFAULT_PROFESSION
         if self.db.profession_rank is None:
             self.db.profession_rank = 1
+        if self.db.total_xp is None:
+            self.db.total_xp = 0
         if self.db.debug_mode is None:
             self.db.debug_mode = True
         if self.db.crime_flag is None:
             self.db.crime_flag = False
         if self.db.crime_severity is None:
             self.db.crime_severity = 0
+        if self.db.is_captured is None:
+            self.db.is_captured = False
+        if self.db.confiscated_items is None:
+            self.db.confiscated_items = []
+        if self.db.fine_amount is None:
+            self.db.fine_amount = 0
+        if self.db.fine_due is None:
+            self.db.fine_due = 0
+        if self.db.collateral_locked is None:
+            self.db.collateral_locked = False
+        if self.db.fine_due_timestamp is None:
+            self.db.fine_due_timestamp = None
+        if self.db.sentence_type is None:
+            self.db.sentence_type = None
+        if self.db.jail_timer is None:
+            self.db.jail_timer = 0
+        if self.db.in_stocks is None:
+            self.db.in_stocks = False
+        if self.db.awaiting_plea is None:
+            self.db.awaiting_plea = False
+        if self.db.plea is None:
+            self.db.plea = None
+        if self.db.surrendered is None:
+            self.db.surrendered = False
+        if self.db.warrants is None:
+            self.db.warrants = {}
+        if self.db.active_bounty is None:
+            self.db.active_bounty = None
+        if self.db.last_known_region is None:
+            self.db.last_known_region = None
+        if self.db.is_hidden_from_tracking is None:
+            self.db.is_hidden_from_tracking = False
+        if self.db.last_seen_magic is None:
+            self.db.last_seen_magic = 0
         if self.db.awareness_bonus is None:
             self.db.awareness_bonus = 0
         if self.db.desc is None:
@@ -461,6 +504,18 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.attunement = 100
         if self.db.max_attunement is None:
             self.db.max_attunement = 100
+        if self.db.inner_fire is None:
+            self.db.inner_fire = 10
+        if self.db.max_inner_fire is None:
+            self.db.max_inner_fire = 10
+        if self.db.focus is None:
+            self.db.focus = 10
+        if self.db.max_focus is None:
+            self.db.max_focus = 10
+        if self.db.transfer_pool is None:
+            self.db.transfer_pool = 10
+        if self.db.max_transfer_pool is None:
+            self.db.max_transfer_pool = 10
         if self.db.bleed_state is None:
             self.db.bleed_state = "none"
         if self.db.roundtime_end is None:
@@ -974,9 +1029,80 @@ class Character(ObjectParent, DefaultCharacter):
 
     def add_crime(self, severity=1):
         self.ensure_core_defaults()
+        room = getattr(self, "location", None)
+        if room and hasattr(room, "is_lawless") and room.is_lawless():
+            return int(getattr(self.db, "crime_severity", 0) or 0)
+
         self.db.crime_flag = True
         self.db.crime_severity = int(getattr(self.db, "crime_severity", 0) or 0) + int(severity or 0)
+        if not self.db.warrants:
+            self.db.warrants = {}
+        region = room.get_region() if room and hasattr(room, "get_region") else "default_region"
+        entry = dict(self.db.warrants.get(region, {"severity": 0, "timestamp": time.time()}))
+        entry["severity"] = int(entry.get("severity", 0) or 0) + 1
+        entry["bounty"] = int(entry.get("bounty", 0) or 0) + 10 + (int(severity or 0) * 5)
+        entry["timestamp"] = time.time()
+        self.db.warrants[region] = entry
+        self.db.last_known_region = region
+        if getattr(self.db, "debug_mode", False):
+            print(f"[WARRANT] {self} in {region} severity={entry['severity']}")
         return self.db.crime_severity
+
+    def is_criminal(self):
+        warrants = getattr(self.db, "warrants", None) or {}
+        return bool(getattr(self.db, "crime_flag", False) or warrants)
+
+    def has_unpaid_fine(self):
+        return bool(getattr(self.db, "fine_due", 0) and getattr(self.db, "fine_due", 0) > 0)
+
+    def get_confiscated_items(self):
+        items = []
+        for item_id in getattr(self.db, "confiscated_items", None) or []:
+            result = search_object(item_id)
+            if result:
+                items.append(result[0])
+        return items
+
+    def get_bounty_target(self):
+        target_id = getattr(self.db, "active_bounty", None)
+        if target_id is None:
+            return None
+        result = search_object(f"#{target_id}")
+        return result[0] if result else None
+
+    def can_trade(self):
+        return not self.has_unpaid_fine()
+
+    def process_justice_tick(self):
+        if self.has_unpaid_fine():
+            check_liquidation(self)
+
+        if getattr(self.db, "warrants", None):
+            decay_warrants(self)
+
+        if getattr(self.db, "awaiting_plea", False) and time.time() >= float(getattr(self.ndb, "plea_deadline", 0) or 0):
+            from utils.crime import resolve_justice_case
+
+            self.db.plea = "guilty"
+            self.db.awaiting_plea = False
+            resolve_justice_case(self)
+
+        if getattr(self.db, "in_stocks", False):
+            next_msg_at = float(getattr(self.ndb, "stocks_msg_at", 0) or 0)
+            if time.time() >= next_msg_at:
+                self.msg("The crowd watches you.")
+                self.ndb.stocks_msg_at = time.time() + 60
+            next_room_msg_at = float(getattr(self.ndb, "stocks_room_msg_at", 0) or 0)
+            if getattr(self, "location", None) and getattr(getattr(self.location, "db", None), "is_stocks", False) and time.time() >= next_room_msg_at:
+                if random.random() < 0.1:
+                    self.location.msg_contents("A passerby jeers at the prisoners in the stocks.", exclude=[])
+                self.ndb.stocks_room_msg_at = time.time() + 60
+
+        if getattr(self.db, "jail_timer", 0):
+            self.db.jail_timer = max(0, int(getattr(self.db, "jail_timer", 0) or 0) - 1)
+
+    def release_from_stocks(self):
+        release_from_stocks(self)
 
     def get_perception_total(self):
         self.ensure_core_defaults()
@@ -1680,6 +1806,11 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("There is no vendor here.")
             return False
 
+        ok, trade_message = self.can_trade_with(vendor)
+        if not ok:
+            self.msg(trade_message)
+            return False
+
         item, matches, base_query, index = self.resolve_numbered_candidate(
             item_name,
             self.get_visible_carried_items(),
@@ -1778,6 +1909,11 @@ class Character(ObjectParent, DefaultCharacter):
         vendor = self.get_nearby_vendor()
         if not vendor:
             self.msg("There is no vendor here.")
+            return False
+
+        ok, trade_message = self.can_trade_with(vendor)
+        if not ok:
+            self.msg(trade_message)
             return False
 
         normalized = str(item_name or "").strip().lower()
@@ -3275,6 +3411,13 @@ class Character(ObjectParent, DefaultCharacter):
         before_subsystem = self.get_subsystem() if hasattr(self, "get_subsystem") else None
         ability = get_ability(key, self)
 
+        if getattr(self.db, "is_captured", False):
+            self.msg("You are restrained and cannot do that.")
+            return
+        if getattr(self.db, "in_stocks", False):
+            self.msg("You cannot do that while restrained in the stocks.")
+            return
+
         if not ability:
             self.msg("You don't know how to do that.")
             return
@@ -3331,6 +3474,8 @@ class Character(ObjectParent, DefaultCharacter):
             self.set_roundtime(ability.roundtime)
         else:
             self.sync_client_state()
+
+        self.emit_ability_presence(ability)
 
     def meets_ability_requirements(self, ability):
         req = getattr(ability, "required", {}) or {}
@@ -3442,8 +3587,7 @@ class Character(ObjectParent, DefaultCharacter):
         return normalized or None
 
     def normalize_profession_name(self, profession_name):
-        normalized = str(profession_name or "").strip().lower().replace("-", "_").replace(" ", "_")
-        return normalized or None
+        return resolve_profession_name(profession_name, default=None)
 
     def is_profession(self, key):
         return self.get_profession() == self.normalize_profession_name(key)
@@ -3452,18 +3596,14 @@ class Character(ObjectParent, DefaultCharacter):
         return PROFESSION_TO_GUILD.get(self.get_profession())
 
     def get_subsystem(self):
-        subsystem = getattr(self.ndb, "subsystem", None)
         profession = self.get_profession()
-        guild_tag = self.get_profession_guild_tag()
-        if isinstance(subsystem, Mapping) and subsystem.get("profession") == profession and subsystem.get("guild_tag") == guild_tag:
-            return subsystem
+        controller = getattr(self.ndb, "subsystem_controller", None)
 
-        subsystem = {
-            "key": profession,
-            "profession": profession,
-            "guild_tag": guild_tag,
-            "label": profession.replace("_", " ").title(),
-        }
+        if not controller or getattr(controller, "profession", None) != profession:
+            controller = create_subsystem(profession)
+            self.ndb.subsystem_controller = controller
+
+        subsystem = controller.get_state(self)
         self.ndb.subsystem = subsystem
         return subsystem
 
@@ -3472,10 +3612,113 @@ class Character(ObjectParent, DefaultCharacter):
         if profession:
             return profession
         legacy = self.normalize_profession_name(getattr(self.db, "guild", None))
-        return legacy or "commoner"
+        return legacy or DEFAULT_PROFESSION
+
+    def get_profession_key(self):
+        return self.get_profession()
+
+    def get_profession_profile(self):
+        return get_profession_profile(self.get_profession())
+
+    def get_profession_display_name(self):
+        return get_profession_display_name(self.get_profession())
 
     def get_profession_rank(self):
         return int(getattr(self.db, "profession_rank", 1) or 1)
+
+    def get_profession_rank_label(self):
+        return get_profession_rank_label(self.get_profession(), self.get_profession_rank())
+
+    def get_social_standing(self):
+        return get_profession_social_standing(self.get_profession())
+
+    def get_profession_skill_weights(self):
+        return dict(PROFESSION_SKILL_WEIGHTS.get(self.get_profession(), {}))
+
+    def get_profession_reaction_message(self, context="presence", observer=None):
+        profession = self.get_profession()
+        profile = self.get_profession_profile()
+        if context == "presence":
+            if profession == "empath":
+                return "seems to relax a little in your presence."
+            if profession == "barbarian":
+                return "takes your measure with the caution reserved for dangerous fighters."
+        if context == "trade" and profession == "thief":
+            return "watches your hands instead of your face."
+        if context == "magic" and profile.get("magic_text"):
+            return f"cannot ignore that you {profile['magic_text']}."
+        return None
+
+    def emit_profession_presence(self):
+        location = getattr(self, "location", None)
+        if not location:
+            return
+
+        presence_text = self.get_profession_profile().get("presence_text")
+        if presence_text:
+            location.msg_contents(f"{self.key} arrives. {presence_text}", exclude=[self])
+
+    def emit_ability_presence(self, ability):
+        location = getattr(self, "location", None)
+        if not location or not ability:
+            return
+
+        profession = self.get_profession()
+        ability_category = str(getattr(ability, "category", "") or "").strip().lower()
+        if profession == "thief" and ability_category == "stealth":
+            location.msg_contents(f"{self.key} moves with unsettling subtlety.", exclude=[self])
+            return
+
+        magic_text = self.get_profession_profile().get("magic_text")
+        if magic_text and ability_category == "magic":
+            self.db.last_seen_magic = time.time()
+            location.msg_contents(f"{self.key} {magic_text}.", exclude=[self])
+            for obj in getattr(location, "contents", []):
+                if obj != self and hasattr(obj, "react_to"):
+                    obj.react_to(self, context="magic")
+
+    def can_trade_with(self, vendor):
+        if not self.can_trade():
+            return False, "The shopkeeper refuses to deal with you until your debts are settled."
+        if vendor and hasattr(vendor, "can_trade"):
+            return vendor.can_trade(self)
+        return True, ""
+
+    def join_profession(self, profession_name):
+        profession = self.normalize_profession_name(profession_name)
+        if profession not in VALID_GUILDS or profession == DEFAULT_PROFESSION:
+            options = ", ".join(name.replace("_", " ") for name in VALID_GUILDS if name != DEFAULT_PROFESSION)
+            return False, f"You may join one of these professions: {options}"
+
+        target_guild_tag = PROFESSION_TO_GUILD.get(profession)
+        room_tag = getattr(getattr(self.location, "db", None), "guild_tag", None)
+        if target_guild_tag and room_tag != target_guild_tag:
+            return False, "You must stand inside the proper guildhall to join that profession."
+
+        if self.get_profession() == profession:
+            return False, f"You already belong to the {self.get_profession_display_name()} profession."
+
+        self.set_profession(profession)
+        self.set_guild(profession)
+        return True, f"You are accepted into the {self.get_profession_display_name()} profession."
+
+    def advance_profession(self):
+        trainer = self.get_room_trainer()
+        ok, message = self.can_train_with(trainer)
+        if not ok:
+            return False, message
+
+        current_rank = self.get_profession_rank()
+        if current_rank >= 5:
+            return False, "You have already mastered your profession."
+
+        required_xp = current_rank * 100
+        total_xp = int(getattr(self.db, "total_xp", 0) or 0)
+        if total_xp and total_xp < required_xp:
+            return False, f"You need {required_xp} total experience before advancing again."
+
+        self.db.profession_rank = current_rank + 1
+        return True, f"Under {trainer.key}'s guidance, you advance to {self.get_profession_rank_label()}."
 
     def debug_log(self, text):
         if getattr(self.db, "debug_mode", False):
@@ -3509,7 +3752,9 @@ class Character(ObjectParent, DefaultCharacter):
         if normalized not in VALID_GUILDS:
             return False
         self.db.profession = normalized
+        self.db.guild = normalized
         self.ndb.subsystem = None
+        self.ndb.subsystem_controller = None
         self.get_subsystem()
         return True
 
@@ -3522,6 +3767,18 @@ class Character(ObjectParent, DefaultCharacter):
         profession = self.get_profession()
         weights = PROFESSION_SKILL_WEIGHTS.get(profession, {})
         return float(weights.get(skillset, 1.0))
+
+    def tick_subsystem_state(self):
+        controller = getattr(self.ndb, "subsystem_controller", None)
+        if not controller or getattr(controller, "profession", None) != self.get_profession():
+            self.get_subsystem()
+            controller = getattr(self.ndb, "subsystem_controller", None)
+        if not controller:
+            return False
+        changed = controller.tick(self)
+        if changed:
+            self.ndb.subsystem = controller.get_state(self)
+        return changed
 
     def format_subsystem_feedback(self, before, after):
         if not isinstance(before, Mapping) or not isinstance(after, Mapping):
@@ -3595,7 +3852,7 @@ class Character(ObjectParent, DefaultCharacter):
     def can_train_with(self, trainer):
         if not trainer:
             return False, "There is no trainer here."
-        if trainer.db.trains_profession != self.db.profession:
+        if trainer.db.trains_profession != self.get_profession():
             return False, "That trainer does not teach your profession."
         return True, ""
 
@@ -4721,8 +4978,18 @@ class Character(ObjectParent, DefaultCharacter):
         return self.get_target() == target and bool(self.db.in_combat)
 
     def at_pre_move(self, destination, **kwargs):
+        if getattr(self.db, "is_captured", False):
+            self.msg("You are restrained and cannot move.")
+            return False
+        if getattr(self.db, "in_stocks", False):
+            self.msg("You are locked in the stocks.")
+            return False
         if self.is_in_combat():
             self.msg("You cannot move while in combat.")
+            return False
+
+        if destination and hasattr(destination, "allows_profession") and not destination.allows_profession(self.get_profession()):
+            self.msg("You are not permitted to enter there as a member of your profession.")
             return False
 
         direction = getattr(self.ndb, "last_traverse_direction", None)

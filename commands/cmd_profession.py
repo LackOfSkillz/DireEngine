@@ -14,7 +14,16 @@ class CmdProfession(Command):
 
         if not args:
             current = caller.get_profession() if hasattr(caller, "get_profession") else "commoner"
-            caller.msg(f"Your current profession is {current.replace('_', ' ').title()}.")
+            rank = caller.get_profession_rank_label() if hasattr(caller, "get_profession_rank_label") else current.replace("_", " ").title()
+            description = ""
+            if hasattr(caller, "get_profession_profile"):
+                description = caller.get_profession_profile().get("description", "")
+            social = caller.get_social_standing() if hasattr(caller, "get_social_standing") else "Neutral"
+            lines = [f"Profession: {rank}"]
+            if description:
+                lines.append(description)
+            lines.append(f"Social Standing: {social}")
+            caller.msg("\n".join(lines))
             return
 
         normalized = str(args).strip().lower().replace("-", "_").replace(" ", "_")

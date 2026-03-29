@@ -58,6 +58,8 @@ class CmdSteal(Command):
             caller.msg("There is no shopkeeper here to steal from.")
             return
 
+        is_lawless = bool(hasattr(room, "is_lawless") and room.is_lawless())
+
         if not caller.is_hidden():
             caller.msg("You must be hidden to do that.")
             return
@@ -81,9 +83,11 @@ class CmdSteal(Command):
         if caller.is_profession("thief"):
             stealth += 20
 
-        awareness = self.get_awareness_score(shopkeeper, extra_bonus=30)
+        suspicion = shopkeeper.get_suspicion_for(caller) if hasattr(shopkeeper, "get_suspicion_for") else 0
+        awareness = self.get_awareness_score(shopkeeper, extra_bonus=0 if is_lawless else 30)
         if hasattr(shopkeeper, "is_shopkeeper") and shopkeeper.is_shopkeeper():
             awareness += 20
+        awareness += suspicion
 
         cooldowns["steal"] = now + 3
         caller.ndb.cooldowns = cooldowns
@@ -93,7 +97,7 @@ class CmdSteal(Command):
         if getattr(caller.db, "debug_mode", False):
             result = "success" if success else "failed"
             caller.msg(f"[Stealth check: {result}]")
-            caller.debug_log(f"[SHOPLIFT] roll={roll} stealth={stealth} awareness={awareness}")
+            caller.debug_log(f"[SHOPLIFT] roll={roll} stealth={stealth} awareness={awareness} suspicion={suspicion}")
 
         if success:
             if not item.move_to(caller, quiet=True, move_type="shoplift"):
@@ -101,23 +105,26 @@ class CmdSteal(Command):
                 caller.reveal()
                 return
             caller.msg(f"You discreetly pocket {item.key}.")
-            if hasattr(shopkeeper, "adjust_awareness_bonus"):
-                shopkeeper.adjust_awareness_bonus(5)
-            caller.reveal()
+            if hasattr(shopkeeper, "adjust_suspicion_for"):
+                shopkeeper.adjust_suspicion_for(caller, 3)
             return
 
         caller.msg("You are caught trying to steal!")
         room.msg_contents(f"{caller.key} is trying to steal!", exclude=[])
-        if hasattr(caller, "add_crime"):
+        if hasattr(shopkeeper, "adjust_suspicion_for"):
+            shopkeeper.adjust_suspicion_for(caller, 6)
+        if not is_lawless and hasattr(caller, "add_crime"):
             caller.add_crime(2)
-        else:
+        elif not is_lawless:
             caller.db.crime_flag = True
             caller.db.crime_severity = int(getattr(caller.db, "crime_severity", 0) or 0) + 2
         shopkeeper.db.witnessed_crime = True
-        room.db.alert_level = int(getattr(room.db, "alert_level", 0) or 0) + 2
-        if hasattr(shopkeeper, "set_awareness"):
+        if not is_lawless:
+            room.db.alert_level = int(getattr(room.db, "alert_level", 0) or 0) + 2
+        if not is_lawless and hasattr(shopkeeper, "set_awareness"):
             shopkeeper.set_awareness("alert")
-        call_guards(room, caller)
+        if not is_lawless:
+            call_guards(room, caller)
         caller.reveal()
 
     def func(self):

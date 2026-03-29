@@ -23,13 +23,34 @@ class CmdStats(Command):
         condition = char.get_condition()
         stats = char.db.stats or {}
         learning = char.get_active_learning_entries()
+        profession_name = char.get_profession_display_name() if hasattr(char, "get_profession_display_name") else char.get_profession().replace("_", " ").title()
+        profession_rank = char.get_profession_rank_label() if hasattr(char, "get_profession_rank_label") else profession_name
+        social_standing = char.get_social_standing() if hasattr(char, "get_social_standing") else "Neutral"
+        skill_weights = char.get_profession_skill_weights() if hasattr(char, "get_profession_skill_weights") else {}
         lines = [
+            f"Profession: {profession_rank}",
+            f"Social Standing: {social_standing}",
             f"Condition: {condition}",
             f"HP: {char.db.hp}/{char.db.max_hp}",
             f"Balance: {bal}/{max_bal}",
             f"Fatigue: {fat}/{max_fat}",
             f"Bleeding: {char.get_bleeding_summary()}",
             char.get_engagement_summary(),
+            "",
+            "Skill Weights:",
+        ]
+
+        if skill_weights:
+            lines.append(
+                "  " + "  ".join(
+                    f"{skillset.title()}: x{weight:.2f}"
+                    for skillset, weight in sorted(skill_weights.items())
+                )
+            )
+        else:
+            lines.append("  Balanced training across all skillsets.")
+
+        lines.extend([
             "",
             "Attributes:",
             "  Strength: {strength}  Stamina: {stamina}  Agility: {agility}  Reflex: {reflex}".format(
@@ -45,7 +66,7 @@ class CmdStats(Command):
                 charisma=stats.get("charisma", 0),
             ),
             "",
-        ]
+        ])
 
         if learning:
             lines.append("Active Learning:")

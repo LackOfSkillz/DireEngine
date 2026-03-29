@@ -300,3 +300,10 @@ class Object(ObjectParent, DefaultObject):
     """
 
     pass
+
+
+class BountyBoard(Object):
+       def at_object_creation(self):
+              super().at_object_creation()
+              self.db.desc = "Names, crude likenesses, and reward notices are nailed here in overlapping layers."
+              self.db.stealable = False

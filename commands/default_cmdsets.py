@@ -48,6 +48,14 @@ from commands.cmd_injuries import CmdInjuries
 from commands.cmd_inspect import CmdInspect
 from commands.cmd_inventory import CmdInventory
 from commands.cmd_ic import CmdIC
+from commands.cmd_justice import CmdJustice
+from commands.cmd_join import CmdJoin
+from commands.cmd_bounty import CmdBounty
+from commands.cmd_bounties import CmdBounties
+from commands.cmd_acceptbounty import CmdAcceptBounty
+from commands.cmd_bribe import CmdBribe
+from commands.cmd_capture import CmdCapture
+from commands.cmd_laylow import CmdLayLow
 from commands.cmd_mindstate import CmdMindstate
 from commands.cmd_maptest import CmdMapTest
 from commands.cmd_hide import CmdHide
@@ -55,6 +63,9 @@ from commands.cmd_observe import CmdObserve
 from commands.cmd_open import CmdOpen
 from commands.cmd_pick import CmdPick
 from commands.cmd_prepare import CmdPrepare
+from commands.cmd_plead import CmdPlead
+from commands.cmd_pleadrelease import CmdPleadRelease
+from commands.cmd_payfine import CmdPayFine
 from commands.cmd_profession import CmdProfession
 from commands.cmd_recall import CmdRecall
 from commands.cmd_remove import CmdRemove
@@ -85,7 +96,11 @@ from commands.cmd_stance import CmdStance
 from commands.cmd_tend import CmdTend
 from commands.cmd_target import CmdTarget
 from commands.cmd_teach import CmdTeach
+from commands.cmd_throw import CmdThrow
+from commands.cmd_train import CmdTrain
+from commands.cmd_surrender import CmdSurrender
 from commands.cmd_testgodot import CmdTestGodot
+from commands.cmd_track import CmdTrack
 from commands.cmd_stopcast import CmdStopCast
 from commands.cmd_study import CmdStudy
 from commands.cmd_unhide import CmdUnhide
@@ -123,7 +138,12 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdAmbush())
         self.add(CmdAttack())
         self.add(CmdBuy())
+        self.add(CmdBounty())
+        self.add(CmdBounties())
+        self.add(CmdAcceptBounty())
+        self.add(CmdBribe())
         self.add(CmdCast())
+        self.add(CmdCapture())
         self.add(CmdCharge())
         self.add(CmdClickMove())
         self.add(CmdClimb())
@@ -146,11 +166,17 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdInspect())
         self.add(CmdInjuries())
         self.add(CmdInventory())
+        self.add(CmdJustice())
+        self.add(CmdJoin())
+        self.add(CmdLayLow())
         self.add(CmdMapTest())
         self.add(CmdMindstate())
         self.add(CmdObserve())
         self.add(CmdOpen())
         self.add(CmdPick())
+        self.add(CmdPlead())
+        self.add(CmdPleadRelease())
+        self.add(CmdPayFine())
         self.add(CmdPrepare())
         self.add(CmdProfession())
         self.add(CmdRecall())
@@ -175,16 +201,20 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdStats())
         self.add(CmdSteal())
         self.add(CmdStow())
+        self.add(CmdSurrender())
         self.add(CmdStopCast())
         self.add(CmdStudy())
         self.add(CmdSurvivalDebug())
         self.add(CmdSwim())
+        self.add(CmdTrack())
         self.add(CmdStalk())
         self.add(CmdStance())
         self.add(CmdStates())
         self.add(CmdTend())
         self.add(CmdTarget())
         self.add(CmdTeach())
+        self.add(CmdThrow())
+        self.add(CmdTrain())
         self.add(CmdTestGodot())
         self.add(CmdUnhide())
         self.add(CmdUnwield())

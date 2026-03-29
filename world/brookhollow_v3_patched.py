@@ -2,6 +2,8 @@
 from evennia import create_object
 from evennia.utils.search import search_object, search_tag
 
+from typeclasses.objects import BountyBoard
+
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
 CHAR_TYPECLASS = "typeclasses.npcs.NPC"
@@ -191,6 +193,7 @@ town_square = make_room(
     surface="cobbles",
     tags=["hub", "civic"],
 )
+create_object(BountyBoard, key="a bounty board", location=town_square)
 wellside_bench = make_room(
     "Wellside Bench",
     "A shallow rise and a ring of benches beside the old well give waiting folk a place to sit, gossip, and watch the town move through the square below.",

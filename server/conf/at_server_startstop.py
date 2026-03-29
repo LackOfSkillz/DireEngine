@@ -28,6 +28,7 @@ from django.conf import settings
 from evennia.utils import logger
 from evennia.utils.create import create_object
 
+from typeclasses.objects import BountyBoard
 from utils.contests import run_contest
 from world.the_landing import build_the_landing
 
@@ -47,6 +48,38 @@ DIR_ALIASES = {
     "up": ["u"],
     "down": ["d"],
 }
+
+_BROOKHOLLOW_LAWLESS_KEYS = {
+    "Crooked Alley",
+    "Ratline Lane",
+    "Whisper Lane",
+    "Fence Cellar",
+    "Safehouse Loft",
+    "Rag Shop",
+    "Pawn Counter",
+}
+
+
+def _configure_brookhollow_justice():
+    for room in ObjectDB.objects.filter(db_typeclass_path=ROOM_TYPECLASS):
+        street_name = getattr(getattr(room, "db", None), "street_name", None)
+        if street_name:
+            room.db.region = "brookhollow"
+        elif str(getattr(room, "key", "") or "") in _BROOKHOLLOW_LAWLESS_KEYS | {"Town Square", "Guard Post", "Town Hall Chamber", "Town Hall Entry"}:
+            room.db.region = "brookhollow"
+
+        room_key = str(getattr(room, "key", "") or "")
+        if room_key in _BROOKHOLLOW_LAWLESS_KEYS:
+            room.db.law_type = "none"
+        elif getattr(room.db, "region", None) == "brookhollow" and not getattr(room.db, "law_type", None):
+            room.db.law_type = "standard"
+
+        if room_key == "Town Square":
+            room.db.is_stocks = True
+
+    town_square = ObjectDB.objects.filter(db_key="Town Square", db_typeclass_path=ROOM_TYPECLASS).first()
+    if town_square and not any(str(getattr(obj, "key", "") or "").lower() == "a bounty board" for obj in town_square.contents):
+        create_object(BountyBoard, key="a bounty board", location=town_square)
 
 
 def _get_cached_tick_npcs():
@@ -308,10 +341,20 @@ def process_status_tick():
             for key in ["augmentation_buff", "debilitated", "warding_barrier", "utility_light", "exposed_magic", "active_cyclic"]
         )
         active_cyclic = bool(states.get("active_cyclic"))
+        has_justice_state = any(
+            [
+                bool(getattr(character.db, "is_captured", False)),
+                bool(getattr(character.db, "in_stocks", False)),
+                bool(getattr(character.db, "awaiting_plea", False)),
+                bool(getattr(character.db, "jail_timer", 0)),
+                bool(getattr(character.db, "fine_due", 0)),
+                bool(getattr(character.db, "warrants", None)),
+            ]
+        )
 
         if (
             balance >= max_balance and fatigue <= 0 and attunement >= max_attunement and total_bleed <= 0
-            and not has_magic_state and not in_combat and not has_ai_target and awareness == "normal" and not observing
+            and not has_magic_state and not in_combat and not has_ai_target and awareness == "normal" and not observing and not has_justice_state
         ):
             continue
 
@@ -341,6 +384,10 @@ def process_status_tick():
                 character.set_awareness("normal")
             elif awareness == "alert" and in_combat and not observing:
                 character.set_awareness("normal")
+        if hasattr(character, "tick_subsystem_state"):
+            character.tick_subsystem_state()
+        if hasattr(character, "process_justice_tick"):
+            character.process_justice_tick()
         if is_npc and hasattr(character, "ai_tick"):
             character.ai_tick()
 
@@ -429,6 +476,7 @@ def at_server_start():
 
     _ensure_limbo_training_dummy()
     build_the_landing()
+    _configure_brookhollow_justice()
 
 
 def at_server_stop():

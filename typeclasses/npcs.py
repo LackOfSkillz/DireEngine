@@ -10,10 +10,68 @@ class NPC(Character):
         self.db.is_trainer = False
         self.db.trains_profession = None
         self.db.is_shopkeeper = False
+        self.db.blocked_professions = []
+        self.db.suspects = {}
         self.db.witnessed_crime = False
 
     def is_shopkeeper(self):
         return bool(getattr(self.db, "is_shopkeeper", False))
+
+    def get_suspects(self):
+        suspects = getattr(self.db, "suspects", None)
+        if not isinstance(suspects, dict):
+            suspects = {}
+            self.db.suspects = suspects
+        return suspects
+
+    def get_suspicion_for(self, actor):
+        if not actor or not getattr(actor, "id", None):
+            return 0
+        suspects = self.get_suspects()
+        return int(suspects.get(str(actor.id), 0) or 0)
+
+    def adjust_suspicion_for(self, actor, amount, maximum=15):
+        if not actor or not getattr(actor, "id", None):
+            return 0
+        suspects = dict(self.get_suspects())
+        key = str(actor.id)
+        current = int(suspects.get(key, 0) or 0)
+        updated = max(0, min(int(maximum or 0), current + int(amount or 0)))
+        if updated > 0:
+            suspects[key] = updated
+        elif key in suspects:
+            suspects.pop(key, None)
+        self.db.suspects = suspects
+        return updated
+
+    def react_to(self, actor, context="presence"):
+        if not actor or actor == self or not hasattr(actor, "get_profession_reaction_message"):
+            return None
+        reaction = actor.get_profession_reaction_message(context=context, observer=self)
+        if reaction:
+            actor.msg(f"{self.key} {reaction}")
+        return reaction
+
+    def can_trade(self, actor):
+        if hasattr(actor, "can_trade") and not actor.can_trade():
+            return False, "The shopkeeper refuses to deal with you until your debts are settled."
+
+        blocked = {
+            str(entry).strip().lower().replace("-", "_").replace(" ", "_")
+            for entry in (getattr(self.db, "blocked_professions", None) or [])
+            if str(entry or "").strip()
+        }
+        profession = actor.get_profession() if hasattr(actor, "get_profession") else None
+        if profession in blocked:
+            return False, f"{self.key} refuses to deal with your kind here."
+
+        location = getattr(self, "location", None)
+        alert_level = int(getattr(getattr(location, "db", None), "alert_level", 0) or 0)
+        if self.is_shopkeeper() and profession == "thief" and (bool(getattr(actor.db, "crime_flag", False)) or alert_level > 0):
+            return False, f"{self.key} narrows their eyes. 'No trade with thieves today.'"
+
+        self.react_to(actor, context="trade")
+        return True, ""
 
     def ai_tick(self):
         if not self.db.is_npc:

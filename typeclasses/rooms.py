@@ -8,6 +8,7 @@ Rooms are simple containers that has no location of their own.
 from django.utils.translation import gettext as _
 from evennia.objects.objects import DefaultRoom
 from evennia.utils.utils import iter_to_str
+from world.law import LAW_NONE, LAW_STANDARD
 
 from .objects import ObjectParent
 
@@ -26,8 +27,12 @@ class Room(ObjectParent, DefaultRoom):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.guild_tag = None
+        self.db.allowed_professions = []
+        self.db.is_stocks = False
         self.db.is_shop = False
         self.db.alert_level = 0
+        self.db.law_type = LAW_STANDARD
+        self.db.region = "default_region"
 
     def is_shop(self):
         return bool(getattr(self.db, "is_shop", False))
@@ -40,6 +45,25 @@ class Room(ObjectParent, DefaultRoom):
             ),
             None,
         )
+
+    def allows_profession(self, profession_name):
+        allowed = [
+            str(entry).strip().lower().replace("-", "_").replace(" ", "_")
+            for entry in (getattr(self.db, "allowed_professions", None) or [])
+            if str(entry or "").strip()
+        ]
+        if not allowed:
+            return True
+        return str(profession_name or "").strip().lower() in allowed
+
+    def get_law_type(self):
+        return getattr(self.db, "law_type", None) or LAW_STANDARD
+
+    def is_lawless(self):
+        return self.get_law_type() == LAW_NONE
+
+    def get_region(self):
+        return getattr(self.db, "region", None) or "default_region"
 
     def get_display_characters(self, looker, **kwargs):
         visible = []
