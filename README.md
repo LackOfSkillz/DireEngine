@@ -165,6 +165,12 @@ Some helpful flows already present in the repo:
 - AreaForge build artifacts are intentionally kept out of git by the current ignore rules.
 - The codebase is under active development and still contains placeholder and future-facing hooks where deeper guild, spell, economy, and content systems will expand.
 
+## License
+
+DireEngine is licensed under the BSD 3-Clause License in [LICENSE.txt](LICENSE.txt).
+
+This repository also includes Evennia-derived and Evennia-dependent work. Evennia's license is included separately in [LICENSE.evennia.txt](LICENSE.evennia.txt).
+
 ## Direction
 
 DireEngine is building toward a full modern text-world platform that preserves the identity of classic skill-based fantasy MUDs while removing the cost and friction that kept those experiences niche.
