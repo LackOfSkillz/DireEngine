@@ -7,6 +7,13 @@ class NPC(Character):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.is_npc = True
+        self.db.is_trainer = False
+        self.db.trains_profession = None
+        self.db.is_shopkeeper = False
+        self.db.witnessed_crime = False
+
+    def is_shopkeeper(self):
+        return bool(getattr(self.db, "is_shopkeeper", False))
 
     def ai_tick(self):
         if not self.db.is_npc:

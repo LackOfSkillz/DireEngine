@@ -7,4 +7,4 @@ class CmdSearch(Command):
     help_category = "Perception"
 
     def func(self):
-        self.caller.use_ability("search")
+        self.caller.execute_ability_input("search")

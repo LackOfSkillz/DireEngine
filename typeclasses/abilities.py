@@ -1,6 +1,7 @@
 class Ability:
     key = "base"
     roundtime = 1.0
+    cooldown = 0.0
 
     required = {
         "skill": None,
@@ -23,14 +24,25 @@ class Ability:
 
 
 ABILITY_REGISTRY = {}
+PROFESSION_ABILITY_MAP = {}
 
 
 def register_ability(ability):
     ABILITY_REGISTRY[ability.key] = ability
 
 
-def get_ability(key):
-    return ABILITY_REGISTRY.get(key)
+def get_ability_map(character=None):
+    ability_map = dict(ABILITY_REGISTRY)
+    if hasattr(character, "get_profession"):
+        # profession abilities extend here
+        for ability_key, ability in PROFESSION_ABILITY_MAP.items():
+            ability_map.setdefault(ability_key, ability)
+    return ability_map
+
+
+def get_ability(key, character=None):
+    ability_map = get_ability_map(character)
+    return ability_map.get(key)
 
 
 class TestAbility(Ability):

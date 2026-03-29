@@ -4,7 +4,7 @@ from evennia.utils.search import search_object, search_tag
 
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
-CHAR_TYPECLASS = "typeclasses.characters.Character"
+CHAR_TYPECLASS = "typeclasses.npcs.NPC"
 OBJ_TYPECLASS = "typeclasses.objects.Object"
 
 TOWN_TAG = ("brookhollow_v3", "build")
@@ -32,6 +32,7 @@ def cleanup_old_build():
             pass
 
 def make_room(key, desc, district, street_name=None, segment_index=None, surface=None, patrol_zone=None, tags=None):
+    room_tags = tags or []
     room = create_object(
         ROOM_TYPECLASS,
         key=key,
@@ -42,7 +43,9 @@ def make_room(key, desc, district, street_name=None, segment_index=None, surface
             ("segment_index", segment_index),
             ("surface", surface),
             ("patrol_zone", patrol_zone or district),
-            ("room_tags", tags or []),
+            ("room_tags", room_tags),
+            ("is_shop", "shop" in room_tags),
+            ("alert_level", 0),
         ],
     )
     room.tags.add(*TOWN_TAG)
@@ -78,6 +81,7 @@ def make_secret_exit(src, direction, dest, reverse_direction):
     make_exit(src, direction, dest, reverse_direction, secret=True)
 
 def make_npc(key, location, desc, role, wander=False, wander_zone=None, patrol_route=None):
+    is_shopkeeper = bool(location and hasattr(location, "is_shop") and location.is_shop())
     npc = create_object(
         CHAR_TYPECLASS,
         key=key,
@@ -88,6 +92,7 @@ def make_npc(key, location, desc, role, wander=False, wander_zone=None, patrol_r
             ("wander", wander),
             ("wander_zone", wander_zone),
             ("patrol_route", patrol_route or []),
+            ("is_shopkeeper", is_shopkeeper),
         ],
     )
     npc.tags.add(*TOWN_TAG)
@@ -103,10 +108,27 @@ def make_item(key, location, desc, category, value=0, shop_stock=False):
             ("category", category),
             ("value", value),
             ("shop_stock", shop_stock),
+            ("stealable", category != "fixture"),
         ],
     )
     obj.tags.add(*TOWN_TAG)
     return obj
+
+
+def stock_shopkeepers():
+    for room in search_tag(TOWN_TAG[0], category=TOWN_TAG[1]):
+        if not getattr(getattr(room, "db", None), "is_shop", False):
+            continue
+        shopkeepers = [obj for obj in room.contents if getattr(getattr(obj, "db", None), "is_shopkeeper", False)]
+        if not shopkeepers:
+            continue
+        shopkeeper = shopkeepers[0]
+        for item in list(room.contents):
+            if item == shopkeeper or getattr(item, "destination", None):
+                continue
+            if not getattr(getattr(item, "db", None), "shop_stock", False):
+                continue
+            item.move_to(shopkeeper, quiet=True, move_type="stock")
 
 def make_road(name, count, district, surface, desc_template, tags=None):
     segments = []
@@ -480,6 +502,8 @@ make_npc("Old Nessa Vale", apothecary, "A quiet herbalist whose certainty does h
 make_npc("Pela Brightstem", flower_shop, "A cheerful florist with dirt under her nails and ribbons at her wrist.", "florist")
 make_npc("Hobb Rake", fence_cellar, "A narrow-eyed fence who smiles only when the goods are good enough.", "fence")
 make_npc("Marn at the Three Lanterns", inn_common, "The innkeeper has the broad patience of someone who has already heard this story twice tonight.", "innkeeper")
+
+stock_shopkeepers()
 
 for name, location, desc, zone in [
     ("Carter Wren", roads["Warehouse Row"][0], "A teamster who always smells faintly of horse, wet rope, and road dust.", "warehouse"),

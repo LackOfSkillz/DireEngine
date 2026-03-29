@@ -7,4 +7,4 @@ class CmdForage(Command):
     help_category = "Survival"
 
     def func(self):
-        self.caller.use_ability("forage")
+        self.caller.execute_ability_input("forage")

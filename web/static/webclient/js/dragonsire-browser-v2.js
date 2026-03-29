@@ -22,6 +22,7 @@
     hotbar: ["look", "inventory", "stats"],
     activeView: "world",
     character: null,
+    subsystem: null,
     inventoryLookup: new Map(),
     abilityLookup: new Map(),
     initialRefreshSent: false,
@@ -336,6 +337,15 @@
     if (message.cmd === "character") {
       const payload = message.args[0] || {};
       byId("debug-last-character").textContent = `Character: ${payload.name || "unknown"}`;
+      const profession = payload.profession || "Unknown";
+      const rank = payload.profession_rank || "Unknown";
+      const node = byId("debug-last-profession");
+      if (node) node.textContent = `Profession: ${profession}, Rank: ${rank}`;
+    }
+    if (message.cmd === "subsystem") {
+      const payload = message.args[0] || {};
+      const node = byId("debug-last-subsystem");
+      if (node) node.textContent = `Subsystem: ${JSON.stringify(payload)}`;
     }
   }
 
@@ -504,11 +514,15 @@
 
     (payload.abilities || []).forEach((ability) => {
       const row = document.createElement("button");
-      row.className = "ability-item";
+      row.className = `ability-item${ability.locked ? " is-locked" : ""}`;
       row.type = "button";
-      row.title = `${ability.category}${ability.required_skill ? ` • ${ability.required_skill} ${ability.current_rank}/${ability.required_rank}` : ""}`;
-      row.innerHTML = `<span class="ability-name">${ability.key}</span><span class="ability-meta">${ability.cooldown > 0 ? `CD ${ability.cooldown}s` : ability.category}</span>`;
+      row.title = `${ability.category}${ability.required_skill ? ` • ${ability.required_skill} ${ability.current_rank}/${ability.required_rank}` : ""}${ability.locked_reason ? ` • ${ability.locked_reason}` : ""}`;
+      row.innerHTML = `<span class="ability-name">${ability.key}</span><span class="ability-meta">${ability.locked ? (ability.locked_reason || "locked") : (ability.cooldown > 0 ? `CD ${ability.cooldown}s` : ability.category)}</span>`;
       row.addEventListener("click", () => {
+        if (ability.locked) {
+          toast(ability.locked_reason || `${ability.key} is locked`);
+          return;
+        }
         if (ability.cooldown > 0) {
           toast(`${ability.key} is on cooldown for ${ability.cooldown}s`);
           return;
@@ -526,15 +540,69 @@
     }
   }
 
+  function updateCharacterPanel(data) {
+    if (!data) return;
+    const professionNode = byId("char-profession");
+    const rankNode = byId("char-rank");
+    if (professionNode) {
+      professionNode.textContent = data.profession
+        ? String(data.profession).replace(/_/g, " ")
+        : "Unknown";
+    }
+    if (rankNode) {
+      rankNode.textContent = `Rank ${data.profession_rank || "Unknown"}`;
+    }
+  }
+
+  function updateSubsystemUI(data) {
+    if (!data) return;
+    state.subsystem = data;
+    const bar = byId("subsystem-bar");
+    if (!bar) return;
+
+    let value = 0;
+    let max = 100;
+    let label = data.type || data.label || "Unknown";
+
+    if (data.fire !== undefined) {
+      value = data.fire;
+      max = data.max_fire || 100;
+      label = "Inner Fire";
+    }
+
+    if (data.focus !== undefined) {
+      value = data.focus;
+      max = data.max_focus || 100;
+      label = "Focus";
+    }
+
+    if (data.transfer_pool !== undefined) {
+      value = data.transfer_pool;
+      max = data.max_pool || 100;
+      label = "Transfer";
+    }
+
+    if (data.attunement !== undefined) {
+      value = data.attunement;
+      max = data.max_attunement || 100;
+      label = "Attunement";
+    }
+
+    bar.textContent = `${label}: ${value}/${max}`;
+  }
+
   function updateCharacter(payload) {
+    if (!payload) return;
     state.character = payload;
     rememberCharacter(payload.name || "");
     state.inventoryLookup = new Map();
     byId("character-name").textContent = payload.name || "Adventurer";
+    updateCharacterPanel(payload);
     const crest = document.querySelector(".crest-banner");
     if (crest) {
-      crest.textContent = payload.guild
-        ? `${String(payload.guild).replace(/_/g, " ").toUpperCase()} INTERFACE`
+      const identity = payload.profession || payload.guild;
+      crest.textContent = identity
+        ? `${String(identity).replace(/_/g, " ").toUpperCase()} INTERFACE`
         : "Wayfarer Interface";
     }
 
@@ -627,7 +695,16 @@
   }
 
   function roomColor(room) {
-    if (room.is_player) return "#df564a";
+    if (room.is_player) {
+      const profession = state.character && state.character.profession;
+      const professionColors = {
+        thief: "#66ccff",
+        empath: "#7ee0a1",
+        barbarian: "#d97a43",
+        moon_mage: "#a3a0ff",
+      };
+      return professionColors[profession] || "#df564a";
+    }
     if (room.type === "guild") return "#bc7eff";
     if (room.type === "shop") return "#54a4ff";
     return "#7fcf66";
@@ -1143,6 +1220,7 @@
     Evennia.emitter.off("character");
     Evennia.emitter.off("combat");
     Evennia.emitter.off("chat");
+    Evennia.emitter.off("subsystem");
     Evennia.emitter.off("logged_in");
     Evennia.emitter.off("connection_open");
     Evennia.emitter.off("connection_close");
@@ -1161,6 +1239,7 @@
       const payload = (Array.isArray(args) && args.length ? args[0] : null) || kwargs || {};
       appendDebug("CHARACTER", payload);
       updateDebugSummary({ cmd: "character", args: [payload], kwargs: kwargs || {} });
+      updateCharacterPanel(payload);
       updateCharacter(payload);
       return true;
     });
@@ -1177,6 +1256,14 @@
       appendChatLine(text);
       toast(text || "New chat message");
       playTone("chat");
+      return true;
+    });
+    Evennia.emitter.on("subsystem", (args, data) => {
+      const payload = (Array.isArray(args) && args.length ? args[0] : null) || data || {};
+      console.log("SUBSYSTEM:", payload);
+      appendDebug("SUBSYSTEM", payload);
+      updateDebugSummary({ cmd: "subsystem", args: [payload], kwargs: {} });
+      updateSubsystemUI(payload);
       return true;
     });
     Evennia.emitter.on("logged_in", () => {

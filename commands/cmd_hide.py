@@ -7,4 +7,4 @@ class CmdHide(Command):
     help_category = "Stealth"
 
     def func(self):
-        self.caller.use_ability("hide")
+        self.caller.execute_ability_input("hide")

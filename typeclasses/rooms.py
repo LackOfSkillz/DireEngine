@@ -23,6 +23,24 @@ class Room(ObjectParent, DefaultRoom):
     properties and methods available on all Objects.
     """
 
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.guild_tag = None
+        self.db.is_shop = False
+        self.db.alert_level = 0
+
+    def is_shop(self):
+        return bool(getattr(self.db, "is_shop", False))
+
+    def get_shopkeeper(self):
+        return next(
+            (
+                obj for obj in self.contents
+                if hasattr(obj, "is_shopkeeper") and obj.is_shopkeeper()
+            ),
+            None,
+        )
+
     def get_display_characters(self, looker, **kwargs):
         visible = []
         for obj in self.contents:

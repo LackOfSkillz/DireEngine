@@ -18,10 +18,16 @@
     <div class="crest-banner">Wayfarer Interface</div>
     <div id="character-card">
       <h2 id="character-name">Adventurer</h2>
+      <div class="character-meta" id="char-profession">Unknown</div>
+      <div class="character-meta" id="char-rank">Rank 1</div>
       <div class="character-meta" id="character-hp-label">Health 100 / 100</div>
       <div class="meter"><div id="hp-fill" class="meter-fill hp-fill"></div></div>
       <div class="character-meta" id="character-stamina-label">Stamina 100 / 100</div>
       <div class="meter"><div id="stamina-fill" class="meter-fill stamina-fill"></div></div>
+    </div>
+    <div class="subpanel">
+      <div class="subpanel-title">Subsystem</div>
+      <div id="subsystem-bar" class="status-tag">Unknown</div>
     </div>
     <div class="subpanel">
       <div class="subpanel-title">Status</div>
@@ -171,6 +177,8 @@
           <span id="debug-last-cmd">Last cmd: none</span>
           <span id="debug-last-room-count">Rooms: 0</span>
           <span id="debug-last-character">Character: none</span>
+          <span id="debug-last-profession">Profession: Unknown</span>
+          <span id="debug-last-subsystem">Subsystem: Unknown</span>
         </div>
         <pre id="debug-log"></pre>
       </div>
@@ -182,6 +190,6 @@
 {% endblock %}
 {% block scripts %}
 <link rel="stylesheet" href="/static/webclient/css/dragonsire-browser.css?v=2">
-<script src="/static/webclient/js/dragonsire-browser-v2.js?v=3"></script>
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=4"></script>
 
 {% endblock %}

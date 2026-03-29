@@ -7,4 +7,4 @@ class CmdObserve(Command):
     help_category = "Perception"
 
     def func(self):
-        self.caller.use_ability("observe")
+        self.caller.execute_ability_input("observe")

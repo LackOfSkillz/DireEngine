@@ -5,7 +5,6 @@ from typeclasses.characters import VALID_GUILDS
 
 class CmdGuild(Command):
     key = "guild"
-    aliases = ["profession"]
     locks = "cmd:all()"
     help_category = "Character"
 
@@ -16,7 +15,7 @@ class CmdGuild(Command):
         if not args:
             current = caller.get_guild() if hasattr(caller, "get_guild") else None
             if not current:
-                caller.msg("You do not currently belong to a guild.")
+                caller.msg("You do not currently have a guild affiliation.")
                 return
             caller.msg(f"You currently belong to the {current.replace('_', ' ').title()} guild.")
             return

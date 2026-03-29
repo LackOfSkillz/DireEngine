@@ -29,7 +29,7 @@ class CmdHelp(EvenniaCmdHelp):
     fieldcraft_groups = OrderedDict(
         (
             ("Awareness", ("observe", "search")),
-            ("Stealth", ("hide", "unhide", "sneak", "stalk", "ambush")),
+            ("Stealth", ("hide", "unhide", "sneak", "stalk", "ambush", "steal")),
             ("Survival", ("analyze", "forage", "harvest", "inspect", "open", "climb", "swim", "skin", "pick", "disarm", "settrap", "rework")),
         )
     )
@@ -59,7 +59,7 @@ class CmdHelp(EvenniaCmdHelp):
             ("Economy & Trade", ("buy", "sell", "haggle", "appraise", "compare")),
             ("Social & Network", ("page", "who", "ic", "ooc", "discord2chan", "irc2chan", "ircstatus", "grapevine2chan")),
             ("System / Core", ("quit", "reload", "shutdown", "reset", "option", "password", "sessions", "userpassword")),
-            ("Training & Lore", ("guild", "study", "teach", "endteach", "recall", "assessstance")),
+            ("Training & Lore", ("guild", "profession", "study", "teach", "endteach", "recall", "assessstance")),
         )
     )
 

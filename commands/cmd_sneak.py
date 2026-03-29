@@ -7,4 +7,4 @@ class CmdSneak(Command):
     help_category = "Stealth"
 
     def func(self):
-        self.caller.use_ability("sneak")
+        self.caller.execute_ability_input("sneak")

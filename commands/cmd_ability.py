@@ -2,21 +2,21 @@ from evennia import Command
 
 
 class CmdAbility(Command):
-    """
-    Use a learned or visible ability.
+  """
+  Use a learned or visible ability.
 
-    Examples:
-      ability test
-    """
+  Examples:
+    ability test
+  """
 
-    key = "ability"
-    locks = "cmd:all()"
-    help_category = "Character"
+  key = "ability"
+  locks = "cmd:all()"
+  help_category = "Character"
 
-    def func(self):
-        if not self.args:
-            self.caller.msg("Use which ability?")
-            return
+  def func(self):
+    if not self.args:
+      self.caller.msg("Use which ability?")
+      return
 
-        ability_key = self.args.strip().lower()
-        self.caller.use_ability(ability_key)
+    ability_key = self.args.strip().lower()
+    self.caller.execute_ability_input(ability_key)

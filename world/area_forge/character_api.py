@@ -1,3 +1,6 @@
+import time
+
+from typeclasses.abilities import get_ability_map
 from world.area_forge.utils.messages import send_structured
 
 
@@ -34,6 +37,15 @@ def _serialize_inventory_item(character, item):
 
 def _get_status_list(character):
     statuses = []
+
+    profession = None
+    if hasattr(character, "get_profession"):
+        profession = character.get_profession()
+    elif getattr(character.db, "profession", None):
+        profession = character.db.profession
+
+    if profession and profession != "commoner":
+        statuses.append(f"Profession: {str(profession).replace('_', ' ').title()}")
 
     if getattr(character.db, "guild", None):
         statuses.append(f"Guild: {str(character.db.guild).replace('_', ' ').title()}")
@@ -93,18 +105,35 @@ def _get_cooldowns(character):
         elif value is not None:
             duration = int(value or 0)
         cooldowns[cooldown_key] = max(0, duration)
+
+    runtime_cooldowns = getattr(getattr(character, "ndb", None), "cooldowns", None)
+    now = time.time()
+    if isinstance(runtime_cooldowns, dict):
+        for cooldown_key, expires_at in runtime_cooldowns.items():
+            remaining = max(0, int(float(expires_at or 0) - now))
+            if remaining > 0:
+                cooldowns[str(cooldown_key)] = max(cooldowns.get(str(cooldown_key), 0), remaining)
     return cooldowns
 
 
 def _get_ability_payload(character, cooldowns):
-    if not hasattr(character, "get_visible_abilities"):
+    if not hasattr(character, "can_see_ability"):
         return []
 
     abilities = []
-    for ability in character.get_visible_abilities():
+    for ability in get_ability_map(character).values():
+        if not character.passes_guild_check(ability):
+            continue
         required = getattr(ability, "required", {}) or {}
         visible_if = getattr(ability, "visible_if", {}) or {}
         skill_name = required.get("skill") or visible_if.get("skill")
+        is_visible = character.can_see_ability(ability)
+        meets_requirements, requirement_message = character.meets_ability_requirements(ability)
+        locked_reason = None
+        if not is_visible and skill_name:
+            locked_reason = f"requires {skill_name} rank {int(visible_if.get('min_rank', 0) or 0)}"
+        elif not meets_requirements:
+            locked_reason = requirement_message.replace("You need ", "requires ")
         abilities.append(
             {
                 "key": ability.key,
@@ -114,10 +143,12 @@ def _get_ability_payload(character, cooldowns):
                 "required_rank": int(required.get("rank", 0) or 0),
                 "current_rank": int(character.get_skill(skill_name) if skill_name else 0),
                 "cooldown": int(cooldowns.get(ability.key, 0) or 0),
+                "locked": bool(not is_visible or not meets_requirements),
+                "locked_reason": locked_reason,
             }
         )
 
-    return sorted(abilities, key=lambda item: (item["category"], item["key"]))
+    return sorted(abilities, key=lambda item: (item["category"], item.get("locked", False), item["key"]))
 
 
 def _object_name(value):
@@ -165,6 +196,8 @@ def get_character_payload(character):
 
     return {
         "name": character.key,
+        "profession": character.get_profession() if hasattr(character, "get_profession") else getattr(character.db, "profession", None),
+        "profession_rank": character.get_profession_rank() if hasattr(character, "get_profession_rank") else int(getattr(character.db, "profession_rank", 1) or 1),
         "guild": getattr(character.db, "guild", None),
         "hp": hp,
         "max_hp": max_hp,
@@ -195,4 +228,22 @@ def get_character_payload(character):
 def send_character_update(character, session=None):
     payload = get_character_payload(character)
     send_structured(character, "character", payload, session=session)
+    return payload
+
+
+def get_subsystem_payload(character):
+    subsystem = character.get_subsystem() if hasattr(character, "get_subsystem") else None
+    if isinstance(subsystem, dict):
+        return dict(subsystem)
+    return {
+        "key": getattr(character.db, "profession", None),
+        "profession": getattr(character.db, "profession", None),
+        "guild_tag": None,
+        "label": None,
+    }
+
+
+def send_subsystem_update(character, session=None):
+    payload = get_subsystem_payload(character)
+    send_structured(character, "subsystem", payload, session=session)
     return payload

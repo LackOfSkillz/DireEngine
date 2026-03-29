@@ -2,6 +2,8 @@ from collections import defaultdict
 
 from evennia import Command
 
+from typeclasses.abilities import get_ability_map
+
 
 class CmdAbilities(Command):
     """
@@ -16,20 +18,44 @@ class CmdAbilities(Command):
     help_category = "Character"
 
     def func(self):
-        abilities = self.caller.get_visible_abilities()
+        ability_map = get_ability_map(self.caller)
+        available = []
+        locked = []
 
-        if not abilities:
+        for ability in ability_map.values():
+            if not self.caller.passes_guild_check(ability):
+                continue
+
+            visible = self.caller.can_see_ability(ability)
+            meets_requirements, requirement_message = self.caller.meets_ability_requirements(ability)
+
+            if visible and meets_requirements:
+                available.append(ability)
+                continue
+
+            visible_if = getattr(ability, "visible_if", {}) or {}
+            skill_name = visible_if.get("skill") or (getattr(ability, "required", {}) or {}).get("skill")
+            min_rank = int(visible_if.get("min_rank", 0) or 0)
+            reason = requirement_message
+            if not reason and skill_name:
+                reason = f"requires rank {min_rank} in {skill_name}"
+            locked.append((ability, reason or "locked"))
+
+        if not available and not locked:
             self.caller.msg("You know no abilities.")
             return
 
         groups = defaultdict(list)
-        for ability in abilities:
+        for ability in available:
             groups[ability.category].append(ability.key)
 
-        lines = []
+        lines = ["Abilities:"]
         for category in sorted(groups):
             lines.append(f"{category.upper()}:")
             for key in sorted(groups[category]):
                 lines.append(f"  - {key}")
+
+        for ability, reason in sorted(locked, key=lambda entry: entry[0].key):
+            lines.append(f"  - {ability.key} (locked{f' - {reason}' if reason else ''})")
 
         self.caller.msg("\n".join(lines))

@@ -24,6 +24,7 @@ from commands.cmd_advance import CmdAdvance
 from commands.cmd_aim import CmdAim
 from commands.cmd_abilities import CmdAbilities
 from commands.cmd_ability import CmdAbility
+from commands.cmd_ability_nomatch import CmdAbilityNoMatch
 from commands.cmd_cast import CmdCast
 from commands.cmd_clickmove import CmdClickMove
 from commands.cmd_buy import CmdBuy
@@ -54,6 +55,7 @@ from commands.cmd_observe import CmdObserve
 from commands.cmd_open import CmdOpen
 from commands.cmd_pick import CmdPick
 from commands.cmd_prepare import CmdPrepare
+from commands.cmd_profession import CmdProfession
 from commands.cmd_recall import CmdRecall
 from commands.cmd_remove import CmdRemove
 from commands.cmd_renew import CmdRenew
@@ -74,6 +76,7 @@ from commands.cmd_spawnlockpick import CmdSpawnLockpick
 from commands.cmd_sneak import CmdSneak
 from commands.cmd_spawnvendor import CmdSpawnVendor
 from commands.cmd_stats import CmdStats
+from commands.cmd_steal import CmdSteal
 from commands.cmd_stow import CmdStow
 from commands.cmd_survivaldebug import CmdSurvivalDebug
 from commands.cmd_swim import CmdSwim
@@ -116,6 +119,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdAim())
         self.add(CmdAbilities())
         self.add(CmdAbility())
+        self.add(CmdAbilityNoMatch())
         self.add(CmdAmbush())
         self.add(CmdAttack())
         self.add(CmdBuy())
@@ -148,6 +152,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdOpen())
         self.add(CmdPick())
         self.add(CmdPrepare())
+        self.add(CmdProfession())
         self.add(CmdRecall())
         self.add(CmdRemove())
         self.add(CmdRenew())
@@ -168,6 +173,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSpawnWeapon())
         self.add(CmdSneak())
         self.add(CmdStats())
+        self.add(CmdSteal())
         self.add(CmdStow())
         self.add(CmdStopCast())
         self.add(CmdStudy())

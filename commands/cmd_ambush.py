@@ -11,8 +11,4 @@ class CmdAmbush(Command):
             self.caller.msg("Ambush whom?")
             return
 
-        target = self.caller.search(self.args.strip())
-        if not target:
-            return
-
-        self.caller.use_ability("ambush", target=target)
+        self.caller.execute_ability_input("ambush", target_name=self.args.strip())

@@ -258,6 +258,10 @@ class Object(ObjectParent, DefaultObject):
                         this object in any fashion
      at_pre_object_receive(obj, source_location)
      at_object_receive(obj, source_location, move_type="move", **kwargs) - called when this object receives
+
+       def at_object_creation(self):
+              super().at_object_creation()
+              self.db.stealable = True
                         another object
      at_post_move(source_location, move_type="move", **kwargs)
 

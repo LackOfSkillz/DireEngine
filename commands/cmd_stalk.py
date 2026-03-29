@@ -11,8 +11,4 @@ class CmdStalk(Command):
             self.caller.msg("Stalk whom?")
             return
 
-        target = self.caller.search(self.args.strip())
-        if not target:
-            return
-
-        self.caller.use_ability("stalk", target=target)
+        self.caller.execute_ability_input("stalk", target_name=self.args.strip())

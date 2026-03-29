@@ -25,7 +25,7 @@ from typeclasses.trap_device import TrapDevice
 from utils.contests import run_contest
 from utils.survival_loot import create_harvest_bundle, create_simple_item
 from utils.survival_messaging import msg_room
-from world.area_forge.character_api import send_character_update
+from world.area_forge.character_api import send_character_update, send_subsystem_update
 from world.area_forge.map_api import send_map_update
 
 from .objects import ObjectParent
@@ -57,6 +57,47 @@ VALID_GUILDS = (
     "trader",
     "warrior_mage",
 )
+
+PROFESSION_TO_GUILD = {
+    "barbarian": "barbarian_guildhall",
+    "bard": "bard_guildhall",
+    "cleric": "cleric_guildhall",
+    "commoner": "commoner_guildhall",
+    "empath": "empath_guildhall",
+    "moon_mage": "moon_mage_guildhall",
+    "necromancer": "necromancer_guildhall",
+    "paladin": "paladin_guildhall",
+    "ranger": "ranger_guildhall",
+    "thief": "thief_guildhall",
+    "trader": "trader_guildhall",
+    "warrior_mage": "warrior_mage_guildhall",
+}
+
+PROFESSION_SKILL_WEIGHTS = {
+    "commoner": {},
+    "barbarian": {"weapons": 1.2, "armor": 1.15, "survival": 1.05, "lore": 0.95, "magic": 0.8},
+    "bard": {"lore": 1.2, "magic": 1.1, "weapons": 1.05, "armor": 0.95, "survival": 1.0},
+    "cleric": {"magic": 1.2, "lore": 1.1, "weapons": 1.0, "armor": 0.95, "survival": 0.95},
+    "empath": {"lore": 1.2, "survival": 1.1, "magic": 1.05, "weapons": 0.9, "armor": 0.85},
+    "moon_mage": {"magic": 1.2, "lore": 1.05, "survival": 0.95, "weapons": 0.9, "armor": 0.85},
+    "necromancer": {"magic": 1.2, "lore": 1.1, "survival": 1.0, "weapons": 0.9, "armor": 0.85},
+    "paladin": {"weapons": 1.15, "armor": 1.15, "magic": 1.05, "lore": 1.0, "survival": 0.95},
+    "ranger": {"survival": 1.2, "weapons": 1.1, "lore": 1.0, "armor": 0.95, "magic": 0.9},
+    "thief": {"survival": 1.2, "weapons": 1.05, "lore": 1.0, "armor": 0.9, "magic": 0.8},
+    "trader": {"lore": 1.2, "survival": 1.05, "armor": 1.0, "weapons": 0.95, "magic": 0.85},
+    "warrior_mage": {"magic": 1.15, "weapons": 1.1, "lore": 1.0, "armor": 0.95, "survival": 0.9},
+}
+
+SKILLSET_ALIASES = {
+    "armor": "armor",
+    "combat": "weapons",
+    "general": "general",
+    "lore": "lore",
+    "magic": "magic",
+    "survival": "survival",
+    "weapon": "weapons",
+    "weapons": "weapons",
+}
 
 MINDSTATE_LEVELS = [
     "clear",
@@ -293,6 +334,12 @@ class Character(ObjectParent, DefaultCharacter):
         super().at_object_creation()
         self.db.gender = "unknown"
         self.db.guild = None
+        self.db.profession = "commoner"
+        self.db.profession_rank = 1
+        self.db.debug_mode = True
+        self.db.crime_flag = False
+        self.db.crime_severity = 0
+        self.db.awareness_bonus = 0
         self.db.desc = "An unremarkable person."
         self.db.is_npc = False
         self.db.stats = DEFAULT_STATS.copy()
@@ -325,13 +372,25 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.last_disarmed_trap = None
         self.db.last_disarmed_trap_difficulty = 0
         self.db.last_disarmed_trap_source = None
+        self.get_subsystem()
         for skill_name, baseline_rank in AVAILABLE_SKILL_BASELINES.items():
             self.learn_skill(skill_name, {"rank": baseline_rank, "mindstate": 0})
 
     def at_post_puppet(self, **kwargs):
         super().at_post_puppet(**kwargs)
         self.ensure_core_defaults()
+        self.get_subsystem()
         self.sync_client_state(include_map=True)
+
+    def at_after_move(self, source_location, **kwargs):
+        super().at_after_move(source_location, **kwargs)
+        self.ndb.is_busy = False
+        self.ndb.is_walking = False
+        self.sync_client_state(include_map=True)
+        guild_tag = getattr(getattr(self, "location", None), "db", None)
+        guild_tag = getattr(guild_tag, "guild_tag", None)
+        if guild_tag:
+            self.msg("You feel the presence of a guild here.")
 
     def sync_client_state(self, include_map=False, session=None):
         sessions_attr = getattr(self, "sessions", None)
@@ -340,6 +399,7 @@ class Character(ObjectParent, DefaultCharacter):
             return
         if include_map:
             send_map_update(self, session=session)
+        send_subsystem_update(self, session=session)
         send_character_update(self, session=session)
 
     def at_object_receive(self, moved_obj, source_location, **kwargs):
@@ -357,6 +417,18 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.gender = "unknown"
         if self.db.guild is None:
             self.db.guild = None
+        if self.db.profession is None:
+            self.db.profession = self.normalize_profession_name(getattr(self.db, "guild", None)) or "commoner"
+        if self.db.profession_rank is None:
+            self.db.profession_rank = 1
+        if self.db.debug_mode is None:
+            self.db.debug_mode = True
+        if self.db.crime_flag is None:
+            self.db.crime_flag = False
+        if self.db.crime_severity is None:
+            self.db.crime_severity = 0
+        if self.db.awareness_bonus is None:
+            self.db.awareness_bonus = 0
         if self.db.desc is None:
             self.db.desc = "An unremarkable person."
         if self.db.is_npc is None:
@@ -881,6 +953,30 @@ class Character(ObjectParent, DefaultCharacter):
 
     def set_awareness(self, level):
         self.set_state("awareness", level)
+
+    def get_awareness_bonus(self):
+        self.ensure_core_defaults()
+        return int(getattr(self.db, "awareness_bonus", 0) or 0)
+
+    def adjust_awareness_bonus(self, amount):
+        self.ensure_core_defaults()
+        self.db.awareness_bonus = max(0, self.get_awareness_bonus() + int(amount or 0))
+        return self.db.awareness_bonus
+
+    def get_awareness_score(self, extra_bonus=0):
+        base = {
+            "unaware": 10,
+            "normal": 30,
+            "alert": 50,
+            "searching": 65,
+        }.get(str(self.get_awareness()).lower(), 30)
+        return base + self.get_awareness_bonus() + int(extra_bonus or 0)
+
+    def add_crime(self, severity=1):
+        self.ensure_core_defaults()
+        self.db.crime_flag = True
+        self.db.crime_severity = int(getattr(self.db, "crime_severity", 0) or 0) + int(severity or 0)
+        return self.db.crime_severity
 
     def get_perception_total(self):
         self.ensure_core_defaults()
@@ -2107,6 +2203,9 @@ class Character(ObjectParent, DefaultCharacter):
         self.clear_state("stalking")
         self.clear_state("ambush_target")
 
+    def reveal(self):
+        self.break_stealth()
+
     def can_detect(self, target):
         return self.can_perceive(target)
 
@@ -2118,11 +2217,18 @@ class Character(ObjectParent, DefaultCharacter):
         if not target.is_hidden():
             return True
 
-        perception = self.get_perception_total()
+        perception_bonus = 0
+        stealth_bonus = 0
+        if hasattr(target, "is_profession") and target.is_profession("thief"):
+            stealth_bonus += 10
+        if self.is_profession("empath"):
+            perception_bonus += 5
+
+        perception = self.get_perception_total() + perception_bonus
         if self.get_state("observing"):
             perception += 10
 
-        return perception >= (target.get_stealth_total() + target.get_hidden_strength())
+        return perception >= (target.get_stealth_total() + target.get_hidden_strength() + stealth_bonus)
 
     def skin_target(self, target):
         if not target:
@@ -3138,33 +3244,59 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("You do not know that skill.")
             return (0, "unknown") if return_learning else False
 
-        gain, band = self.get_learning_amount(skill_name, difficulty)
-        gain = int(gain * learning_multiplier)
-        gain = int(gain * self.get_scholarship_learning_multiplier())
+        amount, band = self.get_learning_amount(skill_name, difficulty)
+        skillset = self.get_skillset(skill_name)
+        weight = self.get_skill_weight(skillset)
+        amount *= weight
+        print(f"[XP] {self} {skillset} x{weight}")
+        amount *= learning_multiplier
+        amount *= self.get_scholarship_learning_multiplier()
+        amount = int(amount) if amount > 0 else 0
+        if amount > 0:
+            amount = max(1, amount)
 
-        if gain > 0:
+        if amount > 0:
             skill = self.db.skills.get(skill_name)
             if skill:
                 cap = self.get_mindstate_cap()
-                self.update_skill(skill_name, mindstate=min(skill.get("mindstate", 0) + gain, cap))
+                # profession weight hook here
+                self.update_skill(skill_name, mindstate=min(skill.get("mindstate", 0) + amount, cap))
 
         if emit_placeholder:
             self.msg(f"You try to use {skill_name}, but it is not implemented.")
         if apply_roundtime:
             self.set_roundtime(3)
         if return_learning:
-            return gain, band
+            return amount, band
         return True
 
     def use_ability(self, key, target=None):
-        ability = get_ability(key)
+        # profession ability injection here
+        before_subsystem = self.get_subsystem() if hasattr(self, "get_subsystem") else None
+        ability = get_ability(key, self)
 
         if not ability:
             self.msg("You don't know how to do that.")
             return
 
+        if getattr(self.ndb, "is_busy", False):
+            self.msg("You are still committed to another action.")
+            return
+
+        now = time.time()
+        cooldowns = self.get_ability_cooldowns()
+        cooldown_until = float(cooldowns.get(ability.key, 0) or 0)
+        if now < cooldown_until:
+            self.msg(f"{ability.key.title()} is not ready yet.")
+            return
+
+        self.ndb.is_walking = False
+        before_feedback = self.format_subsystem_snapshot(before_subsystem)
+        if before_feedback:
+            self.msg(before_feedback)
+
         if not self.passes_guild_check(ability):
-            self.msg("You cannot use that ability.")
+            self.msg("That is not your path.")
             return
 
         ok, msg = self.meets_ability_requirements(ability)
@@ -3174,13 +3306,31 @@ class Character(ObjectParent, DefaultCharacter):
 
         ok, msg = ability.can_use(self, target)
         if not ok:
-            self.msg(msg)
+            self.msg(self.normalize_ability_failure_message(msg, before_subsystem))
             return
 
-        ability.execute(self, target)
+        self.ndb.is_busy = True
+        self.debug_log(f"[ABILITY] {self} triggers {ability.key}{f' -> {target}' if target else ''}")
+        self.msg(f"You prepare to {ability.key}...")
+        try:
+            ability.execute(self, target)
+        finally:
+            self.ndb.is_busy = False
+
+        cooldown_duration = float(getattr(ability, "cooldown", getattr(ability, "roundtime", 0)) or 0)
+        if cooldown_duration > 0:
+            cooldowns[ability.key] = time.time() + cooldown_duration
+            self.ndb.cooldowns = cooldowns
+
+        feedback = self.format_subsystem_feedback(before_subsystem, self.get_subsystem() if hasattr(self, "get_subsystem") else None)
+        if feedback:
+            self.msg(feedback)
+            self.debug_log(f"[SUBSYSTEM] {self} {feedback}")
 
         if hasattr(ability, "roundtime"):
             self.set_roundtime(ability.roundtime)
+        else:
+            self.sync_client_state()
 
     def meets_ability_requirements(self, ability):
         req = getattr(ability, "required", {}) or {}
@@ -3190,7 +3340,7 @@ class Character(ObjectParent, DefaultCharacter):
         if skill:
             current_rank = self.get_skill(skill)
             if current_rank < rank:
-                return False, f"You need {skill} rank {rank} to use {ability.key} (current: {current_rank})."
+                return False, "You are not experienced enough."
 
         return True, ""
 
@@ -3198,8 +3348,8 @@ class Character(ObjectParent, DefaultCharacter):
         if not getattr(ability, "guilds", None):
             return True
 
-        player_guild = getattr(self.db, "guild", None)
-        return player_guild in ability.guilds
+        player_profession = self.get_profession()
+        return player_profession in ability.guilds
 
     def can_see_ability(self, ability):
         if not self.passes_guild_check(ability):
@@ -3215,10 +3365,10 @@ class Character(ObjectParent, DefaultCharacter):
         return True
 
     def get_visible_abilities(self):
-        from typeclasses.abilities import ABILITY_REGISTRY
+        from typeclasses.abilities import get_ability_map
 
         return [
-            ability for ability in ABILITY_REGISTRY.values()
+            ability for ability in get_ability_map(self).values()
             if self.can_see_ability(ability)
         ]
 
@@ -3291,6 +3441,164 @@ class Character(ObjectParent, DefaultCharacter):
         normalized = str(guild_name or "").strip().lower().replace("-", "_").replace(" ", "_")
         return normalized or None
 
+    def normalize_profession_name(self, profession_name):
+        normalized = str(profession_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        return normalized or None
+
+    def is_profession(self, key):
+        return self.get_profession() == self.normalize_profession_name(key)
+
+    def get_profession_guild_tag(self):
+        return PROFESSION_TO_GUILD.get(self.get_profession())
+
+    def get_subsystem(self):
+        subsystem = getattr(self.ndb, "subsystem", None)
+        profession = self.get_profession()
+        guild_tag = self.get_profession_guild_tag()
+        if isinstance(subsystem, Mapping) and subsystem.get("profession") == profession and subsystem.get("guild_tag") == guild_tag:
+            return subsystem
+
+        subsystem = {
+            "key": profession,
+            "profession": profession,
+            "guild_tag": guild_tag,
+            "label": profession.replace("_", " ").title(),
+        }
+        self.ndb.subsystem = subsystem
+        return subsystem
+
+    def get_profession(self):
+        profession = self.normalize_profession_name(getattr(self.db, "profession", None))
+        if profession:
+            return profession
+        legacy = self.normalize_profession_name(getattr(self.db, "guild", None))
+        return legacy or "commoner"
+
+    def get_profession_rank(self):
+        return int(getattr(self.db, "profession_rank", 1) or 1)
+
+    def debug_log(self, text):
+        if getattr(self.db, "debug_mode", False):
+            print(text)
+
+    def get_ability_cooldowns(self):
+        cooldowns = getattr(self.ndb, "cooldowns", None)
+        if not isinstance(cooldowns, dict):
+            cooldowns = {}
+            self.ndb.cooldowns = cooldowns
+        return cooldowns
+
+    def execute_ability_input(self, key, target=None, target_name=None):
+        ability_key = str(key or "").strip().lower()
+        if not ability_key:
+            self.msg("Use which ability?")
+            return
+
+        self.ndb.is_busy = False
+        self.ndb.is_walking = False
+
+        if target is None and target_name:
+            target = self.search(str(target_name).strip())
+            if not target:
+                return
+
+        self.use_ability(ability_key, target=target)
+
+    def set_profession(self, profession_name):
+        normalized = self.normalize_profession_name(profession_name)
+        if normalized not in VALID_GUILDS:
+            return False
+        self.db.profession = normalized
+        self.ndb.subsystem = None
+        self.get_subsystem()
+        return True
+
+    def get_skillset(self, skill_name):
+        metadata = self.get_skill_metadata(skill_name)
+        category = str(metadata.get("category", "general") or "general").strip().lower()
+        return SKILLSET_ALIASES.get(category, category or "general")
+
+    def get_skill_weight(self, skillset):
+        profession = self.get_profession()
+        weights = PROFESSION_SKILL_WEIGHTS.get(profession, {})
+        return float(weights.get(skillset, 1.0))
+
+    def format_subsystem_feedback(self, before, after):
+        if not isinstance(before, Mapping) or not isinstance(after, Mapping):
+            return None
+
+        resource_map = {
+            "fire": ("Inner Fire", "max_fire"),
+            "focus": ("Focus", "max_focus"),
+            "transfer_pool": ("Transfer", "max_pool"),
+            "attunement": ("Attunement", "max_attunement"),
+        }
+
+        for key, (label, _max_key) in resource_map.items():
+            before_value = before.get(key)
+            after_value = after.get(key)
+            if before_value is None or after_value is None or before_value == after_value:
+                continue
+            return f"[{label}: {before_value} -> {after_value}]"
+
+        return None
+
+    def format_subsystem_snapshot(self, subsystem):
+        if not isinstance(subsystem, Mapping):
+            return None
+
+        resource_map = {
+            "fire": "Inner Fire",
+            "focus": "Focus",
+            "transfer_pool": "Transfer",
+            "attunement": "Attunement",
+        }
+
+        for key, label in resource_map.items():
+            value = subsystem.get(key)
+            if value is None:
+                continue
+            return f"[{label}: {value}]"
+
+        return None
+
+    def normalize_ability_failure_message(self, message, subsystem=None):
+        text = str(message or "").strip()
+        lower = text.lower()
+        subsystem_label = self.format_subsystem_snapshot(subsystem)
+
+        if any(token in lower for token in ("inner fire", "focus", "attunement", "transfer", "sufficient", "insufficient", "lack")):
+            if subsystem_label and "Inner Fire" in subsystem_label:
+                return "You lack the inner fire."
+            return text or "You lack the required resource."
+
+        if "experienced" in lower or ("need" in lower and "rank" in lower):
+            return "You are not experienced enough."
+
+        if "cannot use" in lower or "not your" in lower:
+            return "That is not your path."
+
+        return text or "That fails."
+
+    def get_room_trainer(self):
+        room = self.location
+        if not room:
+            return None
+        return next(
+            (
+                obj for obj in room.contents
+                if getattr(obj.db, "is_trainer", False)
+            ),
+            None,
+        )
+
+    def can_train_with(self, trainer):
+        if not trainer:
+            return False, "There is no trainer here."
+        if trainer.db.trains_profession != self.db.profession:
+            return False, "That trainer does not teach your profession."
+        return True, ""
+
     def get_guild(self):
         return self.normalize_guild_name(getattr(self.db, "guild", None))
 
@@ -3306,7 +3614,7 @@ class Character(ObjectParent, DefaultCharacter):
         guilds = metadata.get("guilds") or ()
         if not guilds:
             return False
-        return self.get_guild() in guilds
+        return self.get_profession() in guilds
 
     def get_skill_baseline(self, skill_name):
         return int(self.get_skill_metadata(skill_name).get("starter_rank", 0))
@@ -3332,7 +3640,7 @@ class Character(ObjectParent, DefaultCharacter):
             return False, "You do not know how to prepare that spell."
 
         guilds = metadata.get("guilds") or ()
-        if guilds and self.get_guild() not in guilds:
+        if guilds and self.get_profession() not in guilds:
             return False, "Your guild does not have access to that spell."
 
         return True, ""
