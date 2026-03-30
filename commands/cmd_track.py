@@ -5,12 +5,35 @@ from commands.command import Command
 
 
 class CmdTrack(Command):
+        """
+        Track a bounty target or follow a ranger trail.
+
+        Examples:
+            track outlaw
+            track wolf
+        """
+
     key = "track"
     locks = "cmd:all()"
-    help_category = "Justice"
+    help_category = "Survival"
 
     def func(self):
         caller = self.caller
+        args = str(self.args or "").strip()
+
+        if hasattr(caller, "is_profession") and caller.is_profession("ranger") and args:
+            cooldowns = caller.get_ability_cooldowns() if hasattr(caller, "get_ability_cooldowns") else {}
+            now = time.time()
+            if now < float(cooldowns.get("track", 0) or 0):
+                caller.msg("You need a moment before trying to pick up the trail again.")
+                return
+
+            ok, message = caller.attempt_ranger_track(args)
+            caller.msg(message)
+            cooldowns["track"] = now + 5
+            caller.ndb.cooldowns = cooldowns
+            return
+
         cooldowns = caller.get_ability_cooldowns() if hasattr(caller, "get_ability_cooldowns") else {}
         now = time.time()
         if now < float(cooldowns.get("track", 0) or 0):

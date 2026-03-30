@@ -2,6 +2,14 @@ from evennia import Command
 
 
 class CmdPick(Command):
+        """
+        Pick a lock on a container or door.
+
+        Examples:
+            pick chest
+            pick gate
+        """
+
     key = "pick"
     locks = "cmd:all()"
     help_category = "Survival"

@@ -181,6 +181,7 @@ def capture_criminal(target, guard=None, room=None):
         return False
 
     target.db.is_captured = True
+    target.db.in_passage = False
     target.db.in_combat = False
     target.db.pursuers = []
     if hasattr(target, "set_target"):
@@ -251,6 +252,8 @@ def call_guards(room, culprit):
     responders = []
     if not room or not culprit:
         return responders
+    if getattr(getattr(culprit, "db", None), "in_passage", False):
+        return responders
 
     if hasattr(room, "get_law_type") and room.get_law_type() == LAW_NONE:
         return responders
@@ -269,6 +272,9 @@ def call_guards(room, culprit):
         warrants[region] = warrant
         culprit.db.warrants = warrants
 
+    disguised = bool(getattr(culprit.db, "disguised", False))
+    effective_severity = max(1, severity - 1) if disguised else severity
+
     for guard in _iter_guard_candidates(room):
         if hasattr(guard, "set_awareness"):
             guard.set_awareness("alert")
@@ -276,13 +282,19 @@ def call_guards(room, culprit):
             guard.move_to(room, quiet=True, move_type="pursuit")
         responders.append(guard)
         if hasattr(guard, "location") and hasattr(guard.location, "msg_contents") and warrant:
-            guard.location.msg_contents(f"{guard.key} recognizes {culprit.key}!", exclude=[])
-        if len(responders) >= min(3, severity):
+            if disguised:
+                guard.location.msg_contents(f"{guard.key} squints uncertainly at {culprit.key}.", exclude=[])
+            else:
+                guard.location.msg_contents(f"{guard.key} recognizes {culprit.key}!", exclude=[])
+        if len(responders) >= min(3, effective_severity):
             break
 
-    if responders and severity < 3 and room.db.pending_guard_target != culprit.id:
+    if responders and (effective_severity < 3 or disguised) and room.db.pending_guard_target != culprit.id:
         room.db.pending_guard_target = culprit.id
-        responders[0].location.msg_contents(f"{responders[0].key} barks, 'Hold there, {culprit.key}!'", exclude=[])
+        if disguised:
+            responders[0].location.msg_contents(f"{responders[0].key} barks, 'You there, stop a moment!'", exclude=[])
+        else:
+            responders[0].location.msg_contents(f"{responders[0].key} barks, 'Hold there, {culprit.key}!'", exclude=[])
     elif responders:
         room.db.pending_guard_target = None
         capture_criminal(culprit, guard=responders[0], room=room)

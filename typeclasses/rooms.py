@@ -5,10 +5,22 @@ Rooms are simple containers that has no location of their own.
 
 """
 
+import time
+from collections.abc import Mapping
+
+from evennia import search_object
 from django.utils.translation import gettext as _
 from evennia.objects.objects import DefaultRoom
 from evennia.utils.utils import iter_to_str
 from world.law import LAW_NONE, LAW_STANDARD
+from world.systems.ranger import (
+    TRAIL_DECAY_SECONDS,
+    get_trail_quality_label,
+    infer_environment_type,
+    infer_terrain_type,
+    normalize_environment_type,
+    normalize_terrain_type,
+)
 
 from .objects import ObjectParent
 
@@ -27,15 +39,200 @@ class Room(ObjectParent, DefaultRoom):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.guild_tag = None
+        self.db.environment_type = infer_environment_type(self.key, getattr(self.db, "desc", "") or "")
+        self.db.terrain_type = infer_terrain_type(
+            self.key,
+            getattr(self.db, "desc", "") or "",
+            environment_type=self.db.environment_type,
+        )
         self.db.allowed_professions = []
+        self.db.has_passage = False
+        self.db.passage_links = []
+        self.db.trails = []
         self.db.is_stocks = False
         self.db.is_shop = False
+        self.db.is_shrine = False
         self.db.alert_level = 0
         self.db.law_type = LAW_STANDARD
         self.db.region = "default_region"
 
+    def is_shrine_room(self):
+        if bool(getattr(self.db, "is_shrine", False)):
+            return True
+        tags = getattr(self, "tags", None)
+        return bool(tags and tags.get("shrine"))
+
+    def get_environment_type(self):
+        return normalize_environment_type(
+            getattr(self.db, "environment_type", None),
+            default=infer_environment_type(self.key, getattr(self.db, "desc", "") or ""),
+        )
+
+    def set_environment_type(self, value):
+        normalized = normalize_environment_type(value)
+        self.db.environment_type = normalized
+        return normalized
+
+    def get_terrain_type(self):
+        return normalize_terrain_type(
+            getattr(self.db, "terrain_type", None),
+            default=infer_terrain_type(
+                self.key,
+                getattr(self.db, "desc", "") or "",
+                environment_type=getattr(self.db, "environment_type", None),
+            ),
+        )
+
+    def set_terrain_type(self, value):
+        normalized = normalize_terrain_type(value)
+        self.db.terrain_type = normalized
+        return normalized
+
+    def prune_trails(self):
+        trails = []
+        now = time.time()
+        for trail in list(getattr(self.db, "trails", None) or []):
+            if not isinstance(trail, Mapping):
+                continue
+            expires_at = float(trail.get("expires_at", 0) or 0)
+            if expires_at and now >= expires_at:
+                continue
+            entry = dict(trail)
+            created_at = float(entry.get("created_at", entry.get("timestamp", now)) or now)
+            max_lifetime = max(1.0, expires_at - created_at) if expires_at else 1.0
+            remaining_ratio = 1.0
+            if expires_at:
+                remaining_ratio = max(0.0, min(1.0, (expires_at - now) / max_lifetime))
+            base_strength = int(entry.get("strength", 0) or 0)
+            entry["effective_strength"] = max(1, int(round(base_strength * remaining_ratio))) if base_strength > 0 else 0
+            entry["timestamp"] = created_at
+            trails.append(entry)
+        self.db.trails = trails
+        return trails
+
+    def add_trail_entry(self, target, direction, strength=50):
+        if not target or not direction:
+            return None
+        environment = self.get_environment_type()
+        lifetime = int(TRAIL_DECAY_SECONDS.get(environment, 90) or 90)
+        now = time.time()
+        trails = self.prune_trails()
+        trails.append(
+            {
+                "target_id": getattr(target, "id", None),
+                "target_key": getattr(target, "key", "someone"),
+                "direction": str(direction).strip().lower(),
+                "strength": max(1, min(100, int(strength or 0))),
+                "created_at": now,
+                "timestamp": now,
+                "expires_at": now + lifetime,
+            }
+        )
+        self.db.trails = trails[-50:]
+        return trails[-1]
+
+    def get_trails_for_target(self, target):
+        target_id = getattr(target, "id", None)
+        target_key = ""
+        if target_id is None:
+            if isinstance(target, int):
+                target_id = target
+            else:
+                target_key = str(target or "").strip().lower()
+                if not target_key:
+                    return []
+        trails = []
+        for trail in self.prune_trails():
+            trail_target_id = int(trail.get("target_id", 0) or 0)
+            trail_target_key = str(trail.get("target_key", "") or "").strip().lower()
+            if target_id is not None and trail_target_id == int(target_id):
+                trails.append(trail)
+                continue
+            if target_key and trail_target_key == target_key:
+                trails.append(trail)
+        return sorted(
+            trails,
+            key=lambda trail: (
+                int(trail.get("effective_strength", trail.get("strength", 0)) or 0),
+                float(trail.get("created_at", 0) or 0),
+            ),
+            reverse=True,
+        )
+
+    def get_visible_trails_for(self, looker):
+        trails = self.prune_trails()
+        if not looker:
+            return []
+        if not hasattr(looker, "is_profession") or not looker.is_profession("ranger"):
+            return []
+
+        minimum_strength = 25
+        if hasattr(looker, "is_hidden") and looker.is_hidden():
+            minimum_strength -= 10
+        if hasattr(looker, "get_ranger_tracking_bonus"):
+            minimum_strength -= max(0, int(looker.get_ranger_tracking_bonus() / 2))
+
+        visible = []
+        for trail in trails:
+            perceived_strength = int(trail.get("effective_strength", trail.get("strength", 0)) or 0)
+            if hasattr(looker, "get_ranger_trail_read_bonus"):
+                perceived_strength += int(looker.get_ranger_trail_read_bonus(trail) or 0)
+            if perceived_strength < max(5, minimum_strength):
+                continue
+            entry = dict(trail)
+            entry["apparent_strength"] = perceived_strength
+            visible.append(entry)
+        return sorted(
+            visible,
+            key=lambda trail: (
+                int(trail.get("apparent_strength", trail.get("effective_strength", trail.get("strength", 0))) or 0),
+                float(trail.get("created_at", 0) or 0),
+            ),
+            reverse=True,
+        )
+
+    def describe_trail(self, trail, observer=None):
+        quality = get_trail_quality_label(trail.get("apparent_strength", trail.get("effective_strength", trail.get("strength", 0))))
+        direction = str(trail.get("direction", "somewhere") or "somewhere").lower()
+        target_key = str(trail.get("target_key", "someone") or "someone")
+        description = f"{quality} tracks from {target_key} lead {direction}."
+        if observer and hasattr(observer, "get_ranger_tracking_depth"):
+            depth = observer.get_ranger_tracking_depth()
+            strength = int(trail.get("apparent_strength", trail.get("effective_strength", trail.get("strength", 0))) or 0)
+            if depth in {"clear", "keen"} and strength >= 45:
+                description += " The sign is still easy to read."
+            elif depth == "keen" and strength >= 70:
+                description += " The passage feels recent and confident."
+        return description
+
+    def get_exit_direction_to(self, destination):
+        if not destination:
+            return None
+        destination_id = getattr(destination, "id", None)
+        for exit_obj in self.contents_get(content_type="exit"):
+            exit_destination = getattr(exit_obj, "destination", None)
+            if exit_destination == destination:
+                return str(getattr(exit_obj, "key", "") or "").strip().lower() or None
+            if destination_id is not None and getattr(exit_destination, "id", None) == destination_id:
+                return str(getattr(exit_obj, "key", "") or "").strip().lower() or None
+        return None
+
     def is_shop(self):
         return bool(getattr(self.db, "is_shop", False))
+
+    def has_passage(self):
+        return bool(getattr(self.db, "has_passage", False))
+
+    def get_passage_destinations(self):
+        destinations = []
+        for room_ref in getattr(self.db, "passage_links", None) or []:
+            if hasattr(room_ref, "id") and getattr(room_ref, "id", None):
+                destinations.append(room_ref)
+                continue
+            result = search_object(f"#{room_ref}") if str(room_ref).isdigit() else search_object(room_ref)
+            if result:
+                destinations.append(result[0])
+        return destinations
 
     def get_shopkeeper(self):
         return next(
@@ -45,6 +242,29 @@ class Room(ObjectParent, DefaultRoom):
             ),
             None,
         )
+
+    def at_object_leave(self, moved_obj, target_location, **kwargs):
+        super().at_object_leave(moved_obj, target_location, **kwargs)
+        if not moved_obj or not target_location:
+            return
+        is_character = False
+        if hasattr(moved_obj, "is_typeclass"):
+            is_character = moved_obj.is_typeclass("typeclasses.characters.Character", exact=False)
+        if not is_character:
+            return
+        direction = self.get_exit_direction_to(target_location)
+        if not direction:
+            return
+        bond_strength = 50
+        if hasattr(moved_obj, "get_wilderness_bond"):
+            bond_strength += int((moved_obj.get_wilderness_bond() - 50) / 5)
+        if hasattr(moved_obj, "is_hidden") and moved_obj.is_hidden():
+            bond_strength -= 10
+        if hasattr(moved_obj, "get_state"):
+            cover_data = moved_obj.get_state("ranger_cover_tracks")
+            if isinstance(cover_data, Mapping):
+                bond_strength -= int(cover_data.get("strength_penalty", 25) or 25)
+        self.add_trail_entry(moved_obj, direction, strength=max(5, min(100, bond_strength)))
 
     def allows_profession(self, profession_name):
         allowed = [

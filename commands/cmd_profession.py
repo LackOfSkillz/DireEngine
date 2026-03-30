@@ -4,6 +4,13 @@ from typeclasses.characters import VALID_GUILDS
 
 
 class CmdProfession(Command):
+        """
+        Review information about your current profession.
+
+        Examples:
+            profession
+        """
+
     key = "profession"
     locks = "cmd:all()"
     help_category = "Character"

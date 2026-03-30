@@ -60,6 +60,8 @@ class HideAbility(Ability):
 
         if best_outcome == "fail":
             user.break_stealth()
+            if hasattr(user, "set_position_state"):
+                user.set_position_state("exposed")
             msg_actor(user, "You fail to find concealment.")
             user.use_skill("stealth", apply_roundtime=False, emit_placeholder=False)
             return
@@ -73,6 +75,8 @@ class HideAbility(Ability):
             "hidden",
             {"strength": strength_map.get(best_outcome, 10), "source": "hide"},
         )
+        if hasattr(user, "set_position_state"):
+            user.set_position_state("advantaged")
         if best_outcome == "partial":
             msg_actor(user, "You struggle to conceal yourself.")
         else:

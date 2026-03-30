@@ -30,6 +30,9 @@ def _serialize_inventory_item(character, item):
         "wearable": bool(getattr(item.db, "wearable", False)),
         "wieldable": bool(getattr(item.db, "item_type", None) == "weapon" or getattr(item.db, "weapon_type", None)),
         "weapon_type": getattr(item.db, "weapon_type", None),
+        "weapon_range_type": getattr(item.db, "weapon_range_type", None),
+        "ammo_loaded": bool(getattr(item.db, "ammo_loaded", False)),
+        "ammo_type": getattr(item.db, "ammo_type", None),
         "is_wielded": bool(hasattr(character, "get_weapon") and character.get_weapon() == item),
         "actions": _item_actions(character, item),
     }
@@ -62,8 +65,72 @@ def _get_status_list(character):
         target_name = getattr(target, "key", None)
         statuses.append(f"In combat{f' with {target_name}' if target_name else ''}")
 
+    if hasattr(character, "get_favor"):
+        statuses.append(f"Favor: {character.get_favor()}")
+        if hasattr(character, "get_favor_state_message"):
+            message = character.get_favor_state_message()
+            if message:
+                statuses.append(message)
+    life_state = str(getattr(character.db, "life_state", "ALIVE") or "ALIVE").upper()
+    if life_state != "ALIVE":
+        statuses.append(f"State: {life_state.title()}")
+        if life_state == "DEAD" and hasattr(character, "get_depart_mode"):
+            corpse = character.get_death_corpse() if hasattr(character, "get_death_corpse") else None
+            statuses.append(f"Depart: {character.get_depart_mode(corpse=corpse).title()}")
+
     if hasattr(character, "is_in_roundtime") and character.is_in_roundtime():
         statuses.append(f"Roundtime {character.get_remaining_roundtime():.1f}s")
+
+    if hasattr(character, "is_profession") and character.is_profession("warrior"):
+        if hasattr(character, "get_war_tempo_state"):
+            statuses.append(f"Tempo: {character.get_war_tempo_state().title()}")
+        if hasattr(character, "get_exhaustion") and hasattr(character, "get_exhaustion_profile"):
+            statuses.append(f"Exhaustion: {character.get_exhaustion_profile().get('label', 'Fresh')}")
+        if hasattr(character, "get_pressure_level"):
+            statuses.append(f"Pressure: {character.get_pressure_level()}")
+        if hasattr(character, "get_combat_rhythm_state"):
+            statuses.append(f"Rhythm: {character.get_combat_rhythm_state().title()}")
+        if hasattr(character, "get_active_warrior_berserk"):
+            active_berserk = character.get_active_warrior_berserk()
+            if active_berserk:
+                statuses.append(f"Berserk: {str(active_berserk.get('name') or active_berserk.get('key') or '').title()}")
+    elif hasattr(character, "is_profession") and character.is_profession("ranger"):
+        if hasattr(character, "get_wilderness_bond_profile"):
+            statuses.append(f"Bond: {character.get_wilderness_bond_profile().get('label', 'Attuned')}")
+        if hasattr(character, "get_nature_focus"):
+            statuses.append(f"Focus: {character.get_nature_focus()}")
+        if getattr(character, "location", None) and hasattr(character.location, "get_environment_type"):
+            statuses.append(f"Terrain: {character.location.get_environment_type().title()}")
+        if getattr(character, "location", None) and hasattr(character.location, "get_terrain_type"):
+            statuses.append(f"Ground: {character.location.get_terrain_type().title()}")
+        if hasattr(character, "get_equipped_ammo_state"):
+            ammo_state = character.get_equipped_ammo_state()
+            if ammo_state:
+                statuses.append(f"Ammo: {'Loaded' if ammo_state.get('loaded') else 'Empty'}")
+        if hasattr(character, "get_ranger_aim_stacks"):
+            aim_stacks = character.get_ranger_aim_stacks()
+            if aim_stacks:
+                statuses.append(f"Aim: {aim_stacks}")
+        if hasattr(character, "has_active_ranger_companion") and character.has_active_ranger_companion():
+            statuses.append(f"Companion: {character.get_ranger_companion_label()}")
+    elif hasattr(character, "is_profession") and character.is_profession("empath"):
+        if hasattr(character, "get_empath_shock"):
+            statuses.append(f"Shock: {character.get_empath_shock()}")
+        if hasattr(character, "is_empath_overdrawn") and character.is_empath_overdrawn():
+            statuses.append("Overdraw")
+        if hasattr(character, "get_empath_links"):
+            links = character.get_empath_links(require_local=False, include_group=False)
+            if links:
+                primary = links[0]
+                detail = " deep" if primary.get("deepened") else ""
+                statuses.append(f"Linked: {primary['target'].key} [{str(primary.get('type', 'touch')).title()} {primary.get('strength_label', 'Weak')}{detail}]")
+        if hasattr(character, "get_empath_unity_state"):
+            unity = character.get_empath_unity_state()
+            if unity:
+                statuses.append(f"Unity: {len(unity.get('members', []))}")
+        if hasattr(character, "get_empath_wounds"):
+            wounds = character.get_empath_wounds()
+            statuses.append(f"Wounds V{int(wounds.get('vitality', 0) or 0)}/B{int(wounds.get('bleeding', 0) or 0)}/F{int(wounds.get('fatigue', 0) or 0)}/T{int(wounds.get('trauma', 0) or 0)}/P{int(wounds.get('poison', 0) or 0)}/D{int(wounds.get('disease', 0) or 0)}")
 
     stance = getattr(character.db, "stance", None) or {}
     if stance:
@@ -124,6 +191,8 @@ def _get_ability_payload(character, cooldowns):
     for ability in get_ability_map(character).values():
         if not character.passes_guild_check(ability):
             continue
+        if hasattr(character, "is_hidden_warrior_ability") and character.is_hidden_warrior_ability(ability):
+            continue
         required = getattr(ability, "required", {}) or {}
         visible_if = getattr(ability, "visible_if", {}) or {}
         skill_name = required.get("skill") or visible_if.get("skill")
@@ -138,6 +207,7 @@ def _get_ability_payload(character, cooldowns):
             {
                 "key": ability.key,
                 "category": getattr(ability, "category", "general"),
+                "exhaustion_cost": int(getattr(ability, "exhaustion_cost", 0) or 0),
                 "roundtime": float(getattr(ability, "roundtime", 0) or 0),
                 "required_skill": skill_name,
                 "required_rank": int(required.get("rank", 0) or 0),
@@ -208,7 +278,44 @@ def get_character_payload(character):
         "fatigue": fatigue,
         "attunement": attunement,
         "max_attunement": max_attunement,
+        "war_tempo": int(character.get_war_tempo() if hasattr(character, "get_war_tempo") else 0),
+        "max_war_tempo": int(character.get_max_war_tempo() if hasattr(character, "get_max_war_tempo") else 0),
+        "war_tempo_state": character.get_war_tempo_state() if hasattr(character, "get_war_tempo_state") else None,
+        "wilderness_bond": int(character.get_wilderness_bond() if hasattr(character, "get_wilderness_bond") else 0),
+        "wilderness_bond_state": character.get_wilderness_bond_state() if hasattr(character, "get_wilderness_bond_state") else None,
+        "ranger_instinct": int(character.get_ranger_instinct() if hasattr(character, "get_ranger_instinct") else 0),
+        "nature_focus": int(character.get_nature_focus() if hasattr(character, "get_nature_focus") else 0),
+        "ranger_terrain": character.get_ranger_terrain_type() if hasattr(character, "get_ranger_terrain_type") else None,
+        "ranger_companion": character.get_ranger_companion() if hasattr(character, "get_ranger_companion") else None,
+        "empath_shock": int(character.get_empath_shock() if hasattr(character, "get_empath_shock") else 0),
+        "empath_wounds": character.get_empath_wounds() if hasattr(character, "get_empath_wounds") else None,
+        "empath_link": getattr(character.get_linked_target(), "key", None) if hasattr(character, "get_linked_target") and character.get_linked_target() else None,
+        "empath_links": [
+            {
+                "target": getattr(entry.get("target"), "key", None),
+                "type": entry.get("type"),
+                "priority": int(entry.get("priority", 0) or 0),
+                "strength": int(entry.get("strength", 0) or 0),
+                "strength_label": entry.get("strength_label"),
+                "deepened": bool(entry.get("deepened", False)),
+                "remaining": int(entry.get("remaining", 0) or 0),
+            }
+            for entry in (character.get_empath_links(require_local=False, include_group=False) if hasattr(character, "get_empath_links") else [])
+        ],
+        "empath_unity": [member.key for member in ((character.get_empath_unity_state() or {}).get("members", []) if hasattr(character, "get_empath_unity_state") else [])],
+        "empath_overdraw": bool(character.is_empath_overdrawn() if hasattr(character, "is_empath_overdrawn") else False),
+        "exhaustion": int(character.get_exhaustion() if hasattr(character, "get_exhaustion") else 0),
+        "exhaustion_state": character.get_exhaustion_stage() if hasattr(character, "get_exhaustion_stage") else None,
+        "pressure_level": int(character.get_pressure_level() if hasattr(character, "get_pressure_level") else 0),
+        "combat_rhythm": character.get_combat_rhythm_state() if hasattr(character, "get_combat_rhythm_state") else None,
+        "active_berserk": (character.get_active_warrior_berserk() or {}).get("key") if hasattr(character, "get_active_warrior_berserk") else None,
         "coins": int(getattr(character.db, "coins", 0) or 0),
+        "life_state": str(getattr(character.db, "life_state", "ALIVE") or "ALIVE").upper(),
+        "favor": int(character.get_favor() if hasattr(character, "get_favor") else 0),
+        "favor_state": character.get_favor_state() if hasattr(character, "get_favor_state") else None,
+        "unabsorbed_xp": int(character.get_unabsorbed_xp() if hasattr(character, "get_unabsorbed_xp") else 0),
+        "death_favor_snapshot": character.get_favor_death_snapshot() if hasattr(character, "get_favor_death_snapshot") else None,
+        "depart_mode": character.get_depart_mode(corpse=character.get_death_corpse()) if hasattr(character, "get_depart_mode") and hasattr(character, "is_dead") and character.is_dead() else None,
         "roundtime": float(character.get_remaining_roundtime() if hasattr(character, "get_remaining_roundtime") else 0),
         "in_combat": bool(getattr(character.db, "in_combat", False)),
         "target": getattr(target, "key", None),

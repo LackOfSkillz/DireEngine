@@ -4,6 +4,13 @@ from utils.crime import resolve_justice_case
 
 
 class CmdPlead(Command):
+        """
+        Plead your case to the local authorities.
+
+        Examples:
+            plead
+        """
+
     key = "plead"
     locks = "cmd:all()"
     help_category = "Justice"

@@ -1,4 +1,6 @@
 import random
+import time
+from collections.abc import Mapping
 
 from typeclasses.characters import Character
 
@@ -102,6 +104,17 @@ class NPC(Character):
         self.process_ai_decision()
 
     def process_ai_decision(self):
+        manipulated = self.get_state("empath_manipulated") if hasattr(self, "get_state") else None
+        if isinstance(manipulated, Mapping):
+            expires_at = float(manipulated.get("expires_at", 0) or 0)
+            if expires_at and time.time() >= expires_at:
+                self.clear_state("empath_manipulated")
+            else:
+                if self.get_target():
+                    self.set_target(None)
+                self.db.in_combat = False
+                return
+
         target = self.get_target()
 
         if not target:
@@ -188,7 +201,7 @@ class NPC(Character):
         if random.randint(1, 100) >= 70:
             return False
 
-        self.set_range(target, "melee")
+        self.set_range(target, "near" if self.get_range(target) == "far" else "melee")
         self.set_roundtime(1.5)
         if self.location:
             self.location.msg_contents(f"{self.key} rushes forward to keep {target.key} engaged!")
@@ -202,7 +215,7 @@ class NPC(Character):
         if random.randint(1, 100) >= 30:
             return False
 
-        self.set_range(target, "missile")
+        self.set_range(target, "far")
         self.set_roundtime(1.5)
         if self.location:
             self.location.msg_contents(f"{self.key} attempts to flee!")

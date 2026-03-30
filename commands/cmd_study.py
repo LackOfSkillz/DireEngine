@@ -2,6 +2,13 @@ from evennia import Command
 
 
 class CmdStudy(Command):
+        """
+        Study an item, lesson, or topic source.
+
+        Examples:
+            study book
+        """
+
     key = "study"
     locks = "cmd:all()"
     help_category = "Lore"

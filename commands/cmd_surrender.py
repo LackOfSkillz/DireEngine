@@ -4,6 +4,13 @@ from utils.crime import call_guards
 
 
 class CmdSurrender(Command):
+        """
+        Yield the fight and stop resisting.
+
+        Examples:
+            surrender
+        """
+
     key = "surrender"
     locks = "cmd:all()"
     help_category = "Justice"

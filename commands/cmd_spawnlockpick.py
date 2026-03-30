@@ -5,6 +5,13 @@ from typeclasses.lockpick import Lockpick
 
 
 class CmdSpawnLockpick(Command):
+        """
+        Spawn a test lockpick in the room.
+
+        Examples:
+            spawnlockpick
+        """
+
     key = "spawnlockpick"
     aliases = ["spawnpick"]
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"

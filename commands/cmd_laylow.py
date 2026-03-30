@@ -2,6 +2,13 @@ from commands.command import Command
 
 
 class CmdLayLow(Command):
+        """
+        Try to reduce heat from the justice system.
+
+        Examples:
+            laylow
+        """
+
     key = "laylow"
     aliases = ["lay low"]
     locks = "cmd:all()"

@@ -14,11 +14,19 @@ class CmdHelp(EvenniaCmdHelp):
     page_one_groups = OrderedDict(
         (
             ("Communication", ("help", "look", "say", "whisper", "pose", "nick")),
-            ("Character", ("abilities", "ability", "diagnose", "heal", "injuries", "mindstate", "skills", "states", "stats", "use")),
+            ("Character", ("abilities", "ability", "assess", "center", "circle", "depart", "diagnose", "favor", "heal", "injuries", "link", "manipulate", "mend", "mindstate", "perceive", "pray", "purge", "redirect", "release", "resurrect", "sacrifice", "skills", "stabilize", "states", "stats", "take", "touch", "unity", "use", "xp")),
             ("Inventory & Equipment", ("inventory", "get", "give", "drop", "draw", "stow", "wear", "remove", "wield", "unwield", "slots")),
-            ("Combat", ("attack", "aim", "target", "stance", "advance", "retreat", "disengage", "tend")),
+            ("Combat", ("attack", "aim", "berserk", "fire", "load", "pounce", "reposition", "recover", "roar", "snipe", "target", "stance", "advance", "retreat", "disengage", "tend")),
         )
     )
+
+    def func(self):
+        query = str(self.args or "").strip().lower()
+        if query == "warrior":
+            if hasattr(self.caller, "get_warrior_help_text"):
+                self.msg_help(self.caller.get_warrior_help_text())
+                return
+        super().func()
 
     system_groups = OrderedDict(
         (
@@ -29,8 +37,27 @@ class CmdHelp(EvenniaCmdHelp):
     fieldcraft_groups = OrderedDict(
         (
             ("Awareness", ("observe", "search")),
-            ("Stealth", ("hide", "unhide", "sneak", "stalk", "ambush", "steal")),
-            ("Survival", ("analyze", "forage", "harvest", "inspect", "open", "climb", "swim", "skin", "pick", "disarm", "settrap", "rework")),
+            (
+                "Stealth",
+                (
+                    "blend",
+                    "mark",
+                    "khri",
+                    "hide",
+                    "unhide",
+                    "disguise",
+                    "sneak",
+                    "stalk",
+                    "ambush",
+                    "steal",
+                    "slip",
+                    "thug",
+                    "find passage",
+                    "enter passage",
+                    "passage travel",
+                ),
+            ),
+            ("Survival", ("analyze", "beseech", "companion", "cover tracks", "focus", "follow trail", "forage", "harvest", "hunt", "inspect", "open", "read land", "scout", "track", "climb", "swim", "skin", "pick", "disarm", "settrap", "rework")),
         )
     )
 

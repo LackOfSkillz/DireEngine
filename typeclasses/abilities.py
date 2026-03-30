@@ -59,3 +59,4 @@ register_ability(TestAbility())
 import typeclasses.abilities_stealth
 import typeclasses.abilities_perception
 import typeclasses.abilities_survival
+import typeclasses.abilities_warrior

@@ -2,6 +2,13 @@ from evennia import Command
 
 
 class CmdBuy(Command):
+        """
+        Purchase an item from a nearby shop or vendor.
+
+        Examples:
+            buy bread
+        """
+
     key = "buy"
     locks = "cmd:all()"
     help_category = "Lore"

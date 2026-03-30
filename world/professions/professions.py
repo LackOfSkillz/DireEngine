@@ -117,6 +117,16 @@ PROFESSION_PROFILES = {
         "guild_tag": "trader_guildhall",
         "social": "Established",
     },
+    "warrior": {
+        "display": "Warrior",
+        "description": "Battle-trained fighters who build momentum through disciplined aggression and relentless pressure.",
+        "primary": "weapons",
+        "secondary": "armor",
+        "tertiary": "survival",
+        "guild_tag": "warrior_guildhall",
+        "social": "Respected",
+        "presence_text": "Carries the weight of a practiced fighter.",
+    },
     "warrior_mage": {
         "display": "Warrior Mage",
         "description": "Battle mages who shape destructive force through practiced arms and relentless will.",

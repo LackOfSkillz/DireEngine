@@ -10,6 +10,21 @@ from evennia.commands.command import Command as BaseCommand
 # from evennia import default_cmds
 
 
+DEAD_STATE_ALLOWED_COMMANDS = {
+    "depart",
+    "favor",
+    "help",
+    "look",
+    "l",
+    "pose",
+    "resurrect",
+    "say",
+    "stats",
+    "whisper",
+    "xp",
+}
+
+
 class Command(BaseCommand):
     """
     This command has no custom help entry yet.
@@ -28,7 +43,19 @@ class Command(BaseCommand):
     #     - at_post_cmd(): Extra actions, often things done after
     #         every command, like prompts.
     #
-    pass
+    def at_pre_cmd(self):
+        caller = getattr(self, "caller", None)
+        if caller is None or not hasattr(caller, "is_dead"):
+            return super().at_pre_cmd()
+        if not caller.is_dead():
+            return super().at_pre_cmd()
+
+        command_name = str(getattr(self, "key", "") or getattr(self, "cmdstring", "")).strip().lower()
+        if command_name in DEAD_STATE_ALLOWED_COMMANDS:
+            return super().at_pre_cmd()
+
+        caller.msg("You are dead. You can still look, speak, check your state, depart, or wait for resurrection.")
+        return True
 
 
 # -------------------------------------------------------------

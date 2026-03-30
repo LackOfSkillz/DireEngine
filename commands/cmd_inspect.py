@@ -2,6 +2,14 @@ from evennia import Command
 
 
 class CmdInspect(Command):
+        """
+        Inspect an item or object more closely.
+
+        Examples:
+            inspect sword
+            inspect chest
+        """
+
     key = "inspect"
     locks = "cmd:all()"
     help_category = "Survival"

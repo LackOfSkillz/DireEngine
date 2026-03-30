@@ -10,5 +10,6 @@ PROFESSION_SKILL_WEIGHTS = {
     "ranger": {"survival": 1.2, "weapons": 1.1, "lore": 1.0, "armor": 0.95, "magic": 0.9},
     "thief": {"survival": 1.2, "weapons": 1.05, "lore": 1.0, "armor": 0.9, "magic": 0.8},
     "trader": {"lore": 1.2, "survival": 1.05, "armor": 1.0, "weapons": 0.95, "magic": 0.85},
+    "warrior": {"weapons": 1.2, "armor": 1.1, "survival": 1.0, "lore": 0.95, "magic": 0.75},
     "warrior_mage": {"magic": 1.15, "weapons": 1.1, "lore": 1.0, "armor": 0.95, "survival": 0.9},
 }

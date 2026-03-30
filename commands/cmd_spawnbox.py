@@ -7,6 +7,13 @@ from typeclasses.box import Box
 
 
 class CmdSpawnBox(Command):
+        """
+        Spawn a test box in the room.
+
+        Examples:
+            spawnbox
+        """
+
     key = "spawnbox"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Builder"

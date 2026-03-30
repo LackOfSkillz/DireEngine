@@ -4,6 +4,10 @@ from typeclasses.abilities import get_ability
 
 
 class CmdAbilityNoMatch(Command):
+    """
+    Fallback handler for unmatched ability input.
+    """
+
     key = syscmdkeys.CMD_NOMATCH
     locks = "cmd:all()"
     auto_help = False
@@ -19,6 +23,9 @@ class CmdAbilityNoMatch(Command):
 
         ability = get_ability(ability_key, self.caller)
         if not ability:
+            self.caller.msg(f"Command '{ability_key}' is not available.")
+            return
+        if hasattr(self.caller, "is_hidden_warrior_ability") and self.caller.is_hidden_warrior_ability(ability):
             self.caller.msg(f"Command '{ability_key}' is not available.")
             return
 

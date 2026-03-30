@@ -2,6 +2,14 @@ from evennia import Command
 
 
 class CmdRecall(Command):
+        """
+        Recall learned lore, teaching notes, or profession guidance.
+
+        Examples:
+            recall
+            recall ranger
+        """
+
     key = "recall"
     locks = "cmd:all()"
     help_category = "Lore"

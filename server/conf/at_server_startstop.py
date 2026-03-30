@@ -336,6 +336,8 @@ def process_status_tick():
 
         injuries = character.db.injuries or {}
         total_bleed = sum(part.get("bleed", 0) for part in injuries.values()) if injuries else 0
+        wound_state = dict(getattr(character.db, "wounds", None) or {})
+        has_wound_conditions = bool(int(wound_state.get("poison", 0) or 0) > 0 or int(wound_state.get("disease", 0) or 0) > 0)
         has_magic_state = any(
             bool(states.get(key))
             for key in ["augmentation_buff", "debilitated", "warding_barrier", "utility_light", "exposed_magic", "active_cyclic"]
@@ -351,10 +353,45 @@ def process_status_tick():
                 bool(getattr(character.db, "warrants", None)),
             ]
         )
+        has_thief_state = any(
+            [
+                bool(getattr(character.db, "khri_active", None)),
+                bool(getattr(character.db, "slipping", False)),
+                bool(getattr(character.db, "theft_memory", None)),
+                bool(getattr(character.db, "intimidated", False)),
+                bool(getattr(character.db, "roughed", False)),
+                bool(getattr(character.db, "staggered", False)),
+                bool(getattr(character.db, "marked_target", None)),
+                bool(getattr(character.db, "recent_action", False)),
+                bool(getattr(character.db, "post_ambush_grace", False)),
+                getattr(character.db, "position_state", "neutral") != "neutral",
+                getattr(character.db, "attention_state", "idle") != "idle",
+            ]
+        )
+        has_warrior_state = any(
+            [
+                bool(getattr(character.db, "war_tempo", 0)),
+                bool((character.db.states or {}).get("warrior_surge")),
+                bool((character.db.states or {}).get("warrior_crush")),
+                bool((character.db.states or {}).get("warrior_press")),
+                bool((character.db.states or {}).get("warrior_sweep")),
+                bool((character.db.states or {}).get("warrior_whirl")),
+                bool((character.db.states or {}).get("warrior_hold")),
+                bool((character.db.states or {}).get("warrior_frenzy")),
+            ]
+        )
+        has_ranger_state = bool(
+            getattr(character, "is_profession", None)
+            and character.is_profession("ranger")
+        )
+        has_empath_state = bool(
+            getattr(character, "is_profession", None)
+            and character.is_profession("empath")
+        )
 
         if (
-            balance >= max_balance and fatigue <= 0 and attunement >= max_attunement and total_bleed <= 0
-            and not has_magic_state and not in_combat and not has_ai_target and awareness == "normal" and not observing and not has_justice_state
+            balance >= max_balance and fatigue <= 0 and attunement >= max_attunement and total_bleed <= 0 and not has_wound_conditions
+            and not has_magic_state and not in_combat and not has_ai_target and awareness == "normal" and not observing and not has_justice_state and not has_thief_state and not has_warrior_state and not has_ranger_state and not has_empath_state
         ):
             continue
 
@@ -377,6 +414,8 @@ def process_status_tick():
                 character.process_bleed()
             if hasattr(character, "update_bleed_state"):
                 character.update_bleed_state()
+        if has_wound_conditions and hasattr(character, "process_wound_conditions"):
+            character.process_wound_conditions()
         if awareness != "normal" or observing:
             process_passive_perception(character)
             awareness = (character.db.states or {}).get("awareness") or "normal"
@@ -388,6 +427,10 @@ def process_status_tick():
             character.tick_subsystem_state()
         if hasattr(character, "process_justice_tick"):
             character.process_justice_tick()
+        if hasattr(character, "process_thief_tick"):
+            character.process_thief_tick()
+        if hasattr(character, "process_warrior_tick"):
+            character.process_warrior_tick()
         if is_npc and hasattr(character, "ai_tick"):
             character.ai_tick()
 

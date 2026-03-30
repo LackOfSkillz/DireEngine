@@ -5,6 +5,13 @@ from typeclasses.vendor import Vendor
 
 
 class CmdSpawnVendor(Command):
+        """
+        Spawn a test vendor in the current room.
+
+        Examples:
+            spawnvendor
+        """
+
     key = "spawnvendor"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Builder"

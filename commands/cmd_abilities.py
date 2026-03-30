@@ -25,6 +25,8 @@ class CmdAbilities(Command):
         for ability in ability_map.values():
             if not self.caller.passes_guild_check(ability):
                 continue
+            if hasattr(self.caller, "is_hidden_warrior_ability") and self.caller.is_hidden_warrior_ability(ability):
+                continue
 
             visible = self.caller.can_see_ability(ability)
             meets_requirements, requirement_message = self.caller.meets_ability_requirements(ability)

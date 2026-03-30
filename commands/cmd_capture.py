@@ -6,6 +6,13 @@ from utils.crime import JUDGE_ROOM_KEY, _resolve_room
 
 
 class CmdCapture(Command):
+        """
+        Attempt to capture a subdued bounty target.
+
+        Examples:
+            capture outlaw
+        """
+
     key = "capture"
     locks = "cmd:all()"
     help_category = "Justice"

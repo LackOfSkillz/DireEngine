@@ -2,6 +2,14 @@ from evennia import Command
 
 
 class CmdCast(Command):
+        """
+        Release a prepared spell at its target.
+
+        Examples:
+            cast goblin
+            cast self
+        """
+
     key = "cast"
     locks = "cmd:all()"
     help_category = "Magic"

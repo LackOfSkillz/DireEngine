@@ -37,6 +37,9 @@ class CmdDisengage(Command):
             target.set_target(None)
             target.msg(f"{self.caller.key} breaks away from the fight.")
 
+        if hasattr(self.caller, "break_combat_rhythm"):
+            self.caller.break_combat_rhythm(show_message=True)
+
         self.caller.set_roundtime(3)
         self.caller.msg("You step back and disengage.")
         if self.caller.location:

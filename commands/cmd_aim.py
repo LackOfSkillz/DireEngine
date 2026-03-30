@@ -1,3 +1,5 @@
+import time
+
 from evennia import Command
 
 
@@ -26,6 +28,14 @@ class CmdAim(Command):
         if target.location != self.caller.location:
             self.caller.set_target(None)
             self.caller.msg("Your target is no longer here.")
+            return
+
+        if hasattr(self.caller, "is_profession") and self.caller.is_profession("ranger"):
+            ok, result = self.caller.build_ranger_aim(target) if hasattr(self.caller, "build_ranger_aim") else (False, "You cannot aim right now.")
+            if not ok:
+                self.caller.msg(result)
+                return
+            self.caller.msg(f"You steady your aim on {target.key}. Aim stacks: {result}.")
             return
 
         self.caller.db.aiming = target.id

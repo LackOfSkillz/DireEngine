@@ -2,6 +2,13 @@ from evennia import Command
 
 
 class CmdSkin(Command):
+        """
+        Skin a suitable corpse for salvageable materials.
+
+        Examples:
+            skin wolf
+        """
+
     key = "skin"
     locks = "cmd:all()"
     help_category = "Survival"

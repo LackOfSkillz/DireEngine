@@ -10,6 +10,13 @@ def _find_board(room):
 
 
 class CmdBounties(Command):
+        """
+        List the bounties currently available to you.
+
+        Examples:
+            bounties
+        """
+
     key = "bounties"
     locks = "cmd:all()"
     help_category = "Justice"

@@ -2,6 +2,13 @@ from commands.command import Command
 
 
 class CmdPayFine(Command):
+        """
+        Pay an outstanding legal fine.
+
+        Examples:
+            payfine
+        """
+
     key = "payfine"
     aliases = ["pay fine"]
     locks = "cmd:all()"

@@ -2,6 +2,13 @@ from evennia import Command
 
 
 class CmdHaggle(Command):
+        """
+        Try to negotiate a better shop price.
+
+        Examples:
+            haggle sword
+        """
+
     key = "haggle"
     locks = "cmd:all()"
     help_category = "Lore"

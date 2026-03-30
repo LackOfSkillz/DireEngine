@@ -6,6 +6,13 @@ from utils.crime import release_from_stocks
 
 
 class CmdPleadRelease(Command):
+        """
+        Ask to be released from custody or confinement.
+
+        Examples:
+            pleadrelease
+        """
+
     key = "pleadrelease"
     aliases = ["plead release"]
     locks = "cmd:all()"

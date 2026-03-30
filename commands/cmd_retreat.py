@@ -41,22 +41,24 @@ class CmdRetreat(Command):
         player_score -= (self.caller.db.fatigue or 0) * 0.2
         player_score += (self.caller.db.balance or 0) * 0.1
         player_score -= self.caller.get_leg_penalty()
+        if hasattr(self.caller, "get_ranger_keep_distance_bonus"):
+            player_score += self.caller.get_ranger_keep_distance_bonus()
 
         enemy_score = target.get_stat("reflex") + random.randint(1, 100)
         if hasattr(target, "get_pressure"):
             enemy_score += target.get_pressure(self.caller)
 
         if player_score > enemy_score:
-            self.caller.set_range(target, "missile")
+            self.caller.set_range(target, "far")
             self.caller.msg(f"You successfully retreat from {target.key}!")
-            target.msg(f"{self.caller.key} retreats out to missile range.")
+            target.msg(f"{self.caller.key} retreats out to far range.")
             if self.caller.location:
                 self.caller.location.msg_contents(
                     f"{self.caller.key} retreats from {target.key}.",
                     exclude=[self.caller, target],
                 )
         elif player_score > enemy_score - 10:
-            self.caller.set_range(target, "reach")
+            self.caller.set_range(target, "near")
             self.caller.msg(f"You manage to pull back slightly from {target.key}.")
             target.msg(f"{self.caller.key} pulls back slightly from you.")
             if self.caller.location:

@@ -44,6 +44,10 @@ class Weapon(DefaultObject):
             40: {"flavor": True},
         }
         self.db.is_ranged = False
+        self.db.weapon_range_type = None
+        self.db.range_band = "melee"
+        self.db.ammo_loaded = False
+        self.db.ammo_type = "arrow"
         self.db.roundtime = 2.0
         self.normalize_damage_types()
         self.sync_profile_fields()
@@ -62,6 +66,8 @@ class Weapon(DefaultObject):
         profile.setdefault("damage_min", self.db.damage_min if self.db.damage_min is not None else 1)
         profile.setdefault("damage_max", self.db.damage_max if self.db.damage_max is not None else 4)
         profile.setdefault("roundtime", self.db.roundtime if self.db.roundtime is not None else 2.0)
+        profile.setdefault("weapon_range_type", self.db.weapon_range_type)
+        profile.setdefault("range_band", self.db.range_band if self.db.range_band is not None else "melee")
         return profile
 
     def sync_profile_fields(self):
@@ -75,6 +81,8 @@ class Weapon(DefaultObject):
         self.db.damage_min = profile.get("damage_min", self.db.damage_min)
         self.db.damage_max = profile.get("damage_max", self.db.damage_max)
         self.db.roundtime = profile.get("roundtime", self.db.roundtime)
+        self.db.weapon_range_type = profile.get("weapon_range_type", self.db.weapon_range_type)
+        self.db.range_band = profile.get("range_band", self.db.range_band)
 
     def normalize_damage_types(self):
         damage_types = dict(self.db.damage_types or {})

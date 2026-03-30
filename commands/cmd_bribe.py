@@ -4,6 +4,13 @@ from commands.command import Command
 
 
 class CmdBribe(Command):
+        """
+        Offer money in an attempt to sway a guard or official.
+
+        Examples:
+            bribe guard
+        """
+
     key = "bribe"
     locks = "cmd:all()"
     help_category = "Justice"

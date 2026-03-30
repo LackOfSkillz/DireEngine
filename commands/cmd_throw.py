@@ -4,6 +4,13 @@ from commands.command import Command
 
 
 class CmdThrow(Command):
+        """
+        Throw an item or weapon at a target.
+
+        Examples:
+            throw dagger at goblin
+        """
+
     key = "throw"
     locks = "cmd:all()"
     help_category = "Justice"

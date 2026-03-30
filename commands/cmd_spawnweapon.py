@@ -104,7 +104,7 @@ class CmdSpawnWeapon(Command):
             },
             "bow": {
                 "key": "training bow",
-                "weapon_profile": {"type": "attack", "skill": "attack", "damage": 5, "balance": 50, "speed": 4.0, "damage_min": 3, "damage_max": 7, "roundtime": 4.0, "range": "missile"},
+                "weapon_profile": {"type": "attack", "skill": "attack", "damage": 5, "balance": 50, "speed": 4.0, "damage_min": 3, "damage_max": 7, "roundtime": 4.0, "range_band": "far", "weapon_range_type": "bow"},
                 "weapon_type": "attack",
                 "balance_cost": 10,
                 "fatigue_cost": 5,
@@ -115,10 +115,35 @@ class CmdSpawnWeapon(Command):
                 "speed": 4.0,
                 "unlocks": {20: {"damage_bonus": 2}, 40: {"flavor": True}},
                 "is_ranged": True,
+                "weapon_range_type": "bow",
+                "range_band": "far",
                 "skill_scaling": {
                     "attack": [
                         {"rank": 10, "effects": {"balance": 4}},
                         {"rank": 30, "effects": {"accuracy": 3}},
+                        {"rank": 60, "effects": {"flavor": "archers_focus"}},
+                    ]
+                },
+            },
+            "crossbow": {
+                "key": "training crossbow",
+                "weapon_profile": {"type": "attack", "skill": "attack", "damage": 6, "balance": 45, "speed": 4.5, "damage_min": 4, "damage_max": 8, "roundtime": 4.5, "range_band": "far", "weapon_range_type": "crossbow"},
+                "weapon_type": "attack",
+                "balance_cost": 12,
+                "fatigue_cost": 5,
+                "damage_type": "puncture",
+                "damage_types": {"slice": 0.0, "impact": 0.05, "puncture": 0.95},
+                "balance": 45,
+                "damage": 6,
+                "speed": 4.5,
+                "unlocks": {20: {"damage_bonus": 2}, 40: {"flavor": True}},
+                "is_ranged": True,
+                "weapon_range_type": "crossbow",
+                "range_band": "far",
+                "skill_scaling": {
+                    "attack": [
+                        {"rank": 10, "effects": {"balance": 3}},
+                        {"rank": 30, "effects": {"accuracy": 4}},
                         {"rank": 60, "effects": {"flavor": "archers_focus"}},
                     ]
                 },
@@ -147,6 +172,10 @@ class CmdSpawnWeapon(Command):
         weapon.db.balance = profile["balance"]
         weapon.db.unlocks = profile["unlocks"]
         weapon.db.is_ranged = profile.get("is_ranged", False)
+        weapon.db.weapon_range_type = profile.get("weapon_range_type", None)
+        weapon.db.range_band = profile.get("range_band", "melee")
+        weapon.db.ammo_loaded = False
+        weapon.db.ammo_type = "bolt" if profile.get("weapon_range_type") == "crossbow" else "arrow"
         weapon.db.skill_scaling = profile["skill_scaling"]
         if hasattr(weapon, "sync_profile_fields"):
             weapon.sync_profile_fields()

@@ -4,6 +4,13 @@ from typeclasses.characters import VALID_GUILDS
 
 
 class CmdGuild(Command):
+        """
+        Review guild information relevant to your character.
+
+        Examples:
+            guild
+        """
+
     key = "guild"
     locks = "cmd:all()"
     help_category = "Character"

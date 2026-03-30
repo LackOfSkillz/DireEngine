@@ -13,6 +13,13 @@ def _find_character(name):
 
 
 class CmdAcceptBounty(Command):
+        """
+        Accept an available bounty contract.
+
+        Examples:
+            acceptbounty 3
+        """
+
     key = "acceptbounty"
     aliases = ["accept bounty"]
     locks = "cmd:all()"

@@ -2,6 +2,13 @@ from commands.command import Command
 
 
 class CmdJustice(Command):
+        """
+        Review your justice standing and local legal state.
+
+        Examples:
+            justice
+        """
+
     key = "justice"
     locks = "cmd:all()"
     help_category = "Justice"

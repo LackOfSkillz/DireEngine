@@ -4,6 +4,13 @@ from typeclasses.characters import VALID_GUILDS
 
 
 class CmdJoin(Command):
+        """
+        Join a guild or profession when eligible.
+
+        Examples:
+            join ranger
+        """
+
     key = "join"
     locks = "cmd:all()"
     help_category = "Training & Lore"

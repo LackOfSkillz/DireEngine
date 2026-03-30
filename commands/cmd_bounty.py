@@ -2,6 +2,13 @@ from commands.command import Command
 
 
 class CmdBounty(Command):
+        """
+        Review or manage your current bounty target.
+
+        Examples:
+            bounty
+        """
+
     key = "bounty"
     locks = "cmd:all()"
     help_category = "Justice"
