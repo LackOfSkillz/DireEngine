@@ -1,4 +1,4 @@
-import random
+﻿import random
 
 from commands.command import Command
 
@@ -6,12 +6,12 @@ from utils.crime import release_from_stocks
 
 
 class CmdPleadRelease(Command):
-        """
-        Ask to be released from custody or confinement.
+    """
+    Ask to be released from custody or confinement.
 
-        Examples:
-            pleadrelease
-        """
+    Examples:
+        pleadrelease
+    """
 
     key = "pleadrelease"
     aliases = ["plead release"]

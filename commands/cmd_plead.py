@@ -1,15 +1,15 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 from utils.crime import resolve_justice_case
 
 
 class CmdPlead(Command):
-        """
-        Plead your case to the local authorities.
+    """
+    Plead your case to the local authorities.
 
-        Examples:
-            plead
-        """
+    Examples:
+        plead
+    """
 
     key = "plead"
     locks = "cmd:all()"

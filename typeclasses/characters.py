@@ -9,16 +9,20 @@ creation commands.
 """
 
 from collections.abc import Mapping
+import logging
 import math
 import re
 import random
 import time
 
-from evennia import search_object
 from evennia.objects.objects import DefaultCharacter
+from evennia.utils import delay
 from evennia.utils.create import create_object
+from evennia.utils.search import search_object, search_tag
 
 from typeclasses.abilities import get_ability
+from typeclasses.box import Box
+from typeclasses.items.gem import QUALITY_NAMES, SIZE_NAMES, build_gem_data, create_gem, downgrade_gem_data
 from typeclasses.lockpick import Lockpick
 from typeclasses.spells import SPELLS, SPELLCASTING_GUILDS
 from typeclasses.study_item import StudyItem
@@ -28,6 +32,7 @@ from utils.survival_loot import create_harvest_bundle, create_simple_item
 from utils.survival_messaging import msg_room
 from world.area_forge.character_api import send_character_update, send_subsystem_update
 from world.area_forge.map_api import send_map_update
+from world.area_forge.utils.messages import _supports_structured_session
 from utils.crime import check_liquidation, decay_warrants, release_from_stocks
 from world.professions import (
     DEFAULT_PROFESSION,
@@ -40,6 +45,24 @@ from world.professions import (
     get_profession_rank_label,
     get_profession_social_standing,
     resolve_profession_name,
+)
+from world.races import (
+    BASE_CARRY_WEIGHT,
+    DEFAULT_RACE,
+    RACE_STATS,
+    apply_race,
+    build_race_state,
+    get_race_carry_modifier,
+    get_race_debug_payload,
+    get_race_description,
+    get_race_display_name,
+    get_race_learning_modifier,
+    get_race_profile,
+    get_race_stat_cap,
+    get_race_stat_modifier,
+    normalize_learning_category,
+    resolve_race_name,
+    validate_race_application,
 )
 from world.systems.warrior import (
     EXHAUSTION_GAIN_RATES,
@@ -88,6 +111,9 @@ from world.systems.ranger.beseech import get_beseech_kinds, get_beseech_profile
 from .objects import ObjectParent
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 DEFAULT_STATS = {
     "strength": 10,
     "stamina": 10,
@@ -107,6 +133,8 @@ LIFE_STATE_DEAD = "DEAD"
 LIFE_STATE_DEPARTED = "DEPARTED"
 
 DEAD_STATE_ALLOWED_COMMANDS = {
+    "consent",
+    "death",
     "depart",
     "favor",
     "health",
@@ -117,12 +145,40 @@ DEAD_STATE_ALLOWED_COMMANDS = {
     "pose",
     "raise",
     "resurrect",
+    "corpse",
     "say",
+    "score",
     "sta",
     "stats",
+    "withdraw",
     "whisper",
     "xp",
 }
+
+COPPER = 1
+SILVER = 10
+GOLD = 100
+PLATINUM = 1000
+
+COIN_DENOMINATIONS = (
+    ("platinum", PLATINUM),
+    ("gold", GOLD),
+    ("silver", SILVER),
+    ("copper", COPPER),
+)
+
+WEIGHT_UNIT = 1.0
+COIN_WEIGHT = 0.002
+MAX_CONTAINER_WEIGHT_DEPTH = 5
+
+VENDOR_TYPES = ("general", "gem_buyer", "pawn")
+VENDOR_PAYOUTS = {
+    "general": {"default": 0.5, "gems": None},
+    "gem_buyer": {"default": None, "gems": 0.9},
+    "pawn": {"default": 0.6, "gems": 0.7},
+}
+
+STRICT_BOX_LOCK_DIFFICULTY = 35
 
 SKILLSET_ALIASES = {
     "armor": "armor",
@@ -178,6 +234,7 @@ SKILL_REGISTRY = {
     "appraisal": {"category": "lore", "visibility": "shared", "description": "evaluating items, creatures, and value", "starter_rank": 1},
     "scholarship": {"category": "lore", "visibility": "shared", "description": "improves learning and knowledge systems", "starter_rank": 0},
     "tactics": {"category": "lore", "visibility": "shared", "description": "improves combat awareness and positioning", "starter_rank": 0},
+    "theurgy": {"category": "magic", "visibility": "guild_locked", "guilds": ("cleric",), "description": "ritual practice, communes, and divine mediation", "starter_rank": 0},
     "targeted_magic": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_GUILDS, "description": "direct offensive spellcasting", "starter_rank": 0},
     "trading": {"category": "lore", "visibility": "shared", "description": "improves buying and selling prices", "starter_rank": 1},
     "utility": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_GUILDS, "description": "general purpose magical effects", "starter_rank": 0},
@@ -234,6 +291,7 @@ DEFAULT_INJURIES = {
 BODY_PART_ORDER = tuple(DEFAULT_INJURIES.keys())
 
 DEFAULT_WEAPON_PROFILE = {
+    "damage": 1,
     "damage_min": 1,
     "damage_max": 3,
     "roundtime": 2.0,
@@ -408,6 +466,52 @@ FAVOR_SYSTEM_CONFIG = {
     "resurrection_base_attunement_cost": 30,
 }
 
+DEATH_PROTECTION_CONFIG = {
+    "max_rank": 3,
+    "exp_debt_multiplier": 0.25,
+    "sting_severity_scale": 0.5,
+    "minimum_depart_mode": "full",
+}
+
+RESURRECTION_QUALITY_PROFILES = (
+    (85, {"label": "perfect", "hp_ratio": 1.0, "sting_duration_scale": 0.15, "sting_severity_scale": 0.15, "exp_restore_scale": 1.35}),
+    (60, {"label": "stable", "hp_ratio": 0.88, "sting_duration_scale": 0.35, "sting_severity_scale": 0.35, "exp_restore_scale": 1.1}),
+    (35, {"label": "fragile", "hp_ratio": 0.72, "sting_duration_scale": 0.7, "sting_severity_scale": 0.7, "exp_restore_scale": 0.8}),
+    (1, {"label": "flawed", "hp_ratio": 0.6, "sting_duration_scale": 0.9, "sting_severity_scale": 0.9, "exp_restore_scale": 0.6}),
+)
+
+CLERIC_DEVOTION_CONFIG = {
+    "baseline": 40,
+    "max_devotion": 100,
+    "drift_interval": 30.0,
+    "rituals": {
+        "prayer": {
+            "gain": 8,
+            "cooldown": 20.0,
+            "message": "You offer a quiet prayer, strengthening your connection.",
+        },
+        "focus": {
+            "gain": 14,
+            "cooldown": 45.0,
+            "message": "You focus on the Immortals with measured intent, drawing their attention closer.",
+        },
+        "devotion": {
+            "gain": 22,
+            "cooldown": 90.0,
+            "message": "You commit yourself to a fuller rite, and the divine answer with unmistakable warmth.",
+        },
+    },
+    "communes": {
+        "solace": {"cost": 8},
+        "ward": {"cost": 14},
+        "vigil": {"cost": 12},
+    },
+    "resurrection": {
+        "low_threshold": 20,
+        "high_threshold": 70,
+    },
+}
+
 APPEARANCE_SLOT_ORDER = [
     "head",
     "face",
@@ -527,6 +631,7 @@ class Character(ObjectParent, DefaultCharacter):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.gender = "unknown"
+        self.db.race = DEFAULT_RACE
         self.db.guild = None
         self.db.profession = "commoner"
         self.db.profession_rank = 1
@@ -617,6 +722,14 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.bleed_state = "none"
         self.db.roundtime_end = 0
         self.db.coins = 0
+        self.db.exp_debt = 0
+        self.db.recovery_consent = []
+        self.db.last_recovery_type = None
+        self.db.last_recovery_helper = None
+        self.db.last_recovery_time = 0.0
+        self.db.last_death_time = 0.0
+        self.db.death_analytics = {}
+        self.db.death_protection = True
         self.db.skills = {}
         self.db.stance = {"offense": 50, "defense": 50}
         self.db.position = "standing"
@@ -635,18 +748,43 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.last_disarmed_trap = None
         self.db.last_disarmed_trap_difficulty = 0
         self.db.last_disarmed_trap_source = None
+        apply_race(self, DEFAULT_RACE, sync=False)
         self.get_subsystem()
         for skill_name, baseline_rank in AVAILABLE_SKILL_BASELINES.items():
             self.learn_skill(skill_name, {"rank": baseline_rank, "mindstate": 0})
 
-    def at_post_puppet(self, **kwargs):
-        super().at_post_puppet(**kwargs)
+    def _restore_onboarding_entry_if_needed(self):
+        state = getattr(self.db, "onboarding_state", None)
+        if not isinstance(state, Mapping):
+            return False
+        if bool(state.get("complete", False)):
+            return False
+        room = getattr(self, "location", None)
+        room_is_tutorial = bool(getattr(getattr(room, "db", None), "is_tutorial", False))
+        try:
+            from server.conf.at_server_startstop import _ensure_new_player_tutorial
+            from systems import onboarding
+
+            if not room_is_tutorial:
+                room = _ensure_new_player_tutorial()
+                if room:
+                    self.home = room
+                    self.move_to(room, quiet=True, use_destination=False)
+            onboarding.ensure_onboarding_state(self)
+            onboarding.handle_room_entry(self)
+        except Exception:
+            return False
+        return True
+
+    def at_post_puppet(self, *args, **kwargs):
+        super().at_post_puppet(*args, **kwargs)
         self.ensure_core_defaults()
+        self._restore_onboarding_entry_if_needed()
         self.get_subsystem()
         self.sync_client_state(include_map=True)
 
-    def at_post_unpuppet(self, **kwargs):
-        super().at_post_unpuppet(**kwargs)
+    def at_post_unpuppet(self, *args, **kwargs):
+        super().at_post_unpuppet(*args, **kwargs)
         self.reset_thief_pressure_states()
 
     def at_after_move(self, source_location, **kwargs):
@@ -656,7 +794,6 @@ class Character(ObjectParent, DefaultCharacter):
         if getattr(self.db, "slipping", False):
             self.db.slip_bonus = int(getattr(self.db, "slip_bonus", 0) or 0) + 5
             self.db.escape_chain = int(getattr(self.db, "escape_chain", 0) or 0) + 1
-        self.sync_client_state(include_map=True)
         guild_tag = getattr(getattr(self, "location", None), "db", None)
         guild_tag = getattr(guild_tag, "guild_tag", None)
         if guild_tag:
@@ -682,29 +819,45 @@ class Character(ObjectParent, DefaultCharacter):
 
             call_guards(self.location, self)
 
-    def sync_client_state(self, include_map=False, session=None):
+    def sync_client_state(self, include_map=False, include_subsystem=True, include_character=True, session=None):
         sessions_attr = getattr(self, "sessions", None)
         sessions = [session] if session else list(sessions_attr.all()) if sessions_attr else []
         if not sessions:
             return
+        structured_sessions = [active_session for active_session in sessions if _supports_structured_session(active_session)]
+        if not structured_sessions:
+            return
+        if session:
+            session = structured_sessions[0]
         if include_map:
-            send_map_update(self, session=session)
-        send_subsystem_update(self, session=session)
-        send_character_update(self, session=session)
+            try:
+                send_map_update(self, session=session)
+            except Exception:
+                LOGGER.exception("Failed to sync map state for %s in %s", getattr(self, "key", self), getattr(getattr(self, "location", None), "key", None))
+        if include_subsystem:
+            send_subsystem_update(self, session=session)
+        if include_character:
+            send_character_update(self, session=session)
 
     def at_object_receive(self, moved_obj, source_location, **kwargs):
         super().at_object_receive(moved_obj, source_location, **kwargs)
         if getattr(moved_obj, "destination", None) is None:
+            self.db.encumbrance_dirty = True
             self.sync_client_state()
 
     def at_object_leave(self, moved_obj, target_location, **kwargs):
         super().at_object_leave(moved_obj, target_location, **kwargs)
         if getattr(moved_obj, "destination", None) is None:
+            self.db.encumbrance_dirty = True
             self.sync_client_state()
 
     def ensure_identity_defaults(self):
         if self.db.gender is None:
             self.db.gender = "unknown"
+        if self.db.race is None:
+            self.db.race = DEFAULT_RACE
+        if self.db.onboarding_state is None:
+            self.db.onboarding_state = None
         if self.db.guild is None:
             self.db.guild = None
         if self.db.profession is None:
@@ -774,12 +927,28 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.total_xp = 0
         if self.db.unabsorbed_xp is None:
             self.db.unabsorbed_xp = 0
+        if self.db.exp_debt is None:
+            self.db.exp_debt = 0
         if self.db.favor is None:
             self.db.favor = 0
+        if self.db.cleric_ritual_timestamps is None:
+            self.db.cleric_ritual_timestamps = {}
+        if self.db.last_devotion_drift_at is None:
+            self.db.last_devotion_drift_at = 0.0
         if self.db.death_favor_snapshot is None:
             self.db.death_favor_snapshot = None
+        if self.db.soul_state is None:
+            self.db.soul_state = None
         if self.db.last_corpse_id is None:
             self.db.last_corpse_id = None
+        if self.db.death_sting is None:
+            self.db.death_sting = False
+        if self.db.death_sting_active is None:
+            self.db.death_sting_active = False
+        if self.db.death_sting_end is None:
+            self.db.death_sting_end = 0.0
+        if self.db.death_sting_severity is None:
+            self.db.death_sting_severity = 0.0
         if self.db.deaths_since_last_shrine is None:
             self.db.deaths_since_last_shrine = 0
         if self.db.last_low_favor_warning_at is None:
@@ -894,6 +1063,76 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.is_npc = False
         if self.db.is_dead is None:
             self.db.is_dead = False
+        if self.db.recovery_consent is None:
+            self.db.recovery_consent = []
+        if self.db.last_recovery_type is None:
+            self.db.last_recovery_type = None
+        if self.db.last_recovery_quality is None:
+            self.db.last_recovery_quality = None
+        if self.db.resurrection_vitality_cap_ratio is None:
+            self.db.resurrection_vitality_cap_ratio = 1.0
+        if self.db.last_recovery_helper is None:
+            self.db.last_recovery_helper = None
+        if self.db.last_recovery_time is None:
+            self.db.last_recovery_time = 0.0
+        if self.db.last_death_time is None:
+            self.db.last_death_time = 0.0
+        if self.db.death_analytics is None:
+            self.db.death_analytics = {}
+        if self.db.death_protection is None:
+            self.db.death_protection = True
+        if self.db.stored_coins is None:
+            self.db.stored_coins = 0
+        if self.db.bank_coins is None:
+            self.db.bank_coins = 0
+        if self.db.max_carry_weight is None:
+            self.db.max_carry_weight = 100.0
+        if self.db.encumbrance_ratio is None:
+            self.db.encumbrance_ratio = 0.0
+        if self.db.coin_weight_notice_active is None:
+            self.db.coin_weight_notice_active = False
+        if self.db.searched is None:
+            self.db.searched = False
+        if self.db.coins_looted is None:
+            self.db.coins_looted = False
+        if self.db.gems_looted is None:
+            self.db.gems_looted = False
+        if self.db.box_looted is None:
+            self.db.box_looted = False
+        if self.db.loot_generated is None:
+            self.db.loot_generated = False
+        if self.db.has_gems is None:
+            self.db.has_gems = False
+        if self.db.has_box is None:
+            self.db.has_box = False
+        if self.db.has_coins is None:
+            self.db.has_coins = False
+        if self.db.coin_min is None:
+            self.db.coin_min = 0
+        if self.db.coin_max is None:
+            self.db.coin_max = 0
+        if self.db.drops_box is None:
+            self.db.drops_box = False
+        if self.db.vault_items is None:
+            self.db.vault_items = []
+
+    def ensure_race_defaults(self):
+        race_key = resolve_race_name(getattr(self.db, "race", None), default=DEFAULT_RACE)
+        if self.db.race != race_key:
+            self.db.race = race_key
+
+        canonical = build_race_state(race_key)
+        if not isinstance(getattr(self.db, "stat_caps", None), Mapping) or dict(self.db.stat_caps) != canonical["stat_caps"]:
+            self.db.stat_caps = dict(canonical["stat_caps"])
+        if not isinstance(getattr(self.db, "learning_modifiers", None), Mapping) or dict(self.db.learning_modifiers) != canonical["learning_modifiers"]:
+            self.db.learning_modifiers = dict(canonical["learning_modifiers"])
+        if str(getattr(self.db, "size", "") or "").strip().lower() != canonical["size"]:
+            self.db.size = canonical["size"]
+        if abs(float(getattr(self.db, "carry_modifier", 1.0) or 1.0) - float(canonical["carry_modifier"])) > 0.0001:
+            self.db.carry_modifier = float(canonical["carry_modifier"])
+        if abs(float(getattr(self.db, "max_carry_weight", canonical["max_carry_weight"]) or canonical["max_carry_weight"]) - float(canonical["max_carry_weight"])) > 0.0001:
+            self.db.max_carry_weight = float(canonical["max_carry_weight"])
+        self.clamp_stats_to_race(emit_messages=False)
 
     def ensure_stat_defaults(self):
         current_stats = self.db.stats
@@ -932,6 +1171,10 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.transfer_pool = 10
         if self.db.max_transfer_pool is None:
             self.db.max_transfer_pool = 10
+        if self.db.devotion is None:
+            self.db.devotion = 0
+        if self.db.max_devotion is None:
+            self.db.max_devotion = int(CLERIC_DEVOTION_CONFIG["max_devotion"])
         if self.db.bleed_state is None:
             self.db.bleed_state = "none"
         if self.db.roundtime_end is None:
@@ -1086,12 +1329,19 @@ class Character(ObjectParent, DefaultCharacter):
         if not migrated:
             self.db.starter_skill_baseline_migrated = True
 
+        if self.get_profession() == "cleric":
+            theurgy = dict(skills.get("theurgy") or {"rank": 0, "mindstate": 0})
+            if int(theurgy.get("rank", 0) or 0) < 1 and int(theurgy.get("mindstate", 0) or 0) == 0:
+                theurgy["rank"] = 1
+                skills["theurgy"] = theurgy
+
         if skills != current_skills:
             self.db.skills = skills
 
     def ensure_core_defaults(self):
         self.ensure_identity_defaults()
         self.ensure_stat_defaults()
+        self.ensure_race_defaults()
         self.ensure_resource_defaults()
         self.ensure_combat_defaults()
         self.ensure_equipment_defaults()
@@ -1166,6 +1416,56 @@ class Character(ObjectParent, DefaultCharacter):
         self.sync_client_state()
         return True
 
+    def get_exp_debt(self):
+        self.ensure_core_defaults()
+        return max(0, int(getattr(self.db, "exp_debt", 0) or 0))
+
+    def set_exp_debt(self, value):
+        self.ensure_core_defaults()
+        self.db.exp_debt = max(0, int(value or 0))
+        self.sync_client_state()
+        return self.db.exp_debt
+
+    def adjust_exp_debt(self, amount):
+        return self.set_exp_debt(self.get_exp_debt() + int(amount or 0))
+
+    def reduce_exp_debt(self, amount, emit_clear_message=True):
+        self.ensure_core_defaults()
+        reduction = max(0, int(amount or 0))
+        if reduction <= 0:
+            return self.get_exp_debt()
+        before = self.get_exp_debt()
+        if before <= 0:
+            return 0
+        after = max(0, before - reduction)
+        self.db.exp_debt = after
+        self.sync_client_state()
+        if emit_clear_message and before > 0 and after <= 0:
+            self.msg("You feel your mind clearing as your experience debt fades.")
+        return after
+
+    def get_xp_debt_gain_multiplier(self):
+        return 0.5 if self.get_exp_debt() > 0 else 1.0
+
+    def capture_exp_debt_on_death(self, had_prior_penalty=False):
+        self.ensure_core_defaults()
+        current_field_exp = self.get_unabsorbed_xp()
+        had_prior_penalty = bool(had_prior_penalty or self.get_exp_debt() > 0)
+        if current_field_exp <= 0 and not had_prior_penalty:
+            return 0
+        multiplier = 1.25 if had_prior_penalty else 1.0
+        protection = self.get_death_protection_state()
+        if protection["active"]:
+            multiplier *= float(protection["exp_debt_multiplier"])
+        captured = int(round(current_field_exp * multiplier))
+        if captured > 0:
+            self.adjust_exp_debt(captured)
+        self.db.unabsorbed_xp = 0
+        self.sync_client_state()
+        if captured > 0:
+            self.msg("You feel your recent death weighing on your progress.")
+        return captured
+
     def get_favor(self):
         self.ensure_core_defaults()
         return max(0, int(getattr(self.db, "favor", 0) or 0))
@@ -1201,6 +1501,191 @@ class Character(ObjectParent, DefaultCharacter):
             "anchored": "You feel strongly anchored to the divine.",
         }.get(state, "")
 
+    def calculate_death_sting_severity(self, favor=None):
+        value = self.get_favor() if favor is None else max(0, int(favor or 0))
+        base = 0.20
+        reduction = min(value, 20) * 0.005
+        return max(0.10, base - reduction)
+
+    def refresh_death_sting(self, emit_message=False):
+        self.ensure_core_defaults()
+        active = bool(getattr(self.db, "death_sting_active", False) or getattr(self.db, "death_sting", False))
+        if not active:
+            return False
+        expires_at = float(getattr(self.db, "death_sting_end", 0.0) or 0.0)
+        if expires_at > 0 and expires_at <= time.time():
+            self.db.death_sting = False
+            self.db.death_sting_active = False
+            self.db.death_sting_end = 0.0
+            self.db.death_sting_severity = 0.0
+            self.sync_client_state()
+            if emit_message:
+                self.msg("You feel the last of death's grip release you.")
+            return False
+        return not self.is_dead() and active
+
+    def is_death_sting_active(self):
+        return self.refresh_death_sting(emit_message=False)
+
+    def get_death_sting_severity(self):
+        self.ensure_core_defaults()
+        if self.is_death_sting_active():
+            stored = float(getattr(self.db, "death_sting_severity", 0.0) or 0.0)
+            if stored > 0:
+                return stored
+        return 0.0
+
+    def get_death_sting_modifier(self):
+        severity = self.get_death_sting_severity()
+        return max(0.0, 1.0 - severity) if severity > 0 else 1.0
+
+    def get_death_sting_time_remaining(self):
+        if not self.is_death_sting_active():
+            return 0
+        expires_at = float(getattr(self.db, "death_sting_end", 0.0) or 0.0)
+        return max(0, int(round(expires_at - time.time())))
+
+    def get_death_sting_label(self):
+        severity = self.get_death_sting_severity()
+        if severity >= 0.18:
+            return "Severe"
+        if severity >= 0.14:
+            return "Moderate"
+        if severity > 0:
+            return "Mild"
+        return "None"
+
+    def apply_death_sting_to_contest_value(self, base_value):
+        value = float(base_value or 0.0)
+        if not self.is_death_sting_active():
+            return value
+        return value * self.get_death_sting_modifier()
+
+    def apply_death_sting_to_damage(self, base_damage):
+        damage = float(base_damage or 0.0)
+        if not self.is_death_sting_active():
+            return damage
+        return damage * self.get_death_sting_modifier()
+
+    def get_death_status_lines(self):
+        self.ensure_core_defaults()
+        lines = [f"State: {str(getattr(self.db, 'life_state', LIFE_STATE_ALIVE) or LIFE_STATE_ALIVE).title()}", f"Favor: {self.get_favor()}"]
+        if self.get_exp_debt() > 0:
+            lines.append(f"Experience Debt: {self.get_exp_debt()}")
+        if self.is_dead():
+            corpse = self.get_death_corpse()
+            if hasattr(self, "get_depart_mode"):
+                lines.append(f"Depart Path: {self.get_depart_mode(corpse=corpse).title()}")
+            soul_state = self.get_soul_state()
+            if isinstance(soul_state, Mapping):
+                lines.append(f"Soul: {self.get_soul_strength_label(soul_state=soul_state).title()}")
+                lines.append(f"Soul Strength: {int(round(float(soul_state.get('strength', 0.0) or 0.0)))}/100")
+            if corpse:
+                if hasattr(corpse, "get_condition_tier"):
+                    lines.append(f"Corpse Condition: {corpse.get_condition_tier()} ({int(round(corpse.get_condition()))}/100)")
+                if hasattr(corpse, "get_memory_remaining"):
+                    lines.append(f"Memory: {corpse.get_memory_state().title()}")
+                    memory_remaining = int(round(corpse.get_memory_remaining()))
+                    if memory_remaining > 0:
+                        lines.append(f"Memory Decay: {memory_remaining}s")
+                prep_stacks = int(getattr(corpse.db, "preparation_stacks", 0) or 0)
+                if prep_stacks > 0:
+                    lines.append(f"Preparation: {prep_stacks}")
+                if bool(getattr(corpse.db, "stabilized", False)):
+                    lines.append("Corpse: Stabilized")
+                remaining = max(0, int(round(float(getattr(corpse.db, 'decay_time', 0.0) or 0.0) - time.time())))
+                if remaining > 0:
+                    lines.append(f"Corpse Decay: {remaining}s")
+        if self.is_death_sting_active():
+            lines.append("You are suffering from Death's Sting.")
+            lines.append(f"Severity: {self.get_death_sting_label()} ({int(round(self.get_death_sting_severity() * 100))}% penalty)")
+            lines.append(f"Time Remaining: {self.get_death_sting_time_remaining()}s")
+        last_recovery = str(getattr(self.db, "last_recovery_type", "") or "").strip()
+        if last_recovery:
+            detail = f"Last Recovery: {last_recovery.title()}"
+            quality = str(getattr(self.db, "last_recovery_quality", "") or "").strip()
+            if quality:
+                detail += f" ({quality.title()})"
+            helper = str(getattr(self.db, "last_recovery_helper", "") or "").strip()
+            if helper:
+                detail += f" via {helper}"
+            lines.append(detail)
+        grave = self.get_owned_grave()
+        if grave:
+            item_count = len(list(grave.contents))
+            lines.append(f"Grave Recovery: Available here ({item_count} item{'s' if item_count != 1 else ''})")
+        fragility = self.get_state("resurrection_fragility")
+        if fragility:
+            lines.append(f"Recovery: {str(fragility.get('label', 'fragile')).title()}")
+        instability = self.get_state("resurrection_instability")
+        if instability:
+            lines.append("State: Unstable")
+        return lines
+
+    def get_corpse_status_lines(self):
+        corpse = self.get_death_corpse()
+        if not corpse:
+            return ["You have no linked corpse to inspect."]
+        lines = [f"Corpse: {corpse.key}"]
+        lines.append(f"Condition: {corpse.get_condition_tier()} ({int(round(corpse.get_condition()))}/100)")
+        if hasattr(corpse, "get_decay_remaining"):
+            lines.append(f"Time Until Decay: {int(round(corpse.get_decay_remaining()))}s")
+        if hasattr(corpse, "get_memory_remaining"):
+            lines.append(f"Memory: {corpse.get_memory_state().title()} ({int(round(corpse.get_memory_remaining()))}s)")
+        if getattr(corpse, "location", None):
+            lines.append(f"Location: {corpse.location.key}")
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            lines.append("Body State: Irrecoverable")
+        prep = int(getattr(corpse.db, "preparation_stacks", 0) or 0)
+        if prep > 0:
+            lines.append(f"Preparation: {prep}")
+        return lines
+
+    def get_depart_preview_lines(self, corpse=None):
+        corpse = corpse or self.get_death_corpse()
+        snapshot = corpse.get_favor_snapshot() if corpse and hasattr(corpse, "get_favor_snapshot") else self.get_favor_death_snapshot() or {}
+        available_favor = int(snapshot.get("favor_before", 0) or 0)
+        lines = [f"You have {available_favor} favor{'s' if available_favor != 1 else ''}.", "Available options:"]
+        for mode, cost in (("grave", 0), ("coins", 2), ("items", 2), ("full", 3)):
+            chosen = self.get_depart_mode(corpse=corpse, requested_mode=mode)
+            if chosen is None:
+                continue
+            default_text = " [default]" if mode == self.get_depart_mode(corpse=corpse) else ""
+            lines.append(f"- depart {mode} (cost: {cost}){default_text}")
+        lines.append("Type DEPART <mode> to choose, or DEPART DEFAULT to take the default path.")
+        return lines
+
+    def get_death_inspect_lines(self, target=None):
+        subject = target or self
+        corpse = subject.get_death_corpse() if hasattr(subject, "get_death_corpse") else None
+        soul = subject.get_soul_state() if hasattr(subject, "get_soul_state") else None
+        lines = [f"Target: {subject.key}"]
+        lines.append(f"State: {str(getattr(subject.db, 'life_state', LIFE_STATE_ALIVE) or LIFE_STATE_ALIVE).title()}")
+        lines.append(f"Favor: {subject.get_favor() if hasattr(subject, 'get_favor') else 0}")
+        lines.append(f"XP Debt: {subject.get_exp_debt() if hasattr(subject, 'get_exp_debt') else 0}")
+        lines.append(f"Last Death Time: {float(getattr(subject.db, 'last_death_time', 0.0) or 0.0):.0f}")
+        if hasattr(subject, "get_recovery_consent_lines"):
+            lines.extend(subject.get_recovery_consent_lines())
+        if corpse:
+            lines.append(f"Corpse ID: #{corpse.id}")
+            lines.append(f"Corpse Condition: {int(round(corpse.get_condition()))}/100")
+            lines.append(f"Corpse Decay: {int(round(corpse.get_decay_remaining()))}s")
+            lines.append(f"Corpse Memory: {int(round(corpse.get_memory_remaining()))}s")
+            lines.append(f"Corpse Irrecoverable: {bool(getattr(corpse.db, 'irrecoverable', False))}")
+        if isinstance(soul, Mapping):
+            lines.append(f"Soul Strength: {int(round(float(soul.get('strength', 0.0) or 0.0)))}/100")
+            lines.append(f"Soul Recoverable: {bool(soul.get('recoverable', False))}")
+        return lines
+
+    def get_death_emote(self):
+        return random.choice(
+            [
+                f"{self.key} collapses suddenly, life leaving their body.",
+                f"{self.key} staggers, then falls motionless.",
+                f"{self.key} crumples to the ground.",
+            ]
+        )
+
     def get_favor_cost_multiplier(self, favor=None):
         value = self.get_favor() if favor is None else max(0, int(favor or 0))
         config = FAVOR_SYSTEM_CONFIG
@@ -1232,6 +1717,324 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.deaths_since_last_shrine = 0
         self.db.last_prayed_shrine_at = time.time()
         return True, "You kneel and prepare an offering."
+
+    def get_devotion(self):
+        self.ensure_core_defaults()
+        maximum = max(0, int(getattr(self.db, "max_devotion", CLERIC_DEVOTION_CONFIG["max_devotion"]) or CLERIC_DEVOTION_CONFIG["max_devotion"]))
+        current = max(0, int(getattr(self.db, "devotion", 0) or 0))
+        return min(maximum, current)
+
+    def set_devotion(self, value, sync=True):
+        self.ensure_core_defaults()
+        maximum = max(0, int(getattr(self.db, "max_devotion", CLERIC_DEVOTION_CONFIG["max_devotion"]) or CLERIC_DEVOTION_CONFIG["max_devotion"]))
+        self.db.devotion = max(0, min(maximum, int(value or 0)))
+        if sync:
+            self.sync_client_state()
+        return self.db.devotion
+
+    def adjust_devotion(self, amount, sync=True):
+        return self.set_devotion(self.get_devotion() + int(amount or 0), sync=sync)
+
+    def get_devotion_state(self):
+        devotion = self.get_devotion()
+        if devotion < 15:
+            return "distant"
+        if devotion < 35:
+            return "faint"
+        if devotion < 60:
+            return "steady"
+        if devotion < 85:
+            return "clear"
+        return "radiant"
+
+    def get_devotion_state_message(self):
+        messages = {
+            "distant": "Your connection feels distant.",
+            "faint": "You feel only a faint answering presence.",
+            "steady": "Your connection to the divine feels steady.",
+            "clear": "The divine answers clearly.",
+            "radiant": "Radiant certainty settles over your prayers.",
+        }
+        return messages.get(self.get_devotion_state(), "")
+
+    def get_cleric_magic_modifier(self):
+        if not self.is_profession("cleric"):
+            return 1.0
+        devotion = self.get_devotion()
+        theurgy = self.get_skill("theurgy")
+        modifier = 1.0 + min(0.15, theurgy / 200.0)
+        if devotion < 15:
+            modifier *= 0.8
+        elif devotion < 35:
+            modifier *= 0.92
+        elif devotion >= 85:
+            modifier *= 1.12
+        elif devotion >= 60:
+            modifier *= 1.05
+        return modifier
+
+    def get_corpse_memory_extension(self):
+        return 60 + max(30, int(self.get_skill("theurgy") * 4))
+
+    def get_theurgy_training_difficulty(self, base=12):
+        return max(int(base or 0), int(base or 0) + int(self.get_skill("theurgy") * 0.75))
+
+    def can_work_corpse(self, corpse):
+        if not corpse or getattr(corpse, "location", None) != getattr(self, "location", None):
+            return False, "That corpse is not here."
+        if not getattr(getattr(corpse, "db", None), "is_corpse", False):
+            return False, "You can only use that rite on a corpse."
+        if hasattr(corpse, "is_recovery_allowed") and not corpse.is_recovery_allowed(self):
+            return False, "You do not have permission to work with that corpse."
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if owner and hasattr(owner, "notify_recovery_consent_use"):
+            owner.notify_recovery_consent_use(self)
+        return True, ""
+
+    def perceive_cleric_corpse(self, corpse):
+        if not self.is_profession("cleric"):
+            return False, ["You do not know how to read a corpse that way."]
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, [message]
+        lines = [f"You study {corpse.key} through a veil of divine perception."]
+        condition_state = corpse.get_resurrection_condition_state() if hasattr(corpse, "get_resurrection_condition_state") else corpse.get_condition_tier().upper()
+        condition = int(round(corpse.get_condition())) if hasattr(corpse, "get_condition") else int(getattr(corpse.db, "condition", 0) or 0)
+        snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else None
+        favor_present = bool((snapshot or {}).get("favor_before", 0) or ((snapshot or {}).get("resurrection") or {}).get("can_resurrect", False))
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            condition_state = "IRRECOVERABLE"
+        lines.append(f"Condition: {condition_state.title()} ({condition}/100)")
+        lines.append(f"Favor: {'Present' if favor_present else 'Absent'}")
+        if hasattr(corpse, "get_memory_state"):
+            lines.append(f"Memory: {corpse.get_memory_state().title()}")
+        if hasattr(corpse, "get_memory_remaining"):
+            lines.append(f"Memory Window: {int(round(corpse.get_memory_remaining()))}s")
+        if hasattr(corpse, "get_decay_remaining"):
+            lines.append(f"Decay Window: {int(round(corpse.get_decay_remaining()))}s")
+        prep_stacks = int(getattr(corpse.db, "preparation_stacks", 0) or 0)
+        if prep_stacks > 0:
+            lines.append(f"Preparation: {prep_stacks} ritual layer{'s' if prep_stacks != 1 else ''}")
+        viability = "Viable" if not bool(getattr(corpse.db, "irrecoverable", False)) and favor_present and condition >= 25 and getattr(corpse, "has_viable_memory", lambda: True)() else "Perilous"
+        lines.append(f"Resurrection Outlook: {viability}")
+        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(12))
+        return True, lines
+
+    def preserve_corpse(self, corpse):
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can shield lingering memories that way."
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, message
+        if not hasattr(corpse, "has_viable_memory") or not corpse.has_viable_memory():
+            return False, "The corpse's memories have already faded beyond your reach."
+        attunement_cost = 6
+        if not self.spend_attunement(attunement_cost):
+            return False, "You lack the attunement to preserve those memories."
+        extension = self.get_corpse_memory_extension()
+        remaining = corpse.extend_memory(extension)
+        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(16))
+        if hasattr(corpse, "update_condition_description"):
+            corpse.update_condition_description()
+        return True, f"You shield the lingering memories from fading. Memory window: {int(round(remaining))}s."
+
+    def prepare_corpse(self, corpse):
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can restore coherence to the dead that way."
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, message
+        if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
+            return False, "Too much of the soul's pattern has already faded to prepare this body properly."
+        if float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 0.0) or 0.0) <= 0:
+            return False, "The remains are too ruined to prepare."
+        stacks = int(getattr(corpse.db, "preparation_stacks", 0) or 0)
+        if stacks >= 5:
+            return False, "The body is already as coherent as you can make it."
+        cost = max(4, 8 - min(3, stacks))
+        if not self.spend_attunement(cost):
+            return False, "You lack the attunement to shape that rite."
+        if hasattr(corpse, "add_preparation"):
+            corpse.add_preparation(1)
+        if hasattr(corpse, "adjust_condition"):
+            corpse.adjust_condition(4 + max(1, int(self.get_skill("theurgy") / 20)))
+        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(18 + stacks))
+        return True, "You restore coherence to the body, strengthening the path for a returning soul."
+
+    def get_cleric_ritual_profile(self, ritual_name):
+        ritual = str(ritual_name or "prayer").strip().lower()
+        if ritual == "pray":
+            ritual = "prayer"
+        return CLERIC_DEVOTION_CONFIG["rituals"].get(ritual)
+
+    def get_cleric_ritual_cooldown_remaining(self, ritual_name):
+        ritual = str(ritual_name or "prayer").strip().lower()
+        if ritual == "pray":
+            ritual = "prayer"
+        profile = self.get_cleric_ritual_profile(ritual)
+        if not profile:
+            return 0.0
+        timestamps = dict(getattr(self.db, "cleric_ritual_timestamps", None) or {})
+        last_used = float(timestamps.get(ritual, 0.0) or 0.0)
+        cooldown = float(profile.get("cooldown", 0.0) or 0.0)
+        return max(0.0, cooldown - (time.time() - last_used))
+
+    def perform_cleric_ritual(self, ritual_name):
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can maintain that rite."
+        if self.is_dead():
+            return False, "The dead cannot maintain devotional rites."
+        ritual = str(ritual_name or "prayer").strip().lower() or "prayer"
+        if ritual == "pray":
+            ritual = "prayer"
+        profile = self.get_cleric_ritual_profile(ritual)
+        if not profile:
+            return False, "You know only the rites: pray, pray focus, and pray devotion."
+        remaining = self.get_cleric_ritual_cooldown_remaining(ritual)
+        if remaining > 0:
+            return False, f"You must let the rite settle before repeating it ({remaining:.0f}s)."
+
+        gain = int(profile.get("gain", 0) or 0) + max(0, int(self.get_profession_rank() / 3))
+        before = self.get_devotion()
+        after = self.adjust_devotion(gain, sync=False)
+        timestamps = dict(getattr(self.db, "cleric_ritual_timestamps", None) or {})
+        now = time.time()
+        timestamps[ritual] = now
+        self.db.cleric_ritual_timestamps = timestamps
+        self.db.last_devotion_drift_at = now
+        self.sync_client_state()
+        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(12 + max(0, int(profile.get("gain", 0) / 4))))
+
+        if after <= before:
+            return True, "You complete the rite, but your devotion is already at its height."
+        return True, f"{profile['message']} Devotion: {after}/{getattr(self.db, 'max_devotion', CLERIC_DEVOTION_CONFIG['max_devotion'])}."
+
+    def get_commune_profile(self, commune_name):
+        return CLERIC_DEVOTION_CONFIG["communes"].get(str(commune_name or "").strip().lower())
+
+    def get_resurrection_devotion_profile(self):
+        devotion = self.get_devotion()
+        config = CLERIC_DEVOTION_CONFIG["resurrection"]
+        if devotion < int(config["low_threshold"]):
+            return {
+                "label": "strained",
+                "failure_chance": 0.3,
+                "hp_scale": 0.85,
+                "exp_scale": 0.85,
+                "sting_duration_scale": 1.15,
+                "sting_severity_scale": 1.15,
+            }
+        if devotion >= int(config["high_threshold"]):
+            return {
+                "label": "radiant",
+                "failure_chance": 0.03,
+                "hp_scale": 1.1,
+                "exp_scale": 1.1,
+                "sting_duration_scale": 0.85,
+                "sting_severity_scale": 0.85,
+            }
+        return {
+            "label": "steady",
+            "failure_chance": 0.1,
+            "hp_scale": 1.0,
+            "exp_scale": 1.0,
+            "sting_duration_scale": 1.0,
+            "sting_severity_scale": 1.0,
+        }
+
+    def get_resurrection_devotion_cost(self, corpse=None, snapshot=None):
+        condition = 100.0
+        if corpse is not None and hasattr(corpse, "get_condition"):
+            condition = float(corpse.get_condition())
+        elif corpse is not None:
+            condition = float(getattr(getattr(corpse, "db", None), "condition", 100.0) or 100.0)
+        favor_before = int(((snapshot or {}).get("favor_before", 0) if isinstance(snapshot, Mapping) else 0) or 0)
+        damage_penalty = max(0, int((100 - condition) / 10))
+        favor_discount = min(6, max(0, favor_before // 3))
+        return max(8, 12 + damage_penalty - favor_discount)
+
+    def commune_with_divine(self, commune_name, target=None):
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can call upon a commune."
+        if self.is_dead():
+            return False, "The dead cannot commune with the divine that way."
+
+        commune_key = str(commune_name or "").strip().lower()
+        profile = self.get_commune_profile(commune_key)
+        if not profile:
+            return False, "You may commune solace, ward, or vigil."
+
+        cost = int(profile.get("cost", 0) or 0)
+        if self.get_devotion() < cost:
+            return False, f"You lack the devotion for that commune. {self.get_devotion_state_message()}"
+
+        if commune_key == "solace":
+            missing = max(0, int((self.db.max_attunement or 0) - (self.db.attunement or 0)))
+            if missing <= 0:
+                return False, "The commune finds nothing in you that needs soothing."
+            restored = min(missing, 10 + max(0, self.get_profession_rank() * 2))
+            self.db.attunement = min(int(self.db.max_attunement or 0), int(self.db.attunement or 0) + restored)
+            self.adjust_devotion(-cost, sync=False)
+            self.sync_client_state()
+            self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(14))
+            return True, "A quiet warmth settles through you, restoring your spiritual reserve."
+
+        if commune_key == "ward":
+            strength = max(1, 1 + int(self.get_profession_rank() / 3))
+            duration = 8 + max(0, int(self.get_profession_rank() / 2))
+            self.apply_warding_barrier(self, "commune ward", strength, duration)
+            self.adjust_devotion(-cost, sync=False)
+            self.sync_client_state()
+            self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(16))
+            return True, "You commune for protection, and a pale ward settles around you."
+
+        corpse = target
+        if corpse is None and self.location:
+            corpses = [obj for obj in self.location.contents if getattr(getattr(obj, "db", None), "is_corpse", False)]
+            corpse = corpses[0] if len(corpses) == 1 else None
+        if not corpse or not getattr(getattr(corpse, "db", None), "is_corpse", False):
+            return False, "Commune vigil requires a corpse here."
+        if hasattr(corpse, "is_recovery_allowed") and not corpse.is_recovery_allowed(self):
+            return False, "You do not have permission to watch over that corpse."
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if owner and hasattr(owner, "notify_recovery_consent_use"):
+            owner.notify_recovery_consent_use(self)
+        corpse.db.stabilized = True
+        if hasattr(corpse, "adjust_condition"):
+            corpse.adjust_condition(5 + max(0, self.get_profession_rank()))
+        corpse.db.devotional_vigil_until = time.time() + 300
+        self.adjust_devotion(-cost, sync=False)
+        self.sync_client_state()
+        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(18))
+        return True, "You keep a brief vigil over the corpse, easing decay and steadying what remains."
+
+    def process_cleric_tick(self):
+        if not self.is_profession("cleric"):
+            return False
+        interval = float(CLERIC_DEVOTION_CONFIG["drift_interval"])
+        now = time.time()
+        last_tick = float(getattr(self.db, "last_devotion_drift_at", 0.0) or 0.0)
+        if last_tick <= 0:
+            self.db.last_devotion_drift_at = now
+            return False
+        if now - last_tick < interval:
+            return False
+
+        steps = int((now - last_tick) // interval)
+        if steps <= 0:
+            return False
+        current = self.get_devotion()
+        baseline = int(CLERIC_DEVOTION_CONFIG["baseline"])
+        if current == baseline:
+            self.db.last_devotion_drift_at = last_tick + (steps * interval)
+            return False
+
+        delta = min(abs(current - baseline), steps)
+        updated = current - delta if current > baseline else current + delta
+        self.set_devotion(updated, sync=False)
+        self.db.last_devotion_drift_at = last_tick + (steps * interval)
+        self.sync_client_state()
+        return True
 
     def sacrifice_for_favor(self, offered_amount):
         if not self.is_in_shrine():
@@ -1288,6 +2091,112 @@ class Character(ObjectParent, DefaultCharacter):
         config = FAVOR_SYSTEM_CONFIG
         return int(config["soul_strength_base"]) + (value * int(config["soul_strength_bonus"]))
 
+    def get_soul_state(self):
+        self.ensure_core_defaults()
+        state = getattr(self.db, "soul_state", None)
+        if state is None and self.is_dead() and isinstance(self.get_favor_death_snapshot(), Mapping):
+            state = self.initialize_soul_state(snapshot=self.get_favor_death_snapshot())
+        return dict(state) if isinstance(state, Mapping) else None
+
+    def get_soul_strength_label(self, soul_state=None):
+        state = soul_state if isinstance(soul_state, Mapping) else self.get_soul_state()
+        if not isinstance(state, Mapping):
+            return "lost"
+        strength = max(0.0, float(state.get("strength", 0.0) or 0.0))
+        if not bool(state.get("recoverable", False)) or strength <= 0:
+            return "lost"
+        if strength >= 70:
+            return "strong"
+        if strength >= 35:
+            return "fading"
+        return "barely present"
+
+    def get_soul_recoverability_message(self, soul_state=None):
+        label = self.get_soul_strength_label(soul_state=soul_state)
+        return {
+            "strong": "The soul is strong.",
+            "fading": "The soul is fading.",
+            "barely present": "The soul is barely present.",
+            "lost": "The soul can no longer be reached.",
+        }.get(label, "The soul cannot be read.")
+
+    def calculate_initial_soul_strength(self, snapshot=None):
+        snapshot = snapshot if isinstance(snapshot, Mapping) else self.get_favor_death_snapshot() or {}
+        favor_before = max(0, int(snapshot.get("favor_before", 0) or 0))
+        injuries = dict(getattr(self.db, "injuries", None) or {})
+        trauma = 0.0
+        for part in injuries.values():
+            if not isinstance(part, Mapping):
+                continue
+            trauma += float(part.get("external", 0) or 0)
+            trauma += float(part.get("internal", 0) or 0)
+            trauma += float(part.get("bruise", 0) or 0) * 0.5
+            trauma += float(part.get("bleed", 0) or 0) * 2.0
+        trauma_penalty = min(45.0, trauma / 25.0)
+        debt_penalty = min(12.0, float(self.get_exp_debt()) / 100.0)
+        strength = 55.0 + (favor_before * 2.5) - trauma_penalty - debt_penalty
+        return max(0.0, min(100.0, strength))
+
+    def initialize_soul_state(self, snapshot=None):
+        snapshot = snapshot if isinstance(snapshot, Mapping) else self.get_favor_death_snapshot() or {}
+        strength = self.calculate_initial_soul_strength(snapshot=snapshot)
+        soul_state = {
+            "owner_id": int(self.id or 0),
+            "strength": strength,
+            "location": "spirit_plane",
+            "recoverable": bool((snapshot.get("resurrection") or {}).get("can_resurrect", False)) and strength > 0,
+            "decay_rate": float(snapshot.get("soul_decay_rate", self.get_soul_decay_rate(snapshot.get("favor_before", 0))) or 0.0),
+            "captured_at": time.time(),
+            "last_decay_at": time.time(),
+        }
+        self.db.soul_state = soul_state
+        return dict(soul_state)
+
+    def process_soul_tick(self):
+        if not self.is_dead():
+            return False
+        soul_state = self.get_soul_state()
+        if not isinstance(soul_state, Mapping):
+            return False
+        if not bool(soul_state.get("recoverable", False)):
+            return False
+        now = time.time()
+        last_decay = float(soul_state.get("last_decay_at", soul_state.get("captured_at", now)) or now)
+        elapsed = max(0.0, now - last_decay)
+        if elapsed < 1.0:
+            return False
+        decay_rate = max(0.05, float(soul_state.get("decay_rate", 0.0) or 0.0))
+        updated = dict(soul_state)
+        updated["strength"] = max(0.0, float(updated.get("strength", 0.0) or 0.0) - (elapsed * decay_rate))
+        updated["last_decay_at"] = now
+        if updated["strength"] <= 0:
+            updated["strength"] = 0.0
+            updated["recoverable"] = False
+        self.db.soul_state = updated
+        return True
+
+    def sense_soul_from_corpse(self, corpse):
+        if not self.is_profession("cleric"):
+            return False, ["Only a cleric can search for a soul that way."]
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, [message]
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if not owner:
+            return False, ["That corpse holds no soul you can identify."]
+        soul_state = owner.get_soul_state() if hasattr(owner, "get_soul_state") else None
+        if not isinstance(soul_state, Mapping):
+            return False, ["You feel only silence where the soul should be."]
+        lines = [f"You search beyond {corpse.key}, listening for the soul bound to it."]
+        lines.append(self.get_soul_recoverability_message(soul_state=soul_state))
+        lines.append(f"Soul Strength: {int(round(float(soul_state.get('strength', 0.0) or 0.0)))}/100")
+        if bool(soul_state.get("recoverable", False)):
+            lines.append("The soul remains recoverable.")
+        else:
+            lines.append("The soul has slipped beyond your reach.")
+        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(15))
+        return True, lines
+
     def get_resurrection_favor_profile(self, favor=None):
         value = self.get_favor() if favor is None else max(0, int(favor or 0))
         config = FAVOR_SYSTEM_CONFIG
@@ -1298,6 +2207,296 @@ class Character(ObjectParent, DefaultCharacter):
             "quality_modifier": round(value * float(config["resurrection_quality_bonus"]), 3),
             "failure_bias": round(float(config["low_favor_failure_bias"]) if low_favor else 0.0, 3),
             "can_resurrect": value > 0,
+        }
+
+    def get_resurrection_quality_profile(self, favor_before=None):
+        value = self.get_favor() if favor_before is None else max(0, int(favor_before or 0))
+        for threshold, profile in RESURRECTION_QUALITY_PROFILES:
+            if value >= threshold:
+                result = dict(profile)
+                result["favor_before"] = value
+                return result
+        return {
+            "label": "none",
+            "hp_ratio": float(FAVOR_SYSTEM_CONFIG["resurrection_restore_hp_ratio"]),
+            "sting_duration_scale": 1.0,
+            "sting_severity_scale": 1.0,
+            "exp_restore_scale": 0.5,
+            "favor_before": value,
+        }
+
+    def calculate_resurrection_quality_score(self, corpse=None, caster=None, snapshot=None, soul_state=None):
+        snapshot = snapshot if isinstance(snapshot, Mapping) else self.get_favor_death_snapshot() or {}
+        soul_state = soul_state if isinstance(soul_state, Mapping) else self.get_soul_state() or {}
+        favor_before = max(0, int(snapshot.get("favor_before", 0) or 0))
+        condition = float(corpse.get_condition() if corpse and hasattr(corpse, "get_condition") else getattr(getattr(corpse, "db", None), "condition", 0.0) or 0.0)
+        soul_strength = max(0.0, min(100.0, float(soul_state.get("strength", 0.0) or 0.0)))
+        devotion = caster.get_devotion() if caster is not None and hasattr(caster, "get_devotion") else 0
+        score = min(100.0, favor_before * 3.0)
+        score += condition * 0.28
+        score += soul_strength * 0.24
+        score += devotion * 0.18
+        if corpse is not None:
+            score += min(12.0, int(getattr(corpse.db, "preparation_stacks", 0) or 0) * 3.0)
+            score += min(6.0, int(getattr(corpse.db, "preserve_stacks", 0) or 0) * 1.5)
+        return max(0.0, min(100.0, score))
+
+    def get_resurrection_quality_result(self, corpse=None, caster=None, snapshot=None, soul_state=None):
+        score = self.calculate_resurrection_quality_score(corpse=corpse, caster=caster, snapshot=snapshot, soul_state=soul_state)
+        for threshold, profile in RESURRECTION_QUALITY_PROFILES:
+            if score >= threshold:
+                result = dict(profile)
+                result["score"] = score
+                return result
+        result = dict(RESURRECTION_QUALITY_PROFILES[-1][1])
+        result["score"] = score
+        return result
+
+    def apply_resurrection_aftereffects(self, quality):
+        label = str((quality or {}).get("label", "stable") or "stable").lower()
+        self.clear_state("resurrection_fragility")
+        self.clear_state("resurrection_instability")
+        self.db.resurrection_vitality_cap_ratio = 1.0
+        if label == "perfect":
+            return
+        if label == "stable":
+            self.db.resurrection_vitality_cap_ratio = 0.95
+            return
+        if label == "fragile":
+            self.db.resurrection_vitality_cap_ratio = 0.75
+            self.db.fatigue = min(int(self.db.max_fatigue or 100), max(int(self.db.fatigue or 0), 35))
+            self.set_state("resurrection_fragility", {"duration": 20, "label": "fragile", "hp_cap_ratio": 0.75})
+            self.db.hp = min(int(self.db.hp or 0), max(1, int(round((self.db.max_hp or 1) * 0.75))))
+            return
+        self.db.resurrection_vitality_cap_ratio = 0.6
+        self.db.fatigue = min(int(self.db.max_fatigue or 100), max(int(self.db.fatigue or 0), 50))
+        self.set_state("resurrection_fragility", {"duration": 30, "label": "flawed", "hp_cap_ratio": 0.6})
+        self.set_state("resurrection_instability", {"duration": 18, "label": "unstable", "penalty": 0.15})
+        self.db.hp = min(int(self.db.hp or 0), max(1, int(round((self.db.max_hp or 1) * 0.6))))
+        injuries = dict(self.db.injuries or {})
+        for part_name in ["head", "chest", "abdomen"]:
+            part = dict(injuries.get(part_name) or {})
+            if not part:
+                continue
+            part["bruise"] = min(int(part.get("max", 100) or 100), int(part.get("bruise", 0) or 0) + 8)
+            injuries[part_name] = part
+        self.db.injuries = injuries
+
+    def process_resurrection_recovery_tick(self):
+        changed = False
+        fragility = self.get_state("resurrection_fragility")
+        if fragility:
+            updated = dict(fragility)
+            updated["duration"] = int(updated.get("duration", 0) or 0) - 1
+            if updated["duration"] <= 0:
+                self.clear_state("resurrection_fragility")
+                self.db.resurrection_vitality_cap_ratio = 1.0
+            else:
+                self.set_state("resurrection_fragility", updated)
+            changed = True
+        instability = self.get_state("resurrection_instability")
+        if instability:
+            updated = dict(instability)
+            updated["duration"] = int(updated.get("duration", 0) or 0) - 1
+            if updated["duration"] <= 0:
+                self.clear_state("resurrection_instability")
+            else:
+                self.set_state("resurrection_instability", updated)
+            changed = True
+        return changed
+
+    def _normalize_recovery_consent_entries(self):
+        self.ensure_core_defaults()
+        raw_entries = list(getattr(self.db, "recovery_consent", None) or [])
+        now = time.time()
+        normalized = {}
+        changed = False
+        for entry in raw_entries:
+            target_id = 0
+            expires_at = 0.0
+            if isinstance(entry, Mapping):
+                try:
+                    target_id = int(entry.get("id", 0) or 0)
+                except (TypeError, ValueError):
+                    target_id = 0
+                try:
+                    expires_at = float(entry.get("expires_at", 0.0) or 0.0)
+                except (TypeError, ValueError):
+                    expires_at = 0.0
+            else:
+                try:
+                    target_id = int(entry)
+                except (TypeError, ValueError):
+                    target_id = 0
+            if target_id <= 0:
+                changed = True
+                continue
+            if expires_at > 0 and expires_at <= now:
+                changed = True
+                continue
+            current = normalized.get(target_id)
+            if current is None or expires_at > float(current.get("expires_at", 0.0) or 0.0):
+                normalized[target_id] = {"id": target_id, "expires_at": expires_at}
+            if not isinstance(entry, Mapping):
+                changed = True
+        entries = [normalized[target_id] for target_id in sorted(normalized)]
+        if changed or raw_entries != entries:
+            self.db.recovery_consent = entries
+        return entries
+
+    def get_recovery_consent_ids(self):
+        return {int(entry["id"]) for entry in self._normalize_recovery_consent_entries()}
+
+    def get_recovery_consent_lines(self):
+        entries = self._normalize_recovery_consent_entries()
+        if not entries:
+            return ["Recovery Consent: None"]
+        lines = ["Recovery Consent:"]
+        now = time.time()
+        for entry in entries:
+            target_id = int(entry.get("id", 0) or 0)
+            result = search_object(f"#{target_id}") if target_id > 0 else []
+            name = result[0].key if result else f"#{target_id}"
+            expires_at = float(entry.get("expires_at", 0.0) or 0.0)
+            if expires_at > now:
+                lines.append(f"- {name} ({int(round(expires_at - now))}s remaining)")
+            else:
+                lines.append(f"- {name}")
+        return lines
+
+    def notify_recovery_consent_use(self, actor, action_text="begins assisting with your remains"):
+        if not actor or actor == self or not self.is_recovery_consented(actor):
+            return False
+        self.msg(f"{actor.key} {action_text}.")
+        return True
+
+    def is_recovery_consented(self, other):
+        other_id = int(getattr(other, "id", 0) or 0)
+        return other_id > 0 and other_id in self.get_recovery_consent_ids()
+
+    def sync_recovery_permissions(self):
+        allowed = sorted(self.get_recovery_consent_ids() | {int(self.id or 0)})
+        corpse = self.get_death_corpse()
+        if corpse:
+            corpse.db.recovery_allowed = allowed
+        grave = self.get_owned_grave()
+        if grave:
+            grave.db.recovery_allowed = allowed
+        return allowed
+
+    def grant_recovery_consent(self, target, duration=None):
+        if not target or int(getattr(target, "id", 0) or 0) <= 0:
+            return False, "You can only grant consent to a present character."
+        if target == self:
+            return False, "You already have access to your own remains."
+        entries = {int(entry["id"]): dict(entry) for entry in self._normalize_recovery_consent_entries()}
+        expires_at = 0.0
+        if duration is not None:
+            expires_at = time.time() + max(1, int(duration or 0))
+        entries[int(target.id)] = {"id": int(target.id), "expires_at": expires_at}
+        self.db.recovery_consent = [entries[target_id] for target_id in sorted(entries)]
+        self.sync_recovery_permissions()
+        if expires_at > 0:
+            return True, f"You grant {target.key} permission to aid your recovery for {int(duration)}s."
+        return True, f"You grant {target.key} permission to aid your recovery."
+
+    def withdraw_recovery_consent(self, target):
+        if not target or int(getattr(target, "id", 0) or 0) <= 0:
+            return False, "You can only withdraw consent from a present character."
+        target_id = int(target.id)
+        entries = {int(entry["id"]): dict(entry) for entry in self._normalize_recovery_consent_entries()}
+        if target_id not in entries:
+            return False, f"{target.key} does not currently have your consent."
+        entries.pop(target_id, None)
+        self.db.recovery_consent = [entries[entry_id] for entry_id in sorted(entries)]
+        self.sync_recovery_permissions()
+        return True, f"You withdraw {target.key}'s permission to aid your recovery."
+
+    def resolve_recovery_point_reference(self, reference):
+        if not reference:
+            return None
+        if hasattr(reference, "id") and getattr(reference, "id", None):
+            return reference
+        if isinstance(reference, int) or str(reference).isdigit():
+            result = search_object(f"#{int(reference)}")
+            return result[0] if result else None
+        result = search_object(str(reference))
+        return result[0] if result else None
+
+    def get_recovery_region(self, room=None):
+        source_room = room or self.location
+        if source_room and hasattr(source_room, "get_recovery_region_override"):
+            override = source_room.get_recovery_region_override()
+            if override:
+                return override
+        if source_room and hasattr(source_room, "get_region"):
+            return source_room.get_region()
+        return str(getattr(self.db, "last_known_region", None) or "default_region")
+
+    def get_nearest_recovery_point(self, room=None):
+        source_room = room or self.location
+        if source_room and hasattr(source_room, "get_recovery_point_reference"):
+            resolved = self.resolve_recovery_point_reference(source_room.get_recovery_point_reference())
+            if resolved:
+                return resolved
+        region = self.get_recovery_region(room=source_room)
+        for candidate in search_tag("recovery_point", category="death"):
+            if hasattr(candidate, "get_region") and candidate.get_region() == region:
+                return candidate
+        for candidate in search_tag("shrine"):
+            if hasattr(candidate, "get_region") and candidate.get_region() == region:
+                return candidate
+        if self.home:
+            return self.home
+        return source_room
+
+    def emit_death_event(self, event_name, **payload):
+        event = str(event_name or "").strip()
+        if not event:
+            return False
+        payload = dict(payload)
+        payload.setdefault("character", self)
+        payload.setdefault("timestamp", time.time())
+        listeners = [self, getattr(self, "location", None)]
+        fired = False
+        for listener in listeners:
+            if listener and hasattr(listener, event):
+                getattr(listener, event)(**payload)
+                fired = True
+        LOGGER.info("death_event=%s payload=%s", event, {key: getattr(value, 'id', value) for key, value in payload.items()})
+        return fired
+
+    def update_death_analytics(self, event_name, favor_used=0, recovery_time=None):
+        self.ensure_core_defaults()
+        analytics = dict(getattr(self.db, "death_analytics", None) or {})
+        analytics.setdefault("deaths", 0)
+        analytics.setdefault("departs", 0)
+        analytics.setdefault("resurrections", 0)
+        analytics.setdefault("favor_spent", 0)
+        analytics.setdefault("recovery_count", 0)
+        analytics.setdefault("total_recovery_time", 0.0)
+        if event_name == "death":
+            analytics["deaths"] += 1
+        elif event_name == "depart":
+            analytics["departs"] += 1
+        elif event_name == "resurrection":
+            analytics["resurrections"] += 1
+        analytics["favor_spent"] += max(0, int(favor_used or 0))
+        if recovery_time is not None:
+            analytics["recovery_count"] += 1
+            analytics["total_recovery_time"] += max(0.0, float(recovery_time or 0.0))
+            analytics["average_recovery_time"] = analytics["total_recovery_time"] / max(1, analytics["recovery_count"])
+        self.db.death_analytics = analytics
+        return analytics
+
+    def get_death_protection_state(self):
+        self.ensure_core_defaults()
+        active = bool(getattr(self.db, "death_protection", False)) and not bool(getattr(self.db, "is_npc", False)) and int(getattr(self.db, "profession_rank", 1) or 1) <= int(DEATH_PROTECTION_CONFIG["max_rank"])
+        return {
+            "active": active,
+            "exp_debt_multiplier": float(DEATH_PROTECTION_CONFIG["exp_debt_multiplier"]),
+            "sting_severity_scale": float(DEATH_PROTECTION_CONFIG["sting_severity_scale"]),
+            "minimum_depart_mode": str(DEATH_PROTECTION_CONFIG["minimum_depart_mode"]),
         }
 
     def get_favor_death_consumption(self):
@@ -1328,6 +2527,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("The divine bond strengthens your return.")
             self.msg("Your soul remains firmly tethered.")
         elif favor_before <= int(FAVOR_SYSTEM_CONFIG["low_favor_threshold"]):
+            self.msg("You feel unprepared for what comes next.")
             self.msg("Your return is strained and uncertain.")
             self.msg("Your soul feels tenuous and unanchored.")
 
@@ -1339,7 +2539,9 @@ class Character(ObjectParent, DefaultCharacter):
     def can_attempt_resurrection(self):
         snapshot = self.get_favor_death_snapshot()
         if isinstance(snapshot, Mapping):
-            return not bool(snapshot.get("must_depart", False)) and bool((snapshot.get("resurrection") or {}).get("can_resurrect", False))
+            soul_state = self.get_soul_state()
+            soul_recoverable = bool((soul_state or {}).get("recoverable", False)) if isinstance(soul_state, Mapping) else True
+            return not bool(snapshot.get("must_depart", False)) and bool((snapshot.get("resurrection") or {}).get("can_resurrect", False)) and soul_recoverable
         return self.get_favor() > 0
 
     def get_death_attunement_cost(self, snapshot=None):
@@ -1358,9 +2560,34 @@ class Character(ObjectParent, DefaultCharacter):
             return None
         return corpse
 
+    def get_owned_grave(self, location=None):
+        room = location or self.location
+        if not room:
+            return None
+        for obj in list(getattr(room, "contents", []) or []):
+            if not getattr(getattr(obj, "db", None), "is_grave", False):
+                continue
+            if hasattr(obj, "is_owner") and obj.is_owner(self):
+                return obj
+        return None
+
+    def get_recoverable_grave(self, location=None):
+        room = location or self.location
+        if not room:
+            return None
+        owned = self.get_owned_grave(location=room)
+        if owned:
+            return owned
+        for obj in list(getattr(room, "contents", []) or []):
+            if not getattr(getattr(obj, "db", None), "is_grave", False):
+                continue
+            if hasattr(obj, "is_recovery_allowed") and obj.is_recovery_allowed(self):
+                return obj
+        return None
+
     def create_death_corpse(self):
         corpse = self.get_death_corpse()
-        if corpse and corpse.location == self.location:
+        if corpse:
             return corpse
         corpse = create_object(
             "typeclasses.corpse.Corpse",
@@ -1371,9 +2598,20 @@ class Character(ObjectParent, DefaultCharacter):
         corpse.db.owner_id = self.id
         corpse.db.owner_name = self.key
         corpse.db.death_timestamp = time.time()
-        corpse.db.decay_time = time.time() + (30 * 60)
+        corpse.db.decay_time = time.time() + (10 * 60)
+        corpse.db.memory_time = time.time() + (7 * 60)
+        corpse.db.memory_faded = False
+        corpse.db.memory_loss_applied = False
         corpse.db.favor_snapshot = self.get_favor_death_snapshot()
-        corpse.db.desc = f"The lifeless body of {self.key} lies here."
+        corpse.db.condition = 100.0
+        corpse.db.stabilized = False
+        corpse.db.preserve_stacks = 0
+        corpse.db.preparation_stacks = 0
+        corpse.db.stored_coins = 0
+        corpse.db.recovery_allowed = sorted(self.get_recovery_consent_ids() | {int(self.id or 0)})
+        if hasattr(corpse, "update_condition_description"):
+            corpse.update_condition_description()
+        corpse.scripts.add("typeclasses.scripts.CorpseDecayScript")
         self.db.last_corpse_id = corpse.id
         return corpse
 
@@ -1393,21 +2631,59 @@ class Character(ObjectParent, DefaultCharacter):
     def clear_death_corpse_link(self):
         self.db.last_corpse_id = None
 
+    def move_coins_to_corpse(self, corpse):
+        if not corpse:
+            return 0
+        coins = max(0, int(getattr(self.db, "coins", 0) or 0))
+        corpse.db.stored_coins = coins
+        self.db.coins = 0
+        return coins
+
+    def apply_death_sting(self, duration=600, favor=None, had_prior_penalty=False):
+        self.ensure_core_defaults()
+        self.db.death_sting = True
+        self.db.death_sting_active = True
+        severity = self.calculate_death_sting_severity(favor=favor)
+        if had_prior_penalty or self.get_exp_debt() > 0:
+            severity = min(0.30, severity + 0.03)
+        protection = self.get_death_protection_state()
+        if protection["active"]:
+            severity *= float(protection["sting_severity_scale"])
+        self.db.death_sting_severity = severity
+        self.db.death_sting_end = time.time() + max(0.0, float(duration))
+        self.sync_client_state()
+
     def at_death(self):
         self.ensure_core_defaults()
         if self.db.life_state == LIFE_STATE_DEAD:
             return None
+        had_prior_penalty = self.get_exp_debt() > 0 or bool(getattr(self.db, "death_sting_active", False) or getattr(self.db, "death_sting", False))
         self.db.life_state = LIFE_STATE_DEAD
         self.db.is_dead = True
+        self.db.last_death_time = time.time()
         self.db.in_combat = False
         self.db.target = None
         self.db.aiming = None
+        self.capture_exp_debt_on_death(had_prior_penalty=had_prior_penalty)
         self.handle_favor_death_event()
+        snapshot = self.get_favor_death_snapshot() or {}
+        self.initialize_soul_state(snapshot=snapshot)
+        self.apply_death_sting(favor=snapshot.get("favor_before", self.get_favor()), had_prior_penalty=had_prior_penalty)
         corpse = self.create_death_corpse()
         self.move_carried_items_to_corpse(corpse)
+        lost_coins = self.move_coins_to_corpse(corpse)
+        if bool(getattr(self.db, "is_npc", False)):
+            self.generate_npc_loot()
         if self.location:
-            self.location.msg_contents(f"{self.key} collapses and dies.", exclude=[self])
+            room = self.location
+            death_emote = self.get_death_emote()
+            delay(1.0, room.msg_contents, death_emote, exclude=[self])
+        self.emit_death_event("on_character_death", corpse=corpse, room=self.location)
+        self.update_death_analytics("death")
         self.msg("You have died.")
+        self.msg("You feel yourself slipping free from your body.")
+        if lost_coins > 0 and not bool(getattr(self.db, "is_npc", False)):
+            self.msg("You feel your wealth slip from your grasp as you fall.")
         return corpse
 
     def revive_from_death(self, via="depart"):
@@ -1417,13 +2693,37 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.is_dead = False
         self.db.in_combat = False
         self.db.target = None
+        if via != "resurrection":
+            self.clear_state("resurrection_fragility")
+            self.clear_state("resurrection_instability")
+            self.db.resurrection_vitality_cap_ratio = 1.0
         self.db.hp = max(1, int(round((self.db.max_hp or 1) * restore_ratio)))
         self.db.balance = max(0, int(round((self.db.max_balance or 1) * 0.5)))
         self.db.fatigue = min(self.db.max_fatigue or 100, max(int(self.db.fatigue or 0), int(round((self.db.max_fatigue or 100) * 0.35))))
         self.db.stunned = False
+        self.db.soul_state = None
         self.sync_empath_wounds_from_resources()
         self.sync_client_state()
         return True
+
+    def set_recovery_metadata(self, recovery_type, helper=None, quality=None):
+        self.db.last_recovery_type = str(recovery_type or "unknown")
+        self.db.last_recovery_quality = str(quality or "") or None
+        helper_name = getattr(helper, "key", helper)
+        self.db.last_recovery_helper = str(helper_name) if helper_name else None
+        self.db.last_recovery_time = time.time()
+        return {
+            "type": self.db.last_recovery_type,
+            "quality": self.db.last_recovery_quality,
+            "helper": self.db.last_recovery_helper,
+            "time": self.db.last_recovery_time,
+        }
+
+    def get_last_recovery_elapsed(self):
+        last_death = float(getattr(self.db, "last_death_time", 0.0) or 0.0)
+        if last_death <= 0:
+            return None
+        return max(0.0, time.time() - last_death)
 
     def get_depart_mode(self, corpse=None, requested_mode=None):
         snapshot = None
@@ -1434,11 +2734,16 @@ class Character(ObjectParent, DefaultCharacter):
         available_favor = int(snapshot.get("favor_before", 0) or 0)
         requested = str(requested_mode or "").strip().lower()
         default_mode = "full" if available_favor >= 3 else "items" if available_favor >= 2 else "grave"
+        protection = self.get_death_protection_state()
+        if protection["active"] and not requested:
+            default_mode = str(protection["minimum_depart_mode"])
         if not requested:
             return default_mode
         requirements = {"grave": 0, "coins": 2, "items": 2, "full": 3}
         if requested not in requirements:
             return None
+        if protection["active"]:
+            return requested
         if available_favor < requirements[requested]:
             return None
         return requested
@@ -1447,6 +2752,8 @@ class Character(ObjectParent, DefaultCharacter):
         if not self.is_dead():
             return False, "You are not dead."
         corpse = self.get_death_corpse()
+        if corpse and bool(getattr(corpse.db, "irrecoverable", False)) and not mode:
+            mode = "grave"
         depart_mode = self.get_depart_mode(corpse=corpse, requested_mode=mode)
         if depart_mode is None:
             return False, "You do not have enough favor for that kind of departure."
@@ -1455,18 +2762,25 @@ class Character(ObjectParent, DefaultCharacter):
         if corpse and keep_items:
             for item in list(corpse.contents):
                 item.move_to(self, quiet=True)
-        if not keep_coins:
-            self.db.coins = 0
-        destination = self.home or self.location
-        if destination and self.location != destination:
-            self.move_to(destination, quiet=True)
+        if corpse and keep_coins:
+            self.db.coins = int(getattr(self.db, "coins", 0) or 0) + int(getattr(corpse.db, "stored_coins", 0) or 0)
+            corpse.db.stored_coins = 0
+        destination = self.get_nearest_recovery_point(room=self.location) or self.home or self.location
         self.db.life_state = LIFE_STATE_DEPARTED
         self.revive_from_death(via="depart")
         self.db.life_state = LIFE_STATE_ALIVE
-        if corpse and (keep_items or not corpse.contents):
+        if destination and self.location != destination:
+            self.move_to(destination, quiet=True)
+        self.set_recovery_metadata("depart", helper=None)
+        recovery_time = self.get_last_recovery_elapsed()
+        favor_cost = {"grave": 0, "coins": 2, "items": 2, "full": 3}.get(depart_mode, 0)
+        self.update_death_analytics("depart", favor_used=favor_cost, recovery_time=recovery_time)
+        self.emit_death_event("on_depart", mode=depart_mode, destination=destination)
+        self.db.soul_state = None
+        if corpse and (keep_items or not corpse.contents) and int(getattr(corpse.db, "stored_coins", 0) or 0) <= 0:
             corpse.delete()
             self.clear_death_corpse_link()
-        return True, f"You depart and return to life by the {depart_mode} path."
+        return True, f"You feel your spirit pulled back into your body. You return by the {depart_mode} path."
 
     def resurrect_from_corpse(self, corpse, caster=None):
         if not corpse or not getattr(corpse.db, "is_corpse", False):
@@ -1476,32 +2790,256 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             owner = None
         if not owner:
-            return False, "No soul remains tied to that corpse."
+            return False, "That corpse has no valid owner link to restore."
+        if not owner.is_dead():
+            return False, "They are no longer dead."
         snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else owner.get_favor_death_snapshot()
         if not isinstance(snapshot, Mapping):
             return False, "The corpse holds no viable soul pattern."
+        soul_state = owner.get_soul_state() if hasattr(owner, "get_soul_state") else None
+        if not isinstance(soul_state, Mapping):
+            return False, "The soul cannot be found."
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            return False, "The body can no longer sustain life."
+        room = getattr(corpse, "location", None)
+        if room and hasattr(room, "is_no_resurrection_zone") and room.is_no_resurrection_zone():
+            return False, "Something about this place rejects the rite outright."
         res_profile = dict(snapshot.get("resurrection") or {})
         if not bool(res_profile.get("can_resurrect", False)):
-            return False, "They have no anchor to return by resurrection."
+            return False, "Their spirit cannot be called back. They lack the favor required."
+        if not bool(soul_state.get("recoverable", False)):
+            return False, "Their soul has slipped beyond your reach."
+        if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
+            return False, "The corpse's memories have faded too far to guide the soul home."
+        if caster is not None and hasattr(corpse, "is_recovery_allowed") and not corpse.is_recovery_allowed(caster):
+            return False, "You do not have permission to work with that corpse."
         if caster is not None:
             if hasattr(caster, "is_profession") and not caster.is_profession("cleric"):
                 return False, "Only a cleric can guide that return."
             attunement_cost = owner.get_death_attunement_cost(snapshot=snapshot)
             if hasattr(caster, "spend_attunement") and not caster.spend_attunement(attunement_cost):
                 return False, "You lack the attunement to complete the rite."
+            devotion_cost = caster.get_resurrection_devotion_cost(corpse=corpse, snapshot=snapshot) if hasattr(caster, "get_resurrection_devotion_cost") else 0
+            if devotion_cost and hasattr(caster, "get_devotion") and caster.get_devotion() < devotion_cost:
+                return False, "Your connection is too faint to complete the rite."
+        condition = float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 100.0) or 0.0)
+        if condition < 25:
+            return False, "The corpse is too damaged to call back to life."
+        quality = owner.get_resurrection_quality_result(corpse=corpse, caster=caster, snapshot=snapshot, soul_state=soul_state)
+        if caster is not None and hasattr(caster, "get_resurrection_devotion_profile"):
+            devotion_profile = caster.get_resurrection_devotion_profile()
+            failure_chance = float(devotion_profile.get("failure_chance", 0.0) or 0.0) + float(res_profile.get("failure_bias", 0.0) or 0.0)
+            if condition < 50:
+                failure_chance += 0.1
+            soul_strength = max(0.0, min(100.0, float(soul_state.get("strength", 0.0) or 0.0)))
+            if soul_strength < 35:
+                failure_chance += 0.15
+            elif soul_strength < 70:
+                failure_chance += 0.05
+            death_timestamp = float(getattr(corpse.db, "death_timestamp", 0.0) or 0.0)
+            age_penalty = min(0.25, max(0.0, (time.time() - death_timestamp) / 1200.0)) if death_timestamp > 0 else 0.0
+            prep_bonus = min(0.2, int(getattr(corpse.db, "preparation_stacks", 0) or 0) * 0.05)
+            preserve_bonus = min(0.1, int(getattr(corpse.db, "preserve_stacks", 0) or 0) * 0.02)
+            failure_chance = max(0.0, failure_chance + age_penalty - prep_bonus - preserve_bonus)
+            if random.random() < min(0.85, failure_chance):
+                if devotion_cost:
+                    caster.adjust_devotion(-max(1, int(round(devotion_cost / 2))), sync=False)
+                    caster.sync_client_state()
+                if hasattr(corpse, "adjust_condition"):
+                    corpse.adjust_condition(-10)
+                corpse.db.preparation_stacks = max(0, int(getattr(corpse.db, "preparation_stacks", 0) or 0) - 1)
+                corpse.db.resurrection_failures = int(getattr(corpse.db, "resurrection_failures", 0) or 0) + 1
+                updated_soul = dict(soul_state)
+                updated_soul["strength"] = max(0.0, float(updated_soul.get("strength", 0.0) or 0.0) - 12.0)
+                if updated_soul["strength"] <= 0:
+                    updated_soul["recoverable"] = False
+                owner.db.soul_state = updated_soul
+                failed_condition = float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 0.0) or 0.0)
+                if failed_condition <= 20 or (failed_condition <= 25 and int(getattr(corpse.db, "resurrection_failures", 0) or 0) >= 2):
+                    corpse.db.irrecoverable = True
+                caster.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=caster.get_theurgy_training_difficulty(20))
+                if bool(getattr(corpse.db, "irrecoverable", False)):
+                    return False, "The body can no longer sustain life."
+                return False, "The connection falters."
+            if devotion_cost:
+                caster.adjust_devotion(-devotion_cost, sync=False)
+                caster.sync_client_state()
+            quality = dict(quality)
+            quality["hp_ratio"] = max(0.5, min(1.0, float(quality["hp_ratio"]) * float(devotion_profile.get("hp_scale", 1.0) or 1.0)))
+            quality["exp_restore_scale"] = max(0.4, float(quality["exp_restore_scale"]) * float(devotion_profile.get("exp_scale", 1.0) or 1.0))
+            quality["sting_duration_scale"] = max(0.1, float(quality["sting_duration_scale"]) * float(devotion_profile.get("sting_duration_scale", 1.0) or 1.0))
+            quality["sting_severity_scale"] = max(0.1, float(quality["sting_severity_scale"]) * float(devotion_profile.get("sting_severity_scale", 1.0) or 1.0))
+            quality["exp_restore_scale"] *= 1.0 + min(0.2, int(getattr(corpse.db, "preparation_stacks", 0) or 0) * 0.04)
+            quality["hp_ratio"] = min(1.0, float(quality["hp_ratio"]) + min(0.1, int(getattr(corpse.db, "preparation_stacks", 0) or 0) * 0.02))
+            quality["hp_ratio"] = max(0.45, min(1.0, float(quality["hp_ratio"]) * (0.75 + (soul_strength / 400.0))))
+            quality["exp_restore_scale"] = max(0.3, float(quality["exp_restore_scale"]) * (0.7 + (soul_strength / 250.0)))
         owner.revive_from_death(via="resurrection")
+        if owner.is_death_sting_active():
+            owner.db.death_sting_severity = max(0.0, float(getattr(owner.db, "death_sting_severity", 0.0) or 0.0) * float(quality["sting_severity_scale"]))
+            remaining = owner.get_death_sting_time_remaining()
+            owner.db.death_sting_end = time.time() + max(1, int(round(remaining * float(quality["sting_duration_scale"])))) if remaining > 0 else 0.0
+        owner.db.hp = max(owner.db.hp or 1, int(round((owner.db.max_hp or 1) * float(quality["hp_ratio"]))))
+        restored_ratio = max(0.0, min(1.0, (condition / 100.0) * float(quality["exp_restore_scale"])))
+        restored_exp = int(round(owner.get_exp_debt() * restored_ratio))
+        if restored_exp > 0:
+            owner.reduce_exp_debt(restored_exp, emit_clear_message=True)
+        owner.apply_resurrection_aftereffects(quality)
         if owner.location != corpse.location and corpse.location:
             owner.move_to(corpse.location, quiet=True)
+        restored_coins = int(getattr(corpse.db, "stored_coins", 0) or 0)
+        if restored_coins > 0:
+            owner.db.coins = int(getattr(owner.db, "coins", 0) or 0) + restored_coins
+            corpse.db.stored_coins = 0
         for item in list(corpse.contents):
             item.move_to(owner, quiet=True)
+        if owner.get_favor() > 0:
+            owner.adjust_favor(-1, emit_message=True)
         owner.db.death_favor_snapshot = None
+        owner.db.soul_state = None
         owner.db.last_corpse_id = None
+        owner.set_recovery_metadata("resurrection", helper=caster, quality=quality.get("label"))
+        recovery_time = owner.get_last_recovery_elapsed()
+        owner.update_death_analytics("resurrection", favor_used=1, recovery_time=recovery_time)
+        owner.emit_death_event("on_resurrection", caster=caster, corpse=corpse, quality=label)
+        owner.sync_client_state()
+        if caster is not None:
+            caster.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=caster.get_theurgy_training_difficulty(24))
         corpse.delete()
+        label = str(quality.get("label", "stable") or "stable")
         if int(snapshot.get("favor_before", 0) or 0) >= int(FAVOR_SYSTEM_CONFIG["high_favor_threshold"]):
             owner.msg("The divine bond strengthens your return.")
         elif int(snapshot.get("favor_before", 0) or 0) <= int(FAVOR_SYSTEM_CONFIG["low_favor_threshold"]):
             owner.msg("Your return is strained and uncertain.")
-        return True, f"{owner.key} is restored to life."
+        if label == "perfect":
+            return True, f"Life returns as the soul finds its way back. {owner.key} rises in near-perfect form."
+        if label == "stable":
+            return True, f"Life returns as the soul finds its way back. {owner.key} is restored in stable condition."
+        return True, f"{owner.key} is restored to life, but something feels off."
+
+    def recover_grave_items(self, grave=None):
+        self.ensure_core_defaults()
+        if self.is_dead():
+            return False, "You must return to life before you can recover anything."
+        grave = grave or self.get_recoverable_grave()
+        if not grave:
+            return False, "You have nothing here to recover."
+        if grave.location != self.location:
+            return False, "You must stand where your grave rests to recover it."
+        if hasattr(grave, "is_recovery_allowed") and not grave.is_recovery_allowed(self):
+            return False, "You do not have permission to disturb that grave."
+        moved = []
+        for item in list(grave.contents):
+            if item.move_to(self, quiet=True):
+                damage = int(getattr(getattr(item, "db", None), "grave_damage", 0) or 0)
+                if hasattr(item, "at_grave_recovery"):
+                    item.at_grave_recovery(damage)
+                item.db.grave_damage = 0
+                moved.append(item)
+        recovered_coins = int(getattr(grave.db, "stored_coins", 0) or 0)
+        if recovered_coins > 0:
+            self.db.coins = int(getattr(self.db, "coins", 0) or 0) + recovered_coins
+            grave.db.stored_coins = 0
+        owner_id = int(getattr(grave.db, "owner_id", 0) or 0)
+        if owner_id > 0 and owner_id != int(self.id or 0):
+            result = search_object(f"#{owner_id}")
+            owner = result[0] if result else None
+            if owner and hasattr(owner, "notify_recovery_consent_use"):
+                owner.notify_recovery_consent_use(self, "begins assisting with your remains")
+        self.emit_death_event("on_grave_recovered", grave=grave, actor=self)
+        grave.delete()
+        self.sync_client_state()
+        if moved or recovered_coins > 0:
+            summary = "You recover your belongings from the grave."
+            if recovered_coins > 0:
+                summary = f"{summary} You also recover {recovered_coins} coins."
+            return True, summary
+        return True, "You clear away the grave, but nothing remains within it."
+
+    def get_rejuvenation_strength(self, corpse):
+        attunement = self.get_skill("attunement")
+        theology = self.get_skill("magic")
+        condition_penalty = max(0, int((100 - float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 100.0) or 100.0)) / 20))
+        return max(8, min(30, 10 + int(attunement / 8) + int(theology / 12) - condition_penalty))
+
+    def rejuvenate_corpse(self, corpse):
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can weave that rite through dead flesh."
+        if not corpse or getattr(corpse, "location", None) != getattr(self, "location", None):
+            return False, "That corpse is not here."
+        if not getattr(getattr(corpse, "db", None), "is_corpse", False):
+            return False, "You can only rejuvenate a corpse."
+        if hasattr(corpse, "is_recovery_allowed") and not corpse.is_recovery_allowed(self):
+            return False, "You do not have permission to work with that corpse."
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if owner and hasattr(owner, "notify_recovery_consent_use"):
+            owner.notify_recovery_consent_use(self)
+        before = float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 100.0) or 0.0)
+        if before <= 0:
+            return False, "The remains are too ruined for rejuvenation."
+        if before >= 100:
+            return False, "The corpse cannot be improved any further."
+        power = self.get_rejuvenation_strength(corpse)
+        if not self.spend_attunement(max(5, int(round(power / 2)))):
+            return False, "You lack the attunement to complete the rite."
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if owner and hasattr(owner, "notify_recovery_consent_use"):
+            owner.notify_recovery_consent_use(self, "begins assisting with your remains")
+        corpse.db.stabilized = True
+        after = corpse.adjust_condition(power) if hasattr(corpse, "adjust_condition") else before
+        self.use_skill("attunement", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=18)
+        return True, "You bathe the corpse in restorative radiance, renewing what death had taken."
+
+    def maybe_msg_death_sting_combat_feedback(self):
+        if not self.is_death_sting_active():
+            return False
+        if random.random() > 0.25:
+            return False
+        self.msg("You feel sluggish from your recent death.")
+        return True
+
+    def force_resurrect(self, corpse=None, helper=None):
+        target_corpse = corpse or self.get_death_corpse()
+        if not self.is_dead():
+            return False, "They are not dead."
+        if target_corpse and getattr(target_corpse, "location", None) and self.location != target_corpse.location:
+            self.move_to(target_corpse.location, quiet=True)
+        self.revive_from_death(via="resurrection")
+        if target_corpse:
+            restored_coins = int(getattr(target_corpse.db, "stored_coins", 0) or 0)
+            if restored_coins > 0:
+                self.db.coins = int(getattr(self.db, "coins", 0) or 0) + restored_coins
+                target_corpse.db.stored_coins = 0
+            for item in list(target_corpse.contents):
+                item.move_to(self, quiet=True)
+            target_corpse.delete()
+        self.db.soul_state = None
+        self.db.last_corpse_id = None
+        self.set_recovery_metadata("resurrection", helper=helper, quality="forced")
+        self.update_death_analytics("resurrection", recovery_time=self.get_last_recovery_elapsed())
+        self.emit_death_event("on_resurrection", caster=helper, corpse=target_corpse, quality="forced")
+        return True, f"{self.key} is forced back into life."
+
+    def reduce_death_sting(self, power):
+        self.ensure_core_defaults()
+        if not self.is_death_sting_active():
+            return False, "They are not suffering from Death's Sting."
+        power_value = max(0, int(power or 0))
+        if power_value >= 75:
+            self.db.death_sting = False
+            self.db.death_sting_active = False
+            self.db.death_sting_end = 0.0
+            self.db.death_sting_severity = 0.0
+            self.sync_client_state()
+            return True, "Death's Sting is lifted completely."
+        remaining = self.get_death_sting_time_remaining()
+        if power_value >= 40:
+            self.db.death_sting_severity = max(0.0, float(getattr(self.db, "death_sting_severity", 0.0) or 0.0) * 0.6)
+            self.db.death_sting_end = time.time() + max(1, int(round(remaining * 0.4)))
+            self.sync_client_state()
+            return True, "Death's Sting loosens its grip."
+        self.db.death_sting_end = time.time() + max(1, int(round(remaining * 0.6)))
+        self.sync_client_state()
+        return True, "The lingering ache of death eases slightly."
 
     def maybe_warn_low_favor(self):
         if self.get_favor() > int(FAVOR_SYSTEM_CONFIG["low_favor_threshold"]):
@@ -2685,6 +4223,26 @@ class Character(ObjectParent, DefaultCharacter):
         self.use_skill("first_aid", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=12 + (treated * 3))
         return True, "You steady their condition, slowing the damage."
 
+    def stabilize_corpse(self, corpse):
+        if not self.is_empath():
+            return False, "You do not know how to stabilize deathly remains that way."
+        if not corpse or getattr(corpse, "location", None) != getattr(self, "location", None):
+            return False, "That corpse is not here."
+        if not getattr(getattr(corpse, "db", None), "is_corpse", False):
+            return False, "You can only stabilize a corpse."
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if owner and hasattr(owner, "notify_recovery_consent_use"):
+            owner.notify_recovery_consent_use(self)
+        first_aid = self.get_skill("first_aid")
+        condition_gain = max(6, min(20, 8 + int(first_aid / 5)))
+        before = float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 100.0) or 0.0)
+        corpse.db.stabilized = True
+        after = corpse.adjust_condition(condition_gain) if hasattr(corpse, "adjust_condition") else before
+        self.use_skill("first_aid", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=16)
+        if after <= before and before >= 100:
+            return False, "The corpse is already in the best condition you can preserve."
+        return True, "You carefully tend to the corpse, slowing its decay."
+
     def process_empath_tick(self):
         if not self.is_empath() or not getattr(self, "location", None):
             return False
@@ -2817,6 +4375,10 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.roundtime_end = 0
         self.db.life_state = LIFE_STATE_ALIVE
         self.db.is_dead = False
+        self.db.death_sting = False
+        self.db.death_sting_active = False
+        self.db.death_sting_end = 0.0
+        self.db.death_sting_severity = 0.0
         self.db.stunned = False
         self.db.target_body_part = None
         self.db.position = "standing"
@@ -2829,11 +4391,10 @@ class Character(ObjectParent, DefaultCharacter):
         _clear_combat_link(self)
 
     def is_alive(self):
-        self.ensure_core_defaults()
+        self.refresh_death_sting(emit_message=False)
         return str(getattr(self.db, "life_state", LIFE_STATE_ALIVE) or LIFE_STATE_ALIVE).upper() == LIFE_STATE_ALIVE and (self.db.hp or 0) > 0
 
     def is_dead(self):
-        self.ensure_core_defaults()
         return str(getattr(self.db, "life_state", LIFE_STATE_ALIVE) or LIFE_STATE_ALIVE).upper() == LIFE_STATE_DEAD or bool(self.db.is_dead) or (self.db.hp or 0) <= 0
 
     def can_execute_while_dead(self, raw_string):
@@ -2843,9 +4404,26 @@ class Character(ObjectParent, DefaultCharacter):
         return command_name in DEAD_STATE_ALLOWED_COMMANDS
 
     def execute_cmd(self, raw_string, session=None, **kwargs):
+        if self.is_dead():
+            self.msg("[You are dead. Type DEPART to return.]")
         if self.is_dead() and not self.can_execute_while_dead(raw_string):
             self.msg("You are dead. You can still look, speak, check your state, depart, or wait for resurrection.")
             return None
+        try:
+            from systems import onboarding
+
+            if onboarding.is_onboarding_character(self):
+                remapped_command, immediate_message = onboarding.remap_onboarding_input(self, raw_string)
+                if immediate_message:
+                    self.msg(immediate_message)
+                    return None
+                if remapped_command:
+                    raw_string = remapped_command
+        except Exception:
+            LOGGER.exception("Failed to process onboarding input remap for %s", getattr(self, "key", self))
+        command_name = str(raw_string or "").strip().split(None, 1)[0].lower()
+        if self.is_dead() and command_name in {"say", "whisper"}:
+            self.msg("Your voice echoes faintly, barely heard.")
         return super().execute_cmd(raw_string, session=session, **kwargs)
 
     def is_empath(self):
@@ -2916,7 +4494,156 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_stat(self, name):
         self.ensure_all_defaults()
-        return self.db.stats.get(name, 0)
+        stat_name = str(name or "").strip().lower()
+        default_value = DEFAULT_STATS.get(stat_name, 0)
+        current_value = int(self.db.stats.get(stat_name, default_value) or default_value)
+        cap = self.get_race_stat_cap(stat_name)
+        if cap is not None and current_value > int(cap):
+            self.set_stat(stat_name, cap)
+            return int(cap)
+        return current_value
+
+    def set_stat(self, name, value, emit_cap_message=False):
+        self.ensure_all_defaults()
+        stat_name = str(name or "").strip().lower()
+        if stat_name not in DEFAULT_STATS:
+            raise ValueError(f"Unknown stat: {name}")
+
+        stats = dict(self.db.stats or {})
+        requested_value = int(value or 0)
+        cap = self.get_race_stat_cap(stat_name)
+        final_value = min(requested_value, int(cap)) if cap is not None else requested_value
+        stats[stat_name] = final_value
+        self.db.stats = stats
+
+        if emit_cap_message and cap is not None and requested_value > int(cap):
+            self.msg("You cannot improve that attribute further.")
+
+        return final_value
+
+    def get_race(self):
+        self.ensure_identity_defaults()
+        return resolve_race_name(getattr(self.db, "race", None), default=DEFAULT_RACE)
+
+    def get_race_key(self):
+        return self.get_race()
+
+    def get_race_profile(self):
+        return get_race_profile(self.get_race())
+
+    def get_race_display_name(self):
+        return get_race_display_name(self.get_race())
+
+    def get_race_description(self):
+        return get_race_description(self.get_race())
+
+    def get_race_reference(self, capitalized=False):
+        race_name = self.get_race_display_name().strip()
+        if not race_name:
+            race_name = "Human"
+        lower_name = race_name.lower()
+        article = "an" if lower_name[:1] in "aeiou" else "a"
+        phrase = f"{article} {lower_name}"
+        if capitalized:
+            return phrase[:1].upper() + phrase[1:]
+        return phrase
+
+    def get_self_race_line(self):
+        race_name = self.get_race_display_name().strip() or "Human"
+        article = "an" if race_name[:1].lower() in "aeiou" else "a"
+        return f"You are {article} {race_name}."
+
+    def get_other_race_line(self):
+        return f"{self.get_race_reference(capitalized=True)} stands here."
+
+    def get_race_size(self):
+        profile = self.get_race_profile()
+        return str(profile.get("size", "medium") or "medium").strip().lower()
+
+    def get_race_stat_modifier(self, stat):
+        return get_race_stat_modifier(self.get_race(), stat)
+
+    def get_race_stat_cap(self, stat):
+        return get_race_stat_cap(self.get_race(), stat)
+
+    def get_race_learning_category(self, skill_name=None, category=None):
+        if category is not None:
+            normalized = normalize_learning_category(category)
+            if not normalized:
+                raise ValueError(f"Undefined race learning category: {category}")
+            return normalized
+        metadata = self.get_skill_metadata(skill_name) if skill_name else {}
+        raw_category = metadata.get("category")
+        normalized = normalize_learning_category(raw_category)
+        if not normalized:
+            raise ValueError(f"Skill {skill_name} does not define a valid race learning category.")
+        return normalized
+
+    def get_race_learning_modifier(self, skill_name=None, category=None):
+        normalized_category = self.get_race_learning_category(skill_name=skill_name, category=category)
+        return get_race_learning_modifier(self.get_race(), normalized_category)
+
+    def get_race_carry_modifier(self):
+        return get_race_carry_modifier(self.get_race())
+
+    def get_race_debug_payload(self):
+        payload = get_race_debug_payload(self.get_race())
+        payload["max_carry_weight"] = self.get_max_carry_weight()
+        return payload
+
+    def get_race_profile_lines(self):
+        payload = self.get_race_debug_payload()
+        lines = [
+            f"Race: {payload['name']}",
+            self.get_race_description(),
+            f"Size: {str(payload['size']).title()}",
+            f"Carry Modifier: x{float(payload['carry_modifier']):.2f}",
+            f"Carry Capacity: {float(payload['max_carry_weight']):.1f}",
+            "Stat Biases:",
+        ]
+
+        for stat_name in RACE_STATS:
+            modifier = int(payload.get("stat_modifiers", {}).get(stat_name, 0) or 0)
+            cap = int(payload.get("stat_caps", {}).get(stat_name, 100) or 100)
+            lines.append(f"  {stat_name.title()}: {modifier:+d} bias, cap {cap}")
+
+        lines.append("Learning Biases:")
+        for category, value in payload.get("learning_modifiers", {}).items():
+            lines.append(f"  {category.title()}: x{float(value):.2f}")
+
+        return [line for line in lines if line]
+
+    def validate_race_application(self):
+        return validate_race_application(self)
+
+    def clamp_stats_to_race(self, emit_messages=False):
+        self.ensure_stat_defaults()
+        stats = dict(self.db.stats or {})
+        changed = False
+        for stat_name in RACE_STATS:
+            current_value = int(stats.get(stat_name, DEFAULT_STATS.get(stat_name, 10)) or DEFAULT_STATS.get(stat_name, 10))
+            cap = int(self.get_race_stat_cap(stat_name) or current_value)
+            if current_value > cap:
+                stats[stat_name] = cap
+                changed = True
+        if changed:
+            self.db.stats = stats
+            if emit_messages:
+                self.msg("You cannot improve that attribute further.")
+        return changed
+
+    def set_race(self, race_name, sync=True, emit_messages=False):
+        state = apply_race(self, race_name, sync=sync, emit_messages=emit_messages)
+        return state["race"]
+
+    def get_encumbrance_race_message(self):
+        ratio = self.get_encumbrance_ratio()
+        size = self.get_race_size()
+        if size == "small" and ratio >= 0.8:
+            return "The load feels especially burdensome for your size."
+        if size == "large" and ratio < 0.3:
+            return "You handle the weight with ease."
+        return None
 
     def get_condition(self, hp=None, max_hp=None):
         if hp is None or max_hp is None:
@@ -3501,7 +5228,7 @@ class Character(ObjectParent, DefaultCharacter):
     def locksmith_contest(self, difficulty, stat="intelligence"):
         skill = self.get_skill("locksmithing")
         stat_val = self.db.stats.get(stat, 10)
-        return run_contest(skill + stat_val, difficulty)
+        return run_contest(skill + stat_val, difficulty, attacker=self)
 
     def disarm_box(self, box):
         if not box.db.trap_present:
@@ -3805,9 +5532,16 @@ class Character(ObjectParent, DefaultCharacter):
         if not item:
             return 0
 
+        explicit_value = getattr(item.db, "value", None)
+        if explicit_value is not None:
+            return max(1, int(explicit_value))
+
         explicit = getattr(item.db, "item_value", None)
         if explicit is not None:
             return max(1, int(explicit))
+
+        if getattr(item.db, "is_gem", False):
+            return max(1, int(getattr(item.db, "final_value", 1) or 1))
 
         if getattr(item.db, "box_loot", False):
             difficulty = int(getattr(item.db, "loot_difficulty", 10) or 10)
@@ -3837,6 +5571,565 @@ class Character(ObjectParent, DefaultCharacter):
             return max(8, int(getattr(item.db, "lock_difficulty", 0) or 0) + int(getattr(item.db, "trap_difficulty", 0) or 0))
 
         return max(1, len(str(getattr(item, "key", "") or "")))
+
+    def format_coins(self, amount):
+        remaining = max(0, int(amount or 0))
+        if remaining <= 0:
+            return "0 copper"
+        parts = []
+        for name, value in COIN_DENOMINATIONS:
+            count, remaining = divmod(remaining, value)
+            if count <= 0:
+                continue
+            label = name if count == 1 else f"{name}s"
+            parts.append(f"{count} {label}")
+        return ", ".join(parts) if parts else "0 copper"
+
+    def add_coins(self, amount):
+        value = max(0, int(amount or 0))
+        self.db.coins = max(0, int(getattr(self.db, "coins", 0) or 0) + value)
+        self.update_encumbrance_state()
+        self.update_coin_weight_notice()
+        return int(self.db.coins or 0)
+
+    def has_coins(self, amount):
+        return int(getattr(self.db, "coins", 0) or 0) >= max(0, int(amount or 0))
+
+    def remove_coins(self, amount):
+        value = max(0, int(amount or 0))
+        if not self.has_coins(value):
+            return False
+        self.db.coins = int(getattr(self.db, "coins", 0) or 0) - value
+        self.update_encumbrance_state()
+        self.update_coin_weight_notice()
+        return True
+
+    def get_max_carry_weight(self):
+        self.ensure_race_defaults()
+        max_carry = max(float(WEIGHT_UNIT), float(BASE_CARRY_WEIGHT) * self.get_race_carry_modifier())
+        if abs(float(getattr(self.db, "max_carry_weight", max_carry) or max_carry) - max_carry) > 0.0001:
+            self.db.max_carry_weight = max_carry
+        return max_carry
+
+    def get_coin_weight(self, coins=None):
+        return max(0, int(getattr(self.db, "coins", 0) if coins is None else coins or 0)) * COIN_WEIGHT
+
+    def get_object_total_weight(self, obj, depth=0, seen=None):
+        if not obj:
+            return 0.0
+        seen = set(seen or set())
+        object_id = int(getattr(obj, "id", 0) or 0)
+        if object_id and object_id in seen:
+            return 0.0
+        if object_id:
+            seen.add(object_id)
+
+        if depth >= MAX_CONTAINER_WEIGHT_DEPTH:
+            LOGGER.error("Container weight calculation exceeded max depth for %s", obj)
+            weight = getattr(getattr(obj, "db", None), "weight", 0.0)
+            try:
+                return max(0.0, float(weight or 0.0))
+            except (TypeError, ValueError):
+                return 0.0
+
+        if hasattr(obj, "get_total_weight"):
+            try:
+                return max(0.0, float(obj.get_total_weight(depth=depth, max_depth=MAX_CONTAINER_WEIGHT_DEPTH, seen=seen) or 0.0))
+            except TypeError:
+                return max(0.0, float(obj.get_total_weight() or 0.0))
+
+        weight = getattr(getattr(obj, "db", None), "weight", None)
+        if weight is None:
+            if not getattr(getattr(obj, "ndb", None), "missing_weight_logged", False):
+                LOGGER.error("Missing weight on object %s", obj)
+                obj.ndb.missing_weight_logged = True
+            return 0.0
+        try:
+            return max(0.0, float(weight))
+        except (TypeError, ValueError):
+            LOGGER.error("Invalid weight on object %s", obj)
+            return 0.0
+
+    def get_total_weight(self):
+        total = self.get_coin_weight()
+        for item in list(getattr(self, "contents", []) or []):
+            total += self.get_object_total_weight(item)
+        for item in self.get_worn_items():
+            total += self.get_object_total_weight(item)
+        return float(total)
+
+    def update_encumbrance_state(self):
+        ratio = self.get_total_weight() / max(WEIGHT_UNIT, self.get_max_carry_weight())
+        self.db.encumbrance_ratio = float(ratio)
+        self.db.encumbrance_dirty = False
+        return self.db.encumbrance_ratio
+
+    def get_encumbrance_ratio(self):
+        cached = getattr(self.db, "encumbrance_ratio", None)
+        dirty = bool(getattr(self.db, "encumbrance_dirty", False))
+        if cached is None or dirty:
+            return float(self.update_encumbrance_state())
+        try:
+            return float(cached)
+        except (TypeError, ValueError):
+            return float(self.update_encumbrance_state())
+
+    def get_encumbrance_state(self):
+        ratio = self.get_encumbrance_ratio()
+        if ratio < 0.5:
+            return "Light"
+        if ratio < 0.8:
+            return "Moderate"
+        if ratio < 1.0:
+            return "Heavy"
+        return "Overloaded"
+
+    def update_coin_weight_notice(self):
+        threshold = self.get_max_carry_weight() * 0.1
+        noticeable = self.get_coin_weight() >= threshold if threshold > 0 else False
+        if noticeable and not bool(getattr(self.db, "coin_weight_notice_active", False)):
+            self.msg("The weight of your coins is becoming noticeable.")
+        self.db.coin_weight_notice_active = noticeable
+
+    def can_pick_up_item(self, item):
+        if self.get_encumbrance_ratio() >= 1.0:
+            self.msg("You are carrying too much to pick that up.")
+            return False
+        if self.get_object_total_weight(item) <= 0 and getattr(getattr(item, "db", None), "weight", None) is None:
+            self.msg("That cannot be carried right now.")
+            return False
+        return True
+
+    def get_bank_coins(self):
+        return max(0, int(getattr(self.db, "bank_coins", 0) or 0))
+
+    def add_bank_coins(self, amount):
+        value = max(0, int(amount or 0))
+        self.db.bank_coins = self.get_bank_coins() + value
+        return self.db.bank_coins
+
+    def remove_bank_coins(self, amount):
+        value = max(0, int(amount or 0))
+        current = self.get_bank_coins()
+        if current < value:
+            return False
+        self.db.bank_coins = current - value
+        return True
+
+    def is_in_bank(self):
+        room = getattr(self, "location", None)
+        if not room:
+            return False
+        if hasattr(room, "is_bank_room"):
+            return bool(room.is_bank_room())
+        return bool(getattr(getattr(room, "db", None), "is_bank", False))
+
+    def is_in_vault(self):
+        room = getattr(self, "location", None)
+        if not room:
+            return False
+        if hasattr(room, "is_vault_room"):
+            return bool(room.is_vault_room())
+        return bool(getattr(getattr(room, "db", None), "is_vault", False))
+
+    def parse_coin_amount(self, amount_text, available):
+        text = str(amount_text or "").strip().lower()
+        if text == "all":
+            return max(0, int(available or 0))
+        try:
+            amount = int(text)
+        except (TypeError, ValueError):
+            return None
+        if amount <= 0:
+            return None
+        return amount
+
+    def can_use_bank_account(self):
+        if self.is_dead():
+            self.msg("You cannot access your account in this state.")
+            return False
+        return True
+
+    def deposit_coins(self, amount_text):
+        if not self.can_use_bank_account():
+            return False
+        if not self.is_in_bank():
+            self.msg("You must be at a bank to do that.")
+            return False
+        amount = self.parse_coin_amount(amount_text, int(getattr(self.db, "coins", 0) or 0))
+        if amount is None or amount > int(getattr(self.db, "coins", 0) or 0):
+            self.msg("You do not have that much.")
+            return False
+        self.remove_coins(amount)
+        self.add_bank_coins(amount)
+        self.msg(f"You deposit {self.format_coins(amount)} into your account.")
+        return True
+
+    def withdraw_coins(self, amount_text):
+        if not self.can_use_bank_account():
+            return False
+        if not self.is_in_bank():
+            self.msg("You must be at a bank to do that.")
+            return False
+        amount = self.parse_coin_amount(amount_text, self.get_bank_coins())
+        if amount is None or amount > self.get_bank_coins():
+            self.msg("You do not have that much in your account.")
+            return False
+        self.remove_bank_coins(amount)
+        self.add_coins(amount)
+        self.msg(f"You withdraw {self.format_coins(amount)} from your account.")
+        return True
+
+    def show_bank_balance(self):
+        if not self.can_use_bank_account():
+            return False
+        self.msg(f"On hand: {self.format_coins(int(getattr(self.db, 'coins', 0) or 0))}\nIn bank: {self.format_coins(self.get_bank_coins())}")
+        return True
+
+    def get_vault_item_ids(self):
+        raw = list(getattr(self.db, "vault_items", None) or [])
+        valid_ids = []
+        for entry in raw:
+            try:
+                value = int(entry)
+            except (TypeError, ValueError):
+                continue
+            if value > 0:
+                valid_ids.append(value)
+        if valid_ids != raw:
+            self.db.vault_items = valid_ids
+        return valid_ids
+
+    def get_vault_items(self):
+        items = []
+        kept_ids = []
+        for item_id in self.get_vault_item_ids():
+            result = search_object(f"#{item_id}")
+            item = result[0] if result else None
+            if not item:
+                continue
+            if int(getattr(getattr(item, "db", None), "vault_owner_id", 0) or 0) not in {0, int(self.id or 0)}:
+                continue
+            kept_ids.append(item_id)
+            items.append(item)
+        if kept_ids != self.get_vault_item_ids():
+            self.db.vault_items = kept_ids
+        return items
+
+    def is_item_stored(self, item):
+        if not item:
+            return False
+        return int(getattr(item, "id", 0) or 0) in set(self.get_vault_item_ids())
+
+    def is_item_equipped_or_worn(self, item):
+        if not item:
+            return False
+        if getattr(item.db, "worn_by", None) == self:
+            return True
+        if self.get_wielded_weapon() == item:
+            return True
+        return item in self.get_worn_items()
+
+    def store_vault_item(self, item_name):
+        if not self.is_in_vault():
+            self.msg("You must be in a vault to do that.")
+            return False
+        item, matches, base_query, index = self.resolve_numbered_candidate(
+            item_name,
+            self.get_visible_carried_items(),
+            default_first=True,
+        )
+        if not item:
+            if matches and index is not None:
+                self.msg_numbered_matches(base_query, matches)
+            else:
+                self.msg("You are not carrying that.")
+            return False
+        if self.is_item_equipped_or_worn(item):
+            self.msg("You must remove that before storing it.")
+            return False
+        item.location = None
+        item.db.vault_owner_id = int(self.id or 0)
+        stored_ids = self.get_vault_item_ids()
+        stored_ids.append(int(item.id))
+        self.db.vault_items = stored_ids
+        self.update_encumbrance_state()
+        self.msg(f"You place {item.key} into storage.")
+        return True
+
+    def retrieve_vault_item(self, item_name):
+        if not self.is_in_vault():
+            self.msg("You must be in a vault to do that.")
+            return False
+        item, matches, base_query, index = self.resolve_numbered_candidate(
+            item_name,
+            self.get_vault_items(),
+            default_first=True,
+        )
+        if not item:
+            if matches and index is not None:
+                self.msg_numbered_matches(base_query, matches)
+            else:
+                self.msg("You do not have that in storage.")
+            return False
+        stored_ids = [item_id for item_id in self.get_vault_item_ids() if item_id != int(item.id)]
+        self.db.vault_items = stored_ids
+        item.db.vault_owner_id = None
+        item.move_to(self, quiet=True)
+        self.update_encumbrance_state()
+        self.msg(f"You retrieve {item.key} from storage.")
+        return True
+
+    def get_gem_pouch(self):
+        for item in list(getattr(self, "contents", []) or []):
+            if bool(getattr(item.db, "is_gem_pouch", False)):
+                return item
+        return None
+
+    def store_loot_item(self, item):
+        if not item:
+            return False
+        if bool(getattr(item.db, "is_gem", False)):
+            pouch = self.get_gem_pouch()
+            if pouch and item.location != pouch:
+                return item.move_to(pouch, quiet=True)
+        if item.location != self:
+            return item.move_to(self, quiet=True)
+        return True
+
+    def get_total_gem_value(self, gems):
+        total = 0
+        for gem in list(gems or []):
+            total += int(getattr(getattr(gem, "db", None), "final_value", 0) or getattr(getattr(gem, "db", None), "value", 0) or 0)
+        return total
+
+    def cap_corpse_gem_value(self, holder, max_total=1500):
+        gems = [item for item in list(getattr(holder, "contents", []) or []) if bool(getattr(item.db, "is_gem", False))]
+        while gems and self.get_total_gem_value(gems) > max_total:
+            highest = max(gems, key=lambda gem: int(getattr(gem.db, "final_value", 0) or getattr(gem.db, "value", 0) or 0))
+            before = (
+                str(getattr(highest.db, "gem_type", "quartz") or "quartz"),
+                int(getattr(highest.db, "quality_tier", 1) or 1),
+                int(getattr(highest.db, "size_tier", 1) or 1),
+            )
+            downgraded = downgrade_gem_data(
+                {
+                    "gem_type": before[0],
+                    "quality_tier": before[1],
+                    "size_tier": before[2],
+                }
+            )
+            after = (
+                str(downgraded["gem_type"]),
+                int(downgraded["quality_tier"]),
+                int(downgraded["size_tier"]),
+            )
+            if after == before:
+                break
+            highest.db.gem_type = downgraded["gem_type"]
+            highest.db.quality_tier = downgraded["quality_tier"]
+            highest.db.size_tier = downgraded["size_tier"]
+            highest.sync_gem_state()
+
+    def get_box_contents_value(self, contents):
+        total = 0
+        for entry in list(contents or []):
+            kind = str(entry.get("kind", "") or "").lower()
+            if kind == "coins":
+                total += max(0, int(entry.get("amount", 0) or 0))
+            elif kind == "gem":
+                total += max(0, int((entry.get("data") or {}).get("final_value", 0) or 0))
+        return total
+
+    def cap_box_contents_value(self, contents, max_total=2000):
+        adjusted = [dict(entry) for entry in list(contents or [])]
+        while adjusted and self.get_box_contents_value(adjusted) > max_total:
+            highest_index = None
+            highest_value = -1
+            for index, entry in enumerate(adjusted):
+                if str(entry.get("kind", "") or "").lower() != "gem":
+                    continue
+                gem_value = int((entry.get("data") or {}).get("final_value", 0) or 0)
+                if gem_value > highest_value:
+                    highest_index = index
+                    highest_value = gem_value
+            if highest_index is not None:
+                current_data = dict(adjusted[highest_index].get("data") or {})
+                downgraded = downgrade_gem_data(current_data)
+                if downgraded == current_data:
+                    highest_index = None
+                else:
+                    adjusted[highest_index]["data"] = downgraded
+                    continue
+
+            for entry in adjusted:
+                if str(entry.get("kind", "") or "").lower() == "coins" and int(entry.get("amount", 0) or 0) > 0:
+                    overflow = self.get_box_contents_value(adjusted) - max_total
+                    entry["amount"] = max(0, int(entry.get("amount", 0) or 0) - max(1, overflow))
+                    break
+            else:
+                break
+
+        return adjusted
+
+    def get_loot_gems(self, target):
+        return [item for item in list(getattr(target, "contents", []) or []) if bool(getattr(item.db, "is_gem", False))]
+
+    def get_loot_boxes(self, target):
+        return [item for item in list(getattr(target, "contents", []) or []) if bool(getattr(item.db, "is_box", False))]
+
+    def is_loot_target_empty(self, target):
+        return (
+            not bool(getattr(target.db, "has_coins", False))
+            and not bool(getattr(target.db, "has_gems", False))
+            and not bool(getattr(target.db, "has_box", False))
+        )
+
+    def search_loot_target(self, target):
+        if not target or not bool(getattr(getattr(target, "db", None), "is_npc", False)):
+            self.msg("You cannot search that.")
+            return False
+        if not hasattr(target, "is_dead") or not target.is_dead():
+            self.msg("You cannot search that.")
+            return False
+        if hasattr(target, "generate_npc_loot"):
+            target.generate_npc_loot()
+        if bool(getattr(target.db, "searched", False)):
+            self.msg("You have already searched this.")
+            return False
+
+        target.db.searched = True
+        lines = ["You search the corpse carefully."]
+        if bool(getattr(target.db, "has_coins", False)):
+            lines.append("You find:")
+            lines.append("- some coins")
+            if bool(getattr(target.db, "has_gems", False)):
+                gem_count = len(self.get_loot_gems(target))
+                lines.append("- a gemstone" if gem_count == 1 else "- gemstones")
+            if bool(getattr(target.db, "has_box", False)):
+                lines.append("- a small box")
+        else:
+            found_any = False
+            if bool(getattr(target.db, "has_gems", False)):
+                lines.append("You find:")
+                gem_count = len(self.get_loot_gems(target))
+                lines.append("- a gemstone" if gem_count == 1 else "- gemstones")
+                found_any = True
+            if bool(getattr(target.db, "has_box", False)):
+                if not found_any:
+                    lines.append("You find:")
+                lines.append("- a small box")
+                found_any = True
+            if not found_any:
+                lines.append("You find nothing of value.")
+        self.msg("\n".join(lines))
+        return True
+
+    def create_loot_box(self, holder=None):
+        box = create_object(Box, key="small box", location=holder or self, home=getattr(self, "location", None) or self)
+        box.db.strict_loot_box = True
+        box.db.locked = True
+        box.db.is_locked = True
+        box.db.opened = False
+        box.db.is_open = False
+        box.db.lock_difficulty = STRICT_BOX_LOCK_DIFFICULTY
+        box.db.contents = []
+        box.db.weight = 5.0
+        box.db.item_value = 25
+        box.db.value = 25
+        return box
+
+    def populate_loot_box_contents(self, box):
+        if not box:
+            return []
+        contents = [{"kind": "coins", "amount": random.randint(50, 200)}]
+        contents.append({"kind": "gem", "data": build_gem_data()})
+        if random.random() < 0.2:
+            contents.append({"kind": "gem", "data": build_gem_data()})
+        box.db.contents = self.cap_box_contents_value(contents, max_total=2000)
+        return list(box.db.contents)
+
+    def generate_npc_loot(self):
+        if not bool(getattr(self.db, "is_npc", False)) or bool(getattr(self.db, "loot_generated", False)):
+            return False
+        coin_min = max(0, int(getattr(self.db, "coin_min", 0) or 0))
+        coin_max = max(coin_min, int(getattr(self.db, "coin_max", 0) or 0))
+        generated_coins = min(random.randint(coin_min, coin_max), 200) if coin_max > 0 else 0
+        self.db.stored_coins = generated_coins
+        self.db.searched = False
+        self.db.coins_looted = False
+        self.db.gems_looted = False
+        self.db.box_looted = False
+        self.db.has_coins = generated_coins > 0
+
+        gem_roll = random.random()
+        gem_count = 2 if gem_roll < 0.05 else 1 if gem_roll < 0.35 else 0
+        self.db.has_gems = gem_count > 0
+        for _ in range(gem_count):
+            create_gem(self)
+        self.cap_corpse_gem_value(self, max_total=1500)
+
+        self.db.has_box = False
+        if bool(getattr(self.db, "drops_box", False)) and random.random() < 0.25:
+            box = self.create_loot_box(holder=self)
+            self.populate_loot_box_contents(box)
+            self.db.has_box = True
+
+        self.db.loot_generated = True
+        return True
+
+    def loot_target(self, target):
+        if not target or not bool(getattr(getattr(target, "db", None), "is_npc", False)):
+            self.msg("You cannot loot that.")
+            return False
+        if not hasattr(target, "is_dead") or not target.is_dead():
+            self.msg("You cannot loot that.")
+            return False
+        if hasattr(target, "generate_npc_loot"):
+            target.generate_npc_loot()
+        if not bool(getattr(target.db, "searched", False)):
+            self.msg("You need to search the corpse first.")
+            return False
+
+        if self.is_loot_target_empty(target):
+            self.msg("There is nothing else of value here.")
+            return False
+
+        lines = []
+        coins = int(getattr(target.db, "stored_coins", 0) or 0)
+        if coins > 0 and not bool(getattr(target.db, "coins_looted", False)):
+            self.add_coins(coins)
+            target.db.coins_looted = True
+            target.db.stored_coins = 0
+            target.db.has_coins = False
+            lines.append(f"You collect {self.format_coins(coins)}.")
+
+        gem_names = []
+        if bool(getattr(target.db, "has_gems", False)) and not bool(getattr(target.db, "gems_looted", False)):
+            for item in self.get_loot_gems(target):
+                if self.store_loot_item(item):
+                    gem_names.append(item.key)
+            target.db.gems_looted = True
+            target.db.has_gems = False
+        if gem_names:
+            lines.append(f"You gather {', '.join(gem_names)}.")
+
+        box_names = []
+        if bool(getattr(target.db, "has_box", False)) and not bool(getattr(target.db, "box_looted", False)):
+            for item in self.get_loot_boxes(target):
+                if item.location == target and item.move_to(self, quiet=True):
+                    box_names.append(item.key)
+            target.db.box_looted = True
+            target.db.has_box = False
+        if box_names:
+            lines.append(f"You gather {', '.join(box_names)}.")
+
+        if not lines:
+            self.msg("There is nothing else of value here.")
+            return False
+
+        self.msg("\n".join(lines))
+        return True
 
     def describe_weapon(self, weapon, skill):
         tier = self.get_appraisal_tier()
@@ -3911,7 +6204,19 @@ class Character(ObjectParent, DefaultCharacter):
 
         self.msg(f"You study {target.key} carefully.")
 
+        if getattr(target.db, "is_gem", False):
+            size_name = SIZE_NAMES.get(int(getattr(target.db, "size_tier", 2) or 2), "medium")
+            quality_name = QUALITY_NAMES.get(int(getattr(target.db, "quality_tier", 2) or 2), "average")
+            gem_type = str(getattr(target.db, "gem_type", "quartz") or "quartz")
+            self.msg(f"This appears to be a {size_name} {gem_type} of {quality_name} make.")
+            self.use_skill("appraisal", apply_roundtime=False, emit_placeholder=False, require_known=False)
+            return
+
         if getattr(target.db, "is_box", False):
+            if bool(getattr(target.db, "strict_loot_box", False)):
+                self.msg("This appears to be a locked container of moderate weight.")
+                self.use_skill("appraisal", apply_roundtime=False, emit_placeholder=False, require_known=False)
+                return
             lock_desc = self.describe_lock_difficulty(int(getattr(target.db, "lock_difficulty", 0) or 0))
             if tier == "vague":
                 self.msg("It appears to be some sort of container.")
@@ -3948,7 +6253,7 @@ class Character(ObjectParent, DefaultCharacter):
             elif tier == "clear":
                 self.msg("It looks like it could sell for a fair amount.")
             else:
-                self.msg(f"You judge it to be worth about {value} coins.")
+                self.msg(f"You judge it to be worth about {self.format_coins(value)}.")
 
         self.use_skill("appraisal", apply_roundtime=False, emit_placeholder=False, require_known=False)
         self.set_roundtime(5)
@@ -3981,7 +6286,7 @@ class Character(ObjectParent, DefaultCharacter):
         scholarship = self.get_skill("scholarship")
         charisma = self.db.stats.get("charisma", 10)
         vendor_difficulty = getattr(vendor.db, "trade_difficulty", 20)
-        return run_contest(trading + scholarship + charisma, vendor_difficulty)
+        return run_contest(trading + scholarship + charisma, vendor_difficulty, attacker=self)
 
     def haggle_with(self, vendor):
         if not self.is_vendor_target(vendor):
@@ -4010,15 +6315,89 @@ class Character(ObjectParent, DefaultCharacter):
             self.set_state("haggle_bonus", 0.10 if outcome == "success" else 0.15)
             self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
 
-    def get_nearby_vendor(self):
+    def get_vendor_type(self, vendor):
+        vendor_type = str(getattr(getattr(vendor, "db", None), "vendor_type", "general") or "general").lower()
+        return vendor_type if vendor_type in VENDOR_TYPES else "general"
+
+    def vendor_accepts_item(self, vendor, item):
+        vendor_type = self.get_vendor_type(vendor)
+        is_gem = bool(getattr(getattr(item, "db", None), "is_gem", False))
+        if vendor_type == "general":
+            accepted = not is_gem
+        elif vendor_type == "gem_buyer":
+            accepted = is_gem
+        elif vendor_type == "pawn":
+            accepted = True
+        else:
+            accepted = False
+        if not accepted:
+            return False
+
+        accepted_item_types = list(getattr(getattr(vendor, "db", None), "accepted_item_types", []) or [])
+        if accepted_item_types:
+            item_type = str(getattr(getattr(item, "db", None), "item_type", "") or "").lower()
+            if is_gem:
+                item_type = "gem"
+            return item_type in {str(entry).lower() for entry in accepted_item_types}
+        return True
+
+    def get_vendor_sale_multiplier(self, vendor, item):
+        vendor_type = self.get_vendor_type(vendor)
+        is_gem = bool(getattr(getattr(item, "db", None), "is_gem", False))
+        payout_profile = VENDOR_PAYOUTS.get(vendor_type, VENDOR_PAYOUTS["general"])
+        return payout_profile["gems"] if is_gem else payout_profile["default"]
+
+    def get_nearby_vendor(self, item=None):
         if not self.location:
             return None
+        fallback = None
         for obj in self.location.contents:
             if self.is_vendor_target(obj):
-                return obj
-        return None
+                if item is not None and self.vendor_accepts_item(obj, item):
+                    return obj
+                if fallback is None:
+                    fallback = obj
+        return fallback
 
-    def sell_item(self, item_name):
+    def get_vendor_inventory_entries(self, vendor):
+        inventory = getattr(getattr(vendor, "db", None), "inventory", []) or []
+        return [str(entry).strip() for entry in inventory if str(entry or "").strip()]
+
+    def resolve_vendor_inventory_entry(self, vendor, item_name):
+        entries = self.get_vendor_inventory_entries(vendor)
+        base_query, index = self.split_numbered_query(item_name)
+        normalized = base_query.strip().lower()
+        if not normalized:
+            return None, entries, base_query, index
+
+        exact = [entry for entry in entries if entry.lower() == normalized]
+        prefix = [entry for entry in entries if entry.lower().startswith(normalized)]
+        contains = [entry for entry in entries if normalized in entry.lower()]
+        matches = exact or prefix or contains
+        if not matches:
+            return None, matches, base_query, index
+
+        if index is not None:
+            if 1 <= index <= len(matches):
+                return matches[index - 1], matches, base_query, index
+            return None, matches, base_query, index
+
+        if len(matches) == 1:
+            return matches[0], matches, base_query, index
+
+        return None, matches, base_query, index
+
+    def msg_vendor_matches(self, query, matches):
+        base_query = (query or "").strip()
+        if not matches:
+            return
+
+        lines = [f"More than one item matches '{base_query}' (use '{base_query} <number>' to choose one):"]
+        for index, match in enumerate(matches, start=1):
+            lines.append(f" {index}. {match}")
+        self.msg("\n".join(lines))
+
+    def list_vendor_inventory(self):
         vendor = self.get_nearby_vendor()
         if not vendor:
             self.msg("There is no vendor here.")
@@ -4029,6 +6408,26 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(trade_message)
             return False
 
+        entries = self.get_vendor_inventory_entries(vendor)
+        if not entries:
+            self.msg(f"{vendor.key} has nothing for sale right now.")
+            return False
+
+        price_map = {
+            "lockpick": 20,
+            "trap kit": 20,
+            "book": 20,
+            "gem pouch": 25,
+        }
+        lines = [f"{vendor.key} offers:"]
+        for entry in entries:
+            price = max(1, int(price_map.get(entry.lower(), 20)))
+            lines.append(f" {entry} - {self.format_coins(price)}")
+        lines.append("Use 'buy <item>' to purchase something.")
+        self.msg("\n".join(lines))
+        return True
+
+    def sell_item(self, item_name):
         item, matches, base_query, index = self.resolve_numbered_candidate(
             item_name,
             self.get_visible_carried_items(),
@@ -4041,25 +6440,81 @@ class Character(ObjectParent, DefaultCharacter):
                 self.msg("You are not carrying that.")
             return False
 
-        base_value = self.get_item_value(item)
-        trading = self.get_skill("trading")
-        bonus = 1 + (trading / 100)
-        value = int(base_value * bonus)
-        haggle_bonus = self.get_state("haggle_bonus") or 0
-        value = int(value * (1 + haggle_bonus))
-        if haggle_bonus:
-            self.clear_state("haggle_bonus")
-        value = max(1, value)
-        value = min(value, base_value * 2)
+        vendor = self.get_nearby_vendor(item=item)
+        if not vendor:
+            self.msg("There is no vendor here.")
+            return False
 
-        self.db.coins = int(self.db.coins or 0) + value
-        self.msg(f"You sell {item.key} for {value} coins.")
-        if trading > 10:
-            self.msg("You negotiate a better price.")
+        ok, trade_message = self.can_trade_with(vendor)
+        if not ok:
+            self.msg(trade_message)
+            return False
+
+        multiplier = self.get_vendor_sale_multiplier(vendor, item)
+        if multiplier is None:
+            self.msg("They are not interested in that.")
+            return False
+
+        base_value = self.get_item_value(item)
+        value = max(1, int(base_value * float(multiplier)))
+        self.add_coins(value)
+        self.msg(f"The shopkeeper hands you {self.format_coins(value)}.")
         if self.location:
             self.location.msg_contents(f"{self.key} sells {item.key}.", exclude=[self])
         item.delete()
         self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        try:
+            from systems import onboarding
+
+            completed, awarded = onboarding.note_trade_action(self, "sell")
+            if completed and awarded:
+                self.msg(onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self)))
+        except Exception:
+            pass
+        return True
+
+    def sell_all_items(self):
+        vendor = self.get_nearby_vendor()
+        if not vendor:
+            self.msg("There is no vendor here.")
+            return False
+
+        ok, trade_message = self.can_trade_with(vendor)
+        if not ok:
+            self.msg(trade_message)
+            return False
+
+        total = 0
+        sold_any = False
+        for item in list(self.get_visible_carried_items()):
+            if not self.vendor_accepts_item(vendor, item):
+                continue
+            multiplier = self.get_vendor_sale_multiplier(vendor, item)
+            if multiplier is None:
+                continue
+            base_value = self.get_item_value(item)
+            value = max(1, int(base_value * float(multiplier)))
+            total += value
+            sold_any = True
+            item.delete()
+
+        if not sold_any:
+            self.msg("They are not interested in anything you are carrying.")
+            return False
+
+        self.add_coins(total)
+        self.msg(f"You sell several items for a total of {self.format_coins(total)}.")
+        if self.location:
+            self.location.msg_contents(f"{self.key} sells several items.", exclude=[self])
+        self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        try:
+            from systems import onboarding
+
+            completed, awarded = onboarding.note_trade_action(self, "sell")
+            if completed and awarded:
+                self.msg(onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self)))
+        except Exception:
+            pass
         return True
 
     def recall_knowledge(self, topic):
@@ -4106,13 +6561,20 @@ class Character(ObjectParent, DefaultCharacter):
         if normalized == "lockpick":
             item = create_object(Lockpick, key="basic lockpick", location=self, home=self)
             item.db.item_value = 10
+            item.db.value = 10
+            item.db.weight = 0.2
             return item
         if normalized == "book":
             item = create_object(StudyItem, key="study book", location=self, home=self)
             item.db.skill = "scholarship"
             item.db.difficulty = 10
             item.db.item_value = 10
+            item.db.value = 10
+            item.db.weight = 1.0
             item.db.desc = "A compact study text full of practical notes and marginalia."
+            return item
+        if normalized == "gem pouch":
+            item = create_object("typeclasses.items.gem_pouch.GemPouch", key="gem pouch", location=self, home=self)
             return item
 
         item = create_simple_item(
@@ -4120,6 +6582,8 @@ class Character(ObjectParent, DefaultCharacter):
             key=normalized,
             desc=f"A {normalized} purchased from a local merchant.",
             item_value=10,
+            value=10,
+            weight=1.0,
         )
         return item
 
@@ -4134,30 +6598,40 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(trade_message)
             return False
 
-        normalized = str(item_name or "").strip().lower()
-        inventory = [str(entry).strip().lower() for entry in (vendor.db.inventory or [])]
-        if normalized not in inventory:
-            self.msg("They don't sell that.")
+        stock_name, matches, base_query, index = self.resolve_vendor_inventory_entry(vendor, item_name)
+        if not stock_name:
+            if matches:
+                self.msg_vendor_matches(base_query, matches)
+            else:
+                self.msg("They don't sell that. Try 'shop' to see what is available.")
             return False
+        normalized = stock_name.lower()
 
         price_map = {
             "lockpick": 20,
             "trap kit": 20,
             "book": 20,
+            "gem pouch": 25,
         }
         base_price = price_map.get(normalized, 20)
-        trading = self.get_skill("trading")
-        discount = 1 - (trading / 200)
-        price = max(1, int(base_price * discount))
+        price = max(1, int(base_price))
 
-        if int(self.db.coins or 0) < price:
+        if not self.has_coins(price):
             self.msg("You can't afford that.")
             return False
 
-        self.db.coins = int(self.db.coins or 0) - price
+        self.remove_coins(price)
         self.create_vendor_inventory_item(normalized)
-        self.msg(f"You buy {normalized} for {price} coins.")
+        self.msg(f"You purchase {stock_name} for {self.format_coins(price)}.")
         self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        try:
+            from systems import onboarding
+
+            completed, awarded = onboarding.note_trade_action(self, "buy")
+            if completed and awarded:
+                self.msg(onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self)))
+        except Exception:
+            pass
         return True
 
     def charge_luminar(self, args):
@@ -4268,6 +6742,8 @@ class Character(ObjectParent, DefaultCharacter):
         )
         self.msg(f"You begin preparing {spell_name}.")
         self.use_skill("attunement", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        if self.is_profession("cleric"):
+            self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(max(8, mana)))
         return True
 
     def cast_spell(self, target_name=None):
@@ -4404,7 +6880,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         quality_bonus = float(pick.get_quality() if hasattr(pick, "get_quality") else getattr(pick.db, "quality", 0))
         skill_total = self.get_skill("locksmithing") + self.db.stats.get("intelligence", 10) + quality_bonus
-        result = run_contest(skill_total, box.db.lock_difficulty)
+        result = run_contest(skill_total, box.db.lock_difficulty, attacker=self)
 
         difficulty = box.db.lock_difficulty
         skill = self.get_skill("locksmithing")
@@ -4455,6 +6931,32 @@ class Character(ObjectParent, DefaultCharacter):
                 difficulty=max(10, int(box.db.lock_difficulty or 0)),
             )
 
+    def unlock_box(self, box):
+        if not self.is_box_target(box):
+            self.msg("You can't unlock that.")
+            return False
+
+        if not bool(getattr(box.db, "strict_loot_box", False)):
+            self.msg("You will need to pick that lock the old-fashioned way.")
+            return False
+
+        if bool(getattr(box.db, "is_open", getattr(box.db, "opened", False))):
+            self.msg("The box is empty.")
+            return False
+
+        if not bool(getattr(box.db, "is_locked", getattr(box.db, "locked", True))):
+            self.msg("It is already unlocked.")
+            return False
+
+        if random.random() < 0.7:
+            box.db.locked = False
+            box.db.is_locked = False
+            self.msg("You unlock the box.")
+            return True
+
+        self.msg("You fail to unlock the box.")
+        return False
+
     def generate_box_loot(self, box):
         if not self.location:
             return None
@@ -4485,6 +6987,41 @@ class Character(ObjectParent, DefaultCharacter):
         return loot
 
     def open_box(self, box):
+        if bool(getattr(box.db, "strict_loot_box", False)):
+            if bool(getattr(box.db, "is_open", getattr(box.db, "opened", False))):
+                self.msg("The box is empty.")
+                return
+
+            if bool(getattr(box.db, "is_locked", getattr(box.db, "locked", True))):
+                self.msg("The box is locked.")
+                return
+
+            box.db.opened = True
+            box.db.is_open = True
+            total_coins = 0
+            item_names = []
+            for entry in list(getattr(box.db, "contents", None) or []):
+                kind = str(entry.get("kind", "") or "").lower()
+                if kind == "coins":
+                    total_coins += max(0, int(entry.get("amount", 0) or 0))
+                elif kind == "gem":
+                    gem = create_gem(self, gem_data=dict(entry.get("data") or {}))
+                    self.store_loot_item(gem)
+                    item_names.append(gem.key)
+            box.db.contents = []
+
+            if total_coins > 0:
+                self.add_coins(total_coins)
+
+            self.msg("You open the box.")
+            if total_coins > 0:
+                self.msg(f"You collect {self.format_coins(total_coins)}.")
+            if item_names:
+                self.msg(f"You find {', '.join(item_names)}.")
+            if total_coins <= 0 and not item_names:
+                self.msg("The box is empty.")
+            return
+
         if box.db.opened:
             self.msg("It is already open.")
             return
@@ -4653,7 +7190,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         skill_total = self.get_skill("skinning") + self.get_stat("agility") + self.get_stat("discipline")
         difficulty = int(getattr(target.db, "skin_difficulty", 35) or 35)
-        result = run_contest(skill_total, difficulty)
+        result = run_contest(skill_total, difficulty, attacker=self)
         outcome = result["outcome"]
 
         if outcome == "fail":
@@ -4710,7 +7247,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         msg_room(self, f"{self.key} attempts to climb.", exclude=[self])
         difficulty = int(getattr(target.db, "climb_difficulty", 35) or 35)
-        result = run_contest(self.get_skill("athletics") + self.get_stat("agility") + self.get_stat("strength"), difficulty)
+        result = run_contest(self.get_skill("athletics") + self.get_stat("agility") + self.get_stat("strength"), difficulty, attacker=self)
         if result["outcome"] == "fail":
             self.msg("You fail to make any progress climbing.")
         elif result["outcome"] == "partial":
@@ -4735,7 +7272,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         msg_room(self, f"{self.key} attempts to swim.", exclude=[self])
         difficulty = int(getattr(target.db, "swim_difficulty", 35) or 35)
-        result = run_contest(self.get_skill("athletics") + self.get_stat("stamina") + self.get_stat("agility"), difficulty)
+        result = run_contest(self.get_skill("athletics") + self.get_stat("stamina") + self.get_stat("agility"), difficulty, attacker=self)
         if result["outcome"] == "fail":
             self.msg("You fail to find a workable path through the water.")
         elif result["outcome"] == "partial":
@@ -5307,7 +7844,16 @@ class Character(ObjectParent, DefaultCharacter):
         if getattr(item.db, "is_sheath", False) and not self.db.preferred_sheath:
             self.db.preferred_sheath = item
         self.sync_client_state()
-        return True, f"You wear {item.key}."
+        message = f"You wear {item.key}."
+        try:
+            from systems import onboarding
+
+            completed, awarded = onboarding.note_equipment_action(self, item)
+            if completed and awarded:
+                message = f"{message} {onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self))}"
+        except Exception:
+            pass
+        return True, message
 
     def unequip_item(self, item):
         equipment = self.get_equipment()
@@ -5536,6 +8082,10 @@ class Character(ObjectParent, DefaultCharacter):
 
         desc = self.db.desc or "An unremarkable person."
         lines = [self.get_display_name(looker), desc]
+        if looker == self:
+            lines.append(self.get_self_race_line())
+        else:
+            lines.append(self.get_other_race_line())
 
         lines.extend(self.get_equipment_display_lines(looker=looker))
 
@@ -5587,6 +8137,8 @@ class Character(ObjectParent, DefaultCharacter):
             profile["damage_min"] = weapon.db.damage_min
         if weapon.db.damage_max is not None:
             profile["damage_max"] = weapon.db.damage_max
+        if weapon.db.damage is not None:
+            profile["damage"] = weapon.db.damage
         if weapon.db.roundtime is not None:
             profile["roundtime"] = weapon.db.roundtime
         if weapon.db.balance_cost is not None:
@@ -5623,6 +8175,17 @@ class Character(ObjectParent, DefaultCharacter):
             profile["damage_type"] = weapon.db.damage_type
         elif profile["damage_types"]:
             profile["damage_type"] = max(profile["damage_types"], key=profile["damage_types"].get)
+
+        damage_min = profile.get("damage_min")
+        damage_max = profile.get("damage_max")
+        if damage_min is None:
+            damage_min = profile.get("damage") or 1
+            profile["damage_min"] = damage_min
+        if damage_max is None:
+            damage_max = max(int(damage_min or 1), int(profile.get("damage") or damage_min or 1))
+            profile["damage_max"] = damage_max
+        if profile.get("damage") is None:
+            profile["damage"] = max(1, int(round((int(damage_min or 1) + int(damage_max or damage_min or 1)) / 2)))
 
         if self.has_warrior_passive("weapon_handling_1"):
             profile["roundtime"] = max(1.0, float(profile.get("roundtime", 3.0) or 3.0) - 0.25)
@@ -5664,6 +8227,10 @@ class Character(ObjectParent, DefaultCharacter):
         return_learning = kwargs.get("return_learning", False)
         learning_multiplier = max(0, kwargs.get("learning_multiplier", 1))
 
+        if self.is_dead():
+            self.msg("You cannot learn or practice while dead.")
+            return (0, "dead") if return_learning else False
+
         if apply_roundtime and self.is_in_roundtime():
             self.msg_roundtime_block()
             return (0, "blocked") if return_learning else False
@@ -5679,13 +8246,19 @@ class Character(ObjectParent, DefaultCharacter):
         print(f"[XP] {self} {skillset} x{weight}")
         amount *= learning_multiplier
         amount *= self.get_scholarship_learning_multiplier()
+        amount *= self.get_race_learning_modifier(skill_name=skill_name)
         amount = int(amount) if amount > 0 else 0
         if amount > 0:
             amount = max(1, amount)
 
+        debt_multiplier = self.get_xp_debt_gain_multiplier()
+        if amount > 0 and debt_multiplier < 1.0:
+            amount = max(1, int(round(amount * debt_multiplier)))
+
         if amount > 0:
             self.db.total_xp = int(getattr(self.db, "total_xp", 0) or 0) + amount
             self.adjust_unabsorbed_xp(amount)
+            self.reduce_exp_debt(amount)
             if not bool(FAVOR_SYSTEM_CONFIG.get("route_xp_only", False)):
                 skill = self.db.skills.get(skill_name)
                 if skill:
@@ -5834,14 +8407,14 @@ class Character(ObjectParent, DefaultCharacter):
         self.sync_client_state()
 
     def get_state(self, key):
-        self.ensure_core_defaults()
-        if not self.db.states:
+        states = getattr(self.db, "states", None)
+        if not isinstance(states, Mapping):
             return None
-        return self.db.states.get(key)
+        return states.get(key)
 
     def has_state(self, key):
-        self.ensure_core_defaults()
-        return key in (self.db.states or {})
+        states = getattr(self.db, "states", None)
+        return bool(isinstance(states, Mapping) and key in states)
 
     def clear_state(self, key):
         self.ensure_core_defaults()
@@ -5884,11 +8457,14 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_skill_metadata(self, skill_name):
         metadata = dict(SKILL_REGISTRY.get(skill_name, {}))
-        metadata.setdefault("category", "general")
+        metadata.setdefault("category", None)
         metadata.setdefault("visibility", "shared")
         metadata.setdefault("guilds", None)
         metadata.setdefault("description", "No description is available yet.")
         metadata.setdefault("starter_rank", 0)
+        category = metadata.get("category")
+        if category is not None and not normalize_learning_category(category):
+            raise ValueError(f"Skill {skill_name} defines an invalid learning category: {category}")
         return metadata
 
     def normalize_guild_name(self, guild_name):
@@ -7446,6 +10022,13 @@ class Character(ObjectParent, DefaultCharacter):
         elif normalized == "ranger":
             self.db.wilderness_bond = max(0, min(100, int(getattr(self.db, "wilderness_bond", 50) or 50)))
             self.db.ranger_instinct = max(0, int(getattr(self.db, "ranger_instinct", 0) or 0))
+        elif normalized == "cleric":
+            self.set_devotion(max(int(CLERIC_DEVOTION_CONFIG["baseline"]), self.get_devotion()), sync=False)
+            skills = dict(self.db.skills or {})
+            theurgy = dict(skills.get("theurgy") or {"rank": 0, "mindstate": 0})
+            theurgy["rank"] = max(1, int(theurgy.get("rank", 0) or 0))
+            skills["theurgy"] = theurgy
+            self.db.skills = skills
         self.get_subsystem()
         return True
 
@@ -7476,6 +10059,7 @@ class Character(ObjectParent, DefaultCharacter):
             return None
 
         resource_map = {
+            "devotion": ("Devotion", "max_devotion"),
             "fire": ("Inner Fire", "max_fire"),
             "focus": ("Focus", "max_focus"),
             "tempo": ("War Tempo", "max_tempo"),
@@ -7503,6 +10087,7 @@ class Character(ObjectParent, DefaultCharacter):
             return None
 
         resource_map = {
+            "devotion": "Devotion",
             "fire": "Inner Fire",
             "focus": "Focus",
             "tempo": "War Tempo",
@@ -7628,6 +10213,8 @@ class Character(ObjectParent, DefaultCharacter):
         skill = self.get_skill(category)
         attunement = self.get_skill("attunement")
         control = skill + attunement
+        if self.is_profession("cleric"):
+            control *= self.get_cleric_magic_modifier()
         difficulty = int(mana) * 10
         stability = control / max(1, difficulty)
         return max(0.0, min(1.0, stability))
@@ -7635,7 +10222,10 @@ class Character(ObjectParent, DefaultCharacter):
     def get_spell_power(self, category, mana):
         skill = self.get_skill(category)
         attunement = self.get_skill("attunement")
-        return float(mana) * (1 + (skill + attunement) / 200.0)
+        power = float(mana) * (1 + (skill + attunement) / 200.0)
+        if self.is_profession("cleric"):
+            power *= self.get_cleric_magic_modifier()
+        return power
 
     def resolve_spell_backlash(self, mana, category):
         safe_limit = self.get_safe_mana_limit(category)
@@ -8677,7 +11267,8 @@ class Character(ObjectParent, DefaultCharacter):
                 self.msg("You are no longer in combat.")
 
     def is_in_combat(self):
-        self.ensure_core_defaults()
+        if not bool(getattr(self.db, "in_combat", False)):
+            return False
         self.sync_combat_state()
         return self.db.in_combat
 
@@ -8741,6 +11332,9 @@ class Character(ObjectParent, DefaultCharacter):
         if self.is_in_combat():
             self.msg("You cannot move while in combat.")
             return False
+        if self.get_encumbrance_ratio() >= 1.2:
+            self.msg("You are too encumbered to move.")
+            return False
 
         if destination and hasattr(destination, "allows_profession") and not destination.allows_profession(self.get_profession()):
             self.msg("You are not permitted to enter there as a member of your profession.")
@@ -8757,7 +11351,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.ndb.sneak_move_active = True
 
             for observer in self.get_room_observers():
-                result = run_contest(self.get_stealth_total(), observer.get_perception_total())
+                result = run_contest(self.get_stealth_total(), observer.get_perception_total(), attacker=self, defender=observer)
                 outcome = result["outcome"]
 
                 if outcome == "fail":
@@ -8793,19 +11387,34 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_move(self, source_location, **kwargs):
         super().at_post_move(source_location, **kwargs)
+        try:
+            from systems.onboarding import handle_room_entry
+
+            handle_room_entry(self)
+        except Exception:
+            pass
         if self.is_in_shrine():
             self.msg("This is a place where your fate can be secured.")
-        for part_name in BODY_PART_ORDER:
-            body_part = self.get_body_part(part_name)
-            if not body_part:
-                continue
-            tend_state = body_part.get("tend") or {"strength": 0, "duration": 0, "min_until": 0.0}
-            duration = int(tend_state.get("duration", 0))
-            if duration <= 0 or time.time() < float(tend_state.get("min_until", 0.0)):
-                continue
-            tend_state["duration"] = max(0, duration - 1)
-            body_part["tend"] = tend_state
-            body_part["tended"] = tend_state["duration"] > 0 or time.time() < float(tend_state.get("min_until", 0.0))
+        injuries = getattr(self.db, "injuries", None)
+        if isinstance(injuries, Mapping):
+            now = time.time()
+            for part_name in BODY_PART_ORDER:
+                body_part = injuries.get(part_name)
+                if not body_part:
+                    continue
+                if "bleeding" in body_part and "bleed" not in body_part:
+                    body_part["bleed"] = body_part.pop("bleeding")
+                else:
+                    body_part.pop("bleeding", None)
+                body_part.pop("hp", None)
+                body_part.pop("max_hp", None)
+                tend_state = body_part.get("tend") or {"strength": 0, "duration": 0, "min_until": 0.0}
+                duration = int(tend_state.get("duration", 0))
+                if duration <= 0 or now < float(tend_state.get("min_until", 0.0)):
+                    continue
+                tend_state["duration"] = max(0, duration - 1)
+                body_part["tend"] = tend_state
+                body_part["tended"] = tend_state["duration"] > 0 or now < float(tend_state.get("min_until", 0.0))
 
         direction = getattr(self.ndb, "last_traverse_direction", None)
         if self.ndb.sneak_move_active and self.is_sneaking() and direction:
@@ -8829,7 +11438,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         self.detect_traps_in_room()
 
-        self.sync_client_state(include_map=True)
+        self.sync_client_state(include_map=True, include_subsystem=False, include_character=False)
 
         self.ndb.sneak_move_active = False
         self.ndb.sneak_partial_observer_ids = []

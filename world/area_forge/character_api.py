@@ -50,6 +50,11 @@ def _get_status_list(character):
     if profession and profession != "commoner":
         statuses.append(f"Profession: {str(profession).replace('_', ' ').title()}")
 
+    if hasattr(character, "get_race_display_name"):
+        statuses.append(f"Race: {character.get_race_display_name()}")
+    elif getattr(character.db, "race", None):
+        statuses.append(f"Race: {str(character.db.race).replace('_', ' ').title()}")
+
     if getattr(character.db, "guild", None):
         statuses.append(f"Guild: {str(character.db.guild).replace('_', ' ').title()}")
 
@@ -71,12 +76,31 @@ def _get_status_list(character):
             message = character.get_favor_state_message()
             if message:
                 statuses.append(message)
+    if hasattr(character, "get_exp_debt") and character.get_exp_debt() > 0:
+        statuses.append(f"Experience Debt: {character.get_exp_debt()}")
     life_state = str(getattr(character.db, "life_state", "ALIVE") or "ALIVE").upper()
     if life_state != "ALIVE":
         statuses.append(f"State: {life_state.title()}")
         if life_state == "DEAD" and hasattr(character, "get_depart_mode"):
             corpse = character.get_death_corpse() if hasattr(character, "get_death_corpse") else None
             statuses.append(f"Depart: {character.get_depart_mode(corpse=corpse).title()}")
+        if life_state == "DEAD" and hasattr(character, "get_soul_state"):
+            soul_state = character.get_soul_state()
+            if isinstance(soul_state, dict):
+                if hasattr(character, "get_soul_strength_label"):
+                    statuses.append(f"Soul: {character.get_soul_strength_label(soul_state=soul_state).title()}")
+                statuses.append(f"Soul Strength: {int(round(float(soul_state.get('strength', 0.0) or 0.0)))}/100")
+    if hasattr(character, "is_death_sting_active") and character.is_death_sting_active():
+        statuses.append(f"Death's Sting: {character.get_death_sting_label()} ({int(round(character.get_death_sting_severity() * 100))}%)")
+    if hasattr(character, "get_state"):
+        fragility = character.get_state("resurrection_fragility")
+        if fragility:
+            statuses.append(f"Recovery: {str(fragility.get('label', 'fragile')).title()}")
+        instability = character.get_state("resurrection_instability")
+        if instability:
+            statuses.append("State: Unstable")
+    if hasattr(character, "get_owned_grave") and character.get_owned_grave():
+        statuses.append("Grave: Recoverable here")
 
     if hasattr(character, "is_in_roundtime") and character.is_in_roundtime():
         statuses.append(f"Roundtime {character.get_remaining_roundtime():.1f}s")
@@ -131,6 +155,11 @@ def _get_status_list(character):
         if hasattr(character, "get_empath_wounds"):
             wounds = character.get_empath_wounds()
             statuses.append(f"Wounds V{int(wounds.get('vitality', 0) or 0)}/B{int(wounds.get('bleeding', 0) or 0)}/F{int(wounds.get('fatigue', 0) or 0)}/T{int(wounds.get('trauma', 0) or 0)}/P{int(wounds.get('poison', 0) or 0)}/D{int(wounds.get('disease', 0) or 0)}")
+    elif hasattr(character, "is_profession") and character.is_profession("cleric"):
+        if hasattr(character, "get_devotion"):
+            statuses.append(f"Devotion: {character.get_devotion()}")
+        if hasattr(character, "get_devotion_state"):
+            statuses.append(f"Connection: {character.get_devotion_state().title()}")
 
     stance = getattr(character.db, "stance", None) or {}
     if stance:
@@ -266,6 +295,9 @@ def get_character_payload(character):
 
     return {
         "name": character.key,
+        "race": character.get_race() if hasattr(character, "get_race") else getattr(character.db, "race", None),
+        "race_name": character.get_race_display_name() if hasattr(character, "get_race_display_name") else None,
+        "race_size": character.get_race_size() if hasattr(character, "get_race_size") else getattr(character.db, "size", None),
         "profession": character.get_profession() if hasattr(character, "get_profession") else getattr(character.db, "profession", None),
         "profession_rank": character.get_profession_rank() if hasattr(character, "get_profession_rank") else int(getattr(character.db, "profession_rank", 1) or 1),
         "guild": getattr(character.db, "guild", None),
@@ -310,12 +342,20 @@ def get_character_payload(character):
         "combat_rhythm": character.get_combat_rhythm_state() if hasattr(character, "get_combat_rhythm_state") else None,
         "active_berserk": (character.get_active_warrior_berserk() or {}).get("key") if hasattr(character, "get_active_warrior_berserk") else None,
         "coins": int(getattr(character.db, "coins", 0) or 0),
+        "carry_modifier": float(character.get_race_carry_modifier() if hasattr(character, "get_race_carry_modifier") else getattr(character.db, "carry_modifier", 1.0) or 1.0),
+        "max_carry_weight": float(character.get_max_carry_weight() if hasattr(character, "get_max_carry_weight") else getattr(character.db, "max_carry_weight", 100.0) or 100.0),
         "life_state": str(getattr(character.db, "life_state", "ALIVE") or "ALIVE").upper(),
         "favor": int(character.get_favor() if hasattr(character, "get_favor") else 0),
         "favor_state": character.get_favor_state() if hasattr(character, "get_favor_state") else None,
         "unabsorbed_xp": int(character.get_unabsorbed_xp() if hasattr(character, "get_unabsorbed_xp") else 0),
+        "exp_debt": int(character.get_exp_debt() if hasattr(character, "get_exp_debt") else 0),
         "death_favor_snapshot": character.get_favor_death_snapshot() if hasattr(character, "get_favor_death_snapshot") else None,
         "depart_mode": character.get_depart_mode(corpse=character.get_death_corpse()) if hasattr(character, "get_depart_mode") and hasattr(character, "is_dead") and character.is_dead() else None,
+        "death_sting_active": bool(character.is_death_sting_active() if hasattr(character, "is_death_sting_active") else False),
+        "death_sting_severity": float(character.get_death_sting_severity() if hasattr(character, "get_death_sting_severity") else 0.0),
+        "death_sting_label": character.get_death_sting_label() if hasattr(character, "get_death_sting_label") else None,
+        "death_sting_remaining": int(character.get_death_sting_time_remaining() if hasattr(character, "get_death_sting_time_remaining") else 0),
+        "grave_present": bool(character.get_owned_grave() if hasattr(character, "get_owned_grave") else False),
         "roundtime": float(character.get_remaining_roundtime() if hasattr(character, "get_remaining_roundtime") else 0),
         "in_combat": bool(getattr(character.db, "in_combat", False)),
         "target": getattr(target, "key", None),

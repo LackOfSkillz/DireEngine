@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdRework(Command):
-        """
-        Rework an existing trap or crafted setup.
+    """
+    Rework an existing trap or crafted setup.
 
-        Examples:
-            rework trap
-        """
+    Examples:
+        rework trap
+    """
 
     key = "rework"
     locks = "cmd:all()"

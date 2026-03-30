@@ -8,9 +8,9 @@ Rooms are simple containers that has no location of their own.
 import time
 from collections.abc import Mapping
 
-from evennia import search_object
 from django.utils.translation import gettext as _
 from evennia.objects.objects import DefaultRoom
+from evennia.utils.search import search_object
 from evennia.utils.utils import iter_to_str
 from world.law import LAW_NONE, LAW_STANDARD
 from world.systems.ranger import (
@@ -49,18 +49,71 @@ class Room(ObjectParent, DefaultRoom):
         self.db.has_passage = False
         self.db.passage_links = []
         self.db.trails = []
+        self.db.is_bank = False
         self.db.is_stocks = False
         self.db.is_shop = False
         self.db.is_shrine = False
+        self.db.is_vault = False
+        self.db.is_recovery_point = False
+        self.db.recovery_point_reference = None
+        self.db.recovery_region_override = None
+        self.db.no_resurrection = False
+        self.db.dangerous_zone = False
+        self.db.safe_zone = False
+        self.db.corpse_decay_scale = 1.0
+        self.db.grave_damage_scale = 1.0
         self.db.alert_level = 0
         self.db.law_type = LAW_STANDARD
         self.db.region = "default_region"
+
+    def is_bank_room(self):
+        if bool(getattr(self.db, "is_bank", False)):
+            return True
+        tags = getattr(self, "tags", None)
+        return bool(tags and tags.get("bank"))
 
     def is_shrine_room(self):
         if bool(getattr(self.db, "is_shrine", False)):
             return True
         tags = getattr(self, "tags", None)
         return bool(tags and tags.get("shrine"))
+
+    def is_vault_room(self):
+        if bool(getattr(self.db, "is_vault", False)):
+            return True
+        tags = getattr(self, "tags", None)
+        return bool(tags and tags.get("vault"))
+
+    def is_recovery_point(self):
+        if bool(getattr(self.db, "is_recovery_point", False)):
+            return True
+        tags = getattr(self, "tags", None)
+        return bool(tags and tags.get("recovery_point", category="death"))
+
+    def get_recovery_point_reference(self):
+        return getattr(self.db, "recovery_point_reference", None)
+
+    def get_recovery_region_override(self):
+        return str(getattr(self.db, "recovery_region_override", "") or "").strip() or None
+
+    def is_no_resurrection_zone(self):
+        return bool(getattr(self.db, "no_resurrection", False))
+
+    def get_death_zone_profile(self):
+        corpse_decay_scale = float(getattr(self.db, "corpse_decay_scale", 1.0) or 1.0)
+        grave_damage_scale = float(getattr(self.db, "grave_damage_scale", 1.0) or 1.0)
+        if bool(getattr(self.db, "dangerous_zone", False)):
+            corpse_decay_scale = max(corpse_decay_scale, 1.5)
+            grave_damage_scale = max(grave_damage_scale, 2.0)
+        if bool(getattr(self.db, "safe_zone", False)):
+            corpse_decay_scale = min(corpse_decay_scale, 0.6)
+            grave_damage_scale = min(grave_damage_scale, 0.5)
+        return {
+            "corpse_decay_scale": max(0.1, corpse_decay_scale),
+            "grave_damage_scale": max(0.1, grave_damage_scale),
+            "dangerous": bool(getattr(self.db, "dangerous_zone", False)),
+            "safe": bool(getattr(self.db, "safe_zone", False)),
+        }
 
     def get_environment_type(self):
         return normalize_environment_type(
@@ -260,10 +313,10 @@ class Room(ObjectParent, DefaultRoom):
             bond_strength += int((moved_obj.get_wilderness_bond() - 50) / 5)
         if hasattr(moved_obj, "is_hidden") and moved_obj.is_hidden():
             bond_strength -= 10
-        if hasattr(moved_obj, "get_state"):
-            cover_data = moved_obj.get_state("ranger_cover_tracks")
-            if isinstance(cover_data, Mapping):
-                bond_strength -= int(cover_data.get("strength_penalty", 25) or 25)
+        moved_states = getattr(getattr(moved_obj, "db", None), "states", None)
+        cover_data = moved_states.get("ranger_cover_tracks") if isinstance(moved_states, Mapping) else None
+        if isinstance(cover_data, Mapping):
+            bond_strength -= int(cover_data.get("strength_penalty", 25) or 25)
         self.add_trail_entry(moved_obj, direction, strength=max(5, min(100, bond_strength)))
 
     def allows_profession(self, profession_name):

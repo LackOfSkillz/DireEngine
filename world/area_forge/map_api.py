@@ -1,4 +1,5 @@
 from collections import deque
+import time
 
 from evennia.utils.search import search_tag
 
@@ -66,9 +67,58 @@ _FALLBACK_VECTORS = [
     (-1, 1),
 ]
 
+_ZONE_MAP_TEMPLATE_CACHE = {}
+ZONE_MAP_CACHE_SECONDS = 30.0
+
 
 def _empty_map_payload():
     return {"rooms": [], "edges": [], "exits": [], "player_room_id": None, "zone": None}
+
+
+def _get_cached_zone_template(area_tag):
+    now = time.time()
+    cached = _ZONE_MAP_TEMPLATE_CACHE.get(area_tag)
+    if cached and now < cached["expires_at"]:
+        return cached["template"]
+
+    tagged_objects = list(search_tag(area_tag, category="build"))
+    zone_rooms = [obj for obj in tagged_objects if getattr(obj, "destination", None) is None and getattr(obj, "id", None) is not None]
+    if not zone_rooms:
+        _ZONE_MAP_TEMPLATE_CACHE.pop(area_tag, None)
+        return None
+
+    x_values = [getattr(room.db, "map_x", None) for room in zone_rooms if getattr(room.db, "map_x", None) is not None]
+    y_values = [getattr(room.db, "map_y", None) for room in zone_rooms if getattr(room.db, "map_y", None) is not None]
+    x_offset = min(x_values) if x_values else 0
+    y_offset = min(y_values) if y_values else 0
+
+    rooms_by_id = {room.id: room for room in zone_rooms}
+    edges = _collect_room_edges(rooms_by_id)
+    serialized_rooms = _serialize_rooms(
+        rooms_by_id,
+        edges,
+        current_room_id=None,
+        x_offset=x_offset,
+        y_offset=y_offset,
+    )
+    template = {
+        "rooms": [
+            {
+                "id": room["id"],
+                "x": room["x"],
+                "y": room["y"],
+                "name": room["name"],
+            }
+            for room in serialized_rooms
+        ],
+        "edges": edges,
+        "zone": area_tag,
+    }
+    _ZONE_MAP_TEMPLATE_CACHE[area_tag] = {
+        "expires_at": now + ZONE_MAP_CACHE_SECONDS,
+        "template": template,
+    }
+    return template
 
 
 def _area_tag_for_room(room):
@@ -172,7 +222,9 @@ def _layout_room_positions(rooms_by_id, edges, origin_id, *, x_offset=0, y_offse
 
     while queue or len(positions) < len(rooms_by_id):
         if not queue:
-            next_room_id = next(room_id for room_id in rooms_by_id if room_id not in positions)
+            next_room_id = next((room_id for room_id in rooms_by_id if room_id not in positions), None)
+            if next_room_id is None:
+                break
             fallback_position = _find_open_position((fallback_column, 0), used_positions)
             fallback_column = fallback_position[0] + 2
             positions[next_room_id] = fallback_position
@@ -180,7 +232,14 @@ def _layout_room_positions(rooms_by_id, edges, origin_id, *, x_offset=0, y_offse
             enqueue(next_room_id)
 
         room_id = queue.popleft()
-        base_x, base_y = positions[room_id]
+        current_position = positions.get(room_id)
+        if current_position is None:
+            fallback_position = _find_open_position((fallback_column, 0), used_positions)
+            fallback_column = fallback_position[0] + 2
+            positions[room_id] = fallback_position
+            used_positions.add(fallback_position)
+            current_position = fallback_position
+        base_x, base_y = current_position
 
         for index, (neighbor_id, direction) in enumerate(adjacency.get(room_id, [])):
             if neighbor_id not in rooms_by_id:
@@ -308,30 +367,26 @@ def get_zone_map(character):
     if not area_tag:
         return get_local_map(character)
 
-    tagged_objects = list(search_tag(area_tag, category="build"))
-    zone_rooms = [obj for obj in tagged_objects if getattr(obj, "destination", None) is None and getattr(obj, "id", None) is not None]
-    if not zone_rooms:
+    template = _get_cached_zone_template(area_tag)
+    if not template:
         return get_local_map(character)
 
-    x_values = [getattr(room.db, "map_x", None) for room in zone_rooms if getattr(room.db, "map_x", None) is not None]
-    y_values = [getattr(room.db, "map_y", None) for room in zone_rooms if getattr(room.db, "map_y", None) is not None]
-    x_offset = min(x_values) if x_values else 0
-    y_offset = min(y_values) if y_values else 0
-
-    rooms_by_id = {room.id: room for room in zone_rooms}
-    edges = _collect_room_edges(rooms_by_id)
-    serialized_rooms = _serialize_rooms(
-        rooms_by_id,
-        edges,
-        current_room_id=origin.id,
-        x_offset=x_offset,
-        y_offset=y_offset,
-    )
+    serialized_rooms = [
+        {
+            "id": room["id"],
+            "x": room["x"],
+            "y": room["y"],
+            "name": room["name"],
+            "current": room["id"] == origin.id,
+            "is_player": room["id"] == origin.id,
+        }
+        for room in template["rooms"]
+    ]
 
     return {
         "rooms": serialized_rooms,
-        "edges": edges,
-        "exits": edges,
+        "edges": template["edges"],
+        "exits": template["edges"],
         "player_room_id": origin.id,
         "zone": area_tag,
     }

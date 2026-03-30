@@ -1,13 +1,13 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdReposition(Command):
-        """
-        Shift range and footing to recover a better firing lane.
+    """
+    Shift range and footing to recover a better firing lane.
 
-        Examples:
-            reposition
-        """
+    Examples:
+        reposition
+    """
 
     key = "reposition"
     locks = "cmd:all()"

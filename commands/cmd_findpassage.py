@@ -1,15 +1,15 @@
-import random
+﻿import random
 
 from commands.command import Command
 
 
 class CmdFindPassage(Command):
-        """
-        Search the room for a concealed passage.
+    """
+    Search the room for a concealed passage.
 
-        Examples:
-            find passage
-        """
+    Examples:
+        find passage
+    """
 
     key = "find passage"
     aliases = ["findpassage"]

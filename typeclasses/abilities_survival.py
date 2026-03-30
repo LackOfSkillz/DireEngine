@@ -18,7 +18,7 @@ class ForageAbility(Ability):
 
         skill_total = user.get_skill("outdoorsmanship") + user.get_stat("wisdom") + user.get_stat("intelligence")
         difficulty = int(getattr(getattr(user.location, "db", None), "forage_difficulty", 35) or 35)
-        result = run_contest(skill_total, difficulty)
+        result = run_contest(skill_total, difficulty, attacker=user)
         outcome = result["outcome"]
 
         if outcome == "fail":

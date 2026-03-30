@@ -1,4 +1,4 @@
-from evennia.objects.models import ObjectDB
+﻿from evennia.objects.models import ObjectDB
 
 from commands.command import Command
 
@@ -10,12 +10,12 @@ def _find_board(room):
 
 
 class CmdBounties(Command):
-        """
-        List the bounties currently available to you.
+    """
+    List the bounties currently available to you.
 
-        Examples:
-            bounties
-        """
+    Examples:
+        bounties
+    """
 
     key = "bounties"
     locks = "cmd:all()"

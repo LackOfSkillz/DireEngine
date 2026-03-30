@@ -1,14 +1,14 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdSneak(Command):
-        """
-        Begin moving stealthily between rooms.
+    """
+    Begin moving stealthily between rooms.
 
-        Examples:
-            sneak north
-            sneak east
-        """
+    Examples:
+        sneak north
+        sneak east
+    """
 
     key = "sneak"
     locks = "cmd:all()"

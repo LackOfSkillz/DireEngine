@@ -1,15 +1,15 @@
-import time
+﻿import time
 
 from evennia import Command
 
 
 class CmdSlip(Command):
-        """
-        Slip out of sight or out of a dangerous position.
+    """
+    Slip out of sight or out of a dangerous position.
 
-        Examples:
-            slip
-        """
+    Examples:
+        slip
+    """
 
     key = "slip"
     locks = "cmd:all()"

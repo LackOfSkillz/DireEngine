@@ -51,4 +51,13 @@ class CmdWield(Command):
 
         self.caller.clear_equipped_weapon()
         self.caller.db.equipped_weapon = obj
-        self.caller.msg(f"You wield {obj.key}.")
+        message = f"You wield {obj.key}."
+        try:
+            from systems import onboarding
+
+            completed, awarded = onboarding.note_weapon_action(self.caller, obj)
+            if completed and awarded:
+                message = f"{message} {onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self.caller))}"
+        except Exception:
+            pass
+        self.caller.msg(message)

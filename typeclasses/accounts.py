@@ -22,12 +22,19 @@ several more options for customizing the Guest account system.
 
 """
 
+from collections.abc import Mapping
+
 from django.conf import settings
 from django.utils.translation import gettext as _
 
 from evennia.accounts.accounts import DefaultAccount, DefaultGuest
 from evennia.objects.models import ObjectDB
 from evennia.utils.utils import mod_import
+
+from systems.chargen.controller import ChargenController
+from systems.chargen.flow import format_chargen_summary, render_step_prompt
+from systems.chargen.validators import release_name
+from systems.character.creation import CharacterCreationError, finalize_character_creation, is_onboarding_start_room, resolve_creation_start_room
 
 
 class Account(DefaultAccount):
@@ -199,6 +206,152 @@ class Account(DefaultAccount):
 
         return candidates
 
+    def get_onboarding_entry_room(self, create=False):
+        room = resolve_creation_start_room(start_room=None)
+        if is_onboarding_start_room(room):
+            return room
+        if not create:
+            return None
+        try:
+            from server.conf.at_server_startstop import _ensure_new_player_tutorial
+
+            room = _ensure_new_player_tutorial()
+        except Exception:
+            return None
+        return room if is_onboarding_start_room(room) else None
+
+    def route_character_to_onboarding(self, character, create=False):
+        if not character or bool(getattr(getattr(character, "db", None), "is_npc", False)):
+            return False
+        state = getattr(character.db, "onboarding_state", None)
+        if not isinstance(state, Mapping):
+            return False
+        if bool(state.get("complete", False)):
+            return False
+
+        room = getattr(character, "location", None)
+        if not is_onboarding_start_room(room):
+            room = self.get_onboarding_entry_room(create=create)
+            if not room:
+                return False
+            character.home = room
+            character.move_to(room, quiet=True, use_destination=False)
+
+        try:
+            from systems import onboarding
+
+            onboarding.ensure_onboarding_state(character)
+            onboarding.handle_room_entry(character)
+        except Exception:
+            pass
+        return True
+
+    def get_chargen_controller(self, create=False, reset=False):
+        state = getattr(self.ndb, "chargen_state", None)
+        if state is None and not create and not reset:
+            return None
+        controller = ChargenController(state=state, account=self)
+        if state is None or reset:
+            controller.start(reset=reset)
+            self.ndb.chargen_state = controller.state
+            return controller
+        return controller
+
+    def clear_chargen_state(self):
+        state = getattr(self.ndb, "chargen_state", None)
+        if state and getattr(state, "reserved_name", None):
+            release_name(state.reserved_name)
+        if hasattr(self.ndb, "chargen_state"):
+            del self.ndb.chargen_state
+
+    def handle_chargen_input(self, command, args=None):
+        controller = self.get_chargen_controller(create=command in {"charcreate", "chargen"})
+        if not controller:
+            return {"ok": False, "error": "No active character creation session. Use 'charcreate' to begin."}
+        result = controller.handle_input(command, args=args)
+        self.ndb.chargen_state = controller.state
+        if result.get("step") in {"complete", "cancelled"}:
+            self.clear_chargen_state()
+        return result
+
+    def render_chargen_prompt(self):
+        controller = self.get_chargen_controller(create=False)
+        if not controller:
+            return None
+        return render_step_prompt(controller.state)
+
+    def at_look(self, target=None, session=None, **kwargs):
+        if target and not isinstance(target, (list, tuple)):
+            return super().at_look(target=target, session=session, **kwargs)
+
+        characters = list(entry for entry in (target or self.characters.all()) if entry)
+        try:
+            sessions = list(self.sessions.all())
+        except Exception:
+            sessions = []
+
+        txt_header = f"Account |g{self.name}|n (Character Manager)"
+
+        session_lines = []
+        if not sessions:
+            session_lines.append("- no active sessions")
+        else:
+            for index, sess in enumerate(sessions, start=1):
+                ip_addr = sess.address[0] if isinstance(sess.address, tuple) else sess.address
+                marker = "|w*|n" if session and session.sessid == sess.sessid else "-"
+                session_lines.append(f"{marker} {index}. {sess.protocol_key} ({ip_addr})")
+        txt_sessions = "|wConnected session(s):|n\n" + "\n".join(session_lines)
+
+        manager_lines = [
+            "|wManager Commands:|n",
+            "  |wcharcreate|n begins or restarts character creation.",
+            "  |wlook|n refreshes this manager screen.",
+            "  |wic <name>|n enters the world with a character.",
+        ]
+        controller = self.get_chargen_controller(create=False)
+        if controller:
+            manager_lines.append("")
+            manager_lines.append("|wChargen In Progress:|n")
+            manager_lines.append(render_step_prompt(controller.state))
+            manager_lines.append(format_chargen_summary(controller.state))
+        else:
+            manager_lines.append("")
+            manager_lines.append("|wNo active chargen session.|n")
+            if not characters:
+                manager_lines.append("Create your first character with |wcharcreate|n.")
+        manager_lines.append("")
+        manager_lines.append("|wCareer Flow:|n new characters arrive as Commoners. Profession choice happens later in the world.")
+        txt_manager = "\n".join(manager_lines)
+
+        if not characters:
+            txt_characters = "You have no characters yet. Use |wcharcreate|n to begin."
+        else:
+            max_chars = "unlimited" if self.is_superuser or settings.MAX_NR_CHARACTERS is None else settings.MAX_NR_CHARACTERS
+            char_lines = []
+            for char in characters:
+                race = getattr(char.db, "race", "unknown")
+                gender = getattr(char.db, "gender", "unknown")
+                profession = getattr(char.db, "profession", "commoner")
+                try:
+                    char_sessions = list(char.sessions.all())
+                except Exception:
+                    char_sessions = []
+                if char_sessions:
+                    char_lines.append(f" - |G{char.name}|n [{race} / {gender} / {profession}] (currently active)")
+                else:
+                    char_lines.append(f" - {char.name} [{race} / {gender} / {profession}]")
+            txt_characters = (
+                f"Available character(s) ({len(characters)}/{max_chars}, |wic <name>|n to play):|n\n"
+                + "\n".join(char_lines)
+            )
+
+        return self.ooc_appearance_template.format(
+            header=txt_header,
+            sessions=txt_sessions,
+            characters=txt_manager + "\n\n" + txt_characters,
+            footer="",
+        )
+
     def at_post_login(self, session=None, **kwargs):
         if not session:
             return
@@ -235,12 +388,15 @@ class Account(DefaultAccount):
                     continue
 
             self.msg(_("No playable character could be auto-selected."), session=session)
+            if not self.characters.all():
+                self.msg("You have no characters yet. Type |wcharcreate|n to begin character creation.", session=session)
             self.msg(self.at_look(target=self.characters, session=session), session=session)
             return
 
         if settings.AUTO_PUPPET_ON_LOGIN:
             for candidate in self.get_auto_puppet_candidates():
                 try:
+                    self.route_character_to_onboarding(candidate, create=True)
                     self.puppet_object(session, candidate)
                     self.db._last_puppet = candidate
                     return
@@ -248,20 +404,65 @@ class Account(DefaultAccount):
                     continue
 
             self.msg(_("No playable character could be auto-selected."), session=session)
+            if not self.characters.all():
+                self.msg("You have no characters yet. Type |wcharcreate|n to begin character creation.", session=session)
             self.msg(self.at_look(target=self.characters, session=session), session=session)
             return
 
+        if not self.characters.all():
+            self.msg("You have no characters yet. Type |wcharcreate|n to begin character creation.", session=session)
         self.msg(self.at_look(target=self.characters, session=session), session=session)
+
+    def create_character(self, *args, **kwargs):
+        creation_blueprint = kwargs.pop("creation_blueprint", None)
+        race = kwargs.pop("race", None)
+        gender = kwargs.pop("gender", None)
+        profession = kwargs.pop("profession", None)
+        stats = kwargs.pop("stats", None)
+        description = kwargs.pop("description", None)
+        start_room = kwargs.pop("start_room", None)
+
+        character, errors = super().create_character(*args, **kwargs)
+        if errors or not character:
+            return character, errors
+
+        try:
+            finalize_character_creation(
+                character,
+                blueprint=creation_blueprint,
+                race=race,
+                gender=gender,
+                profession=profession,
+                stats=stats,
+                description=description,
+                start_room=start_room,
+            )
+        except CharacterCreationError as exc:
+            character.delete()
+            return None, [str(exc)]
+        except Exception as exc:
+            character.delete()
+            return None, [f"Character creation failed during finalization: {exc}"]
+
+        return character, errors
 
     def at_post_create_character(self, character, **kwargs):
         super().at_post_create_character(character, **kwargs)
-
-        start_room = ObjectDB.objects.filter(id=2).first()
-        if not start_room or not character:
+        room = self.get_onboarding_entry_room(create=True)
+        if not room:
             return
+        try:
+            from systems import onboarding
 
-        character.home = start_room
-        character.location = start_room
+            state = onboarding.ensure_onboarding_state(character)
+            state["active"] = True
+            state["complete"] = False
+            character.db.onboarding_state = state
+        except Exception:
+            character.db.onboarding_state = {"active": True, "complete": False}
+        character.home = room
+        character.move_to(room, quiet=True, use_destination=False)
+        self.route_character_to_onboarding(character, create=False)
 
 
 class Guest(DefaultGuest):

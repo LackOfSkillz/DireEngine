@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdSwim(Command):
-        """
-        Swim across a swimmable obstacle or exit.
+    """
+    Swim across a swimmable obstacle or exit.
 
-        Examples:
-            swim river
-        """
+    Examples:
+        swim river
+    """
 
     key = "swim"
     locks = "cmd:all()"

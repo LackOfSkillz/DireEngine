@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdEndTeach(Command):
-        """
-        End your current teaching session.
+    """
+    End your current teaching session.
 
-        Examples:
-            endteach
-        """
+    Examples:
+        endteach
+    """
 
     key = "endteach"
     locks = "cmd:all()"

@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdTeach(Command):
-        """
-        Start teaching a skill or lesson to another character.
+    """
+    Start teaching a skill or lesson to another character.
 
-        Examples:
-            teach corl tactics
-        """
+    Examples:
+        teach corl tactics
+    """
 
     key = "teach"
     locks = "cmd:all()"

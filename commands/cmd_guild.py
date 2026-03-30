@@ -1,15 +1,15 @@
-from evennia import Command
+﻿from evennia import Command
 
 from typeclasses.characters import VALID_GUILDS
 
 
 class CmdGuild(Command):
-        """
-        Review guild information relevant to your character.
+    """
+    Review guild information relevant to your character.
 
-        Examples:
-            guild
-        """
+    Examples:
+        guild
+    """
 
     key = "guild"
     locks = "cmd:all()"

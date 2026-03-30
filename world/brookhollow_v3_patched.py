@@ -46,7 +46,9 @@ def make_room(key, desc, district, street_name=None, segment_index=None, surface
             ("surface", surface),
             ("patrol_zone", patrol_zone or district),
             ("room_tags", room_tags),
+            ("is_bank", "bank" in room_tags),
             ("is_shop", "shop" in room_tags),
+            ("is_vault", "vault" in room_tags),
             ("alert_level", 0),
         ],
     )

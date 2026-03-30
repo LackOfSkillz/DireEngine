@@ -1,15 +1,15 @@
-from evennia import Command
+﻿from evennia import Command
 
 from world.systems.warrior import format_warrior_ability_name
 
 
 class CmdCircle(Command):
-        """
-        View your current profession circle and advancement progress.
+    """
+    View your current profession circle and advancement progress.
 
-        Examples:
-            circle
-        """
+    Examples:
+        circle
+    """
 
     key = "circle"
     locks = "cmd:all()"

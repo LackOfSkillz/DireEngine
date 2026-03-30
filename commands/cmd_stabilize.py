@@ -24,6 +24,12 @@ class CmdStabilize(Command):
         target = caller.search(self.args.strip(), location=caller.location)
         if not target:
             return
+        if getattr(getattr(target, "db", None), "is_corpse", False):
+            ok, message = caller.stabilize_corpse(target) if hasattr(caller, "stabilize_corpse") else (False, "You fail to preserve the corpse.")
+            caller.msg(message)
+            if ok and getattr(caller, "location", None):
+                caller.location.msg_contents(f"{caller.key} carefully tends to {target.key}, slowing its decay.", exclude=[caller])
+            return
         ok, message = caller.stabilize_empath_target(target) if hasattr(caller, "stabilize_empath_target") else (False, "You fail to steady their condition.")
         caller.msg(message)
         if ok:

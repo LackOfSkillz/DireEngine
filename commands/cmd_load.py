@@ -1,14 +1,14 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdLoad(Command):
-        """
-        Load a ranged weapon with ammunition.
+    """
+    Load a ranged weapon with ammunition.
 
-        Examples:
-            load bow
-            load
-        """
+    Examples:
+        load bow
+        load
+    """
 
     key = "load"
     locks = "cmd:all()"

@@ -12,7 +12,7 @@ class CmdStats(Command):
     """
 
     key = "stats"
-    aliases = ["health", "hp", "sta"]
+    aliases = ["health", "hp", "sta", "score"]
     help_category = "Character"
 
     def func(self):
@@ -28,6 +28,7 @@ class CmdStats(Command):
         social_standing = char.get_social_standing() if hasattr(char, "get_social_standing") else "Neutral"
         skill_weights = char.get_profession_skill_weights() if hasattr(char, "get_profession_skill_weights") else {}
         lines = [
+            f"Race: {char.get_race_display_name() if hasattr(char, 'get_race_display_name') else str(getattr(char.db, 'race', 'human') or 'human').replace('_', ' ').title()}",
             f"Profession: {profession_rank}",
             f"Social Standing: {social_standing}",
             f"Life State: {str(getattr(char.db, 'life_state', 'ALIVE') or 'ALIVE').title()}",
@@ -37,15 +38,20 @@ class CmdStats(Command):
             f"Fatigue: {fat}/{max_fat}",
             f"Favor: {char.get_favor() if hasattr(char, 'get_favor') else 0} ({char.get_favor_state().title() if hasattr(char, 'get_favor_state') else 'Unprepared'})",
             f"Unabsorbed XP: {char.get_unabsorbed_xp() if hasattr(char, 'get_unabsorbed_xp') else 0}",
+            f"Experience Debt: {char.get_exp_debt() if hasattr(char, 'get_exp_debt') else 0}",
             f"Bleeding: {char.get_bleeding_summary()}",
+            f"Carry Capacity: {char.get_max_carry_weight():.1f}" if hasattr(char, 'get_max_carry_weight') else "Carry Capacity: 100.0",
             char.get_engagement_summary(),
             "",
             "Skill Weights:",
         ]
 
-        if hasattr(char, "is_dead") and char.is_dead() and hasattr(char, "get_depart_mode"):
-            corpse = char.get_death_corpse() if hasattr(char, "get_death_corpse") else None
-            lines.insert(8, f"Depart Path: {char.get_depart_mode(corpse=corpse).title()}")
+        if hasattr(char, "get_death_status_lines"):
+            death_lines = char.get_death_status_lines()
+            if death_lines:
+                insert_at = len(lines) - 2
+                for offset, line in enumerate(death_lines):
+                    lines.insert(insert_at + offset, line)
 
         if hasattr(char, "is_profession") and char.is_profession("warrior"):
             lines.insert(2, f"Warrior Circle: {char.get_warrior_circle()}")

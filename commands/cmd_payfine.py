@@ -1,13 +1,13 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdPayFine(Command):
-        """
-        Pay an outstanding legal fine.
+    """
+    Pay an outstanding legal fine.
 
-        Examples:
-            payfine
-        """
+    Examples:
+        payfine
+    """
 
     key = "payfine"
     aliases = ["pay fine"]

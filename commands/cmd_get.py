@@ -47,10 +47,14 @@ class CmdGet(Command):
             return
         if not obj.at_pre_get(caller):
             return
+        if hasattr(caller, "can_pick_up_item") and not caller.can_pick_up_item(obj):
+            return
 
         if not obj.move_to(caller, quiet=True, move_type="get"):
             caller.msg("That can't be picked up.")
             return
 
         obj.at_get(caller)
+        if hasattr(caller, "update_encumbrance_state"):
+            caller.update_encumbrance_state()
         room.msg_contents(f"$You() $conj(pick) up {obj.key}.", from_obj=caller)

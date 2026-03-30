@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdSetCircle(Command):
-        """
-        Set a character's profession circle for testing or admin work.
+    """
+    Set a character's profession circle for testing or admin work.
 
-        Examples:
-            setcircle ranger = 5
-        """
+    Examples:
+        setcircle ranger = 5
+    """
 
     key = "setcircle"
     locks = "cmd:perm(Developer) or perm(Admin)"

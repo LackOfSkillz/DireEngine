@@ -6,6 +6,8 @@ class Wearable(Object):
         super().at_object_creation()
         self.db.wearable = True
         self.db.slot = None
+        if self.db.weight is None:
+            self.db.weight = 1.0
         self.db.worn_by = None
 
     def clear_wear_state(self):

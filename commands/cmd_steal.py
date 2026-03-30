@@ -1,4 +1,4 @@
-import random
+﻿import random
 import time
 
 from evennia import Command
@@ -17,12 +17,12 @@ STATE_AWARENESS_SCORES = {
 
 
 class CmdSteal(Command):
-        """
-        Attempt to steal from a target's belongings.
+    """
+    Attempt to steal from a target's belongings.
 
-        Examples:
-            steal pouch from guard
-        """
+    Examples:
+        steal pouch from guard
+    """
 
     key = "steal"
     locks = "cmd:all()"

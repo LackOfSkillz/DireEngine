@@ -1,13 +1,13 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdPounce(Command):
-        """
-        Leap from hiding into an opening attack.
+    """
+    Leap from hiding into an opening attack.
 
-        Examples:
-            pounce goblin
-        """
+    Examples:
+        pounce goblin
+    """
 
     key = "pounce"
     locks = "cmd:all()"

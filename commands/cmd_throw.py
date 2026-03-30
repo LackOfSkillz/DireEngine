@@ -1,15 +1,15 @@
-import time
+﻿import time
 
 from commands.command import Command
 
 
 class CmdThrow(Command):
-        """
-        Throw an item or weapon at a target.
+    """
+    Throw an item or weapon at a target.
 
-        Examples:
-            throw dagger at goblin
-        """
+    Examples:
+        throw dagger at goblin
+    """
 
     key = "throw"
     locks = "cmd:all()"

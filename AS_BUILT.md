@@ -2,25 +2,66 @@
 
 ## Purpose
 
-This document summarizes the custom gameplay systems currently implemented on top of stock Evennia in this repository.
+This document summarizes the gameplay, world, client, and server systems currently implemented on top of the stock Evennia game scaffold in this repository.
 
-It is intended to answer three questions:
+It is intended to answer four questions:
 
-- What has been added beyond the base Evennia scaffold?
-- Where does each system live in the codebase?
-- What are the current behaviors, assumptions, and known design constraints?
+- What has been added beyond base Evennia?
+- Which systems are currently live and player-facing?
+- Where do the important systems live in the codebase?
+- What architectural choices now define the running server?
 
 ## Base Platform
 
 - Engine: Evennia
+- Language/runtime: Python 3.11
+- Web stack: Django through Evennia
 - Project root: `dragonsire`
-- Core game focus so far: lightweight DragonRealms-inspired combat, injuries, bleeding, roundtime, skills, NPC combat, weapons, and delayed skill progression
+- Game target: browser-first, DragonRealms-inspired text gameplay with modern client support
 
-## High-Level Custom Systems
+## What Is No Longer Stock Evennia
 
-The following systems have been added on top of default Evennia behavior.
+This repository is no longer a thin Evennia tutorial game. It now includes:
 
-### 1. Character Combat State
+- a custom browser client and structured server-to-client payloads
+- a custom world bootstrap path for The Landing and supporting spaces
+- custom character, room, exit, object, corpse, grave, NPC, weapon, armor, trap, and vendor typeclasses
+- a large custom command surface replacing basic stock play with domain-specific verbs
+- custom progression, combat, injury, survival, justice, profession, magic, and death systems
+- AreaForge map and world-building support
+
+## Runtime Startup Behavior
+
+Primary file:
+
+- `server/conf/at_server_startstop.py`
+
+Current startup behavior includes:
+
+- installation of a lightweight `1s` global status ticker
+- installation of a separate `10s` learning ticker
+- legacy Character/NPC backfill through `ensure_core_defaults()` at startup
+- cleanup of legacy bleed ticker scripts
+- creation/maintenance of the Limbo training complex and training dummy
+- automatic build/bootstrap of The Landing content
+- Brookhollow justice-region configuration
+
+Current design intent:
+
+- the server should start into a usable game world without requiring manual world bootstrap steps
+- periodic game work should be split into small, state-gated loops rather than a monolithic every-character sweep
+
+## Code Layout
+
+- `typeclasses/`: core game rules and persistent object behavior
+- `commands/`: player verbs, admin/debug verbs, and movement/combat interaction entry points
+- `world/`: profession systems, map/world APIs, content builders, justice helpers, and game subsystems
+- `world/area_forge/`: map ingestion, payload generation, graph building, and client-facing map APIs
+- `web/templates/webclient/`: custom browser client template
+- `web/static/webclient/`: client JavaScript and CSS
+- `server/conf/`: startup hooks and configuration
+
+## Core Character Layer
 
 Primary file:
 
@@ -28,121 +69,117 @@ Primary file:
 
 Implemented behavior:
 
-- HP and max HP tracking
-- alive/defeated state checks
-- combat target tracking
-- in-combat state tracking
-- defensive combat-state cleanup when target links or room state drift out of sync
-- movement lock while in combat
+- centralized persistent-character migration/backfill through `ensure_core_defaults()` and related helpers
+- persistent stats, resources, injuries, equipment, combat, profession, magic, death, and state fields
+- custom `return_appearance()` and player-facing condition/equipment presentation
+- structured client-sync hooks for character and map updates
 
-Current behavior summary:
+Important architectural rule:
 
-- Characters can engage targets through `attack`
-- Defeated characters cannot attack
-- Targets at `0` HP cannot be attacked again
-- Combat clears when a target is defeated, disengaged, or leaves the room
-- Limbo now contains a persistent `training dummy` NPC for retaliation-capable sparring tests after restart
+- any new persistent Character field must be added through the default/backfill helpers so older characters remain valid
 
-### 1a. Character Presentation Layer
+## Browser Client and Structured APIs
 
-Primary file:
+Primary files:
 
-- `typeclasses/characters.py`
+- `web/templates/webclient/`
+- `web/static/webclient/`
+- `world/area_forge/character_api.py`
+- `world/area_forge/map_api.py`
 
 Implemented behavior:
 
-- default character description field (`desc`)
-- condition helper derived from HP ratio
-- overridden `return_appearance()`
-- wielded-weapon visibility in `look`
+- custom browser-first web client rather than the stock Evennia shell alone
+- structured character payload updates
+- structured subsystem updates
+- structured map payloads
+- click-to-move support through clickable exits and map interactions
+- local and zone map rendering support
+- fullscreen/pan/fit/center map UX in the web client
 
 Current behavior summary:
 
-- looking at a character now shows:
-  - name
-  - description
-  - wielded weapon, if any
-  - current condition
+- movement, state, and map data are pushed to the browser client in structured form
+- map-assisted navigation is a first-class supported play mode
 
-### 2. Roundtime System
+## World Bootstrap and Content Pipeline
+
+Primary files:
+
+- `world/the_landing.py`
+- `world/area_forge/`
+- `server/conf/at_server_startstop.py`
+
+Implemented behavior:
+
+- automatic bootstrap of The Landing world content at server start
+- AreaForge support for graph/map-driven world creation and payload generation
+- auto-maintained Limbo training space for test combat and equipment workflows
+- justice-region assignment for Brookhollow-related areas
+
+Current behavior summary:
+
+- the running server is built around authored and generated/custom-processed world spaces, not just stock Evennia test rooms
+
+## Combat and Action Pacing
 
 Primary files:
 
 - `typeclasses/characters.py`
 - `commands/cmd_attack.py`
+- `commands/cmd_advance.py`
+- `commands/cmd_retreat.py`
 - `commands/cmd_disengage.py`
-- `commands/cmd_tend.py`
+- `utils/contests.py`
 
 Implemented behavior:
 
-- `roundtime_end` persistent attribute
-- `is_in_roundtime()`
-- `get_remaining_roundtime()`
-- `set_roundtime()`
-- `msg_roundtime_block()`
-
-Commands using roundtime:
-
-- `attack`
-- `disengage`
-- `tend`
-- `use <skill>` via shared skill executor
-- `health` / `hp` are available as convenience aliases for `stats`
+- target-based combat state
+- engagement/range state and range transitions
+- roundtime-based action pacing
+- probabilistic contest-driven combat resolution
+- explicit hit, miss, damage, defense, and messaging branches
+- movement restrictions while in combat
+- target cleanup when combat links drift or break
 
 Current behavior summary:
 
-- Actions are blocked while roundtime is active
-- successful attacks apply roundtime
-- missed attacks also apply roundtime
-- disengage applies roundtime
-- tend applies roundtime
-- blocked-action messaging now reports roundtime with two decimal places instead of truncating to `0 seconds`
+- combat is no longer stock Evennia command handling; it is a custom stateful combat loop with range, accuracy, defense, damage, and resource pressure
 
-### 3. Injury Model
+## Injuries, Bleeding, and Condition
 
 Primary files:
 
 - `typeclasses/characters.py`
 - `commands/cmd_injuries.py`
 - `commands/cmd_tend.py`
-
-Canonical injury schema per body part:
-
-- `external`
-- `internal`
-- `bleed`
-- `max`
-- `vital`
-
-Current tracked body parts:
-
-- `head`
-- `chest`
-- `abdomen`
-- `back`
-- `left_arm`
-- `right_arm`
-- `left_hand`
-- `right_hand`
-- `left_leg`
-- `right_leg`
+- `server/conf/at_server_startstop.py`
 
 Implemented behavior:
 
-- per-body-part injury storage
-- body-part lookup and normalization helpers
-- per-body-part damage application
-- healing of body-part external damage
-- vital body-part destruction checks
-- human-readable body-part formatting for player-facing messages
+- per-body-part injuries
+- external/internal/bruise/bleed tracking
+- bleed-state summarization and over-time bleed processing
+- body-part injury display and severity formatting
+- tend-based bleeding treatment
+- character condition text derived from current state
+
+Current tracked body regions include:
+
+- head
+- chest
+- abdomen
+- back
+- arms
+- hands
+- legs
 
 Current behavior summary:
 
-- attacks apply damage to specific body parts
-- `injuries` reports body-part injury severity and bleeding state
-- `tend` distinguishes invalid part, uninjured part, not bleeding, and success
+- injury and bleeding are central gameplay state, not flavor-only messaging
+- bleeding progresses over time and can be stabilized rather than trivially ignored
 
-### 4. Bleeding and Bleed UX
+## Balance, Fatigue, Resources, and Recovery
 
 Primary files:
 
@@ -152,417 +189,474 @@ Primary files:
 
 Implemented behavior:
 
-- bleed accumulation on sufficiently strong hits
-- total bleed aggregation across body parts
-- bleed severity ladder:
-  - `none`
-  - `light`
-  - `moderate`
-  - `severe`
-  - `critical`
-- `bleed_state` persistence
-- state-change messaging without per-tick spam
-- bleed damage processing in the global ticker
-- bleed exposure in `stats`
+- HP and max HP
+- balance and max balance
+- fatigue and max fatigue
+- attunement and max attunement
+- profession-specific resource bridges such as Inner Fire, Focus, and Transfer Pool
+- ticker-driven passive recovery for appropriate states
 
 Current behavior summary:
 
-- bleed damage is processed over time
-- bleed messaging is state-change based, not spammed every tick
-- tending can stop bleed on a specific body part
+- actions create persistent pressure on resources, and the server recovers those resources over time based on activity state
 
-### 5. Tend / Field Treatment Flow
+## Weapons, Equipment, Inventory, and Containers
 
-Primary file:
+Primary files:
 
-- `commands/cmd_tend.py`
+- `typeclasses/characters.py`
+- `typeclasses/weapons.py`
+- `typeclasses/wearable_containers.py`
+- `typeclasses/sheaths.py`
+- `commands/cmd_inventory.py`
+- `commands/cmd_wear.py`
+- `commands/cmd_remove.py`
+- `commands/cmd_wield.py`
+- `commands/cmd_unwield.py`
+- `commands/cmd_draw.py`
+- `commands/cmd_stow.py`
+- `commands/cmd_slots.py`
 
 Implemented behavior:
 
-- natural-language body-part parsing, including phrases like `my right hand`
-- body-part validation
-- distinction between unsupported anatomy, uninjured parts, non-bleeding injuries, and bleeding wounds
-- stopping bleed on a body part
-- small healing amount to external injury
-- room messaging
+- slot-based worn equipment
+- wielded weapon handling
+- sheaths and wearable containers
+- inventory and slot display
+- unified carried-weight calculation including coins, worn gear, nested container contents, and carry limits
+- encumbrance state calculation with overload movement blocking
+- weighted container capacity checks and container weight/capacity display
+- permissive wielding of non-weapon objects through improvised/default weapon profiles
+- armor-type handling and armor-derived hindrance/effects
 
-Current behavior contract:
+Current behavior summary:
 
-- invalid part: `Invalid body part.`
-- valid but uninjured: `Your <part> is uninjured.`
-- injured but not bleeding: `Your <part> is not bleeding.`
-- bleeding: `You stop bleeding on your <part>.`
+- equipment handling is custom and deeply tied into combat, appearance, and movement/combat penalties
 
-### 6. Skills Scaffold
+## Skills, Mindstate, XP, and Learning
 
 Primary files:
 
 - `typeclasses/characters.py`
 - `commands/cmd_skills.py`
 - `commands/cmd_use.py`
-
-Implemented behavior:
-
-- central `use_skill()` execution path
-- `has_skill()`
-- `learn_skill()`
-- skill storage as structured dictionaries:
-  - `rank`
-  - `mindstate`
-- starter skills seeded for characters:
-  - `brawling`
-  - `light_edge`
-  - `attack`
-  - `tend`
-  - `disengage`
-
-Current behavior summary:
-
-- `skills` lists known skills with rank and mindstate label
-- `use <skill>` routes through the shared skill executor
-- attack-driven learning now flows through weapon skill mapping instead of generic `attack`
-
-### 7. Mindstate and Learning Pulse
-
-Primary files:
-
-- `typeclasses/characters.py`
+- `commands/cmd_mindstate.py`
 - `server/conf/at_server_startstop.py`
-- `commands/cmd_skills.py`
-- `commands/cmd_attack.py`
 
 Implemented behavior:
 
-- mindstate ladder from `clear` to `mind locked`
-- `get_mindstate_label()`
-- mindstate cap at `110`
-- `process_learning_pulse()`
-- learning pulse hook in the global ticker
-- simple rank gain and mindstate drain on pulse
-- light improvement messaging on pulse rank gain
+- central skill registry across combat, survival, lore, armor, and magic
+- per-skill rank and mindstate storage
+- `use_skill()` as the shared skill-learning/action hook
+- learning pulse conversion over time
+- difficulty-band-based learning logic
+- total XP and unabsorbed XP support
+- experience debt support tied to the death system
 
 Current behavior summary:
 
-- successful meaningful attacks increase mindstate
-- misses do not grant learning
-- trivial attacks are gated by a temporary heuristic: no learning when final hit chance is `95` or higher
-- ticker pulses convert mindstate into rank over time
-- Intelligence increases learning capacity through a dynamic mindstate cap
-- Wisdom increases pulse drain speed through a dynamic learning drain
-- higher stored mindstate produces larger pulse rank gains
-- attack learning now also uses a difficulty curve based on the target's `reflex + agility`
-- current learning bands are:
-  - `trivial`
-  - `easy`
-  - `optimal`
-  - `hard`
-  - `too_hard`
-- trivial targets provide no learning, parity targets provide the strongest learning, and much stronger targets provide reduced learning
+- the game now has delayed progression behavior rather than instant one-shot advancement
+- learning is connected to real action use and post-action progression pulses
 
-Current simplifications:
-
-- no XP system
-- no instant level-up model
-- pulse conversion is still intentionally simple, but no longer flat
-- mindstate gain is currently a flat `+1` when granted
-- temporary pulse debug output is still enabled
-- temporary attack-side learning-band debug output is still enabled
-
-### 8. Probabilistic Combat Resolution
-
-Primary files:
-
-- `commands/cmd_attack.py`
-- `typeclasses/characters.py`
-
-Implemented behavior:
-
-- hit roll using `random.randint(1, 100)`
-- attacker accuracy based on:
-  - base `50`
-  - `reflex`
-  - `agility`
-  - active combat skill rank
-- defender evasion based on:
-  - `reflex`
-  - `agility`
-- minimum and maximum hit-chance clamps
-- explicit miss branch before damage application
-
-Current behavior summary:
-
-- combat is probabilistic rather than deterministic
-- misses still consume fatigue and roundtime
-- skill rank now directly affects hit chance
-- attack messaging is layered across actor, target, and room observers
-- combat phrasing is now weapon-aware and quality-aware through helper-driven verbs and hit-result text
-
-Debug note:
-
-- the attack command currently still emits debug lines for roll/chance and weapon/damage during testing
-
-### 9. Balance and Fatigue
+## Professions and Subsystems
 
 Primary files:
 
 - `typeclasses/characters.py`
-- `server/conf/at_server_startstop.py`
-- `commands/cmd_attack.py`
-- `commands/cmd_stats.py`
+- `world/professions.py`
+- `world/systems/warrior/`
+- `world/systems/ranger/`
 
 Implemented behavior:
 
-- `balance` / `max_balance`
-- `fatigue` / `max_fatigue`
-- getters, setters, and clamping
-- recovery through the global ticker
-- attack costs applied through the active weapon profile
-- attack block at zero balance
+- profession identity and guild mapping
+- profession rank/circle concepts
+- subsystem controllers and per-profession subsystem state
+- profession-aware commands, unlocks, bonuses, and UI exposure
+- cleric devotion subsystem support with structured subsystem/UI state
 
-Current behavior summary:
+Current live profession-facing systems include:
 
-- attacks spend balance and add fatigue
-- ticker recovers balance upward and fatigue downward
-- `stats` exposes current values
+- Warrior systems
+- Ranger systems
+- Empath systems
+- Thief-facing systems and khri hooks
+- Cleric devotion, commune, and death/favor-facing support
+- spellcasting guild access hooks
 
-### 10. Weapons and Improvised Wielding
+## Warrior Systems
 
 Primary files:
 
-- `typeclasses/weapons.py`
+- `world/systems/warrior/`
 - `typeclasses/characters.py`
-- `commands/cmd_wield.py`
-- `commands/cmd_spawnweapon.py`
+- Warrior-related command modules in `commands/`
 
 Implemented behavior:
 
-- base `Weapon` typeclass
-- weapon fields:
-  - `weapon_type`
-  - `damage_min`
-  - `damage_max`
-  - `roundtime`
-  - `balance_cost`
-  - `fatigue_cost`
-  - `skill`
-  - `damage_type`
-- canonical weapon taxonomy:
-  - `brawling`
-  - `light_edge`
-  - `heavy_edge`
-  - `blunt`
-  - `polearm`
-  - `short_bow`
-  - `long_bow`
-  - `crossbow`
-- `get_weapon_skill()` on weapons
-- wield command
-- training weapon spawn command
+- warrior circles/ranks
+- war tempo and tempo-state logic
+- berserk and roar systems
+- exhaustion/recovery hooks
+- warrior-specific combat abilities and passives
+- `recover` fallback for warrior exhaustion when grave recovery is not applicable
+
+## Ranger Systems
+
+Primary files:
+
+- `world/systems/ranger/`
+- `typeclasses/abilities_survival.py`
+- `typeclasses/characters.py`
+- ranger-related commands in `commands/`
+
+Implemented behavior:
+
+- wilderness bond
+- terrain/environment-aware bonuses
+- trail creation and reading
+- tracking/hunting support
+- stealth and movement support such as hide, sneak, stalk, pounce, snipe, cover tracks, and related flow
+- companion support hooks
+- beseech and environment-derived bonuses
+
+## Empath Systems
+
+Primary files:
+
+- `typeclasses/characters.py`
+- empath-related commands in `commands/`
+
+Implemented behavior:
+
+- empath wound model and wound transfer foundations
+- empath links
+- empath shock/load behavior
+- stabilization of living bleeding targets
+- corpse stabilization support for the death system
+- poison/disease wound-condition processing
+
+## Magic Systems
+
+Primary files:
+
+- `typeclasses/spells.py`
+- `typeclasses/characters.py`
+- `commands/cmd_prepare.py`
+- `commands/cmd_charge.py`
+- `commands/cmd_cast.py`
+- `commands/cmd_stopcast.py`
+
+Implemented behavior:
+
+- spell preparation
+- charge/release flow
+- spell schools/categories including targeted, augmentation, debilitation, warding, and utility
+- cyclic-ready support hooks
+- guild-aware spell access foundations
 
 Current behavior summary:
 
-- weapon profile drives damage, fatigue cost, balance cost, roundtime, and active combat skill
-- any object may be wielded
-- non-weapon objects are normalized through a safe improvised/default profile rather than rejected
+- magic is no longer a placeholder command shell; it has a real stateful prepare/cast pipeline even if the content breadth is still growing
 
-### 11. NPC Combat Loop
+## Stealth, Survival, and Exploration Verbs
+
+Primary files:
+
+- `typeclasses/abilities_stealth.py`
+- `typeclasses/abilities_survival.py`
+- `typeclasses/abilities_perception.py`
+- related commands in `commands/`
+
+Implemented behavior:
+
+- hide
+- sneak
+- stalk
+- ambush
+- observe
+- search
+- analyze
+- forage
+- harvest
+- skin
+- climb
+- swim
+- passage discovery and travel
+
+Current behavior summary:
+
+- room movement and exploration are tied into stealth, tracking, trails, terrain, and survival skill use rather than plain stock exit traversal
+
+## Economy, Vendors, and Appraisal
+
+Primary files:
+
+- `typeclasses/vendor.py`
+- `typeclasses/characters.py`
+- `typeclasses/items/gem.py`
+- `typeclasses/items/gem_pouch.py`
+- `typeclasses/box.py`
+- `typeclasses/rooms.py`
+- `commands/cmd_buy.py`
+- `commands/cmd_sell.py`
+- `commands/cmd_loot.py`
+- `commands/cmd_unlock.py`
+- `commands/cmd_deposit.py`
+- `commands/cmd_withdraw.py`
+- `commands/cmd_balance.py`
+- `commands/cmd_store.py`
+- `commands/cmd_retrieve.py`
+- `commands/cmd_haggle.py`
+- `commands/cmd_appraise.py`
+- `commands/cmd_compare.py`
+
+Implemented behavior:
+
+- typed loot generation for NPCs: coins, gems, and boxes
+- strict gem schema, deterministic gem value tables, and gem pouch auto-storage
+- corpse search before loot extraction, with separate one-time coin, gem, and box recovery
+- strict box generation, unlock/open flow, and capped box contents
+- specialized vendor types: general, gem buyer, and pawn
+- vendor acceptance and payout rules, including `sell all`
+- vendor inventory sink behavior that prevents buy/sell loops
+- buying and selling
+- haggle flow
+- appraisal and comparison support
+- coin tracking on characters and corpses/graves
+- banked coin storage via `deposit`, `withdraw`, and `balance`
+- vault item storage via `store` and `retrieve`
+- location-gated bank and vault support through room flags
+- Brookhollow bank/vault rooms marked explicitly and The Landing room generation now classifies bank/vault service rooms from generated POI labels and descriptions
+- coin weight and carry-weight pressure integrated into the economy loop
+
+Current behavior summary:
+
+- the economy is now a multi-step loop with typed loot, specialized sinks, bank/vault safety, Landing-aware service locations, and carry-weight pressure rather than a flat buy/sell coin counter
+
+## Traps, Locksmithing, and Devices
+
+Primary files:
+
+- `typeclasses/trap_device.py`
+- `typeclasses/box.py`
+- `typeclasses/lockpick.py`
+- `typeclasses/characters.py`
+- related commands in `commands/`
+
+Implemented behavior:
+
+- traps and concealed devices
+- trap deployment and detection
+- boxes, locks, and lock difficulty
+- lockpick spawning and use
+- inspect/open/pick/disarm/rework flows
+
+## Justice, Crime, and Bounties
+
+Primary files:
+
+- `utils/crime.py`
+- `typeclasses/npcs.py`
+- `typeclasses/characters.py`
+- justice/bounty commands in `commands/`
+
+Implemented behavior:
+
+- law-region support
+- crime flags, warrants, fines, stocks/jail state hooks
+- guards/capture flows
+- bounty boards and bounty acceptance/review commands
+- justice-facing commands such as `justice`, `bribe`, `capture`, `surrender`, `plead`, `payfine`, and `laylow`
+
+Current behavior summary:
+
+- justice is an active game system with command/UI consequences, not a planned placeholder
+
+## Death, Favor, Resurrection, Corpses, and Graves
+
+Primary files:
+
+- `typeclasses/characters.py`
+- `typeclasses/corpse.py`
+- `typeclasses/grave.py`
+- `typeclasses/scripts.py`
+- `typeclasses/objects.py`
+- `commands/cmd_depart.py`
+- `commands/cmd_perceive.py`
+- `commands/cmd_prepare.py`
+- `commands/cmd_preserve.py`
+- `commands/cmd_sensesoul.py`
+- `commands/cmd_resurrect.py`
+- `commands/cmd_death.py`
+- `commands/cmd_corpse.py`
+- `commands/cmd_recover.py`
+- `commands/cmd_stabilize.py`
+- `commands/cmd_rejuvenate.py`
+- `commands/cmd_uncurse.py`
+- `commands/cmd_consent.py`
+- `commands/cmd_deathinspect.py`
+- `commands/cmd_decaycorpse.py`
+- `commands/cmd_res.py`
+- `commands/cmd_die.py`
+
+Implemented behavior:
+
+- life-state model: alive, dead, departed
+- Favor-based death-state modeling
+- dead-state command gating in `Character.execute_cmd()`
+- Death's Sting penalties
+- experience debt on death, stacking on repeated death, and partial recovery on resurrection
+- corpse creation on death
+- explicit soul-state creation on death with per-character recoverability and strength
+- corpse condition tiers and condition-based description
+- owner-aware corpse presentation for named versus anonymous dead
+- corpse memory timer/state parallel to physical decay
+- soul decay over time on dead characters through the active status tick
+- corpse stabilization by Empaths
+- cleric corpse perception with resurrection-state readout
+- cleric soul sensing through `sense soul`
+- cleric memory preservation through `preserve`
+- cleric corpse preparation stacks through `prepare`
+- corpse decay into owner-visible graves
+- corpse/grave stored coin handling
+- grave item-damage metadata with time-based grave damage growth
+- grave expiry timers and owner-facing expiry warnings
+- grave item and coin recovery
+- depart paths based on available Favor profile
+- region-aware recovery-point resolution for depart destinations
+- room-level no-resurrection, dangerous-zone, and safe-zone death flags
+- resurrection favor requirement and favor consumption on success
+- favor-threshold-based resurrection quality scaling
+- favor-based soul durability and no-favor resurrection lockout
+- cleric-driven resurrection from corpse
+- resurrection quality tiers: perfect, stable, fragile, flawed
+- post-resurrection fragility/instability penalties on weak returns
+- cleric devotion as a separate profession resource from Favor
+- cleric ritual support through `pray`, with tiered devotion gain and ritual cooldowns
+- first commune set through `commune solace`, `commune ward`, and `commune vigil`
+- Theurgy as a cleric guild skill trained by rituals, communes, corpse rites, and resurrection
+- devotion drift toward baseline through the active status tick
+- devotion-aware resurrection cost, failure pressure, and recovery quality adjustments
+- devotion-aware cleric spell preparation stability and spell power scaling
+- resurrection gating on corpse state, memory state, and soul recoverability together
+- failed resurrection attempts damage corpse condition and soul strength and can make a corpse irrecoverable
+- `uncurse` support for reducing or clearing Death's Sting
+- recovery metadata tracking for depart versus resurrection
+- corpse/grave recovery permissions and player consent
+- consent listing, expiry windows, and consent-use notification messaging
+- new-player death protection that softens sting/debt and upgrades early depart outcomes
+- randomized death emote variants with a delayed room beat
+- ghost-state messaging and a persistent dead-command banner
+- refined Death's Sting severity labels and expiry messaging
+- occasional combat feedback while Death's Sting remains active
+- player-facing `death` status command
+- player-facing `corpse` status command
+- preview and confirmation flow for favor-spending `depart` paths
+- anti-duplication protections for corpse and grave creation
+- orphan corpse/grave cleanup, death event hooks, and per-character death analytics
+- admin `@deathinspect`, `@decaycorpse`, and `@res` commands for testing and intervention
+- admin `die` command for testing
+
+Current behavior summary:
+
+- death is now a production-ready multi-stage gameplay loop with penalties, rescue/prep support, protected onboarding behavior, corpse/grave logistics, consented recovery, and cleric/empath recovery depth
+
+## NPCs and AI
 
 Primary files:
 
 - `typeclasses/npcs.py`
 - `server/conf/at_server_startstop.py`
-- `commands/cmd_spawnnpc.py`
 
 Implemented behavior:
 
-- NPC typeclass inheriting from Character
-- `is_npc` flag
-- `npc_combat_tick()` AI hook
-- NPC spawn command for test combatants
-- ticker-driven retaliation and combat continuation
+- NPCs inherit from Character and share most combat/state logic
+- roundtime-aware combat AI
+- target pursuit/retreat logic
+- profession/trade/justice reaction hooks
+- startup-maintained training dummy for test combat loops
 
 Current behavior summary:
 
-- NPCs enter combat when attacked because the shared attack path establishes mutual targeting
-- NPCs attack through the same `attack` command path used by players
-- NPCs respect roundtime
-- NPCs stop when target is dead, absent, or combat is broken
+- NPCs are integrated into the same action model as players rather than using a separate toy combat system
 
-### 12. Global Ticker-Orchestrated Systems
-
-Primary file:
-
-- `server/conf/at_server_startstop.py`
-
-Current global ticker responsibilities:
-
-- recover balance
-- recover fatigue
-- process bleed
-- update bleed state
-- process learning pulse
-- run NPC combat ticks
-
-The ticker is currently the main periodic orchestrator for character-state progression.
-
-### 12a. Visibility / Messaging Layer
+## Commands and Verb Surface
 
 Primary files:
 
-- `typeclasses/characters.py`
-- `commands/cmd_attack.py`
-- `commands/cmd_disengage.py`
-- `commands/cmd_tend.py`
+- `commands/default_cmdsets.py`
+- `commands/cmd_help.py`
 
 Implemented behavior:
 
-- layered hit messaging for actor, target, and room observers
-- layered miss messaging for actor, target, and room observers
-- room-visible disengage messaging
-- room-visible tend messaging
+- large custom Character command set covering combat, inventory, professions, stealth, survival, justice, magic, teaching, death, and admin/debug support
+- custom help grouping for player and staff commands
+- clickable movement wrapper command `__clickmove__` used by the browser client
 
 Current behavior summary:
 
-- combat actions are now visible to uninvolved observers in the room
-- `disengage` produces room-facing exit text
-- `tend` produces room-facing treatment text
+- moment-to-moment gameplay is driven by a broad custom verb layer rather than the stock Evennia demo surface
 
-### 13. Legacy Character Backfill / Migration Safety
+## Server Performance Architecture
 
 Primary files:
 
-- `typeclasses/characters.py`
 - `server/conf/at_server_startstop.py`
-- `typeclasses/scripts.py`
+- `typeclasses/characters.py`
+- `typeclasses/rooms.py`
 
 Implemented behavior:
 
-- centralized `ensure_core_defaults()` migration path
-- smaller `ensure_*` helpers inside Character for maintainability
-- automatic backfill on puppet and on runtime access paths
-- startup backfill for Characters/NPCs
-- retirement of legacy script-based bleed tickers
+- split status and learning tickers instead of one heavyweight global sweep
+- state-gated status work
+- room-scoped NPC tick participation near active puppets
+- hot-path movement optimizations for state checks and post-move processing
+- retirement of earlier expensive periodic patterns
 
 Current behavior summary:
 
-- older characters created before later systems were added are upgraded in-place when accessed
-- startup no longer depends on the old per-object persistent `BleedTicker` scripts
+- the running server has already been tuned away from multi-second reactor stalls caused by global gameplay sweeps and expensive move-time default normalization
 
-Covered legacy fields currently include:
+## Admin, Debug, and Test Utilities
 
-- stats
-- HP
-- balance/fatigue
-- bleed state
-- roundtime
-- injuries
-- combat flags
-- equipped weapon slot
-- structured skill storage and starter skills
+Primary files:
 
-## Custom Commands Currently Available
+- `commands/default_cmdsets.py`
+- admin/debug command modules in `commands/`
 
-Registered in the Character cmdset:
+Implemented behavior:
 
-- `attack`
-- `disengage`
-- `injuries`
-- `skills`
-- `spawnnpc`
-- `spawnweapon`
-- `stats`
-- `tend`
-- `use`
-- `wield`
+- spawn helpers for NPCs, weapons, wearables, lockpicks, vendors, boxes, and other test fixtures
+- `renew` reset flows
+- `survivaldebug`
+- `maptest`
+- `die` for forced death testing
+- profession/circle test helpers
 
-Command roles:
+## Known Architectural Constraints
 
-- `attack`: combat resolution entry point
-- `disengage`: leaves combat and clears mutual combat state when linked
-- `injuries`: shows body-part injury severity and bleed visibility
-- `skills`: shows known skills with rank and mindstate label
-- `spawnnpc`: creates a test NPC combatant
-- `spawnweapon`: creates a test training sword
-- `stats`: shows HP, combat status, bleed state, balance, and fatigue
-- `tend`: field-treats a body part
-- `use`: executes a skill through the shared skill executor
-- `wield`: equips an object for combat use
+These are current design rules already reflected in the codebase:
 
-## Current Design Constraints and Locks
+- `typeclasses/characters.py` is the authoritative location for persistent character-state evolution
+- dead-state command enforcement lives in `Character.execute_cmd()` because not all commands inherit the custom command base
+- shared systems such as contests should remain centralized rather than forked per command
+- periodic server work must remain state-gated and should never regress into a full every-object heavy sweep
+- move-time hooks must avoid calling full default-normalization paths where direct attribute access is sufficient
 
-These constraints are already reflected in code and should be preserved unless intentionally changed.
+## Current State Summary
 
-- There should be one authoritative combat path. `attack` is the primary combat executor; other interfaces should delegate rather than fork combat logic.
-- Missed attacks still incur fatigue and roundtime.
-- `wield` should remain permissive; profile normalization belongs in `get_weapon_profile()`, not in rigid wield-time type checks.
-- Legacy character migration should continue to be handled through the centralized Character backfill helpers whenever persistent fields are added.
+As built today, Dragonsire is a custom Evennia game server with:
 
-## World / Content Notes
+- a custom browser client
+- structured character and map APIs
+- world bootstrap for The Landing and related content
+- custom combat, injuries, bleeding, and pacing
+- equipment, weapons, armor, and containers
+- progression through skills, mindstate, XP, and profession subsystems
+- Ranger, Warrior, Empath, justice/thief-facing, and magic foundations
+- vendors, traps, locksmithing, and survival verbs
+- a live death/favor/corpse/grave/resurrection system with consent, coin retention, rejuvenation, uncurse, and new-player protection
+- server-side performance work to keep all of the above playable in real time
 
-Repository-specific custom world content noted so far:
-
-- `world/brookhollow_v3_patched.py` contains Brookhollow map/content construction
-
-Current note:
-
-- Brookhollow does not appear to auto-load on startup through a current startup hook; it appears intended for manual execution/import.
-
-## Known Limitations / In-Progress Areas
-
-This repository is no longer just stock Evennia, but several gameplay systems are still intentionally simplified.
-
-- learning gain is currently flat
-- learning pulse conversion is currently flat
-- difficulty-based learning has not yet been implemented
-- weapon categories exist, but deeper category-specific differentiation is still shallow
-- body-part coverage is intentionally limited to the current schema and does not include finer anatomy like eyes or feet
-- combat debug messaging is still present
-- NPC AI is functional but still simple; it uses the shared combat path and basic pacing checks rather than advanced decision-making
-
-## Suggested Maintenance Rule
-
-Whenever a new persistent Character attribute is added, update the Character backfill helpers in `typeclasses/characters.py` at the same time.
-
-That keeps:
-
-- older characters safe
-- ticker-driven systems stable
-- new gameplay features compatible with existing accounts/characters
-
-## Performance Regression Note
-
-The most important confirmed live-performance regression so far was not command rendering or telnet compression alone; it was a reactor-blocking periodic gameplay loop.
-
-- Historical symptom pattern:
-  - login delayed by several seconds
-  - trivial commands like `look` and room movement delayed by roughly `5s` to `8s`
-  - once command execution actually started, the command body itself still completed quickly
-- Confirmed root cause:
-  - the original 1-second global ticker in `server/conf/at_server_startstop.py` iterated every Character/NPC object and ran multiple gameplay maintenance calls on each pass
-  - with roughly `185` tracked Character/NPC objects, that full sweep stalled the main Evennia event loop badly enough to delay unrelated commands
-- Permanent mitigation now in place:
-  - status processing split into a lightweight `1s` status tick and a separate `10s` learning tick
-  - idle characters are skipped entirely
-  - NPC combat work only runs when the NPC is actually in combat
-  - learning pulses only run for characters with meaningful pending mindstate
-  - noisy per-pulse debug messaging was removed
-  - MCCP is also hard-disabled at the telnet protocol layer, but that was not the decisive fix for the severe multi-second lag
-- Fast recognition rule if lag ever reappears:
-  - if `connect`, `look`, and simple room movement all become uniformly slow by several seconds, inspect periodic global loops before touching appearance/combat rendering code
-  - especially scrutinize any ticker that walks all Character/NPC objects or performs default-normalization work every second
-
-## Summary
-
-As built today, this project has moved from stock Evennia into a functioning lightweight MUD gameplay layer with:
-
-- real combat state
-- injuries and bleeding
-- roundtime pacing
-- balance and fatigue
-- weapon-driven attacks
-- NPC retaliation
-- skill tracking
-- mindstate-based delayed progression
-- legacy character migration safeguards
-
-The core custom game loop now exists and is testable in live play.
+This is no longer a stock Evennia server with a few sample commands. It is a custom gameplay platform with active world, client, profession, death, and map/navigation systems layered over the original Evennia base.

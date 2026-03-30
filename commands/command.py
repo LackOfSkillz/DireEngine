@@ -11,15 +11,26 @@ from evennia.commands.command import Command as BaseCommand
 
 
 DEAD_STATE_ALLOWED_COMMANDS = {
+    "balance",
+    "consent",
+    "corpse",
+    "death",
+    "deposit",
     "depart",
     "favor",
+    "health",
     "help",
+    "hp",
     "look",
     "l",
     "pose",
+    "raise",
     "resurrect",
     "say",
+    "score",
+    "sta",
     "stats",
+    "withdraw",
     "whisper",
     "xp",
 }

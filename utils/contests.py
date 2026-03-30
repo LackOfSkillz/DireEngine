@@ -4,6 +4,12 @@ import random
 DEBUG_CONTESTS = False
 
 
+def _apply_character_modifier(character, value):
+    if character and hasattr(character, "apply_death_sting_to_contest_value"):
+        return character.apply_death_sting_to_contest_value(value)
+    return value
+
+
 def contest(attacker_value, defender_value):
     roll_a = attacker_value + random.randint(1, 100)
     roll_d = defender_value + random.randint(1, 100)
@@ -33,7 +39,9 @@ def get_difficulty_band(diff):
     return "trivial"
 
 
-def run_contest(attacker_value, defender_value):
+def run_contest(attacker_value, defender_value, attacker=None, defender=None):
+    attacker_value = _apply_character_modifier(attacker, attacker_value)
+    defender_value = _apply_character_modifier(defender, defender_value)
     roll_a, roll_d, diff = contest(attacker_value, defender_value)
     outcome = resolve_outcome(diff)
     band = get_difficulty_band(diff)
@@ -66,4 +74,4 @@ def apply_learning(character, skill, difficulty):
 def skill_vs_skill(attacker, defender, skill_a, skill_d, stat_a="agility", stat_d="agility"):
     a_val = get_skill_total(attacker, skill_a, stat_a)
     d_val = get_skill_total(defender, skill_d, stat_d)
-    return run_contest(a_val, d_val)
+    return run_contest(a_val, d_val, attacker=attacker, defender=defender)

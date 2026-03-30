@@ -1,16 +1,16 @@
-from evennia import Command
+﻿from evennia import Command
 
 from world.khri import KHRI
 
 
 class CmdKhri(Command):
-        """
-        Activate, list, or dismiss your available khri.
+    """
+    Activate, list, or dismiss your available khri.
 
-        Examples:
-            khri
-            khri cunning
-        """
+    Examples:
+        khri
+        khri cunning
+    """
 
     key = "khri"
     locks = "cmd:all()"

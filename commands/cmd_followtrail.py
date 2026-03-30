@@ -1,16 +1,16 @@
-import time
+﻿import time
 
 from commands.command import Command
 
 
 class CmdFollowTrail(Command):
-        """
-        Follow a visible trail into the next room.
+    """
+    Follow a visible trail into the next room.
 
-        Examples:
-            followtrail wolf
-            follow trail wolf
-        """
+    Examples:
+        followtrail wolf
+        follow trail wolf
+    """
 
     key = "followtrail"
     aliases = ["follow trail"]

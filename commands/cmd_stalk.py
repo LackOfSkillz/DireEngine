@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdStalk(Command):
-        """
-        Begin quietly following a target.
+    """
+    Begin quietly following a target.
 
-        Examples:
-            stalk goblin
-        """
+    Examples:
+        stalk goblin
+    """
 
     key = "stalk"
     locks = "cmd:all()"

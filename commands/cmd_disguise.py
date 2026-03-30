@@ -1,14 +1,14 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdDisguise(Command):
-        """
-        Adopt or remove a disguise identity.
+    """
+    Adopt or remove a disguise identity.
 
-        Examples:
-            disguise traveler
-            disguise clear
-        """
+    Examples:
+        disguise traveler
+        disguise clear
+    """
 
     key = "disguise"
     locks = "cmd:all()"

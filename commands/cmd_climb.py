@@ -1,14 +1,14 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdClimb(Command):
-        """
-        Climb a marked obstacle or exit.
+    """
+    Climb a marked obstacle or exit.
 
-        Examples:
-            climb wall
-            climb ladder
-        """
+    Examples:
+        climb wall
+        climb ladder
+    """
 
     key = "climb"
     locks = "cmd:all()"

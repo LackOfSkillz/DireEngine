@@ -1,15 +1,15 @@
-from evennia import Command
+﻿from evennia import Command
 
 from typeclasses.characters import VALID_GUILDS
 
 
 class CmdProfession(Command):
-        """
-        Review information about your current profession.
+    """
+    Review information about your current profession.
 
-        Examples:
-            profession
-        """
+    Examples:
+        profession
+    """
 
     key = "profession"
     locks = "cmd:all()"

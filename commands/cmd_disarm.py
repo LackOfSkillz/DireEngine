@@ -1,14 +1,14 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdDisarm(Command):
-        """
-        Attempt to disarm a trap or similar mechanism.
+    """
+    Attempt to disarm a trap or similar mechanism.
 
-        Examples:
-            disarm chest
-            disarm trap
-        """
+    Examples:
+        disarm chest
+        disarm trap
+    """
 
     key = "disarm"
     locks = "cmd:all()"

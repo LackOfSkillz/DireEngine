@@ -2,12 +2,12 @@ from evennia import Command
 
 
 class CmdAnalyze(Command):
-        """
-        Study the current room for useful fieldcraft details.
+    """
+    Study the current room for useful fieldcraft details.
 
-        Examples:
-            analyze
-        """
+    Examples:
+        analyze
+    """
 
     key = "analyze"
     locks = "cmd:all()"

@@ -23,6 +23,8 @@ class SearchAbility(Ability):
             result = run_contest(
                 user.get_perception_total(),
                 obj.get_stealth_total() + obj.get_hidden_strength(),
+                attacker=user,
+                defender=obj,
             )
 
             if result["outcome"] in ["success", "strong"]:

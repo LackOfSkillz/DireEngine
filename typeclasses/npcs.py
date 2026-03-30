@@ -6,12 +6,18 @@ from typeclasses.characters import Character
 
 
 class NPC(Character):
+    COMBAT_AI_INTERVAL = 1.0
+    IDLE_AI_INTERVAL = 8.0
+
     def at_object_creation(self):
         super().at_object_creation()
         self.db.is_npc = True
         self.db.is_trainer = False
         self.db.trains_profession = None
         self.db.is_shopkeeper = False
+        self.db.coin_min = 0
+        self.db.coin_max = 0
+        self.db.drops_box = False
         self.db.blocked_professions = []
         self.db.suspects = {}
         self.db.witnessed_crime = False
@@ -90,8 +96,20 @@ class NPC(Character):
             self.msg("You are too startled to react!")
             return
 
+        target = self.get_target()
+        has_pursuit_state = bool(self.get_state("last_seen_target") or self.get_state("empath_manipulated"))
+        if not target and not has_pursuit_state:
+            return
+
+        now = time.time()
+        interval = self.COMBAT_AI_INTERVAL if target else self.IDLE_AI_INTERVAL
+        next_tick_at = float(getattr(self.ndb, "next_ai_tick_at", 0.0) or 0.0)
+        if now < next_tick_at:
+            return
+        self.ndb.next_ai_tick_at = now + interval
+
         combat_timer = int(self.get_state("combat_timer") or 0)
-        if self.get_target():
+        if target:
             if combat_timer <= 0:
                 self.set_state("combat_timer", 5)
         elif combat_timer > 0:

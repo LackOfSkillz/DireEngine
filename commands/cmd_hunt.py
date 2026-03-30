@@ -1,15 +1,15 @@
-import time
+﻿import time
 
 from commands.command import Command
 
 
 class CmdHunt(Command):
-        """
-        Scan nearby rooms for signs of living prey.
+    """
+    Scan nearby rooms for signs of living prey.
 
-        Examples:
-            hunt
-        """
+    Examples:
+        hunt
+    """
 
     key = "hunt"
     locks = "cmd:all()"

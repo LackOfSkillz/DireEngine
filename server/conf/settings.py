@@ -34,15 +34,20 @@ from evennia.settings_default import *
 # This is the name of your game. Make it catchy!
 SERVERNAME = "dragonsire"
 
+BASE_ACCOUNT_TYPECLASS = "typeclasses.accounts.Account"
+BASE_GUEST_TYPECLASS = "typeclasses.accounts.Guest"
 BASE_CHARACTER_TYPECLASS = "typeclasses.characters.Character"
+AT_SERVER_STARTSTOP_MODULE = "server.conf.at_server_startstop"
 DEFAULT_HOME = "#2"
 COMMAND_PARSER = "server.conf.cmdparser.cmdparser"
 SEARCH_AT_RESULT = "server.conf.at_search.at_search_result"
 SERVER_SESSION_CLASS = "server.conf.serversession.ServerSession"
 TELNET_PROTOCOL_CLASS = "server.conf.telnet.NoMCCPTelnetProtocol"
 ENABLE_GLOBAL_STATUS_TICK = True
-STATUS_TICK_WARN_SECONDS = 0.01
-LEARNING_TICK_WARN_SECONDS = 0.01
+STATUS_TICK_WARN_SECONDS = 0.25
+LEARNING_TICK_WARN_SECONDS = 0.25
+SERVER_LOG_MAX_SIZE = 50_000_000
+PORTAL_LOG_MAX_SIZE = 50_000_000
 PORTAL_SERVICES_PLUGIN_MODULES.append("evennia.contrib.base_systems.godotwebsocket.webclient")
 GODOT_CLIENT_WEBSOCKET_PORT = 4008
 GODOT_CLIENT_WEBSOCKET_CLIENT_INTERFACE = "127.0.0.1"

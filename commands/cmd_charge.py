@@ -1,14 +1,14 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdCharge(Command):
-        """
-        Charge power into a prepared spell.
+    """
+    Charge power into a prepared spell.
 
-        Examples:
-            charge
-            charge 5
-        """
+    Examples:
+        charge
+        charge 5
+    """
 
     key = "charge"
     locks = "cmd:all()"

@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdTrain(Command):
-        """
-        Train with an instructor or training source.
+    """
+    Train with an instructor or training source.
 
-        Examples:
-            train tactics
-        """
+    Examples:
+        train tactics
+    """
 
     key = "train"
     locks = "cmd:all()"

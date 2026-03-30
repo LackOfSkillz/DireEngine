@@ -14,7 +14,7 @@ class CmdHelp(EvenniaCmdHelp):
     page_one_groups = OrderedDict(
         (
             ("Communication", ("help", "look", "say", "whisper", "pose", "nick")),
-            ("Character", ("abilities", "ability", "assess", "center", "circle", "depart", "diagnose", "favor", "heal", "injuries", "link", "manipulate", "mend", "mindstate", "perceive", "pray", "purge", "redirect", "release", "resurrect", "sacrifice", "skills", "stabilize", "states", "stats", "take", "touch", "unity", "use", "xp")),
+            ("Character", ("abilities", "ability", "assess", "center", "circle", "commune", "corpse", "death", "depart", "diagnose", "favor", "heal", "injuries", "link", "manipulate", "mend", "mindstate", "perceive", "pray", "preserve", "purge", "race", "redirect", "release", "resurrect", "sacrifice", "sense soul", "selfreturn", "skills", "stabilize", "states", "stats", "take", "touch", "unity", "use", "xp")),
             ("Inventory & Equipment", ("inventory", "get", "give", "drop", "draw", "stow", "wear", "remove", "wield", "unwield", "slots")),
             ("Combat", ("attack", "aim", "berserk", "fire", "load", "pounce", "reposition", "recover", "roar", "snipe", "target", "stance", "advance", "retreat", "disengage", "tend")),
         )
@@ -73,7 +73,7 @@ class CmdHelp(EvenniaCmdHelp):
     staff_groups = OrderedDict(
         (
             ("Spawn Tools", ("spawnnpc", "spawnweapon", "spawnwearable", "spawnsheath", "spawnbox", "spawnlockpick", "spawnvendor")),
-            ("Admin Tools", ("ban", "boot", "creeper", "emit", "perm", "renew", "survivaldebug", "unban", "wall")),
+            ("Admin Tools", ("@deathinspect", "@decaycorpse", "@racemods", "@res", "ban", "boot", "creeper", "die", "emit", "perm", "renew", "setrace", "survivaldebug", "unban", "wall")),
             ("World Building", ("@open", "alias", "batchcode", "batchcommands", "cmdsets", "copy", "cpattr", "create", "desc", "destroy", "dig", "examine", "find", "force", "link", "lock", "mvattr", "name", "set", "sethelp", "sethome", "spawn", "tag", "teleport", "tunnel", "typeclass", "unlink", "wipe")),
         )
     )

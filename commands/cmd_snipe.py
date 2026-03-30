@@ -1,13 +1,13 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdSnipe(Command):
-        """
-        Fire a concealed aimed shot from hiding.
+    """
+    Fire a concealed aimed shot from hiding.
 
-        Examples:
-            snipe goblin
-        """
+    Examples:
+        snipe goblin
+    """
 
     key = "snipe"
     locks = "cmd:all()"

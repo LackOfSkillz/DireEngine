@@ -1,4 +1,4 @@
-import time
+﻿import time
 
 from commands.command import Command
 
@@ -6,12 +6,12 @@ from utils.crime import JUDGE_ROOM_KEY, _resolve_room
 
 
 class CmdCapture(Command):
-        """
-        Attempt to capture a subdued bounty target.
+    """
+    Attempt to capture a subdued bounty target.
 
-        Examples:
-            capture outlaw
-        """
+    Examples:
+        capture outlaw
+    """
 
     key = "capture"
     locks = "cmd:all()"

@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdSetTrap(Command):
-        """
-        Place a trap from a prepared device.
+    """
+    Place a trap from a prepared device.
 
-        Examples:
-            settrap box
-        """
+    Examples:
+        settrap box
+    """
 
     key = "settrap"
     aliases = ["set trap"]

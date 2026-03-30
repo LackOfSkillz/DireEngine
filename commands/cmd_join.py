@@ -1,15 +1,15 @@
-from evennia import Command
+﻿from evennia import Command
 
 from typeclasses.characters import VALID_GUILDS
 
 
 class CmdJoin(Command):
-        """
-        Join a guild or profession when eligible.
+    """
+    Join a guild or profession when eligible.
 
-        Examples:
-            join ranger
-        """
+    Examples:
+        join ranger
+    """
 
     key = "join"
     locks = "cmd:all()"

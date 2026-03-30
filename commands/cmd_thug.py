@@ -1,4 +1,4 @@
-import time
+﻿import time
 
 from evennia import Command
 
@@ -6,12 +6,12 @@ from utils.crime import call_guards
 
 
 class CmdThug(Command):
-        """
-        Use thug-style intimidation or rough tactics.
+    """
+    Use thug-style intimidation or rough tactics.
 
-        Examples:
-            thug guard
-        """
+    Examples:
+        thug guard
+    """
 
     key = "thug"
     locks = "cmd:all()"

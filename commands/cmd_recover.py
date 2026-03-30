@@ -3,10 +3,10 @@ from evennia import Command
 
 class CmdRecover(Command):
     """
-    Steady yourself and reduce warrior exhaustion.
+    Recover grave goods or steady yourself as a Warrior.
 
     Examples:
-      recover
+        recover
     """
 
     key = "recover"
@@ -15,8 +15,16 @@ class CmdRecover(Command):
 
     def func(self):
         caller = self.caller
+        if hasattr(caller, "recover_grave_items"):
+            ok, message = caller.recover_grave_items()
+            if ok:
+                caller.msg(message)
+                if getattr(caller, "location", None):
+                    caller.location.msg_contents(f"{caller.key} recovers what remained in a lonely grave.", exclude=[caller])
+                return
+
         if not hasattr(caller, "is_profession") or not caller.is_profession("warrior"):
-            caller.msg("You are not following the Warrior path.")
+            caller.msg("You have nothing here to recover.")
             return
 
         if caller.is_in_roundtime():

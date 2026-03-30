@@ -38,6 +38,8 @@ class HideAbility(Ability):
             result = run_contest(
                 user.get_stealth_total() + stealth_bonus,
                 observer.get_perception_total(),
+                attacker=user,
+                defender=observer,
             )
             outcome = result["outcome"]
             if outcome_rank[outcome] < outcome_rank[best_outcome]:
@@ -133,7 +135,7 @@ class StalkAbility(Ability):
         user.set_state("stalking", target.id)
         msg_actor(user, f"You begin stalking {target.key}.")
         defender_total = target.get_perception_total() if hasattr(target, "get_perception_total") else 0
-        result = run_contest(user.get_stealth_total(), defender_total)
+        result = run_contest(user.get_stealth_total(), defender_total, attacker=user, defender=target)
         if result["outcome"] == "fail":
             react_or_message_target(target, player_text=f"You spot {user.key} shadowing you.", awareness="alert")
         elif result["outcome"] == "partial":

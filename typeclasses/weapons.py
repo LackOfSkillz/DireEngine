@@ -16,6 +16,7 @@ class Weapon(DefaultObject):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.item_type = "weapon"
+        self.db.weight = 3.0
         self.db.weapon_type = "brawling"
         self.db.damage = 5
         self.db.speed = 2.0

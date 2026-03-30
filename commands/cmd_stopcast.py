@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdStopCast(Command):
-        """
-        Cancel your current spell preparation or casting.
+    """
+    Cancel your current spell preparation or casting.
 
-        Examples:
-            stopcast
-        """
+    Examples:
+        stopcast
+    """
 
     key = "stopcast"
     locks = "cmd:all()"

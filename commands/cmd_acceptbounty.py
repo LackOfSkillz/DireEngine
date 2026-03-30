@@ -1,4 +1,4 @@
-from evennia import search_object
+﻿from evennia import search_object
 
 from commands.command import Command
 from commands.cmd_bounties import _find_board
@@ -13,12 +13,12 @@ def _find_character(name):
 
 
 class CmdAcceptBounty(Command):
-        """
-        Accept an available bounty contract.
+    """
+    Accept an available bounty contract.
 
-        Examples:
-            acceptbounty 3
-        """
+    Examples:
+        acceptbounty 3
+    """
 
     key = "acceptbounty"
     aliases = ["accept bounty"]

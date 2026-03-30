@@ -1,15 +1,15 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 from utils.crime import call_guards
 
 
 class CmdSurrender(Command):
-        """
-        Yield the fight and stop resisting.
+    """
+    Yield the fight and stop resisting.
 
-        Examples:
-            surrender
-        """
+    Examples:
+        surrender
+    """
 
     key = "surrender"
     locks = "cmd:all()"

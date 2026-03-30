@@ -1,14 +1,14 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdCoverTracks(Command):
-        """
-        Mask your trail as you move through the area.
+    """
+    Mask your trail as you move through the area.
 
-        Examples:
-            covertracks
-            cover tracks
-        """
+    Examples:
+        covertracks
+        cover tracks
+    """
 
     key = "covertracks"
     aliases = ["cover tracks"]

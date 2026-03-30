@@ -12,6 +12,8 @@ just overloads its hooks to have it perform its function.
 
 """
 
+import time
+
 from evennia.scripts.scripts import DefaultScript
 
 
@@ -117,3 +119,74 @@ class BleedTicker(Script):
     def at_repeat(self):
         if self.obj and hasattr(self.obj, "process_bleed"):
             self.obj.process_bleed()
+
+
+class CorpseDecayScript(Script):
+    def at_script_creation(self):
+        self.key = "corpse_decay"
+        self.interval = 30
+        self.start_delay = True
+        self.repeats = 0
+        self.persistent = True
+
+    def is_valid(self):
+        obj = self.obj
+        return bool(obj and getattr(getattr(obj, "db", None), "is_corpse", False))
+
+    def at_repeat(self):
+        obj = self.obj
+        if not obj or not getattr(obj.db, "is_corpse", False):
+            return
+        if hasattr(obj, "is_orphaned") and obj.is_orphaned():
+            obj.delete()
+            return
+        now = time.time()
+        vigil_until = float(getattr(obj.db, "devotional_vigil_until", 0.0) or 0.0)
+        protected = bool(getattr(obj.db, "stabilized", False)) or now < vigil_until
+        decay_scale = 1.0
+        if getattr(obj, "location", None) and hasattr(obj.location, "get_death_zone_profile"):
+            decay_scale = float(obj.location.get_death_zone_profile().get("corpse_decay_scale", 1.0) or 1.0)
+        if not protected and hasattr(obj, "adjust_condition"):
+            obj.adjust_condition(-((self.interval / 60.0) * decay_scale))
+        if hasattr(obj, "get_memory_remaining") and obj.get_memory_remaining() <= 0:
+            if hasattr(obj, "apply_memory_loss"):
+                obj.apply_memory_loss()
+        decay_time = float(getattr(obj.db, "decay_time", 0.0) or 0.0)
+        if decay_time <= 0:
+            return
+        if now < decay_time:
+            return
+        if hasattr(obj, "decay_to_grave"):
+            obj.decay_to_grave()
+
+
+class GraveMaintenanceScript(Script):
+    def at_script_creation(self):
+        self.key = "grave_maintenance"
+        self.interval = 2 * 60 * 60
+        self.start_delay = True
+        self.repeats = 0
+        self.persistent = True
+
+    def is_valid(self):
+        obj = self.obj
+        return bool(obj and getattr(getattr(obj, "db", None), "is_grave", False))
+
+    def at_repeat(self):
+        obj = self.obj
+        if not obj or not getattr(getattr(obj, "db", None), "is_grave", False):
+            return
+        if hasattr(obj, "is_orphaned") and obj.is_orphaned():
+            obj.delete()
+            return
+        expiry_remaining = float(getattr(obj, "get_expiry_remaining", lambda: 0.0)() or 0.0)
+        owner = obj.get_owner() if hasattr(obj, "get_owner") else None
+        if expiry_remaining > 0 and expiry_remaining <= 3600 and owner and not bool(getattr(obj.db, "expiry_warned", False)):
+            owner.msg("You feel your connection to your lost possessions fading.")
+            obj.db.expiry_warned = True
+        if float(getattr(obj.db, "expiry_time", 0.0) or 0.0) > 0 and expiry_remaining <= 0:
+            obj.delete()
+            return
+        if hasattr(obj, "increment_grave_damage"):
+            obj.increment_grave_damage(1)
+        obj.db.last_grave_damage_tick = time.time()

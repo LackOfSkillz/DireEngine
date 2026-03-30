@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdHide(Command):
-        """
-        Attempt to hide from view.
+    """
+    Attempt to hide from view.
 
-        Examples:
-            hide
-        """
+    Examples:
+        hide
+    """
 
     key = "hide"
     locks = "cmd:all()"

@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdAmbush(Command):
-        """
-        Prepare a hidden ambush against a target.
+    """
+    Prepare a hidden ambush against a target.
 
-        Examples:
-            ambush goblin
-        """
+    Examples:
+        ambush goblin
+    """
 
     key = "ambush"
     locks = "cmd:all()"

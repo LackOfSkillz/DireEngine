@@ -1,14 +1,14 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdOpen(Command):
-        """
-        Open a container, door, or similar object.
+    """
+    Open a container, door, or similar object.
 
-        Examples:
-            open chest
-            open door
-        """
+    Examples:
+        open chest
+        open door
+    """
 
     key = "open"
     locks = "cmd:all()"

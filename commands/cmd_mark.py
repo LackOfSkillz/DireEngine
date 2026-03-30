@@ -1,16 +1,16 @@
-import random
+﻿import random
 import time
 
 from evennia import Command
 
 
 class CmdMark(Command):
-        """
-        Mark a target for thief abilities and ambush setup.
+    """
+    Mark a target for thief abilities and ambush setup.
 
-        Examples:
-            mark goblin
-        """
+    Examples:
+        mark goblin
+    """
 
     key = "mark"
     locks = "cmd:all()"

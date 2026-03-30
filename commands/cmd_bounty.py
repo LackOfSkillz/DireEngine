@@ -1,13 +1,13 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdBounty(Command):
-        """
-        Review or manage your current bounty target.
+    """
+    Review or manage your current bounty target.
 
-        Examples:
-            bounty
-        """
+    Examples:
+        bounty
+    """
 
     key = "bounty"
     locks = "cmd:all()"

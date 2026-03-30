@@ -17,6 +17,17 @@ class CmdPerceive(Command):
     def func(self):
         caller = self.caller
         args = str(self.args or "").strip()
+        if getattr(caller, "is_profession", lambda *_: False)("cleric"):
+            if not args:
+                caller.msg("Perceive what? Try a corpse.")
+                return
+            target = caller.search(args, location=caller.location)
+            if not target:
+                return
+            ok, lines = caller.perceive_cleric_corpse(target) if hasattr(caller, "perceive_cleric_corpse") else (False, ["You sense nothing useful."])
+            for line in lines:
+                caller.msg(line)
+            return
         if not getattr(caller, "is_empath", lambda: False)():
             caller.msg("You cannot read life forces that way.")
             return

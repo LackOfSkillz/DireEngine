@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdCompare(Command):
-        """
-        Compare two items to judge their differences.
+    """
+    Compare two items to judge their differences.
 
-        Examples:
-            compare sword, dagger
-        """
+    Examples:
+        compare sword, dagger
+    """
 
     key = "compare"
     locks = "cmd:all()"

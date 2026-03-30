@@ -1,14 +1,14 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdFire(Command):
-        """
-        Fire your loaded ranged weapon at a target.
+    """
+    Fire your loaded ranged weapon at a target.
 
-        Examples:
-            fire goblin
-            fire
-        """
+    Examples:
+        fire goblin
+        fire
+    """
 
     key = "fire"
     locks = "cmd:all()"

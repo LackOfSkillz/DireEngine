@@ -158,6 +158,19 @@ Some helpful flows already present in the repo:
 - `spawnweapon`, `spawnwearable`, `spawnsheath`, `spawnvendor`, and related debug spawners
 - `maptest local` and `maptest zone` for structured map payload checks
 
+DireTest currently has its first live scenario entrypoint:
+
+```powershell
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario race-balance
+```
+
+Optional flags:
+
+- `--profession commoner`
+- `--sample-weight 80`
+- `--base-xp 100`
+- `--json`
+
 ## Development Notes
 
 - The repository includes implementation reports and task-range reports documenting major system work.

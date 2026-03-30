@@ -132,10 +132,13 @@ class CmdTend(Command):
             patient.apply_tend(part_key, tender=self.caller)
             patient.heal_body_part(part_key, 5 + max(0, skill_rank // 5))
             if patient == self.caller:
-                self.caller.msg(f"You tend your {part_display}.")
+                message = f"You tend your {part_display}."
             else:
-                self.caller.msg(f"You tend {patient.key}'s {part_display}.")
+                message = f"You tend {patient.key}'s {part_display}."
+                self.caller.msg(message)
                 patient.msg(f"{self.caller.key} tends your {part_display}.")
+            if patient == self.caller:
+                self.caller.msg(message)
             if self.caller.location:
                 action = (
                     f"{self.caller.key} tends to their {part_display}."
@@ -146,6 +149,14 @@ class CmdTend(Command):
                     action,
                     exclude=[self.caller, patient] if patient != self.caller else self.caller,
                 )
+            try:
+                from systems import onboarding
+
+                completed, awarded = onboarding.note_healing_action(self.caller, patient=patient, part=part_key)
+                if completed and awarded:
+                    self.caller.msg(onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self.caller)))
+            except Exception:
+                pass
             return
 
         if patient == self.caller:
@@ -163,3 +174,9 @@ class CmdTend(Command):
                 action,
                 exclude=[self.caller, patient] if patient != self.caller else self.caller,
             )
+        try:
+            from systems import onboarding
+
+            onboarding.note_step_failure(self.caller, "healing")
+        except Exception:
+            pass

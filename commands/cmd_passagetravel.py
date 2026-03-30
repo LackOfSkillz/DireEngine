@@ -1,15 +1,15 @@
-import random
+﻿import random
 
 from commands.command import Command
 
 
 class CmdPassageTravel(Command):
-        """
-        Travel through a discovered passage network.
+    """
+    Travel through a discovered passage network.
 
-        Examples:
-            passage travel cellar
-        """
+    Examples:
+        passage travel cellar
+    """
 
     key = "passage travel"
     aliases = ["passagetravel"]

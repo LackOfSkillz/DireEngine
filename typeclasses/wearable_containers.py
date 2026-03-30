@@ -7,6 +7,7 @@ class WearableContainer(Wearable):
         self.db.is_container = True
         self.db.capacity = 1
         self.db.allowed_types = []
+        self.db.max_capacity_weight = 10.0
 
     def is_worn(self):
         return getattr(self.db, "worn_by", None) is not None
@@ -27,6 +28,15 @@ class WearableContainer(Wearable):
 
         if len(self.get_stored_items()) >= (self.db.capacity or 1):
             return False, "It cannot hold anything more."
+
+        current_contents_weight = self.get_contents_weight() if hasattr(self, "get_contents_weight") else 0.0
+        if owner and hasattr(owner, "get_object_total_weight"):
+            item_weight = owner.get_object_total_weight(item)
+        else:
+            item_weight = float(getattr(item.db, "weight", 0.0) or 0.0)
+        max_capacity_weight = float(getattr(self.db, "max_capacity_weight", 0.0) or 0.0)
+        if max_capacity_weight > 0 and (current_contents_weight + item_weight) > max_capacity_weight:
+            return False, "There is no room for that."
 
         allowed = self.db.allowed_types or []
         if allowed and getattr(item.db, "item_type", None) not in allowed:
@@ -83,6 +93,10 @@ class WearableContainer(Wearable):
     def return_appearance(self, looker):
         desc = self.db.desc or "A practical wearable container."
         lines = [self.key, desc]
+        total_weight = self.get_total_weight() if hasattr(self, "get_total_weight") else float(getattr(self.db, "weight", 0.0) or 0.0)
+        contents_weight = self.get_contents_weight() if hasattr(self, "get_contents_weight") else 0.0
+        lines.append(f"Weight: {total_weight:.1f} (contents: {contents_weight:.1f})")
+        lines.append(f"Capacity: {contents_weight:.1f} / {float(getattr(self.db, 'max_capacity_weight', 0.0) or 0.0):.1f}")
         if self.is_worn():
             lines.append("It is currently being worn.")
 

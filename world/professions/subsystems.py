@@ -37,6 +37,7 @@ class ProfessionSubsystem:
 
     def _db_key(self):
         return {
+            "devotion": "devotion",
             "fire": "inner_fire",
             "focus": "focus",
             "tempo": "war_tempo",
@@ -46,12 +47,30 @@ class ProfessionSubsystem:
 
     def _db_max_key(self):
         return {
+            "max_devotion": "max_devotion",
             "max_fire": "max_inner_fire",
             "max_focus": "max_focus",
             "max_tempo": "max_war_tempo",
             "max_pool": "max_transfer_pool",
             "max_attunement": "max_attunement",
         }[self.max_key]
+
+
+class ClericSubsystem(ProfessionSubsystem):
+    resource_key = "devotion"
+    max_key = "max_devotion"
+    default_max = 100
+
+    def get_state(self, character):
+        state = super().get_state(character)
+        if hasattr(character, "get_devotion_state"):
+            state["devotion_state"] = character.get_devotion_state()
+        return state
+
+    def tick(self, character):
+        if hasattr(character, "process_cleric_tick"):
+            return character.process_cleric_tick()
+        return False
 
 
 class BarbarianSubsystem(ProfessionSubsystem):
@@ -183,6 +202,7 @@ class MagicSubsystem(ProfessionSubsystem):
 
 SUBSYSTEMS = {
     "barbarian": BarbarianSubsystem,
+    "cleric": ClericSubsystem,
     "empath": EmpathSubsystem,
     "moon_mage": MagicSubsystem,
     "necromancer": MagicSubsystem,

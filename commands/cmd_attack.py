@@ -61,7 +61,7 @@ class CmdAttack(Command):
     """
 
     key = "attack"
-    aliases = ["att", "slice", "bash", "jab"]
+    aliases = ["att", "hit", "kill", "slice", "bash", "jab"]
     help_category = "Combat"
 
     def func(self):
@@ -90,13 +90,29 @@ class CmdAttack(Command):
                 return
         else:
             target_name = self.args.strip()
-            target = self.caller.search(target_name)
-
+            room = self.caller.location
+            if not room:
+                self.caller.msg("There is no one here to attack.")
+                return
+            candidates = [obj for obj in room.contents if obj != self.caller]
+            target, matches, base_query, index = self.caller.resolve_numbered_candidate(
+                target_name,
+                candidates,
+                default_first=True,
+            )
             if not target:
+                if matches and index is not None:
+                    self.caller.msg_numbered_matches(base_query, matches)
+                else:
+                    self.caller.msg("You do not see that target here.")
                 return
 
         if target == self.caller:
             self.caller.msg("Attacking yourself would accomplish very little.")
+            return
+
+        if getattr(getattr(target, "db", None), "is_corpse", False):
+            self.caller.msg("There is no life left there to fight.")
             return
 
         if not hasattr(target, "set_hp") or target.db.hp is None:
@@ -106,6 +122,9 @@ class CmdAttack(Command):
         if not target.is_alive():
             self.caller.msg(f"{target.key} is already down.")
             return
+
+        if hasattr(self.caller, "maybe_msg_death_sting_combat_feedback"):
+            self.caller.maybe_msg_death_sting_combat_feedback()
 
         if is_player_character(self.caller) and is_gm_character(target):
             target_target = target.get_target() if hasattr(target, "get_target") else None
@@ -164,6 +183,14 @@ class CmdAttack(Command):
             self.caller.register_empath_offensive_action(target=target, context="attack", amount=10)
         if hasattr(target, "check_room_traps_for_enemy"):
             target.check_room_traps_for_enemy(self.caller)
+        try:
+            from systems import onboarding
+
+            onboarding.note_combat_start(self.caller, target)
+            if str(getattr(getattr(target, "db", None), "onboarding_enemy_role", "") or "").lower() == "breach":
+                onboarding.note_breach_progress(self.caller, "start")
+        except Exception:
+            pass
 
         ambush = False
         strong_ambush = False
@@ -182,7 +209,7 @@ class CmdAttack(Command):
                     stealth_total += 5
                 if self.caller.is_stalking() and self.caller.get_stalk_target_id() == target.id:
                     stealth_total += 10
-                ambush_result = run_contest(stealth_total, target.get_perception_total())
+                ambush_result = run_contest(stealth_total, target.get_perception_total(), attacker=self.caller, defender=target)
                 if ambush_result["outcome"] == "fail":
                     self.caller.msg("You fail to find the opening!")
                     if hasattr(self.caller, "set_position_state"):
@@ -382,6 +409,11 @@ class CmdAttack(Command):
         if strong_ambush:
             evasion = 0
 
+        if hasattr(self.caller, "apply_death_sting_to_contest_value"):
+            accuracy = self.caller.apply_death_sting_to_contest_value(accuracy)
+        if hasattr(target, "apply_death_sting_to_contest_value"):
+            evasion = target.apply_death_sting_to_contest_value(evasion)
+
         aimed_location, aimed_part = self.caller.resolve_targeted_body_part()
         if aimed_part == "head":
             accuracy -= 20
@@ -477,9 +509,11 @@ class CmdAttack(Command):
                 )
             return
 
-        base = profile.get("damage") if weapon else 1
+        base = max(1, int(profile.get("damage") or 1)) if weapon else 1
         if weapon:
-            base = max(base, random.randint(profile["damage_min"], profile["damage_max"]))
+            damage_min = max(1, int(profile.get("damage_min") or base))
+            damage_max = max(damage_min, int(profile.get("damage_max") or damage_min))
+            base = max(base, random.randint(damage_min, damage_max))
         damage = base + int(skill_rank * 0.2) + int(suitability * 0.3)
         if skill_rank > 30:
             damage += 2
@@ -562,6 +596,8 @@ class CmdAttack(Command):
             damage = max(1, damage - int(round(protection)))
             target.msg("Your armor absorbs part of the blow.")
 
+        if hasattr(self.caller, "apply_death_sting_to_damage"):
+            damage = self.caller.apply_death_sting_to_damage(damage)
         damage = max(0, int(damage))
         if final_chance < 95:
             difficulty = target.get_stat("reflex") + target.get_stat("agility")
@@ -696,3 +732,11 @@ class CmdAttack(Command):
             target.msg("You collapse from the blow.")
             self.caller.set_target(None)
             target.set_target(None)
+            try:
+                from systems import onboarding
+
+                completed, awarded = onboarding.note_combat_win(self.caller, target)
+                if completed and awarded:
+                    self.caller.msg(onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self.caller)))
+            except Exception:
+                pass

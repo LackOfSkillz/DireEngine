@@ -1070,6 +1070,26 @@ def _room_desc(node, road_meta):
     return " ".join(part for part in parts if part)
 
 
+def _classify_service_flags(node):
+    text_parts = [
+        node.get("final_label"),
+        node.get("generated_name"),
+        node.get("ocr_label"),
+        node.get("label_candidate"),
+        node.get("poi_anchor"),
+        node.get("poi_exit_name"),
+        node.get("landmark_flavor"),
+        node.get("generated_desc"),
+        node.get("desc_final"),
+    ]
+    combined = " ".join(str(part or "") for part in text_parts).lower()
+    is_bank = any(token in combined for token in ("bank", "exchange", "depository", "clerk", "ledger"))
+    is_vault = any(token in combined for token in ("vault", "strongroom", "depository"))
+    if is_bank and any(token in combined for token in ("strongroom", "vault", "storage")):
+        is_vault = True
+    return is_bank, is_vault
+
+
 def _ensure_room(node, road_meta, namespace):
     room = _get_tagged(node["id"], namespace["node_category"])
     if not room:
@@ -1091,6 +1111,9 @@ def _ensure_room(node, road_meta, namespace):
     room.db.map_y = node["y"]
     room.db.marker_kind = node["kind"]
     room.db.region_name = _region_for_position(node["x"], node["y"])[0]
+    is_bank, is_vault = _classify_service_flags(node)
+    room.db.is_bank = is_bank
+    room.db.is_vault = is_vault
     if road_meta.get("street"):
         room.db.street_name = road_meta["street"]["name"]
     else:
@@ -1105,6 +1128,10 @@ def _ensure_room(node, road_meta, namespace):
     room.tags.add(*namespace["area_tag"])
     room.tags.add(*namespace["area_version_tag"])
     room.tags.add(node["id"], category=namespace["node_category"])
+    if is_bank:
+        room.tags.add("bank")
+    if is_vault:
+        room.tags.add("vault")
     return room
 
 

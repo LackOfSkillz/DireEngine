@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdForage(Command):
-        """
-        Search the area for useful natural materials.
+    """
+    Search the area for useful natural materials.
 
-        Examples:
-            forage
-        """
+    Examples:
+        forage
+    """
 
     key = "forage"
     locks = "cmd:all()"

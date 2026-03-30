@@ -1,17 +1,17 @@
-import random
+﻿import random
 import time
 
 from commands.command import Command
 
 
 class CmdTrack(Command):
-        """
-        Track a bounty target or follow a ranger trail.
+    """
+    Track a bounty target or follow a ranger trail.
 
-        Examples:
-            track outlaw
-            track wolf
-        """
+    Examples:
+        track outlaw
+        track wolf
+    """
 
     key = "track"
     locks = "cmd:all()"

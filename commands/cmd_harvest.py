@@ -1,14 +1,14 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdHarvest(Command):
-        """
-        Harvest a usable resource from the current room.
+    """
+    Harvest a usable resource from the current room.
 
-        Examples:
-            harvest
-            harvest herb
-        """
+    Examples:
+        harvest
+        harvest herb
+    """
 
     key = "harvest"
     locks = "cmd:all()"

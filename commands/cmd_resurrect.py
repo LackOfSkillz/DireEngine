@@ -59,4 +59,10 @@ class CmdResurrect(Command):
         caller.msg(message)
         if ok:
             if restored and restored.location:
-                restored.location.msg_contents(f"{restored.key} gasps and returns to life.", exclude=[restored])
+                quality = str(getattr(getattr(restored, 'db', None), 'last_recovery_quality', '') or '')
+                room_message = f"{restored.key} stirs, breath returning."
+                if quality == "perfect":
+                    room_message = f"{restored.key} rises with startling clarity as life returns."
+                elif quality in {"fragile", "flawed"}:
+                    room_message = f"{restored.key} stirs weakly, breath returning with visible strain."
+                restored.location.msg_contents(room_message, exclude=[restored])

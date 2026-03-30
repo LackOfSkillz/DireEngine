@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdObserve(Command):
-        """
-        Carefully watch the room for details or movement.
+    """
+    Carefully watch the room for details or movement.
 
-        Examples:
-            observe
-        """
+    Examples:
+        observe
+    """
 
     key = "observe"
     locks = "cmd:all()"

@@ -26,4 +26,13 @@ class Exit(ObjectParent, DefaultExit):
     def at_traverse(self, traversing_object, target_location, **kwargs):
         if traversing_object:
             traversing_object.ndb.last_traverse_direction = self.key
+            try:
+                from systems.onboarding import get_traverse_block
+
+                message = get_traverse_block(self, traversing_object, target_location)
+                if message:
+                    traversing_object.msg(message)
+                    return False
+            except Exception:
+                pass
         return super().at_traverse(traversing_object, target_location, **kwargs)

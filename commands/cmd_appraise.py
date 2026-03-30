@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdAppraise(Command):
-        """
-        Estimate the value and quality of an item.
+    """
+    Estimate the value and quality of an item.
 
-        Examples:
-            appraise sword
-        """
+    Examples:
+        appraise sword
+    """
 
     key = "appraise"
     locks = "cmd:all()"

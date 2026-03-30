@@ -1,13 +1,13 @@
-from evennia import Command
+﻿from evennia import Command
 
 
 class CmdAssessStance(Command):
-        """
-        Review what your current stance settings mean in combat.
+    """
+    Review what your current stance settings mean in combat.
 
-        Examples:
-            assessstance
-        """
+    Examples:
+        assessstance
+    """
 
     key = "assessstance"
     locks = "cmd:all()"

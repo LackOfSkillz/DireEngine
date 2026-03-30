@@ -1,13 +1,13 @@
-from commands.command import Command
+﻿from commands.command import Command
 
 
 class CmdEnterPassage(Command):
-        """
-        Enter a hidden or discovered passage.
+    """
+    Enter a hidden or discovered passage.
 
-        Examples:
-            enter passage
-        """
+    Examples:
+        enter passage
+    """
 
     key = "enter passage"
     aliases = ["enterpassage"]

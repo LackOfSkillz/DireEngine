@@ -1,16 +1,16 @@
-from evennia import Command
+﻿from evennia import Command
 from evennia.utils.create import create_object
 
 from typeclasses.lockpick import Lockpick
 
 
 class CmdSpawnLockpick(Command):
-        """
-        Spawn a test lockpick in the room.
+    """
+    Spawn a test lockpick in the room.
 
-        Examples:
-            spawnlockpick
-        """
+    Examples:
+        spawnlockpick
+    """
 
     key = "spawnlockpick"
     aliases = ["spawnpick"]

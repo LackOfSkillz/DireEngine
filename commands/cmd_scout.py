@@ -1,15 +1,15 @@
-import time
+﻿import time
 
 from commands.command import Command
 
 
 class CmdScout(Command):
-        """
-        Scout the area for visible signs and trails.
+    """
+    Scout the area for visible signs and trails.
 
-        Examples:
-            scout
-        """
+    Examples:
+        scout
+    """
 
     key = "scout"
     locks = "cmd:all()"
