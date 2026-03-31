@@ -1,0 +1,48 @@
+{
+  "deletion_failures": [
+    {
+      "error": "database is locked",
+      "id": 7302,
+      "key": "TEST_ROOM_FA0E216E"
+    }
+  ],
+  "exit_code": 1,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    }
+  ],
+  "leaks": [
+    {
+      "id": 7280,
+      "key": "TEST_ROOM_32A4C838",
+      "type": "typeclasses.rooms.Room"
+    },
+    {
+      "id": 7281,
+      "key": "TEST_CHAR_709D03C3",
+      "type": "typeclasses.characters.Character"
+    },
+    {
+      "id": 7289,
+      "key": "TEST_CHAR_4A7059DE",
+      "type": "typeclasses.characters.Character"
+    },
+    {
+      "id": 7291,
+      "key": "TEST_CHAR_C67C4272",
+      "type": "typeclasses.characters.Character"
+    },
+    {
+      "id": 7302,
+      "key": "TEST_ROOM_FA0E216E",
+      "type": "typeclasses.rooms.Room"
+    }
+  ],
+  "output_log": [],
+  "result": {
+    "ok": true
+  }
+}

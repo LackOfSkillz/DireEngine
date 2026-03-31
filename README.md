@@ -158,10 +158,17 @@ Some helpful flows already present in the repo:
 - `spawnweapon`, `spawnwearable`, `spawnsheath`, `spawnvendor`, and related debug spawners
 - `maptest local` and `maptest zone` for structured map payload checks
 
-DireTest currently has its first live scenario entrypoint:
+DireTest currently has these live scenario entrypoints:
 
 ```powershell
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario race-balance
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario movement --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario inventory --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario combat-basic --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario death-loop --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario grave-recovery --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario economy --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario bank --seed 1234
 ```
 
 Optional flags:
@@ -170,6 +177,8 @@ Optional flags:
 - `--sample-weight 80`
 - `--base-xp 100`
 - `--json`
+
+The direct gameplay scenarios now cover movement, inventory, basic combat, death and depart loops, grave recovery, vendor trading, and banking with reproducible artifacts under `artifacts/`.
 
 ## Development Notes
 

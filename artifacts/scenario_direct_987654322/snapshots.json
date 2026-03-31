@@ -1,0 +1,53 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7291,
+        "key": "TEST_CHAR_C67C4272",
+        "location": "TEST_ROOM_7255813B",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "look",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7290,
+            "key": "TEST_ROOM_7255813B",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7291,
+            "key": "TEST_CHAR_C67C4272",
+            "location": "TEST_ROOM_7255813B",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_CHAR_C67C4272"
+        ],
+        "exits": [],
+        "id": 7290,
+        "key": "TEST_ROOM_7255813B"
+      },
+      "timestamp": 1774916541.5379872
+    },
+    "label": "look"
+  }
+]

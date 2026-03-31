@@ -1,0 +1,254 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 100,
+        "hp": 100,
+        "id": 7363,
+        "is_dead": false,
+        "key": "TEST_ECON_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_ECON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7365,
+          "key": "TEST_ECON_TRINKET",
+          "location": "TEST_ECON_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7362,
+            "key": "TEST_ECON_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7363,
+            "key": "TEST_ECON_CHAR",
+            "location": "TEST_ECON_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7364,
+            "key": "merchant",
+            "location": "TEST_ECON_ROOM",
+            "typeclass": "typeclasses.vendor.Vendor"
+          },
+          {
+            "id": 7365,
+            "key": "TEST_ECON_TRINKET",
+            "location": "TEST_ECON_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_ECON_CHAR",
+          "merchant"
+        ],
+        "exits": [],
+        "id": 7362,
+        "key": "TEST_ECON_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1774920883.1364973
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 100,
+        "hp": 100,
+        "id": 7363,
+        "is_dead": false,
+        "key": "TEST_ECON_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_ECON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "haggle_bonus": 0.15
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7365,
+          "key": "TEST_ECON_TRINKET",
+          "location": "TEST_ECON_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "haggled",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_ECON_CHAR",
+          "merchant"
+        ],
+        "exits": [],
+        "id": 7362,
+        "key": "TEST_ECON_ROOM"
+      },
+      "snapshot_label": "haggled",
+      "timestamp": 1774920883.8974526
+    },
+    "label": "haggled"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 80,
+        "hp": 100,
+        "id": 7363,
+        "is_dead": false,
+        "key": "TEST_ECON_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_ECON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "haggle_bonus": 0.15
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7365,
+          "key": "TEST_ECON_TRINKET",
+          "location": "TEST_ECON_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 7366,
+          "key": "study book",
+          "location": "TEST_ECON_CHAR",
+          "typeclass": "typeclasses.study_item.StudyItem"
+        }
+      ],
+      "label": "bought",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7366,
+            "key": "study book",
+            "location": "TEST_ECON_CHAR",
+            "typeclass": "typeclasses.study_item.StudyItem"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_ECON_CHAR",
+          "merchant"
+        ],
+        "exits": [],
+        "id": 7362,
+        "key": "TEST_ECON_ROOM"
+      },
+      "snapshot_label": "bought",
+      "timestamp": 1774920884.5347378
+    },
+    "label": "bought"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 95,
+        "hp": 100,
+        "id": 7363,
+        "is_dead": false,
+        "key": "TEST_ECON_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_ECON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "haggle_bonus": 0.15
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7366,
+          "key": "study book",
+          "location": "TEST_ECON_CHAR",
+          "typeclass": "typeclasses.study_item.StudyItem"
+        }
+      ],
+      "label": "sold",
+      "object_deltas": {
+        "created": [],
+        "deleted": [
+          {
+            "id": 7365,
+            "key": "TEST_ECON_TRINKET",
+            "location": "TEST_ECON_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ]
+      },
+      "room": {
+        "contents": [
+          "TEST_ECON_CHAR",
+          "merchant"
+        ],
+        "exits": [],
+        "id": 7362,
+        "key": "TEST_ECON_ROOM"
+      },
+      "snapshot_label": "sold",
+      "timestamp": 1774920885.287152
+    },
+    "label": "sold"
+  }
+]

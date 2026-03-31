@@ -1,0 +1,26 @@
+{
+  "deletion_failures": [
+    {
+      "error": "This object was already deleted!",
+      "id": 7312,
+      "key": "TEST_ROOM_8136EDC9"
+    }
+  ],
+  "exit_code": 0,
+  "invariant_results": [],
+  "leaks": [],
+  "output_log": [
+    "|cTEST_ROOM_8136EDC9|n\nThis is a room. {'type': 'look'}",
+    "FROM_OBJ TEST_CHAR_3B2A7CE3",
+    "SESSION None"
+  ],
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "output_log": [
+      "|cTEST_ROOM_8136EDC9|n\nThis is a room. {'type': 'look'}",
+      "FROM_OBJ TEST_CHAR_3B2A7CE3",
+      "SESSION None"
+    ]
+  }
+}

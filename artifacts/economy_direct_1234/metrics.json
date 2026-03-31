@@ -1,0 +1,147 @@
+{
+  "deletion_failures": [],
+  "exit_code": 0,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "leaks": [],
+  "output_log": [
+    "You attempt to negotiate with merchant.",
+    "You negotiate a better deal.",
+    "You purchase book for 2 silvers.",
+    "The shopkeeper hands you 1 silver, 5 coppers."
+  ],
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "buy_diff": {
+      "after_label": "bought",
+      "after_snapshot_created": [
+        "study book"
+      ],
+      "after_snapshot_deleted": [],
+      "before_label": "haggled",
+      "character_coins_after": 80,
+      "character_coins_before": 100,
+      "character_coins_delta": -20,
+      "character_hp_after": 100,
+      "character_hp_before": 100,
+      "character_hp_delta": 0,
+      "character_location_after": "TEST_ECON_ROOM",
+      "character_location_before": "TEST_ECON_ROOM",
+      "died": false,
+      "entered_combat": false,
+      "exited_combat": false,
+      "in_combat_after": false,
+      "in_combat_before": false,
+      "inventory_added": [
+        "study book"
+      ],
+      "inventory_removed": [],
+      "is_dead_after": false,
+      "is_dead_before": false,
+      "life_state_after": "ALIVE",
+      "life_state_before": "ALIVE",
+      "range_changed": false,
+      "revived": false,
+      "room_after": "TEST_ECON_ROOM",
+      "room_before": "TEST_ECON_ROOM",
+      "room_changed": false,
+      "room_contents_added": [],
+      "room_contents_removed": [],
+      "roundtime_after": 0.0,
+      "roundtime_before": 0.0,
+      "target_after": null,
+      "target_assigned": false,
+      "target_before": null,
+      "target_cleared": false,
+      "target_hp_after": null,
+      "target_hp_before": null,
+      "target_hp_delta": null,
+      "target_range_after": null,
+      "target_range_before": null
+    },
+    "coins": 95,
+    "commands": [
+      "haggle merchant",
+      "buy book",
+      "sell TEST_ECON_TRINKET"
+    ],
+    "haggle_bonus": 0.15,
+    "output_log": [
+      "You attempt to negotiate with merchant.",
+      "You negotiate a better deal.",
+      "You purchase book for 2 silvers.",
+      "The shopkeeper hands you 1 silver, 5 coppers."
+    ],
+    "sell_diff": {
+      "after_label": "sold",
+      "after_snapshot_created": [],
+      "after_snapshot_deleted": [
+        "TEST_ECON_TRINKET"
+      ],
+      "before_label": "bought",
+      "character_coins_after": 95,
+      "character_coins_before": 80,
+      "character_coins_delta": 15,
+      "character_hp_after": 100,
+      "character_hp_before": 100,
+      "character_hp_delta": 0,
+      "character_location_after": "TEST_ECON_ROOM",
+      "character_location_before": "TEST_ECON_ROOM",
+      "died": false,
+      "entered_combat": false,
+      "exited_combat": false,
+      "in_combat_after": false,
+      "in_combat_before": false,
+      "inventory_added": [],
+      "inventory_removed": [
+        "TEST_ECON_TRINKET"
+      ],
+      "is_dead_after": false,
+      "is_dead_before": false,
+      "life_state_after": "ALIVE",
+      "life_state_before": "ALIVE",
+      "range_changed": false,
+      "revived": false,
+      "room_after": "TEST_ECON_ROOM",
+      "room_before": "TEST_ECON_ROOM",
+      "room_changed": false,
+      "room_contents_added": [],
+      "room_contents_removed": [],
+      "roundtime_after": 0.0,
+      "roundtime_before": 0.0,
+      "target_after": null,
+      "target_assigned": false,
+      "target_before": null,
+      "target_cleared": false,
+      "target_hp_after": null,
+      "target_hp_before": null,
+      "target_hp_delta": null,
+      "target_range_after": null,
+      "target_range_before": null
+    },
+    "snapshot_count": 4,
+    "snapshot_labels": [
+      "initial",
+      "haggled",
+      "bought",
+      "sold"
+    ]
+  },
+  "snapshot_labels": [
+    "initial",
+    "haggled",
+    "bought",
+    "sold"
+  ]
+}

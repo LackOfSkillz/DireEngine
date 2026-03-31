@@ -1,0 +1,179 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 37,
+        "hp": 100,
+        "id": 7368,
+        "is_dead": false,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7369,
+          "key": "TEST_DEATH_TOKEN",
+          "location": "TEST_DEATH_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "alive",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7367,
+            "key": "TEST_DEATH_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7368,
+            "key": "TEST_DEATH_CHAR",
+            "location": "TEST_DEATH_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7369,
+            "key": "TEST_DEATH_TOKEN",
+            "location": "TEST_DEATH_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 7367,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "alive",
+      "timestamp": 1774920914.2767146
+    },
+    "label": "alive"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7368,
+        "is_dead": true,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "DEAD",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "dead",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7370,
+            "key": "corpse of TEST_DEATH_CHAR",
+            "location": "TEST_DEATH_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR",
+          "corpse of TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 7367,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "dead",
+      "timestamp": 1774920916.187645
+    },
+    "label": "dead"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 37,
+        "hp": 50,
+        "id": 7368,
+        "is_dead": false,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7369,
+          "key": "TEST_DEATH_TOKEN",
+          "location": "TEST_DEATH_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "departed",
+      "object_deltas": {
+        "created": [],
+        "deleted": [
+          {
+            "id": 7370,
+            "key": "corpse of TEST_DEATH_CHAR",
+            "location": "TEST_DEATH_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ]
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 7367,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "departed",
+      "timestamp": 1774920918.0728104
+    },
+    "label": "departed"
+  }
+]

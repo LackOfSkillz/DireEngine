@@ -1,0 +1,156 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7325,
+        "key": "TEST_MOVE_CHAR",
+        "location": "TEST_MOVE_START",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "look",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7321,
+            "key": "TEST_MOVE_START",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7322,
+            "key": "TEST_MOVE_NORTH",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7323,
+            "key": "north",
+            "location": "TEST_MOVE_START",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 7324,
+            "key": "south",
+            "location": "TEST_MOVE_NORTH",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 7325,
+            "key": "TEST_MOVE_CHAR",
+            "location": "TEST_MOVE_START",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "north",
+          "TEST_MOVE_CHAR"
+        ],
+        "exits": [
+          "north"
+        ],
+        "id": 7321,
+        "key": "TEST_MOVE_START"
+      },
+      "timestamp": 1774918972.339904
+    },
+    "label": "look"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7325,
+        "key": "TEST_MOVE_CHAR",
+        "location": "TEST_MOVE_NORTH",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "north",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "south",
+          "TEST_MOVE_CHAR"
+        ],
+        "exits": [
+          "south"
+        ],
+        "id": 7322,
+        "key": "TEST_MOVE_NORTH"
+      },
+      "timestamp": 1774918972.8474686
+    },
+    "label": "north"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7325,
+        "key": "TEST_MOVE_CHAR",
+        "location": "TEST_MOVE_NORTH",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "look",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "south",
+          "TEST_MOVE_CHAR"
+        ],
+        "exits": [
+          "south"
+        ],
+        "id": 7322,
+        "key": "TEST_MOVE_NORTH"
+      },
+      "timestamp": 1774918973.1696424
+    },
+    "label": "look"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "deletion_failures": [],
+  "exit_code": 1,
+  "leaks": [
+    {
+      "id": 7280,
+      "key": "TEST_ROOM_32A4C838",
+      "type": "typeclasses.rooms.Room"
+    },
+    {
+      "id": 7281,
+      "key": "TEST_CHAR_709D03C3",
+      "type": "typeclasses.characters.Character"
+    }
+  ],
+  "result": {
+    "character": "TEST_CHAR_B19FE43B",
+    "room": "TEST_ROOM_C474B73E"
+  }
+}

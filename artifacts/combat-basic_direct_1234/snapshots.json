@@ -1,0 +1,199 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7348,
+        "key": "TEST_COMBAT_ATTACKER",
+        "location": "TEST_COMBAT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7347,
+            "key": "TEST_COMBAT_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7348,
+            "key": "TEST_COMBAT_ATTACKER",
+            "location": "TEST_COMBAT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7349,
+            "key": "TEST_COMBAT_DEFENDER",
+            "location": "TEST_COMBAT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_COMBAT_ATTACKER",
+          "TEST_COMBAT_DEFENDER"
+        ],
+        "exits": [],
+        "id": 7347,
+        "key": "TEST_COMBAT_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1774920490.1099129
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7348,
+        "key": "TEST_COMBAT_ATTACKER",
+        "location": "TEST_COMBAT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 0.0,
+        "target": "TEST_COMBAT_DEFENDER",
+        "target_summary": {
+          "hp": 50,
+          "id": 7349,
+          "in_combat": false,
+          "key": "TEST_COMBAT_DEFENDER",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "engaged",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_COMBAT_ATTACKER",
+          "TEST_COMBAT_DEFENDER"
+        ],
+        "exits": [],
+        "id": 7347,
+        "key": "TEST_COMBAT_ROOM"
+      },
+      "snapshot_label": "engaged",
+      "timestamp": 1774920490.5331223
+    },
+    "label": "engaged"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7348,
+        "key": "TEST_COMBAT_ATTACKER",
+        "location": "TEST_COMBAT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 1.66,
+        "target": "TEST_COMBAT_DEFENDER",
+        "target_summary": {
+          "hp": 49,
+          "id": 7349,
+          "in_combat": true,
+          "key": "TEST_COMBAT_DEFENDER",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "damaged",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_COMBAT_ATTACKER",
+          "TEST_COMBAT_DEFENDER"
+        ],
+        "exits": [],
+        "id": 7347,
+        "key": "TEST_COMBAT_ROOM"
+      },
+      "snapshot_label": "damaged",
+      "timestamp": 1774920496.0043397
+    },
+    "label": "damaged"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7348,
+        "key": "TEST_COMBAT_ATTACKER",
+        "location": "TEST_COMBAT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.83,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "disengaged",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_COMBAT_ATTACKER",
+          "TEST_COMBAT_DEFENDER"
+        ],
+        "exits": [],
+        "id": 7347,
+        "key": "TEST_COMBAT_ROOM"
+      },
+      "snapshot_label": "disengaged",
+      "timestamp": 1774920496.8550544
+    },
+    "label": "disengaged"
+  }
+]

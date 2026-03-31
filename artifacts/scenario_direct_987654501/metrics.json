@@ -1,0 +1,24 @@
+{
+  "deletion_failures": [],
+  "exit_code": 0,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    }
+  ],
+  "leaks": [],
+  "output_log": [
+    "|cTEST_ROOM_399B6495|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}"
+  ],
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "output_log": [
+      "|cTEST_ROOM_399B6495|n\nThis is a room.",
+      "OPTIONS {'type': 'look'}"
+    ]
+  }
+}

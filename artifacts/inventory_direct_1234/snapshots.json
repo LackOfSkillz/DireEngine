@@ -1,0 +1,238 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7351,
+        "key": "TEST_INV_CHAR",
+        "location": "TEST_INV_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "inventory",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7350,
+            "key": "TEST_INV_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7351,
+            "key": "TEST_INV_CHAR",
+            "location": "TEST_INV_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7352,
+            "key": "TEST_INV_PACK",
+            "location": "TEST_INV_ROOM",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INV_CHAR",
+          "TEST_INV_PACK"
+        ],
+        "exits": [],
+        "id": 7350,
+        "key": "TEST_INV_ROOM"
+      },
+      "snapshot_label": "inventory",
+      "timestamp": 1774920507.9950712
+    },
+    "label": "inventory"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7351,
+        "key": "TEST_INV_CHAR",
+        "location": "TEST_INV_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7352,
+          "key": "TEST_INV_PACK",
+          "location": "TEST_INV_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "get TEST_INV_PACK",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INV_CHAR"
+        ],
+        "exits": [],
+        "id": 7350,
+        "key": "TEST_INV_ROOM"
+      },
+      "snapshot_label": "get TEST_INV_PACK",
+      "timestamp": 1774920508.3260581
+    },
+    "label": "get TEST_INV_PACK"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7351,
+        "key": "TEST_INV_CHAR",
+        "location": "TEST_INV_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7352,
+          "key": "TEST_INV_PACK",
+          "location": "TEST_INV_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "inventory",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INV_CHAR"
+        ],
+        "exits": [],
+        "id": 7350,
+        "key": "TEST_INV_ROOM"
+      },
+      "snapshot_label": "inventory",
+      "timestamp": 1774920508.807759
+    },
+    "label": "inventory"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7351,
+        "key": "TEST_INV_CHAR",
+        "location": "TEST_INV_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "drop TEST_INV_PACK",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INV_CHAR",
+          "TEST_INV_PACK"
+        ],
+        "exits": [],
+        "id": 7350,
+        "key": "TEST_INV_ROOM"
+      },
+      "snapshot_label": "drop TEST_INV_PACK",
+      "timestamp": 1774920509.067931
+    },
+    "label": "drop TEST_INV_PACK"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "coins": 0,
+        "hp": 100,
+        "id": 7351,
+        "key": "TEST_INV_CHAR",
+        "location": "TEST_INV_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "inventory",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INV_CHAR",
+          "TEST_INV_PACK"
+        ],
+        "exits": [],
+        "id": 7350,
+        "key": "TEST_INV_ROOM"
+      },
+      "snapshot_label": "inventory",
+      "timestamp": 1774920509.487276
+    },
+    "label": "inventory"
+  }
+]

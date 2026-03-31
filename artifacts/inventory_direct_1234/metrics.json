@@ -1,0 +1,127 @@
+{
+  "deletion_failures": [],
+  "exit_code": 0,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "leaks": [],
+  "output_log": [
+    "You are carrying nothing.\nCoins: 0 copper\nWeight: 0.0 / 100.0\nEncumbrance: Light",
+    "You pick up TEST_INV_PACK.",
+    "You are carrying:\nCoins: 0 copper\nWeight: 2.5 / 100.0\nEncumbrance: Light\n TEST_INV_PACK",
+    "You drop TEST_INV_PACK.",
+    "You are carrying nothing.\nCoins: 0 copper\nWeight: 0.0 / 100.0\nEncumbrance: Light"
+  ],
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "inventory",
+      "get TEST_INV_PACK",
+      "inventory",
+      "drop TEST_INV_PACK",
+      "inventory"
+    ],
+    "drop_diff": {
+      "after_label": "drop TEST_INV_PACK",
+      "after_snapshot_created": [],
+      "after_snapshot_deleted": [],
+      "before_label": "get TEST_INV_PACK",
+      "character_hp_after": 100,
+      "character_hp_before": 100,
+      "character_hp_delta": 0,
+      "character_location_after": "TEST_INV_ROOM",
+      "character_location_before": "TEST_INV_ROOM",
+      "entered_combat": false,
+      "exited_combat": false,
+      "in_combat_after": false,
+      "in_combat_before": false,
+      "inventory_added": [],
+      "inventory_removed": [
+        "TEST_INV_PACK"
+      ],
+      "range_changed": false,
+      "room_after": "TEST_INV_ROOM",
+      "room_before": "TEST_INV_ROOM",
+      "room_changed": false,
+      "room_contents_added": [
+        "TEST_INV_PACK"
+      ],
+      "room_contents_removed": [],
+      "roundtime_after": 0.0,
+      "roundtime_before": 0.0,
+      "target_after": null,
+      "target_assigned": false,
+      "target_before": null,
+      "target_cleared": false,
+      "target_hp_after": null,
+      "target_hp_before": null,
+      "target_hp_delta": null,
+      "target_range_after": null,
+      "target_range_before": null
+    },
+    "item": "TEST_INV_PACK",
+    "output_log": [
+      "You are carrying nothing.\nCoins: 0 copper\nWeight: 0.0 / 100.0\nEncumbrance: Light",
+      "You pick up TEST_INV_PACK.",
+      "You are carrying:\nCoins: 0 copper\nWeight: 2.5 / 100.0\nEncumbrance: Light\n TEST_INV_PACK",
+      "You drop TEST_INV_PACK.",
+      "You are carrying nothing.\nCoins: 0 copper\nWeight: 0.0 / 100.0\nEncumbrance: Light"
+    ],
+    "pickup_diff": {
+      "after_label": "get TEST_INV_PACK",
+      "after_snapshot_created": [],
+      "after_snapshot_deleted": [],
+      "before_label": "inventory",
+      "character_hp_after": 100,
+      "character_hp_before": 100,
+      "character_hp_delta": 0,
+      "character_location_after": "TEST_INV_ROOM",
+      "character_location_before": "TEST_INV_ROOM",
+      "entered_combat": false,
+      "exited_combat": false,
+      "in_combat_after": false,
+      "in_combat_before": false,
+      "inventory_added": [
+        "TEST_INV_PACK"
+      ],
+      "inventory_removed": [],
+      "range_changed": false,
+      "room_after": "TEST_INV_ROOM",
+      "room_before": "TEST_INV_ROOM",
+      "room_changed": false,
+      "room_contents_added": [],
+      "room_contents_removed": [
+        "TEST_INV_PACK"
+      ],
+      "roundtime_after": 0.0,
+      "roundtime_before": 0.0,
+      "target_after": null,
+      "target_assigned": false,
+      "target_before": null,
+      "target_cleared": false,
+      "target_hp_after": null,
+      "target_hp_before": null,
+      "target_hp_delta": null,
+      "target_range_after": null,
+      "target_range_before": null
+    },
+    "snapshot_count": 5
+  },
+  "snapshot_labels": [
+    "inventory",
+    "get TEST_INV_PACK",
+    "inventory",
+    "drop TEST_INV_PACK",
+    "inventory"
+  ]
+}

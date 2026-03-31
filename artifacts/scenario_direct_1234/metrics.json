@@ -1,0 +1,55 @@
+{
+  "deletion_failures": [],
+  "exit_code": 0,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    },
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "leaks": [],
+  "output_log": [
+    "|cTEST_MOVE_START|n\nThis is a room.\n|wExits:|n |lc__clickmove__ north|lt|ynorth|n|le",
+    "OPTIONS {'type': 'look'}",
+    "|cTEST_MOVE_NORTH|n\nThis is a room.\n|wExits:|n |lc__clickmove__ south|lt|ysouth|n|le",
+    "OPTIONS {'type': 'look'}",
+    "|cTEST_MOVE_NORTH|n\nThis is a room.\n|wExits:|n |lc__clickmove__ south|lt|ysouth|n|le",
+    "OPTIONS {'type': 'look'}"
+  ],
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "look",
+      "north",
+      "look"
+    ],
+    "end_room": "TEST_MOVE_NORTH",
+    "output_log": [
+      "|cTEST_MOVE_START|n\nThis is a room.\n|wExits:|n |lc__clickmove__ north|lt|ynorth|n|le",
+      "OPTIONS {'type': 'look'}",
+      "|cTEST_MOVE_NORTH|n\nThis is a room.\n|wExits:|n |lc__clickmove__ south|lt|ysouth|n|le",
+      "OPTIONS {'type': 'look'}",
+      "|cTEST_MOVE_NORTH|n\nThis is a room.\n|wExits:|n |lc__clickmove__ south|lt|ysouth|n|le",
+      "OPTIONS {'type': 'look'}"
+    ],
+    "snapshot_count": 3,
+    "start_room": "TEST_MOVE_START"
+  }
+}

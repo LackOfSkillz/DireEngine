@@ -1,0 +1,64 @@
+{
+  "deletion_failures": [
+    {
+      "error": "database is locked",
+      "id": 7291,
+      "key": "TEST_CHAR_C67C4272"
+    }
+  ],
+  "exit_code": 1,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    }
+  ],
+  "leaks": [
+    {
+      "id": 7280,
+      "key": "TEST_ROOM_32A4C838",
+      "type": "typeclasses.rooms.Room"
+    },
+    {
+      "id": 7281,
+      "key": "TEST_CHAR_709D03C3",
+      "type": "typeclasses.characters.Character"
+    },
+    {
+      "id": 7289,
+      "key": "TEST_CHAR_4A7059DE",
+      "type": "typeclasses.characters.Character"
+    },
+    {
+      "id": 7291,
+      "key": "TEST_CHAR_C67C4272",
+      "type": "typeclasses.characters.Character"
+    }
+  ],
+  "output_log": [
+    "\nNo command sets found! This is a critical bug that can have\nmultiple causes.\n \nNo command sets found! This is a sign of a critical bug.  If\ndisconnecting/reconnecting doesn't\" solve the problem, try to contact\nthe server admin through\" some other means for assistance.\n",
+    "DIRECT_OK",
+    "RETURN 'ok'"
+  ],
+  "result": {
+    "command_log": [
+      "look",
+      "DIRECT direct_emit"
+    ],
+    "direct_result": "ok",
+    "invariant_results": [
+      {
+        "message": "Character exists.",
+        "name": "character_exists",
+        "passed": true
+      }
+    ],
+    "output_log": [
+      "\nNo command sets found! This is a critical bug that can have\nmultiple causes.\n \nNo command sets found! This is a sign of a critical bug.  If\ndisconnecting/reconnecting doesn't\" solve the problem, try to contact\nthe server admin through\" some other means for assistance.\n",
+      "DIRECT_OK",
+      "RETURN 'ok'"
+    ],
+    "snapshot_count": 1
+  }
+}
