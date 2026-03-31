@@ -1,13 +1,120 @@
 import argparse
 import json
 import os
+from pathlib import Path
 import sys
 import time
 import traceback
 
+from tools.diretest.core.diff import diff_snapshots as build_snapshot_diff
 from tools.diretest.core.artifacts import write_artifacts
+from tools.diretest.core.failures import build_failure_summary
 from tools.diretest.core.runner import run_scenario
 from tools.diretest.core.seed import set_seed
+
+
+SCENARIO_REGISTRY = {}
+
+
+def register_scenario(name):
+    scenario_name = str(name or "").strip()
+    if not scenario_name:
+        raise ValueError("DireTest scenario name must be a non-empty string.")
+
+    def decorator(func):
+        SCENARIO_REGISTRY[scenario_name] = func
+        setattr(func, "diretest_scenario_name", scenario_name)
+        return func
+
+    return decorator
+
+
+def _get_registered_scenario(name):
+    return SCENARIO_REGISTRY.get(str(name or "").strip())
+
+
+def _write_cli_failure_artifact(scenario_name, seed, failure_type, message, mode="direct"):
+    run_id = f"{str(scenario_name or 'scenario').replace(' ', '_').lower()}_{str(mode or 'direct')}_{int(seed or 0)}"
+    artifact_dir = write_artifacts(
+        run_id,
+        {
+            "scenario": {
+                "name": str(scenario_name or "scenario"),
+                "mode": str(mode or "direct"),
+                "seed": int(seed or 0),
+            },
+            "seed": int(seed or 0),
+            "command_log": [],
+            "snapshots": [],
+            "diffs": [],
+            "metrics": {
+                "exit_code": 1,
+                "failure_type": str(failure_type or "unexpected_exception"),
+            },
+            "failure_summary": build_failure_summary(
+                failure_type=failure_type,
+                message=message,
+                scenario=scenario_name,
+                seed=seed,
+                mode=mode,
+            ),
+            "traceback": str(message or ""),
+        },
+    )
+    return str(artifact_dir)
+
+
+def _load_json_file(path):
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _load_snapshot_reference(reference):
+    raw = str(reference or "").strip()
+    if not raw:
+        raise ValueError("Snapshot reference cannot be empty.")
+
+    path_text = raw
+    label = None
+    if "::" in raw:
+        path_text, label = raw.split("::", 1)
+
+    payload = _load_json_file(path_text)
+    if isinstance(payload, list):
+        if label is None:
+            if len(payload) == 1:
+                payload = payload[0]
+            else:
+                raise ValueError("Snapshot list input requires a ::label selector when multiple entries exist.")
+        else:
+            for entry in payload:
+                if str((entry or {}).get("label", "") or "") == label:
+                    return entry
+            raise KeyError(f"Snapshot label not found: {label}")
+
+    if isinstance(payload, dict) and "data" in payload:
+        return payload
+    if isinstance(payload, dict):
+        return {"label": str(label or payload.get("label", "") or Path(path_text).stem), "data": payload}
+    raise TypeError("Snapshot file must contain a snapshot entry, snapshot data dict, or snapshot-entry list.")
+
+
+def _parse_seed_text(seed_text):
+    raw = str(seed_text or "").strip()
+    if raw.startswith("seed="):
+        raw = raw.split("=", 1)[1]
+    return int(raw or 0)
+
+
+def _load_artifact_metadata(artifact_path):
+    root = Path(artifact_path)
+    scenario_payload = _load_json_file(root / "scenario.json")
+    seed_value = _parse_seed_text((root / "seed.txt").read_text(encoding="utf-8"))
+    return {
+        "path": str(root),
+        "scenario": str((scenario_payload or {}).get("name", "") or ""),
+        "seed": int(seed_value),
+        "mode": str((scenario_payload or {}).get("mode", "direct") or "direct"),
+    }
 
 
 def _setup_django():
@@ -195,6 +302,7 @@ def _has_recent_line(onboarding, character, text):
     return any(needle in str(line or "").lower() for line in onboarding.get_recent_lines(character))
 
 
+@register_scenario("race-balance")
 def run_race_balance_scenario(args):
     _setup_django()
 
@@ -248,6 +356,7 @@ def run_race_balance_scenario(args):
         _cleanup_named_object(room_name)
 
 
+@register_scenario("movement")
 def run_movement_scenario(args):
     _setup_django()
 
@@ -268,7 +377,7 @@ def run_movement_scenario(args):
         ctx.cmd("look")
 
         movement_diff = ctx.diff_snapshots(0, 1)
-        if not movement_diff["room_changed"]:
+        if not movement_diff["room_changes"]["changed"]:
             raise AssertionError("Movement diff did not record a room change between the first two snapshots.")
 
         current_room = getattr(ctx.character, "location", None)
@@ -289,6 +398,7 @@ def run_movement_scenario(args):
     return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=True, name="movement")
 
 
+@register_scenario("inventory")
 def run_inventory_scenario(args):
     _setup_django()
 
@@ -316,16 +426,16 @@ def run_inventory_scenario(args):
         pickup_diff = ctx.diff_snapshots(0, 1)
         drop_diff = ctx.diff_snapshots(1, 3)
 
-        if pickup_diff["inventory_added"] != ["TEST_INV_PACK"]:
+        if pickup_diff["inventory_changes"]["added"] != ["TEST_INV_PACK"]:
             raise AssertionError(f"Inventory pickup diff was not meaningful: {pickup_diff}")
-        if pickup_diff["room_changed"]:
+        if pickup_diff["room_changes"]["changed"]:
             raise AssertionError("Inventory pickup unexpectedly changed rooms.")
-        if "TEST_INV_PACK" not in pickup_diff["room_contents_removed"]:
+        if "TEST_INV_PACK" not in pickup_diff["room_changes"]["contents_removed"]:
             raise AssertionError(f"Pickup diff did not record room-content removal: {pickup_diff}")
 
-        if drop_diff["inventory_removed"] != ["TEST_INV_PACK"]:
+        if drop_diff["inventory_changes"]["removed"] != ["TEST_INV_PACK"]:
             raise AssertionError(f"Inventory drop diff was not meaningful: {drop_diff}")
-        if "TEST_INV_PACK" not in drop_diff["room_contents_added"]:
+        if "TEST_INV_PACK" not in drop_diff["room_changes"]["contents_added"]:
             raise AssertionError(f"Drop diff did not record room-content addition: {drop_diff}")
 
         carried_keys = [str(getattr(item, "key", "") or "") for item in list(getattr(ctx.character, "contents", []) or [])]
@@ -347,6 +457,7 @@ def run_inventory_scenario(args):
     return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=True, name="inventory")
 
 
+@register_scenario("combat-basic")
 def run_combat_basic_scenario(args):
     _setup_django()
 
@@ -385,21 +496,21 @@ def run_combat_basic_scenario(args):
         damaged_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("engaged"), ctx.get_snapshot_by_label("damaged"))
         disengaged_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("damaged"), ctx.get_snapshot_by_label("disengaged"))
 
-        if not engaged_diff["target_assigned"]:
+        if not engaged_diff["combat_changes"]["target_assigned"]:
             raise AssertionError(f"Combat engagement did not assign a target: {engaged_diff}")
-        if not engaged_diff["entered_combat"]:
+        if not engaged_diff["combat_changes"]["entered_combat"]:
             raise AssertionError(f"Combat engagement did not enter combat state: {engaged_diff}")
-        if engaged_diff["target_after"] != "TEST_COMBAT_DEFENDER":
+        if engaged_diff["combat_changes"]["target_after"] != "TEST_COMBAT_DEFENDER":
             raise AssertionError(f"Combat engagement targeted the wrong actor: {engaged_diff}")
 
-        if damaged_diff["target_hp_delta"] is None or damaged_diff["target_hp_delta"] >= 0:
+        if damaged_diff["combat_changes"]["target_hp_delta"] is None or damaged_diff["combat_changes"]["target_hp_delta"] >= 0:
             raise AssertionError(f"Combat damage diff did not record target HP loss: {damaged_diff}")
-        if not damaged_diff["in_combat_after"]:
+        if not damaged_diff["combat_changes"]["in_combat_after"]:
             raise AssertionError(f"Combat damage snapshot lost combat state unexpectedly: {damaged_diff}")
 
-        if not disengaged_diff["target_cleared"]:
+        if not disengaged_diff["combat_changes"]["target_cleared"]:
             raise AssertionError(f"Combat disengage did not clear the target: {disengaged_diff}")
-        if not disengaged_diff["exited_combat"]:
+        if not disengaged_diff["combat_changes"]["exited_combat"]:
             raise AssertionError(f"Combat disengage did not exit combat state: {disengaged_diff}")
 
         return {
@@ -416,6 +527,7 @@ def run_combat_basic_scenario(args):
     return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="combat-basic")
 
 
+@register_scenario("death-loop")
 def run_death_loop_scenario(args):
     _setup_django()
 
@@ -458,22 +570,22 @@ def run_death_loop_scenario(args):
         death_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("alive"), ctx.get_snapshot_by_label("dead"))
         depart_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("dead"), ctx.get_snapshot_by_label("departed"))
 
-        if not death_diff["died"]:
+        if not death_diff["character_changes"]["died"]:
             raise AssertionError(f"Death diff did not record a dead life-state transition: {death_diff}")
-        if death_diff["character_coins_delta"] != -37:
+        if death_diff["character_changes"]["coins_delta"] != -37:
             raise AssertionError(f"Death diff did not move carried coins off the character: {death_diff}")
-        if death_diff["inventory_removed"] != ["TEST_DEATH_TOKEN"]:
+        if death_diff["inventory_changes"]["removed"] != ["TEST_DEATH_TOKEN"]:
             raise AssertionError(f"Death diff did not move carried items off the character: {death_diff}")
-        if corpse.key not in death_diff["after_snapshot_created"]:
+        if corpse.key not in death_diff["object_delta_changes"]["created"]:
             raise AssertionError(f"Death diff did not record corpse creation: {death_diff}")
 
-        if not depart_diff["revived"]:
+        if not depart_diff["character_changes"]["revived"]:
             raise AssertionError(f"Depart diff did not record revival back to life: {depart_diff}")
-        if depart_diff["character_coins_delta"] != 37:
+        if depart_diff["character_changes"]["coins_delta"] != 37:
             raise AssertionError(f"Depart diff did not restore kept coins: {depart_diff}")
-        if depart_diff["inventory_added"] != ["TEST_DEATH_TOKEN"]:
+        if depart_diff["inventory_changes"]["added"] != ["TEST_DEATH_TOKEN"]:
             raise AssertionError(f"Depart diff did not restore carried items: {depart_diff}")
-        if corpse.key not in depart_diff["after_snapshot_deleted"]:
+        if corpse.key not in depart_diff["object_delta_changes"]["deleted"]:
             raise AssertionError(f"Depart diff did not record corpse cleanup: {depart_diff}")
 
         if character.is_dead():
@@ -497,6 +609,7 @@ def run_death_loop_scenario(args):
     return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="death-loop")
 
 
+@register_scenario("economy")
 def run_economy_scenario(args):
     _setup_django()
 
@@ -562,18 +675,18 @@ def run_economy_scenario(args):
         buy_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("haggled"), ctx.get_snapshot_by_label("bought"))
         sell_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("bought"), ctx.get_snapshot_by_label("sold"))
 
-        if buy_diff["character_coins_delta"] != -20:
+        if buy_diff["character_changes"]["coins_delta"] != -20:
             raise AssertionError(f"Economy buy diff did not spend the expected coins: {buy_diff}")
-        if buy_diff["inventory_added"] != ["study book"]:
+        if buy_diff["inventory_changes"]["added"] != ["study book"]:
             raise AssertionError(f"Economy buy diff did not add the purchased item: {buy_diff}")
-        if buy_diff["room_changed"]:
+        if buy_diff["room_changes"]["changed"]:
             raise AssertionError(f"Economy buy unexpectedly changed rooms: {buy_diff}")
 
-        if sell_diff["character_coins_delta"] != 15:
+        if sell_diff["character_changes"]["coins_delta"] != 15:
             raise AssertionError(f"Economy sell diff did not pay the expected vendor amount: {sell_diff}")
-        if sell_diff["inventory_removed"] != ["TEST_ECON_TRINKET"]:
+        if sell_diff["inventory_changes"]["removed"] != ["TEST_ECON_TRINKET"]:
             raise AssertionError(f"Economy sell diff did not remove the sold item: {sell_diff}")
-        if sale_item.key not in sell_diff["after_snapshot_deleted"]:
+        if sale_item.key not in sell_diff["object_delta_changes"]["deleted"]:
             raise AssertionError(f"Economy sell diff did not record sold-item deletion: {sell_diff}")
 
         if int(getattr(character.db, "coins", 0) or 0) != 95:
@@ -595,6 +708,7 @@ def run_economy_scenario(args):
     return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="economy")
 
 
+@register_scenario("bank")
 def run_bank_scenario(args):
     _setup_django()
 
@@ -627,9 +741,9 @@ def run_bank_scenario(args):
         deposit_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("initial"), ctx.get_snapshot_by_label("deposited"))
         withdraw_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("deposited"), ctx.get_snapshot_by_label("withdrawn"))
 
-        if deposit_diff["character_coins_delta"] != -40 or deposit_diff["bank_coins_delta"] != 40:
+        if deposit_diff["character_changes"]["coins_delta"] != -40 or deposit_diff["character_changes"]["bank_coins_delta"] != 40:
             raise AssertionError(f"Bank deposit diff did not move funds correctly: {deposit_diff}")
-        if withdraw_diff["character_coins_delta"] != 15 or withdraw_diff["bank_coins_delta"] != -15:
+        if withdraw_diff["character_changes"]["coins_delta"] != 15 or withdraw_diff["character_changes"]["bank_coins_delta"] != -15:
             raise AssertionError(f"Bank withdraw diff did not move funds correctly: {withdraw_diff}")
 
         if int(getattr(character.db, "coins", 0) or 0) != 75:
@@ -651,6 +765,7 @@ def run_bank_scenario(args):
     return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="bank")
 
 
+@register_scenario("grave-recovery")
 def run_grave_recovery_scenario(args):
     _setup_django()
 
@@ -700,21 +815,21 @@ def run_grave_recovery_scenario(args):
         depart_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("graved"), ctx.get_snapshot_by_label("departed"))
         recover_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("departed"), ctx.get_snapshot_by_label("recovered"))
 
-        if grave.key not in grave_decay_diff["after_snapshot_created"]:
+        if grave.key not in grave_decay_diff["object_delta_changes"]["created"]:
             raise AssertionError(f"Grave decay diff did not record grave creation: {grave_decay_diff}")
-        if corpse.key not in grave_decay_diff["after_snapshot_deleted"]:
+        if corpse.key not in grave_decay_diff["object_delta_changes"]["deleted"]:
             raise AssertionError(f"Grave decay diff did not record corpse removal: {grave_decay_diff}")
 
-        if not depart_diff["revived"]:
+        if not depart_diff["character_changes"]["revived"]:
             raise AssertionError(f"Grave depart diff did not record revival: {depart_diff}")
-        if depart_diff["inventory_added"] or depart_diff["character_coins_delta"] != 0:
+        if depart_diff["inventory_changes"]["added"] or depart_diff["character_changes"]["coins_delta"] != 0:
             raise AssertionError(f"Grave depart unexpectedly restored belongings: {depart_diff}")
 
-        if recover_diff["inventory_added"] != ["TEST_GRAVE_TOKEN"]:
+        if recover_diff["inventory_changes"]["added"] != ["TEST_GRAVE_TOKEN"]:
             raise AssertionError(f"Grave recover diff did not restore the grave item: {recover_diff}")
-        if recover_diff["character_coins_delta"] != 29:
+        if recover_diff["character_changes"]["coins_delta"] != 29:
             raise AssertionError(f"Grave recover diff did not restore grave coins: {recover_diff}")
-        if grave.key not in recover_diff["after_snapshot_deleted"]:
+        if grave.key not in recover_diff["object_delta_changes"]["deleted"]:
             raise AssertionError(f"Grave recover diff did not record grave cleanup: {recover_diff}")
 
         if character.is_dead():
@@ -739,6 +854,7 @@ def run_grave_recovery_scenario(args):
     return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="grave-recovery")
 
 
+@register_scenario("onboarding_full")
 def run_onboarding_full_scenario(args):
     _setup_django()
 
@@ -903,14 +1019,17 @@ def _run_onboarding_failure_case(args, case_name):
             _cleanup_named_object(name)
 
 
+@register_scenario("onboarding_no_armor")
 def run_onboarding_no_armor_scenario(args):
     return _run_onboarding_failure_case(args, "no_armor")
 
 
+@register_scenario("onboarding_no_attack")
 def run_onboarding_no_attack_scenario(args):
     return _run_onboarding_failure_case(args, "no_attack")
 
 
+@register_scenario("onboarding_no_heal")
 def run_onboarding_no_heal_scenario(args):
     return _run_onboarding_failure_case(args, "no_heal")
 
@@ -950,9 +1069,40 @@ def _emit_runner_result(args, result):
     print(f"Artifact Dir: {result.get('artifact_dir')}")
     print(f"Commands Logged: {command_count}")
     print(f"Snapshots: {snapshot_count}")
+    duration_ms = int((result.get("metrics", {}) or {}).get("scenario_duration_ms", 0) or 0)
+    if duration_ms:
+        print(f"Duration Ms: {duration_ms}")
     if result.get("traceback"):
         print("Traceback:")
         print(result.get("traceback"))
+    status = "PASS" if int(result.get("exit_code", 0) or 0) == 0 else "FAIL"
+    print(f"{status}: {str(getattr(args, 'scenario_name', 'scenario') or 'scenario')}")
+    print(f"See artifacts: {result.get('artifact_dir')}")
+
+
+def _emit_basic_result(args, exit_code, artifact_dir, traceback_text="", failure_type=None):
+    payload = {
+        "artifact_dir": str(artifact_dir or ""),
+        "exit_code": int(exit_code),
+        "failure_type": str(failure_type or "") or None,
+        "scenario": str(getattr(args, "scenario_name", getattr(args, "command", "scenario")) or "scenario"),
+        "seed": int(getattr(args, "seed", 0) or 0),
+        "traceback": str(traceback_text or ""),
+    }
+    if bool(getattr(args, "json", False)):
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return
+
+    print(f"DireTest Scenario: {payload['scenario']}")
+    print(f"Seed: {payload['seed']}")
+    print(f"Exit Code: {payload['exit_code']}")
+    print(f"Artifact Dir: {payload['artifact_dir']}")
+    if traceback_text:
+        print("Traceback:")
+        print(traceback_text)
+    status = "PASS" if int(exit_code) == 0 else "FAIL"
+    print(f"{status}: {payload['scenario']}")
+    print(f"See artifacts: {payload['artifact_dir']}")
 
 
 def _execute_cli_scenario(args):
@@ -960,21 +1110,22 @@ def _execute_cli_scenario(args):
     traceback_text = ""
     exit_code = 1
     handler_result = None
+    artifact_dir = None
+    failure_type = None
 
     try:
         handler_result = args.handler(args)
-        if _is_runner_result(handler_result):
-            _emit_runner_result(args, handler_result)
-            return int(handler_result.get("exit_code", 0))
-        exit_code = int(handler_result)
-        return exit_code
     except Exception:
         traceback_text = traceback.format_exc()
-        raise
-    finally:
-        if _is_runner_result(handler_result):
-            return
-        write_artifacts(
+        failure_type = "unexpected_exception"
+    if _is_runner_result(handler_result):
+        _emit_runner_result(args, handler_result)
+        return int(handler_result.get("exit_code", 0))
+
+    if handler_result is not None:
+        exit_code = int(handler_result)
+
+    artifact_dir = write_artifacts(
             _build_run_id(args),
             {
                 "scenario": {
@@ -985,12 +1136,111 @@ def _execute_cli_scenario(args):
                 "seed": seed,
                 "command_log": [],
                 "snapshots": [],
+                "diffs": [],
                 "metrics": {
                     "exit_code": int(exit_code),
+                    "failure_type": failure_type,
                 },
+                "failure_summary": build_failure_summary(
+                    failure_type=failure_type,
+                    message=traceback_text.strip().splitlines()[-1] if traceback_text else "",
+                    scenario=str(getattr(args, "scenario_name", "scenario") or "scenario"),
+                    seed=seed,
+                    mode="direct",
+                ),
                 "traceback": traceback_text,
             },
         )
+    _emit_basic_result(args, exit_code=exit_code, artifact_dir=artifact_dir, traceback_text=traceback_text, failure_type=failure_type)
+    return int(exit_code)
+
+
+def _handle_list_command(args):
+    scenario_names = sorted(SCENARIO_REGISTRY)
+    if bool(getattr(args, "json", False)):
+        print(json.dumps({"scenarios": scenario_names}, indent=2, sort_keys=True))
+        return 0
+
+    print("Available scenarios:")
+    for scenario_name in scenario_names:
+        print(f"- {scenario_name}")
+    return 0
+
+
+def _handle_repro_command(args):
+    metadata = _load_artifact_metadata(args.artifact_path)
+    scenario_name = metadata["scenario"]
+    seed = int(metadata["seed"])
+    handler = _get_registered_scenario(scenario_name)
+
+    if not bool(getattr(args, "json", False)):
+        print(f"Replaying scenario: {scenario_name}")
+        print(f"Seed: {seed}")
+
+    if handler is None:
+        artifact_dir = _write_cli_failure_artifact(
+            scenario_name=scenario_name or "repro",
+            seed=seed,
+            failure_type="scenario_lookup_failure",
+            message=f"No registered DireTest scenario matches artifact scenario '{scenario_name}'.",
+            mode=metadata.get("mode", "direct"),
+        )
+        if bool(getattr(args, "json", False)):
+            print(
+                json.dumps(
+                    {
+                        "artifact_dir": artifact_dir,
+                        "exit_code": 1,
+                        "failure_type": "scenario_lookup_failure",
+                        "scenario": scenario_name,
+                        "seed": seed,
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+        else:
+            print(f"FAIL: {scenario_name}")
+            print(f"See artifacts: {artifact_dir}")
+        return 1
+
+    parser = build_parser()
+    replay_args = parser.parse_args(["scenario", scenario_name, "--seed", str(seed)])
+    replay_args.json = bool(getattr(args, "json", False))
+    return _execute_cli_scenario(replay_args)
+
+
+def _handle_diff_command(args):
+    before_snapshot = _load_snapshot_reference(args.before_snapshot)
+    after_snapshot = _load_snapshot_reference(args.after_snapshot)
+    diff_payload = build_snapshot_diff(before_snapshot, after_snapshot)
+
+    if getattr(args, "output", None):
+        Path(args.output).write_text(json.dumps(diff_payload, indent=2, sort_keys=True), encoding="utf-8")
+
+    if bool(getattr(args, "json", False)):
+        print(json.dumps(diff_payload, indent=2, sort_keys=True))
+        return 0
+
+    character_changes = diff_payload["character_changes"]
+    room_changes = diff_payload["room_changes"]
+    inventory_changes = diff_payload["inventory_changes"]
+    combat_changes = diff_payload["combat_changes"]
+    object_changes = diff_payload["object_delta_changes"]
+
+    print(f"Diff: {before_snapshot.get('label', '')} -> {after_snapshot.get('label', '')}")
+    print(f"Room Changed: {room_changes['changed']}")
+    print(f"Coins Delta: {character_changes['coins_delta']}")
+    print(f"Bank Coins Delta: {character_changes['bank_coins_delta']}")
+    print(f"Inventory Added: {', '.join(inventory_changes['added']) if inventory_changes['added'] else '(none)'}")
+    print(f"Inventory Removed: {', '.join(inventory_changes['removed']) if inventory_changes['removed'] else '(none)'}")
+    print(f"Entered Combat: {combat_changes['entered_combat']}")
+    print(f"Exited Combat: {combat_changes['exited_combat']}")
+    print(f"Objects Created: {', '.join(object_changes['created']) if object_changes['created'] else '(none)'}")
+    print(f"Objects Deleted: {', '.join(object_changes['deleted']) if object_changes['deleted'] else '(none)'}")
+    if getattr(args, "output", None):
+        print(f"Wrote JSON diff: {args.output}")
+    return 0
 
 
 def build_parser():
@@ -998,7 +1248,24 @@ def build_parser():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     scenario_parser = subparsers.add_parser("scenario")
+    scenario_parser.set_defaults(cli_handler=_execute_cli_scenario)
     scenario_subparsers = scenario_parser.add_subparsers(dest="scenario_name", required=True)
+
+    list_parser = subparsers.add_parser("list")
+    list_parser.add_argument("--json", action="store_true")
+    list_parser.set_defaults(cli_handler=_handle_list_command)
+
+    repro_parser = subparsers.add_parser("repro")
+    repro_parser.add_argument("artifact_path")
+    repro_parser.add_argument("--json", action="store_true")
+    repro_parser.set_defaults(cli_handler=_handle_repro_command)
+
+    diff_parser = subparsers.add_parser("diff")
+    diff_parser.add_argument("before_snapshot")
+    diff_parser.add_argument("after_snapshot")
+    diff_parser.add_argument("--json", action="store_true")
+    diff_parser.add_argument("--output")
+    diff_parser.set_defaults(cli_handler=_handle_diff_command)
 
     race_balance_parser = scenario_subparsers.add_parser("race-balance")
     race_balance_parser.add_argument("--profession", default="commoner")
@@ -1073,7 +1340,10 @@ def build_parser():
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
-    return _execute_cli_scenario(args)
+    cli_handler = getattr(args, "cli_handler", None)
+    if cli_handler is None:
+        return _execute_cli_scenario(args)
+    return cli_handler(args)
 
 
 if __name__ == "__main__":

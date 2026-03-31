@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import time
 
+from .diff import diff_snapshots as build_snapshot_diff
 from .invariants import INVARIANTS, run_invariant
+from .metrics import capture_metric_state
 from .snapshot import capture_snapshot
 
 
@@ -20,8 +22,18 @@ class DireTestContext:
         self.command_log = []
         self.output_log = []
         self.snapshots = []
+        self.diffs = []
         self.log_messages = []
         self.invariant_results = []
+        self.metrics = {"command_timings_ms": []}
+        self.metric_baseline = {}
+        self.failure_type = None
+        self.failure_message = ""
+        self.test_mode = True
+        self.suppress_client_payloads = False
+        self.time_offset = 0.0
+        self.time_frozen = False
+        self.frozen_time = None
         self._previous_object_records = {}
 
     def _coerce_snapshot_entry(self, snapshot_ref):
@@ -31,107 +43,22 @@ class DireTestContext:
             return snapshot_ref
         raise TypeError("Snapshot reference must be an index or a snapshot entry.")
 
-    def _snapshot_inventory_keys(self, snapshot_data):
-        inventory = list(snapshot_data.get("inventory", []) or [])
-        return {
-            str(entry.get("key", "") or "")
-            for entry in inventory
-            if isinstance(entry, dict) and str(entry.get("key", "") or "")
-        }
+    def _ensure_metric_baseline(self):
+        if self.metric_baseline:
+            return self.metric_baseline
+        character = self.get_character()
+        if character is None:
+            return {}
+        self.metric_baseline = capture_metric_state(character)
+        return self.metric_baseline
 
-    def _snapshot_room_contents(self, snapshot_data):
-        room = dict(snapshot_data.get("room", {}) or {})
-        return {str(entry or "") for entry in list(room.get("contents", []) or []) if str(entry or "")}
+    def set_failure(self, failure_type, message=""):
+        self.failure_type = str(failure_type or "") or None
+        self.failure_message = str(message or "")
+        return self.failure_type
 
     def diff_snapshots(self, before, after):
-        before_entry = self._coerce_snapshot_entry(before)
-        after_entry = self._coerce_snapshot_entry(after)
-        before_data = dict(before_entry.get("data", {}) or {})
-        after_data = dict(after_entry.get("data", {}) or {})
-        before_character = dict(before_data.get("character", {}) or {})
-        after_character = dict(after_data.get("character", {}) or {})
-
-        before_inventory = self._snapshot_inventory_keys(before_data)
-        after_inventory = self._snapshot_inventory_keys(after_data)
-        before_room_contents = self._snapshot_room_contents(before_data)
-        after_room_contents = self._snapshot_room_contents(after_data)
-        before_room = str((before_data.get("room", {}) or {}).get("key", "") or "")
-        after_room = str((after_data.get("room", {}) or {}).get("key", "") or "")
-        before_location = str(before_character.get("location", "") or "")
-        after_location = str(after_character.get("location", "") or "")
-        before_character_hp = int(before_character.get("hp", 0) or 0)
-        after_character_hp = int(after_character.get("hp", 0) or 0)
-        before_character_coins = int(before_character.get("coins", 0) or 0)
-        after_character_coins = int(after_character.get("coins", 0) or 0)
-        before_bank_coins = int(before_character.get("bank_coins", 0) or 0)
-        after_bank_coins = int(after_character.get("bank_coins", 0) or 0)
-        before_life_state = str(before_character.get("life_state", "") or "")
-        after_life_state = str(after_character.get("life_state", "") or "")
-        before_is_dead = bool(before_character.get("is_dead", False))
-        after_is_dead = bool(after_character.get("is_dead", False))
-        before_combat = dict(before_data.get("combat", {}) or {})
-        after_combat = dict(after_data.get("combat", {}) or {})
-        before_target_summary = dict(before_combat.get("target_summary", {}) or {})
-        after_target_summary = dict(after_combat.get("target_summary", {}) or {})
-        before_target = str(before_combat.get("target", "") or "")
-        after_target = str(after_combat.get("target", "") or "")
-        before_in_combat = bool(before_combat.get("in_combat", False))
-        after_in_combat = bool(after_combat.get("in_combat", False))
-        before_roundtime = float(before_combat.get("roundtime", 0.0) or 0.0)
-        after_roundtime = float(after_combat.get("roundtime", 0.0) or 0.0)
-        before_target_hp = int(before_target_summary.get("hp", 0) or 0) if before_target_summary else None
-        after_target_hp = int(after_target_summary.get("hp", 0) or 0) if after_target_summary else None
-        before_target_range = str(before_target_summary.get("range", "") or "") if before_target_summary else None
-        after_target_range = str(after_target_summary.get("range", "") or "") if after_target_summary else None
-        after_created = list((((after_data.get("object_deltas", {}) or {}).get("created", []) or [])))
-        after_deleted = list((((after_data.get("object_deltas", {}) or {}).get("deleted", []) or [])))
-
-        return {
-            "before_label": str(before_entry.get("label", "") or ""),
-            "after_label": str(after_entry.get("label", "") or ""),
-            "room_before": before_room,
-            "room_after": after_room,
-            "character_location_before": before_location,
-            "character_location_after": after_location,
-            "character_hp_before": before_character_hp,
-            "character_hp_after": after_character_hp,
-            "character_hp_delta": after_character_hp - before_character_hp,
-            "character_coins_before": before_character_coins,
-            "character_coins_after": after_character_coins,
-            "character_coins_delta": after_character_coins - before_character_coins,
-            "bank_coins_before": before_bank_coins,
-            "bank_coins_after": after_bank_coins,
-            "bank_coins_delta": after_bank_coins - before_bank_coins,
-            "life_state_before": before_life_state or None,
-            "life_state_after": after_life_state or None,
-            "is_dead_before": before_is_dead,
-            "is_dead_after": after_is_dead,
-            "died": (before_life_state != "DEAD") and (after_life_state == "DEAD"),
-            "revived": (before_life_state == "DEAD") and (after_life_state == "ALIVE"),
-            "room_changed": (before_room != after_room) or (before_location != after_location),
-            "inventory_added": sorted(after_inventory - before_inventory),
-            "inventory_removed": sorted(before_inventory - after_inventory),
-            "room_contents_added": sorted(after_room_contents - before_room_contents),
-            "room_contents_removed": sorted(before_room_contents - after_room_contents),
-            "target_before": before_target or None,
-            "target_after": after_target or None,
-            "target_assigned": not before_target and bool(after_target),
-            "target_cleared": bool(before_target) and not after_target,
-            "in_combat_before": before_in_combat,
-            "in_combat_after": after_in_combat,
-            "entered_combat": (not before_in_combat) and after_in_combat,
-            "exited_combat": before_in_combat and (not after_in_combat),
-            "roundtime_before": before_roundtime,
-            "roundtime_after": after_roundtime,
-            "target_hp_before": before_target_hp,
-            "target_hp_after": after_target_hp,
-            "target_hp_delta": (None if before_target_hp is None or after_target_hp is None else after_target_hp - before_target_hp),
-            "target_range_before": before_target_range,
-            "target_range_after": after_target_range,
-            "range_changed": before_target_range != after_target_range,
-            "after_snapshot_created": [str(entry.get("key", "") or "") for entry in after_created if isinstance(entry, dict)],
-            "after_snapshot_deleted": [str(entry.get("key", "") or "") for entry in after_deleted if isinstance(entry, dict)],
-        }
+        return build_snapshot_diff(self._coerce_snapshot_entry(before), self._coerce_snapshot_entry(after))
 
     def _coerce_output_entries(self, payload=None, options=None, kwargs=None):
         entries = []
@@ -191,14 +118,19 @@ class DireTestContext:
         if not self.character:
             raise ValueError("ctx.cmd requires an active test character.")
 
+        self._ensure_metric_baseline()
         self.command_log.append(command)
         original_msg, output_entries = self._capture_character_output()
+        started = time.perf_counter()
         try:
             result = self.character.execute_cmd(command)
         except Exception as error:
+            self.set_failure("command_execution_failure", str(error))
             output_entries.append(f"ERROR {error}")
             raise
         finally:
+            elapsed_ms = max(0, int(round((time.perf_counter() - started) * 1000.0)))
+            self.metrics.setdefault("command_timings_ms", []).append(elapsed_ms)
             self._restore_character_output(original_msg, output_entries)
 
         self.room = getattr(self.character, "location", None) or self.room
@@ -208,6 +140,7 @@ class DireTestContext:
 
     def direct(self, func, *args, **kwargs):
         function_name = getattr(func, "__name__", "callable")
+        self._ensure_metric_baseline()
         self.command_log.append(f"DIRECT {function_name}")
 
         original_msg, output_entries = self._capture_character_output()
@@ -215,6 +148,7 @@ class DireTestContext:
             result = func(*args, **kwargs)
             output_entries.append(f"RETURN {result!r}")
         except Exception as error:
+            self.set_failure("direct_execution_failure", str(error))
             output_entries.append(f"ERROR {error}")
             raise
         finally:
@@ -223,12 +157,25 @@ class DireTestContext:
         return result
 
     def snapshot(self, label):
-        snapshot = capture_snapshot(self)
+        self._ensure_metric_baseline()
+        try:
+            snapshot = capture_snapshot(self)
+        except Exception as error:
+            self.set_failure("snapshot_failure", str(error))
+            raise
         snapshot["label"] = str(label)
         snapshot["snapshot_label"] = str(label)
         snapshot["timestamp"] = time.time()
         entry = {"label": str(label), "data": snapshot}
+        previous_entry = self.snapshots[-1] if self.snapshots else None
         self.snapshots.append(entry)
+        if previous_entry is not None:
+            diff_entry = {
+                "from": str(previous_entry.get("label", "") or ""),
+                "to": str(entry.get("label", "") or ""),
+                "data": build_snapshot_diff(previous_entry, entry),
+            }
+            self.diffs.append(diff_entry)
         return snapshot
 
     def get_snapshot_labels(self):
@@ -242,11 +189,13 @@ class DireTestContext:
         raise KeyError(f"Unknown snapshot label: {target_label}")
 
     def assert_invariant(self, name):
+        self._ensure_metric_baseline()
         invariant_name = str(name or "").strip()
         result = run_invariant(invariant_name, self)
         self.invariant_results.append(result)
         if not result["passed"]:
             message = result["message"] or f"DireTest invariant failed: {invariant_name}"
+            self.set_failure("invariant_failure", message)
             raise AssertionError(message)
         return result
 
@@ -277,3 +226,19 @@ class DireTestContext:
             if getattr(obj, "destination", None) is None and str(getattr(obj, "key", "") or "").lower() == target:
                 return obj
         return None
+
+    def advance_time(self, seconds):
+        self.time_offset += float(seconds or 0.0)
+        if self.time_frozen:
+            self.frozen_time = (self.frozen_time or time.time()) + float(seconds or 0.0)
+        return self.time_offset
+
+    def freeze_time(self):
+        self.time_frozen = True
+        self.frozen_time = time.time() + self.time_offset
+        return self.frozen_time
+
+    def resume_time(self):
+        self.time_frozen = False
+        self.frozen_time = None
+        return self.time_offset

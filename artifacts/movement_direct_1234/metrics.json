@@ -1,6 +1,15 @@
 {
+  "coin_delta": 0,
+  "command_count": 3,
+  "command_timings_ms": [
+    13,
+    153,
+    10
+  ],
   "deletion_failures": [],
+  "ended_at": 1774951303.8765604,
   "exit_code": 0,
+  "failure_type": null,
   "invariant_results": [
     {
       "message": "Character exists.",
@@ -23,7 +32,9 @@
       "passed": true
     }
   ],
+  "item_delta_count": 0,
   "leaks": [],
+  "mindstate_delta": {},
   "output_log": [
     "|cTEST_MOVE_START|n\nThis is a room.\n|wExits:|n |lc__clickmove__ north|lt|ynorth|n|le",
     "OPTIONS {'type': 'look'}",
@@ -42,42 +53,71 @@
     ],
     "end_room": "TEST_MOVE_NORTH",
     "movement_diff": {
-      "after_label": "north",
-      "after_snapshot_created": [],
-      "after_snapshot_deleted": [],
-      "before_label": "look",
-      "character_hp_after": 100,
-      "character_hp_before": 100,
-      "character_hp_delta": 0,
-      "character_location_after": "TEST_MOVE_NORTH",
-      "character_location_before": "TEST_MOVE_START",
-      "entered_combat": false,
-      "exited_combat": false,
-      "in_combat_after": false,
-      "in_combat_before": false,
-      "inventory_added": [],
-      "inventory_removed": [],
-      "range_changed": false,
-      "room_after": "TEST_MOVE_NORTH",
-      "room_before": "TEST_MOVE_START",
-      "room_changed": true,
-      "room_contents_added": [
-        "south"
-      ],
-      "room_contents_removed": [
-        "north"
-      ],
-      "roundtime_after": 0.0,
-      "roundtime_before": 0.0,
-      "target_after": null,
-      "target_assigned": false,
-      "target_before": null,
-      "target_cleared": false,
-      "target_hp_after": null,
-      "target_hp_before": null,
-      "target_hp_delta": null,
-      "target_range_after": null,
-      "target_range_before": null
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "north",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "look",
+        "coins_after": 0,
+        "coins_before": 0,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_MOVE_NORTH",
+        "location_before": "TEST_MOVE_START",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": true,
+        "contents_added": [
+          "south"
+        ],
+        "contents_removed": [
+          "north"
+        ],
+        "room_after": "TEST_MOVE_NORTH",
+        "room_before": "TEST_MOVE_START"
+      }
     },
     "output_log": [
       "|cTEST_MOVE_START|n\nThis is a room.\n|wExits:|n |lc__clickmove__ north|lt|ynorth|n|le",
@@ -87,12 +127,23 @@
       "|cTEST_MOVE_NORTH|n\nThis is a room.\n|wExits:|n |lc__clickmove__ south|lt|ysouth|n|le",
       "OPTIONS {'type': 'look'}"
     ],
-    "snapshot_count": 3,
+    "snapshot_count": 4,
+    "snapshot_labels": [
+      "look",
+      "north",
+      "look",
+      "final"
+    ],
     "start_room": "TEST_MOVE_START"
   },
+  "scenario_duration_ms": 5787,
   "snapshot_labels": [
     "look",
     "north",
-    "look"
-  ]
+    "look",
+    "final"
+  ],
+  "started_at": 1774951298.08948,
+  "state_transition_count": 3,
+  "xp_delta": 0
 }

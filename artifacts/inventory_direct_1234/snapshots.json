@@ -3,10 +3,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7351,
+        "id": 7405,
+        "is_dead": false,
         "key": "TEST_INV_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_INV_ROOM",
         "max_hp": 100,
         "states": {
@@ -25,19 +28,19 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7350,
+            "id": 7404,
             "key": "TEST_INV_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7351,
+            "id": 7405,
             "key": "TEST_INV_CHAR",
             "location": "TEST_INV_ROOM",
             "typeclass": "typeclasses.characters.Character"
           },
           {
-            "id": 7352,
+            "id": 7406,
             "key": "TEST_INV_PACK",
             "location": "TEST_INV_ROOM",
             "typeclass": "typeclasses.objects.Object"
@@ -51,11 +54,11 @@
           "TEST_INV_PACK"
         ],
         "exits": [],
-        "id": 7350,
+        "id": 7404,
         "key": "TEST_INV_ROOM"
       },
       "snapshot_label": "inventory",
-      "timestamp": 1774920507.9950712
+      "timestamp": 1774951309.0423715
     },
     "label": "inventory"
   },
@@ -63,10 +66,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7351,
+        "id": 7405,
+        "is_dead": false,
         "key": "TEST_INV_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_INV_ROOM",
         "max_hp": 100,
         "states": {
@@ -82,7 +88,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7352,
+          "id": 7406,
           "key": "TEST_INV_PACK",
           "location": "TEST_INV_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -98,11 +104,11 @@
           "TEST_INV_CHAR"
         ],
         "exits": [],
-        "id": 7350,
+        "id": 7404,
         "key": "TEST_INV_ROOM"
       },
       "snapshot_label": "get TEST_INV_PACK",
-      "timestamp": 1774920508.3260581
+      "timestamp": 1774951309.3328216
     },
     "label": "get TEST_INV_PACK"
   },
@@ -110,10 +116,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7351,
+        "id": 7405,
+        "is_dead": false,
         "key": "TEST_INV_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_INV_ROOM",
         "max_hp": 100,
         "states": {
@@ -129,7 +138,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7352,
+          "id": 7406,
           "key": "TEST_INV_PACK",
           "location": "TEST_INV_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -145,11 +154,11 @@
           "TEST_INV_CHAR"
         ],
         "exits": [],
-        "id": 7350,
+        "id": 7404,
         "key": "TEST_INV_ROOM"
       },
       "snapshot_label": "inventory",
-      "timestamp": 1774920508.807759
+      "timestamp": 1774951309.6996584
     },
     "label": "inventory"
   },
@@ -157,10 +166,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7351,
+        "id": 7405,
+        "is_dead": false,
         "key": "TEST_INV_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_INV_ROOM",
         "max_hp": 100,
         "states": {
@@ -186,11 +198,11 @@
           "TEST_INV_PACK"
         ],
         "exits": [],
-        "id": 7350,
+        "id": 7404,
         "key": "TEST_INV_ROOM"
       },
       "snapshot_label": "drop TEST_INV_PACK",
-      "timestamp": 1774920509.067931
+      "timestamp": 1774951309.9229493
     },
     "label": "drop TEST_INV_PACK"
   },
@@ -198,10 +210,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7351,
+        "id": 7405,
+        "is_dead": false,
         "key": "TEST_INV_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_INV_ROOM",
         "max_hp": 100,
         "states": {
@@ -227,12 +242,56 @@
           "TEST_INV_PACK"
         ],
         "exits": [],
-        "id": 7350,
+        "id": 7404,
         "key": "TEST_INV_ROOM"
       },
       "snapshot_label": "inventory",
-      "timestamp": 1774920509.487276
+      "timestamp": 1774951310.414467
     },
     "label": "inventory"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7405,
+        "is_dead": false,
+        "key": "TEST_INV_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_INV_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INV_CHAR",
+          "TEST_INV_PACK"
+        ],
+        "exits": [],
+        "id": 7404,
+        "key": "TEST_INV_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774951310.5984402
+    },
+    "label": "final"
   }
 ]

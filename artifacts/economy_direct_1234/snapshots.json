@@ -6,7 +6,7 @@
         "bank_coins": 0,
         "coins": 100,
         "hp": 100,
-        "id": 7363,
+        "id": 7415,
         "is_dead": false,
         "key": "TEST_ECON_CHAR",
         "life_state": "ALIVE",
@@ -25,7 +25,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7365,
+          "id": 7417,
           "key": "TEST_ECON_TRINKET",
           "location": "TEST_ECON_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -35,25 +35,25 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7362,
+            "id": 7414,
             "key": "TEST_ECON_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7363,
+            "id": 7415,
             "key": "TEST_ECON_CHAR",
             "location": "TEST_ECON_ROOM",
             "typeclass": "typeclasses.characters.Character"
           },
           {
-            "id": 7364,
+            "id": 7416,
             "key": "merchant",
             "location": "TEST_ECON_ROOM",
             "typeclass": "typeclasses.vendor.Vendor"
           },
           {
-            "id": 7365,
+            "id": 7417,
             "key": "TEST_ECON_TRINKET",
             "location": "TEST_ECON_CHAR",
             "typeclass": "typeclasses.objects.Object"
@@ -67,11 +67,11 @@
           "merchant"
         ],
         "exits": [],
-        "id": 7362,
+        "id": 7414,
         "key": "TEST_ECON_ROOM"
       },
       "snapshot_label": "initial",
-      "timestamp": 1774920883.1364973
+      "timestamp": 1774951343.9279222
     },
     "label": "initial"
   },
@@ -82,7 +82,7 @@
         "bank_coins": 0,
         "coins": 100,
         "hp": 100,
-        "id": 7363,
+        "id": 7415,
         "is_dead": false,
         "key": "TEST_ECON_CHAR",
         "life_state": "ALIVE",
@@ -102,7 +102,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7365,
+          "id": 7417,
           "key": "TEST_ECON_TRINKET",
           "location": "TEST_ECON_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -119,11 +119,11 @@
           "merchant"
         ],
         "exits": [],
-        "id": 7362,
+        "id": 7414,
         "key": "TEST_ECON_ROOM"
       },
       "snapshot_label": "haggled",
-      "timestamp": 1774920883.8974526
+      "timestamp": 1774951344.5076365
     },
     "label": "haggled"
   },
@@ -134,7 +134,7 @@
         "bank_coins": 0,
         "coins": 80,
         "hp": 100,
-        "id": 7363,
+        "id": 7415,
         "is_dead": false,
         "key": "TEST_ECON_CHAR",
         "life_state": "ALIVE",
@@ -154,13 +154,13 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7365,
+          "id": 7417,
           "key": "TEST_ECON_TRINKET",
           "location": "TEST_ECON_CHAR",
           "typeclass": "typeclasses.objects.Object"
         },
         {
-          "id": 7366,
+          "id": 7418,
           "key": "study book",
           "location": "TEST_ECON_CHAR",
           "typeclass": "typeclasses.study_item.StudyItem"
@@ -170,7 +170,7 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7366,
+            "id": 7418,
             "key": "study book",
             "location": "TEST_ECON_CHAR",
             "typeclass": "typeclasses.study_item.StudyItem"
@@ -184,11 +184,11 @@
           "merchant"
         ],
         "exits": [],
-        "id": 7362,
+        "id": 7414,
         "key": "TEST_ECON_ROOM"
       },
       "snapshot_label": "bought",
-      "timestamp": 1774920884.5347378
+      "timestamp": 1774951345.2044928
     },
     "label": "bought"
   },
@@ -199,7 +199,7 @@
         "bank_coins": 0,
         "coins": 95,
         "hp": 100,
-        "id": 7363,
+        "id": 7415,
         "is_dead": false,
         "key": "TEST_ECON_CHAR",
         "life_state": "ALIVE",
@@ -219,7 +219,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7366,
+          "id": 7418,
           "key": "study book",
           "location": "TEST_ECON_CHAR",
           "typeclass": "typeclasses.study_item.StudyItem"
@@ -230,7 +230,7 @@
         "created": [],
         "deleted": [
           {
-            "id": 7365,
+            "id": 7417,
             "key": "TEST_ECON_TRINKET",
             "location": "TEST_ECON_CHAR",
             "typeclass": "typeclasses.objects.Object"
@@ -243,12 +243,64 @@
           "merchant"
         ],
         "exits": [],
-        "id": 7362,
+        "id": 7414,
         "key": "TEST_ECON_ROOM"
       },
       "snapshot_label": "sold",
-      "timestamp": 1774920885.287152
+      "timestamp": 1774951345.9444969
     },
     "label": "sold"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 95,
+        "hp": 100,
+        "id": 7415,
+        "is_dead": false,
+        "key": "TEST_ECON_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_ECON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "haggle_bonus": 0.15
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7418,
+          "key": "study book",
+          "location": "TEST_ECON_CHAR",
+          "typeclass": "typeclasses.study_item.StudyItem"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_ECON_CHAR",
+          "merchant"
+        ],
+        "exits": [],
+        "id": 7414,
+        "key": "TEST_ECON_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774951346.1198885
+    },
+    "label": "final"
   }
 ]

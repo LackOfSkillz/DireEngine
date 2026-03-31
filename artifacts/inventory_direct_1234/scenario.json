@@ -1,5 +1,6 @@
 {
   "mode": "direct",
   "name": "inventory",
-  "seed": 1234
+  "seed": 1234,
+  "started_at": 1774951306.4590197
 }

@@ -6,7 +6,7 @@
         "bank_coins": 0,
         "coins": 29,
         "hp": 100,
-        "id": 7379,
+        "id": 7393,
         "is_dead": false,
         "key": "TEST_GRAVE_CHAR",
         "life_state": "ALIVE",
@@ -25,7 +25,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7380,
+          "id": 7394,
           "key": "TEST_GRAVE_TOKEN",
           "location": "TEST_GRAVE_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -35,19 +35,19 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7378,
+            "id": 7392,
             "key": "TEST_GRAVE_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7379,
+            "id": 7393,
             "key": "TEST_GRAVE_CHAR",
             "location": "TEST_GRAVE_ROOM",
             "typeclass": "typeclasses.characters.Character"
           },
           {
-            "id": 7380,
+            "id": 7394,
             "key": "TEST_GRAVE_TOKEN",
             "location": "TEST_GRAVE_CHAR",
             "typeclass": "typeclasses.objects.Object"
@@ -60,11 +60,11 @@
           "TEST_GRAVE_CHAR"
         ],
         "exits": [],
-        "id": 7378,
+        "id": 7392,
         "key": "TEST_GRAVE_ROOM"
       },
       "snapshot_label": "alive",
-      "timestamp": 1774921208.1600382
+      "timestamp": 1774951246.4673212
     },
     "label": "alive"
   },
@@ -75,7 +75,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7379,
+        "id": 7393,
         "is_dead": true,
         "key": "TEST_GRAVE_CHAR",
         "life_state": "DEAD",
@@ -97,7 +97,7 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7381,
+            "id": 7395,
             "key": "corpse of TEST_GRAVE_CHAR",
             "location": "TEST_GRAVE_ROOM",
             "typeclass": "typeclasses.corpse.Corpse"
@@ -111,11 +111,11 @@
           "corpse of TEST_GRAVE_CHAR"
         ],
         "exits": [],
-        "id": 7378,
+        "id": 7392,
         "key": "TEST_GRAVE_ROOM"
       },
       "snapshot_label": "dead",
-      "timestamp": 1774921209.7638924
+      "timestamp": 1774951247.8009768
     },
     "label": "dead"
   },
@@ -126,7 +126,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7379,
+        "id": 7393,
         "is_dead": true,
         "key": "TEST_GRAVE_CHAR",
         "life_state": "DEAD",
@@ -148,7 +148,7 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7382,
+            "id": 7396,
             "key": "grave of TEST_GRAVE_CHAR",
             "location": "TEST_GRAVE_ROOM",
             "typeclass": "typeclasses.grave.Grave"
@@ -156,7 +156,7 @@
         ],
         "deleted": [
           {
-            "id": 7381,
+            "id": 7395,
             "key": "corpse of TEST_GRAVE_CHAR",
             "location": "TEST_GRAVE_ROOM",
             "typeclass": "typeclasses.corpse.Corpse"
@@ -169,11 +169,11 @@
           "grave of TEST_GRAVE_CHAR"
         ],
         "exits": [],
-        "id": 7378,
+        "id": 7392,
         "key": "TEST_GRAVE_ROOM"
       },
       "snapshot_label": "graved",
-      "timestamp": 1774921210.4234958
+      "timestamp": 1774951248.2113006
     },
     "label": "graved"
   },
@@ -184,7 +184,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 50,
-        "id": 7379,
+        "id": 7393,
         "is_dead": false,
         "key": "TEST_GRAVE_CHAR",
         "life_state": "ALIVE",
@@ -213,11 +213,11 @@
           "grave of TEST_GRAVE_CHAR"
         ],
         "exits": [],
-        "id": 7378,
+        "id": 7392,
         "key": "TEST_GRAVE_ROOM"
       },
       "snapshot_label": "departed",
-      "timestamp": 1774921211.4261556
+      "timestamp": 1774951249.2423213
     },
     "label": "departed"
   },
@@ -228,7 +228,7 @@
         "bank_coins": 0,
         "coins": 29,
         "hp": 50,
-        "id": 7379,
+        "id": 7393,
         "is_dead": false,
         "key": "TEST_GRAVE_CHAR",
         "life_state": "ALIVE",
@@ -247,7 +247,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7380,
+          "id": 7394,
           "key": "TEST_GRAVE_TOKEN",
           "location": "TEST_GRAVE_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -258,7 +258,7 @@
         "created": [],
         "deleted": [
           {
-            "id": 7382,
+            "id": 7396,
             "key": "grave of TEST_GRAVE_CHAR",
             "location": "TEST_GRAVE_ROOM",
             "typeclass": "typeclasses.grave.Grave"
@@ -270,12 +270,62 @@
           "TEST_GRAVE_CHAR"
         ],
         "exits": [],
-        "id": 7378,
+        "id": 7392,
         "key": "TEST_GRAVE_ROOM"
       },
       "snapshot_label": "recovered",
-      "timestamp": 1774921212.113699
+      "timestamp": 1774951250.1474755
     },
     "label": "recovered"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 29,
+        "hp": 50,
+        "id": 7393,
+        "is_dead": false,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7394,
+          "key": "TEST_GRAVE_TOKEN",
+          "location": "TEST_GRAVE_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 7392,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774951250.421495
+    },
+    "label": "final"
   }
 ]

@@ -161,6 +161,7 @@ Some helpful flows already present in the repo:
 DireTest currently has these live scenario entrypoints:
 
 ```powershell
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py list
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario race-balance
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario movement --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario inventory --seed 1234
@@ -169,6 +170,8 @@ c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario death-loo
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario grave-recovery --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario economy --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario bank --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py repro artifacts/bank_direct_1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py diff artifacts/bank_direct_1234/snapshots.json::initial artifacts/bank_direct_1234/snapshots.json::deposited
 ```
 
 Optional flags:
@@ -178,7 +181,7 @@ Optional flags:
 - `--base-xp 100`
 - `--json`
 
-The direct gameplay scenarios now cover movement, inventory, basic combat, death and depart loops, grave recovery, vendor trading, and banking with reproducible artifacts under `artifacts/`.
+The direct gameplay scenarios now cover movement, inventory, basic combat, death and depart loops, grave recovery, vendor trading, and banking. Artifact bundles under `artifacts/` now include `diffs.json`, `failure_summary.json`, timing and delta metrics, and replayable scenario metadata.
 
 ## Development Notes
 

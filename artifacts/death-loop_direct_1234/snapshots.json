@@ -6,7 +6,7 @@
         "bank_coins": 0,
         "coins": 37,
         "hp": 100,
-        "id": 7368,
+        "id": 7411,
         "is_dead": false,
         "key": "TEST_DEATH_CHAR",
         "life_state": "ALIVE",
@@ -25,7 +25,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7369,
+          "id": 7412,
           "key": "TEST_DEATH_TOKEN",
           "location": "TEST_DEATH_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -35,19 +35,19 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7367,
+            "id": 7410,
             "key": "TEST_DEATH_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7368,
+            "id": 7411,
             "key": "TEST_DEATH_CHAR",
             "location": "TEST_DEATH_ROOM",
             "typeclass": "typeclasses.characters.Character"
           },
           {
-            "id": 7369,
+            "id": 7412,
             "key": "TEST_DEATH_TOKEN",
             "location": "TEST_DEATH_CHAR",
             "typeclass": "typeclasses.objects.Object"
@@ -60,11 +60,11 @@
           "TEST_DEATH_CHAR"
         ],
         "exits": [],
-        "id": 7367,
+        "id": 7410,
         "key": "TEST_DEATH_ROOM"
       },
       "snapshot_label": "alive",
-      "timestamp": 1774920914.2767146
+      "timestamp": 1774951332.4865973
     },
     "label": "alive"
   },
@@ -75,7 +75,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7368,
+        "id": 7411,
         "is_dead": true,
         "key": "TEST_DEATH_CHAR",
         "life_state": "DEAD",
@@ -97,7 +97,7 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7370,
+            "id": 7413,
             "key": "corpse of TEST_DEATH_CHAR",
             "location": "TEST_DEATH_ROOM",
             "typeclass": "typeclasses.corpse.Corpse"
@@ -111,11 +111,11 @@
           "corpse of TEST_DEATH_CHAR"
         ],
         "exits": [],
-        "id": 7367,
+        "id": 7410,
         "key": "TEST_DEATH_ROOM"
       },
       "snapshot_label": "dead",
-      "timestamp": 1774920916.187645
+      "timestamp": 1774951334.068508
     },
     "label": "dead"
   },
@@ -126,7 +126,7 @@
         "bank_coins": 0,
         "coins": 37,
         "hp": 50,
-        "id": 7368,
+        "id": 7411,
         "is_dead": false,
         "key": "TEST_DEATH_CHAR",
         "life_state": "ALIVE",
@@ -145,7 +145,7 @@
       "equipment": [],
       "inventory": [
         {
-          "id": 7369,
+          "id": 7412,
           "key": "TEST_DEATH_TOKEN",
           "location": "TEST_DEATH_CHAR",
           "typeclass": "typeclasses.objects.Object"
@@ -156,7 +156,7 @@
         "created": [],
         "deleted": [
           {
-            "id": 7370,
+            "id": 7413,
             "key": "corpse of TEST_DEATH_CHAR",
             "location": "TEST_DEATH_ROOM",
             "typeclass": "typeclasses.corpse.Corpse"
@@ -168,12 +168,62 @@
           "TEST_DEATH_CHAR"
         ],
         "exits": [],
-        "id": 7367,
+        "id": 7410,
         "key": "TEST_DEATH_ROOM"
       },
       "snapshot_label": "departed",
-      "timestamp": 1774920918.0728104
+      "timestamp": 1774951335.7404637
     },
     "label": "departed"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 37,
+        "hp": 50,
+        "id": 7411,
+        "is_dead": false,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7412,
+          "key": "TEST_DEATH_TOKEN",
+          "location": "TEST_DEATH_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 7410,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774951335.9122658
+    },
+    "label": "final"
   }
 ]

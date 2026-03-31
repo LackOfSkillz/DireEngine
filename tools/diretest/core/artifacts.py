@@ -11,7 +11,9 @@ REQUIRED_ARTIFACT_FILES = {
     "seed.txt": "text",
     "commands.log": "lines",
     "snapshots.json": "json",
+    "diffs.json": "json",
     "metrics.json": "json",
+    "failure_summary.json": "json",
     "traceback.txt": "text",
 }
 
@@ -44,14 +46,18 @@ def write_artifacts(run_id, data, base_path=None):
     seed_value = int(data.get("seed", 0) or 0)
     command_log = list(data.get("command_log", []) or [])
     snapshots = list(data.get("snapshots", []) or [])
+    diffs = list(data.get("diffs", []) or [])
     metrics = dict(data.get("metrics", {}) or {})
+    failure_summary = dict(data.get("failure_summary", {}) or {})
     traceback_text = str(data.get("traceback", "") or "")
 
     _write_json(artifact_dir / "scenario.json", scenario_payload)
     _write_text(artifact_dir / "seed.txt", f"seed={seed_value}\n")
     _write_lines(artifact_dir / "commands.log", command_log)
     _write_json(artifact_dir / "snapshots.json", snapshots)
+    _write_json(artifact_dir / "diffs.json", diffs)
     _write_json(artifact_dir / "metrics.json", metrics)
+    _write_json(artifact_dir / "failure_summary.json", failure_summary)
     _write_text(artifact_dir / "traceback.txt", traceback_text)
 
     for filename in REQUIRED_ARTIFACT_FILES:

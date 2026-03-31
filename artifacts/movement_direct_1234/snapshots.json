@@ -3,10 +3,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7357,
+        "id": 7403,
+        "is_dead": false,
         "key": "TEST_MOVE_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_MOVE_START",
         "max_hp": 100,
         "states": {
@@ -25,31 +28,31 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7353,
+            "id": 7399,
             "key": "TEST_MOVE_START",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7354,
+            "id": 7400,
             "key": "TEST_MOVE_NORTH",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7355,
+            "id": 7401,
             "key": "north",
             "location": "TEST_MOVE_START",
             "typeclass": "typeclasses.exits.Exit"
           },
           {
-            "id": 7356,
+            "id": 7402,
             "key": "south",
             "location": "TEST_MOVE_NORTH",
             "typeclass": "typeclasses.exits.Exit"
           },
           {
-            "id": 7357,
+            "id": 7403,
             "key": "TEST_MOVE_CHAR",
             "location": "TEST_MOVE_START",
             "typeclass": "typeclasses.characters.Character"
@@ -65,11 +68,11 @@
         "exits": [
           "north"
         ],
-        "id": 7353,
+        "id": 7399,
         "key": "TEST_MOVE_START"
       },
       "snapshot_label": "look",
-      "timestamp": 1774920517.4931264
+      "timestamp": 1774951301.0392685
     },
     "label": "look"
   },
@@ -77,10 +80,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7357,
+        "id": 7403,
+        "is_dead": false,
         "key": "TEST_MOVE_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_MOVE_NORTH",
         "max_hp": 100,
         "states": {
@@ -108,11 +114,11 @@
         "exits": [
           "south"
         ],
-        "id": 7354,
+        "id": 7400,
         "key": "TEST_MOVE_NORTH"
       },
       "snapshot_label": "north",
-      "timestamp": 1774920517.9722414
+      "timestamp": 1774951301.3830512
     },
     "label": "north"
   },
@@ -120,10 +126,13 @@
     "data": {
       "attributes": {},
       "character": {
+        "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7357,
+        "id": 7403,
+        "is_dead": false,
         "key": "TEST_MOVE_CHAR",
+        "life_state": "ALIVE",
         "location": "TEST_MOVE_NORTH",
         "max_hp": 100,
         "states": {
@@ -151,12 +160,58 @@
         "exits": [
           "south"
         ],
-        "id": 7354,
+        "id": 7400,
         "key": "TEST_MOVE_NORTH"
       },
       "snapshot_label": "look",
-      "timestamp": 1774920518.244274
+      "timestamp": 1774951301.619904
     },
     "label": "look"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7403,
+        "is_dead": false,
+        "key": "TEST_MOVE_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_MOVE_NORTH",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "south",
+          "TEST_MOVE_CHAR"
+        ],
+        "exits": [
+          "south"
+        ],
+        "id": 7400,
+        "key": "TEST_MOVE_NORTH"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774951302.0578496
+    },
+    "label": "final"
   }
 ]

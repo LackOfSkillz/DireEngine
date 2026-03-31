@@ -3,6 +3,7 @@ import time
 
 from evennia.utils.search import search_tag
 
+from tools.diretest.core.runtime import suppress_client_payloads
 from world.area_forge.utils.messages import send_structured
 
 
@@ -394,7 +395,9 @@ def get_zone_map(character):
 
 def send_map_update(character, radius=3, session=None, mode="zone"):
     map_data = get_zone_map(character) if mode == "zone" else get_local_map(character, radius=radius)
-    sent = send_structured(character, "map", map_data, session=session)
+    sent = 0
+    if not suppress_client_payloads():
+        sent = send_structured(character, "map", map_data, session=session)
     if sent:
         print(f"[MAP] Sent {len(map_data['rooms'])} rooms to {sent} structured session(s) for {character.key}")
     return map_data

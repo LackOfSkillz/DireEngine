@@ -8,6 +8,7 @@ class CmdTend(Command):
     Try to stop bleeding on one of your injured body parts.
 
     Examples:
+            tend
       tend head
       tend left arm
       ten chest
@@ -48,15 +49,24 @@ class CmdTend(Command):
             self.caller.msg_roundtime_block()
             return
 
-        if not self.args:
-            self.caller.msg("Which body part are you trying to tend?")
-            return
-
         patient = self.caller
-        part_key = self.caller.normalize_body_part_name(self.args)
-        bp = patient.get_body_part(part_key)
+        raw_args = (self.args or "").strip()
+        if not raw_args:
+            part_key = patient.get_first_bleeding_part()
+            if not part_key:
+                fallback_part = patient.get_first_bleeding_part(include_tended=True)
+                if fallback_part and patient.is_tended(fallback_part):
+                    fallback_display = patient.format_body_part_name(fallback_part)
+                    self.caller.msg(f"Your {fallback_display} is already tended.")
+                else:
+                    self.caller.msg("You are not bleeding anywhere that needs tending.")
+                return
+            bp = patient.get_body_part(part_key)
+        else:
+            part_key = self.caller.normalize_body_part_name(raw_args)
+            bp = patient.get_body_part(part_key)
 
-        if not bp:
+        if raw_args and not bp:
             patient = self.resolve_tend_target()
             if not patient:
                 return

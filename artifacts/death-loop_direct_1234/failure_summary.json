@@ -1,0 +1,7 @@
+{
+  "failure_type": null,
+  "message": "",
+  "mode": "direct",
+  "scenario": "death-loop",
+  "seed": 1234
+}

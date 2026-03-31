@@ -1,5 +1,6 @@
 import time
 
+from tools.diretest.core.runtime import suppress_client_payloads
 from typeclasses.abilities import get_ability_map
 from world.area_forge.utils.messages import send_structured
 
@@ -374,7 +375,8 @@ def get_character_payload(character):
 
 def send_character_update(character, session=None):
     payload = get_character_payload(character)
-    send_structured(character, "character", payload, session=session)
+    if not suppress_client_payloads():
+        send_structured(character, "character", payload, session=session)
     return payload
 
 
@@ -392,5 +394,6 @@ def get_subsystem_payload(character):
 
 def send_subsystem_update(character, session=None):
     payload = get_subsystem_payload(character)
-    send_structured(character, "subsystem", payload, session=session)
+    if not suppress_client_payloads():
+        send_structured(character, "subsystem", payload, session=session)
     return payload

@@ -412,9 +412,12 @@ def ensure_onboarding_state(character):
 
 
 def is_onboarding_character(character):
-    if not character or not bool(getattr(character, "has_account", False)):
+    if not character or bool(getattr(getattr(character, "db", None), "is_npc", False)):
         return False
     state = ensure_onboarding_state(character)
+    has_player_binding = bool(getattr(character, "has_account", False) or getattr(character, "account", None))
+    if not has_player_binding and not isinstance(state, Mapping):
+        return False
     if bool(state.get("complete", False)):
         return False
     location = getattr(character, "location", None)
@@ -439,7 +442,7 @@ def _calculate_onboarding_objective(state):
             return "Attack the training goblin in the Training Yard."
         return "Bring down the training goblin in the Training Yard."
     if "healing" not in completed:
-        return "Stop the bleeding with tend once you reach the Supply Shack."
+        return "Use tend in the Supply Shack to stop your bleeding. Try: tend."
     if "economy" not in completed:
         if not bool(action_flags.get("economy_buy", False)):
             return "Buy one item from Quartermaster Nella in the Vendor Stall."
@@ -482,15 +485,47 @@ def _emit_objective_line(character, objective, state, force=False, minimum_inter
     now = time.time()
     last_roleplay = dict(state.get("last_roleplay") or {})
     last_objective = float(last_roleplay.get("system:objective", 0.0) or 0.0)
+    last_objective_text = str(last_roleplay.get("system:objective_text", "") or "")
+    repeated_objective_window = max(float(minimum_interval or 0.0), 30.0)
+    if not force and last_objective_text == str(objective or "") and now - last_objective < repeated_objective_window:
+        return False
     if not force and now - last_objective < float(minimum_interval or 0.0):
         return False
     line = f"[Objective] {objective}"
     character.msg(line)
     _remember_recent_line(character, line)
     last_roleplay["system:objective"] = now
+    last_roleplay["system:objective_text"] = str(objective or "")
     last_roleplay["system:prompt_pause"] = now
     state["last_roleplay"] = last_roleplay
     _persist_state(character, state)
+    return True
+
+
+def _ensure_healing_wound(character, state=None):
+    if not character:
+        return False
+    state = state or ensure_onboarding_state(character)
+    completed = set(state.get("completed_steps") or [])
+    if "combat" not in completed or "healing" in completed:
+        return False
+    room_key = str(getattr(getattr(character, "location", None), "key", "") or "")
+    if room_key != "Supply Shack":
+        return False
+    if hasattr(character, "get_first_bleeding_part") and character.get_first_bleeding_part():
+        return False
+
+    part_key = "left_arm"
+    body_part = character.get_body_part(part_key) if hasattr(character, "get_body_part") else None
+    if not body_part:
+        return False
+
+    body_part["external"] = max(int(body_part.get("external", 0) or 0), 4)
+    body_part["bleed"] = max(int(body_part.get("bleed", 0) or 0), 2)
+    body_part["tended"] = False
+    body_part["tend"] = {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}
+    if hasattr(character, "update_bleed_state"):
+        character.update_bleed_state()
     return True
 
 
@@ -950,6 +985,7 @@ def handle_room_entry(character):
     state["room_entered_at"] = time.time()
     _persist_state(character, state)
     first_visit = _record_room_visit(character, room_key)
+    _ensure_healing_wound(character, state=state)
     if first_visit and room_key == "Wake Room":
         emit_progress_cue(character, "wake_room")
     elif first_visit and room_key == "Outer Gate":

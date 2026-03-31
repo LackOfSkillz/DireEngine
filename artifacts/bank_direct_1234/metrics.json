@@ -1,6 +1,15 @@
 {
+  "coin_delta": -25,
+  "command_count": 3,
+  "command_timings_ms": [
+    2,
+    188,
+    183
+  ],
   "deletion_failures": [],
+  "ended_at": 1774951259.083724,
   "exit_code": 0,
+  "failure_type": null,
   "invariant_results": [
     {
       "message": "Character exists.",
@@ -13,7 +22,9 @@
       "passed": true
     }
   ],
+  "item_delta_count": 0,
   "leaks": [],
+  "mindstate_delta": {},
   "output_log": [
     "On hand: 1 gold\nIn bank: 2 silvers, 5 coppers",
     "You deposit 4 silvers into your account.",
@@ -30,112 +41,152 @@
       "withdraw 15"
     ],
     "deposit_diff": {
-      "after_label": "deposited",
-      "after_snapshot_created": [],
-      "after_snapshot_deleted": [],
-      "bank_coins_after": 65,
-      "bank_coins_before": 25,
-      "bank_coins_delta": 40,
-      "before_label": "initial",
-      "character_coins_after": 60,
-      "character_coins_before": 100,
-      "character_coins_delta": -40,
-      "character_hp_after": 100,
-      "character_hp_before": 100,
-      "character_hp_delta": 0,
-      "character_location_after": "TEST_BANK_ROOM",
-      "character_location_before": "TEST_BANK_ROOM",
-      "died": false,
-      "entered_combat": false,
-      "exited_combat": false,
-      "in_combat_after": false,
-      "in_combat_before": false,
-      "inventory_added": [],
-      "inventory_removed": [],
-      "is_dead_after": false,
-      "is_dead_before": false,
-      "life_state_after": "ALIVE",
-      "life_state_before": "ALIVE",
-      "range_changed": false,
-      "revived": false,
-      "room_after": "TEST_BANK_ROOM",
-      "room_before": "TEST_BANK_ROOM",
-      "room_changed": false,
-      "room_contents_added": [],
-      "room_contents_removed": [],
-      "roundtime_after": 0.0,
-      "roundtime_before": 0.0,
-      "target_after": null,
-      "target_assigned": false,
-      "target_before": null,
-      "target_cleared": false,
-      "target_hp_after": null,
-      "target_hp_before": null,
-      "target_hp_delta": null,
-      "target_range_after": null,
-      "target_range_before": null
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "deposited",
+        "bank_coins_after": 65,
+        "bank_coins_before": 25,
+        "bank_coins_delta": 40,
+        "before_label": "initial",
+        "coins_after": 60,
+        "coins_before": 100,
+        "coins_delta": -40,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_BANK_ROOM",
+        "location_before": "TEST_BANK_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [],
+        "room_after": "TEST_BANK_ROOM",
+        "room_before": "TEST_BANK_ROOM"
+      }
     },
     "output_log": [
       "On hand: 1 gold\nIn bank: 2 silvers, 5 coppers",
       "You deposit 4 silvers into your account.",
       "You withdraw 1 silver, 5 coppers from your account."
     ],
-    "snapshot_count": 3,
+    "snapshot_count": 4,
     "snapshot_labels": [
       "initial",
       "deposited",
-      "withdrawn"
+      "withdrawn",
+      "final"
     ],
     "withdraw_diff": {
-      "after_label": "withdrawn",
-      "after_snapshot_created": [],
-      "after_snapshot_deleted": [],
-      "bank_coins_after": 50,
-      "bank_coins_before": 65,
-      "bank_coins_delta": -15,
-      "before_label": "deposited",
-      "character_coins_after": 75,
-      "character_coins_before": 60,
-      "character_coins_delta": 15,
-      "character_hp_after": 100,
-      "character_hp_before": 100,
-      "character_hp_delta": 0,
-      "character_location_after": "TEST_BANK_ROOM",
-      "character_location_before": "TEST_BANK_ROOM",
-      "died": false,
-      "entered_combat": false,
-      "exited_combat": false,
-      "in_combat_after": false,
-      "in_combat_before": false,
-      "inventory_added": [],
-      "inventory_removed": [],
-      "is_dead_after": false,
-      "is_dead_before": false,
-      "life_state_after": "ALIVE",
-      "life_state_before": "ALIVE",
-      "range_changed": false,
-      "revived": false,
-      "room_after": "TEST_BANK_ROOM",
-      "room_before": "TEST_BANK_ROOM",
-      "room_changed": false,
-      "room_contents_added": [],
-      "room_contents_removed": [],
-      "roundtime_after": 0.0,
-      "roundtime_before": 0.0,
-      "target_after": null,
-      "target_assigned": false,
-      "target_before": null,
-      "target_cleared": false,
-      "target_hp_after": null,
-      "target_hp_before": null,
-      "target_hp_delta": null,
-      "target_range_after": null,
-      "target_range_before": null
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "withdrawn",
+        "bank_coins_after": 50,
+        "bank_coins_before": 65,
+        "bank_coins_delta": -15,
+        "before_label": "deposited",
+        "coins_after": 75,
+        "coins_before": 60,
+        "coins_delta": 15,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_BANK_ROOM",
+        "location_before": "TEST_BANK_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [],
+        "room_after": "TEST_BANK_ROOM",
+        "room_before": "TEST_BANK_ROOM"
+      }
     }
   },
+  "scenario_duration_ms": 4777,
   "snapshot_labels": [
     "initial",
     "deposited",
-    "withdrawn"
-  ]
+    "withdrawn",
+    "final"
+  ],
+  "started_at": 1774951254.3063157,
+  "state_transition_count": 3,
+  "xp_delta": 0
 }
