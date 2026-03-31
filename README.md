@@ -1,6 +1,4 @@
 # Dragons Ire
-
-
 [![Dragons Ire Screenshot](images/DragonsIre.jpg)](images/DragonsIre.jpg)
 
 # DireEngine
@@ -28,14 +26,18 @@ The project currently includes:
 
 - a custom browser-native web client for moment-to-moment play
 - DragonRealms-inspired combat pacing with roundtime, targeting, weapon profiles, and NPC retaliation
+- race, profession, and subsystem state for warrior, ranger, empath, and cleric gameplay identity
 - a body-part injury model with bleeding, tending, recovery pressure, and condition reporting
+- death, depart, grave, favor, and resurrection-recovery foundations instead of a trivial respawn loop
 - survival, lore, combat, armor, and early magic/guild scaffolding
 - inventory, equipment, wearable containers, sheaths, and weapon handling flows
 - stealth and survival verbs such as hide, sneak, stalk, forage, harvest, skin, and search
+- law, theft, and shoplifting-oriented systems with regional justice hooks and stocks support
 - trading and appraisal-oriented systems including vendors, buying, selling, haggle support, and item evaluation flows
 - spell preparation and casting scaffolding with targeted, warding, augmentation, debilitation, utility, and cyclic-ready support
 - a browser map system with fullscreen mode, drag/pan, fit/center controls, pathfinding, click-to-walk, and generic fallback layouts for non-forged rooms
 - AreaForge, a map-driven world-building pipeline that can turn processed source maps into playable area graphs and Evennia content
+- DireTest automation with scenario artifacts, replay support, baseline persistence, and lag diagnostics
 
 ## What Makes It Different
 
@@ -92,6 +94,22 @@ This lets the project mix traditional hand-authored game logic with faster world
 - ability visibility, cooldown, and execution scaffolding
 - mindstate and learning-oriented support paths
 
+### Race, profession, and subsystem identity
+
+- race selection and validation with race-specific stat caps, carry modifiers, learning modifiers, and display state
+- profession-aware subsystem payloads and browser-visible state for warrior, ranger, empath, and cleric progression
+- warrior tempo, pressure, exhaustion, berserk, and roar support paths
+- ranger bond, focus, terrain, companion, aim, and ammo state support
+- empath shock, wounds, links, unity, and overdraw tracking
+- cleric devotion and favor-facing state hooks
+
+### Death, favor, and recovery systems
+
+- persistent life-state handling for alive, dead, and departed characters
+- corpse creation, corpse decay, grave ownership, grave expiry, and grave recovery support
+- depart-mode handling, soul-state recovery hooks, resurrection fragility, and instability tracking
+- favor snapshots and death-sting severity state carried through death and recovery flows
+
 ### World interaction and item systems
 
 - inventory inspection and action routing
@@ -107,6 +125,18 @@ This lets the project mix traditional hand-authored game logic with faster world
 - targeted, augmentation, debilitation, warding, and utility support layers
 - cyclic spell scaffolding
 - guild-aware access hooks for future spellbook identity
+
+### Justice, theft, and economy-facing systems
+
+- regional justice configuration with room law types, bounty board support, and stocks-linked recovery flows
+- theft and shoplifting support paths with criminal-state hooks for broader stealth gameplay
+- vendor trading, banking, and economy diagnostics covered by DireTest scenarios
+
+### Onboarding and scripted tutorial content
+
+- guided onboarding progression through race choice, mirror, weapon, combat, vendor, and breach beats
+- mentor and gremlin roleplay scripts that react to idle players and tutorial delays
+- invasion scripting that escalates tutorial pressure with staged breach events and repeatable NPC spawns
 
 ### Browser map and navigation systems
 
@@ -199,6 +229,8 @@ The direct gameplay scenarios now cover movement, inventory, basic combat, death
 `diretest.py baseline save <name> --seed <n>` persists that aggregated report under `artifacts/baselines/<name>.json`. `diretest.py baseline compare <name> --seed <n>` reruns the same aggregated baseline and prints simple factual deltas against the saved baseline with no analysis layer yet.
 
 `diretest.py scenario <name> --check-lag` promotes lag status into a scenario failure when the run reaches `bad` or `critical`, while `critical` lag fails even without the extra flag. `diretest.py repro <artifact_path>` now recomputes lag metrics and prints a replay lag comparison against the original artifact.
+
+DireTest is also now wired into live payload-generation and ticker/script timing paths, so lag artifacts can distinguish command latency from client-payload cost and scheduled-system delay.
 
 ## Development Notes
 
