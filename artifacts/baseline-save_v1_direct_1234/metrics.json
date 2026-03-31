@@ -1,0 +1,105 @@
+{
+  "exit_code": 0,
+  "failure_type": null,
+  "result": {
+    "baseline_name": "v1",
+    "baseline_path": "C:\\Users\\gary\\dragonsire\\artifacts\\baselines\\v1.json",
+    "current_report": {
+      "all_valid": true,
+      "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\balance-baseline_direct_1234",
+      "baselines": {
+        "combat_outcomes": {
+          "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\combat-basic_direct_1234",
+          "command_count": 3,
+          "duration_ms": 17592,
+          "entered_combat": true,
+          "exit_code": 0,
+          "exited_combat": true,
+          "hit_damage": 1,
+          "roundtime_after_attack": 1.77,
+          "target_hp_after": 49,
+          "target_hp_before": 50
+        },
+        "economy_flows": {
+          "banking": {
+            "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\bank_direct_1234",
+            "command_count": 3,
+            "deposit_to_bank": 40,
+            "duration_ms": 5695,
+            "exit_code": 0,
+            "net_carried_coin_delta": -25,
+            "withdraw_to_hand": 15
+          },
+          "vendor_trade": {
+            "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\economy_direct_1234",
+            "command_count": 3,
+            "duration_ms": 11102,
+            "exit_code": 0,
+            "haggle_bonus": 0.15,
+            "net_coin_delta": -5,
+            "purchase_cost": 20,
+            "sale_return": 15
+          }
+        },
+        "progression_pacing": {
+          "completed_step_count": 10,
+          "completed_steps": [
+            "gender",
+            "race",
+            "appearance",
+            "gear",
+            "weapon",
+            "combat",
+            "healing",
+            "economy",
+            "breach",
+            "name"
+          ],
+          "duration_ms": 14136,
+          "exit_ready": true,
+          "scenario": "onboarding_full",
+          "token_count": 10
+        }
+      },
+      "duration_ms": 55149,
+      "exit_code": 0,
+      "scenario": "balance-baseline",
+      "seed": 1234,
+      "subruns": {
+        "bank_artifact": "C:\\Users\\gary\\dragonsire\\artifacts\\bank_direct_1234",
+        "combat_basic_artifact": "C:\\Users\\gary\\dragonsire\\artifacts\\combat-basic_direct_1234",
+        "economy_artifact": "C:\\Users\\gary\\dragonsire\\artifacts\\economy_direct_1234"
+      }
+    },
+    "duration_ms": 55149,
+    "exit_code": 0,
+    "saved_baseline": {
+      "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\balance-baseline_direct_1234",
+      "metrics": {
+        "bank_deposit_delta": 40,
+        "bank_net_carried_coin_delta": -25,
+        "bank_withdraw_delta": 15,
+        "combat_damage": 1,
+        "combat_duration_ms": 17592,
+        "combat_entered": true,
+        "combat_exited": true,
+        "combat_target_hp_after": 49,
+        "onboarding_duration_ms": 14136,
+        "onboarding_exit_ready": true,
+        "onboarding_steps": 10,
+        "onboarding_tokens": 10,
+        "vendor_haggle_bonus": 0.15,
+        "vendor_net_coin_delta": -5,
+        "vendor_purchase_cost": 20,
+        "vendor_sale_return": 15
+      },
+      "name": "v1",
+      "saved_at": 1774955492.5193806,
+      "scenario": "balance-baseline",
+      "seed": 1234,
+      "version": 1
+    },
+    "scenario": "baseline-save"
+  },
+  "scenario_duration_ms": 55149
+}

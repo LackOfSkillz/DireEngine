@@ -627,11 +627,15 @@ In other words, the first job of DireTest is not to be broad. The first job is t
 Current bootstrap path:
 
 - `diretest balance-baseline --seed 1234`
+- `diretest baseline save v1 --seed 1234`
+- `diretest baseline compare v1 --seed 1234`
 - combat baseline from `combat-basic`
 - economy baseline from `economy` + `bank`
 - progression baseline from `onboarding_full`
 
 This first balance layer should stay descriptive. It should answer whether baseline behavior drifted before it starts asserting what the exact correct balance must be.
+
+Persistence should remain simple at this stage: save one aggregated baseline payload, compare the same aggregated payload later, and print raw deltas such as combat damage, coin flow, and onboarding step count changes without adding interpretation logic.
 
 Only after those phases are stable should DireTest expand toward broader simulation or declarative scenario definitions.
 

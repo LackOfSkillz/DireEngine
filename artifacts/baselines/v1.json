@@ -1,0 +1,26 @@
+{
+  "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\balance-baseline_direct_1234",
+  "metrics": {
+    "bank_deposit_delta": 40,
+    "bank_net_carried_coin_delta": -25,
+    "bank_withdraw_delta": 15,
+    "combat_damage": 1,
+    "combat_duration_ms": 17592,
+    "combat_entered": true,
+    "combat_exited": true,
+    "combat_target_hp_after": 49,
+    "onboarding_duration_ms": 14136,
+    "onboarding_exit_ready": true,
+    "onboarding_steps": 10,
+    "onboarding_tokens": 10,
+    "vendor_haggle_bonus": 0.15,
+    "vendor_net_coin_delta": -5,
+    "vendor_purchase_cost": 20,
+    "vendor_sale_return": 15
+  },
+  "name": "v1",
+  "saved_at": 1774955492.5193806,
+  "scenario": "balance-baseline",
+  "seed": 1234,
+  "version": 1
+}

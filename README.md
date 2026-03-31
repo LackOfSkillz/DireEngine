@@ -163,6 +163,8 @@ DireTest currently has these live scenario entrypoints:
 ```powershell
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py list
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py balance-baseline --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline save v1 --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline compare v1 --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario race-balance
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario movement --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario inventory --seed 1234
@@ -185,6 +187,8 @@ Optional flags:
 The direct gameplay scenarios now cover movement, inventory, basic combat, death and depart loops, grave recovery, vendor trading, and banking. Artifact bundles under `artifacts/` now include `diffs.json`, `failure_summary.json`, timing and delta metrics, and replayable scenario metadata.
 
 `diretest.py balance-baseline --seed <n>` is the first descriptive balance pass. It rolls up combat outcomes, economy flow, and onboarding progression pacing into a single artifact-backed report without adding hard balance gates yet.
+
+`diretest.py baseline save <name> --seed <n>` persists that aggregated report under `artifacts/baselines/<name>.json`. `diretest.py baseline compare <name> --seed <n>` reruns the same aggregated baseline and prints simple factual deltas against the saved baseline with no analysis layer yet.
 
 ## Development Notes
 

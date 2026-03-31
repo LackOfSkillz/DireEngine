@@ -2,12 +2,12 @@
   "coin_delta": -5,
   "command_count": 3,
   "command_timings_ms": [
-    654,
-    547,
-    458
+    490,
+    837,
+    558
   ],
   "deletion_failures": [],
-  "ended_at": 1774953344.3392093,
+  "ended_at": 1774955527.7981095,
   "exit_code": 0,
   "failure_type": null,
   "invariant_results": [
@@ -192,7 +192,7 @@
       "final"
     ]
   },
-  "scenario_duration_ms": 13853,
+  "scenario_duration_ms": 12099,
   "snapshot_labels": [
     "initial",
     "haggled",
@@ -200,7 +200,7 @@
     "sold",
     "final"
   ],
-  "started_at": 1774953330.4862988,
+  "started_at": 1774955515.699366,
   "state_transition_count": 4,
   "xp_delta": 0
 }

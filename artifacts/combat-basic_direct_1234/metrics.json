@@ -2,12 +2,12 @@
   "coin_delta": 0,
   "command_count": 3,
   "command_timings_ms": [
-    245,
-    4660,
-    612
+    221,
+    4743,
+    608
   ],
   "deletion_failures": [],
-  "ended_at": 1774953330.4833007,
+  "ended_at": 1774955515.696367,
   "exit_code": 0,
   "failure_type": null,
   "invariant_results": [
@@ -71,7 +71,7 @@
         "in_combat_after": true,
         "in_combat_before": true,
         "range_changed": false,
-        "roundtime_after": 1.75,
+        "roundtime_after": 1.77,
         "roundtime_before": 0.0,
         "target_after": "TEST_COMBAT_DEFENDER",
         "target_assigned": false,
@@ -134,8 +134,8 @@
         "in_combat_after": false,
         "in_combat_before": true,
         "range_changed": true,
-        "roundtime_after": 2.85,
-        "roundtime_before": 1.75,
+        "roundtime_after": 2.83,
+        "roundtime_before": 1.77,
         "target_after": null,
         "target_assigned": false,
         "target_before": "TEST_COMBAT_DEFENDER",
@@ -246,7 +246,7 @@
     ],
     "target_hp": 49
   },
-  "scenario_duration_ms": 16981,
+  "scenario_duration_ms": 16525,
   "snapshot_labels": [
     "initial",
     "engaged",
@@ -254,7 +254,7 @@
     "disengaged",
     "final"
   ],
-  "started_at": 1774953313.5018086,
+  "started_at": 1774955499.1705089,
   "state_transition_count": 4,
   "xp_delta": 0
 }

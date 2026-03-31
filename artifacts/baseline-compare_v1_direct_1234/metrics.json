@@ -1,0 +1,255 @@
+{
+  "exit_code": 0,
+  "failure_type": null,
+  "result": {
+    "baseline_metrics": {
+      "bank_deposit_delta": 40,
+      "bank_net_carried_coin_delta": -25,
+      "bank_withdraw_delta": 15,
+      "combat_damage": 1,
+      "combat_duration_ms": 17592,
+      "combat_entered": true,
+      "combat_exited": true,
+      "combat_target_hp_after": 49,
+      "onboarding_duration_ms": 14136,
+      "onboarding_exit_ready": true,
+      "onboarding_steps": 10,
+      "onboarding_tokens": 10,
+      "vendor_haggle_bonus": 0.15,
+      "vendor_net_coin_delta": -5,
+      "vendor_purchase_cost": 20,
+      "vendor_sale_return": 15
+    },
+    "baseline_name": "v1",
+    "baseline_path": "C:\\Users\\gary\\dragonsire\\artifacts\\baselines\\v1.json",
+    "current_metrics": {
+      "bank_deposit_delta": 40,
+      "bank_net_carried_coin_delta": -25,
+      "bank_withdraw_delta": 15,
+      "combat_damage": 1,
+      "combat_duration_ms": 16525,
+      "combat_entered": true,
+      "combat_exited": true,
+      "combat_target_hp_after": 49,
+      "onboarding_duration_ms": 16416,
+      "onboarding_exit_ready": true,
+      "onboarding_steps": 10,
+      "onboarding_tokens": 10,
+      "vendor_haggle_bonus": 0.15,
+      "vendor_net_coin_delta": -5,
+      "vendor_purchase_cost": 20,
+      "vendor_sale_return": 15
+    },
+    "current_report": {
+      "all_valid": true,
+      "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\balance-baseline_direct_1234",
+      "baselines": {
+        "combat_outcomes": {
+          "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\combat-basic_direct_1234",
+          "command_count": 3,
+          "duration_ms": 16525,
+          "entered_combat": true,
+          "exit_code": 0,
+          "exited_combat": true,
+          "hit_damage": 1,
+          "roundtime_after_attack": 1.77,
+          "target_hp_after": 49,
+          "target_hp_before": 50
+        },
+        "economy_flows": {
+          "banking": {
+            "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\bank_direct_1234",
+            "command_count": 3,
+            "deposit_to_bank": 40,
+            "duration_ms": 6116,
+            "exit_code": 0,
+            "net_carried_coin_delta": -25,
+            "withdraw_to_hand": 15
+          },
+          "vendor_trade": {
+            "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\economy_direct_1234",
+            "command_count": 3,
+            "duration_ms": 12099,
+            "exit_code": 0,
+            "haggle_bonus": 0.15,
+            "net_coin_delta": -5,
+            "purchase_cost": 20,
+            "sale_return": 15
+          }
+        },
+        "progression_pacing": {
+          "completed_step_count": 10,
+          "completed_steps": [
+            "gender",
+            "race",
+            "appearance",
+            "gear",
+            "weapon",
+            "combat",
+            "healing",
+            "economy",
+            "breach",
+            "name"
+          ],
+          "duration_ms": 16416,
+          "exit_ready": true,
+          "scenario": "onboarding_full",
+          "token_count": 10
+        }
+      },
+      "duration_ms": 57289,
+      "exit_code": 0,
+      "scenario": "balance-baseline",
+      "seed": 1234,
+      "subruns": {
+        "bank_artifact": "C:\\Users\\gary\\dragonsire\\artifacts\\bank_direct_1234",
+        "combat_basic_artifact": "C:\\Users\\gary\\dragonsire\\artifacts\\combat-basic_direct_1234",
+        "economy_artifact": "C:\\Users\\gary\\dragonsire\\artifacts\\economy_direct_1234"
+      }
+    },
+    "deltas": [
+      {
+        "baseline": 1,
+        "current": 1,
+        "delta": 0,
+        "key": "combat_damage",
+        "label": "combat damage"
+      },
+      {
+        "baseline": 49,
+        "current": 49,
+        "delta": 0,
+        "key": "combat_target_hp_after",
+        "label": "combat target hp after"
+      },
+      {
+        "baseline": true,
+        "changed": false,
+        "current": true,
+        "key": "combat_entered",
+        "label": "combat entered"
+      },
+      {
+        "baseline": true,
+        "changed": false,
+        "current": true,
+        "key": "combat_exited",
+        "label": "combat exited"
+      },
+      {
+        "baseline": 17592,
+        "current": 16525,
+        "delta": -1067,
+        "key": "combat_duration_ms",
+        "label": "combat duration ms"
+      },
+      {
+        "baseline": 20,
+        "current": 20,
+        "delta": 0,
+        "key": "vendor_purchase_cost",
+        "label": "vendor purchase cost"
+      },
+      {
+        "baseline": 15,
+        "current": 15,
+        "delta": 0,
+        "key": "vendor_sale_return",
+        "label": "vendor sale return"
+      },
+      {
+        "baseline": -5,
+        "current": -5,
+        "delta": 0,
+        "key": "vendor_net_coin_delta",
+        "label": "vendor coin delta"
+      },
+      {
+        "baseline": 0.15,
+        "current": 0.15,
+        "delta": 0.0,
+        "key": "vendor_haggle_bonus",
+        "label": "vendor haggle bonus"
+      },
+      {
+        "baseline": 40,
+        "current": 40,
+        "delta": 0,
+        "key": "bank_deposit_delta",
+        "label": "bank deposit delta"
+      },
+      {
+        "baseline": 15,
+        "current": 15,
+        "delta": 0,
+        "key": "bank_withdraw_delta",
+        "label": "bank withdraw delta"
+      },
+      {
+        "baseline": -25,
+        "current": -25,
+        "delta": 0,
+        "key": "bank_net_carried_coin_delta",
+        "label": "bank carried coin delta"
+      },
+      {
+        "baseline": 14136,
+        "current": 16416,
+        "delta": 2280,
+        "key": "onboarding_duration_ms",
+        "label": "onboarding duration ms"
+      },
+      {
+        "baseline": 10,
+        "current": 10,
+        "delta": 0,
+        "key": "onboarding_steps",
+        "label": "onboarding steps"
+      },
+      {
+        "baseline": 10,
+        "current": 10,
+        "delta": 0,
+        "key": "onboarding_tokens",
+        "label": "onboarding tokens"
+      },
+      {
+        "baseline": true,
+        "changed": false,
+        "current": true,
+        "key": "onboarding_exit_ready",
+        "label": "onboarding exit ready"
+      }
+    ],
+    "duration_ms": 57289,
+    "exit_code": 0,
+    "saved_baseline": {
+      "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\balance-baseline_direct_1234",
+      "metrics": {
+        "bank_deposit_delta": 40,
+        "bank_net_carried_coin_delta": -25,
+        "bank_withdraw_delta": 15,
+        "combat_damage": 1,
+        "combat_duration_ms": 17592,
+        "combat_entered": true,
+        "combat_exited": true,
+        "combat_target_hp_after": 49,
+        "onboarding_duration_ms": 14136,
+        "onboarding_exit_ready": true,
+        "onboarding_steps": 10,
+        "onboarding_tokens": 10,
+        "vendor_haggle_bonus": 0.15,
+        "vendor_net_coin_delta": -5,
+        "vendor_purchase_cost": 20,
+        "vendor_sale_return": 15
+      },
+      "name": "v1",
+      "saved_at": 1774955492.5193806,
+      "scenario": "balance-baseline",
+      "seed": 1234,
+      "version": 1
+    },
+    "scenario": "baseline-compare"
+  },
+  "scenario_duration_ms": 57289
+}

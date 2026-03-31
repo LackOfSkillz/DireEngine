@@ -8,6 +8,7 @@ import traceback
 
 from tools.diretest.core.diff import diff_snapshots as build_snapshot_diff
 from tools.diretest.core.artifacts import write_artifacts
+from tools.diretest.core.baselines import METRIC_SPECS, compare_named_baseline, load_named_baseline, save_named_baseline
 from tools.diretest.core.failures import build_failure_summary
 from tools.diretest.core.runner import run_scenario
 from tools.diretest.core.seed import set_seed
@@ -156,6 +157,20 @@ def _cleanup_named_object(name):
 def _print_lines(lines):
     for line in list(lines or []):
         print(line)
+
+
+def _safe_int(value, default=0):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return int(default)
+
+
+def _safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return float(default)
 
 
 def _format_onboarding_output(output):
@@ -460,9 +475,9 @@ def _summarize_combat_baseline(result):
         hit_damage = int(target_hp_before) - int(target_hp_after)
     return {
         "artifact_dir": str((result or {}).get("artifact_dir", "") or ""),
-        "exit_code": int((result or {}).get("exit_code", 1) or 1),
-        "duration_ms": int(metrics.get("scenario_duration_ms", 0) or 0),
-        "command_count": int(metrics.get("command_count", 0) or 0),
+        "exit_code": _safe_int((result or {}).get("exit_code", 1), 1),
+        "duration_ms": _safe_int(metrics.get("scenario_duration_ms", 0), 0),
+        "command_count": _safe_int(metrics.get("command_count", 0), 0),
         "target_hp_before": target_hp_before,
         "target_hp_after": target_hp_after,
         "hit_damage": hit_damage,
@@ -484,9 +499,9 @@ def _summarize_economy_baseline(economy_result, bank_result):
     return {
         "vendor_trade": {
             "artifact_dir": str((economy_result or {}).get("artifact_dir", "") or ""),
-            "exit_code": int((economy_result or {}).get("exit_code", 1) or 1),
-            "duration_ms": int(economy_metrics.get("scenario_duration_ms", 0) or 0),
-            "command_count": int(economy_metrics.get("command_count", 0) or 0),
+            "exit_code": _safe_int((economy_result or {}).get("exit_code", 1), 1),
+            "duration_ms": _safe_int(economy_metrics.get("scenario_duration_ms", 0), 0),
+            "command_count": _safe_int(economy_metrics.get("command_count", 0), 0),
             "purchase_cost": abs(int(buy_diff.get("character_changes", {}).get("coins_delta", 0) or 0)),
             "sale_return": int(sell_diff.get("character_changes", {}).get("coins_delta", 0) or 0),
             "net_coin_delta": int(economy_metrics.get("coin_delta", 0) or 0),
@@ -494,9 +509,9 @@ def _summarize_economy_baseline(economy_result, bank_result):
         },
         "banking": {
             "artifact_dir": str((bank_result or {}).get("artifact_dir", "") or ""),
-            "exit_code": int((bank_result or {}).get("exit_code", 1) or 1),
-            "duration_ms": int(bank_metrics.get("scenario_duration_ms", 0) or 0),
-            "command_count": int(bank_metrics.get("command_count", 0) or 0),
+            "exit_code": _safe_int((bank_result or {}).get("exit_code", 1), 1),
+            "duration_ms": _safe_int(bank_metrics.get("scenario_duration_ms", 0), 0),
+            "command_count": _safe_int(bank_metrics.get("command_count", 0), 0),
             "deposit_to_bank": int(deposit_diff.get("character_changes", {}).get("bank_coins_delta", 0) or 0),
             "withdraw_to_hand": int(withdraw_diff.get("character_changes", {}).get("coins_delta", 0) or 0),
             "net_carried_coin_delta": int(bank_metrics.get("coin_delta", 0) or 0),
@@ -561,15 +576,14 @@ def _emit_balance_baseline_output(report, as_json=False):
     _print_lines(lines)
 
 
-def _handle_balance_baseline_command(args):
-    seed = _ensure_scenario_seed(args)
+def _run_balance_baseline(seed, character_name):
     started_at = time.time()
     started_perf = time.perf_counter()
     command_log = [
         f"scenario combat-basic --seed {seed}",
         f"scenario economy --seed {seed}",
         f"scenario bank --seed {seed}",
-        f"scenario onboarding_full --seed {seed} --name {str(getattr(args, 'name', 'DireTestHero') or 'DireTestHero')}",
+        f"scenario onboarding_full --seed {seed} --name {str(character_name or 'DireTestHero')}",
     ]
 
     failure_type = None
@@ -585,7 +599,7 @@ def _handle_balance_baseline_command(args):
         combat_result = run_combat_basic_scenario(_build_runner_namespace(seed))
         economy_result = run_economy_scenario(_build_runner_namespace(seed))
         bank_result = run_bank_scenario(_build_runner_namespace(seed))
-        onboarding_output = _build_onboarding_full_output(_build_runner_namespace(seed, name=getattr(args, "name", "DireTestHero")))
+        onboarding_output = _build_onboarding_full_output(_build_runner_namespace(seed, name=character_name))
     except Exception:
         exit_code = 1
         failure_type = "unexpected_exception"
@@ -661,8 +675,198 @@ def _handle_balance_baseline_command(args):
     report["exit_code"] = int(exit_code)
     report["duration_ms"] = duration_ms
 
+    return report
+
+
+def _format_metric_value(value):
+    if isinstance(value, bool):
+        return "True" if value else "False"
+    if isinstance(value, float):
+        text = f"{value:.4f}".rstrip("0").rstrip(".")
+        return text if text else "0"
+    if value is None:
+        return "None"
+    return str(value)
+
+
+def _format_metric_delta(delta_value):
+    if isinstance(delta_value, float) and not float(delta_value).is_integer():
+        return f"{delta_value:+.4f}".rstrip("0").rstrip(".")
+    return f"{int(delta_value):+d}"
+
+
+def _format_baseline_metric_lines(metrics):
+    lines = []
+    payload = dict(metrics or {})
+    for key, label in METRIC_SPECS:
+        lines.append(f"- {label}: {_format_metric_value(payload.get(key))}")
+    return lines
+
+
+def _emit_baseline_save_output(record, baseline_path, report, as_json=False):
+    payload = {
+        "baseline": record,
+        "baseline_path": str(baseline_path),
+        "current_artifact_dir": str(report.get("artifact_dir", "") or ""),
+        "exit_code": int(report.get("exit_code", 0) or 0),
+    }
+    if as_json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+        return
+
+    lines = [
+        "DireTest Baseline Saved",
+        f"Name: {record.get('name', '')}",
+        f"Seed: {int(record.get('seed', 0) or 0)}",
+        f"Baseline File: {baseline_path}",
+        f"Current Artifact: {report.get('artifact_dir', '')}",
+        "",
+        "Metrics:",
+    ]
+    lines.extend(_format_baseline_metric_lines(record.get("metrics", {})))
+    _print_lines(lines)
+
+
+def _emit_baseline_compare_output(name, baseline_path, compare_payload, as_json=False):
+    if as_json:
+        print(json.dumps(compare_payload, indent=2, sort_keys=True))
+        return
+
+    lines = [
+        "DireTest Baseline Compare",
+        f"Name: {name}",
+        f"Baseline File: {baseline_path}",
+        f"Saved Seed: {int((compare_payload.get('saved_baseline', {}) or {}).get('seed', 0) or 0)}",
+        f"Current Seed: {int((compare_payload.get('current_report', {}) or {}).get('seed', 0) or 0)}",
+        f"Current Artifact: {(compare_payload.get('current_report', {}) or {}).get('artifact_dir', '')}",
+        "",
+        "Deltas:",
+    ]
+    for entry in list(compare_payload.get("deltas", []) or []):
+        label = str(entry.get("label", "metric") or "metric")
+        if "delta" in entry:
+            lines.append(
+                f"- {label}: {_format_metric_delta(entry.get('delta', 0))} "
+                f"(baseline {_format_metric_value(entry.get('baseline'))} -> current {_format_metric_value(entry.get('current'))})"
+            )
+        else:
+            lines.append(
+                f"- {label}: {_format_metric_value(entry.get('baseline'))} -> {_format_metric_value(entry.get('current'))}"
+            )
+    _print_lines(lines)
+
+
+def _write_baseline_command_artifact(run_id, seed, command_log, result_payload, failure_type=None, failure_message="", traceback_text=""):
+    duration_ms = _safe_int((result_payload or {}).get("duration_ms", 0), 0)
+    return write_artifacts(
+        run_id,
+        {
+            "scenario": {
+                "name": str((result_payload or {}).get("scenario", run_id) or run_id),
+                "mode": "direct",
+                "seed": int(seed or 0),
+                "started_at": time.time(),
+            },
+            "seed": int(seed or 0),
+            "command_log": list(command_log or []),
+            "snapshots": [],
+            "diffs": [],
+            "metrics": {
+                "exit_code": _safe_int((result_payload or {}).get("exit_code", 0), 0),
+                "result": result_payload,
+                "failure_type": failure_type,
+                "scenario_duration_ms": duration_ms,
+            },
+            "failure_summary": build_failure_summary(
+                failure_type=failure_type,
+                message=failure_message,
+                scenario=str((result_payload or {}).get("scenario", run_id) or run_id),
+                seed=seed,
+                mode="direct",
+            ),
+            "traceback": traceback_text,
+        },
+    )
+
+
+def _handle_balance_baseline_command(args):
+    seed = _ensure_scenario_seed(args)
+    report = _run_balance_baseline(seed, getattr(args, "name", "DireTestHero"))
+
     _emit_balance_baseline_output(report, as_json=bool(getattr(args, "json", False)))
-    return int(exit_code)
+    return int(report.get("exit_code", 0) or 0)
+
+
+def _handle_baseline_save_command(args):
+    seed = _ensure_scenario_seed(args)
+    baseline_name = str(getattr(args, "baseline_name", "") or "").strip()
+    report = _run_balance_baseline(seed, getattr(args, "character_name", "DireTestHero"))
+    baseline_path, record = save_named_baseline(baseline_name, report)
+
+    payload = {
+        "scenario": "baseline-save",
+        "baseline_name": record.get("name"),
+        "baseline_path": str(baseline_path),
+        "saved_baseline": record,
+        "current_report": report,
+        "exit_code": int(report.get("exit_code", 0) or 0),
+        "duration_ms": int(report.get("duration_ms", 0) or 0),
+    }
+    artifact_dir = _write_baseline_command_artifact(
+        f"baseline-save_{record.get('name', 'baseline')}_direct_{seed}",
+        seed,
+        [f"baseline save {baseline_name} --seed {seed}"],
+        payload,
+    )
+    payload["artifact_dir"] = str(artifact_dir)
+
+    _emit_baseline_save_output(record, baseline_path, report, as_json=bool(getattr(args, "json", False)))
+    return int(payload.get("exit_code", 0) or 0)
+
+
+def _handle_baseline_compare_command(args):
+    seed = _ensure_scenario_seed(args)
+    baseline_name = str(getattr(args, "baseline_name", "") or "").strip()
+
+    try:
+        baseline_path, saved_record = load_named_baseline(baseline_name)
+    except FileNotFoundError as exc:
+        artifact_dir = _write_cli_failure_artifact("baseline-compare", seed, "missing_baseline", str(exc), mode="direct")
+        if bool(getattr(args, "json", False)):
+            print(json.dumps({"exit_code": 1, "failure_type": "missing_baseline", "message": str(exc), "artifact_dir": artifact_dir}, indent=2, sort_keys=True))
+        else:
+            _print_lines([
+                "DireTest Baseline Compare",
+                f"Name: {baseline_name}",
+                f"Artifact Dir: {artifact_dir}",
+                f"FAIL: {exc}",
+            ])
+        return 1
+
+    report = _run_balance_baseline(seed, getattr(args, "character_name", "DireTestHero"))
+    comparison = compare_named_baseline(saved_record, report)
+    payload = {
+        "scenario": "baseline-compare",
+        "baseline_name": str(saved_record.get("name", baseline_name) or baseline_name),
+        "baseline_path": str(baseline_path),
+        "saved_baseline": saved_record,
+        "current_report": report,
+        "deltas": list(comparison.get("deltas", []) or []),
+        "current_metrics": dict(comparison.get("current_metrics", {}) or {}),
+        "baseline_metrics": dict(comparison.get("baseline_metrics", {}) or {}),
+        "exit_code": int(report.get("exit_code", 0) or 0),
+        "duration_ms": int(report.get("duration_ms", 0) or 0),
+    }
+    artifact_dir = _write_baseline_command_artifact(
+        f"baseline-compare_{saved_record.get('name', 'baseline')}_direct_{seed}",
+        seed,
+        [f"baseline compare {baseline_name} --seed {seed}"],
+        payload,
+    )
+    payload["artifact_dir"] = str(artifact_dir)
+
+    _emit_baseline_compare_output(payload.get("baseline_name", baseline_name), baseline_path, payload, as_json=bool(getattr(args, "json", False)))
+    return int(payload.get("exit_code", 0) or 0)
 
 
 @register_scenario("movement")
@@ -1530,6 +1734,23 @@ def build_parser():
     balance_baseline_parser.add_argument("--seed", type=int)
     balance_baseline_parser.add_argument("--json", action="store_true")
     balance_baseline_parser.set_defaults(cli_handler=_handle_balance_baseline_command)
+
+    baseline_parser = subparsers.add_parser("baseline")
+    baseline_subparsers = baseline_parser.add_subparsers(dest="baseline_action", required=True)
+
+    baseline_save_parser = baseline_subparsers.add_parser("save")
+    baseline_save_parser.add_argument("baseline_name")
+    baseline_save_parser.add_argument("--character-name", default="DireTestHero")
+    baseline_save_parser.add_argument("--seed", type=int)
+    baseline_save_parser.add_argument("--json", action="store_true")
+    baseline_save_parser.set_defaults(cli_handler=_handle_baseline_save_command)
+
+    baseline_compare_parser = baseline_subparsers.add_parser("compare")
+    baseline_compare_parser.add_argument("baseline_name")
+    baseline_compare_parser.add_argument("--character-name", default="DireTestHero")
+    baseline_compare_parser.add_argument("--seed", type=int)
+    baseline_compare_parser.add_argument("--json", action="store_true")
+    baseline_compare_parser.set_defaults(cli_handler=_handle_baseline_compare_command)
 
     race_balance_parser = scenario_subparsers.add_parser("race-balance")
     race_balance_parser.add_argument("--profession", default="commoner")

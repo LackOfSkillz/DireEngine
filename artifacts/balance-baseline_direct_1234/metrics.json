@@ -1,5 +1,5 @@
 {
-  "ended_at": 1774953376.3327348,
+  "ended_at": 1774955554.6411238,
   "exit_code": 0,
   "failure_type": null,
   "result": {
@@ -8,12 +8,12 @@
       "combat_outcomes": {
         "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\combat-basic_direct_1234",
         "command_count": 3,
-        "duration_ms": 16981,
+        "duration_ms": 16525,
         "entered_combat": true,
-        "exit_code": 1,
+        "exit_code": 0,
         "exited_combat": true,
         "hit_damage": 1,
-        "roundtime_after_attack": 1.75,
+        "roundtime_after_attack": 1.77,
         "target_hp_after": 49,
         "target_hp_before": 50
       },
@@ -22,16 +22,16 @@
           "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\bank_direct_1234",
           "command_count": 3,
           "deposit_to_bank": 40,
-          "duration_ms": 8599,
-          "exit_code": 1,
+          "duration_ms": 6116,
+          "exit_code": 0,
           "net_carried_coin_delta": -25,
           "withdraw_to_hand": 15
         },
         "vendor_trade": {
           "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\economy_direct_1234",
           "command_count": 3,
-          "duration_ms": 13853,
-          "exit_code": 1,
+          "duration_ms": 12099,
+          "exit_code": 0,
           "haggle_bonus": 0.15,
           "net_coin_delta": -5,
           "purchase_cost": 20,
@@ -52,7 +52,7 @@
           "breach",
           "name"
         ],
-        "duration_ms": 18143,
+        "duration_ms": 16416,
         "exit_ready": true,
         "scenario": "onboarding_full",
         "token_count": 10
@@ -66,6 +66,6 @@
       "economy_artifact": "C:\\Users\\gary\\dragonsire\\artifacts\\economy_direct_1234"
     }
   },
-  "scenario_duration_ms": 64445,
-  "started_at": 1774953311.8877025
+  "scenario_duration_ms": 57289,
+  "started_at": 1774955497.3521485
 }
