@@ -153,6 +153,44 @@ def _cleanup_named_object(name):
             pass
 
 
+def _print_lines(lines):
+    for line in list(lines or []):
+        print(line)
+
+
+def _format_onboarding_output(output):
+    lines = [
+        "DireTest Scenario: onboarding_full",
+        f"Name: {output.get('name', '')}",
+        "",
+    ]
+    for result in list(output.get("results", []) or []):
+        status = "PASS" if result.get("ok") else "FAIL"
+        lines.append(f"[{status}] {result.get('step')}: {result.get('message')}")
+    lines.extend(
+        [
+            "",
+            f"Completed Steps: {', '.join(list(output.get('completed_steps', []) or []))}",
+            f"Tokens: {int(output.get('tokens', 0) or 0)}",
+            f"Exit Ready: {'PASS' if output.get('can_exit') else 'FAIL'}",
+        ]
+    )
+    exit_message = str(output.get("exit_message", "") or "")
+    if exit_message:
+        lines.append(f"Exit Message: {exit_message}")
+    duration_ms = int(output.get("duration_ms", 0) or 0)
+    if duration_ms:
+        lines.append(f"Duration Ms: {duration_ms}")
+    return lines
+
+
+def _emit_onboarding_output(output, as_json=False):
+    if as_json:
+        print(json.dumps(output, indent=2, sort_keys=True))
+        return
+    _print_lines(_format_onboarding_output(output))
+
+
 ONBOARDING_ROOM_NAMES = [
     "Intake Hall",
     "Lineup Platform",
@@ -354,6 +392,277 @@ def run_race_balance_scenario(args):
         return 0 if output["all_valid"] else 1
     finally:
         _cleanup_named_object(room_name)
+
+
+def _build_runner_namespace(seed, as_json=False, **extra):
+    payload = {"seed": int(seed), "json": bool(as_json)}
+    payload.update(extra)
+    return argparse.Namespace(**payload)
+
+
+def _build_onboarding_full_output(args):
+    started_perf = time.perf_counter()
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from evennia.utils.create import create_object
+
+    from systems import onboarding
+
+    created_objects = []
+    try:
+        rooms = _get_or_create_tutorial_rooms(ObjectDB, create_object, created_objects)
+        character = _create_test_onboarding_character(create_object, rooms, created_objects, onboarding)
+        final_name = _default_test_name(getattr(args, "name", "DireTestHero"))
+        results = []
+        _apply_onboarding_identity(character, rooms, onboarding, results)
+
+        character.move_to(rooms["Gear Rack Room"], quiet=True, use_destination=False)
+        _equip_test_gear(character, create_object, created_objects)
+        results.append({"step": "gear", "ok": "gear" in set(onboarding.ensure_onboarding_state(character).get("completed_steps") or []), "message": "wore starter gear"})
+
+        character.move_to(rooms["Weapon Cage"], quiet=True, use_destination=False)
+        weapon = _create_test_weapon(character, create_object, created_objects)
+        onboarding.note_weapon_action(character, weapon)
+        results.append({"step": "weapon", "ok": "weapon" in set(onboarding.ensure_onboarding_state(character).get("completed_steps") or []), "message": "wielded training weapon"})
+        _run_finish_sequence(character, rooms, create_object, created_objects, onboarding, results, final_name)
+
+        state = onboarding.ensure_onboarding_state(character)
+        can_exit, exit_message = onboarding.can_exit_to_world(character)
+        output = {
+            "scenario": "onboarding_full",
+            "name": final_name,
+            "results": results,
+            "can_exit": can_exit,
+            "exit_message": exit_message,
+            "tokens": int(state.get("tokens", 0) or 0),
+            "completed_steps": list(state.get("completed_steps") or []),
+            "all_valid": bool(can_exit) and all(result.get("ok") for result in results),
+            "duration_ms": int(max(0, round((time.perf_counter() - started_perf) * 1000.0))),
+        }
+        return output
+    finally:
+        for name in reversed(created_objects):
+            _cleanup_named_object(name)
+
+
+def _summarize_combat_baseline(result):
+    scenario_result = dict((result or {}).get("result", {}) or {})
+    metrics = dict((result or {}).get("metrics", {}) or {})
+    engaged_diff = dict(scenario_result.get("engaged_diff", {}) or {})
+    damaged_diff = dict(scenario_result.get("damaged_diff", {}) or {})
+    engaged_combat_changes = dict(engaged_diff.get("combat_changes", {}) or {})
+    combat_changes = dict(damaged_diff.get("combat_changes", {}) or {})
+    target_hp_after = combat_changes.get("target_hp_after")
+    target_hp_before = combat_changes.get("target_hp_before")
+    hit_damage = None
+    if target_hp_before is not None and target_hp_after is not None:
+        hit_damage = int(target_hp_before) - int(target_hp_after)
+    return {
+        "artifact_dir": str((result or {}).get("artifact_dir", "") or ""),
+        "exit_code": int((result or {}).get("exit_code", 1) or 1),
+        "duration_ms": int(metrics.get("scenario_duration_ms", 0) or 0),
+        "command_count": int(metrics.get("command_count", 0) or 0),
+        "target_hp_before": target_hp_before,
+        "target_hp_after": target_hp_after,
+        "hit_damage": hit_damage,
+        "entered_combat": bool(engaged_combat_changes.get("entered_combat", False)),
+        "exited_combat": bool(scenario_result.get("disengaged_diff", {}).get("combat_changes", {}).get("exited_combat", False)),
+        "roundtime_after_attack": combat_changes.get("roundtime_after"),
+    }
+
+
+def _summarize_economy_baseline(economy_result, bank_result):
+    economy_payload = dict((economy_result or {}).get("result", {}) or {})
+    economy_metrics = dict((economy_result or {}).get("metrics", {}) or {})
+    bank_payload = dict((bank_result or {}).get("result", {}) or {})
+    bank_metrics = dict((bank_result or {}).get("metrics", {}) or {})
+    buy_diff = dict(economy_payload.get("buy_diff", {}) or {})
+    sell_diff = dict(economy_payload.get("sell_diff", {}) or {})
+    deposit_diff = dict(bank_payload.get("deposit_diff", {}) or {})
+    withdraw_diff = dict(bank_payload.get("withdraw_diff", {}) or {})
+    return {
+        "vendor_trade": {
+            "artifact_dir": str((economy_result or {}).get("artifact_dir", "") or ""),
+            "exit_code": int((economy_result or {}).get("exit_code", 1) or 1),
+            "duration_ms": int(economy_metrics.get("scenario_duration_ms", 0) or 0),
+            "command_count": int(economy_metrics.get("command_count", 0) or 0),
+            "purchase_cost": abs(int(buy_diff.get("character_changes", {}).get("coins_delta", 0) or 0)),
+            "sale_return": int(sell_diff.get("character_changes", {}).get("coins_delta", 0) or 0),
+            "net_coin_delta": int(economy_metrics.get("coin_delta", 0) or 0),
+            "haggle_bonus": float(economy_payload.get("haggle_bonus", 0.0) or 0.0),
+        },
+        "banking": {
+            "artifact_dir": str((bank_result or {}).get("artifact_dir", "") or ""),
+            "exit_code": int((bank_result or {}).get("exit_code", 1) or 1),
+            "duration_ms": int(bank_metrics.get("scenario_duration_ms", 0) or 0),
+            "command_count": int(bank_metrics.get("command_count", 0) or 0),
+            "deposit_to_bank": int(deposit_diff.get("character_changes", {}).get("bank_coins_delta", 0) or 0),
+            "withdraw_to_hand": int(withdraw_diff.get("character_changes", {}).get("coins_delta", 0) or 0),
+            "net_carried_coin_delta": int(bank_metrics.get("coin_delta", 0) or 0),
+        },
+    }
+
+
+def _summarize_progression_baseline(onboarding_output):
+    completed_steps = list(onboarding_output.get("completed_steps", []) or [])
+    return {
+        "scenario": "onboarding_full",
+        "duration_ms": int(onboarding_output.get("duration_ms", 0) or 0),
+        "completed_step_count": len(completed_steps),
+        "completed_steps": completed_steps,
+        "token_count": int(onboarding_output.get("tokens", 0) or 0),
+        "exit_ready": bool(onboarding_output.get("can_exit", False)),
+    }
+
+
+def _emit_balance_baseline_output(report, as_json=False):
+    if as_json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return
+
+    combat = dict((report.get("baselines", {}) or {}).get("combat_outcomes", {}) or {})
+    economy = dict((report.get("baselines", {}) or {}).get("economy_flows", {}) or {})
+    vendor_trade = dict(economy.get("vendor_trade", {}) or {})
+    banking = dict(economy.get("banking", {}) or {})
+    progression = dict((report.get("baselines", {}) or {}).get("progression_pacing", {}) or {})
+
+    lines = [
+        "DireTest Balance Baseline",
+        f"Seed: {int(report.get('seed', 0) or 0)}",
+        f"Exit Code: {int(report.get('exit_code', 0) or 0)}",
+        f"Artifact Dir: {report.get('artifact_dir', '')}",
+        "",
+        "Combat Outcomes:",
+        f"- Duration Ms: {int(combat.get('duration_ms', 0) or 0)}",
+        f"- Commands: {int(combat.get('command_count', 0) or 0)}",
+        f"- Hit Damage: {combat.get('hit_damage')}",
+        f"- Target HP After Hit: {combat.get('target_hp_after')}",
+        f"- Entered Combat: {combat.get('entered_combat')}",
+        f"- Exited Combat: {combat.get('exited_combat')}",
+        "",
+        "Economy Flows:",
+        f"- Vendor Purchase Cost: {int(vendor_trade.get('purchase_cost', 0) or 0)}",
+        f"- Vendor Sale Return: {int(vendor_trade.get('sale_return', 0) or 0)}",
+        f"- Vendor Net Coin Delta: {int(vendor_trade.get('net_coin_delta', 0) or 0)}",
+        f"- Haggle Bonus: {float(vendor_trade.get('haggle_bonus', 0.0) or 0.0):.2f}",
+        f"- Bank Deposit Delta: {int(banking.get('deposit_to_bank', 0) or 0)}",
+        f"- Bank Withdraw Delta: {int(banking.get('withdraw_to_hand', 0) or 0)}",
+        f"- Net Carried Coin Delta: {int(banking.get('net_carried_coin_delta', 0) or 0)}",
+        "",
+        "Progression Pacing:",
+        f"- Onboarding Duration Ms: {int(progression.get('duration_ms', 0) or 0)}",
+        f"- Completed Steps: {int(progression.get('completed_step_count', 0) or 0)}",
+        f"- Tokens: {int(progression.get('token_count', 0) or 0)}",
+        f"- Exit Ready: {progression.get('exit_ready')}",
+        "",
+        f"PASS: {'yes' if bool(report.get('all_valid', False)) else 'no'}",
+    ]
+    _print_lines(lines)
+
+
+def _handle_balance_baseline_command(args):
+    seed = _ensure_scenario_seed(args)
+    started_at = time.time()
+    started_perf = time.perf_counter()
+    command_log = [
+        f"scenario combat-basic --seed {seed}",
+        f"scenario economy --seed {seed}",
+        f"scenario bank --seed {seed}",
+        f"scenario onboarding_full --seed {seed} --name {str(getattr(args, 'name', 'DireTestHero') or 'DireTestHero')}",
+    ]
+
+    failure_type = None
+    failure_message = ""
+    traceback_text = ""
+    combat_result = None
+    economy_result = None
+    bank_result = None
+    onboarding_output = None
+    exit_code = 0
+
+    try:
+        combat_result = run_combat_basic_scenario(_build_runner_namespace(seed))
+        economy_result = run_economy_scenario(_build_runner_namespace(seed))
+        bank_result = run_bank_scenario(_build_runner_namespace(seed))
+        onboarding_output = _build_onboarding_full_output(_build_runner_namespace(seed, name=getattr(args, "name", "DireTestHero")))
+    except Exception:
+        exit_code = 1
+        failure_type = "unexpected_exception"
+        traceback_text = traceback.format_exc()
+        failure_message = traceback_text.strip().splitlines()[-1]
+
+    if combat_result and int(combat_result.get("exit_code", 0) or 0) != 0:
+        exit_code = 1
+        failure_type = failure_type or "unexpected_exception"
+        failure_message = failure_message or "combat-basic baseline failed"
+    if economy_result and int(economy_result.get("exit_code", 0) or 0) != 0:
+        exit_code = 1
+        failure_type = failure_type or "unexpected_exception"
+        failure_message = failure_message or "economy baseline failed"
+    if bank_result and int(bank_result.get("exit_code", 0) or 0) != 0:
+        exit_code = 1
+        failure_type = failure_type or "unexpected_exception"
+        failure_message = failure_message or "bank baseline failed"
+    if onboarding_output and not bool(onboarding_output.get("all_valid", False)):
+        exit_code = 1
+        failure_type = failure_type or "unexpected_exception"
+        failure_message = failure_message or "onboarding progression baseline failed"
+
+    report = {
+        "scenario": "balance-baseline",
+        "seed": seed,
+        "all_valid": exit_code == 0,
+        "baselines": {
+            "combat_outcomes": _summarize_combat_baseline(combat_result or {}),
+            "economy_flows": _summarize_economy_baseline(economy_result or {}, bank_result or {}),
+            "progression_pacing": _summarize_progression_baseline(onboarding_output or {}),
+        },
+        "subruns": {
+            "combat_basic_artifact": str((combat_result or {}).get("artifact_dir", "") or ""),
+            "economy_artifact": str((economy_result or {}).get("artifact_dir", "") or ""),
+            "bank_artifact": str((bank_result or {}).get("artifact_dir", "") or ""),
+        },
+    }
+
+    duration_ms = int(max(0, round((time.perf_counter() - started_perf) * 1000.0)))
+    artifact_dir = write_artifacts(
+        f"balance-baseline_direct_{seed}",
+        {
+            "scenario": {
+                "name": "balance-baseline",
+                "mode": "direct",
+                "seed": seed,
+                "started_at": started_at,
+            },
+            "seed": seed,
+            "command_log": command_log,
+            "snapshots": [],
+            "diffs": [],
+            "metrics": {
+                "exit_code": int(exit_code),
+                "result": report,
+                "failure_type": failure_type,
+                "started_at": started_at,
+                "ended_at": time.time(),
+                "scenario_duration_ms": duration_ms,
+            },
+            "failure_summary": build_failure_summary(
+                failure_type=failure_type,
+                message=failure_message,
+                scenario="balance-baseline",
+                seed=seed,
+                mode="direct",
+            ),
+            "traceback": traceback_text,
+        },
+    )
+    report["artifact_dir"] = str(artifact_dir)
+    report["exit_code"] = int(exit_code)
+    report["duration_ms"] = duration_ms
+
+    _emit_balance_baseline_output(report, as_json=bool(getattr(args, "json", False)))
+    return int(exit_code)
 
 
 @register_scenario("movement")
@@ -856,60 +1165,9 @@ def run_grave_recovery_scenario(args):
 
 @register_scenario("onboarding_full")
 def run_onboarding_full_scenario(args):
-    _setup_django()
-
-    from evennia.objects.models import ObjectDB
-    from evennia.utils.create import create_object
-
-    from systems import onboarding
-
-    created_objects = []
-    try:
-        rooms = _get_or_create_tutorial_rooms(ObjectDB, create_object, created_objects)
-        character = _create_test_onboarding_character(create_object, rooms, created_objects, onboarding)
-        final_name = _default_test_name(args.name)
-        results = []
-        _apply_onboarding_identity(character, rooms, onboarding, results)
-
-        character.move_to(rooms["Gear Rack Room"], quiet=True, use_destination=False)
-        _equip_test_gear(character, create_object, created_objects)
-        results.append({"step": "gear", "ok": "gear" in set(onboarding.ensure_onboarding_state(character).get("completed_steps") or []), "message": "wore starter gear"})
-
-        character.move_to(rooms["Weapon Cage"], quiet=True, use_destination=False)
-        weapon = _create_test_weapon(character, create_object, created_objects)
-        onboarding.note_weapon_action(character, weapon)
-        results.append({"step": "weapon", "ok": "weapon" in set(onboarding.ensure_onboarding_state(character).get("completed_steps") or []), "message": "wielded training weapon"})
-        _run_finish_sequence(character, rooms, create_object, created_objects, onboarding, results, final_name)
-
-        can_exit, exit_message = onboarding.can_exit_to_world(character)
-        output = {
-            "scenario": "onboarding_full",
-            "name": final_name,
-            "results": results,
-            "can_exit": can_exit,
-            "exit_message": exit_message,
-            "tokens": int(onboarding.ensure_onboarding_state(character).get("tokens", 0) or 0),
-            "completed_steps": list(onboarding.ensure_onboarding_state(character).get("completed_steps") or []),
-            "all_valid": bool(can_exit) and all(result.get("ok") for result in results),
-        }
-        if args.json:
-            print(json.dumps(output, indent=2, sort_keys=True))
-        else:
-            print("DireTest Scenario: onboarding_full")
-            print(f"Name: {final_name}")
-            print("")
-            for result in results:
-                print(f"[{ 'PASS' if result['ok'] else 'FAIL' }] {result['step']}: {result['message']}")
-            print("")
-            print(f"Completed Steps: {', '.join(output['completed_steps'])}")
-            print(f"Tokens: {output['tokens']}")
-            print(f"Exit Ready: {'PASS' if output['can_exit'] else 'FAIL'}")
-            if exit_message:
-                print(f"Exit Message: {exit_message}")
-        return 0 if output["all_valid"] else 1
-    finally:
-        for name in reversed(created_objects):
-            _cleanup_named_object(name)
+    output = _build_onboarding_full_output(args)
+    _emit_onboarding_output(output, as_json=bool(getattr(args, "json", False)))
+    return 0 if output["all_valid"] else 1
 
 
 def _run_onboarding_failure_case(args, case_name):
@@ -1266,6 +1524,12 @@ def build_parser():
     diff_parser.add_argument("--json", action="store_true")
     diff_parser.add_argument("--output")
     diff_parser.set_defaults(cli_handler=_handle_diff_command)
+
+    balance_baseline_parser = subparsers.add_parser("balance-baseline")
+    balance_baseline_parser.add_argument("--name", default="DireTestHero")
+    balance_baseline_parser.add_argument("--seed", type=int)
+    balance_baseline_parser.add_argument("--json", action="store_true")
+    balance_baseline_parser.set_defaults(cli_handler=_handle_balance_baseline_command)
 
     race_balance_parser = scenario_subparsers.add_parser("race-balance")
     race_balance_parser.add_argument("--profession", default="commoner")

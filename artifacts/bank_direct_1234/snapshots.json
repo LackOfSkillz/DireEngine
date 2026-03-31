@@ -6,7 +6,7 @@
         "bank_coins": 25,
         "coins": 100,
         "hp": 100,
-        "id": 7398,
+        "id": 7525,
         "is_dead": false,
         "key": "TEST_BANK_CHAR",
         "life_state": "ALIVE",
@@ -28,13 +28,13 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7397,
+            "id": 7524,
             "key": "TEST_BANK_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7398,
+            "id": 7525,
             "key": "TEST_BANK_CHAR",
             "location": "TEST_BANK_ROOM",
             "typeclass": "typeclasses.characters.Character"
@@ -47,11 +47,11 @@
           "TEST_BANK_CHAR"
         ],
         "exits": [],
-        "id": 7397,
+        "id": 7524,
         "key": "TEST_BANK_ROOM"
       },
       "snapshot_label": "initial",
-      "timestamp": 1774951256.8633997
+      "timestamp": 1774953346.9974911
     },
     "label": "initial"
   },
@@ -62,7 +62,7 @@
         "bank_coins": 65,
         "coins": 60,
         "hp": 100,
-        "id": 7398,
+        "id": 7525,
         "is_dead": false,
         "key": "TEST_BANK_CHAR",
         "life_state": "ALIVE",
@@ -90,11 +90,11 @@
           "TEST_BANK_CHAR"
         ],
         "exits": [],
-        "id": 7397,
+        "id": 7524,
         "key": "TEST_BANK_ROOM"
       },
       "snapshot_label": "deposited",
-      "timestamp": 1774951257.218928
+      "timestamp": 1774953348.111534
     },
     "label": "deposited"
   },
@@ -105,7 +105,7 @@
         "bank_coins": 50,
         "coins": 75,
         "hp": 100,
-        "id": 7398,
+        "id": 7525,
         "is_dead": false,
         "key": "TEST_BANK_CHAR",
         "life_state": "ALIVE",
@@ -133,11 +133,11 @@
           "TEST_BANK_CHAR"
         ],
         "exits": [],
-        "id": 7397,
+        "id": 7524,
         "key": "TEST_BANK_ROOM"
       },
       "snapshot_label": "withdrawn",
-      "timestamp": 1774951257.573623
+      "timestamp": 1774953349.0792027
     },
     "label": "withdrawn"
   },
@@ -148,7 +148,7 @@
         "bank_coins": 50,
         "coins": 75,
         "hp": 100,
-        "id": 7398,
+        "id": 7525,
         "is_dead": false,
         "key": "TEST_BANK_CHAR",
         "life_state": "ALIVE",
@@ -176,11 +176,11 @@
           "TEST_BANK_CHAR"
         ],
         "exits": [],
-        "id": 7397,
+        "id": 7524,
         "key": "TEST_BANK_ROOM"
       },
       "snapshot_label": "final",
-      "timestamp": 1774951257.803228
+      "timestamp": 1774953349.3773074
     },
     "label": "final"
   }

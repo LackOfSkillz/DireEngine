@@ -6,7 +6,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7408,
+        "id": 7517,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -28,19 +28,19 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7407,
+            "id": 7516,
             "key": "TEST_COMBAT_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7408,
+            "id": 7517,
             "key": "TEST_COMBAT_ATTACKER",
             "location": "TEST_COMBAT_ROOM",
             "typeclass": "typeclasses.characters.Character"
           },
           {
-            "id": 7409,
+            "id": 7518,
             "key": "TEST_COMBAT_DEFENDER",
             "location": "TEST_COMBAT_ROOM",
             "typeclass": "typeclasses.characters.Character"
@@ -54,11 +54,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 7407,
+        "id": 7516,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "initial",
-      "timestamp": 1774951319.2451437
+      "timestamp": 1774953320.0988982
     },
     "label": "initial"
   },
@@ -69,7 +69,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7408,
+        "id": 7517,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -85,7 +85,7 @@
         "target": "TEST_COMBAT_DEFENDER",
         "target_summary": {
           "hp": 50,
-          "id": 7409,
+          "id": 7518,
           "in_combat": false,
           "key": "TEST_COMBAT_DEFENDER",
           "max_hp": 100,
@@ -105,11 +105,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 7407,
+        "id": 7516,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "engaged",
-      "timestamp": 1774951319.7181954
+      "timestamp": 1774953320.7256207
     },
     "label": "engaged"
   },
@@ -120,7 +120,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7408,
+        "id": 7517,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -132,11 +132,11 @@
       },
       "combat": {
         "in_combat": true,
-        "roundtime": 1.79,
+        "roundtime": 1.75,
         "target": "TEST_COMBAT_DEFENDER",
         "target_summary": {
           "hp": 49,
-          "id": 7409,
+          "id": 7518,
           "in_combat": true,
           "key": "TEST_COMBAT_DEFENDER",
           "max_hp": 100,
@@ -156,11 +156,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 7407,
+        "id": 7516,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "damaged",
-      "timestamp": 1774951324.3511393
+      "timestamp": 1774953325.624609
     },
     "label": "damaged"
   },
@@ -171,7 +171,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7408,
+        "id": 7517,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -183,7 +183,7 @@
       },
       "combat": {
         "in_combat": false,
-        "roundtime": 2.84,
+        "roundtime": 2.85,
         "target": null,
         "target_summary": null
       },
@@ -200,11 +200,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 7407,
+        "id": 7516,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "disengaged",
-      "timestamp": 1774951325.1080225
+      "timestamp": 1774953326.3904798
     },
     "label": "disengaged"
   },
@@ -215,7 +215,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7408,
+        "id": 7517,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -244,11 +244,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 7407,
+        "id": 7516,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "final",
-      "timestamp": 1774951325.2584374
+      "timestamp": 1774953326.5452929
     },
     "label": "final"
   }

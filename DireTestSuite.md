@@ -545,6 +545,12 @@ Initial recommended metrics:
 
 Balance evaluation should begin as descriptive reporting first. Hard pass/fail balance gates should only be added after enough stable baseline data exists.
 
+The first baseline report should track at minimum:
+
+- combat outcome shape: hit damage, target HP after first exchange, combat enter/exit integrity, duration
+- economy flow shape: purchase cost, sale return, net carried coin delta, bank transfer deltas, haggle bonus
+- progression pacing shape: onboarding completion time, completed step count, token count, exit readiness
+
 ### Major Risks To Design Around
 
 The following are expected failure sources and should be treated as first-class design constraints:
@@ -617,6 +623,15 @@ In other words, the first job of DireTest is not to be broad. The first job is t
 - diffable scenario outputs
 - baseline comparison support
 - targeted balance scenarios for combat, economy, and progression
+
+Current bootstrap path:
+
+- `diretest balance-baseline --seed 1234`
+- combat baseline from `combat-basic`
+- economy baseline from `economy` + `bank`
+- progression baseline from `onboarding_full`
+
+This first balance layer should stay descriptive. It should answer whether baseline behavior drifted before it starts asserting what the exact correct balance must be.
 
 Only after those phases are stable should DireTest expand toward broader simulation or declarative scenario definitions.
 

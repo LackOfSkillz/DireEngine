@@ -2,12 +2,12 @@
   "coin_delta": -5,
   "command_count": 3,
   "command_timings_ms": [
-    430,
-    544,
-    585
+    654,
+    547,
+    458
   ],
   "deletion_failures": [],
-  "ended_at": 1774951348.75485,
+  "ended_at": 1774953344.3392093,
   "exit_code": 0,
   "failure_type": null,
   "invariant_results": [
@@ -29,6 +29,7 @@
     "You attempt to negotiate with merchant.",
     "You negotiate a better deal.",
     "You purchase book for 2 silvers.",
+    "[Objective] Choose your gender in Intake Hall. Try: male, female, neutral.",
     "The shopkeeper hands you 1 silver, 5 coppers."
   ],
   "preexisting_cleanup_failures": [],
@@ -112,6 +113,7 @@
       "You attempt to negotiate with merchant.",
       "You negotiate a better deal.",
       "You purchase book for 2 silvers.",
+      "[Objective] Choose your gender in Intake Hall. Try: male, female, neutral.",
       "The shopkeeper hands you 1 silver, 5 coppers."
     ],
     "sell_diff": {
@@ -190,7 +192,7 @@
       "final"
     ]
   },
-  "scenario_duration_ms": 9343,
+  "scenario_duration_ms": 13853,
   "snapshot_labels": [
     "initial",
     "haggled",
@@ -198,7 +200,7 @@
     "sold",
     "final"
   ],
-  "started_at": 1774951339.4124093,
+  "started_at": 1774953330.4862988,
   "state_transition_count": 4,
   "xp_delta": 0
 }
