@@ -1,0 +1,474 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 7584,
+        "is_dead": false,
+        "key": "TEST_ONBOARD_LAG_CHAR",
+        "life_state": "ALIVE",
+        "location": "Intake Hall",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "post_gender",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7584,
+            "key": "TEST_ONBOARD_LAG_CHAR",
+            "location": "Intake Hall",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "east",
+          "TEST_ONBOARD_LAG_CHAR",
+          "Marshal Vey",
+          "Pip the Gremlin"
+        ],
+        "exits": [
+          "west",
+          "east"
+        ],
+        "id": 7196,
+        "key": "Intake Hall"
+      },
+      "snapshot_label": "post_gender",
+      "timestamp": 1774956997.127694
+    },
+    "label": "post_gender"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 7584,
+        "is_dead": false,
+        "key": "TEST_ONBOARD_LAG_CHAR",
+        "life_state": "ALIVE",
+        "location": "Lineup Platform",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "post_race",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "east",
+          "human station",
+          "elf station",
+          "dwarf station",
+          "TEST_ONBOARD_LAG_CHAR",
+          "Marshal Vey",
+          "Pip the Gremlin"
+        ],
+        "exits": [
+          "west",
+          "east"
+        ],
+        "id": 7197,
+        "key": "Lineup Platform"
+      },
+      "snapshot_label": "post_race",
+      "timestamp": 1774956999.004922
+    },
+    "label": "post_race"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 7584,
+        "is_dead": false,
+        "key": "TEST_ONBOARD_LAG_CHAR",
+        "life_state": "ALIVE",
+        "location": "Mirror Alcove",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "post_mirror",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "east",
+          "silvered mirror",
+          "TEST_ONBOARD_LAG_CHAR",
+          "Marshal Vey",
+          "Pip the Gremlin"
+        ],
+        "exits": [
+          "west",
+          "east"
+        ],
+        "id": 7198,
+        "key": "Mirror Alcove"
+      },
+      "snapshot_label": "post_mirror",
+      "timestamp": 1774957000.998275
+    },
+    "label": "post_mirror"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 7584,
+        "is_dead": false,
+        "key": "TEST_ONBOARD_LAG_CHAR",
+        "life_state": "ALIVE",
+        "location": "Weapon Cage",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [
+        {
+          "id": 7585,
+          "key": "TEST_ONBOARD_LAG_SHIRT",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        },
+        {
+          "id": 7586,
+          "key": "TEST_ONBOARD_LAG_BOOTS",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        }
+      ],
+      "inventory": [
+        {
+          "id": 7587,
+          "key": "TEST_ONBOARD_LAG_SWORD",
+          "location": "TEST_ONBOARD_LAG_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "post_weapon",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7585,
+            "key": "TEST_ONBOARD_LAG_SHIRT",
+            "location": null,
+            "typeclass": "typeclasses.wearables.Wearable"
+          },
+          {
+            "id": 7586,
+            "key": "TEST_ONBOARD_LAG_BOOTS",
+            "location": null,
+            "typeclass": "typeclasses.wearables.Wearable"
+          },
+          {
+            "id": 7587,
+            "key": "TEST_ONBOARD_LAG_SWORD",
+            "location": "TEST_ONBOARD_LAG_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "east",
+          "weapon rack",
+          "training mace",
+          "training spear",
+          "training sword",
+          "TEST_ONBOARD_LAG_CHAR",
+          "Marshal Vey",
+          "Pip the Gremlin"
+        ],
+        "exits": [
+          "west",
+          "east"
+        ],
+        "id": 7200,
+        "key": "Weapon Cage"
+      },
+      "snapshot_label": "post_weapon",
+      "timestamp": 1774957005.244072
+    },
+    "label": "post_weapon"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 7584,
+        "is_dead": false,
+        "key": "TEST_ONBOARD_LAG_CHAR",
+        "life_state": "ALIVE",
+        "location": "Training Yard",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [
+        {
+          "id": 7585,
+          "key": "TEST_ONBOARD_LAG_SHIRT",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        },
+        {
+          "id": 7586,
+          "key": "TEST_ONBOARD_LAG_BOOTS",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        }
+      ],
+      "inventory": [
+        {
+          "id": 7587,
+          "key": "TEST_ONBOARD_LAG_SWORD",
+          "location": "TEST_ONBOARD_LAG_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "post_combat",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7588,
+            "key": "TEST_ONBOARD_LAG_GOBLIN",
+            "location": "Training Yard",
+            "typeclass": "typeclasses.npcs.NPC"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "east",
+          "training goblin",
+          "grave of training goblin",
+          "TEST_ONBOARD_LAG_CHAR",
+          "TEST_ONBOARD_LAG_GOBLIN",
+          "Marshal Vey",
+          "Pip the Gremlin"
+        ],
+        "exits": [
+          "west",
+          "east"
+        ],
+        "id": 7201,
+        "key": "Training Yard"
+      },
+      "snapshot_label": "post_combat",
+      "timestamp": 1774957010.1550095
+    },
+    "label": "post_combat"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 7584,
+        "is_dead": false,
+        "key": "TEST_ONBOARD_LAG_CHAR",
+        "life_state": "ALIVE",
+        "location": "Vendor Stall",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [
+        {
+          "id": 7585,
+          "key": "TEST_ONBOARD_LAG_SHIRT",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        },
+        {
+          "id": 7586,
+          "key": "TEST_ONBOARD_LAG_BOOTS",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        }
+      ],
+      "inventory": [
+        {
+          "id": 7587,
+          "key": "TEST_ONBOARD_LAG_SWORD",
+          "location": "TEST_ONBOARD_LAG_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "post_vendor",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "east",
+          "Quartermaster Nella",
+          "TEST_ONBOARD_LAG_CHAR"
+        ],
+        "exits": [
+          "west",
+          "east"
+        ],
+        "id": 7203,
+        "key": "Vendor Stall"
+      },
+      "snapshot_label": "post_vendor",
+      "timestamp": 1774957010.7318785
+    },
+    "label": "post_vendor"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 7584,
+        "is_dead": false,
+        "key": "TEST_ONBOARD_LAG_CHAR",
+        "life_state": "ALIVE",
+        "location": "Vendor Stall",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [
+        {
+          "id": 7585,
+          "key": "TEST_ONBOARD_LAG_SHIRT",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        },
+        {
+          "id": 7586,
+          "key": "TEST_ONBOARD_LAG_BOOTS",
+          "location": null,
+          "typeclass": "typeclasses.wearables.Wearable"
+        }
+      ],
+      "inventory": [
+        {
+          "id": 7587,
+          "key": "TEST_ONBOARD_LAG_SWORD",
+          "location": "TEST_ONBOARD_LAG_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "east",
+          "Quartermaster Nella",
+          "TEST_ONBOARD_LAG_CHAR"
+        ],
+        "exits": [
+          "west",
+          "east"
+        ],
+        "id": 7203,
+        "key": "Vendor Stall"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774957010.9971642
+    },
+    "label": "final"
+  }
+]

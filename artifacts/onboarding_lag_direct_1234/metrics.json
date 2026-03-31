@@ -1,0 +1,642 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 20,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_gender",
+      "first_response_ms": 39.37980002956465,
+      "kind": "direct",
+      "ms": 1728.0878000310622,
+      "npc_response_delay_ms": 39.37980002956465,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_gender"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 65.08000002941117,
+      "kind": "direct",
+      "ms": 337.9725000122562,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_race"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT select_race",
+      "first_response_ms": 161.55680001247674,
+      "kind": "direct",
+      "ms": 943.4479000046849,
+      "npc_response_delay_ms": 161.55680001247674,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_race"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 59.10699995001778,
+      "kind": "direct",
+      "ms": 505.9210999752395,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 33.12869998626411,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 25.60819999780506,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 25.355200050398707,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 23.53239996591583,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": 67.693600023631,
+      "kind": "direct",
+      "ms": 961.3913000212051,
+      "npc_response_delay_ms": 67.693600023631,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 55.620300001464784,
+      "kind": "direct",
+      "ms": 516.3084999658167,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT equip_item",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 639.7797999670729,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT equip_item",
+      "first_response_ms": 588.718900049571,
+      "kind": "direct",
+      "ms": 1462.9176000016741,
+      "npc_response_delay_ms": 588.718900049571,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 280.120600014925,
+      "kind": "direct",
+      "ms": 552.9950000345707,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_weapon_action",
+      "first_response_ms": 41.89529997529462,
+      "kind": "direct",
+      "ms": 644.3553999997675,
+      "npc_response_delay_ms": 41.89529997529462,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 233.51069999625906,
+      "kind": "direct",
+      "ms": 471.0878999903798,
+      "npc_response_delay_ms": 233.51069999625906,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_combat_start",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 21.892699995078146,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_combat_win",
+      "first_response_ms": 38.59319997718558,
+      "kind": "direct",
+      "ms": 570.5424000043422,
+      "npc_response_delay_ms": 38.59319997718558,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 24.52660002745688,
+      "kind": "direct",
+      "ms": 231.50980001082644,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_vendor"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_trade_action",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 28.81000004708767,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_vendor"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_trade_action",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 6.382499996107072,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_vendor"
+    }
+  ],
+  "command_timings_ms": [
+    1728.0878000310622,
+    337.9725000122562,
+    943.4479000046849,
+    505.9210999752395,
+    33.12869998626411,
+    25.60819999780506,
+    25.355200050398707,
+    23.53239996591583,
+    961.3913000212051,
+    516.3084999658167,
+    639.7797999670729,
+    1462.9176000016741,
+    552.9950000345707,
+    644.3553999997675,
+    471.0878999903798,
+    21.892699995078146,
+    570.5424000043422,
+    231.50980001082644,
+    28.81000004708767,
+    6.382499996107072
+  ],
+  "deletion_failures": [],
+  "ended_at": 1774957016.2389271,
+  "exit_code": 1,
+  "failure_type": "lag_failure",
+  "first_response_ms": 137.98356667393818,
+  "invariant_results": [],
+  "item_delta_count": 3,
+  "lag": {
+    "avg_ms": 486.55133500287775,
+    "jitter": 490.8933473447494,
+    "max_ms": 1728.0878000310622,
+    "min_ms": 6.382499996107072,
+    "p95_ms": 1476.1761100031438,
+    "slow_count": 13,
+    "spike_count": 12,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT set_gender",
+      "ms": 1728.0878000310622,
+      "snapshot": "post_gender"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 337.9725000122562,
+      "snapshot": "post_race"
+    },
+    {
+      "command": "DIRECT select_race",
+      "ms": 943.4479000046849,
+      "snapshot": "post_race"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 505.9210999752395,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 33.12869998626411,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 25.60819999780506,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 25.355200050398707,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 23.53239996591583,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 961.3913000212051,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 516.3084999658167,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT equip_item",
+      "ms": 639.7797999670729,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT equip_item",
+      "ms": 1462.9176000016741,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 552.9950000345707,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT note_weapon_action",
+      "ms": 644.3553999997675,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 471.0878999903798,
+      "snapshot": "post_combat"
+    },
+    {
+      "command": "DIRECT note_combat_start",
+      "ms": 21.892699995078146,
+      "snapshot": "post_combat"
+    },
+    {
+      "command": "DIRECT note_combat_win",
+      "ms": 570.5424000043422,
+      "snapshot": "post_combat"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 231.50980001082644,
+      "snapshot": "post_vendor"
+    },
+    {
+      "command": "DIRECT note_trade_action",
+      "ms": 28.81000004708767,
+      "snapshot": "post_vendor"
+    },
+    {
+      "command": "DIRECT note_trade_action",
+      "ms": 6.382499996107072,
+      "snapshot": "post_vendor"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 167.3354714377118,
+  "output_log": [
+    "[Objective] Choose your race at the Lineup Platform. Try: human, elf, dwarf.",
+    "Marshal Vey says, \"Make the call and keep moving.\"",
+    "Pip the Gremlin says, \"See? Easy. Unless I wrote it down backward again.\"",
+    "RETURN (True, \"You set your intake gender to male. You've learned something. (+1 Token, 1 total.)\")",
+    "|cLineup Platform|n\nA raised stone platform marked with faded sigils dominates the chamber. Different sets of gear rest at each position, sized and shaped with deliberate intent. Someone expected choice here, just not this late.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a dwarf station, an elf station, and a human station",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "[Objective] Set all five mirror traits in the Mirror Alcove. Try: hair short, hair black, build lean, height tall, eyes green.",
+    "Marshal Vey says, \"Good. Better to choose plainly than pretend badly.\"",
+    "Pip the Gremlin says, \"We could still swap boots between stations if you want excitement.\"",
+    "RETURN (True, \"You take your place at the human station. You've learned something. (+1 Token, 2 total.)\")",
+    "|cMirror Alcove|n\nA tight alcove lined with mirrors forces every glance back on itself. The silvered glass is polished too often to be decorative; this is a place for deciding what people will see before the world has time to decide for you.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a silvered mirror",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "RETURN (True, 'You adjust your reflection. Remaining traits: hair color, build, height, eyes.')",
+    "RETURN (True, 'You adjust your reflection. Remaining traits: build, height, eyes.')",
+    "RETURN (True, 'You adjust your reflection. Remaining traits: height, eyes.')",
+    "RETURN (True, 'You adjust your reflection. Remaining traits: eyes.')",
+    "[Objective] Wear at least two pieces of starter gear in the Gear Rack Room.",
+    "Marshal Vey says, \"Good. That's what strangers get first. Make it count.\"",
+    "Pip the Gremlin says, \"I liked the messier version, personally.\"",
+    "RETURN (True, \"You settle your reflection into focus. A average, average human with short brown hair and gray eyes. You've learned something. (+1 Token, 3 total.)\")",
+    "|cGear Rack Room|n\nArmor stands, folded clothing, and open crates pack the room in orderly rows. It looks less like generosity than triage: wear something useful and move on.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a clothing rack, a plain shirt, a simple boots, and a traveler's trousers",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "RETURN (True, 'You wear TEST_ONBOARD_LAG_SHIRT.')",
+    "[Objective] Wield a weapon in the Weapon Cage.",
+    "Marshal Vey says, \"Wear what keeps you breathing, not what flatters you.\"",
+    "Pip the Gremlin says, \"I only handed out one left glove by mistake this time.\"",
+    "RETURN (True, \"You wear TEST_ONBOARD_LAG_BOOTS. You've learned something. (+1 Token, 4 total.)\")",
+    "|cWeapon Cage|n\nIron latticework separates neat rows of training weapons from the rest of the room. Whatever order once governed this cage is breaking down into urgency, but the choices are still clear enough to matter.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a training mace, a training spear, a training sword, and a weapon rack",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "[Objective] Attack the training goblin in the Training Yard.",
+    "Marshal Vey says, \"Pick a weapon you can actually recover with after the first bad swing.\"",
+    "Pip the Gremlin says, \"The spear looked dramatic. I respect drama.\"",
+    "RETURN (True, True)",
+    "|cTraining Yard|n\nThe yard is all churned dust, battered posts, and hard angles meant to teach movement under pressure. It feels like a lesson already half interrupted by the noise rising beyond the compound walls.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\nCharacters: training goblin",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "RETURN True",
+    "[Objective] Use tend in the Supply Shack to stop your bleeding. Try: tend.",
+    "Marshal Vey says, \"It bleeds. So will you, if you drift.\"",
+    "Pip the Gremlin says, \"If it bites you, try not to take it personally.\"",
+    "RETURN (True, True)",
+    "|cVendor Stall|n\nA cramped stall has been thrown together from crates, ledgers, and hanging hooks of practical goods. Even under threat, someone here is still counting what survival costs.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\nCharacters: Quartermaster Nella",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "RETURN (False, False)",
+    "RETURN (False, False)"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT set_gender",
+      "DIRECT move_to",
+      "DIRECT select_race",
+      "DIRECT move_to",
+      "DIRECT set_trait",
+      "DIRECT set_trait",
+      "DIRECT set_trait",
+      "DIRECT set_trait",
+      "DIRECT set_trait",
+      "DIRECT move_to",
+      "DIRECT equip_item",
+      "DIRECT equip_item",
+      "DIRECT move_to",
+      "DIRECT note_weapon_action",
+      "DIRECT move_to",
+      "DIRECT note_combat_start",
+      "DIRECT note_combat_win",
+      "DIRECT move_to",
+      "DIRECT note_trade_action",
+      "DIRECT note_trade_action"
+    ],
+    "completed_steps": [
+      "gender",
+      "race",
+      "appearance",
+      "gear",
+      "weapon",
+      "combat"
+    ],
+    "output_log": [
+      "[Objective] Choose your race at the Lineup Platform. Try: human, elf, dwarf.",
+      "Marshal Vey says, \"Make the call and keep moving.\"",
+      "Pip the Gremlin says, \"See? Easy. Unless I wrote it down backward again.\"",
+      "RETURN (True, \"You set your intake gender to male. You've learned something. (+1 Token, 1 total.)\")",
+      "|cLineup Platform|n\nA raised stone platform marked with faded sigils dominates the chamber. Different sets of gear rest at each position, sized and shaped with deliberate intent. Someone expected choice here, just not this late.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a dwarf station, an elf station, and a human station",
+      "OPTIONS {'type': 'look'}",
+      "RETURN True",
+      "[Objective] Set all five mirror traits in the Mirror Alcove. Try: hair short, hair black, build lean, height tall, eyes green.",
+      "Marshal Vey says, \"Good. Better to choose plainly than pretend badly.\"",
+      "Pip the Gremlin says, \"We could still swap boots between stations if you want excitement.\"",
+      "RETURN (True, \"You take your place at the human station. You've learned something. (+1 Token, 2 total.)\")",
+      "|cMirror Alcove|n\nA tight alcove lined with mirrors forces every glance back on itself. The silvered glass is polished too often to be decorative; this is a place for deciding what people will see before the world has time to decide for you.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a silvered mirror",
+      "OPTIONS {'type': 'look'}",
+      "RETURN True",
+      "RETURN (True, 'You adjust your reflection. Remaining traits: hair color, build, height, eyes.')",
+      "RETURN (True, 'You adjust your reflection. Remaining traits: build, height, eyes.')",
+      "RETURN (True, 'You adjust your reflection. Remaining traits: height, eyes.')",
+      "RETURN (True, 'You adjust your reflection. Remaining traits: eyes.')",
+      "[Objective] Wear at least two pieces of starter gear in the Gear Rack Room.",
+      "Marshal Vey says, \"Good. That's what strangers get first. Make it count.\"",
+      "Pip the Gremlin says, \"I liked the messier version, personally.\"",
+      "RETURN (True, \"You settle your reflection into focus. A average, average human with short brown hair and gray eyes. You've learned something. (+1 Token, 3 total.)\")",
+      "|cGear Rack Room|n\nArmor stands, folded clothing, and open crates pack the room in orderly rows. It looks less like generosity than triage: wear something useful and move on.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a clothing rack, a plain shirt, a simple boots, and a traveler's trousers",
+      "OPTIONS {'type': 'look'}",
+      "RETURN True",
+      "RETURN (True, 'You wear TEST_ONBOARD_LAG_SHIRT.')",
+      "[Objective] Wield a weapon in the Weapon Cage.",
+      "Marshal Vey says, \"Wear what keeps you breathing, not what flatters you.\"",
+      "Pip the Gremlin says, \"I only handed out one left glove by mistake this time.\"",
+      "RETURN (True, \"You wear TEST_ONBOARD_LAG_BOOTS. You've learned something. (+1 Token, 4 total.)\")",
+      "|cWeapon Cage|n\nIron latticework separates neat rows of training weapons from the rest of the room. Whatever order once governed this cage is breaking down into urgency, but the choices are still clear enough to matter.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a training mace, a training spear, a training sword, and a weapon rack",
+      "OPTIONS {'type': 'look'}",
+      "RETURN True",
+      "[Objective] Attack the training goblin in the Training Yard.",
+      "Marshal Vey says, \"Pick a weapon you can actually recover with after the first bad swing.\"",
+      "Pip the Gremlin says, \"The spear looked dramatic. I respect drama.\"",
+      "RETURN (True, True)",
+      "|cTraining Yard|n\nThe yard is all churned dust, battered posts, and hard angles meant to teach movement under pressure. It feels like a lesson already half interrupted by the noise rising beyond the compound walls.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\nCharacters: training goblin",
+      "OPTIONS {'type': 'look'}",
+      "RETURN True",
+      "RETURN True",
+      "[Objective] Use tend in the Supply Shack to stop your bleeding. Try: tend.",
+      "Marshal Vey says, \"It bleeds. So will you, if you drift.\"",
+      "Pip the Gremlin says, \"If it bites you, try not to take it personally.\"",
+      "RETURN (True, True)",
+      "|cVendor Stall|n\nA cramped stall has been thrown together from crates, ledgers, and hanging hooks of practical goods. Even under threat, someone here is still counting what survival costs.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le and |lc__clickmove__ west|lt|ywest|n|le\nCharacters: Quartermaster Nella",
+      "OPTIONS {'type': 'look'}",
+      "RETURN True",
+      "RETURN (False, False)",
+      "RETURN (False, False)"
+    ],
+    "results": [
+      {
+        "message": "You set your intake gender to male. You've learned something. (+1 Token, 1 total.)",
+        "ok": true,
+        "step": "gender"
+      },
+      {
+        "message": "You take your place at the human station. You've learned something. (+1 Token, 2 total.)",
+        "ok": true,
+        "step": "race"
+      },
+      {
+        "message": "You settle your reflection into focus. A average, average human with short brown hair and gray eyes. You've learned something. (+1 Token, 3 total.)",
+        "ok": true,
+        "step": "mirror"
+      },
+      {
+        "message": true,
+        "ok": true,
+        "step": "weapon"
+      },
+      {
+        "message": true,
+        "ok": true,
+        "step": "combat"
+      },
+      {
+        "message": false,
+        "ok": false,
+        "step": "vendor"
+      }
+    ],
+    "snapshot_count": 7,
+    "snapshot_labels": [
+      "post_gender",
+      "post_race",
+      "post_mirror",
+      "post_weapon",
+      "post_combat",
+      "post_vendor",
+      "final"
+    ],
+    "token_count": 6
+  },
+  "scenario_duration_ms": 27479,
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT set_gender",
+      "ms": 1728.0878000310622
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 337.9725000122562
+    },
+    {
+      "cmd": "DIRECT select_race",
+      "ms": 943.4479000046849
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 505.9210999752395
+    },
+    {
+      "cmd": "DIRECT set_trait",
+      "ms": 961.3913000212051
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 516.3084999658167
+    },
+    {
+      "cmd": "DIRECT equip_item",
+      "ms": 639.7797999670729
+    },
+    {
+      "cmd": "DIRECT equip_item",
+      "ms": 1462.9176000016741
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 552.9950000345707
+    },
+    {
+      "cmd": "DIRECT note_weapon_action",
+      "ms": 644.3553999997675
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 471.0878999903798
+    },
+    {
+      "cmd": "DIRECT note_combat_win",
+      "ms": 570.5424000043422
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 231.50980001082644
+    }
+  ],
+  "snapshot_labels": [
+    "post_gender",
+    "post_race",
+    "post_mirror",
+    "post_weapon",
+    "post_combat",
+    "post_vendor",
+    "final"
+  ],
+  "started_at": 1774956988.7600913,
+  "state_transition_count": 6,
+  "xp_delta": 0
+}

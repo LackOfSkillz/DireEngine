@@ -1,0 +1,8 @@
+{
+  "failure_type": "lag_failure",
+  "lag_status": "critical",
+  "message": "Lag status critical exceeded DireTest thresholds.",
+  "mode": "direct",
+  "scenario": "onboarding_lag",
+  "seed": 1234
+}

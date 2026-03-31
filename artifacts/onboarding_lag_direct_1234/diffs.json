@@ -1,0 +1,449 @@
+[
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "post_race",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "post_gender",
+        "coins_after": 50,
+        "coins_before": 50,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "Lineup Platform",
+        "location_before": "Intake Hall",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": true,
+        "contents_added": [
+          "dwarf station",
+          "elf station",
+          "human station"
+        ],
+        "contents_removed": [],
+        "room_after": "Lineup Platform",
+        "room_before": "Intake Hall"
+      }
+    },
+    "from": "post_gender",
+    "to": "post_race"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "post_mirror",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "post_race",
+        "coins_after": 50,
+        "coins_before": 50,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "Mirror Alcove",
+        "location_before": "Lineup Platform",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": true,
+        "contents_added": [
+          "silvered mirror"
+        ],
+        "contents_removed": [
+          "dwarf station",
+          "elf station",
+          "human station"
+        ],
+        "room_after": "Mirror Alcove",
+        "room_before": "Lineup Platform"
+      }
+    },
+    "from": "post_race",
+    "to": "post_mirror"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "post_weapon",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "post_mirror",
+        "coins_after": 50,
+        "coins_before": 50,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "Weapon Cage",
+        "location_before": "Mirror Alcove",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [
+          "TEST_ONBOARD_LAG_BOOTS",
+          "TEST_ONBOARD_LAG_SHIRT"
+        ],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [
+          "TEST_ONBOARD_LAG_SWORD"
+        ],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [
+          "TEST_ONBOARD_LAG_BOOTS",
+          "TEST_ONBOARD_LAG_SHIRT",
+          "TEST_ONBOARD_LAG_SWORD"
+        ],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": true,
+        "contents_added": [
+          "training mace",
+          "training spear",
+          "training sword",
+          "weapon rack"
+        ],
+        "contents_removed": [
+          "silvered mirror"
+        ],
+        "room_after": "Weapon Cage",
+        "room_before": "Mirror Alcove"
+      }
+    },
+    "from": "post_mirror",
+    "to": "post_weapon"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "post_combat",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "post_weapon",
+        "coins_after": 50,
+        "coins_before": 50,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "Training Yard",
+        "location_before": "Weapon Cage",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [
+          "TEST_ONBOARD_LAG_GOBLIN"
+        ],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": true,
+        "contents_added": [
+          "TEST_ONBOARD_LAG_GOBLIN",
+          "grave of training goblin",
+          "training goblin"
+        ],
+        "contents_removed": [
+          "training mace",
+          "training spear",
+          "training sword",
+          "weapon rack"
+        ],
+        "room_after": "Training Yard",
+        "room_before": "Weapon Cage"
+      }
+    },
+    "from": "post_weapon",
+    "to": "post_combat"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "post_vendor",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "post_combat",
+        "coins_after": 50,
+        "coins_before": 50,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "Vendor Stall",
+        "location_before": "Training Yard",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": true,
+        "contents_added": [
+          "Quartermaster Nella"
+        ],
+        "contents_removed": [
+          "Marshal Vey",
+          "Pip the Gremlin",
+          "TEST_ONBOARD_LAG_GOBLIN",
+          "grave of training goblin",
+          "training goblin"
+        ],
+        "room_after": "Vendor Stall",
+        "room_before": "Training Yard"
+      }
+    },
+    "from": "post_combat",
+    "to": "post_vendor"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "final",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "post_vendor",
+        "coins_after": 50,
+        "coins_before": 50,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "Vendor Stall",
+        "location_before": "Vendor Stall",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [],
+        "room_after": "Vendor Stall",
+        "room_before": "Vendor Stall"
+      }
+    },
+    "from": "post_vendor",
+    "to": "final"
+  }
+]

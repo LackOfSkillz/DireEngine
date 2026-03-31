@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import sys
 import time
 import traceback
@@ -10,7 +12,7 @@ from .artifacts import write_artifacts
 from .context import DireTestContext
 from .failures import build_failure_summary
 from .harness import DireTestHarness, cleanup_test_objects
-from .metrics import capture_metric_state, summarize_metrics
+from .metrics import build_lag_artifact, capture_metric_state, summarize_metrics
 from .runtime import clear_active_context, set_active_context
 from .seed import set_seed
 
@@ -33,7 +35,39 @@ def _build_run_id(name, mode, seed):
     return f"{slug}_{mode}_{seed}"
 
 
-def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = False, name: str | None = None):
+def _load_previous_lag_payload(artifact_path):
+    if not artifact_path:
+        return {}
+    root = Path(artifact_path)
+    lag_path = root / "lag.json"
+    if lag_path.exists():
+        return dict(json.loads(lag_path.read_text(encoding="utf-8")) or {})
+    metrics_path = root / "metrics.json"
+    if metrics_path.exists():
+        metrics_payload = dict(json.loads(metrics_path.read_text(encoding="utf-8")) or {})
+        return {"lag": dict(metrics_payload.get("lag", {}) or {})}
+    return {}
+
+
+def _build_replay_lag_comparison(original_lag_payload, current_lag_payload):
+    original_lag = dict((original_lag_payload or {}).get("lag", {}) or {})
+    current_lag = dict((current_lag_payload or {}).get("lag", {}) or {})
+    if not original_lag and not current_lag:
+        return {}
+    numeric_keys = ["avg_ms", "max_ms", "min_ms", "p95_ms", "spike_count", "slow_count", "jitter"]
+    deltas = {}
+    for key in numeric_keys:
+        before = float(original_lag.get(key, 0.0) or 0.0)
+        after = float(current_lag.get(key, 0.0) or 0.0)
+        deltas[key] = after - before
+    return {
+        "original_status": str(original_lag.get("status", "ok") or "ok"),
+        "current_status": str(current_lag.get("status", "ok") or "ok"),
+        "delta": deltas,
+    }
+
+
+def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = False, name: str | None = None, check_lag: bool = False, compare_lag_artifact_path: str | None = None):
     normalized_mode = _normalize_mode(mode)
     normalized_seed = _coerce_seed(seed)
     set_seed(normalized_seed)
@@ -45,6 +79,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
 
     harness = DireTestHarness()
     ctx = DireTestContext(harness=harness, mode=normalized_mode, auto_snapshot=auto_snapshot)
+    ctx.check_lag = bool(check_lag)
     scenario_name = str(name or getattr(scenario_func, "__name__", "scenario") or "scenario")
     run_id = _build_run_id(scenario_name, normalized_mode, normalized_seed)
     result = None
@@ -108,6 +143,21 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
         leaks=list(teardown_data.get("leaks", []) or []),
         final_state=final_metric_state,
     )
+    lag_summary = dict(metrics_summary.get("lag", {}) or {})
+    lag_status = str(lag_summary.get("status", "ok") or "ok")
+    lag_failure_required = lag_status == "critical" or (bool(check_lag) and lag_status in {"bad", "critical"})
+    if lag_failure_required:
+        exit_code = 1
+        failure_type = failure_type or "lag_failure"
+        failure_message = failure_message or f"Lag status {lag_status} exceeded DireTest thresholds."
+
+    lag_payload = build_lag_artifact(ctx, metrics_summary)
+    replay_lag_comparison = {}
+    if compare_lag_artifact_path:
+        replay_lag_comparison = _build_replay_lag_comparison(_load_previous_lag_payload(compare_lag_artifact_path), lag_payload)
+    if replay_lag_comparison:
+        metrics_summary["replay_lag_comparison"] = replay_lag_comparison
+        lag_payload["replay_comparison"] = replay_lag_comparison
 
     if isinstance(result, dict):
         result["snapshot_count"] = len(ctx.snapshots)
@@ -119,6 +169,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
         scenario=scenario_name,
         seed=normalized_seed,
         mode=normalized_mode,
+        lag_status=lag_status,
     )
 
     try:
@@ -139,6 +190,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
                     "exit_code": exit_code,
                     "result": result,
                     "failure_type": failure_summary["failure_type"],
+                    "lag_status": lag_status,
                     "started_at": started_at,
                     "ended_at": time.time(),
                     "preexisting_cleanup_failures": list(preexisting_cleanup.get("deletion_failures", []) or []),
@@ -150,6 +202,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
                     "snapshot_labels": list(ctx.get_snapshot_labels() if hasattr(ctx, "get_snapshot_labels") else []),
                     **metrics_summary,
                 },
+                "lag": lag_payload,
                 "failure_summary": failure_summary,
                 "traceback": traceback_text,
             },
@@ -165,6 +218,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
         "invariant_results": list(ctx.invariant_results or []),
         "leaks": list(teardown_data.get("leaks", []) or []),
         "metrics": metrics_summary,
+        "lag": lag_payload,
         "output_log": list(ctx.output_log or []),
         "preexisting_cleanup_failures": list(preexisting_cleanup.get("deletion_failures", []) or []),
         "preexisting_leaks": list(preexisting_leaks),

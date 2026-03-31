@@ -167,12 +167,14 @@ c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline save v1 -
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline compare v1 --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario race-balance
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario movement --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario movement --seed 1234 --check-lag
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario inventory --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario combat-basic --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario death-loop --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario grave-recovery --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario economy --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario bank --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario onboarding_lag --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py repro artifacts/bank_direct_1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py diff artifacts/bank_direct_1234/snapshots.json::initial artifacts/bank_direct_1234/snapshots.json::deposited
 ```
@@ -182,13 +184,16 @@ Optional flags:
 - `--profession commoner`
 - `--sample-weight 80`
 - `--base-xp 100`
+- `--check-lag`
 - `--json`
 
-The direct gameplay scenarios now cover movement, inventory, basic combat, death and depart loops, grave recovery, vendor trading, and banking. Artifact bundles under `artifacts/` now include `diffs.json`, `failure_summary.json`, timing and delta metrics, and replayable scenario metadata.
+The direct gameplay scenarios now cover movement, inventory, basic combat, death and depart loops, grave recovery, vendor trading, banking, and onboarding lag diagnostics. Artifact bundles under `artifacts/` now include `diffs.json`, `failure_summary.json`, `lag.json`, timing and delta metrics, and replayable scenario metadata.
 
 `diretest.py balance-baseline --seed <n>` is the first descriptive balance pass. It rolls up combat outcomes, economy flow, and onboarding progression pacing into a single artifact-backed report without adding hard balance gates yet.
 
 `diretest.py baseline save <name> --seed <n>` persists that aggregated report under `artifacts/baselines/<name>.json`. `diretest.py baseline compare <name> --seed <n>` reruns the same aggregated baseline and prints simple factual deltas against the saved baseline with no analysis layer yet.
+
+`diretest.py scenario <name> --check-lag` promotes lag status into a scenario failure when the run reaches `bad` or `critical`, while `critical` lag fails even without the extra flag. `diretest.py repro <artifact_path>` now recomputes lag metrics and prints a replay lag comparison against the original artifact.
 
 ## Development Notes
 

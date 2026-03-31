@@ -173,6 +173,41 @@ def _safe_float(value, default=0.0):
         return float(default)
 
 
+def _format_ms_value(value):
+    numeric = _safe_float(value, 0.0)
+    if numeric.is_integer():
+        return str(int(numeric))
+    return f"{numeric:.1f}".rstrip("0").rstrip(".")
+
+
+def _build_lag_summary_lines(metrics):
+    lag = dict((metrics or {}).get("lag", {}) or {})
+    status = str(lag.get("status", "ok") or "ok")
+    if status == "ok":
+        return []
+    return [
+        "Lag Summary:",
+        f"  avg: {_format_ms_value(lag.get('avg_ms', 0.0))}ms",
+        f"  max: {_format_ms_value(lag.get('max_ms', 0.0))}ms",
+        f"  spikes: {int(lag.get('spike_count', 0) or 0)}",
+        f"  status: {status.upper()}",
+    ]
+
+
+def _build_replay_lag_lines(metrics):
+    comparison = dict((metrics or {}).get("replay_lag_comparison", {}) or {})
+    delta = dict(comparison.get("delta", {}) or {})
+    if not comparison:
+        return []
+    return [
+        "Replay Lag Compare:",
+        f"  status: {comparison.get('original_status', 'ok')} -> {comparison.get('current_status', 'ok')}",
+        f"  avg delta: {_format_ms_value(delta.get('avg_ms', 0.0))}ms",
+        f"  max delta: {_format_ms_value(delta.get('max_ms', 0.0))}ms",
+        f"  spike delta: {int(round(_safe_float(delta.get('spike_count', 0.0), 0.0)))}",
+    ]
+
+
 def _format_onboarding_output(output):
     lines = [
         "DireTest Scenario: onboarding_full",
@@ -410,9 +445,21 @@ def run_race_balance_scenario(args):
 
 
 def _build_runner_namespace(seed, as_json=False, **extra):
-    payload = {"seed": int(seed), "json": bool(as_json)}
+    payload = {"seed": int(seed), "json": bool(as_json), "check_lag": False, "repro_artifact_path": None}
     payload.update(extra)
     return argparse.Namespace(**payload)
+
+
+def _run_registered_scenario(args, scenario_func, *, auto_snapshot=False, name=None, mode="direct"):
+    return run_scenario(
+        scenario_func,
+        seed=args.seed,
+        mode=mode,
+        auto_snapshot=auto_snapshot,
+        name=name,
+        check_lag=bool(getattr(args, "check_lag", False)),
+        compare_lag_artifact_path=getattr(args, "repro_artifact_path", None),
+    )
 
 
 def _build_onboarding_full_output(args):
@@ -908,7 +955,7 @@ def run_movement_scenario(args):
             "output_log": list(ctx.output_log),
         }
 
-    return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=True, name="movement")
+    return _run_registered_scenario(args, scenario, auto_snapshot=True, name="movement")
 
 
 @register_scenario("inventory")
@@ -967,7 +1014,7 @@ def run_inventory_scenario(args):
             "item": getattr(test_item, "key", None),
         }
 
-    return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=True, name="inventory")
+    return _run_registered_scenario(args, scenario, auto_snapshot=True, name="inventory")
 
 
 @register_scenario("combat-basic")
@@ -1037,7 +1084,7 @@ def run_combat_basic_scenario(args):
             "target_hp": int(getattr(defender.db, "hp", 0) or 0),
         }
 
-    return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="combat-basic")
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="combat-basic")
 
 
 @register_scenario("death-loop")
@@ -1119,7 +1166,7 @@ def run_death_loop_scenario(args):
             "coins": int(getattr(character.db, "coins", 0) or 0),
         }
 
-    return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="death-loop")
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="death-loop")
 
 
 @register_scenario("economy")
@@ -1218,7 +1265,7 @@ def run_economy_scenario(args):
             "coins": int(getattr(character.db, "coins", 0) or 0),
         }
 
-    return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="economy")
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="economy")
 
 
 @register_scenario("bank")
@@ -1275,7 +1322,7 @@ def run_bank_scenario(args):
             "bank_coins": int(getattr(character.db, "bank_coins", 0) or 0),
         }
 
-    return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="bank")
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="bank")
 
 
 @register_scenario("grave-recovery")
@@ -1364,7 +1411,121 @@ def run_grave_recovery_scenario(args):
             "coins": int(getattr(character.db, "coins", 0) or 0),
         }
 
-    return run_scenario(scenario, seed=args.seed, mode="direct", auto_snapshot=False, name="grave-recovery")
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="grave-recovery")
+
+
+@register_scenario("onboarding_lag")
+def run_onboarding_lag_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.objects.models import ObjectDB
+        from evennia.utils.create import create_object
+
+        from systems import onboarding
+
+        def ensure_tutorial_room(room_name):
+            for candidate in ObjectDB.objects.filter(db_key__iexact=room_name):
+                if getattr(getattr(candidate, "db", None), "is_tutorial", False):
+                    return candidate
+            room = create_object("typeclasses.rooms.Room", key=room_name, nohome=True)
+            room.db.is_tutorial = True
+            ctx.harness.track_object(room)
+            return room
+
+        rooms = {room_name: ensure_tutorial_room(room_name) for room_name in ONBOARDING_ROOM_NAMES}
+        character = create_object("typeclasses.characters.Character", key="TEST_ONBOARD_LAG_CHAR", location=rooms["Intake Hall"], home=rooms["Intake Hall"])
+        ctx.harness.track_object(character)
+        character.db.onboarding_state = onboarding._default_state()
+        character.db.gender = None
+        character.db.race = "human"
+        character.db.injuries = {
+            "left_arm": {"bleed": 2, "external": 6, "internal": 0, "bruise": 0, "max": 100, "vital": False, "tended": False, "tend": {}},
+            "head": {"bleed": 0, "external": 0, "internal": 0, "bruise": 0, "max": 100, "vital": True, "tended": False, "tend": {}},
+            "chest": {"bleed": 0, "external": 0, "internal": 0, "bruise": 0, "max": 100, "vital": True, "tended": False, "tend": {}},
+        }
+        character.db.coins = 50
+
+        ctx.character = character
+        ctx.room = rooms["Intake Hall"]
+
+        results = []
+
+        gender_ok, gender_message = ctx.direct(onboarding.set_gender, character, "male")
+        ctx.snapshot("post_gender")
+        results.append({"step": "gender", "ok": gender_ok, "message": gender_message})
+
+        ctx.direct(character.move_to, rooms["Lineup Platform"], quiet=True, use_destination=False)
+        ctx.room = rooms["Lineup Platform"]
+        race_ok, race_message = ctx.direct(onboarding.select_race, character, "human")
+        ctx.snapshot("post_race")
+        results.append({"step": "race", "ok": race_ok, "message": race_message})
+
+        ctx.direct(character.move_to, rooms["Mirror Alcove"], quiet=True, use_destination=False)
+        ctx.room = rooms["Mirror Alcove"]
+        mirror_ok = True
+        mirror_message = "configured tutorial appearance"
+        for trait, value in {"hair style": "short", "hair color": "brown", "build": "average", "height": "average", "eyes": "gray"}.items():
+            step_ok, step_message = ctx.direct(onboarding.set_trait, character, trait, value)
+            mirror_ok = mirror_ok and bool(step_ok)
+            mirror_message = step_message
+        ctx.snapshot("post_mirror")
+        results.append({"step": "mirror", "ok": mirror_ok, "message": mirror_message})
+
+        ctx.direct(character.move_to, rooms["Gear Rack Room"], quiet=True, use_destination=False)
+        ctx.room = rooms["Gear Rack Room"]
+        shirt = create_object("typeclasses.wearables.Wearable", key="TEST_ONBOARD_LAG_SHIRT", location=character, home=character)
+        shirt.db.slot = "torso"
+        shirt.db.weight = 1.0
+        boots = create_object("typeclasses.wearables.Wearable", key="TEST_ONBOARD_LAG_BOOTS", location=character, home=character)
+        boots.db.slot = "feet"
+        boots.db.weight = 1.5
+        ctx.harness.track_object(shirt)
+        ctx.harness.track_object(boots)
+        ctx.direct(character.equip_item, shirt)
+        ctx.direct(character.equip_item, boots)
+        ctx.direct(character.move_to, rooms["Weapon Cage"], quiet=True, use_destination=False)
+        ctx.room = rooms["Weapon Cage"]
+        weapon = create_object("typeclasses.objects.Object", key="TEST_ONBOARD_LAG_SWORD", location=character, home=character)
+        weapon.db.item_type = "weapon"
+        weapon.db.weight = 3.0
+        ctx.harness.track_object(weapon)
+        weapon_ok, weapon_message = ctx.direct(onboarding.note_weapon_action, character, weapon)
+        ctx.snapshot("post_weapon")
+        results.append({"step": "weapon", "ok": weapon_ok, "message": weapon_message})
+
+        ctx.direct(character.move_to, rooms["Training Yard"], quiet=True, use_destination=False)
+        ctx.room = rooms["Training Yard"]
+        goblin = create_object("typeclasses.npcs.NPC", key="TEST_ONBOARD_LAG_GOBLIN", location=rooms["Training Yard"], home=rooms["Training Yard"])
+        goblin.db.is_npc = True
+        goblin.db.is_tutorial_enemy = True
+        goblin.db.onboarding_enemy_role = "training"
+        goblin.db.hp = 0
+        ctx.harness.track_object(goblin)
+        ctx.direct(onboarding.note_combat_start, character, goblin)
+        combat_ok, combat_message = ctx.direct(onboarding.note_combat_win, character, goblin)
+        ctx.snapshot("post_combat")
+        results.append({"step": "combat", "ok": combat_ok, "message": combat_message})
+
+        ctx.direct(character.move_to, rooms["Vendor Stall"], quiet=True, use_destination=False)
+        ctx.room = rooms["Vendor Stall"]
+        buy_ok, _ = ctx.direct(onboarding.note_trade_action, character, "buy")
+        sell_ok, vendor_message = ctx.direct(onboarding.note_trade_action, character, "sell")
+        ctx.snapshot("post_vendor")
+        results.append({"step": "vendor", "ok": bool(buy_ok and sell_ok), "message": vendor_message})
+
+        state = onboarding.ensure_onboarding_state(character)
+        return {
+            "commands": list(ctx.command_log),
+            "results": results,
+            "completed_steps": list(state.get("completed_steps") or []),
+            "token_count": int(state.get("tokens", 0) or 0),
+            "output_log": list(ctx.output_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="onboarding_lag")
 
 
 @register_scenario("onboarding_full")
@@ -1534,6 +1695,10 @@ def _emit_runner_result(args, result):
     duration_ms = int((result.get("metrics", {}) or {}).get("scenario_duration_ms", 0) or 0)
     if duration_ms:
         print(f"Duration Ms: {duration_ms}")
+    for line in _build_lag_summary_lines(result.get("metrics", {})):
+        print(line)
+    for line in _build_replay_lag_lines(result.get("metrics", {})):
+        print(line)
     if result.get("traceback"):
         print("Traceback:")
         print(result.get("traceback"))
@@ -1669,6 +1834,7 @@ def _handle_repro_command(args):
     parser = build_parser()
     replay_args = parser.parse_args(["scenario", scenario_name, "--seed", str(seed)])
     replay_args.json = bool(getattr(args, "json", False))
+    replay_args.repro_artifact_path = args.artifact_path
     return _execute_cli_scenario(replay_args)
 
 
@@ -1703,6 +1869,13 @@ def _handle_diff_command(args):
     if getattr(args, "output", None):
         print(f"Wrote JSON diff: {args.output}")
     return 0
+
+
+def _add_common_scenario_args(parser):
+    parser.add_argument("--seed", type=int)
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--check-lag", action="store_true")
+    return parser
 
 
 def build_parser():
@@ -1752,71 +1925,50 @@ def build_parser():
     baseline_compare_parser.add_argument("--json", action="store_true")
     baseline_compare_parser.set_defaults(cli_handler=_handle_baseline_compare_command)
 
-    race_balance_parser = scenario_subparsers.add_parser("race-balance")
+    race_balance_parser = _add_common_scenario_args(scenario_subparsers.add_parser("race-balance"))
     race_balance_parser.add_argument("--profession", default="commoner")
     race_balance_parser.add_argument("--sample-weight", type=float, default=80.0)
     race_balance_parser.add_argument("--base-xp", type=int, default=100)
-    race_balance_parser.add_argument("--seed", type=int)
-    race_balance_parser.add_argument("--json", action="store_true")
     race_balance_parser.set_defaults(handler=run_race_balance_scenario)
 
-    movement_parser = scenario_subparsers.add_parser("movement")
-    movement_parser.add_argument("--seed", type=int)
-    movement_parser.add_argument("--json", action="store_true")
+    movement_parser = _add_common_scenario_args(scenario_subparsers.add_parser("movement"))
     movement_parser.set_defaults(handler=run_movement_scenario)
 
-    inventory_parser = scenario_subparsers.add_parser("inventory")
-    inventory_parser.add_argument("--seed", type=int)
-    inventory_parser.add_argument("--json", action="store_true")
+    inventory_parser = _add_common_scenario_args(scenario_subparsers.add_parser("inventory"))
     inventory_parser.set_defaults(handler=run_inventory_scenario)
 
-    combat_basic_parser = scenario_subparsers.add_parser("combat-basic")
-    combat_basic_parser.add_argument("--seed", type=int)
-    combat_basic_parser.add_argument("--json", action="store_true")
+    combat_basic_parser = _add_common_scenario_args(scenario_subparsers.add_parser("combat-basic"))
     combat_basic_parser.set_defaults(handler=run_combat_basic_scenario)
 
-    death_loop_parser = scenario_subparsers.add_parser("death-loop")
-    death_loop_parser.add_argument("--seed", type=int)
-    death_loop_parser.add_argument("--json", action="store_true")
+    death_loop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("death-loop"))
     death_loop_parser.set_defaults(handler=run_death_loop_scenario)
 
-    economy_parser = scenario_subparsers.add_parser("economy")
-    economy_parser.add_argument("--seed", type=int)
-    economy_parser.add_argument("--json", action="store_true")
+    economy_parser = _add_common_scenario_args(scenario_subparsers.add_parser("economy"))
     economy_parser.set_defaults(handler=run_economy_scenario)
 
-    bank_parser = scenario_subparsers.add_parser("bank")
-    bank_parser.add_argument("--seed", type=int)
-    bank_parser.add_argument("--json", action="store_true")
+    bank_parser = _add_common_scenario_args(scenario_subparsers.add_parser("bank"))
     bank_parser.set_defaults(handler=run_bank_scenario)
 
-    grave_recovery_parser = scenario_subparsers.add_parser("grave-recovery")
-    grave_recovery_parser.add_argument("--seed", type=int)
-    grave_recovery_parser.add_argument("--json", action="store_true")
+    grave_recovery_parser = _add_common_scenario_args(scenario_subparsers.add_parser("grave-recovery"))
     grave_recovery_parser.set_defaults(handler=run_grave_recovery_scenario)
 
-    onboarding_parser = scenario_subparsers.add_parser("onboarding_full")
+    onboarding_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_full"))
     onboarding_parser.add_argument("--name", default="DireTestHero")
-    onboarding_parser.add_argument("--seed", type=int)
-    onboarding_parser.add_argument("--json", action="store_true")
     onboarding_parser.set_defaults(handler=run_onboarding_full_scenario)
 
-    onboarding_no_armor_parser = scenario_subparsers.add_parser("onboarding_no_armor")
+    onboarding_lag_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_lag"))
+    onboarding_lag_parser.set_defaults(handler=run_onboarding_lag_scenario)
+
+    onboarding_no_armor_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_no_armor"))
     onboarding_no_armor_parser.add_argument("--name", default="DireTestHero")
-    onboarding_no_armor_parser.add_argument("--seed", type=int)
-    onboarding_no_armor_parser.add_argument("--json", action="store_true")
     onboarding_no_armor_parser.set_defaults(handler=run_onboarding_no_armor_scenario)
 
-    onboarding_no_attack_parser = scenario_subparsers.add_parser("onboarding_no_attack")
+    onboarding_no_attack_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_no_attack"))
     onboarding_no_attack_parser.add_argument("--name", default="DireTestHero")
-    onboarding_no_attack_parser.add_argument("--seed", type=int)
-    onboarding_no_attack_parser.add_argument("--json", action="store_true")
     onboarding_no_attack_parser.set_defaults(handler=run_onboarding_no_attack_scenario)
 
-    onboarding_no_heal_parser = scenario_subparsers.add_parser("onboarding_no_heal")
+    onboarding_no_heal_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_no_heal"))
     onboarding_no_heal_parser.add_argument("--name", default="DireTestHero")
-    onboarding_no_heal_parser.add_argument("--seed", type=int)
-    onboarding_no_heal_parser.add_argument("--json", action="store_true")
     onboarding_no_heal_parser.set_defaults(handler=run_onboarding_no_heal_scenario)
 
     return parser

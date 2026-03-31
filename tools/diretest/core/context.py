@@ -23,9 +23,10 @@ class DireTestContext:
         self.output_log = []
         self.snapshots = []
         self.diffs = []
+        self.lag_events = []
         self.log_messages = []
         self.invariant_results = []
-        self.metrics = {"command_timings_ms": []}
+        self.metrics = {"command_timings_ms": [], "command_timing_entries": []}
         self.metric_baseline = {}
         self.failure_type = None
         self.failure_message = ""
@@ -35,6 +36,9 @@ class DireTestContext:
         self.time_frozen = False
         self.frozen_time = None
         self._previous_object_records = {}
+        self._pending_lag_event_indexes = []
+        self._pending_payload_ms = 0.0
+        self._pending_script_delays = []
 
     def _coerce_snapshot_entry(self, snapshot_ref):
         if isinstance(snapshot_ref, int):
@@ -85,12 +89,33 @@ class DireTestContext:
 
         return [entry for entry in entries if str(entry).strip()]
 
-    def _capture_character_output(self):
+    def _looks_like_npc_response(self, text):
+        payload = str(text or "").strip().lower()
+        if not payload:
+            return False
+        return any(token in payload for token in ["mentor", "gremlin", "goblin", "objective", " says", "asks", "growls"])
+
+    def _looks_like_combat_response(self, command, text):
+        command_text = str(command or "").strip().lower()
+        payload = str(text or "").strip().lower()
+        if not command_text or not payload:
+            return False
+        if not any(token in command_text for token in ["attack", "ambush", "target", "disengage", "retreat"]):
+            return False
+        return any(token in payload for token in ["attack", "hit", "miss", "damage", "roundtime", "disengage", "retreat", "engage", "combat"])
+
+    def _capture_character_output(self, started_perf=None, command_label=""):
         if not self.character:
             return None, None
 
         original_msg = self.character.msg
-        output_entries = []
+        probe = {
+            "entries": [],
+            "timed_entries": [],
+            "first_response_ms": None,
+            "npc_response_delay_ms": None,
+            "combat_response_ms": None,
+        }
 
         def capture_msg(*args, **kwargs):
             payload = kwargs.get("text")
@@ -98,18 +123,84 @@ class DireTestContext:
                 payload = args[0]
             options = kwargs.get("options")
             entries = self._coerce_output_entries(payload=payload, options=options, kwargs={key: value for key, value in kwargs.items() if key not in {"text", "options"}})
-            output_entries.extend(entries)
+            elapsed_ms = None
+            if started_perf is not None:
+                elapsed_ms = max(0.0, (time.perf_counter() - started_perf) * 1000.0)
+            for entry in entries:
+                probe["entries"].append(entry)
+                probe["timed_entries"].append({"text": entry, "ms": elapsed_ms})
+                if elapsed_ms is not None and probe["first_response_ms"] is None:
+                    probe["first_response_ms"] = elapsed_ms
+                if elapsed_ms is not None and probe["npc_response_delay_ms"] is None and self._looks_like_npc_response(entry):
+                    probe["npc_response_delay_ms"] = elapsed_ms
+                if elapsed_ms is not None and probe["combat_response_ms"] is None and self._looks_like_combat_response(command_label, entry):
+                    probe["combat_response_ms"] = elapsed_ms
             return original_msg(*args, **kwargs)
 
         self.character.msg = capture_msg
-        return original_msg, output_entries
+        return original_msg, probe
 
-    def _restore_character_output(self, original_msg, output_entries):
+    def _restore_character_output(self, original_msg, output_probe):
         if self.character and original_msg is not None:
             self.character.msg = original_msg
-        if output_entries:
-            self.output_log.extend(output_entries)
-        return output_entries or []
+        entries = list((output_probe or {}).get("entries", []) or [])
+        if entries:
+            self.output_log.extend(entries)
+        return entries
+
+    def record_payload_timing(self, duration_ms):
+        try:
+            self._pending_payload_ms += max(0.0, float(duration_ms or 0.0))
+        except (TypeError, ValueError):
+            return self._pending_payload_ms
+        return self._pending_payload_ms
+
+    def record_script_delay(self, duration_ms, source=""):
+        try:
+            delay_ms = max(0.0, float(duration_ms or 0.0))
+        except (TypeError, ValueError):
+            delay_ms = 0.0
+        self._pending_script_delays.append({"source": str(source or ""), "ms": delay_ms})
+        return delay_ms
+
+    def _link_pending_lag_events(self, snapshot_label):
+        if not self._pending_lag_event_indexes:
+            return
+        label = str(snapshot_label or "")
+        event_indexes = list(self._pending_lag_event_indexes)
+        self._pending_lag_event_indexes = []
+        for index in event_indexes:
+            if 0 <= index < len(self.lag_events):
+                self.lag_events[index]["snapshot"] = label
+            timing_entries = list((self.metrics or {}).get("command_timing_entries", []) or [])
+            if 0 <= index < len(timing_entries):
+                timing_entries[index]["snapshot"] = label
+
+    def _record_timing_entry(self, command_label, elapsed_ms, output_probe, kind="command"):
+        probe = dict(output_probe or {})
+        payload_ms = max(0.0, float(self._pending_payload_ms or 0.0))
+        script_entries = list(self._pending_script_delays or [])
+        script_delay_ms = sum(float((entry or {}).get("ms", 0.0) or 0.0) for entry in script_entries)
+        entry = {
+            "command": str(command_label or "").strip(),
+            "kind": str(kind or "command"),
+            "ms": max(0.0, float(elapsed_ms or 0.0)),
+            "first_response_ms": probe.get("first_response_ms"),
+            "npc_response_delay_ms": probe.get("npc_response_delay_ms"),
+            "combat_response_ms": probe.get("combat_response_ms"),
+            "payload_ms": payload_ms,
+            "script_delay_ms": script_delay_ms,
+            "script_delay_sources": script_entries,
+            "snapshot": None,
+        }
+        timing_entries = self.metrics.setdefault("command_timing_entries", [])
+        timing_entries.append(entry)
+        self.metrics.setdefault("command_timings_ms", []).append(entry["ms"])
+        self.lag_events.append({"command": entry["command"], "ms": entry["ms"], "snapshot": None})
+        self._pending_lag_event_indexes.append(len(self.lag_events) - 1)
+        self._pending_payload_ms = 0.0
+        self._pending_script_delays = []
+        return entry
 
     def cmd(self, command_str):
         command = str(command_str or "").strip()
@@ -120,18 +211,19 @@ class DireTestContext:
 
         self._ensure_metric_baseline()
         self.command_log.append(command)
-        original_msg, output_entries = self._capture_character_output()
+        original_msg, output_probe = self._capture_character_output(started_perf=time.perf_counter(), command_label=command)
         started = time.perf_counter()
         try:
             result = self.character.execute_cmd(command)
         except Exception as error:
             self.set_failure("command_execution_failure", str(error))
-            output_entries.append(f"ERROR {error}")
+            if output_probe is not None:
+                output_probe.setdefault("entries", []).append(f"ERROR {error}")
             raise
         finally:
-            elapsed_ms = max(0, int(round((time.perf_counter() - started) * 1000.0)))
-            self.metrics.setdefault("command_timings_ms", []).append(elapsed_ms)
-            self._restore_character_output(original_msg, output_entries)
+            elapsed_ms = max(0.0, (time.perf_counter() - started) * 1000.0)
+            self._restore_character_output(original_msg, output_probe)
+            self._record_timing_entry(command, elapsed_ms, output_probe, kind="command")
 
         self.room = getattr(self.character, "location", None) or self.room
         if self.auto_snapshot:
@@ -143,16 +235,21 @@ class DireTestContext:
         self._ensure_metric_baseline()
         self.command_log.append(f"DIRECT {function_name}")
 
-        original_msg, output_entries = self._capture_character_output()
+        started = time.perf_counter()
+        original_msg, output_probe = self._capture_character_output(started_perf=started, command_label=f"DIRECT {function_name}")
         try:
             result = func(*args, **kwargs)
-            output_entries.append(f"RETURN {result!r}")
+            if output_probe is not None:
+                output_probe.setdefault("entries", []).append(f"RETURN {result!r}")
         except Exception as error:
             self.set_failure("direct_execution_failure", str(error))
-            output_entries.append(f"ERROR {error}")
+            if output_probe is not None:
+                output_probe.setdefault("entries", []).append(f"ERROR {error}")
             raise
         finally:
-            self._restore_character_output(original_msg, output_entries)
+            elapsed_ms = max(0.0, (time.perf_counter() - started) * 1000.0)
+            self._restore_character_output(original_msg, output_probe)
+            self._record_timing_entry(f"DIRECT {function_name}", elapsed_ms, output_probe, kind="direct")
 
         return result
 
@@ -176,6 +273,7 @@ class DireTestContext:
                 "data": build_snapshot_diff(previous_entry, entry),
             }
             self.diffs.append(diff_entry)
+        self._link_pending_lag_events(label)
         return snapshot
 
     def get_snapshot_labels(self):

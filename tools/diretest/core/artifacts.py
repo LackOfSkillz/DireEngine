@@ -13,6 +13,7 @@ REQUIRED_ARTIFACT_FILES = {
     "snapshots.json": "json",
     "diffs.json": "json",
     "metrics.json": "json",
+    "lag.json": "json",
     "failure_summary.json": "json",
     "traceback.txt": "text",
 }
@@ -48,6 +49,7 @@ def write_artifacts(run_id, data, base_path=None):
     snapshots = list(data.get("snapshots", []) or [])
     diffs = list(data.get("diffs", []) or [])
     metrics = dict(data.get("metrics", {}) or {})
+    lag_payload = dict(data.get("lag", {}) or {})
     failure_summary = dict(data.get("failure_summary", {}) or {})
     traceback_text = str(data.get("traceback", "") or "")
 
@@ -57,6 +59,7 @@ def write_artifacts(run_id, data, base_path=None):
     _write_json(artifact_dir / "snapshots.json", snapshots)
     _write_json(artifact_dir / "diffs.json", diffs)
     _write_json(artifact_dir / "metrics.json", metrics)
+    _write_json(artifact_dir / "lag.json", lag_payload)
     _write_json(artifact_dir / "failure_summary.json", failure_summary)
     _write_text(artifact_dir / "traceback.txt", traceback_text)
 

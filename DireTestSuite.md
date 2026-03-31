@@ -2036,6 +2036,14 @@ At the end of this set:
 ✔ reproducible lag diagnostics (not guesswork)
 
 🧱 PHASE: LAG DETECTION CORE
+
+Current implemented status:
+
+- `tools/diretest/core/lag.py` now defines the lag schema, thresholds, spike detection, jitter calculation, and status analysis.
+- `ctx.cmd()` and `ctx.direct()` now record structured timing entries, first-response timing, lag-event-to-snapshot correlation, and lag hooks for payload/script delay reporting.
+- `metrics.json`, `failure_summary.json`, and `lag.json` now carry lag summaries, slow commands, lag status, and replay lag comparisons.
+- `diretest scenario <name> --check-lag`, `diretest repro <artifact>`, and `diretest scenario onboarding_lag` are live entrypoints for this phase.
+
 🟩 LAG-001 — Define Lag Metrics Schema (LOCKED)
 
 File:

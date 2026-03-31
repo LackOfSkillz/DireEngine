@@ -1,0 +1,562 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 137.98356667393818,
+  "lag": {
+    "avg_ms": 486.55133500287775,
+    "jitter": 490.8933473447494,
+    "max_ms": 1728.0878000310622,
+    "min_ms": 6.382499996107072,
+    "p95_ms": 1476.1761100031438,
+    "slow_count": 13,
+    "spike_count": 12,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT set_gender",
+      "ms": 1728.0878000310622,
+      "snapshot": "post_gender"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 337.9725000122562,
+      "snapshot": "post_race"
+    },
+    {
+      "command": "DIRECT select_race",
+      "ms": 943.4479000046849,
+      "snapshot": "post_race"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 505.9210999752395,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 33.12869998626411,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 25.60819999780506,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 25.355200050398707,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 23.53239996591583,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT set_trait",
+      "ms": 961.3913000212051,
+      "snapshot": "post_mirror"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 516.3084999658167,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT equip_item",
+      "ms": 639.7797999670729,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT equip_item",
+      "ms": 1462.9176000016741,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 552.9950000345707,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT note_weapon_action",
+      "ms": 644.3553999997675,
+      "snapshot": "post_weapon"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 471.0878999903798,
+      "snapshot": "post_combat"
+    },
+    {
+      "command": "DIRECT note_combat_start",
+      "ms": 21.892699995078146,
+      "snapshot": "post_combat"
+    },
+    {
+      "command": "DIRECT note_combat_win",
+      "ms": 570.5424000043422,
+      "snapshot": "post_combat"
+    },
+    {
+      "command": "DIRECT move_to",
+      "ms": 231.50980001082644,
+      "snapshot": "post_vendor"
+    },
+    {
+      "command": "DIRECT note_trade_action",
+      "ms": 28.81000004708767,
+      "snapshot": "post_vendor"
+    },
+    {
+      "command": "DIRECT note_trade_action",
+      "ms": 6.382499996107072,
+      "snapshot": "post_vendor"
+    }
+  ],
+  "npc_response_delay_ms": 167.3354714377118,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT set_gender",
+      "ms": 1728.0878000310622
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 337.9725000122562
+    },
+    {
+      "cmd": "DIRECT select_race",
+      "ms": 943.4479000046849
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 505.9210999752395
+    },
+    {
+      "cmd": "DIRECT set_trait",
+      "ms": 961.3913000212051
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 516.3084999658167
+    },
+    {
+      "cmd": "DIRECT equip_item",
+      "ms": 639.7797999670729
+    },
+    {
+      "cmd": "DIRECT equip_item",
+      "ms": 1462.9176000016741
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 552.9950000345707
+    },
+    {
+      "cmd": "DIRECT note_weapon_action",
+      "ms": 644.3553999997675
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 471.0878999903798
+    },
+    {
+      "cmd": "DIRECT note_combat_win",
+      "ms": 570.5424000043422
+    },
+    {
+      "cmd": "DIRECT move_to",
+      "ms": 231.50980001082644
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_gender",
+      "first_response_ms": 39.37980002956465,
+      "kind": "direct",
+      "ms": 1728.0878000310622,
+      "npc_response_delay_ms": 39.37980002956465,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_gender"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 65.08000002941117,
+      "kind": "direct",
+      "ms": 337.9725000122562,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_race"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT select_race",
+      "first_response_ms": 161.55680001247674,
+      "kind": "direct",
+      "ms": 943.4479000046849,
+      "npc_response_delay_ms": 161.55680001247674,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_race"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 59.10699995001778,
+      "kind": "direct",
+      "ms": 505.9210999752395,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": 67.693600023631,
+      "kind": "direct",
+      "ms": 961.3913000212051,
+      "npc_response_delay_ms": 67.693600023631,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 55.620300001464784,
+      "kind": "direct",
+      "ms": 516.3084999658167,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT equip_item",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 639.7797999670729,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT equip_item",
+      "first_response_ms": 588.718900049571,
+      "kind": "direct",
+      "ms": 1462.9176000016741,
+      "npc_response_delay_ms": 588.718900049571,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 280.120600014925,
+      "kind": "direct",
+      "ms": 552.9950000345707,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_weapon_action",
+      "first_response_ms": 41.89529997529462,
+      "kind": "direct",
+      "ms": 644.3553999997675,
+      "npc_response_delay_ms": 41.89529997529462,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 233.51069999625906,
+      "kind": "direct",
+      "ms": 471.0878999903798,
+      "npc_response_delay_ms": 233.51069999625906,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_combat_win",
+      "first_response_ms": 38.59319997718558,
+      "kind": "direct",
+      "ms": 570.5424000043422,
+      "npc_response_delay_ms": 38.59319997718558,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_gender",
+      "first_response_ms": 39.37980002956465,
+      "kind": "direct",
+      "ms": 1728.0878000310622,
+      "npc_response_delay_ms": 39.37980002956465,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_gender"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 65.08000002941117,
+      "kind": "direct",
+      "ms": 337.9725000122562,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_race"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT select_race",
+      "first_response_ms": 161.55680001247674,
+      "kind": "direct",
+      "ms": 943.4479000046849,
+      "npc_response_delay_ms": 161.55680001247674,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_race"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 59.10699995001778,
+      "kind": "direct",
+      "ms": 505.9210999752395,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 33.12869998626411,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 25.60819999780506,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 25.355200050398707,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 23.53239996591583,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_trait",
+      "first_response_ms": 67.693600023631,
+      "kind": "direct",
+      "ms": 961.3913000212051,
+      "npc_response_delay_ms": 67.693600023631,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_mirror"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 55.620300001464784,
+      "kind": "direct",
+      "ms": 516.3084999658167,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT equip_item",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 639.7797999670729,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT equip_item",
+      "first_response_ms": 588.718900049571,
+      "kind": "direct",
+      "ms": 1462.9176000016741,
+      "npc_response_delay_ms": 588.718900049571,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 280.120600014925,
+      "kind": "direct",
+      "ms": 552.9950000345707,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_weapon_action",
+      "first_response_ms": 41.89529997529462,
+      "kind": "direct",
+      "ms": 644.3553999997675,
+      "npc_response_delay_ms": 41.89529997529462,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_weapon"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 233.51069999625906,
+      "kind": "direct",
+      "ms": 471.0878999903798,
+      "npc_response_delay_ms": 233.51069999625906,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_combat_start",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 21.892699995078146,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_combat_win",
+      "first_response_ms": 38.59319997718558,
+      "kind": "direct",
+      "ms": 570.5424000043422,
+      "npc_response_delay_ms": 38.59319997718558,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_combat"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT move_to",
+      "first_response_ms": 24.52660002745688,
+      "kind": "direct",
+      "ms": 231.50980001082644,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_vendor"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_trade_action",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 28.81000004708767,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_vendor"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT note_trade_action",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 6.382499996107072,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_vendor"
+    }
+  ]
+}
