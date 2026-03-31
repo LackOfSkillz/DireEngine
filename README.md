@@ -1,7 +1,8 @@
+# Dragons Ire
+
+
 [![Dragons Ire Screenshot](images/DragonsIre.jpg)](images/DragonsIre.jpg)
 
-
-https://github.com/LackOfSkillz/DireEngine/blob/main/images/DragonsIre.jpg
 # DireEngine
 
 DireEngine is the game and engine workspace behind Dragons Ire, a modern browser-first MUD project built to recreate the feel of DragonRealms while making it faster to access, easier to extend, and free to play.
