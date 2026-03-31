@@ -102,7 +102,14 @@ class Script(DefaultScript):
 
     """
 
-    pass
+    def _track_repeat_timing(self, source, callback):
+        started_at = time.perf_counter()
+        try:
+            return callback()
+        finally:
+            from tools.diretest.core.runtime import record_script_delay
+
+            record_script_delay((time.perf_counter() - started_at) * 1000.0, source=source)
 
 
 class BleedTicker(Script):
@@ -117,8 +124,11 @@ class BleedTicker(Script):
         return False
 
     def at_repeat(self):
-        if self.obj and hasattr(self.obj, "process_bleed"):
-            self.obj.process_bleed()
+        def _run():
+            if self.obj and hasattr(self.obj, "process_bleed"):
+                self.obj.process_bleed()
+
+        self._track_repeat_timing("script:BleedTicker", _run)
 
 
 class CorpseDecayScript(Script):
@@ -134,30 +144,33 @@ class CorpseDecayScript(Script):
         return bool(obj and getattr(getattr(obj, "db", None), "is_corpse", False))
 
     def at_repeat(self):
-        obj = self.obj
-        if not obj or not getattr(obj.db, "is_corpse", False):
-            return
-        if hasattr(obj, "is_orphaned") and obj.is_orphaned():
-            obj.delete()
-            return
-        now = time.time()
-        vigil_until = float(getattr(obj.db, "devotional_vigil_until", 0.0) or 0.0)
-        protected = bool(getattr(obj.db, "stabilized", False)) or now < vigil_until
-        decay_scale = 1.0
-        if getattr(obj, "location", None) and hasattr(obj.location, "get_death_zone_profile"):
-            decay_scale = float(obj.location.get_death_zone_profile().get("corpse_decay_scale", 1.0) or 1.0)
-        if not protected and hasattr(obj, "adjust_condition"):
-            obj.adjust_condition(-((self.interval / 60.0) * decay_scale))
-        if hasattr(obj, "get_memory_remaining") and obj.get_memory_remaining() <= 0:
-            if hasattr(obj, "apply_memory_loss"):
-                obj.apply_memory_loss()
-        decay_time = float(getattr(obj.db, "decay_time", 0.0) or 0.0)
-        if decay_time <= 0:
-            return
-        if now < decay_time:
-            return
-        if hasattr(obj, "decay_to_grave"):
-            obj.decay_to_grave()
+        def _run():
+            obj = self.obj
+            if not obj or not getattr(obj.db, "is_corpse", False):
+                return
+            if hasattr(obj, "is_orphaned") and obj.is_orphaned():
+                obj.delete()
+                return
+            now = time.time()
+            vigil_until = float(getattr(obj.db, "devotional_vigil_until", 0.0) or 0.0)
+            protected = bool(getattr(obj.db, "stabilized", False)) or now < vigil_until
+            decay_scale = 1.0
+            if getattr(obj, "location", None) and hasattr(obj.location, "get_death_zone_profile"):
+                decay_scale = float(obj.location.get_death_zone_profile().get("corpse_decay_scale", 1.0) or 1.0)
+            if not protected and hasattr(obj, "adjust_condition"):
+                obj.adjust_condition(-((self.interval / 60.0) * decay_scale))
+            if hasattr(obj, "get_memory_remaining") and obj.get_memory_remaining() <= 0:
+                if hasattr(obj, "apply_memory_loss"):
+                    obj.apply_memory_loss()
+            decay_time = float(getattr(obj.db, "decay_time", 0.0) or 0.0)
+            if decay_time <= 0:
+                return
+            if now < decay_time:
+                return
+            if hasattr(obj, "decay_to_grave"):
+                obj.decay_to_grave()
+
+        self._track_repeat_timing("script:CorpseDecayScript", _run)
 
 
 class GraveMaintenanceScript(Script):
@@ -173,20 +186,23 @@ class GraveMaintenanceScript(Script):
         return bool(obj and getattr(getattr(obj, "db", None), "is_grave", False))
 
     def at_repeat(self):
-        obj = self.obj
-        if not obj or not getattr(getattr(obj, "db", None), "is_grave", False):
-            return
-        if hasattr(obj, "is_orphaned") and obj.is_orphaned():
-            obj.delete()
-            return
-        expiry_remaining = float(getattr(obj, "get_expiry_remaining", lambda: 0.0)() or 0.0)
-        owner = obj.get_owner() if hasattr(obj, "get_owner") else None
-        if expiry_remaining > 0 and expiry_remaining <= 3600 and owner and not bool(getattr(obj.db, "expiry_warned", False)):
-            owner.msg("You feel your connection to your lost possessions fading.")
-            obj.db.expiry_warned = True
-        if float(getattr(obj.db, "expiry_time", 0.0) or 0.0) > 0 and expiry_remaining <= 0:
-            obj.delete()
-            return
-        if hasattr(obj, "increment_grave_damage"):
-            obj.increment_grave_damage(1)
-        obj.db.last_grave_damage_tick = time.time()
+        def _run():
+            obj = self.obj
+            if not obj or not getattr(getattr(obj, "db", None), "is_grave", False):
+                return
+            if hasattr(obj, "is_orphaned") and obj.is_orphaned():
+                obj.delete()
+                return
+            expiry_remaining = float(getattr(obj, "get_expiry_remaining", lambda: 0.0)() or 0.0)
+            owner = obj.get_owner() if hasattr(obj, "get_owner") else None
+            if expiry_remaining > 0 and expiry_remaining <= 3600 and owner and not bool(getattr(obj.db, "expiry_warned", False)):
+                owner.msg("You feel your connection to your lost possessions fading.")
+                obj.db.expiry_warned = True
+            if float(getattr(obj.db, "expiry_time", 0.0) or 0.0) > 0 and expiry_remaining <= 0:
+                obj.delete()
+                return
+            if hasattr(obj, "increment_grave_damage"):
+                obj.increment_grave_damage(1)
+            obj.db.last_grave_damage_tick = time.time()
+
+        self._track_repeat_timing("script:GraveMaintenanceScript", _run)

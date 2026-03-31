@@ -20,49 +20,52 @@ class OnboardingRoleplayScript(Script):
         return bool(obj and role in {"mentor", "gremlin"})
 
     def at_repeat(self):
-        obj = self.obj
-        room = getattr(obj, "location", None)
-        if not obj or not room:
-            return
-        from systems import onboarding
+        def _run():
+            obj = self.obj
+            room = getattr(obj, "location", None)
+            if not obj or not room:
+                return
+            from systems import onboarding
 
-        last_prompt = dict(getattr(self.db, "last_prompt_by_character", {}) or {})
-        now = time.time()
-        for occupant in list(getattr(room, "contents", []) or []):
-            if not getattr(occupant, "has_account", False):
-                continue
-            if not onboarding.is_onboarding_character(occupant):
-                continue
-            character_id = str(getattr(occupant, "id", "") or "")
-            if onboarding.prompt_spacing_active(occupant, minimum_interval=2.5):
-                continue
-            if now - float(last_prompt.get(character_id, 0.0) or 0.0) < 20.0:
-                continue
-            state = onboarding.ensure_onboarding_state(occupant)
-            delay = now - max(
-                float(state.get("last_progress_at", 0.0) or 0.0),
-                float(state.get("room_entered_at", 0.0) or 0.0),
-            )
-            room_key = str(getattr(getattr(occupant, "location", None), "key", "") or "")
-            role = str(getattr(getattr(obj, "db", None), "onboarding_role", "") or "").lower()
-            if onboarding.remind_objective_if_idle(occupant, idle_threshold=5.0, minimum_interval=12.0):
+            last_prompt = dict(getattr(self.db, "last_prompt_by_character", {}) or {})
+            now = time.time()
+            for occupant in list(getattr(room, "contents", []) or []):
+                if not getattr(occupant, "has_account", False):
+                    continue
+                if not onboarding.is_onboarding_character(occupant):
+                    continue
+                character_id = str(getattr(occupant, "id", "") or "")
+                if onboarding.prompt_spacing_active(occupant, minimum_interval=2.5):
+                    continue
+                if now - float(last_prompt.get(character_id, 0.0) or 0.0) < 20.0:
+                    continue
+                state = onboarding.ensure_onboarding_state(occupant)
+                delay = now - max(
+                    float(state.get("last_progress_at", 0.0) or 0.0),
+                    float(state.get("room_entered_at", 0.0) or 0.0),
+                )
+                room_key = str(getattr(getattr(occupant, "location", None), "key", "") or "")
+                role = str(getattr(getattr(obj, "db", None), "onboarding_role", "") or "").lower()
+                if onboarding.remind_objective_if_idle(occupant, idle_threshold=5.0, minimum_interval=12.0):
+                    last_prompt[character_id] = now
+                    break
+                if role == "gremlin" and room_key == "Gear Rack Room" and delay > 10.0:
+                    if onboarding.trigger_gear_delay_scene(occupant):
+                        last_prompt[character_id] = now
+                        break
+                if role == "gremlin" and room_key == "Training Yard" and delay > 8.0:
+                    if onboarding.trigger_almost_failure_scene(occupant):
+                        last_prompt[character_id] = now
+                        break
+                line = onboarding.get_roleplay_nudge(obj, occupant)
+                if not line:
+                    continue
+                onboarding.emit_npc_line(occupant, obj, line)
                 last_prompt[character_id] = now
                 break
-            if role == "gremlin" and room_key == "Gear Rack Room" and delay > 10.0:
-                if onboarding.trigger_gear_delay_scene(occupant):
-                    last_prompt[character_id] = now
-                    break
-            if role == "gremlin" and room_key == "Training Yard" and delay > 8.0:
-                if onboarding.trigger_almost_failure_scene(occupant):
-                    last_prompt[character_id] = now
-                    break
-            line = onboarding.get_roleplay_nudge(obj, occupant)
-            if not line:
-                continue
-            onboarding.emit_npc_line(occupant, obj, line)
-            last_prompt[character_id] = now
-            break
-        self.db.last_prompt_by_character = last_prompt
+            self.db.last_prompt_by_character = last_prompt
+
+        self._track_repeat_timing("script:OnboardingRoleplayScript", _run)
 
 
 class OnboardingInvasionScript(Script):
@@ -135,69 +138,72 @@ class OnboardingInvasionScript(Script):
         return goblin
 
     def at_repeat(self):
-        from systems import onboarding
+        def _run():
+            from systems import onboarding
 
-        characters = self._get_onboarding_characters()
-        if not characters:
-            self.db.stage = "idle"
-            self.db.announced_warning = False
-            return
-
-        ready = [char for char in characters if "economy" in set(onboarding.ensure_onboarding_state(char).get("completed_steps") or []) and "breach" not in set(onboarding.ensure_onboarding_state(char).get("completed_steps") or [])]
-        if not ready:
-            self.db.stage = "idle"
-            self.db.announced_warning = False
-            self.db.stabilized = False
-            return
-
-        stage = str(getattr(self.db, "stage", "idle") or "idle")
-        if stage == "idle":
-            self.db.stage = "warning"
-            self.db.stage_started_at = time.time()
-            if not bool(getattr(self.db, "announced_warning", False)):
-                self.obj.msg_contents('A horn sounds somewhere deeper in the compound, followed by the scrape of something forcing metal wide.')
-                for char in ready:
-                    onboarding.note_breach_progress(char, "start")
-                    onboarding.note_step_failure(char, "breach")
-                self.db.announced_warning = True
-            return
-
-        if stage == "warning":
-            if time.time() - float(getattr(self.db, "stage_started_at", 0.0) or 0.0) < 6.0:
+            characters = self._get_onboarding_characters()
+            if not characters:
+                self.db.stage = "idle"
+                self.db.announced_warning = False
                 return
-            self.obj.msg_contents("A training horn cracks across the compound, then cuts off mid-call as something slams into the outer braces.")
-            self.db.stage = "first_contact"
-            self.db.stage_started_at = time.time()
-            return
 
-        if stage == "first_contact":
-            if time.time() - float(getattr(self.db, "stage_started_at", 0.0) or 0.0) < 6.0:
+            ready = [char for char in characters if "economy" in set(onboarding.ensure_onboarding_state(char).get("completed_steps") or []) and "breach" not in set(onboarding.ensure_onboarding_state(char).get("completed_steps") or [])]
+            if not ready:
+                self.db.stage = "idle"
+                self.db.announced_warning = False
+                self.db.stabilized = False
                 return
-            self.obj.msg_contents("A barricade post jumps in its brackets, showering dust and splinters into the corridor.")
-            self.db.stage = "breach"
-            self.db.stage_started_at = time.time()
-            return
 
-        if stage == "breach" and not self._active_breach_goblins():
-            self._spawn_breach_goblin()
-            self.obj.msg_contents("A goblin squeezes through the breach with a ragged shriek as the outer door buckles inward.")
-            self.db.stage = "active"
-            self.db.stage_started_at = time.time()
-            return
-
-        if stage == "active":
-            if self._active_breach_goblins():
-                return
-            if int(getattr(self.db, "spawn_count", 0) or 0) < 2:
-                self.db.stage = "breach"
-                return
-            if not bool(getattr(self.db, "stabilized", False)):
-                self.obj.msg_contents("The corridor steadies as the last shove against the gate fails and the broken barricade settles back into place.")
-                self.db.stabilized = True
-                self.db.stage = "stabilization"
+            stage = str(getattr(self.db, "stage", "idle") or "idle")
+            if stage == "idle":
+                self.db.stage = "warning"
                 self.db.stage_started_at = time.time()
-            return
+                if not bool(getattr(self.db, "announced_warning", False)):
+                    self.obj.msg_contents('A horn sounds somewhere deeper in the compound, followed by the scrape of something forcing metal wide.')
+                    for char in ready:
+                        onboarding.note_breach_progress(char, "start")
+                        onboarding.note_step_failure(char, "breach")
+                    self.db.announced_warning = True
+                return
 
-        if stage == "stabilization" and not bool(getattr(self.db, "stabilized_mentor_line", False)):
-            self.obj.msg_contents('Marshal Vey shouts from down the corridor, "Hold it there. That was the push."')
-            self.db.stabilized_mentor_line = True
+            if stage == "warning":
+                if time.time() - float(getattr(self.db, "stage_started_at", 0.0) or 0.0) < 6.0:
+                    return
+                self.obj.msg_contents("A training horn cracks across the compound, then cuts off mid-call as something slams into the outer braces.")
+                self.db.stage = "first_contact"
+                self.db.stage_started_at = time.time()
+                return
+
+            if stage == "first_contact":
+                if time.time() - float(getattr(self.db, "stage_started_at", 0.0) or 0.0) < 6.0:
+                    return
+                self.obj.msg_contents("A barricade post jumps in its brackets, showering dust and splinters into the corridor.")
+                self.db.stage = "breach"
+                self.db.stage_started_at = time.time()
+                return
+
+            if stage == "breach" and not self._active_breach_goblins():
+                self._spawn_breach_goblin()
+                self.obj.msg_contents("A goblin squeezes through the breach with a ragged shriek as the outer door buckles inward.")
+                self.db.stage = "active"
+                self.db.stage_started_at = time.time()
+                return
+
+            if stage == "active":
+                if self._active_breach_goblins():
+                    return
+                if int(getattr(self.db, "spawn_count", 0) or 0) < 2:
+                    self.db.stage = "breach"
+                    return
+                if not bool(getattr(self.db, "stabilized", False)):
+                    self.obj.msg_contents("The corridor steadies as the last shove against the gate fails and the broken barricade settles back into place.")
+                    self.db.stabilized = True
+                    self.db.stage = "stabilization"
+                    self.db.stage_started_at = time.time()
+                return
+
+            if stage == "stabilization" and not bool(getattr(self.db, "stabilized_mentor_line", False)):
+                self.obj.msg_contents('Marshal Vey shouts from down the corridor, "Hold it there. That was the push."')
+                self.db.stabilized_mentor_line = True
+
+        self._track_repeat_timing("script:OnboardingInvasionScript", _run)

@@ -3,7 +3,7 @@ import time
 
 from evennia.utils.search import search_tag
 
-from tools.diretest.core.runtime import suppress_client_payloads
+from tools.diretest.core.runtime import record_payload_timing, suppress_client_payloads
 from world.area_forge.utils.messages import send_structured
 
 
@@ -312,9 +312,12 @@ def _collect_room_edges(rooms_by_id):
 
 
 def get_local_map(character, radius=3):
+    started_at = time.perf_counter()
     origin = getattr(character, "location", None)
     if not origin:
-        return _empty_map_payload()
+        payload = _empty_map_payload()
+        record_payload_timing((time.perf_counter() - started_at) * 1000.0)
+        return payload
 
     visited = set()
     queue = deque([(origin, 0)])
@@ -350,19 +353,24 @@ def get_local_map(character, radius=3):
     filtered_edges = [edge for edge in edges if edge["from"] in room_ids and edge["to"] in room_ids]
     serialized_rooms = _serialize_rooms(rooms_by_id, filtered_edges, current_room_id=origin.id)
 
-    return {
+    payload = {
         "rooms": serialized_rooms,
         "edges": filtered_edges,
         "exits": filtered_edges,
         "player_room_id": origin.id,
         "zone": "local",
     }
+    record_payload_timing((time.perf_counter() - started_at) * 1000.0)
+    return payload
 
 
 def get_zone_map(character):
+    started_at = time.perf_counter()
     origin = getattr(character, "location", None)
     if not origin:
-        return _empty_map_payload()
+        payload = _empty_map_payload()
+        record_payload_timing((time.perf_counter() - started_at) * 1000.0)
+        return payload
 
     area_tag = _area_tag_for_room(origin)
     if not area_tag:
@@ -384,13 +392,15 @@ def get_zone_map(character):
         for room in template["rooms"]
     ]
 
-    return {
+    payload = {
         "rooms": serialized_rooms,
         "edges": template["edges"],
         "exits": template["edges"],
         "player_room_id": origin.id,
         "zone": area_tag,
     }
+    record_payload_timing((time.perf_counter() - started_at) * 1000.0)
+    return payload
 
 
 def send_map_update(character, radius=3, session=None, mode="zone"):

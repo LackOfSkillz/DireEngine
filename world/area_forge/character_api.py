@@ -1,6 +1,6 @@
 import time
 
-from tools.diretest.core.runtime import suppress_client_payloads
+from tools.diretest.core.runtime import record_payload_timing, suppress_client_payloads
 from typeclasses.abilities import get_ability_map
 from world.area_forge.utils.messages import send_structured
 
@@ -258,6 +258,7 @@ def _object_name(value):
 
 
 def get_character_payload(character):
+    started_at = time.perf_counter()
     max_hp = getattr(character.db, "max_hp", None) or 100
     hp = getattr(character.db, "hp", None)
     if hp is None:
@@ -294,7 +295,7 @@ def get_character_payload(character):
     target = getattr(character.db, "target", None)
     stance = getattr(character.db, "stance", None) or {"offense": 50, "defense": 50}
 
-    return {
+    payload = {
         "name": character.key,
         "race": character.get_race() if hasattr(character, "get_race") else getattr(character.db, "race", None),
         "race_name": character.get_race_display_name() if hasattr(character, "get_race_display_name") else None,
@@ -371,6 +372,8 @@ def get_character_payload(character):
         "cooldowns": cooldowns,
         "abilities": _get_ability_payload(character, cooldowns),
     }
+    record_payload_timing((time.perf_counter() - started_at) * 1000.0)
+    return payload
 
 
 def send_character_update(character, session=None):
@@ -381,15 +384,20 @@ def send_character_update(character, session=None):
 
 
 def get_subsystem_payload(character):
+    started_at = time.perf_counter()
     subsystem = character.get_subsystem() if hasattr(character, "get_subsystem") else None
     if isinstance(subsystem, dict):
-        return dict(subsystem)
-    return {
+        payload = dict(subsystem)
+        record_payload_timing((time.perf_counter() - started_at) * 1000.0)
+        return payload
+    payload = {
         "key": getattr(character.db, "profession", None),
         "profession": getattr(character.db, "profession", None),
         "guild_tag": None,
         "label": None,
     }
+    record_payload_timing((time.perf_counter() - started_at) * 1000.0)
+    return payload
 
 
 def send_subsystem_update(character, session=None):

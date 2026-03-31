@@ -2041,6 +2041,8 @@ Current implemented status:
 
 - `tools/diretest/core/lag.py` now defines the lag schema, thresholds, spike detection, jitter calculation, and status analysis.
 - `ctx.cmd()` and `ctx.direct()` now record structured timing entries, first-response timing, lag-event-to-snapshot correlation, and lag hooks for payload/script delay reporting.
+- `world/area_forge/character_api.py` and `world/area_forge/map_api.py` now report real client payload generation timing into DireTest lag metrics.
+- `server/conf/at_server_startstop.py`, `typeclasses/scripts.py`, and `typeclasses/onboarding_scripts.py` now report live ticker/script execution delay into DireTest lag metrics.
 - `metrics.json`, `failure_summary.json`, and `lag.json` now carry lag summaries, slow commands, lag status, and replay lag comparisons.
 - `diretest scenario <name> --check-lag`, `diretest repro <artifact>`, and `diretest scenario onboarding_lag` are live entrypoints for this phase.
 

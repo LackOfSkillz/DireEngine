@@ -6,9 +6,9 @@
     {
       "combat_response_ms": null,
       "command": "look",
-      "first_response_ms": 20.323899982031435,
+      "first_response_ms": 18.267399980686605,
       "kind": "command",
-      "ms": 20.416300045326352,
+      "ms": 18.344700045417994,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -18,9 +18,9 @@
     {
       "combat_response_ms": null,
       "command": "north",
-      "first_response_ms": 36.24730004230514,
+      "first_response_ms": 51.594800024759024,
       "kind": "command",
-      "ms": 216.03330003563315,
+      "ms": 483.3793999860063,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -30,9 +30,9 @@
     {
       "combat_response_ms": null,
       "command": "look",
-      "first_response_ms": 14.132099982816726,
+      "first_response_ms": 18.909200036432594,
       "kind": "command",
-      "ms": 14.192000031471252,
+      "ms": 18.97049997933209,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -41,15 +41,15 @@
     }
   ],
   "command_timings_ms": [
-    20.416300045326352,
-    216.03330003563315,
-    14.192000031471252
+    18.344700045417994,
+    483.3793999860063,
+    18.97049997933209
   ],
   "deletion_failures": [],
-  "ended_at": 1774956911.569603,
-  "exit_code": 0,
-  "failure_type": null,
-  "first_response_ms": 23.5677666690511,
+  "ended_at": 1774957620.8173654,
+  "exit_code": 1,
+  "failure_type": "lag_failure",
+  "first_response_ms": 29.590466680626076,
   "invariant_results": [
     {
       "message": "Character exists.",
@@ -74,33 +74,33 @@
   ],
   "item_delta_count": 0,
   "lag": {
-    "avg_ms": 83.54720003747691,
-    "jitter": 114.77852803206142,
-    "max_ms": 216.03330003563315,
-    "min_ms": 14.192000031471252,
-    "p95_ms": 196.47160003660244,
+    "avg_ms": 173.56486667025214,
+    "jitter": 268.30743876499815,
+    "max_ms": 483.3793999860063,
+    "min_ms": 18.344700045417994,
+    "p95_ms": 436.93850998533884,
     "slow_count": 1,
-    "spike_count": 0,
-    "status": "warning"
+    "spike_count": 1,
+    "status": "bad"
   },
   "lag_events": [
     {
       "command": "look",
-      "ms": 20.416300045326352,
+      "ms": 18.344700045417994,
       "snapshot": "look"
     },
     {
       "command": "north",
-      "ms": 216.03330003563315,
+      "ms": 483.3793999860063,
       "snapshot": "north"
     },
     {
       "command": "look",
-      "ms": 14.192000031471252,
+      "ms": 18.97049997933209,
       "snapshot": "look"
     }
   ],
-  "lag_status": "warning",
+  "lag_status": "bad",
   "leaks": [],
   "mindstate_delta": {},
   "npc_response_delay_ms": 0.0,
@@ -115,19 +115,6 @@
   "payload_timing_ms": 0.0,
   "preexisting_cleanup_failures": [],
   "preexisting_leaks": [],
-  "replay_lag_comparison": {
-    "current_status": "warning",
-    "delta": {
-      "avg_ms": -18.79096663712214,
-      "jitter": -26.13574096231244,
-      "max_ms": -48.9716999582015,
-      "min_ms": -3.427899966482073,
-      "p95_ms": -44.47185996104963,
-      "slow_count": 0.0,
-      "spike_count": 0.0
-    },
-    "original_status": "bad"
-  },
   "result": {
     "commands": [
       "look",
@@ -219,12 +206,12 @@
     ],
     "start_room": "TEST_MOVE_START"
   },
-  "scenario_duration_ms": 7782,
+  "scenario_duration_ms": 13350,
   "script_delay_ms": 0.0,
   "slow_commands": [
     {
       "cmd": "north",
-      "ms": 216.03330003563315
+      "ms": 483.3793999860063
     }
   ],
   "snapshot_labels": [
@@ -233,7 +220,7 @@
     "look",
     "final"
   ],
-  "started_at": 1774956903.7689924,
+  "started_at": 1774957607.467248,
   "state_transition_count": 3,
   "xp_delta": 0
 }

@@ -644,6 +644,9 @@ def _ensure_new_player_tutorial():
 
 def _log_slow_tick(name, started_at, threshold):
     duration = time.perf_counter() - started_at
+    from tools.diretest.core.runtime import record_script_delay
+
+    record_script_delay(duration * 1000.0, source=f"ticker:{name}")
     if duration > threshold:
         logger.log_warn(f"{name} slow: {duration:.4f}s")
 

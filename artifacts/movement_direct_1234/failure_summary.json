@@ -1,7 +1,7 @@
 {
-  "failure_type": null,
-  "lag_status": "warning",
-  "message": "",
+  "failure_type": "lag_failure",
+  "lag_status": "bad",
+  "message": "Lag status bad exceeded DireTest thresholds.",
   "mode": "direct",
   "scenario": "movement",
   "seed": 1234
