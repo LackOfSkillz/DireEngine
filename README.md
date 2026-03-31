@@ -1,4 +1,4 @@
-[![Dragons Ire Screenshot](main/images/DragonsIre.jpg)](main/images/DragonsIre.jpg)
+[![Dragons Ire Screenshot](images/DragonsIre.jpg)](images/DragonsIre.jpg)
 
 
 https://github.com/LackOfSkillz/DireEngine/blob/main/images/DragonsIre.jpg
