@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Structural scheduled-activation validation should report lag without failing on environment-specific latency."
+  },
+  "mode": "direct",
+  "name": "interest-scheduled-activation",
+  "seed": 997983500,
+  "started_at": 1774982157.2134776
+}

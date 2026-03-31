@@ -61,6 +61,7 @@ from commands.cmd_covertracks import CmdCoverTracks
 from commands.cmd_disarm import CmdDisarm
 from commands.cmd_draw import CmdDraw
 from commands.cmd_endteach import CmdEndTeach
+from commands.cmd_engine import CmdEngine
 from commands.cmd_enterpassage import CmdEnterPassage
 from commands.cmd_findpassage import CmdFindPassage
 from commands.cmd_fire import CmdFire
@@ -176,6 +177,7 @@ from commands.cmd_throw import CmdThrow
 from commands.cmd_train import CmdTrain
 from commands.cmd_surrender import CmdSurrender
 from commands.cmd_testgodot import CmdTestGodot
+from commands.cmd_timingaudit import CmdTimingAudit
 from commands.cmd_track import CmdTrack
 from commands.cmd_stopcast import CmdStopCast
 from commands.cmd_study import CmdStudy
@@ -255,6 +257,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDraw())
         self.add(CmdEnterPassage())
         self.add(CmdEndTeach())
+        self.add(CmdEngine())
         self.add(CmdDiagnose())
         self.add(CmdDeath())
         self.add(CmdDeathInspect())
@@ -372,6 +375,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdTend())
         self.add(CmdTarget())
         self.add(CmdTeach())
+        self.add(CmdTimingAudit())
         self.add(CmdThrow())
         self.add(CmdTrain())
         self.add(CmdTestGodot())

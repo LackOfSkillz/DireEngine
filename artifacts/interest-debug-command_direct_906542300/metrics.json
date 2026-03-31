@@ -1,0 +1,202 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT run_interest_debug_command",
+      "first_response_ms": 0.8124999585561454,
+      "kind": "direct",
+      "ms": 0.8428999572061002,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    0.8428999572061002
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.8428999572061002
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774984439.3795156,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.8124999585561454,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 3,
+    "active_source_types": [],
+    "exercised_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 1,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 5,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 1,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 5,
+      "deactivate": 5
+    },
+    "transition_event_counts": {
+      "activate": 5,
+      "deactivate": 5
+    },
+    "transition_total": 10
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.8428999572061002,
+    "jitter": 0.0,
+    "max_ms": 0.8428999572061002,
+    "min_ms": 0.8428999572061002,
+    "p95_ms": 0.8428999572061002,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT run_interest_debug_command",
+      "ms": 0.8428999572061002,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Interest Debug\ninterest_activation: ON\nactive objects: 3 (peak 3)\nsources: 5 (peak 5)\ntransitions: activate=5 deactivate=2\nsource types:\n  direct: current=1 peak=1\n  proximity: current=0 peak=0\n  room: current=3 peak=4\n  scheduled: current=1 peak=1\n  zone: current=0 peak=0\nactive object details: 3\n  TEST_INTEREST_DEBUG_CALLER: room:room:TEST_INTEREST_DEBUG_CALLER, scheduled:scheduled:combat.roundtime:combat:roundtime:8020\n  TEST_INTEREST_DEBUG_ROOM: room:room:TEST_INTEREST_DEBUG_CALLER\n  TEST_INTEREST_DEBUG_TARGET: direct:direct:TEST_INTEREST_DEBUG_CALLER:combat, room:room:TEST_INTEREST_DEBUG_CALLER",
+    "RETURN None"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT run_interest_debug_command"
+    ],
+    "output_line_count": 2,
+    "output_log": [
+      "Interest Debug\ninterest_activation: ON\nactive objects: 3 (peak 3)\nsources: 5 (peak 5)\ntransitions: activate=5 deactivate=2\nsource types:\n  direct: current=1 peak=1\n  proximity: current=0 peak=0\n  room: current=3 peak=4\n  scheduled: current=1 peak=1\n  zone: current=0 peak=0\nactive object details: 3\n  TEST_INTEREST_DEBUG_CALLER: room:room:TEST_INTEREST_DEBUG_CALLER, scheduled:scheduled:combat.roundtime:combat:roundtime:8020\n  TEST_INTEREST_DEBUG_ROOM: room:room:TEST_INTEREST_DEBUG_CALLER\n  TEST_INTEREST_DEBUG_TARGET: direct:direct:TEST_INTEREST_DEBUG_CALLER:combat, room:room:TEST_INTEREST_DEBUG_CALLER",
+      "RETURN None"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 17689,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1774984420.794841,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Structural interest-debug command validation should report lag without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

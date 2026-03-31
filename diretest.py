@@ -220,6 +220,21 @@ def _build_performance_summary_line(metrics):
     return f"commands: {command_count} | scheduler: {scheduler_events} | max_cmd: {_format_ms_value(max_command_time)}ms"
 
 
+def _build_benchmark_summary_lines(result_payload):
+    benchmark = dict((result_payload or {}).get("benchmark", {}) or {})
+    if not benchmark:
+        return []
+    return [
+        "Benchmark Summary:",
+        f"  legacy cmd: {_format_ms_value(benchmark.get('legacy_command_ms', 0.0))}ms",
+        f"  scoped cmd: {_format_ms_value(benchmark.get('scoped_command_ms', 0.0))}ms",
+        f"  cmd delta: {_format_ms_value(benchmark.get('command_delta_ms', 0.0))}ms",
+        f"  legacy targets: {int(benchmark.get('legacy_target_count', 0) or 0)}",
+        f"  scoped targets: {int(benchmark.get('scoped_target_count', 0) or 0)}",
+        f"  target delta: {int(benchmark.get('target_delta', 0) or 0)}",
+    ]
+
+
 def _format_onboarding_output(output):
     lines = [
         "DireTest Scenario: onboarding_full",
@@ -478,6 +493,127 @@ def _run_registered_scenario(args, scenario_func, *, auto_snapshot=False, name=N
         fail_on_critical_lag=fail_on_critical_lag,
         scenario_metadata=scenario_metadata,
     )
+
+
+def _run_interest_renew_dual_mode_benchmark(ctx):
+    from commands.cmd_renew import CmdRenew
+    from world.systems.engine_flags import set_flag
+    from world.systems.interest import clear_subject_interest, sync_subject_interest
+    from world.systems.metrics import snapshot_metrics
+
+    room_a = ctx.harness.create_test_room(key="TEST_INTEREST_RENEW_A")
+    room_b = ctx.harness.create_test_room(key="TEST_INTEREST_RENEW_B")
+    room_c = ctx.harness.create_test_room(key="TEST_INTEREST_RENEW_C")
+    ctx.harness.create_test_exit(room_a, room_b, "east", aliases=["e"])
+    ctx.harness.create_test_exit(room_b, room_a, "west", aliases=["w"])
+    ctx.harness.create_test_exit(room_b, room_c, "east", aliases=["e2"])
+    ctx.harness.create_test_exit(room_c, room_b, "west", aliases=["w2"])
+
+    caller = ctx.harness.create_test_character(room=room_a, key="TEST_INTEREST_RENEW_CALLER")
+    ctx.character = caller
+    ctx.room = room_a
+    caller.db.renewed = False
+    caller.renew_state = lambda target=caller: setattr(target.db, "renewed", True)
+
+    local_targets = []
+    nearby_targets = []
+    far_targets = []
+
+    for index in range(12):
+        target = ctx.harness.create_test_object(key=f"TEST_RENEW_LOCAL_{index}", location=room_a)
+        target.db.renewed = False
+        target.renew_state = lambda target=target: setattr(target.db, "renewed", True)
+        local_targets.append(target)
+    for index in range(12):
+        target = ctx.harness.create_test_object(key=f"TEST_RENEW_NEARBY_{index}", location=room_b)
+        target.db.renewed = False
+        target.renew_state = lambda target=target: setattr(target.db, "renewed", True)
+        nearby_targets.append(target)
+    for index in range(120):
+        target = ctx.harness.create_test_object(key=f"TEST_RENEW_FAR_{index}", location=room_c)
+        target.db.renewed = False
+        target.renew_state = lambda target=target: setattr(target.db, "renewed", True)
+        far_targets.append(target)
+
+    all_targets = [caller, *local_targets, *nearby_targets, *far_targets]
+
+    def run_renew_all():
+        command = CmdRenew()
+        command.caller = caller
+        command.args = "all"
+        command._is_admin = lambda: True
+        command._get_renewable_global_targets = lambda: (list(all_targets), len(all_targets))
+        command.func()
+
+    def reset_renewed(targets):
+        for target in list(targets or []):
+            target.db.renewed = False
+
+    for target in all_targets:
+        if hasattr(target, "db"):
+            target.db.renewed = False
+
+    set_flag("interest_activation", False, actor="diretest-benchmark")
+    ctx.direct(run_renew_all)
+    legacy_command_ms = float(((ctx.metrics or {}).get("command_timing_entries", []) or [])[-1].get("ms", 0.0) or 0.0)
+    legacy_renewed = [target.key for target in all_targets if bool(getattr(getattr(target, "db", None), "renewed", False))]
+
+    reset_renewed(all_targets)
+    set_flag("interest_activation", True, actor="diretest-benchmark")
+    clear_subject_interest(caller)
+    sync_subject_interest(caller)
+    ctx.direct(run_renew_all)
+    scoped_command_ms = float(((ctx.metrics or {}).get("command_timing_entries", []) or [])[-1].get("ms", 0.0) or 0.0)
+    scoped_renewed = [target.key for target in all_targets if bool(getattr(getattr(target, "db", None), "renewed", False))]
+
+    runtime_metrics = dict(snapshot_metrics() or {})
+    target_select_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("command.renew.target_select", {}) or {}).get("entries", []) or [])
+    execute_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("command.renew.execute", {}) or {}).get("entries", []) or [])
+
+    legacy_select = next((entry for entry in target_select_entries if str(((entry or {}).get("metadata", {}) or {}).get("mode", "") or "") == "legacy-global"), None)
+    scoped_select = next((entry for entry in target_select_entries if str(((entry or {}).get("metadata", {}) or {}).get("mode", "") or "") == "scoped"), None)
+    if not legacy_select or not scoped_select:
+        raise AssertionError(f"Interest renew benchmark did not record both selection modes: {runtime_metrics}")
+
+    legacy_target_count = int((((legacy_select or {}).get("metadata", {}) or {}).get("target_count", 0) or 0))
+    scoped_target_count = int((((scoped_select or {}).get("metadata", {}) or {}).get("target_count", 0) or 0))
+    if legacy_target_count <= scoped_target_count:
+        raise AssertionError(
+            f"Interest renew benchmark did not reduce renew scope under activation: legacy={legacy_target_count} scoped={scoped_target_count}"
+        )
+    expected_scoped = 1 + len(local_targets) + len(nearby_targets)
+    if scoped_target_count != expected_scoped:
+        raise AssertionError(
+            f"Interest renew benchmark renewed the wrong scoped target count: expected {expected_scoped}, got {scoped_target_count}"
+        )
+
+    benchmark = {
+        "legacy_select_ms": float((legacy_select or {}).get("duration_ms", 0.0) or 0.0),
+        "scoped_select_ms": float((scoped_select or {}).get("duration_ms", 0.0) or 0.0),
+        "legacy_command_ms": legacy_command_ms,
+        "scoped_command_ms": scoped_command_ms,
+        "legacy_target_count": legacy_target_count,
+        "scoped_target_count": scoped_target_count,
+        "legacy_scanned_count": int((((legacy_select or {}).get("metadata", {}) or {}).get("scanned_count", 0) or 0)),
+        "scoped_scanned_count": int((((scoped_select or {}).get("metadata", {}) or {}).get("scanned_count", 0) or 0)),
+        "selection_delta_ms": float((legacy_select or {}).get("duration_ms", 0.0) or 0.0) - float((scoped_select or {}).get("duration_ms", 0.0) or 0.0),
+        "command_delta_ms": legacy_command_ms - scoped_command_ms,
+        "target_delta": legacy_target_count - scoped_target_count,
+        "execute_event_count": len(execute_entries),
+        "interest_active_object_peak": _safe_int((runtime_metrics.get("gauges", {}) or {}).get("interest.active_object_peak", 0), 0),
+        "interest_source_count_peak": _safe_int((runtime_metrics.get("gauges", {}) or {}).get("interest.source_count.peak", 0), 0),
+    }
+
+    set_flag("interest_activation", False, actor="diretest-benchmark")
+    return {
+        "commands": list(ctx.command_log),
+        "legacy_renewed_count": len(legacy_renewed),
+        "scoped_renewed_count": len(scoped_renewed),
+        "legacy_renewed": legacy_renewed,
+        "scoped_renewed": scoped_renewed,
+        "benchmark": benchmark,
+        "output_log": list(ctx.output_log),
+    }
 
 
 def _build_onboarding_full_output(args):
@@ -1413,11 +1549,19 @@ def run_bank_scenario(args):
     return _run_registered_scenario(args, scenario, auto_snapshot=False, name="bank")
 
 
-@register_scenario("grave-recovery")
+@register_scenario(
+    "grave-recovery",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural corpse decay scheduling validation should report lag without failing on environment-specific latency.",
+    },
+)
 def run_grave_recovery_scenario(args):
     _setup_django()
 
     def scenario(ctx):
+        from world.systems.scheduler import flush_due, get_scheduler_snapshot
+
         room = ctx.harness.create_test_room(key="TEST_GRAVE_ROOM")
         character = ctx.harness.create_test_character(room=room, key="TEST_GRAVE_CHAR")
         keepsake = ctx.harness.create_test_object(
@@ -1444,9 +1588,20 @@ def run_grave_recovery_scenario(args):
             raise AssertionError("Grave-recovery scenario did not create a corpse.")
         ctx.harness.track_object(corpse)
         ctx.snapshot("dead")
-        grave = ctx.direct(corpse.decay_to_grave)
+
+        corpse.db.decay_time = time.time() + 0.1
+        ctx.direct(corpse.schedule_decay_transition)
+        scheduler_snapshot = get_scheduler_snapshot() or {}
+        active_jobs = list(scheduler_snapshot.get("active_jobs", []) or [])
+        decay_key = corpse._get_decay_schedule_key() if hasattr(corpse, "_get_decay_schedule_key") else None
+        if not any(job.get("key") == decay_key and job.get("system") == "world.corpse_decay" for job in active_jobs):
+            raise AssertionError(f"Grave-recovery scenario did not register corpse decay scheduler metadata: {scheduler_snapshot}")
+
+        time.sleep(0.15)
+        ctx.direct(flush_due)
+        grave = character.get_owned_grave(location=room) if hasattr(character, "get_owned_grave") else None
         if not grave:
-            raise AssertionError("Grave-recovery scenario did not decay the corpse into a grave.")
+            raise AssertionError("Grave-recovery scenario did not decay the corpse into a grave via scheduler expiry.")
         ctx.harness.track_object(grave)
         ctx.snapshot("graved")
         ctx.cmd("depart grave")
@@ -1496,10 +1651,816 @@ def run_grave_recovery_scenario(args):
             "snapshot_labels": labels,
             "output_log": list(ctx.output_log),
             "grave_key": getattr(grave, "key", None),
+            "corpse_decay_key": decay_key,
             "coins": int(getattr(character.db, "coins", 0) or 0),
         }
 
-    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="grave-recovery")
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="grave-recovery",
+        scenario_metadata=getattr(run_grave_recovery_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "trap-expiry",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural trap-expiry scheduling validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_trap_expiry_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.objects.models import ObjectDB
+
+        from world.systems.scheduler import flush_due, get_scheduler_snapshot
+
+        room = ctx.harness.create_test_room(key="TEST_TRAP_ROOM")
+        character = ctx.harness.create_test_character(room=room, key="TEST_TRAP_CHAR")
+        device = ctx.harness.create_test_object(
+            key="TEST_TRAP_DEVICE",
+            location=character,
+            typeclass="typeclasses.trap_device.TrapDevice",
+        )
+
+        ctx.character = character
+        ctx.room = room
+        ctx.harness.track_object(device)
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("carried")
+        device.db.expire_time = 0.1
+        ctx.direct(character.deploy_trap)
+        if device.location != room:
+            raise AssertionError("Trap-expiry scenario did not deploy the trap into the room.")
+        ctx.snapshot("deployed")
+
+        scheduler_snapshot = get_scheduler_snapshot() or {}
+        active_jobs = list(scheduler_snapshot.get("active_jobs", []) or [])
+        trap_key = device._get_expiry_schedule_key() if hasattr(device, "_get_expiry_schedule_key") else None
+        if not any(job.get("key") == trap_key and job.get("system") == "world.trap_expiry" for job in active_jobs):
+            raise AssertionError(f"Trap-expiry scenario did not register trap scheduler metadata: {scheduler_snapshot}")
+
+        deleted = False
+        for _ in range(5):
+            time.sleep(0.15)
+            ctx.direct(flush_due)
+            if not ObjectDB.objects.filter(id=int(getattr(device, "id", 0) or 0)).exists():
+                deleted = True
+                break
+        if not deleted:
+            raise AssertionError("Trap-expiry scenario did not delete the trap via scheduler expiry.")
+        ctx.snapshot("expired")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = ["carried", "deployed", "expired"]
+        if labels != expected_labels:
+            raise AssertionError(f"Trap-expiry snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        expire_diff = ctx.diff_snapshots(ctx.get_snapshot_by_label("deployed"), ctx.get_snapshot_by_label("expired"))
+        if device.key not in expire_diff["object_delta_changes"]["deleted"]:
+            raise AssertionError(f"Trap-expiry diff did not record trap deletion: {expire_diff}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "expire_diff": expire_diff,
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "output_log": list(ctx.output_log),
+            "trap_key": trap_key,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="trap-expiry",
+        scenario_metadata=getattr(run_trap_expiry_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "ticker-execution",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural shared-ticker execution validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_ticker_execution_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from server.conf.at_server_startstop import process_learning_tick
+        from world.systems.metrics import snapshot_metrics
+        from world.systems.timing_audit import collect_timing_audit, register_ticker_metadata
+
+        room = ctx.harness.create_test_room(key="TEST_TICKER_ROOM")
+        character = ctx.harness.create_test_character(room=room, key="TEST_TICKER_CHAR")
+
+        ctx.character = character
+        ctx.room = room
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        character.ensure_skill_defaults()
+        skills = dict(character.db.skills or {})
+        athletics = dict(skills.get("athletics", {}) or {})
+        athletics["rank"] = max(1, int(athletics.get("rank", 1) or 1))
+        athletics["mindstate"] = 20
+        skills["athletics"] = athletics
+        character.db.skills = skills
+
+        register_ticker_metadata(
+            10,
+            process_learning_tick,
+            idstring="global_learning_tick",
+            persistent=True,
+            system="world.learning_tick",
+            reason="Frequency-separated learning and teaching pulse processing.",
+        )
+
+        before_skill = dict((character.db.skills or {}).get("athletics", {}) or {})
+        ctx.snapshot("before")
+        ctx.direct(process_learning_tick)
+        ctx.snapshot("after")
+
+        after_skill = dict((character.db.skills or {}).get("athletics", {}) or {})
+
+        runtime_metrics = dict(snapshot_metrics() or {})
+        ticker_stats = dict((runtime_metrics.get("events", {}) or {}).get("ticker.execute", {}) or {})
+        ticker_entries = list(ticker_stats.get("entries", []) or [])
+        if not any(str(((entry or {}).get("metadata", {}) or {}).get("ticker", "") or "") == "process_learning_tick" for entry in ticker_entries):
+            raise AssertionError(f"Ticker-execution scenario did not record ticker.execute for process_learning_tick: {runtime_metrics}")
+
+        audit_payload = dict(collect_timing_audit() or {})
+        ticker_payload = dict(audit_payload.get("tickers", {}) or {})
+        performance = dict((ticker_payload.get("performance", {}) or {}).get("process_learning_tick", {}) or {})
+        if int(performance.get("count", 0) or 0) <= 0:
+            raise AssertionError(f"Ticker-execution scenario did not surface per-ticker performance: {audit_payload}")
+        registrations = list(ticker_payload.get("registered_tickers", []) or [])
+        if not any(
+            str((record or {}).get("idstring", "") or "") == "global_learning_tick"
+            and str((record or {}).get("system", "") or "") == "world.learning_tick"
+            for record in registrations
+        ):
+            raise AssertionError(f"Ticker-execution scenario did not surface learning ticker registration metadata: {audit_payload}")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = ["before", "after"]
+        if labels != expected_labels:
+            raise AssertionError(f"Ticker-execution snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "output_log": list(ctx.output_log),
+            "before_skill": before_skill,
+            "after_skill": after_skill,
+            "learning_state_changed": before_skill != after_skill,
+            "ticker_performance": performance,
+            "registered_ticker_count": int(ticker_payload.get("registered_ticker_count", 0) or 0),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="ticker-execution",
+        scenario_metadata=getattr(run_ticker_execution_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-renew-benchmark",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Interest activation benchmark should report timing deltas without failing on environment-specific latency.",
+    },
+)
+def run_interest_renew_benchmark_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        return _run_interest_renew_dual_mode_benchmark(ctx)
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-renew-benchmark",
+        scenario_metadata=getattr(run_interest_renew_benchmark_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-dual-mode-compare",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Dual-mode activation comparison should report timing deltas without failing on environment-specific latency.",
+    },
+)
+def run_interest_dual_mode_compare_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        payload = dict(_run_interest_renew_dual_mode_benchmark(ctx) or {})
+        benchmark = dict(payload.get("benchmark", {}) or {})
+        return {
+            **payload,
+            "comparison": {
+                "correctness": {
+                    "legacy_target_count": _safe_int(benchmark.get("legacy_target_count", 0), 0),
+                    "scoped_target_count": _safe_int(benchmark.get("scoped_target_count", 0), 0),
+                    "target_delta": _safe_int(benchmark.get("target_delta", 0), 0),
+                },
+                "timing": {
+                    "legacy_select_ms": _safe_float(benchmark.get("legacy_select_ms", 0.0), 0.0),
+                    "scoped_select_ms": _safe_float(benchmark.get("scoped_select_ms", 0.0), 0.0),
+                    "selection_delta_ms": _safe_float(benchmark.get("selection_delta_ms", 0.0), 0.0),
+                    "legacy_command_ms": _safe_float(benchmark.get("legacy_command_ms", 0.0), 0.0),
+                    "scoped_command_ms": _safe_float(benchmark.get("scoped_command_ms", 0.0), 0.0),
+                    "command_delta_ms": _safe_float(benchmark.get("command_delta_ms", 0.0), 0.0),
+                },
+                "performance": {
+                    "legacy_scanned_count": _safe_int(benchmark.get("legacy_scanned_count", 0), 0),
+                    "scoped_scanned_count": _safe_int(benchmark.get("scoped_scanned_count", 0), 0),
+                    "interest_active_object_peak": _safe_int(benchmark.get("interest_active_object_peak", 0), 0),
+                    "interest_source_count_peak": _safe_int(benchmark.get("interest_source_count_peak", 0), 0),
+                },
+            },
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-dual-mode-compare",
+        scenario_metadata=getattr(run_interest_dual_mode_compare_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-zone-activation",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural zone-activation validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_zone_activation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.engine_flags import set_flag
+        from world.systems.interest import clear_subject_interest, get_activation_sources, get_zone_rooms, is_active, sync_subject_interest
+
+        zone_a = ctx.harness.create_test_room(key="TEST_ZONE_A")
+        zone_b = ctx.harness.create_test_room(key="TEST_ZONE_B")
+        other_zone = ctx.harness.create_test_room(key="TEST_ZONE_OTHER")
+        for room in (zone_a, zone_b):
+            room.tags.add("test-zone-alpha", category="build")
+        other_zone.tags.add("test-zone-beta", category="build")
+
+        caller = ctx.harness.create_test_character(room=zone_a, key="TEST_ZONE_CALLER")
+        zone_obj = ctx.harness.create_test_object(key="TEST_ZONE_OBJ", location=zone_b)
+        outside_obj = ctx.harness.create_test_object(key="TEST_ZONE_OUTSIDE", location=other_zone)
+
+        ctx.character = caller
+        ctx.room = zone_a
+
+        set_flag("interest_activation", True, actor="diretest-zone")
+        sync_subject_interest(caller)
+
+        zone_rooms = [getattr(room, "key", None) for room in get_zone_rooms(zone_a)]
+        if sorted(zone_rooms) != ["TEST_ZONE_A", "TEST_ZONE_B"]:
+            raise AssertionError(f"Zone activation resolved the wrong rooms: {zone_rooms}")
+        if not is_active(zone_obj):
+            raise AssertionError("Zone activation did not activate objects in the same build zone.")
+        if is_active(outside_obj):
+            raise AssertionError("Zone activation leaked into an unrelated zone.")
+
+        zone_sources = [entry for entry in get_activation_sources(zone_obj) if str(entry.get("type", "") or "") == "zone"]
+        if not zone_sources:
+            raise AssertionError("Zone activation did not register a zone source on the zone object.")
+
+        clear_subject_interest(caller)
+        if is_active(zone_obj):
+            raise AssertionError("Zone cleanup did not remove zone interest from the zone object.")
+
+        set_flag("interest_activation", False, actor="diretest-zone")
+        return {
+            "commands": list(ctx.command_log),
+            "zone_rooms": zone_rooms,
+            "zone_source_count": len(zone_sources),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-zone-activation",
+        scenario_metadata=getattr(run_interest_zone_activation_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-activation-metrics",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural activation-metrics validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_activation_metrics_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.engine_flags import set_flag
+        from world.systems.interest import clear_subject_interest, get_activation_sources, is_active, sync_subject_interest
+        from world.systems.metrics import snapshot_metrics
+
+        room = ctx.harness.create_test_room(key="TEST_INTEREST_METRICS_ROOM")
+        caller = ctx.harness.create_test_character(room=room, key="TEST_INTEREST_METRICS_CALLER")
+        target = ctx.harness.create_test_character(room=room, key="TEST_INTEREST_METRICS_TARGET")
+
+        ctx.character = caller
+        ctx.room = room
+
+        set_flag("interest_activation", True, actor="diretest-interest-metrics")
+
+        sync_subject_interest(caller)
+        caller.set_target(target)
+        caller.set_roundtime(0.5)
+
+        runtime_metrics = dict(snapshot_metrics() or {})
+        counters = dict((runtime_metrics.get("counters", {}) or {}))
+        gauges = dict((runtime_metrics.get("gauges", {}) or {}))
+        if int(gauges.get("interest.active_object_count", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record any active objects: {runtime_metrics}")
+        if int(gauges.get("interest.active_object_peak", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record the active-object peak: {runtime_metrics}")
+        if int(gauges.get("interest.source.current.room", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record room sources: {runtime_metrics}")
+        if int(gauges.get("interest.source.current.direct", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record direct sources: {runtime_metrics}")
+        if int(gauges.get("interest.source.current.scheduled", 0) or 0) != 1:
+            raise AssertionError(f"Activation metrics did not record exactly one scheduled source: {runtime_metrics}")
+        if int(counters.get("interest.transition.activate", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record activate transitions: {runtime_metrics}")
+        if int(counters.get("interest.source.add.room", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record room source additions: {runtime_metrics}")
+        if int(counters.get("interest.source.add.direct", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record direct source additions: {runtime_metrics}")
+        if int(counters.get("interest.source.add.scheduled", 0) or 0) != 1:
+            raise AssertionError(f"Activation metrics did not record the scheduled source addition: {runtime_metrics}")
+
+        caller.set_target(None)
+        caller.set_roundtime(0.0)
+        clear_subject_interest(caller)
+        clear_subject_interest(target)
+
+        runtime_metrics_after_cleanup = dict(snapshot_metrics() or {})
+        cleanup_counters = dict((runtime_metrics_after_cleanup.get("counters", {}) or {}))
+        cleanup_gauges = dict((runtime_metrics_after_cleanup.get("gauges", {}) or {}))
+        if is_active(caller):
+            raise AssertionError(f"Activation metrics scenario did not fully deactivate the caller: {get_activation_sources(caller)}")
+        if int(cleanup_counters.get("interest.transition.deactivate", 0) or 0) <= 0:
+            raise AssertionError(f"Activation metrics did not record deactivate transitions: {runtime_metrics_after_cleanup}")
+        if int(cleanup_gauges.get("interest.active_object_count", 0) or 0) != 0:
+            raise AssertionError(
+                f"Activation metrics did not return active-object count to zero after cleanup: {runtime_metrics_after_cleanup}"
+            )
+
+        set_flag("interest_activation", False, actor="diretest-interest-metrics")
+        return {
+            "commands": list(ctx.command_log),
+            "active_object_peak": int(gauges.get("interest.active_object_peak", 0) or 0),
+            "source_count_peak": int(gauges.get("interest.source_count.peak", 0) or 0),
+            "room_source_count": int(gauges.get("interest.source.current.room", 0) or 0),
+            "direct_source_count": int(gauges.get("interest.source.current.direct", 0) or 0),
+            "scheduled_source_count": int(gauges.get("interest.source.current.scheduled", 0) or 0),
+            "activate_count": int(counters.get("interest.transition.activate", 0) or 0),
+            "deactivate_count": int(cleanup_counters.get("interest.transition.deactivate", 0) or 0),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-activation-metrics",
+        scenario_metadata=getattr(run_interest_activation_metrics_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-debug-command",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural interest-debug command validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_debug_command_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from commands.cmd_engine import CmdEngine
+        from world.systems.engine_flags import set_flag
+        from world.systems.interest import clear_subject_interest, sync_subject_interest
+
+        room = ctx.harness.create_test_room(key="TEST_INTEREST_DEBUG_ROOM")
+        caller = ctx.harness.create_test_character(room=room, key="TEST_INTEREST_DEBUG_CALLER")
+        target = ctx.harness.create_test_character(room=room, key="TEST_INTEREST_DEBUG_TARGET")
+
+        ctx.character = caller
+        ctx.room = room
+
+        set_flag("interest_activation", True, actor="diretest-interest-debug")
+        clear_subject_interest(caller)
+        clear_subject_interest(target)
+        sync_subject_interest(caller)
+        caller.set_target(target)
+        caller.set_roundtime(0.5)
+
+        def run_interest_debug_command():
+            command = CmdEngine()
+            command.caller = caller
+            command.args = "interest debug"
+            command._is_admin = lambda: True
+            command.func()
+
+        ctx.direct(run_interest_debug_command)
+        output_text = "\n".join(list(ctx.output_log or []))
+        expected_fragments = [
+            "Interest Debug",
+            "interest_activation: ON",
+            "source types:",
+            "room: current=",
+            "direct: current=",
+            "scheduled: current=",
+            "active object details:",
+            "TEST_INTEREST_DEBUG_CALLER",
+            "TEST_INTEREST_DEBUG_TARGET",
+        ]
+        for fragment in expected_fragments:
+            if fragment not in output_text:
+                raise AssertionError(f"Interest debug command output missing '{fragment}': {output_text}")
+
+        caller.set_target(None)
+        caller.set_roundtime(0.0)
+        clear_subject_interest(caller)
+        clear_subject_interest(target)
+        set_flag("interest_activation", False, actor="diretest-interest-debug")
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "output_line_count": len(list(ctx.output_log or [])),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-debug-command",
+        scenario_metadata=getattr(run_interest_debug_command_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-direct-activation",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural direct-target activation validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_direct_activation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.engine_flags import set_flag
+        from world.systems.interest import clear_direct_interest, direct_interest, get_activation_sources, is_active
+
+        room = ctx.harness.create_test_room(key="TEST_DIRECT_ROOM")
+        caller = ctx.harness.create_test_character(room=room, key="TEST_DIRECT_CALLER")
+        combat_target = ctx.harness.create_test_character(room=room, key="TEST_DIRECT_TARGET")
+        aim_target = ctx.harness.create_test_character(room=room, key="TEST_DIRECT_AIM_TARGET")
+        spell_target = ctx.harness.create_test_character(room=room, key="TEST_DIRECT_SPELL_TARGET")
+        caller.has_ranged_weapon_equipped = lambda: True
+
+        ctx.character = caller
+        ctx.room = room
+
+        set_flag("interest_activation", True, actor="diretest-direct")
+
+        caller.set_target(combat_target)
+        combat_sources = [entry for entry in get_activation_sources(combat_target) if str(entry.get("type", "") or "") == "direct"]
+        if not is_active(combat_target) or not combat_sources:
+            raise AssertionError("Direct activation did not attach to the combat target.")
+
+        aim_ok, _ = caller.build_ranger_aim(aim_target)
+        if not aim_ok:
+            raise AssertionError("Direct activation scenario could not establish ranger aim state.")
+        aim_sources = [entry for entry in get_activation_sources(aim_target) if str(entry.get("type", "") or "") == "direct"]
+        if not is_active(aim_target) or not aim_sources:
+            raise AssertionError("Direct activation did not attach to the aim target.")
+
+        caller.clear_aim()
+        if any(str(entry.get("source", "") or "").startswith("direct:TEST_DIRECT_CALLER:aim") for entry in get_activation_sources(aim_target)):
+            raise AssertionError("Direct activation did not clear aim interest.")
+
+        with direct_interest(caller, [spell_target], channel="spell"):
+            spell_sources_during = [entry for entry in get_activation_sources(spell_target) if str(entry.get("type", "") or "") == "direct"]
+            if not spell_sources_during:
+                raise AssertionError("Direct activation did not attach temporary spell interest.")
+        if any(str(entry.get("source", "") or "").startswith("direct:TEST_DIRECT_CALLER:spell") for entry in get_activation_sources(spell_target)):
+            raise AssertionError("Direct activation did not clear temporary spell interest.")
+
+        caller.set_target(None)
+        if any(str(entry.get("source", "") or "").startswith("direct:TEST_DIRECT_CALLER:combat") for entry in get_activation_sources(combat_target)):
+            raise AssertionError("Direct activation did not clear combat interest.")
+
+        clear_direct_interest(caller, channel="spell")
+        set_flag("interest_activation", False, actor="diretest-direct")
+        return {
+            "commands": list(ctx.command_log),
+            "combat_direct_source_count": len(combat_sources),
+            "aim_direct_source_count": len(aim_sources),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-direct-activation",
+        scenario_metadata=getattr(run_interest_direct_activation_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-scheduled-activation",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural scheduled-activation validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_scheduled_activation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.engine_flags import set_flag
+        from world.systems.interest import get_activation_sources, is_active
+        from world.systems.scheduler import flush_due, get_scheduler_snapshot
+
+        room = ctx.harness.create_test_room(key="TEST_SCHEDULED_ROOM")
+        caller = ctx.harness.create_test_character(room=room, key="TEST_SCHEDULED_CALLER")
+
+        ctx.character = caller
+        ctx.room = room
+
+        set_flag("interest_activation", True, actor="diretest-scheduled")
+
+        initial_scheduled_sources = [entry for entry in get_activation_sources(caller) if str(entry.get("type", "") or "") == "scheduled"]
+        if initial_scheduled_sources:
+            raise AssertionError(f"Scheduled activation scenario started with unexpected scheduled sources: {initial_scheduled_sources}")
+
+        caller.set_roundtime(0.1)
+        scheduled_sources = [entry for entry in get_activation_sources(caller) if str(entry.get("type", "") or "") == "scheduled"]
+        if not is_active(caller) or len(scheduled_sources) != 1:
+            raise AssertionError("Scheduled activation did not attach a scheduled source to the pending roundtime job.")
+
+        scheduler_snapshot = get_scheduler_snapshot() or {}
+        active_jobs = list(scheduler_snapshot.get("active_jobs", []) or [])
+        scheduled_job = next((job for job in active_jobs if job.get("key") == caller._get_roundtime_schedule_key()), None)
+        if not scheduled_job:
+            raise AssertionError(f"Scheduled activation did not expose the roundtime job in scheduler snapshot: {scheduler_snapshot}")
+        if scheduled_job.get("interest_object_key") != f"#{int(caller.id)}":
+            raise AssertionError(f"Scheduled activation did not record the owning object on the scheduler job: {scheduled_job}")
+
+        time.sleep(0.15)
+        ctx.direct(flush_due)
+        remaining_sources_after_flush = [entry for entry in get_activation_sources(caller) if str(entry.get("type", "") or "") == "scheduled"]
+        if remaining_sources_after_flush:
+            raise AssertionError("Scheduled activation did not clear scheduled interest after job completion.")
+
+        caller.set_roundtime(1.0)
+        cancel_sources = [entry for entry in get_activation_sources(caller) if str(entry.get("type", "") or "") == "scheduled"]
+        if len(cancel_sources) != 1:
+            raise AssertionError("Scheduled activation did not reattach scheduled interest for the second pending job.")
+
+        caller.set_roundtime(0.0)
+        remaining_sources_after_cancel = [entry for entry in get_activation_sources(caller) if str(entry.get("type", "") or "") == "scheduled"]
+        if remaining_sources_after_cancel:
+            raise AssertionError("Scheduled activation did not clear scheduled interest after cancellation.")
+
+        set_flag("interest_activation", False, actor="diretest-scheduled")
+        return {
+            "commands": list(ctx.command_log),
+            "scheduled_source_count": len(scheduled_sources),
+            "scheduler_job_key": scheduled_job.get("key"),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-scheduled-activation",
+        scenario_metadata=getattr(run_interest_scheduled_activation_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-scheduler-respects-activation",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural scheduler activation-gate validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_scheduler_respects_activation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.engine_flags import set_flag
+        from world.systems.interest import clear_subject_interest, get_activation_sources, is_active, remove_scheduled_interest
+        from world.systems.metrics import snapshot_metrics
+        from world.systems.scheduler import flush_due, get_scheduler_snapshot, schedule
+        from world.systems.time_model import SCHEDULED_EXPIRY
+
+        room = ctx.harness.create_test_room(key="TEST_SCHED_GATE_ROOM")
+        caller = ctx.harness.create_test_character(room=room, key="TEST_SCHED_GATE_CALLER")
+
+        ctx.character = caller
+        ctx.room = room
+
+        set_flag("interest_activation", True, actor="diretest-scheduler-gate")
+        clear_subject_interest(caller)
+
+        callback_hits = []
+        schedule_key = f"diretest:scheduler-gate:{int(caller.id)}"
+
+        def _mark_executed():
+            callback_hits.append("executed")
+
+        schedule(
+            0.1,
+            _mark_executed,
+            key=schedule_key,
+            system="diretest.scheduler_gate",
+            timing_mode=SCHEDULED_EXPIRY,
+            keep_active_obj=caller,
+            inactive_policy="skip",
+        )
+
+        if not is_active(caller):
+            raise AssertionError("Scheduler gate scenario did not activate the caller while the job was pending.")
+
+        remove_scheduled_interest(caller, schedule_key=schedule_key, system="diretest.scheduler_gate")
+        if is_active(caller):
+            raise AssertionError(
+                f"Scheduler gate scenario did not make the caller inactive before execution: {get_activation_sources(caller)}"
+            )
+
+        time.sleep(0.15)
+        ctx.direct(flush_due)
+
+        if callback_hits:
+            raise AssertionError("Scheduler activation gate did not suppress execution for an inactive owner.")
+
+        scheduler_snapshot = get_scheduler_snapshot() or {}
+        if int(scheduler_snapshot.get("active_job_count", 0) or 0) != 0:
+            raise AssertionError(f"Scheduler activation gate left the skipped job in the queue: {scheduler_snapshot}")
+
+        runtime_metrics = dict(snapshot_metrics() or {})
+        counters = dict((runtime_metrics.get("counters", {}) or {}))
+        skip_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("scheduler.skip", {}) or {}).get("entries", []) or [])
+        if int(counters.get("scheduler.skip.inactive", 0) or 0) <= 0:
+            raise AssertionError(f"Scheduler activation gate did not record an inactive skip counter: {runtime_metrics}")
+        if not any(str(((entry or {}).get("metadata", {}) or {}).get("key", "") or "") == schedule_key for entry in skip_entries):
+            raise AssertionError(f"Scheduler activation gate did not record the skipped job metadata: {runtime_metrics}")
+
+        set_flag("interest_activation", False, actor="diretest-scheduler-gate")
+        return {
+            "commands": list(ctx.command_log),
+            "skip_count": int(counters.get("scheduler.skip", 0) or 0),
+            "skip_reason_count": int(counters.get("scheduler.skip.inactive", 0) or 0),
+            "scheduler_job_key": schedule_key,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-scheduler-respects-activation",
+        scenario_metadata=getattr(run_interest_scheduler_respects_activation_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-scheduler-safe-skip",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural scheduler defer validation should report lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_scheduler_safe_skip_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.engine_flags import set_flag
+        from world.systems.interest import clear_subject_interest, is_active, remove_scheduled_interest
+        from world.systems.metrics import snapshot_metrics
+        from world.systems.scheduler import flush_due, get_scheduler_snapshot, schedule
+        from world.systems.time_model import SCHEDULED_EXPIRY
+
+        room = ctx.harness.create_test_room(key="TEST_SCHED_DEFER_ROOM")
+        caller = ctx.harness.create_test_character(room=room, key="TEST_SCHED_DEFER_CALLER")
+
+        ctx.character = caller
+        ctx.room = room
+
+        set_flag("interest_activation", True, actor="diretest-scheduler-defer")
+        clear_subject_interest(caller)
+
+        callback_hits = []
+        schedule_key = f"diretest:scheduler-defer:{int(caller.id)}"
+
+        def _mark_executed():
+            callback_hits.append("executed")
+
+        schedule(
+            0.1,
+            _mark_executed,
+            key=schedule_key,
+            system="diretest.scheduler_defer",
+            timing_mode=SCHEDULED_EXPIRY,
+            keep_active_obj=caller,
+            inactive_policy="defer",
+            inactive_defer_delay=0.1,
+            max_inactive_defers=2,
+        )
+
+        remove_scheduled_interest(caller, schedule_key=schedule_key, system="diretest.scheduler_defer")
+        if is_active(caller):
+            raise AssertionError("Scheduler defer scenario did not isolate the caller before the first flush.")
+
+        time.sleep(0.15)
+        ctx.direct(flush_due)
+        if callback_hits:
+            raise AssertionError("Scheduler defer scenario executed too early instead of deferring.")
+
+        deferred_snapshot = get_scheduler_snapshot() or {}
+        deferred_jobs = list(deferred_snapshot.get("active_jobs", []) or [])
+        deferred_job = next((job for job in deferred_jobs if job.get("key") == schedule_key), None)
+        if not deferred_job:
+            raise AssertionError(f"Scheduler defer scenario did not retain the deferred job: {deferred_snapshot}")
+        if str(deferred_job.get("inactive_policy", "") or "") != "defer":
+            raise AssertionError(f"Scheduler defer scenario lost the inactive policy metadata: {deferred_job}")
+        if int(deferred_job.get("inactive_defer_count", 0) or 0) != 1:
+            raise AssertionError(f"Scheduler defer scenario did not increment defer count on the retained job: {deferred_job}")
+        if not is_active(caller):
+            raise AssertionError("Scheduler defer scenario did not reactivate the caller after deferring the job.")
+
+        time.sleep(0.15)
+        ctx.direct(flush_due)
+        if callback_hits != ["executed"]:
+            raise AssertionError(f"Scheduler defer scenario did not re-execute the callback safely: {callback_hits}")
+
+        final_snapshot = get_scheduler_snapshot() or {}
+        if int(final_snapshot.get("active_job_count", 0) or 0) != 0:
+            raise AssertionError(f"Scheduler defer scenario left the deferred job queued after execution: {final_snapshot}")
+
+        runtime_metrics = dict(snapshot_metrics() or {})
+        counters = dict((runtime_metrics.get("counters", {}) or {}))
+        defer_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("scheduler.defer", {}) or {}).get("entries", []) or [])
+        if int(counters.get("scheduler.defer", 0) or 0) != 1:
+            raise AssertionError(f"Scheduler defer scenario did not record exactly one defer: {runtime_metrics}")
+        if not any(str(((entry or {}).get("metadata", {}) or {}).get("key", "") or "") == schedule_key for entry in defer_entries):
+            raise AssertionError(f"Scheduler defer scenario did not record defer metadata for the retained job: {runtime_metrics}")
+
+        set_flag("interest_activation", False, actor="diretest-scheduler-defer")
+        return {
+            "commands": list(ctx.command_log),
+            "defer_count": int(counters.get("scheduler.defer", 0) or 0),
+            "scheduler_job_key": schedule_key,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-scheduler-safe-skip",
+        scenario_metadata=getattr(run_interest_scheduler_safe_skip_scenario, "diretest_metadata", {}),
+    )
 
 
 @register_scenario("onboarding_lag")
@@ -1790,6 +2751,8 @@ def _emit_runner_result(args, result):
         print(line)
     for line in _build_replay_lag_lines(result.get("metrics", {})):
         print(line)
+    for line in _build_benchmark_summary_lines(scenario_result):
+        print(line)
     if result.get("traceback"):
         print("Traceback:")
         print(result.get("traceback"))
@@ -2045,6 +3008,41 @@ def build_parser():
 
     grave_recovery_parser = _add_common_scenario_args(scenario_subparsers.add_parser("grave-recovery"))
     grave_recovery_parser.set_defaults(handler=run_grave_recovery_scenario)
+
+    trap_expiry_parser = _add_common_scenario_args(scenario_subparsers.add_parser("trap-expiry"))
+    trap_expiry_parser.set_defaults(handler=run_trap_expiry_scenario)
+
+    ticker_execution_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ticker-execution"))
+    ticker_execution_parser.set_defaults(handler=run_ticker_execution_scenario)
+
+    interest_renew_benchmark_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-renew-benchmark"))
+    interest_renew_benchmark_parser.set_defaults(handler=run_interest_renew_benchmark_scenario)
+
+    interest_dual_mode_compare_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-dual-mode-compare"))
+    interest_dual_mode_compare_parser.set_defaults(handler=run_interest_dual_mode_compare_scenario)
+
+    interest_zone_activation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-zone-activation"))
+    interest_zone_activation_parser.set_defaults(handler=run_interest_zone_activation_scenario)
+
+    interest_activation_metrics_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-activation-metrics"))
+    interest_activation_metrics_parser.set_defaults(handler=run_interest_activation_metrics_scenario)
+
+    interest_debug_command_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-debug-command"))
+    interest_debug_command_parser.set_defaults(handler=run_interest_debug_command_scenario)
+
+    interest_direct_activation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-direct-activation"))
+    interest_direct_activation_parser.set_defaults(handler=run_interest_direct_activation_scenario)
+
+    interest_scheduled_activation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-scheduled-activation"))
+    interest_scheduled_activation_parser.set_defaults(handler=run_interest_scheduled_activation_scenario)
+
+    interest_scheduler_respects_activation_parser = _add_common_scenario_args(
+        scenario_subparsers.add_parser("interest-scheduler-respects-activation")
+    )
+    interest_scheduler_respects_activation_parser.set_defaults(handler=run_interest_scheduler_respects_activation_scenario)
+
+    interest_scheduler_safe_skip_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-scheduler-safe-skip"))
+    interest_scheduler_safe_skip_parser.set_defaults(handler=run_interest_scheduler_safe_skip_scenario)
 
     onboarding_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_full"))
     onboarding_parser.add_argument("--name", default="DireTestHero")

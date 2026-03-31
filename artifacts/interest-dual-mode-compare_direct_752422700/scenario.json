@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Dual-mode activation comparison should report timing deltas without failing on environment-specific latency."
+  },
+  "mode": "direct",
+  "name": "interest-dual-mode-compare",
+  "seed": 752422700,
+  "started_at": 1774984738.68567
+}

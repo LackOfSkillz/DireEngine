@@ -1,0 +1,65 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8020,
+        "is_dead": false,
+        "key": "TEST_INTEREST_DEBUG_CALLER",
+        "life_state": "ALIVE",
+        "location": "TEST_INTEREST_DEBUG_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8019,
+            "key": "TEST_INTEREST_DEBUG_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8020,
+            "key": "TEST_INTEREST_DEBUG_CALLER",
+            "location": "TEST_INTEREST_DEBUG_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8021,
+            "key": "TEST_INTEREST_DEBUG_TARGET",
+            "location": "TEST_INTEREST_DEBUG_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INTEREST_DEBUG_CALLER",
+          "TEST_INTEREST_DEBUG_TARGET"
+        ],
+        "exits": [],
+        "id": 8019,
+        "key": "TEST_INTEREST_DEBUG_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774984431.7383242
+    },
+    "label": "final"
+  }
+]

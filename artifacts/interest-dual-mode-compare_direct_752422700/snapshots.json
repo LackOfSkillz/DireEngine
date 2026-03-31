@@ -1,0 +1,973 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8029,
+        "is_dead": false,
+        "key": "TEST_INTEREST_RENEW_CALLER",
+        "life_state": "ALIVE",
+        "location": "TEST_INTEREST_RENEW_A",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8022,
+            "key": "TEST_INTEREST_RENEW_A",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8023,
+            "key": "TEST_INTEREST_RENEW_B",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8024,
+            "key": "TEST_INTEREST_RENEW_C",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8025,
+            "key": "east",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 8026,
+            "key": "west",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 8027,
+            "key": "east",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 8028,
+            "key": "west",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 8029,
+            "key": "TEST_INTEREST_RENEW_CALLER",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8030,
+            "key": "TEST_RENEW_LOCAL_0",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8031,
+            "key": "TEST_RENEW_LOCAL_1",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8032,
+            "key": "TEST_RENEW_LOCAL_2",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8033,
+            "key": "TEST_RENEW_LOCAL_3",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8034,
+            "key": "TEST_RENEW_LOCAL_4",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8035,
+            "key": "TEST_RENEW_LOCAL_5",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8036,
+            "key": "TEST_RENEW_LOCAL_6",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8037,
+            "key": "TEST_RENEW_LOCAL_7",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8038,
+            "key": "TEST_RENEW_LOCAL_8",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8039,
+            "key": "TEST_RENEW_LOCAL_9",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8040,
+            "key": "TEST_RENEW_LOCAL_10",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8041,
+            "key": "TEST_RENEW_LOCAL_11",
+            "location": "TEST_INTEREST_RENEW_A",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8042,
+            "key": "TEST_RENEW_NEARBY_0",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8043,
+            "key": "TEST_RENEW_NEARBY_1",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8044,
+            "key": "TEST_RENEW_NEARBY_2",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8045,
+            "key": "TEST_RENEW_NEARBY_3",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8046,
+            "key": "TEST_RENEW_NEARBY_4",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8047,
+            "key": "TEST_RENEW_NEARBY_5",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8048,
+            "key": "TEST_RENEW_NEARBY_6",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8049,
+            "key": "TEST_RENEW_NEARBY_7",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8050,
+            "key": "TEST_RENEW_NEARBY_8",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8051,
+            "key": "TEST_RENEW_NEARBY_9",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8052,
+            "key": "TEST_RENEW_NEARBY_10",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8053,
+            "key": "TEST_RENEW_NEARBY_11",
+            "location": "TEST_INTEREST_RENEW_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8054,
+            "key": "TEST_RENEW_FAR_0",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8055,
+            "key": "TEST_RENEW_FAR_1",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8056,
+            "key": "TEST_RENEW_FAR_2",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8057,
+            "key": "TEST_RENEW_FAR_3",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8058,
+            "key": "TEST_RENEW_FAR_4",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8059,
+            "key": "TEST_RENEW_FAR_5",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8060,
+            "key": "TEST_RENEW_FAR_6",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8061,
+            "key": "TEST_RENEW_FAR_7",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8062,
+            "key": "TEST_RENEW_FAR_8",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8063,
+            "key": "TEST_RENEW_FAR_9",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8064,
+            "key": "TEST_RENEW_FAR_10",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8065,
+            "key": "TEST_RENEW_FAR_11",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8066,
+            "key": "TEST_RENEW_FAR_12",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8067,
+            "key": "TEST_RENEW_FAR_13",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8068,
+            "key": "TEST_RENEW_FAR_14",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8069,
+            "key": "TEST_RENEW_FAR_15",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8070,
+            "key": "TEST_RENEW_FAR_16",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8071,
+            "key": "TEST_RENEW_FAR_17",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8072,
+            "key": "TEST_RENEW_FAR_18",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8073,
+            "key": "TEST_RENEW_FAR_19",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8074,
+            "key": "TEST_RENEW_FAR_20",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8075,
+            "key": "TEST_RENEW_FAR_21",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8076,
+            "key": "TEST_RENEW_FAR_22",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8077,
+            "key": "TEST_RENEW_FAR_23",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8078,
+            "key": "TEST_RENEW_FAR_24",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8079,
+            "key": "TEST_RENEW_FAR_25",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8080,
+            "key": "TEST_RENEW_FAR_26",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8081,
+            "key": "TEST_RENEW_FAR_27",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8082,
+            "key": "TEST_RENEW_FAR_28",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8083,
+            "key": "TEST_RENEW_FAR_29",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8084,
+            "key": "TEST_RENEW_FAR_30",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8085,
+            "key": "TEST_RENEW_FAR_31",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8086,
+            "key": "TEST_RENEW_FAR_32",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8087,
+            "key": "TEST_RENEW_FAR_33",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8088,
+            "key": "TEST_RENEW_FAR_34",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8089,
+            "key": "TEST_RENEW_FAR_35",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8090,
+            "key": "TEST_RENEW_FAR_36",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8091,
+            "key": "TEST_RENEW_FAR_37",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8092,
+            "key": "TEST_RENEW_FAR_38",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8093,
+            "key": "TEST_RENEW_FAR_39",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8094,
+            "key": "TEST_RENEW_FAR_40",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8095,
+            "key": "TEST_RENEW_FAR_41",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8096,
+            "key": "TEST_RENEW_FAR_42",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8097,
+            "key": "TEST_RENEW_FAR_43",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8098,
+            "key": "TEST_RENEW_FAR_44",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8099,
+            "key": "TEST_RENEW_FAR_45",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8100,
+            "key": "TEST_RENEW_FAR_46",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8101,
+            "key": "TEST_RENEW_FAR_47",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8102,
+            "key": "TEST_RENEW_FAR_48",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8103,
+            "key": "TEST_RENEW_FAR_49",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8104,
+            "key": "TEST_RENEW_FAR_50",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8105,
+            "key": "TEST_RENEW_FAR_51",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8106,
+            "key": "TEST_RENEW_FAR_52",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8107,
+            "key": "TEST_RENEW_FAR_53",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8108,
+            "key": "TEST_RENEW_FAR_54",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8109,
+            "key": "TEST_RENEW_FAR_55",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8110,
+            "key": "TEST_RENEW_FAR_56",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8111,
+            "key": "TEST_RENEW_FAR_57",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8112,
+            "key": "TEST_RENEW_FAR_58",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8113,
+            "key": "TEST_RENEW_FAR_59",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8114,
+            "key": "TEST_RENEW_FAR_60",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8115,
+            "key": "TEST_RENEW_FAR_61",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8116,
+            "key": "TEST_RENEW_FAR_62",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8117,
+            "key": "TEST_RENEW_FAR_63",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8118,
+            "key": "TEST_RENEW_FAR_64",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8119,
+            "key": "TEST_RENEW_FAR_65",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8120,
+            "key": "TEST_RENEW_FAR_66",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8121,
+            "key": "TEST_RENEW_FAR_67",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8122,
+            "key": "TEST_RENEW_FAR_68",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8123,
+            "key": "TEST_RENEW_FAR_69",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8124,
+            "key": "TEST_RENEW_FAR_70",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8125,
+            "key": "TEST_RENEW_FAR_71",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8126,
+            "key": "TEST_RENEW_FAR_72",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8127,
+            "key": "TEST_RENEW_FAR_73",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8128,
+            "key": "TEST_RENEW_FAR_74",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8129,
+            "key": "TEST_RENEW_FAR_75",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8130,
+            "key": "TEST_RENEW_FAR_76",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8131,
+            "key": "TEST_RENEW_FAR_77",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8132,
+            "key": "TEST_RENEW_FAR_78",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8133,
+            "key": "TEST_RENEW_FAR_79",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8134,
+            "key": "TEST_RENEW_FAR_80",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8135,
+            "key": "TEST_RENEW_FAR_81",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8136,
+            "key": "TEST_RENEW_FAR_82",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8137,
+            "key": "TEST_RENEW_FAR_83",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8138,
+            "key": "TEST_RENEW_FAR_84",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8139,
+            "key": "TEST_RENEW_FAR_85",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8140,
+            "key": "TEST_RENEW_FAR_86",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8141,
+            "key": "TEST_RENEW_FAR_87",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8142,
+            "key": "TEST_RENEW_FAR_88",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8143,
+            "key": "TEST_RENEW_FAR_89",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8144,
+            "key": "TEST_RENEW_FAR_90",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8145,
+            "key": "TEST_RENEW_FAR_91",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8146,
+            "key": "TEST_RENEW_FAR_92",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8147,
+            "key": "TEST_RENEW_FAR_93",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8148,
+            "key": "TEST_RENEW_FAR_94",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8149,
+            "key": "TEST_RENEW_FAR_95",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8150,
+            "key": "TEST_RENEW_FAR_96",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8151,
+            "key": "TEST_RENEW_FAR_97",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8152,
+            "key": "TEST_RENEW_FAR_98",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8153,
+            "key": "TEST_RENEW_FAR_99",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8154,
+            "key": "TEST_RENEW_FAR_100",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8155,
+            "key": "TEST_RENEW_FAR_101",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8156,
+            "key": "TEST_RENEW_FAR_102",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8157,
+            "key": "TEST_RENEW_FAR_103",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8158,
+            "key": "TEST_RENEW_FAR_104",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8159,
+            "key": "TEST_RENEW_FAR_105",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8160,
+            "key": "TEST_RENEW_FAR_106",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8161,
+            "key": "TEST_RENEW_FAR_107",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8162,
+            "key": "TEST_RENEW_FAR_108",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8163,
+            "key": "TEST_RENEW_FAR_109",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8164,
+            "key": "TEST_RENEW_FAR_110",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8165,
+            "key": "TEST_RENEW_FAR_111",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8166,
+            "key": "TEST_RENEW_FAR_112",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8167,
+            "key": "TEST_RENEW_FAR_113",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8168,
+            "key": "TEST_RENEW_FAR_114",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8169,
+            "key": "TEST_RENEW_FAR_115",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8170,
+            "key": "TEST_RENEW_FAR_116",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8171,
+            "key": "TEST_RENEW_FAR_117",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8172,
+            "key": "TEST_RENEW_FAR_118",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8173,
+            "key": "TEST_RENEW_FAR_119",
+            "location": "TEST_INTEREST_RENEW_C",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "east",
+          "TEST_INTEREST_RENEW_CALLER",
+          "TEST_RENEW_LOCAL_0",
+          "TEST_RENEW_LOCAL_1",
+          "TEST_RENEW_LOCAL_2",
+          "TEST_RENEW_LOCAL_3",
+          "TEST_RENEW_LOCAL_4",
+          "TEST_RENEW_LOCAL_5",
+          "TEST_RENEW_LOCAL_6",
+          "TEST_RENEW_LOCAL_7",
+          "TEST_RENEW_LOCAL_8",
+          "TEST_RENEW_LOCAL_9",
+          "TEST_RENEW_LOCAL_10",
+          "TEST_RENEW_LOCAL_11"
+        ],
+        "exits": [
+          "east"
+        ],
+        "id": 8022,
+        "key": "TEST_INTEREST_RENEW_A"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774984756.140901
+    },
+    "label": "final"
+  }
+]

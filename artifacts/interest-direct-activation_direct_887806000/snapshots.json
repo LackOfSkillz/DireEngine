@@ -1,0 +1,79 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7993,
+        "is_dead": false,
+        "key": "TEST_DIRECT_CALLER",
+        "life_state": "ALIVE",
+        "location": "TEST_DIRECT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7992,
+            "key": "TEST_DIRECT_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7993,
+            "key": "TEST_DIRECT_CALLER",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7994,
+            "key": "TEST_DIRECT_TARGET",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7995,
+            "key": "TEST_DIRECT_AIM_TARGET",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7996,
+            "key": "TEST_DIRECT_SPELL_TARGET",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DIRECT_CALLER",
+          "TEST_DIRECT_TARGET",
+          "TEST_DIRECT_AIM_TARGET",
+          "TEST_DIRECT_SPELL_TARGET"
+        ],
+        "exits": [],
+        "id": 7992,
+        "key": "TEST_DIRECT_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774981691.726947
+    },
+    "label": "final"
+  }
+]

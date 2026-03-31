@@ -1,0 +1,82 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7984,
+        "is_dead": false,
+        "key": "TEST_ZONE_CALLER",
+        "life_state": "ALIVE",
+        "location": "TEST_ZONE_A",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7981,
+            "key": "TEST_ZONE_A",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7982,
+            "key": "TEST_ZONE_B",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7983,
+            "key": "TEST_ZONE_OTHER",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7984,
+            "key": "TEST_ZONE_CALLER",
+            "location": "TEST_ZONE_A",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7985,
+            "key": "TEST_ZONE_OBJ",
+            "location": "TEST_ZONE_B",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 7986,
+            "key": "TEST_ZONE_OUTSIDE",
+            "location": "TEST_ZONE_OTHER",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_ZONE_CALLER"
+        ],
+        "exits": [],
+        "id": 7981,
+        "key": "TEST_ZONE_A"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774980751.0983744
+    },
+    "label": "final"
+  }
+]

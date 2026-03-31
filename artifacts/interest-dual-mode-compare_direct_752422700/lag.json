@@ -1,0 +1,92 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 1120.7835999957751,
+  "lag": {
+    "avg_ms": 1120.8122000098228,
+    "jitter": 1151.7995890279194,
+    "max_ms": 1935.2574999793433,
+    "min_ms": 306.3669000403024,
+    "p95_ms": 1853.8129699823912,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT run_renew_all",
+      "ms": 1935.2574999793433,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT run_renew_all",
+      "ms": 306.3669000403024,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT run_renew_all",
+      "ms": 1935.2574999793433
+    },
+    {
+      "cmd": "DIRECT run_renew_all",
+      "ms": 306.3669000403024
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT run_renew_all",
+      "first_response_ms": 1935.2257999707945,
+      "kind": "direct",
+      "ms": 1935.2574999793433,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT run_renew_all",
+      "first_response_ms": 306.3414000207558,
+      "kind": "direct",
+      "ms": 306.3669000403024,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT run_renew_all",
+      "first_response_ms": 1935.2257999707945,
+      "kind": "direct",
+      "ms": 1935.2574999793433,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT run_renew_all",
+      "first_response_ms": 306.3414000207558,
+      "kind": "direct",
+      "ms": 306.3669000403024,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

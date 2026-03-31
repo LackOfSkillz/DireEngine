@@ -1,0 +1,449 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT run_renew_all",
+      "first_response_ms": 1935.2257999707945,
+      "kind": "direct",
+      "ms": 1935.2574999793433,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT run_renew_all",
+      "first_response_ms": 306.3414000207558,
+      "kind": "direct",
+      "ms": 306.3669000403024,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    1935.2574999793433,
+    306.3669000403024
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 0.0,
+    "timings_ms": [
+      1935.2574999793433,
+      306.3669000403024
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774984783.2159572,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 1120.7835999957751,
+  "interest": {
+    "active_object_count": 30,
+    "active_object_peak": 30,
+    "active_source_types": [
+      "proximity",
+      "room"
+    ],
+    "exercised_source_types": [
+      "proximity",
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 18,
+      "room": 17,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 30,
+    "source_count_peak": 30,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 15,
+      "room": 15,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 15,
+      "room": 15,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 35,
+      "deactivate": 5
+    },
+    "transition_event_counts": {
+      "activate": 35,
+      "deactivate": 5
+    },
+    "transition_total": 40
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 1120.8122000098228,
+    "jitter": 1151.7995890279194,
+    "max_ms": 1935.2574999793433,
+    "min_ms": 306.3669000403024,
+    "p95_ms": 1853.8129699823912,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT run_renew_all",
+      "ms": 1935.2574999793433,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT run_renew_all",
+      "ms": 306.3669000403024,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You renew all renewable targets. (145 targets)",
+    "RETURN None",
+    "You renew nearby active renewable targets. (25 targets; visible=13, nearby=12, active=25)",
+    "RETURN None"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "benchmark": {
+      "command_delta_ms": 1628.8905999390408,
+      "execute_event_count": 2,
+      "interest_active_object_peak": 30,
+      "interest_source_count_peak": 30,
+      "legacy_command_ms": 1935.2574999793433,
+      "legacy_scanned_count": 145,
+      "legacy_select_ms": 0.7489999989047647,
+      "legacy_target_count": 145,
+      "scoped_command_ms": 306.3669000403024,
+      "scoped_scanned_count": 25,
+      "scoped_select_ms": 68.98879999062046,
+      "scoped_target_count": 25,
+      "selection_delta_ms": -68.2397999917157,
+      "target_delta": 120
+    },
+    "commands": [
+      "DIRECT run_renew_all",
+      "DIRECT run_renew_all"
+    ],
+    "comparison": {
+      "correctness": {
+        "legacy_target_count": 145,
+        "scoped_target_count": 25,
+        "target_delta": 120
+      },
+      "performance": {
+        "interest_active_object_peak": 30,
+        "interest_source_count_peak": 30,
+        "legacy_scanned_count": 145,
+        "scoped_scanned_count": 25
+      },
+      "timing": {
+        "command_delta_ms": 1628.8905999390408,
+        "legacy_command_ms": 1935.2574999793433,
+        "legacy_select_ms": 0.7489999989047647,
+        "scoped_command_ms": 306.3669000403024,
+        "scoped_select_ms": 68.98879999062046,
+        "selection_delta_ms": -68.2397999917157
+      }
+    },
+    "legacy_renewed": [
+      "TEST_INTEREST_RENEW_CALLER",
+      "TEST_RENEW_LOCAL_0",
+      "TEST_RENEW_LOCAL_1",
+      "TEST_RENEW_LOCAL_2",
+      "TEST_RENEW_LOCAL_3",
+      "TEST_RENEW_LOCAL_4",
+      "TEST_RENEW_LOCAL_5",
+      "TEST_RENEW_LOCAL_6",
+      "TEST_RENEW_LOCAL_7",
+      "TEST_RENEW_LOCAL_8",
+      "TEST_RENEW_LOCAL_9",
+      "TEST_RENEW_LOCAL_10",
+      "TEST_RENEW_LOCAL_11",
+      "TEST_RENEW_NEARBY_0",
+      "TEST_RENEW_NEARBY_1",
+      "TEST_RENEW_NEARBY_2",
+      "TEST_RENEW_NEARBY_3",
+      "TEST_RENEW_NEARBY_4",
+      "TEST_RENEW_NEARBY_5",
+      "TEST_RENEW_NEARBY_6",
+      "TEST_RENEW_NEARBY_7",
+      "TEST_RENEW_NEARBY_8",
+      "TEST_RENEW_NEARBY_9",
+      "TEST_RENEW_NEARBY_10",
+      "TEST_RENEW_NEARBY_11",
+      "TEST_RENEW_FAR_0",
+      "TEST_RENEW_FAR_1",
+      "TEST_RENEW_FAR_2",
+      "TEST_RENEW_FAR_3",
+      "TEST_RENEW_FAR_4",
+      "TEST_RENEW_FAR_5",
+      "TEST_RENEW_FAR_6",
+      "TEST_RENEW_FAR_7",
+      "TEST_RENEW_FAR_8",
+      "TEST_RENEW_FAR_9",
+      "TEST_RENEW_FAR_10",
+      "TEST_RENEW_FAR_11",
+      "TEST_RENEW_FAR_12",
+      "TEST_RENEW_FAR_13",
+      "TEST_RENEW_FAR_14",
+      "TEST_RENEW_FAR_15",
+      "TEST_RENEW_FAR_16",
+      "TEST_RENEW_FAR_17",
+      "TEST_RENEW_FAR_18",
+      "TEST_RENEW_FAR_19",
+      "TEST_RENEW_FAR_20",
+      "TEST_RENEW_FAR_21",
+      "TEST_RENEW_FAR_22",
+      "TEST_RENEW_FAR_23",
+      "TEST_RENEW_FAR_24",
+      "TEST_RENEW_FAR_25",
+      "TEST_RENEW_FAR_26",
+      "TEST_RENEW_FAR_27",
+      "TEST_RENEW_FAR_28",
+      "TEST_RENEW_FAR_29",
+      "TEST_RENEW_FAR_30",
+      "TEST_RENEW_FAR_31",
+      "TEST_RENEW_FAR_32",
+      "TEST_RENEW_FAR_33",
+      "TEST_RENEW_FAR_34",
+      "TEST_RENEW_FAR_35",
+      "TEST_RENEW_FAR_36",
+      "TEST_RENEW_FAR_37",
+      "TEST_RENEW_FAR_38",
+      "TEST_RENEW_FAR_39",
+      "TEST_RENEW_FAR_40",
+      "TEST_RENEW_FAR_41",
+      "TEST_RENEW_FAR_42",
+      "TEST_RENEW_FAR_43",
+      "TEST_RENEW_FAR_44",
+      "TEST_RENEW_FAR_45",
+      "TEST_RENEW_FAR_46",
+      "TEST_RENEW_FAR_47",
+      "TEST_RENEW_FAR_48",
+      "TEST_RENEW_FAR_49",
+      "TEST_RENEW_FAR_50",
+      "TEST_RENEW_FAR_51",
+      "TEST_RENEW_FAR_52",
+      "TEST_RENEW_FAR_53",
+      "TEST_RENEW_FAR_54",
+      "TEST_RENEW_FAR_55",
+      "TEST_RENEW_FAR_56",
+      "TEST_RENEW_FAR_57",
+      "TEST_RENEW_FAR_58",
+      "TEST_RENEW_FAR_59",
+      "TEST_RENEW_FAR_60",
+      "TEST_RENEW_FAR_61",
+      "TEST_RENEW_FAR_62",
+      "TEST_RENEW_FAR_63",
+      "TEST_RENEW_FAR_64",
+      "TEST_RENEW_FAR_65",
+      "TEST_RENEW_FAR_66",
+      "TEST_RENEW_FAR_67",
+      "TEST_RENEW_FAR_68",
+      "TEST_RENEW_FAR_69",
+      "TEST_RENEW_FAR_70",
+      "TEST_RENEW_FAR_71",
+      "TEST_RENEW_FAR_72",
+      "TEST_RENEW_FAR_73",
+      "TEST_RENEW_FAR_74",
+      "TEST_RENEW_FAR_75",
+      "TEST_RENEW_FAR_76",
+      "TEST_RENEW_FAR_77",
+      "TEST_RENEW_FAR_78",
+      "TEST_RENEW_FAR_79",
+      "TEST_RENEW_FAR_80",
+      "TEST_RENEW_FAR_81",
+      "TEST_RENEW_FAR_82",
+      "TEST_RENEW_FAR_83",
+      "TEST_RENEW_FAR_84",
+      "TEST_RENEW_FAR_85",
+      "TEST_RENEW_FAR_86",
+      "TEST_RENEW_FAR_87",
+      "TEST_RENEW_FAR_88",
+      "TEST_RENEW_FAR_89",
+      "TEST_RENEW_FAR_90",
+      "TEST_RENEW_FAR_91",
+      "TEST_RENEW_FAR_92",
+      "TEST_RENEW_FAR_93",
+      "TEST_RENEW_FAR_94",
+      "TEST_RENEW_FAR_95",
+      "TEST_RENEW_FAR_96",
+      "TEST_RENEW_FAR_97",
+      "TEST_RENEW_FAR_98",
+      "TEST_RENEW_FAR_99",
+      "TEST_RENEW_FAR_100",
+      "TEST_RENEW_FAR_101",
+      "TEST_RENEW_FAR_102",
+      "TEST_RENEW_FAR_103",
+      "TEST_RENEW_FAR_104",
+      "TEST_RENEW_FAR_105",
+      "TEST_RENEW_FAR_106",
+      "TEST_RENEW_FAR_107",
+      "TEST_RENEW_FAR_108",
+      "TEST_RENEW_FAR_109",
+      "TEST_RENEW_FAR_110",
+      "TEST_RENEW_FAR_111",
+      "TEST_RENEW_FAR_112",
+      "TEST_RENEW_FAR_113",
+      "TEST_RENEW_FAR_114",
+      "TEST_RENEW_FAR_115",
+      "TEST_RENEW_FAR_116",
+      "TEST_RENEW_FAR_117",
+      "TEST_RENEW_FAR_118",
+      "TEST_RENEW_FAR_119"
+    ],
+    "legacy_renewed_count": 145,
+    "output_log": [
+      "You renew all renewable targets. (145 targets)",
+      "RETURN None",
+      "You renew nearby active renewable targets. (25 targets; visible=13, nearby=12, active=25)",
+      "RETURN None"
+    ],
+    "scoped_renewed": [
+      "TEST_INTEREST_RENEW_CALLER",
+      "TEST_RENEW_LOCAL_0",
+      "TEST_RENEW_LOCAL_1",
+      "TEST_RENEW_LOCAL_2",
+      "TEST_RENEW_LOCAL_3",
+      "TEST_RENEW_LOCAL_4",
+      "TEST_RENEW_LOCAL_5",
+      "TEST_RENEW_LOCAL_6",
+      "TEST_RENEW_LOCAL_7",
+      "TEST_RENEW_LOCAL_8",
+      "TEST_RENEW_LOCAL_9",
+      "TEST_RENEW_LOCAL_10",
+      "TEST_RENEW_LOCAL_11",
+      "TEST_RENEW_NEARBY_0",
+      "TEST_RENEW_NEARBY_1",
+      "TEST_RENEW_NEARBY_2",
+      "TEST_RENEW_NEARBY_3",
+      "TEST_RENEW_NEARBY_4",
+      "TEST_RENEW_NEARBY_5",
+      "TEST_RENEW_NEARBY_6",
+      "TEST_RENEW_NEARBY_7",
+      "TEST_RENEW_NEARBY_8",
+      "TEST_RENEW_NEARBY_9",
+      "TEST_RENEW_NEARBY_10",
+      "TEST_RENEW_NEARBY_11"
+    ],
+    "scoped_renewed_count": 25,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 43100,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT run_renew_all",
+      "ms": 1935.2574999793433
+    },
+    {
+      "cmd": "DIRECT run_renew_all",
+      "ms": 306.3669000403024
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1774984738.68567,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Dual-mode activation comparison should report timing deltas without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}
