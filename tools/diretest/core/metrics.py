@@ -8,6 +8,8 @@ from .lag import LAG_THRESHOLDS, analyze_latency, detect_spikes
 METRICS_SCHEMA = {
     "command_count": int,
     "command_timings_ms": list,
+    "scheduler_events": int,
+    "max_command_time_ms": float,
     "item_delta_count": int,
     "coin_delta": int,
     "xp_delta": int,
@@ -114,7 +116,7 @@ def mindstate_delta(before, after):
     return changed
 
 
-def summarize_metrics(ctx, duration_ms, leaks=None, final_state=None):
+def summarize_metrics(ctx, duration_ms, leaks=None, final_state=None, runtime_metrics=None):
     initial = dict(getattr(ctx, "metric_baseline", {}) or {})
     final = dict(final_state or capture_metric_state(ctx.get_character()) or {})
     diffs = list(getattr(ctx, "diffs", []) or [])
@@ -127,11 +129,22 @@ def summarize_metrics(ctx, duration_ms, leaks=None, final_state=None):
     combat_response_values = [entry.get("combat_response_ms") for entry in timing_entries if entry.get("combat_response_ms") is not None]
     payload_values = [entry.get("payload_ms") for entry in timing_entries if entry.get("payload_ms") is not None]
     script_delay_values = [entry.get("script_delay_ms") for entry in timing_entries if entry.get("script_delay_ms") is not None]
+    runtime_snapshot = dict(runtime_metrics or {})
+    runtime_events = dict(runtime_snapshot.get("events", {}) or {})
+    runtime_counters = dict(runtime_snapshot.get("counters", {}) or {})
+    runtime_gauges = dict(runtime_snapshot.get("gauges", {}) or {})
+    command_execute_stats = dict(runtime_events.get("command.execute", {}) or {})
+    scheduler_execute_stats = dict(runtime_events.get("scheduler.execute", {}) or {})
+    command_count = len(list(getattr(ctx, "command_log", []) or []))
+    scheduler_event_count = _safe_int(runtime_counters.get("scheduler.execute", scheduler_execute_stats.get("count", 0)))
+    max_command_time_ms = _safe_float(command_execute_stats.get("max_ms", 0.0), 0.0)
 
     return {
-        "command_count": len(list(getattr(ctx, "command_log", []) or [])),
+        "command_count": command_count,
         "command_timings_ms": [_safe_float(entry.get("ms", 0.0), 0.0) for entry in timing_entries],
         "command_timing_entries": timing_entries,
+        "scheduler_events": scheduler_event_count,
+        "max_command_time_ms": max_command_time_ms,
         "item_delta_count": _safe_int(final.get("item_count", 0)) - _safe_int(initial.get("item_count", 0)),
         "coin_delta": _safe_int(final.get("coins", 0)) - _safe_int(initial.get("coins", 0)),
         "xp_delta": _safe_int(final.get("total_xp", 0)) - _safe_int(initial.get("total_xp", 0)),
@@ -147,4 +160,21 @@ def summarize_metrics(ctx, duration_ms, leaks=None, final_state=None):
         "combat_responsiveness_ms": _mean(combat_response_values),
         "payload_timing_ms": _mean(payload_values),
         "script_delay_ms": _mean(script_delay_values),
+        "commands": {
+            "count": command_count,
+            "max_ms": max_command_time_ms,
+            "timings_ms": [_safe_float(entry.get("ms", 0.0), 0.0) for entry in timing_entries],
+        },
+        "scheduler": {
+            "events": scheduler_event_count,
+            "scheduled_total": _safe_int(runtime_counters.get("scheduler.schedule", 0)),
+            "cancel_total": _safe_int(runtime_counters.get("scheduler.cancel", 0)),
+            "reschedule_total": _safe_int(runtime_counters.get("scheduler.reschedule", 0)),
+            "queue_current": _safe_float(runtime_gauges.get("scheduler.queue.current", 0.0), 0.0),
+            "queue_peak": _safe_float(runtime_gauges.get("scheduler.queue.peak", 0.0), 0.0),
+        },
+        "timings": {
+            "command_execute": command_execute_stats,
+            "scheduler_execute": scheduler_execute_stats,
+        },
     }

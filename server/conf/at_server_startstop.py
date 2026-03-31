@@ -915,6 +915,16 @@ def at_server_start():
     except Exception:
         pass
 
+    try:
+        from world.systems.tick_audit import scan_for_tick_violations
+
+        for warning in scan_for_tick_violations()[:25]:
+            logger.log_warn(
+                f"[TickAudit] {warning.get('kind')}: {warning.get('path')}:{int(warning.get('line', 0) or 0)} - {warning.get('message', '')}"
+            )
+    except Exception:
+        logger.log_warn("[TickAudit] Soft timing audit failed during server start.")
+
     if getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
         TICKER_HANDLER.add(1, process_status_tick, idstring="global_status_tick", persistent=True)
         TICKER_HANDLER.add(10, process_learning_tick, idstring="global_learning_tick", persistent=True)

@@ -17,14 +17,16 @@ from tools.diretest.core.seed import set_seed
 SCENARIO_REGISTRY = {}
 
 
-def register_scenario(name):
+def register_scenario(name, *, metadata=None):
     scenario_name = str(name or "").strip()
     if not scenario_name:
         raise ValueError("DireTest scenario name must be a non-empty string.")
+    scenario_metadata = dict(metadata or {})
 
     def decorator(func):
         SCENARIO_REGISTRY[scenario_name] = func
         setattr(func, "diretest_scenario_name", scenario_name)
+        setattr(func, "diretest_metadata", scenario_metadata)
         return func
 
     return decorator
@@ -206,6 +208,16 @@ def _build_replay_lag_lines(metrics):
         f"  max delta: {_format_ms_value(delta.get('max_ms', 0.0))}ms",
         f"  spike delta: {int(round(_safe_float(delta.get('spike_count', 0.0), 0.0)))}",
     ]
+
+
+def _build_performance_summary_line(metrics):
+    payload = dict(metrics or {})
+    command_count = int((payload.get("commands", {}) or {}).get("count", payload.get("command_count", 0)) or 0)
+    scheduler_events = int((payload.get("scheduler", {}) or {}).get("events", payload.get("scheduler_events", 0)) or 0)
+    max_command_time = _safe_float((payload.get("commands", {}) or {}).get("max_ms", payload.get("max_command_time_ms", 0.0)), 0.0)
+    if not command_count and not scheduler_events and max_command_time <= 0.0:
+        return ""
+    return f"commands: {command_count} | scheduler: {scheduler_events} | max_cmd: {_format_ms_value(max_command_time)}ms"
 
 
 def _format_onboarding_output(output):
@@ -450,7 +462,11 @@ def _build_runner_namespace(seed, as_json=False, **extra):
     return argparse.Namespace(**payload)
 
 
-def _run_registered_scenario(args, scenario_func, *, auto_snapshot=False, name=None, mode="direct"):
+def _run_registered_scenario(args, scenario_func, *, auto_snapshot=False, name=None, mode="direct", scenario_metadata=None):
+    scenario_metadata = dict(scenario_metadata or getattr(scenario_func, "diretest_metadata", {}) or {})
+    fail_on_critical_lag = bool(scenario_metadata.get("fail_on_critical_lag", True))
+    if not fail_on_critical_lag and not str(scenario_metadata.get("lag_policy_reason", "") or "").strip():
+        raise ValueError(f"DireTest scenario '{name or getattr(scenario_func, 'diretest_scenario_name', 'scenario')}' disables critical-lag failure without a metadata reason.")
     return run_scenario(
         scenario_func,
         seed=args.seed,
@@ -459,6 +475,8 @@ def _run_registered_scenario(args, scenario_func, *, auto_snapshot=False, name=N
         name=name,
         check_lag=bool(getattr(args, "check_lag", False)),
         compare_lag_artifact_path=getattr(args, "repro_artifact_path", None),
+        fail_on_critical_lag=fail_on_critical_lag,
+        scenario_metadata=scenario_metadata,
     )
 
 
@@ -956,6 +974,76 @@ def run_movement_scenario(args):
         }
 
     return _run_registered_scenario(args, scenario, auto_snapshot=True, name="movement")
+
+
+@register_scenario(
+    "rt-timing",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural roundtime validation should still emit lag telemetry without failing on environment-specific latency.",
+    },
+)
+def run_rt_timing_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.scheduler import flush_due, get_scheduler_snapshot
+
+        room = ctx.harness.create_test_room(key="TEST_RT_ROOM")
+        character = ctx.harness.create_test_character(room=room, key="TEST_RT_CHAR")
+
+        ctx.character = character
+        ctx.room = room
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("initial")
+        ctx.direct(character.set_roundtime, 2.0)
+        ctx.snapshot("triggered")
+        if float(character.db.roundtime_end or 0.0) <= time.time():
+            raise AssertionError("RT scenario did not apply roundtime.")
+        if int((get_scheduler_snapshot() or {}).get("active_job_count", 0) or 0) <= 0:
+            raise AssertionError("RT scenario did not register a scheduler job for roundtime expiry.")
+
+        output_count_before_block = len(list(ctx.output_log or []))
+        ctx.cmd("advance")
+        ctx.snapshot("blocked")
+        blocked_output = " ".join(list(ctx.output_log or [])[output_count_before_block:])
+        if "must wait" not in blocked_output.lower():
+            raise AssertionError("RT scenario did not block command execution during roundtime.")
+
+        remaining = float(character.get_remaining_roundtime() or 0.0)
+        if remaining > 0.0:
+            time.sleep(min(remaining + 0.05, 1.5))
+        ctx.direct(flush_due)
+        if character.get_remaining_roundtime() > 0:
+            raise AssertionError("RT scenario did not expire roundtime.")
+
+        output_count_before_recovery = len(list(ctx.output_log or []))
+        ctx.cmd("advance")
+        ctx.snapshot("recovered")
+        recovered_output = " ".join(list(ctx.output_log or [])[output_count_before_recovery:])
+        if "must wait" in recovered_output.lower():
+            raise AssertionError("RT scenario did not allow command execution after roundtime expiry.")
+        if "advance toward what" not in recovered_output.lower():
+            raise AssertionError("RT scenario did not reach the normal non-blocked advance path after roundtime expiry.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "output_log": list(ctx.output_log),
+            "remaining_roundtime": character.get_remaining_roundtime(),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="rt-timing",
+        scenario_metadata=getattr(run_rt_timing_scenario, "diretest_metadata", {}),
+    )
 
 
 @register_scenario("inventory")
@@ -1695,6 +1783,9 @@ def _emit_runner_result(args, result):
     duration_ms = int((result.get("metrics", {}) or {}).get("scenario_duration_ms", 0) or 0)
     if duration_ms:
         print(f"Duration Ms: {duration_ms}")
+    performance_summary = _build_performance_summary_line(result.get("metrics", {}))
+    if performance_summary:
+        print(performance_summary)
     for line in _build_lag_summary_lines(result.get("metrics", {})):
         print(line)
     for line in _build_replay_lag_lines(result.get("metrics", {})):
@@ -1933,6 +2024,9 @@ def build_parser():
 
     movement_parser = _add_common_scenario_args(scenario_subparsers.add_parser("movement"))
     movement_parser.set_defaults(handler=run_movement_scenario)
+
+    rt_timing_parser = _add_common_scenario_args(scenario_subparsers.add_parser("rt-timing"))
+    rt_timing_parser.set_defaults(handler=run_rt_timing_scenario)
 
     inventory_parser = _add_common_scenario_args(scenario_subparsers.add_parser("inventory"))
     inventory_parser.set_defaults(handler=run_inventory_scenario)

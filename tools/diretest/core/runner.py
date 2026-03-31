@@ -67,7 +67,7 @@ def _build_replay_lag_comparison(original_lag_payload, current_lag_payload):
     }
 
 
-def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = False, name: str | None = None, check_lag: bool = False, compare_lag_artifact_path: str | None = None):
+def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = False, name: str | None = None, check_lag: bool = False, compare_lag_artifact_path: str | None = None, fail_on_critical_lag: bool = True, scenario_metadata: dict | None = None):
     normalized_mode = _normalize_mode(mode)
     normalized_seed = _coerce_seed(seed)
     set_seed(normalized_seed)
@@ -80,7 +80,9 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
     harness = DireTestHarness()
     ctx = DireTestContext(harness=harness, mode=normalized_mode, auto_snapshot=auto_snapshot)
     ctx.check_lag = bool(check_lag)
+    runtime_metrics_snapshot = {}
     scenario_name = str(name or getattr(scenario_func, "__name__", "scenario") or "scenario")
+    normalized_metadata = dict(scenario_metadata or {})
     run_id = _build_run_id(scenario_name, normalized_mode, normalized_seed)
     result = None
     traceback_text = ""
@@ -98,6 +100,12 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
         failure_message = traceback_text
     else:
         try:
+            try:
+                from world.systems.metrics import reset_metrics
+
+                reset_metrics()
+            except Exception:
+                pass
             result = scenario_func(ctx)
         except Exception:
             exit_code = 1
@@ -137,15 +145,22 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
         print(f"Leak detected: {leak_count} preexisting test objects could not be cleaned up.", file=sys.stderr)
 
     duration_ms = int(max(0, round((time.perf_counter() - started_perf) * 1000.0)))
+    try:
+        from world.systems.metrics import snapshot_metrics
+
+        runtime_metrics_snapshot = snapshot_metrics()
+    except Exception:
+        runtime_metrics_snapshot = {}
     metrics_summary = summarize_metrics(
         ctx,
         duration_ms,
         leaks=list(teardown_data.get("leaks", []) or []),
         final_state=final_metric_state,
+        runtime_metrics=runtime_metrics_snapshot,
     )
     lag_summary = dict(metrics_summary.get("lag", {}) or {})
     lag_status = str(lag_summary.get("status", "ok") or "ok")
-    lag_failure_required = lag_status == "critical" or (bool(check_lag) and lag_status in {"bad", "critical"})
+    lag_failure_required = (bool(fail_on_critical_lag) and lag_status == "critical") or (bool(check_lag) and lag_status in {"bad", "critical"})
     if lag_failure_required:
         exit_code = 1
         failure_type = failure_type or "lag_failure"
@@ -181,6 +196,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
                     "mode": normalized_mode,
                     "seed": normalized_seed,
                     "started_at": started_at,
+                    "metadata": normalized_metadata,
                 },
                 "seed": normalized_seed,
                 "command_log": list(ctx.command_log or []),

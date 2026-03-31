@@ -4404,27 +4404,38 @@ class Character(ObjectParent, DefaultCharacter):
         return command_name in DEAD_STATE_ALLOWED_COMMANDS
 
     def execute_cmd(self, raw_string, session=None, **kwargs):
-        if self.is_dead():
-            self.msg("[You are dead. Type DEPART to return.]")
-        if self.is_dead() and not self.can_execute_while_dead(raw_string):
-            self.msg("You are dead. You can still look, speak, check your state, depart, or wait for resurrection.")
-            return None
-        try:
-            from systems import onboarding
+        from world.systems.metrics import increment_counter, measure
 
-            if onboarding.is_onboarding_character(self):
-                remapped_command, immediate_message = onboarding.remap_onboarding_input(self, raw_string)
-                if immediate_message:
-                    self.msg(immediate_message)
-                    return None
-                if remapped_command:
-                    raw_string = remapped_command
-        except Exception:
-            LOGGER.exception("Failed to process onboarding input remap for %s", getattr(self, "key", self))
         command_name = str(raw_string or "").strip().split(None, 1)[0].lower()
-        if self.is_dead() and command_name in {"say", "whisper"}:
-            self.msg("Your voice echoes faintly, barely heard.")
-        return super().execute_cmd(raw_string, session=session, **kwargs)
+        with measure(
+            "command.execute",
+            metadata={
+                "character": str(getattr(self, "key", "") or ""),
+                "command": command_name,
+            },
+        ):
+            increment_counter("command.execute")
+            if self.is_dead():
+                self.msg("[You are dead. Type DEPART to return.]")
+            if self.is_dead() and not self.can_execute_while_dead(raw_string):
+                self.msg("You are dead. You can still look, speak, check your state, depart, or wait for resurrection.")
+                return None
+            try:
+                from systems import onboarding
+
+                if onboarding.is_onboarding_character(self):
+                    remapped_command, immediate_message = onboarding.remap_onboarding_input(self, raw_string)
+                    if immediate_message:
+                        self.msg(immediate_message)
+                        return None
+                    if remapped_command:
+                        raw_string = remapped_command
+            except Exception:
+                LOGGER.exception("Failed to process onboarding input remap for %s", getattr(self, "key", self))
+            command_name = str(raw_string or "").strip().split(None, 1)[0].lower()
+            if self.is_dead() and command_name in {"say", "whisper"}:
+                self.msg("Your voice echoes faintly, barely heard.")
+            return super().execute_cmd(raw_string, session=session, **kwargs)
 
     def is_empath(self):
         self.ensure_core_defaults()
@@ -8201,18 +8212,66 @@ class Character(ObjectParent, DefaultCharacter):
         remaining = (self.db.roundtime_end or 0) - time.time()
         return max(0, round(remaining, 2))
 
+    def _get_roundtime_schedule_key(self):
+        object_id = int(getattr(self, "id", 0) or 0)
+        return f"character.roundtime.{object_id or id(self)}"
+
+    def _expire_roundtime(self, expected_end=None):
+        self.ensure_core_defaults()
+        current_end = float(self.db.roundtime_end or 0.0)
+        if current_end <= 0.0:
+            return False
+        if expected_end is not None and current_end > float(expected_end or 0.0) + 0.01:
+            return False
+        if time.time() + 0.01 < current_end:
+            return False
+        self.db.roundtime_end = 0
+        self.sync_client_state()
+        return True
+
     def set_roundtime(self, seconds):
         self.ensure_core_defaults()
-        self.db.roundtime_end = time.time() + seconds
+        from world.systems.scheduler import cancel, schedule
+
+        seconds = max(0.0, float(seconds or 0.0))
+        if seconds <= 0.0:
+            self.db.roundtime_end = 0
+            cancel(self._get_roundtime_schedule_key())
+            self.sync_client_state()
+            return 0.0
+
+        target_end = time.time() + seconds
+        self.db.roundtime_end = target_end
+        schedule(
+            seconds,
+            self._expire_roundtime,
+            key=self._get_roundtime_schedule_key(),
+            source="combat.roundtime",
+            timing_mode="scheduled_expiry",
+            expected_end=target_end,
+        )
         self.sync_client_state()
+        return target_end
 
     def apply_thief_roundtime(self, seconds, minimum=0.5):
         self.ensure_core_defaults()
+        from world.systems.scheduler import schedule
+
         seconds = max(float(minimum), float(seconds))
         current_end = float(self.db.roundtime_end or 0)
         now = time.time()
-        self.db.roundtime_end = max(current_end, now) + seconds
+        target_end = max(current_end, now) + seconds
+        self.db.roundtime_end = target_end
+        schedule(
+            max(0.0, target_end - now),
+            self._expire_roundtime,
+            key=self._get_roundtime_schedule_key(),
+            source="thief.roundtime",
+            timing_mode="scheduled_expiry",
+            expected_end=target_end,
+        )
         self.sync_client_state()
+        return target_end
 
     def msg_roundtime_block(self):
         remaining = self.get_remaining_roundtime()
