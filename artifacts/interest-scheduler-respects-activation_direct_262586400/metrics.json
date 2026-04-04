@@ -1,0 +1,201 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.4132000030949712,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    0.4132000030949712
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.4132000030949712
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774999492.6195948,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 2,
+    "active_source_types": [],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 2,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 3,
+      "deactivate": 3
+    },
+    "transition_event_counts": {
+      "activate": 3,
+      "deactivate": 3
+    },
+    "transition_total": 6
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.4132000030949712,
+    "jitter": 0.0,
+    "max_ms": 0.4132000030949712,
+    "min_ms": 0.4132000030949712,
+    "p95_ms": 0.4132000030949712,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.4132000030949712,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "RETURN 0"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT flush_due"
+    ],
+    "output_log": [
+      "RETURN 0"
+    ],
+    "scheduler_job_key": "diretest:scheduler-gate:8191",
+    "skip_count": 1,
+    "skip_reason_count": 1,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 7773,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 1,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 1,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1774999484.3129225,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 1
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Structural scheduler activation-gate validation should report lag without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -1,5 +1,9 @@
 # Time Model
 
+Related architecture:
+
+- see `docs/architecture/interest-model.md` for the Phase 1.5 activation layer that decides whether continuous behavior should run at all
+
 ## Timing Primitives
 
 ### Delay
@@ -102,6 +106,49 @@ Poor fits:
 - one-shot expirations
 - simple keyed unlocks
 - repeated polling that should be event-driven
+
+## Script Split Rules
+
+Script behavior should be reviewed using the PH1-017 categories:
+
+- `controller`: keep as a Script when the repeat loop is genuinely orchestrating long-lived state, multi-step flow, or actor coordination
+- `poller`: convert away from Script when the repeat loop exists mainly to notice that a timestamp elapsed or to perform stateless one-shot cleanup
+- `mixed`: split the responsibilities so orchestration stays in the Script and isolated expiry boundaries move to scheduler-backed events or simpler one-shot timing
+
+When to keep a Script whole:
+
+- the script owns persistent scenario or world-controller state
+- the timing checks are part of a stage machine rather than hidden cleanup
+- multiple actors or rooms are coordinated by one long-lived controller
+
+When to split a Script:
+
+- the script both orchestrates state and polls one-shot deadlines
+- warning, deletion, expiry, or reminder boundaries are independent from the core controller loop
+- parts of the logic can be expressed as keyed scheduler events without changing authoritative ownership
+
+When to convert a Script responsibility to scheduler-backed expiry:
+
+- the behavior is a single boundary such as expiry, warning, unlock, fade, or retry
+- the deadline is derivable from durable gameplay state
+- the callback can tolerate stale state and no longer needs ambient polling
+
+When to keep controller logic in Script after a split:
+
+- the remaining work still coordinates multi-step flow or persistent actor state
+- the script maintains durable caches or orchestration state between repeats
+- removing the Script would force unrelated timing behavior back into a shared ticker or hidden polls
+
+Phase 1 examples:
+
+- `OnboardingInvasionScript`: keep as a controller because its interval drives a stage machine
+- `CorpseDecayScript`: split one-shot discovery such as memory-loss boundaries away from the controller/reload logic
+- `GraveMaintenanceScript`: keep recurring grave wear in a controller only if needed, but split warning/deletion boundaries to explicit expiry where practical
+- `OnboardingRoleplayScript`: keep onboarding coordination in the controller, but isolated idle reminders and prompt deadlines are split candidates
+
+Reference audit:
+
+- see `docs/architecture/script-usage-audit.md` for the live controller/poller/mixed classification used by these rules
 
 ## Anti-Patterns
 

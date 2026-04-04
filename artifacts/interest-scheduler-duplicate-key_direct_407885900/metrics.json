@@ -1,0 +1,257 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.02859998494386673,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.022799998987466097,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    }
+  ],
+  "command_timings_ms": [
+    0.02859998494386673,
+    0.022799998987466097
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.02859998494386673,
+      0.022799998987466097
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774999507.8926506,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.025699991965666413,
+    "jitter": 0.004101209400557631,
+    "max_ms": 0.02859998494386673,
+    "min_ms": 0.022799998987466097,
+    "p95_ms": 0.028309985646046698,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.02859998494386673,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.022799998987466097,
+      "snapshot": null
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT flush_due",
+      "DIRECT flush_due"
+    ],
+    "duplicate_rejections": 1,
+    "executed_jobs": 2,
+    "output_log": [],
+    "snapshot_count": 0,
+    "snapshot_labels": []
+  },
+  "scenario_duration_ms": 8,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 2,
+    "flush_executed_total": 2,
+    "flush_total": 2,
+    "job_key_breakdown": {
+      "diretest:scheduler-duplicate:reject": 1,
+      "diretest:scheduler-duplicate:replace": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3,
+    "skip_total": 0,
+    "system_counts": {
+      "diretest.scheduler_duplicate": 2
+    },
+    "systems_exercised": [
+      "diretest.scheduler_duplicate"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 2
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 2,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [],
+  "started_at": 1774999507.3730714,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 2,
+      "flush_total": 2
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Duplicate-key scheduler validation is structural and should not fail on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "diretest:scheduler-duplicate:reject": 1,
+      "diretest:scheduler-duplicate:replace": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {
+      "avg_ms": 0.0009500072337687016,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 0.00100000761449337,
+          "metadata": {
+            "created_at": 1774999507.3770723,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-duplicate:replace",
+            "owner": "owner:replace",
+            "owner_label": "owner:replace",
+            "source": "diretest.scheduler_duplicate",
+            "system": "diretest.scheduler_duplicate",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999507.3770723
+        },
+        {
+          "duration_ms": 0.000900006853044033,
+          "metadata": {
+            "created_at": 1774999507.3770723,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-duplicate:reject",
+            "owner": "owner:reject",
+            "owner_label": "owner:reject",
+            "source": "diretest.scheduler_duplicate",
+            "system": "diretest.scheduler_duplicate",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999507.3770723
+        }
+      ],
+      "max_ms": 0.00100000761449337,
+      "total_ms": 0.001900014467537403
+    }
+  },
+  "xp_delta": 0
+}

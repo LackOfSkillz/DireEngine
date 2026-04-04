@@ -1,0 +1,101 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 213.29849999165162,
+  "lag": {
+    "avg_ms": 164.08525001315866,
+    "jitter": 67.02326577427083,
+    "max_ms": 256.5745000028983,
+    "min_ms": 111.40009999508038,
+    "p95_ms": 243.61895500624084,
+    "slow_count": 2,
+    "spike_count": 0,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT set_roundtime",
+      "ms": 118.16220002947375,
+      "snapshot": "triggered"
+    },
+    {
+      "command": "advance",
+      "ms": 256.5745000028983,
+      "snapshot": "blocked"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 111.40009999508038,
+      "snapshot": "recovered"
+    },
+    {
+      "command": "advance",
+      "ms": 170.20420002518222,
+      "snapshot": "recovered"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "advance",
+      "ms": 256.5745000028983
+    },
+    {
+      "cmd": "advance",
+      "ms": 170.20420002518222
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_roundtime",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 118.16220002947375,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "triggered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "advance",
+      "first_response_ms": 256.4731999882497,
+      "kind": "command",
+      "ms": 256.5745000028983,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "blocked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 111.40009999508038,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "advance",
+      "first_response_ms": 170.12379999505356,
+      "kind": "command",
+      "ms": 170.20420002518222,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    }
+  ]
+}

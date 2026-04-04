@@ -139,6 +139,11 @@ class CorpseDecayScript(Script):
         self.repeats = 0
         self.persistent = True
 
+    def at_start(self):
+        obj = self.obj
+        if obj and hasattr(obj, "schedule_decay_transition"):
+            obj.schedule_decay_transition()
+
     def is_valid(self):
         obj = self.obj
         return bool(obj and getattr(getattr(obj, "db", None), "is_corpse", False))
@@ -162,13 +167,6 @@ class CorpseDecayScript(Script):
             if hasattr(obj, "get_memory_remaining") and obj.get_memory_remaining() <= 0:
                 if hasattr(obj, "apply_memory_loss"):
                     obj.apply_memory_loss()
-            decay_time = float(getattr(obj.db, "decay_time", 0.0) or 0.0)
-            if decay_time <= 0:
-                return
-            if now < decay_time:
-                return
-            if hasattr(obj, "decay_to_grave"):
-                obj.decay_to_grave()
 
         self._track_repeat_timing("script:CorpseDecayScript", _run)
 

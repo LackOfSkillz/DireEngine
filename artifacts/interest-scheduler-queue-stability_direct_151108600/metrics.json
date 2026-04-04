@@ -1,0 +1,1003 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 12,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.06089999806135893,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.043199979700148106,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.04989997250959277,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.2438000519759953,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.041000021155923605,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.035999983083456755,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.03439997090026736,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.04240003181621432,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.036100042052567005,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.03400002606213093,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.03459997242316604,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.034100026823580265,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    }
+  ],
+  "command_timings_ms": [
+    0.06089999806135893,
+    0.043199979700148106,
+    0.04989997250959277,
+    0.2438000519759953,
+    0.041000021155923605,
+    0.035999983083456755,
+    0.03439997090026736,
+    0.04240003181621432,
+    0.036100042052567005,
+    0.03400002606213093,
+    0.03459997242316604,
+    0.034100026823580265
+  ],
+  "commands": {
+    "count": 12,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.06089999806135893,
+      0.043199979700148106,
+      0.04989997250959277,
+      0.2438000519759953,
+      0.041000021155923605,
+      0.035999983083456755,
+      0.03439997090026736,
+      0.04240003181621432,
+      0.036100042052567005,
+      0.03400002606213093,
+      0.03459997242316604,
+      0.034100026823580265
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774999383.5744934,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.057533339713700116,
+    "jitter": 0.05920672904693166,
+    "max_ms": 0.2438000519759953,
+    "min_ms": 0.03400002606213093,
+    "p95_ms": 0.14320502232294519,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.06089999806135893,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.043199979700148106,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.04989997250959277,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.2438000519759953,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.041000021155923605,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.035999983083456755,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.03439997090026736,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.04240003181621432,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.036100042052567005,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.03400002606213093,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.03459997242316604,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.034100026823580265,
+      "snapshot": null
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due",
+      "DIRECT flush_due"
+    ],
+    "cycles": 12,
+    "executed_jobs": 36,
+    "jobs_per_cycle": 3,
+    "output_log": [],
+    "queue_peak": 3,
+    "snapshot_count": 0,
+    "snapshot_labels": []
+  },
+  "scenario_duration_ms": 17,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 36,
+    "flush_executed_total": 36,
+    "flush_total": 12,
+    "job_key_breakdown": {
+      "diretest:scheduler-stability:0:0": 1,
+      "diretest:scheduler-stability:0:1": 1,
+      "diretest:scheduler-stability:0:2": 1,
+      "diretest:scheduler-stability:10:0": 1,
+      "diretest:scheduler-stability:10:1": 1,
+      "diretest:scheduler-stability:10:2": 1,
+      "diretest:scheduler-stability:11:0": 1,
+      "diretest:scheduler-stability:11:1": 1,
+      "diretest:scheduler-stability:11:2": 1,
+      "diretest:scheduler-stability:1:0": 1,
+      "diretest:scheduler-stability:1:1": 1,
+      "diretest:scheduler-stability:1:2": 1,
+      "diretest:scheduler-stability:2:0": 1,
+      "diretest:scheduler-stability:2:1": 1,
+      "diretest:scheduler-stability:2:2": 1,
+      "diretest:scheduler-stability:3:0": 1,
+      "diretest:scheduler-stability:3:1": 1,
+      "diretest:scheduler-stability:3:2": 1,
+      "diretest:scheduler-stability:4:0": 1,
+      "diretest:scheduler-stability:4:1": 1,
+      "diretest:scheduler-stability:4:2": 1,
+      "diretest:scheduler-stability:5:0": 1,
+      "diretest:scheduler-stability:5:1": 1,
+      "diretest:scheduler-stability:5:2": 1,
+      "diretest:scheduler-stability:6:0": 1,
+      "diretest:scheduler-stability:6:1": 1,
+      "diretest:scheduler-stability:6:2": 1,
+      "diretest:scheduler-stability:7:0": 1,
+      "diretest:scheduler-stability:7:1": 1,
+      "diretest:scheduler-stability:7:2": 1,
+      "diretest:scheduler-stability:8:0": 1,
+      "diretest:scheduler-stability:8:1": 1,
+      "diretest:scheduler-stability:8:2": 1,
+      "diretest:scheduler-stability:9:0": 1,
+      "diretest:scheduler-stability:9:1": 1,
+      "diretest:scheduler-stability:9:2": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 3.0,
+    "reschedule_total": 0,
+    "scheduled_total": 36,
+    "skip_total": 0,
+    "system_counts": {
+      "diretest.scheduler_stability": 36
+    },
+    "systems_exercised": [
+      "diretest.scheduler_stability"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 36
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 36,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [],
+  "started_at": 1774999383.015045,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 36,
+      "flush_total": 12
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Queue stability validation is structural and should not fail on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "diretest:scheduler-stability:0:0": 1,
+      "diretest:scheduler-stability:0:1": 1,
+      "diretest:scheduler-stability:0:2": 1,
+      "diretest:scheduler-stability:10:0": 1,
+      "diretest:scheduler-stability:10:1": 1,
+      "diretest:scheduler-stability:10:2": 1,
+      "diretest:scheduler-stability:11:0": 1,
+      "diretest:scheduler-stability:11:1": 1,
+      "diretest:scheduler-stability:11:2": 1,
+      "diretest:scheduler-stability:1:0": 1,
+      "diretest:scheduler-stability:1:1": 1,
+      "diretest:scheduler-stability:1:2": 1,
+      "diretest:scheduler-stability:2:0": 1,
+      "diretest:scheduler-stability:2:1": 1,
+      "diretest:scheduler-stability:2:2": 1,
+      "diretest:scheduler-stability:3:0": 1,
+      "diretest:scheduler-stability:3:1": 1,
+      "diretest:scheduler-stability:3:2": 1,
+      "diretest:scheduler-stability:4:0": 1,
+      "diretest:scheduler-stability:4:1": 1,
+      "diretest:scheduler-stability:4:2": 1,
+      "diretest:scheduler-stability:5:0": 1,
+      "diretest:scheduler-stability:5:1": 1,
+      "diretest:scheduler-stability:5:2": 1,
+      "diretest:scheduler-stability:6:0": 1,
+      "diretest:scheduler-stability:6:1": 1,
+      "diretest:scheduler-stability:6:2": 1,
+      "diretest:scheduler-stability:7:0": 1,
+      "diretest:scheduler-stability:7:1": 1,
+      "diretest:scheduler-stability:7:2": 1,
+      "diretest:scheduler-stability:8:0": 1,
+      "diretest:scheduler-stability:8:1": 1,
+      "diretest:scheduler-stability:8:2": 1,
+      "diretest:scheduler-stability:9:0": 1,
+      "diretest:scheduler-stability:9:1": 1,
+      "diretest:scheduler-stability:9:2": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {
+      "avg_ms": 0.0030249955468914574,
+      "count": 36,
+      "entries": [
+        {
+          "duration_ms": 0.001100008375942707,
+          "metadata": {
+            "created_at": 1774999383.019579,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:0:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.019579
+        },
+        {
+          "duration_ms": 0.000700005330145359,
+          "metadata": {
+            "created_at": 1774999383.019579,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:0:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.019579
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1774999383.019579,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:0:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.019579
+        },
+        {
+          "duration_ms": 0.0014999532140791416,
+          "metadata": {
+            "created_at": 1774999383.019579,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:1:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0205805
+        },
+        {
+          "duration_ms": 0.0007999478839337826,
+          "metadata": {
+            "created_at": 1774999383.019579,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:1:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0205805
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1774999383.019579,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:1:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0205805
+        },
+        {
+          "duration_ms": 0.000800006091594696,
+          "metadata": {
+            "created_at": 1774999383.0205805,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:2:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0205805
+        },
+        {
+          "duration_ms": 0.00100000761449337,
+          "metadata": {
+            "created_at": 1774999383.0205805,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:2:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0205805
+        },
+        {
+          "duration_ms": 0.000700005330145359,
+          "metadata": {
+            "created_at": 1774999383.0205805,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:2:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0205805
+        },
+        {
+          "duration_ms": 0.08650001836940646,
+          "metadata": {
+            "created_at": 1774999383.0205805,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:3:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0205805
+        },
+        {
+          "duration_ms": 0.000600004568696022,
+          "metadata": {
+            "created_at": 1774999383.0205805,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:3:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0205805,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:3:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000800006091594696,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:4:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:4:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:4:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000700005330145359,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:5:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.0006999471224844456,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:5:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:5:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.0006999471224844456,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:6:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:6:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:6:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0216632
+        },
+        {
+          "duration_ms": 0.001100008375942707,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:7:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000600004568696022,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:7:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0216632,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:7:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000900006853044033,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:8:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000600004568696022,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:8:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.00039994483813643456,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:8:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.0007999478839337826,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:9:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:9:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:9:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000700005330145359,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:10:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:10:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:10:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000800006091594696,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:11:0",
+            "owner": "owner:stability:0",
+            "owner_label": "owner:stability:0",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:11:1",
+            "owner": "owner:stability:1",
+            "owner_label": "owner:stability:1",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1774999383.0225782,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stability:11:2",
+            "owner": "owner:stability:2",
+            "owner_label": "owner:stability:2",
+            "source": "diretest.scheduler_stability",
+            "system": "diretest.scheduler_stability",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774999383.0225782
+        }
+      ],
+      "max_ms": 0.08650001836940646,
+      "total_ms": 0.10889983968809247
+    }
+  },
+  "xp_delta": 0
+}

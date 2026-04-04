@@ -30,13 +30,13 @@ from evennia.utils.create import create_object
 
 from typeclasses.objects import BountyBoard
 from utils.contests import run_contest
+from world.systems.metrics import increment_counter, record_event
+from world.systems.timing_audit import register_ticker_metadata, unregister_ticker_metadata
 from world.the_landing import build_the_landing
 
 
 _NPC_TICK_CACHE = {"expires_at": 0.0, "objects": []}
-_TRAP_TICK_STATE = {"next_sweep_at": 0.0}
 IDLE_RECOVERY_INTERVAL = 2.0
-TRAP_SWEEP_INTERVAL = 5.0
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
 DIR_ALIASES = {
@@ -646,6 +646,9 @@ def _log_slow_tick(name, started_at, threshold):
     duration = time.perf_counter() - started_at
     from tools.diretest.core.runtime import record_script_delay
 
+    increment_counter("ticker.execute")
+    increment_counter(f"ticker.execute.{name}")
+    record_event("ticker.execute", duration * 1000.0, metadata={"ticker": name})
     record_script_delay(duration * 1000.0, source=f"ticker:{name}")
     if duration > threshold:
         logger.log_warn(f"{name} slow: {duration:.4f}s")
@@ -841,12 +844,6 @@ def process_status_tick():
         if is_npc and hasattr(character, "ai_tick"):
             character.ai_tick()
 
-    if now >= _TRAP_TICK_STATE["next_sweep_at"]:
-        for trap in ObjectDB.objects.filter(db_typeclass_path="typeclasses.trap_device.TrapDevice"):
-            if hasattr(trap, "at_tick"):
-                trap.at_tick()
-        _TRAP_TICK_STATE["next_sweep_at"] = now + TRAP_SWEEP_INTERVAL
-
     _log_slow_tick(
         "process_status_tick",
         started_at,
@@ -897,21 +894,25 @@ def at_server_start():
     """
     try:
         TICKER_HANDLER.remove(1, process_status_tick, idstring="global_status_tick", persistent=True)
+        unregister_ticker_metadata(1, idstring="global_status_tick", persistent=True)
     except Exception:
         pass
 
     try:
         TICKER_HANDLER.remove(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
+        unregister_ticker_metadata(10, idstring="global_learning_tick", persistent=True)
     except Exception:
         pass
 
     try:
         TICKER_HANDLER.remove(1, process_status_tick, idstring="global_bleed_tick", persistent=True)
+        unregister_ticker_metadata(1, idstring="global_bleed_tick", persistent=True)
     except Exception:
         pass
 
     try:
         TICKER_HANDLER.remove(1, process_learning_tick, idstring="global_bleed_tick", persistent=True)
+        unregister_ticker_metadata(1, idstring="global_bleed_tick", persistent=True)
     except Exception:
         pass
 
@@ -928,6 +929,22 @@ def at_server_start():
     if getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
         TICKER_HANDLER.add(1, process_status_tick, idstring="global_status_tick", persistent=True)
         TICKER_HANDLER.add(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
+        register_ticker_metadata(
+            1,
+            process_status_tick,
+            idstring="global_status_tick",
+            persistent=True,
+            system="world.status_tick",
+            reason="State-gated global status processing for recovery, subsystem state, justice/thief/warrior updates, and AI.",
+        )
+        register_ticker_metadata(
+            10,
+            process_learning_tick,
+            idstring="global_learning_tick",
+            persistent=True,
+            system="world.learning_tick",
+            reason="Frequency-separated learning and teaching pulse processing.",
+        )
 
     for character in ObjectDB.objects.filter(
         db_typeclass_path__in=["typeclasses.characters.Character", "typeclasses.npcs.NPC"]

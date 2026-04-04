@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Direct activation did not attach to the aim target.",
+  "mode": "direct",
+  "scenario": "interest-direct-activation",
+  "seed": 623052100
+}

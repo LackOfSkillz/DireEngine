@@ -1,0 +1,181 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT process_learning_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.04340003943070769,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.009600014891475439,
+      "script_delay_sources": [
+        {
+          "ms": 0.009600014891475439,
+          "source": "ticker:process_learning_tick"
+        }
+      ],
+      "snapshot": "after"
+    }
+  ],
+  "command_timings_ms": [
+    0.04340003943070769
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.04340003943070769
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774978068.1654365,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 0.0,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.04340003943070769,
+    "jitter": 0.0,
+    "max_ms": 0.04340003943070769,
+    "min_ms": 0.04340003943070769,
+    "p95_ms": 0.04340003943070769,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT process_learning_tick",
+      "ms": 0.04340003943070769,
+      "snapshot": "after"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "RETURN None"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 8540,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.009600014891475439,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "before",
+    "after",
+    "final"
+  ],
+  "started_at": 1774978059.073655,
+  "state_transition_count": 2,
+  "ticker": {
+    "avg_ms": 0.009600014891475439,
+    "count": 1,
+    "execution_count": 1,
+    "max_ms": 0.009600014891475439,
+    "performance": {
+      "process_learning_tick": {
+        "avg_ms": 0.009600014891475439,
+        "count": 1,
+        "max_ms": 0.009600014891475439,
+        "total_ms": 0.009600014891475439
+      }
+    },
+    "sources": [
+      {
+        "count": 1,
+        "source": "ticker:process_learning_tick",
+        "total_ms": 0.009600014891475439
+      }
+    ],
+    "total_ms": 0.009600014891475439
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Structural shared-ticker execution validation should report lag without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.009600014891475439,
+      "count": 1,
+      "execution_count": 1,
+      "max_ms": 0.009600014891475439,
+      "performance": {
+        "process_learning_tick": {
+          "avg_ms": 0.009600014891475439,
+          "count": 1,
+          "max_ms": 0.009600014891475439,
+          "total_ms": 0.009600014891475439
+        }
+      },
+      "sources": [
+        {
+          "count": 1,
+          "source": "ticker:process_learning_tick",
+          "total_ms": 0.009600014891475439
+        }
+      ],
+      "total_ms": 0.009600014891475439
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

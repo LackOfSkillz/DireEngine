@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Activation metrics scenario did not fully deactivate the caller: [{'type': 'room', 'source': 'room:TEST_INTEREST_METRICS_TARGET', 'source_key': 'room-subject:8009', 'added_at': 1774983268.919905}]",
+  "mode": "direct",
+  "scenario": "interest-activation-metrics",
+  "seed": 684459000
+}

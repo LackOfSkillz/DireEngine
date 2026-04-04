@@ -1,0 +1,481 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 1381.0059999814257,
+      "kind": "direct",
+      "ms": 3449.034399993252,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT schedule_decay_transition",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.15849998453631997,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 879.8054999788292,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart grave",
+      "first_response_ms": 0.03920000744983554,
+      "kind": "command",
+      "ms": 1627.0726000075229,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "recover",
+      "first_response_ms": 465.1102999923751,
+      "kind": "command",
+      "ms": 465.21819999907166,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    }
+  ],
+  "command_timings_ms": [
+    3449.034399993252,
+    0.15849998453631997,
+    879.8054999788292,
+    1627.0726000075229,
+    465.21819999907166
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 1627.0522000268102,
+    "timings_ms": [
+      3449.034399993252,
+      0.15849998453631997,
+      879.8054999788292,
+      1627.0726000075229,
+      465.21819999907166
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774968981.0395272,
+  "exit_code": 1,
+  "failure_type": "lag_failure",
+  "first_response_ms": 615.3851666604169,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 1284.2578399926424,
+    "jitter": 1349.731293317751,
+    "max_ms": 3449.034399993252,
+    "min_ms": 0.15849998453631997,
+    "p95_ms": 3084.642039996106,
+    "slow_count": 4,
+    "spike_count": 4,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 3449.034399993252,
+      "snapshot": "dead"
+    },
+    {
+      "command": "DIRECT schedule_decay_transition",
+      "ms": 0.15849998453631997,
+      "snapshot": "graved"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 879.8054999788292,
+      "snapshot": "graved"
+    },
+    {
+      "command": "depart grave",
+      "ms": 1627.0726000075229,
+      "snapshot": "departed"
+    },
+    {
+      "command": "recover",
+      "ms": 465.21819999907166,
+      "snapshot": "recovered"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 1627.0522000268102,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You have no anchor to return. You must depart.",
+    "You have died.",
+    "You feel yourself slipping free from your body.",
+    "You feel your wealth slip from your grasp as you fall.",
+    "RETURN corpse of TEST_GRAVE_CHAR",
+    "RETURN <world.systems.scheduler._DeferredTask object at 0x000001875D750210>",
+    "RETURN 1",
+    "[You are dead. Type DEPART to return.]",
+    "You feel your spirit pulled back into your body. You return by the grave path.",
+    "You recover your belongings from the grave. You also recover 29 coins."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "coins": 29,
+    "commands": [
+      "DIRECT at_death",
+      "DIRECT schedule_decay_transition",
+      "DIRECT flush_due",
+      "depart grave",
+      "recover"
+    ],
+    "corpse_decay_key": "world:corpse-decay:7637",
+    "depart_diff": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "departed",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "graved",
+        "coins_after": 0,
+        "coins_before": 0,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 50,
+        "hp_before": 100,
+        "hp_delta": -50,
+        "is_dead_after": false,
+        "is_dead_before": true,
+        "life_state_after": "ALIVE",
+        "life_state_before": "DEAD",
+        "location_after": "TEST_GRAVE_ROOM",
+        "location_before": "TEST_GRAVE_ROOM",
+        "revived": true
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [],
+        "room_after": "TEST_GRAVE_ROOM",
+        "room_before": "TEST_GRAVE_ROOM"
+      }
+    },
+    "grave_decay_diff": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "graved",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "dead",
+        "coins_after": 0,
+        "coins_before": 0,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": true,
+        "is_dead_before": true,
+        "life_state_after": "DEAD",
+        "life_state_before": "DEAD",
+        "location_after": "TEST_GRAVE_ROOM",
+        "location_before": "TEST_GRAVE_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [
+          "grave of TEST_GRAVE_CHAR"
+        ],
+        "deleted": [
+          "corpse of TEST_GRAVE_CHAR"
+        ]
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [
+          "grave of TEST_GRAVE_CHAR"
+        ],
+        "contents_removed": [
+          "corpse of TEST_GRAVE_CHAR"
+        ],
+        "room_after": "TEST_GRAVE_ROOM",
+        "room_before": "TEST_GRAVE_ROOM"
+      }
+    },
+    "grave_key": "grave of TEST_GRAVE_CHAR",
+    "output_log": [
+      "You have no anchor to return. You must depart.",
+      "You have died.",
+      "You feel yourself slipping free from your body.",
+      "You feel your wealth slip from your grasp as you fall.",
+      "RETURN corpse of TEST_GRAVE_CHAR",
+      "RETURN <world.systems.scheduler._DeferredTask object at 0x000001875D750210>",
+      "RETURN 1",
+      "[You are dead. Type DEPART to return.]",
+      "You feel your spirit pulled back into your body. You return by the grave path.",
+      "You recover your belongings from the grave. You also recover 29 coins."
+    ],
+    "recover_diff": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "recovered",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "departed",
+        "coins_after": 29,
+        "coins_before": 0,
+        "coins_delta": 29,
+        "died": false,
+        "hp_after": 50,
+        "hp_before": 50,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_GRAVE_ROOM",
+        "location_before": "TEST_GRAVE_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [
+          "TEST_GRAVE_TOKEN"
+        ],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": [
+          "grave of TEST_GRAVE_CHAR"
+        ]
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [
+          "grave of TEST_GRAVE_CHAR"
+        ],
+        "room_after": "TEST_GRAVE_ROOM",
+        "room_before": "TEST_GRAVE_ROOM"
+      }
+    },
+    "snapshot_count": 6,
+    "snapshot_labels": [
+      "alive",
+      "dead",
+      "graved",
+      "departed",
+      "recovered",
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 15408,
+  "scheduler": {
+    "cancel_total": 3,
+    "events": 1,
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3
+  },
+  "scheduler_events": 1,
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 3449.034399993252
+    },
+    {
+      "cmd": "DIRECT flush_due",
+      "ms": 879.8054999788292
+    },
+    {
+      "cmd": "depart grave",
+      "ms": 1627.0726000075229
+    },
+    {
+      "cmd": "recover",
+      "ms": 465.21819999907166
+    }
+  ],
+  "snapshot_labels": [
+    "alive",
+    "dead",
+    "graved",
+    "departed",
+    "recovered",
+    "final"
+  ],
+  "started_at": 1774968965.629374,
+  "state_transition_count": 5,
+  "timings": {
+    "command_execute": {
+      "avg_ms": 1046.1263500037603,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 1627.0522000268102,
+          "metadata": {
+            "character": "TEST_GRAVE_CHAR",
+            "command": "depart"
+          },
+          "timestamp": 1774968977.3807588
+        },
+        {
+          "duration_ms": 465.20049998071045,
+          "metadata": {
+            "character": "TEST_GRAVE_CHAR",
+            "command": "recover"
+          },
+          "timestamp": 1774968978.080541
+        }
+      ],
+      "max_ms": 1627.0522000268102,
+      "total_ms": 2092.2527000075206
+    },
+    "scheduler_execute": {
+      "avg_ms": 879.7354000271298,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 879.7354000271298,
+          "metadata": {
+            "delay_s": 0.0,
+            "key": "world:corpse-decay:7637",
+            "source": "world.corpse_decay",
+            "system": "world.corpse_decay",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774968975.4489121
+        }
+      ],
+      "max_ms": 879.7354000271298,
+      "total_ms": 879.7354000271298
+    }
+  },
+  "xp_delta": 0
+}

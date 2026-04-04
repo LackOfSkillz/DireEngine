@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Structural corpse decay scheduling validation should report lag without failing on environment-specific latency."
+  },
+  "mode": "direct",
+  "name": "grave-recovery",
+  "seed": 632454300,
+  "started_at": 1774969031.3727415
+}

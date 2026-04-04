@@ -1,0 +1,86 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7988,
+        "is_dead": false,
+        "key": "TEST_DIRECT_CALLER",
+        "life_state": "ALIVE",
+        "location": "TEST_DIRECT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 0.0,
+        "target": "TEST_DIRECT_TARGET",
+        "target_summary": {
+          "hp": 100,
+          "id": 7989,
+          "in_combat": false,
+          "key": "TEST_DIRECT_TARGET",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7987,
+            "key": "TEST_DIRECT_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7988,
+            "key": "TEST_DIRECT_CALLER",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7989,
+            "key": "TEST_DIRECT_TARGET",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7990,
+            "key": "TEST_DIRECT_AIM_TARGET",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7991,
+            "key": "TEST_DIRECT_SPELL_TARGET",
+            "location": "TEST_DIRECT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DIRECT_CALLER",
+          "TEST_DIRECT_TARGET",
+          "TEST_DIRECT_AIM_TARGET",
+          "TEST_DIRECT_SPELL_TARGET"
+        ],
+        "exits": [],
+        "id": 7987,
+        "key": "TEST_DIRECT_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774981633.5430758
+    },
+    "label": "final"
+  }
+]

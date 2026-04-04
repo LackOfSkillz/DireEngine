@@ -1,0 +1,212 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT deploy_trap",
+      "first_response_ms": 452.62060000095516,
+      "kind": "direct",
+      "ms": 452.69419997930527,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "deployed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 169.459700002335,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    452.69419997930527,
+    169.459700002335
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 0.0,
+    "timings_ms": [
+      452.69419997930527,
+      169.459700002335
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774976565.764305,
+  "exit_code": 1,
+  "failure_type": "direct_execution_failure",
+  "first_response_ms": 452.62060000095516,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": -1,
+  "lag": {
+    "avg_ms": 311.07694999082014,
+    "jitter": 200.27703559969672,
+    "max_ms": 452.69419997930527,
+    "min_ms": 169.459700002335,
+    "p95_ms": 438.53247498045675,
+    "slow_count": 2,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT deploy_trap",
+      "ms": 452.69419997930527,
+      "snapshot": "deployed"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 169.459700002335,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You carefully set a concealed device.",
+    "RETURN None",
+    "ERROR database is locked"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 8048,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 1,
+    "events": 1,
+    "flush_executed_total": 0,
+    "flush_total": 1,
+    "job_key_breakdown": {
+      "trap:expiry:7663": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "system_counts": {
+      "world.trap_expiry": 1
+    },
+    "systems_exercised": [
+      "world.trap_expiry"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 1
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 1,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT deploy_trap",
+      "ms": 452.69419997930527
+    },
+    {
+      "cmd": "DIRECT flush_due",
+      "ms": 169.459700002335
+    }
+  ],
+  "snapshot_labels": [
+    "carried",
+    "deployed",
+    "final"
+  ],
+  "started_at": 1774976556.8098247,
+  "state_transition_count": 2,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 1
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Structural trap-expiry scheduling validation should report lag without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "trap:expiry:7663": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {
+      "avg_ms": 169.39369996543974,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 169.39369996543974,
+          "metadata": {
+            "delay_s": 0.0,
+            "key": "trap:expiry:7663",
+            "source": "world.trap_expiry",
+            "system": "world.trap_expiry",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774976561.7782733
+        }
+      ],
+      "max_ms": 169.39369996543974,
+      "total_ms": 169.39369996543974
+    }
+  },
+  "xp_delta": 0
+}

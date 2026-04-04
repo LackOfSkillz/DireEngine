@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": "ok",
+  "message": "",
+  "mode": "direct",
+  "scenario": "interest-scheduler-duplicate-key",
+  "seed": 548067200
+}

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Interest renew benchmark renewed the wrong scoped target count: expected 25, got 24",
+  "mode": "direct",
+  "scenario": "interest-renew-benchmark",
+  "seed": 894219800
+}

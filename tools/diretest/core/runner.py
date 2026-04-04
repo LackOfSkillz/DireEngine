@@ -151,12 +151,26 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
         runtime_metrics_snapshot = snapshot_metrics()
     except Exception:
         runtime_metrics_snapshot = {}
+    try:
+        from world.systems.scheduler import get_scheduler_snapshot
+
+        final_scheduler_snapshot = dict(get_scheduler_snapshot() or {})
+    except Exception:
+        final_scheduler_snapshot = {}
+    try:
+        from world.systems.timing_audit import collect_timing_audit
+
+        timing_audit_payload = dict(collect_timing_audit() or {})
+    except Exception:
+        timing_audit_payload = {}
     metrics_summary = summarize_metrics(
         ctx,
         duration_ms,
         leaks=list(teardown_data.get("leaks", []) or []),
         final_state=final_metric_state,
         runtime_metrics=runtime_metrics_snapshot,
+        final_scheduler_snapshot=final_scheduler_snapshot,
+        scenario_metadata=normalized_metadata,
     )
     lag_summary = dict(metrics_summary.get("lag", {}) or {})
     lag_status = str(lag_summary.get("status", "ok") or "ok")
@@ -218,6 +232,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
                     "snapshot_labels": list(ctx.get_snapshot_labels() if hasattr(ctx, "get_snapshot_labels") else []),
                     **metrics_summary,
                 },
+                "timing_audit": timing_audit_payload,
                 "lag": lag_payload,
                 "failure_summary": failure_summary,
                 "traceback": traceback_text,
@@ -235,6 +250,7 @@ def run_scenario(scenario_func, seed: int, mode: str, auto_snapshot: bool = Fals
         "leaks": list(teardown_data.get("leaks", []) or []),
         "metrics": metrics_summary,
         "lag": lag_payload,
+        "timing_audit": timing_audit_payload,
         "output_log": list(ctx.output_log or []),
         "preexisting_cleanup_failures": list(preexisting_cleanup.get("deletion_failures", []) or []),
         "preexisting_leaks": list(preexisting_leaks),

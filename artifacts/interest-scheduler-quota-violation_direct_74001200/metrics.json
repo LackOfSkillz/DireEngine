@@ -1,0 +1,262 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.03809999907389283,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.16959995264187455,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    }
+  ],
+  "command_timings_ms": [
+    0.03809999907389283,
+    0.16959995264187455
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.03809999907389283,
+      0.16959995264187455
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775000580.7832901,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.10384997585788369,
+    "jitter": 0.092984508893636,
+    "max_ms": 0.16959995264187455,
+    "min_ms": 0.03809999907389283,
+    "p95_ms": 0.16302495496347547,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.03809999907389283,
+      "snapshot": null
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.16959995264187455,
+      "snapshot": null
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT flush_due",
+      "DIRECT flush_due"
+    ],
+    "global_quota_rejections": 1,
+    "output_log": [],
+    "owner_quota_delays": 1,
+    "owner_quota_rejections": 1,
+    "owner_quota_replacements": 1,
+    "snapshot_count": 0,
+    "snapshot_labels": [],
+    "system_quota_rejections": 1
+  },
+  "scenario_duration_ms": 309,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 6,
+    "defer_total": 0,
+    "events": 2,
+    "flush_executed_total": 2,
+    "flush_total": 2,
+    "job_key_breakdown": {
+      "diretest:scheduler-quota:delay:2": 1,
+      "diretest:scheduler-quota:replace:3": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 2.0,
+    "reschedule_total": 0,
+    "scheduled_total": 9,
+    "skip_total": 0,
+    "system_counts": {
+      "diretest.scheduler_delay": 1,
+      "diretest.scheduler_replace": 1
+    },
+    "systems_exercised": [
+      "diretest.scheduler_delay",
+      "diretest.scheduler_replace"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 2
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 2,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [],
+  "started_at": 1775000580.0234935,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 2,
+      "flush_total": 2
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Quota enforcement validation is structural and should not fail on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "diretest:scheduler-quota:delay:2": 1,
+      "diretest:scheduler-quota:replace:3": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {
+      "avg_ms": 0.001349952071905136,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 0.0011999509297311306,
+          "metadata": {
+            "created_at": 1775000580.0277975,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-quota:replace:3",
+            "owner": "owner:replace",
+            "owner_label": "owner:replace",
+            "source": "diretest.scheduler_replace",
+            "system": "diretest.scheduler_replace",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000580.0277975
+        },
+        {
+          "duration_ms": 0.0014999532140791416,
+          "metadata": {
+            "created_at": 1775000580.328935,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-quota:delay:2",
+            "owner": "owner:delay",
+            "owner_label": "owner:delay",
+            "source": "diretest.scheduler_delay",
+            "system": "diretest.scheduler_delay",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000580.328935
+        }
+      ],
+      "max_ms": 0.0014999532140791416,
+      "total_ms": 0.002699904143810272
+    }
+  },
+  "xp_delta": 0
+}

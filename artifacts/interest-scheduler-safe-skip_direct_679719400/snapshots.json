@@ -1,0 +1,58 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8197,
+        "is_dead": false,
+        "key": "TEST_SCHED_DEFER_CALLER",
+        "life_state": "ALIVE",
+        "location": "TEST_SCHED_DEFER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8196,
+            "key": "TEST_SCHED_DEFER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8197,
+            "key": "TEST_SCHED_DEFER_CALLER",
+            "location": "TEST_SCHED_DEFER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_SCHED_DEFER_CALLER"
+        ],
+        "exits": [],
+        "id": 8196,
+        "key": "TEST_SCHED_DEFER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775000548.7938359
+    },
+    "label": "final"
+  }
+]

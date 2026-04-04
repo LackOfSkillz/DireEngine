@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Structural roundtime validation should still emit lag telemetry without failing on environment-specific latency."
+  },
+  "mode": "direct",
+  "name": "rt-timing",
+  "seed": 573803900,
+  "started_at": 1774977675.6960511
+}

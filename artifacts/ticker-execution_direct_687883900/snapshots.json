@@ -1,0 +1,144 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7676,
+        "is_dead": false,
+        "key": "TEST_TICKER_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_TICKER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "before",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7675,
+            "key": "TEST_TICKER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7676,
+            "key": "TEST_TICKER_CHAR",
+            "location": "TEST_TICKER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_TICKER_CHAR"
+        ],
+        "exits": [],
+        "id": 7675,
+        "key": "TEST_TICKER_ROOM"
+      },
+      "snapshot_label": "before",
+      "timestamp": 1774978118.2768245
+    },
+    "label": "before"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7676,
+        "is_dead": false,
+        "key": "TEST_TICKER_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_TICKER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "after",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_TICKER_CHAR"
+        ],
+        "exits": [],
+        "id": 7675,
+        "key": "TEST_TICKER_ROOM"
+      },
+      "snapshot_label": "after",
+      "timestamp": 1774978118.5240836
+    },
+    "label": "after"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7676,
+        "is_dead": false,
+        "key": "TEST_TICKER_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_TICKER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_TICKER_CHAR"
+        ],
+        "exits": [],
+        "id": 7675,
+        "key": "TEST_TICKER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774978119.5170407
+    },
+    "label": "final"
+  }
+]

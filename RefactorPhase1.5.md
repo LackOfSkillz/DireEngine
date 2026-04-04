@@ -76,9 +76,11 @@ STATUS UPDATE
 - COMPLETE: PH1.5-014 direct target activation
 - COMPLETE: PH1.5-015 scheduler-based activation
 - COMPLETE: PH1.5-016 interest cleanup expansion
+- COMPLETE: PH1.5-017 remove global scans
 - COMPLETE: PH1.5-018 target scope helpers
 - COMPLETE: PH1.5-019 renew-all scoping under activation
 - COMPLETE: PH1.5-020 scheduler respects activation
+- COMPLETE: PH1.5-021 scheduler adds interest
 - COMPLETE: PH1.5-022 safe skip behavior
 - COMPLETE: PH1.5-023 activation metrics
 - COMPLETE: PH1.5-024 @engine interest debug
@@ -184,7 +186,7 @@ effect ends
 → remove interest
 
 ⚙️ SECTION D — COMMAND SCOPE (FIRST REAL WIN)
-PH1.5-017 — Remove Global Scans
+PH1.5-017 — Remove Global Scans [DONE]
 
 Audit commands:
 
@@ -209,7 +211,7 @@ Before execution:
 
 if not is_active(obj):
     skip or defer
-PH1.5-021 — Scheduler Adds Interest
+PH1.5-021 — Scheduler Adds Interest [DONE]
 
 Objects with pending jobs must remain active
 

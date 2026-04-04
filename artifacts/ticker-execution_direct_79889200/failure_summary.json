@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Ticker-execution scenario did not process a learning pulse: before={'rank': 1, 'mindstate': 20}, after={'rank': 1, 'mindstate': 20}",
+  "mode": "direct",
+  "scenario": "ticker-execution",
+  "seed": 79889200
+}

@@ -8,6 +8,10 @@ from world.systems.target_scope import get_active_targets, get_nearby_targets, g
 
 
 ADMIN_PERMISSIONS = ("Admin", "Developer")
+RENEWABLE_TYPECLASS_PATHS = (
+    "typeclasses.characters.Character",
+    "typeclasses.npcs.NPC",
+)
 
 
 class CmdRenew(Command):
@@ -53,7 +57,7 @@ class CmdRenew(Command):
         targets = []
         seen_ids = set()
         scanned_count = 0
-        for obj in ObjectDB.objects.all().order_by("id"):
+        for obj in ObjectDB.objects.filter(db_typeclass_path__in=RENEWABLE_TYPECLASS_PATHS).order_by("id"):
             scanned_count += 1
             if not hasattr(obj, "renew_state"):
                 continue

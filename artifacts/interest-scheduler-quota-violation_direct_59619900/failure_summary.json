@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Quota scenario should not admit the overflow job immediately when delay backpressure is enabled.",
+  "mode": "direct",
+  "scenario": "interest-scheduler-quota-violation",
+  "seed": 59619900
+}

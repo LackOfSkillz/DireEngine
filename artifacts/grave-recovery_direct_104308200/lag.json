@@ -1,0 +1,175 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 482.42676665540785,
+  "lag": {
+    "avg_ms": 1161.5735399886034,
+    "jitter": 1077.9312960392404,
+    "max_ms": 2706.5953999990597,
+    "min_ms": 0.1783999614417553,
+    "p95_ms": 2513.383479998447,
+    "slow_count": 4,
+    "spike_count": 4,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 2706.5953999990597,
+      "snapshot": "dead"
+    },
+    {
+      "command": "DIRECT schedule_decay_transition",
+      "ms": 0.1783999614417553,
+      "snapshot": "graved"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 918.3191999909468,
+      "snapshot": "graved"
+    },
+    {
+      "command": "depart grave",
+      "ms": 1740.535799995996,
+      "snapshot": "departed"
+    },
+    {
+      "command": "recover",
+      "ms": 442.23889999557287,
+      "snapshot": "recovered"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 2706.5953999990597
+    },
+    {
+      "cmd": "DIRECT flush_due",
+      "ms": 918.3191999909468
+    },
+    {
+      "cmd": "depart grave",
+      "ms": 1740.535799995996
+    },
+    {
+      "cmd": "recover",
+      "ms": 442.23889999557287
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 1005.1371000008658,
+      "kind": "direct",
+      "ms": 2706.5953999990597,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 918.3191999909468,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart grave",
+      "first_response_ms": 0.03779999678954482,
+      "kind": "command",
+      "ms": 1740.535799995996,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "recover",
+      "first_response_ms": 442.10539996856824,
+      "kind": "command",
+      "ms": 442.23889999557287,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 1005.1371000008658,
+      "kind": "direct",
+      "ms": 2706.5953999990597,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT schedule_decay_transition",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.1783999614417553,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 918.3191999909468,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart grave",
+      "first_response_ms": 0.03779999678954482,
+      "kind": "command",
+      "ms": 1740.535799995996,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "recover",
+      "first_response_ms": 442.10539996856824,
+      "kind": "command",
+      "ms": 442.23889999557287,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    }
+  ]
+}

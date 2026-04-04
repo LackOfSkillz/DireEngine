@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Scheduler gate scenario did not make the caller inactive before execution.",
+  "mode": "direct",
+  "scenario": "interest-scheduler-respects-activation",
+  "seed": 440221400
+}

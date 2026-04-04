@@ -107,6 +107,13 @@ from world.systems.ranger.companion import (
     normalize_ranger_companion,
 )
 from world.systems.ranger.beseech import get_beseech_kinds, get_beseech_profile
+from world.systems.interest import (
+    clear_direct_interest,
+    clear_subject_interest,
+    direct_interest,
+    sync_direct_interest,
+    sync_subject_interest,
+)
 
 from .objects import ObjectParent
 
@@ -781,10 +788,12 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_core_defaults()
         self._restore_onboarding_entry_if_needed()
         self.get_subsystem()
+        sync_subject_interest(self)
         self.sync_client_state(include_map=True)
 
     def at_post_unpuppet(self, *args, **kwargs):
         super().at_post_unpuppet(*args, **kwargs)
+        clear_subject_interest(self)
         self.reset_thief_pressure_states()
 
     def at_after_move(self, source_location, **kwargs):
@@ -2612,6 +2621,8 @@ class Character(ObjectParent, DefaultCharacter):
         if hasattr(corpse, "update_condition_description"):
             corpse.update_condition_description()
         corpse.scripts.add("typeclasses.scripts.CorpseDecayScript")
+        if hasattr(corpse, "schedule_decay_transition"):
+            corpse.schedule_decay_transition()
         self.db.last_corpse_id = corpse.id
         return corpse
 
@@ -5502,6 +5513,8 @@ class Character(ObjectParent, DefaultCharacter):
         device.db.placed_time = time.time()
         device.db.concealment = self.get_skill("stealth") + self.get_stat("agility")
         device.db.detected_by = []
+        if hasattr(device, "schedule_expiry"):
+            device.schedule_expiry()
 
         self.msg("You carefully set a concealed device.")
         msg_room(self, f"{self.key} crouches briefly near the ground.", exclude=[self])
@@ -6813,14 +6826,25 @@ class Character(ObjectParent, DefaultCharacter):
             return True
 
         self.msg(f"You release {spell_name}.")
-        resolved = self.resolve_spell(
-            spell_name,
-            total_power,
-            spell_def=spell_metadata,
-            quality=quality,
-            target=target,
-            wild_modifier=wild_modifier,
-        )
+        if target_mode == "single" and target is not None:
+            with direct_interest(self, [target], channel="spell"):
+                resolved = self.resolve_spell(
+                    spell_name,
+                    total_power,
+                    spell_def=spell_metadata,
+                    quality=quality,
+                    target=target,
+                    wild_modifier=wild_modifier,
+                )
+        else:
+            resolved = self.resolve_spell(
+                spell_name,
+                total_power,
+                spell_def=spell_metadata,
+                quality=quality,
+                target=target,
+                wild_modifier=wild_modifier,
+            )
         if not resolved:
             return False
 
@@ -8050,6 +8074,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.clear_state("aiming")
         self.clear_state("ranger_aiming")
         self.clear_state("ranger_snipe")
+        clear_direct_interest(self, channel="aim")
 
     def get_pressure(self, target=None):
         self.ensure_core_defaults()
@@ -8214,7 +8239,13 @@ class Character(ObjectParent, DefaultCharacter):
 
     def _get_roundtime_schedule_key(self):
         object_id = int(getattr(self, "id", 0) or 0)
-        return f"character.roundtime.{object_id or id(self)}"
+        if object_id > 0:
+            return f"combat:roundtime:{object_id}"
+        dbref = str(getattr(self, "dbref", "") or "").strip().lstrip("#")
+        if dbref.isdigit():
+            return f"combat:roundtime:{dbref}"
+        stable_name = str(getattr(self, "key", "character") or "character").strip().lower().replace(" ", "-")
+        return f"combat:roundtime:{stable_name}"
 
     def _expire_roundtime(self, expected_end=None):
         self.ensure_core_defaults()
@@ -8232,6 +8263,7 @@ class Character(ObjectParent, DefaultCharacter):
     def set_roundtime(self, seconds):
         self.ensure_core_defaults()
         from world.systems.scheduler import cancel, schedule
+        from world.systems.time_model import SCHEDULED_EXPIRY
 
         seconds = max(0.0, float(seconds or 0.0))
         if seconds <= 0.0:
@@ -8246,8 +8278,8 @@ class Character(ObjectParent, DefaultCharacter):
             seconds,
             self._expire_roundtime,
             key=self._get_roundtime_schedule_key(),
-            source="combat.roundtime",
-            timing_mode="scheduled_expiry",
+            system="combat.roundtime",
+            timing_mode=SCHEDULED_EXPIRY,
             expected_end=target_end,
         )
         self.sync_client_state()
@@ -8256,6 +8288,7 @@ class Character(ObjectParent, DefaultCharacter):
     def apply_thief_roundtime(self, seconds, minimum=0.5):
         self.ensure_core_defaults()
         from world.systems.scheduler import schedule
+        from world.systems.time_model import SCHEDULED_EXPIRY
 
         seconds = max(float(minimum), float(seconds))
         current_end = float(self.db.roundtime_end or 0)
@@ -8266,8 +8299,8 @@ class Character(ObjectParent, DefaultCharacter):
             max(0.0, target_end - now),
             self._expire_roundtime,
             key=self._get_roundtime_schedule_key(),
-            source="thief.roundtime",
-            timing_mode="scheduled_expiry",
+            system="thief.roundtime",
+            timing_mode=SCHEDULED_EXPIRY,
             expected_end=target_end,
         )
         self.sync_client_state()
@@ -9235,6 +9268,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.aiming = target.id
         self.set_state("aiming", target.id)
         self.set_state("ranger_aiming", {"target_id": target.id, "stacks": stacks, "timestamp": time.time()})
+        sync_direct_interest(self, [target], channel="aim")
         return True, stacks
 
     def maybe_break_ranger_aim_on_hit(self, damage_amount):
@@ -11338,6 +11372,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.target = None
             self.db.in_combat = False
             self.db.aiming = None
+            clear_direct_interest(self, channel="combat")
             self.sync_client_state()
             return
 
@@ -11346,6 +11381,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         self.db.target = target
         self.db.in_combat = target is not None
+        sync_direct_interest(self, [target] if target is not None else [], channel="combat")
         if target is not None and old_target != target:
             self.maybe_warn_low_favor()
         if target is None:
@@ -11446,6 +11482,7 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_move(self, source_location, **kwargs):
         super().at_post_move(source_location, **kwargs)
+        sync_subject_interest(self, previous_room=source_location)
         try:
             from systems.onboarding import handle_room_entry
 

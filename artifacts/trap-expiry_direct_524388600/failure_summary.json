@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": "critical",
+  "message": "",
+  "mode": "direct",
+  "scenario": "trap-expiry",
+  "seed": 524388600
+}

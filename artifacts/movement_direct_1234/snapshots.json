@@ -6,7 +6,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7593,
+        "id": 7611,
         "is_dead": false,
         "key": "TEST_MOVE_CHAR",
         "life_state": "ALIVE",
@@ -28,31 +28,31 @@
       "object_deltas": {
         "created": [
           {
-            "id": 7589,
+            "id": 7607,
             "key": "TEST_MOVE_START",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7590,
+            "id": 7608,
             "key": "TEST_MOVE_NORTH",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 7591,
+            "id": 7609,
             "key": "north",
             "location": "TEST_MOVE_START",
             "typeclass": "typeclasses.exits.Exit"
           },
           {
-            "id": 7592,
+            "id": 7610,
             "key": "south",
             "location": "TEST_MOVE_NORTH",
             "typeclass": "typeclasses.exits.Exit"
           },
           {
-            "id": 7593,
+            "id": 7611,
             "key": "TEST_MOVE_CHAR",
             "location": "TEST_MOVE_START",
             "typeclass": "typeclasses.characters.Character"
@@ -68,11 +68,11 @@
         "exits": [
           "north"
         ],
-        "id": 7589,
+        "id": 7607,
         "key": "TEST_MOVE_START"
       },
       "snapshot_label": "look",
-      "timestamp": 1774957614.1652217
+      "timestamp": 1774964932.4595914
     },
     "label": "look"
   },
@@ -83,7 +83,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7593,
+        "id": 7611,
         "is_dead": false,
         "key": "TEST_MOVE_CHAR",
         "life_state": "ALIVE",
@@ -114,11 +114,11 @@
         "exits": [
           "south"
         ],
-        "id": 7590,
+        "id": 7608,
         "key": "TEST_MOVE_NORTH"
       },
       "snapshot_label": "north",
-      "timestamp": 1774957614.9699497
+      "timestamp": 1774964933.444143
     },
     "label": "north"
   },
@@ -129,7 +129,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7593,
+        "id": 7611,
         "is_dead": false,
         "key": "TEST_MOVE_CHAR",
         "life_state": "ALIVE",
@@ -160,11 +160,11 @@
         "exits": [
           "south"
         ],
-        "id": 7590,
+        "id": 7608,
         "key": "TEST_MOVE_NORTH"
       },
       "snapshot_label": "look",
-      "timestamp": 1774957615.3709617
+      "timestamp": 1774964934.1758044
     },
     "label": "look"
   },
@@ -175,7 +175,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 7593,
+        "id": 7611,
         "is_dead": false,
         "key": "TEST_MOVE_CHAR",
         "life_state": "ALIVE",
@@ -206,11 +206,11 @@
         "exits": [
           "south"
         ],
-        "id": 7590,
+        "id": 7608,
         "key": "TEST_MOVE_NORTH"
       },
       "snapshot_label": "final",
-      "timestamp": 1774957616.2161496
+      "timestamp": 1774964934.4921303
     },
     "label": "final"
   }

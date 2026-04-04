@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 1981, in scenario
+    raise AssertionError(f"Activation metrics scenario did not fully deactivate the caller: {get_activation_sources(caller)}")
+AssertionError: Activation metrics scenario did not fully deactivate the caller: [{'type': 'room', 'source': 'room:TEST_INTEREST_METRICS_TARGET', 'source_key': 'room-subject:8009', 'added_at': 1774983268.919905}]

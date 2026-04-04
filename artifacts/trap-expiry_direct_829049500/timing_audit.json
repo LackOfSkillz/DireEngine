@@ -1,0 +1,365 @@
+{
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "breakdown": {
+      "by_key": {},
+      "by_system": {},
+      "by_timing_mode": {}
+    }
+  },
+  "scripts": {
+    "active_script_count": 19,
+    "active_scripts": [
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6586,
+        "object_key": "corpse of death victim",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": false,
+        "key": "corpse_decay",
+        "object_id": 6591,
+        "object_key": "corpse of death victim",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6663,
+        "object_key": "corpse of loot goblin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6671,
+        "object_key": "corpse of loot goblin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6686,
+        "object_key": "corpse of loot goblin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6699,
+        "object_key": "corpse of loot goblin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6780,
+        "object_key": "corpse of cleric_q1_dead",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6784,
+        "object_key": "corpse of cleric_q2_dead",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6818,
+        "object_key": "corpse of deathtest_owner_378260",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": false,
+        "key": "corpse_decay",
+        "object_id": 6822,
+        "object_key": "corpse of deathadmin_owner_505092",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6826,
+        "object_key": "corpse of evenniaadmin_owner_550232",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": false,
+        "key": "corpse_decay",
+        "object_id": 6830,
+        "object_key": "corpse of deathadmin_owner_580577",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 7200,
+        "is_active": true,
+        "key": "grave_maintenance",
+        "object_id": 6831,
+        "object_key": "grave of deathadmin_owner_580577",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.GraveMaintenanceScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6835,
+        "object_key": "corpse of deathinspect_owner_760156",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_invasion",
+        "object_id": 7204,
+        "object_key": "Breach Corridor",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingInvasionScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 7200,
+        "is_active": true,
+        "key": "grave_maintenance",
+        "object_id": 7254,
+        "object_key": "grave of manualpass6342",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.GraveMaintenanceScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 7200,
+        "is_active": true,
+        "key": "grave_maintenance",
+        "object_id": 7270,
+        "object_key": "grave of training goblin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.GraveMaintenanceScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 5,
+        "is_active": true,
+        "key": "onboarding_roleplay",
+        "object_id": 7626,
+        "object_key": "Marshal Vey",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingRoleplayScript"
+      },
+      {
+        "classification": "controller",
+        "interval": 5,
+        "is_active": true,
+        "key": "onboarding_roleplay",
+        "object_id": 7627,
+        "object_key": "Pip the Gremlin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingRoleplayScript"
+      }
+    ],
+    "unclassified_scripts": []
+  },
+  "tick_audit_warnings": [
+    {
+      "kind": "tick_function",
+      "line": 88,
+      "message": "suspicious tick-like function: _get_cached_tick_npcs",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 104,
+      "message": "suspicious tick-like function: _npc_needs_status_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 147,
+      "message": "suspicious tick-like function: _iter_tick_characters",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 645,
+      "message": "suspicious tick-like function: _log_slow_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 681,
+      "message": "suspicious tick-like function: process_status_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 854,
+      "message": "suspicious tick-like function: process_learning_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 104,
+      "message": "suspicious tick-like function: _build_ticker_performance",
+      "path": "C:\\Users\\gary\\dragonsire\\tools\\diretest\\core\\metrics.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 2011,
+      "message": "suspicious tick-like function: process_cleric_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 2155,
+      "message": "suspicious tick-like function: process_soul_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 2285,
+      "message": "suspicious tick-like function: process_resurrection_recovery_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 4248,
+      "message": "suspicious tick-like function: process_empath_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 4885,
+      "message": "suspicious tick-like function: process_justice_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 4913,
+      "message": "suspicious tick-like function: process_thief_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 4971,
+      "message": "suspicious tick-like function: process_warrior_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 5054,
+      "message": "suspicious tick-like function: process_ranger_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 8063,
+      "message": "suspicious tick-like function: process_combat_range_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 84,
+      "message": "suspicious tick-like function: ai_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\npcs.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 210,
+      "message": "suspicious tick-like function: npc_combat_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\npcs.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 111,
+      "message": "suspicious tick-like function: at_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\trap_device.py"
+    },
+    {
+      "kind": "while_true",
+      "line": 757,
+      "message": "while True loop found in gameplay code",
+      "path": "C:\\Users\\gary\\dragonsire\\world\\the_landing.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 14,
+      "message": "suspicious tick-like function: scan_for_tick_violations",
+      "path": "C:\\Users\\gary\\dragonsire\\world\\systems\\tick_audit.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 25,
+      "message": "suspicious tick-like function: _ticker_registry_key",
+      "path": "C:\\Users\\gary\\dragonsire\\world\\systems\\timing_audit.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 29,
+      "message": "suspicious tick-like function: register_ticker_metadata",
+      "path": "C:\\Users\\gary\\dragonsire\\world\\systems\\timing_audit.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 44,
+      "message": "suspicious tick-like function: unregister_ticker_metadata",
+      "path": "C:\\Users\\gary\\dragonsire\\world\\systems\\timing_audit.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 49,
+      "message": "suspicious tick-like function: get_ticker_snapshot",
+      "path": "C:\\Users\\gary\\dragonsire\\world\\systems\\timing_audit.py"
+    }
+  ],
+  "tickers": {
+    "performance": {},
+    "registered_ticker_count": 0,
+    "registered_tickers": []
+  },
+  "unclassified_registrations": []
+}

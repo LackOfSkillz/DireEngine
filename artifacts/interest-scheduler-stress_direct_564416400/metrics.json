@@ -1,0 +1,590 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.3572999848984182,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": null
+    }
+  ],
+  "command_timings_ms": [
+    0.3572999848984182
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.3572999848984182
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775000599.837536,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.3572999848984182,
+    "jitter": 0.0,
+    "max_ms": 0.3572999848984182,
+    "min_ms": 0.3572999848984182,
+    "p95_ms": 0.3572999848984182,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT flush_due",
+      "ms": 0.3572999848984182,
+      "snapshot": null
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT flush_due"
+    ],
+    "executed_jobs": 24,
+    "output_log": [],
+    "queue_peak": 24,
+    "snapshot_count": 0,
+    "snapshot_labels": [],
+    "total_jobs": 24
+  },
+  "scenario_duration_ms": 8,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 24,
+    "flush_executed_total": 24,
+    "flush_total": 1,
+    "job_key_breakdown": {
+      "diretest:scheduler-stress:0": 1,
+      "diretest:scheduler-stress:1": 1,
+      "diretest:scheduler-stress:10": 1,
+      "diretest:scheduler-stress:11": 1,
+      "diretest:scheduler-stress:12": 1,
+      "diretest:scheduler-stress:13": 1,
+      "diretest:scheduler-stress:14": 1,
+      "diretest:scheduler-stress:15": 1,
+      "diretest:scheduler-stress:16": 1,
+      "diretest:scheduler-stress:17": 1,
+      "diretest:scheduler-stress:18": 1,
+      "diretest:scheduler-stress:19": 1,
+      "diretest:scheduler-stress:2": 1,
+      "diretest:scheduler-stress:20": 1,
+      "diretest:scheduler-stress:21": 1,
+      "diretest:scheduler-stress:22": 1,
+      "diretest:scheduler-stress:23": 1,
+      "diretest:scheduler-stress:3": 1,
+      "diretest:scheduler-stress:4": 1,
+      "diretest:scheduler-stress:5": 1,
+      "diretest:scheduler-stress:6": 1,
+      "diretest:scheduler-stress:7": 1,
+      "diretest:scheduler-stress:8": 1,
+      "diretest:scheduler-stress:9": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 24.0,
+    "reschedule_total": 0,
+    "scheduled_total": 24,
+    "skip_total": 0,
+    "system_counts": {
+      "diretest.scheduler_stress": 24
+    },
+    "systems_exercised": [
+      "diretest.scheduler_stress"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 24
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 24,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [],
+  "started_at": 1775000599.278617,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 24,
+      "flush_total": 1
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Scheduler stress validation is structural and should surface lag without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "diretest:scheduler-stress:0": 1,
+      "diretest:scheduler-stress:1": 1,
+      "diretest:scheduler-stress:10": 1,
+      "diretest:scheduler-stress:11": 1,
+      "diretest:scheduler-stress:12": 1,
+      "diretest:scheduler-stress:13": 1,
+      "diretest:scheduler-stress:14": 1,
+      "diretest:scheduler-stress:15": 1,
+      "diretest:scheduler-stress:16": 1,
+      "diretest:scheduler-stress:17": 1,
+      "diretest:scheduler-stress:18": 1,
+      "diretest:scheduler-stress:19": 1,
+      "diretest:scheduler-stress:2": 1,
+      "diretest:scheduler-stress:20": 1,
+      "diretest:scheduler-stress:21": 1,
+      "diretest:scheduler-stress:22": 1,
+      "diretest:scheduler-stress:23": 1,
+      "diretest:scheduler-stress:3": 1,
+      "diretest:scheduler-stress:4": 1,
+      "diretest:scheduler-stress:5": 1,
+      "diretest:scheduler-stress:6": 1,
+      "diretest:scheduler-stress:7": 1,
+      "diretest:scheduler-stress:8": 1,
+      "diretest:scheduler-stress:9": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {
+      "avg_ms": 0.0005083323533957204,
+      "count": 24,
+      "entries": [
+        {
+          "duration_ms": 0.001400010660290718,
+          "metadata": {
+            "created_at": 1775000599.2815912,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:0",
+            "owner": "owner:0",
+            "owner_label": "owner:0",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000700005330145359,
+          "metadata": {
+            "created_at": 1775000599.2815912,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:1",
+            "owner": "owner:1",
+            "owner_label": "owner:1",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1775000599.2815912,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:2",
+            "owner": "owner:2",
+            "owner_label": "owner:2",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.001200009137392044,
+          "metadata": {
+            "created_at": 1775000599.2815912,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:3",
+            "owner": "owner:3",
+            "owner_label": "owner:3",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1775000599.2815912,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:4",
+            "owner": "owner:4",
+            "owner_label": "owner:4",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:5",
+            "owner": "owner:5",
+            "owner_label": "owner:5",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:6",
+            "owner": "owner:6",
+            "owner_label": "owner:6",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.0007999478839337826,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:7",
+            "owner": "owner:7",
+            "owner_label": "owner:7",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:8",
+            "owner": "owner:8",
+            "owner_label": "owner:8",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:9",
+            "owner": "owner:9",
+            "owner_label": "owner:9",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:10",
+            "owner": "owner:10",
+            "owner_label": "owner:10",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:11",
+            "owner": "owner:11",
+            "owner_label": "owner:11",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000200001522898674,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:12",
+            "owner": "owner:12",
+            "owner_label": "owner:12",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:13",
+            "owner": "owner:13",
+            "owner_label": "owner:13",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2825303
+        },
+        {
+          "duration_ms": 0.0010999501682817936,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:14",
+            "owner": "owner:14",
+            "owner_label": "owner:14",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000600004568696022,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:15",
+            "owner": "owner:15",
+            "owner_label": "owner:15",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000500003807246685,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:16",
+            "owner": "owner:16",
+            "owner_label": "owner:16",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:17",
+            "owner": "owner:17",
+            "owner_label": "owner:17",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:18",
+            "owner": "owner:18",
+            "owner_label": "owner:18",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000200001522898674,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:19",
+            "owner": "owner:19",
+            "owner_label": "owner:19",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:20",
+            "owner": "owner:20",
+            "owner_label": "owner:20",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000400003045797348,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:21",
+            "owner": "owner:21",
+            "owner_label": "owner:21",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:22",
+            "owner": "owner:22",
+            "owner_label": "owner:22",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        },
+        {
+          "duration_ms": 0.000300002284348011,
+          "metadata": {
+            "created_at": 1775000599.2825303,
+            "delay_s": 0.0,
+            "key": "diretest:scheduler-stress:23",
+            "owner": "owner:23",
+            "owner_label": "owner:23",
+            "source": "diretest.scheduler_stress",
+            "system": "diretest.scheduler_stress",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775000599.2835853
+        }
+      ],
+      "max_ms": 0.001400010660290718,
+      "total_ms": 0.012199976481497288
+    }
+  },
+  "xp_delta": 0
+}

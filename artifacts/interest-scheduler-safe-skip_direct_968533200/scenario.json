@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Structural scheduler defer validation should report lag without failing on environment-specific latency."
+  },
+  "mode": "direct",
+  "name": "interest-scheduler-safe-skip",
+  "seed": 968533200,
+  "started_at": 1774999494.938977
+}

@@ -73,7 +73,7 @@ class CmdHelp(EvenniaCmdHelp):
     staff_groups = OrderedDict(
         (
             ("Spawn Tools", ("spawnnpc", "spawnweapon", "spawnwearable", "spawnsheath", "spawnbox", "spawnlockpick", "spawnvendor")),
-            ("Admin Tools", ("@deathinspect", "@decaycorpse", "@racemods", "@res", "ban", "boot", "creeper", "die", "emit", "perm", "renew", "setrace", "survivaldebug", "unban", "wall")),
+            ("Admin Tools", ("@deathinspect", "@decaycorpse", "@engine", "@racemods", "@res", "ban", "boot", "creeper", "die", "emit", "perm", "renew", "setrace", "survivaldebug", "unban", "wall")),
             ("World Building", ("@open", "alias", "batchcode", "batchcommands", "cmdsets", "copy", "cpattr", "create", "desc", "destroy", "dig", "examine", "find", "force", "link", "lock", "mvattr", "name", "set", "sethelp", "sethome", "spawn", "tag", "teleport", "tunnel", "typeclass", "unlink", "wipe")),
         )
     )

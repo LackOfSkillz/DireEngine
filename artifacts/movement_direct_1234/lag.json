@@ -1,30 +1,30 @@
 {
   "combat_responsiveness_ms": 0.0,
-  "first_response_ms": 29.590466680626076,
+  "first_response_ms": 35.57236665316547,
   "lag": {
-    "avg_ms": 173.56486667025214,
-    "jitter": 268.30743876499815,
-    "max_ms": 483.3793999860063,
-    "min_ms": 18.344700045417994,
-    "p95_ms": 436.93850998533884,
+    "avg_ms": 215.2953666712468,
+    "jitter": 327.87324038479613,
+    "max_ms": 593.8565999967977,
+    "min_ms": 21.609499992337078,
+    "p95_ms": 537.5129399995785,
     "slow_count": 1,
     "spike_count": 1,
-    "status": "bad"
+    "status": "critical"
   },
   "lag_events": [
     {
       "command": "look",
-      "ms": 18.344700045417994,
+      "ms": 21.609499992337078,
       "snapshot": "look"
     },
     {
       "command": "north",
-      "ms": 483.3793999860063,
+      "ms": 593.8565999967977,
       "snapshot": "north"
     },
     {
       "command": "look",
-      "ms": 18.97049997933209,
+      "ms": 30.420000024605542,
       "snapshot": "look"
     }
   ],
@@ -35,16 +35,16 @@
   "slow_commands": [
     {
       "cmd": "north",
-      "ms": 483.3793999860063
+      "ms": 593.8565999967977
     }
   ],
   "spike_events": [
     {
       "combat_response_ms": null,
       "command": "north",
-      "first_response_ms": 51.594800024759024,
+      "first_response_ms": 54.92409999715164,
       "kind": "command",
-      "ms": 483.3793999860063,
+      "ms": 593.8565999967977,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -56,9 +56,9 @@
     {
       "combat_response_ms": null,
       "command": "look",
-      "first_response_ms": 18.267399980686605,
+      "first_response_ms": 21.497200010344386,
       "kind": "command",
-      "ms": 18.344700045417994,
+      "ms": 21.609499992337078,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -68,9 +68,9 @@
     {
       "combat_response_ms": null,
       "command": "north",
-      "first_response_ms": 51.594800024759024,
+      "first_response_ms": 54.92409999715164,
       "kind": "command",
-      "ms": 483.3793999860063,
+      "ms": 593.8565999967977,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -80,9 +80,9 @@
     {
       "combat_response_ms": null,
       "command": "look",
-      "first_response_ms": 18.909200036432594,
+      "first_response_ms": 30.29579995200038,
       "kind": "command",
-      "ms": 18.97049997933209,
+      "ms": 30.420000024605542,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,

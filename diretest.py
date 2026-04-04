@@ -2463,6 +2463,531 @@ def run_interest_scheduler_safe_skip_scenario(args):
     )
 
 
+@register_scenario(
+    "interest-scheduler-stress",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Scheduler stress validation is structural and should surface lag without failing on environment-specific latency.",
+    },
+)
+def run_interest_scheduler_stress_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import world.systems.scheduler as scheduler_module
+
+        from world.systems.metrics import snapshot_metrics
+        from world.systems.scheduler import cancel, flush_due, get_scheduler_snapshot, schedule
+
+        total_jobs = 24
+        key_prefix = "diretest:scheduler-stress"
+        system_name = "diretest.scheduler_stress"
+        system_metric_key = "scheduler.queue.system.diretest_scheduler_stress"
+        callback_hits = []
+        scheduled_keys = []
+        owner_limit = scheduler_module.MAX_JOBS_PER_OWNER
+        system_limit = scheduler_module.MAX_JOBS_PER_SYSTEM
+        total_limit = scheduler_module.MAX_TOTAL_JOBS
+
+        try:
+            scheduler_module.MAX_JOBS_PER_OWNER = max(int(owner_limit or 0), total_jobs)
+            scheduler_module.MAX_JOBS_PER_SYSTEM = max(int(system_limit or 0), total_jobs)
+            scheduler_module.MAX_TOTAL_JOBS = max(int(total_limit or 0), total_jobs)
+
+            for index in range(total_jobs):
+                key = f"{key_prefix}:{index}"
+                scheduled_keys.append(key)
+                schedule(
+                    0,
+                    lambda job_index=index: callback_hits.append(job_index),
+                    key=key,
+                    owner=f"owner:{index}",
+                    system=system_name,
+                )
+
+            queued_snapshot = get_scheduler_snapshot() or {}
+            queued_jobs = [job for job in list(queued_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "").startswith(key_prefix)]
+            if len(queued_jobs) != total_jobs:
+                raise AssertionError(f"Scheduler stress scenario queued an unexpected job count: {queued_snapshot}")
+            if int((queued_snapshot.get("by_system", {}) or {}).get(system_name, 0) or 0) != total_jobs:
+                raise AssertionError(f"Scheduler stress scenario did not expose by-system counts: {queued_snapshot}")
+
+            queued_metrics = dict(snapshot_metrics() or {})
+            queued_gauges = dict((queued_metrics.get("gauges", {}) or {}))
+            if int(queued_gauges.get("scheduler.queue.current", 0) or 0) != total_jobs:
+                raise AssertionError(f"Scheduler stress scenario did not update queue depth metrics: {queued_metrics}")
+            if int(queued_gauges.get(system_metric_key, 0) or 0) != total_jobs:
+                raise AssertionError(f"Scheduler stress scenario did not update system queue gauges: {queued_metrics}")
+
+            executed = ctx.direct(flush_due)
+            if int(executed or 0) != total_jobs:
+                raise AssertionError(f"Scheduler stress scenario executed {executed} jobs instead of {total_jobs}.")
+            if sorted(callback_hits) != list(range(total_jobs)):
+                raise AssertionError(f"Scheduler stress scenario lost callbacks under load: {callback_hits}")
+
+            final_snapshot = get_scheduler_snapshot() or {}
+            if any(str(job.get("key", "") or "").startswith(key_prefix) for job in list(final_snapshot.get("active_jobs", []) or [])):
+                raise AssertionError(f"Scheduler stress scenario left jobs queued after flush: {final_snapshot}")
+
+            runtime_metrics = dict(snapshot_metrics() or {})
+            counters = dict((runtime_metrics.get("counters", {}) or {}))
+            gauges = dict((runtime_metrics.get("gauges", {}) or {}))
+            if int(counters.get("scheduler.execute", 0) or 0) != total_jobs:
+                raise AssertionError(f"Scheduler stress scenario did not record execute counters correctly: {runtime_metrics}")
+            if int(gauges.get("scheduler.queue.peak", 0) or 0) < total_jobs:
+                raise AssertionError(f"Scheduler stress scenario did not record queue peak metrics: {runtime_metrics}")
+            if int(gauges.get("scheduler.queue.current", 0) or 0) != 0:
+                raise AssertionError(f"Scheduler stress scenario did not drain the queue metrics: {runtime_metrics}")
+            if int(gauges.get(system_metric_key, 0) or 0) != 0:
+                raise AssertionError(f"Scheduler stress scenario did not clear the system gauge after flush: {runtime_metrics}")
+
+            return {
+                "commands": list(ctx.command_log),
+                "total_jobs": total_jobs,
+                "executed_jobs": int(counters.get("scheduler.execute", 0) or 0),
+                "queue_peak": int(gauges.get("scheduler.queue.peak", 0) or 0),
+                "output_log": list(ctx.output_log),
+            }
+        finally:
+            for key in scheduled_keys:
+                cancel(key)
+            scheduler_module.MAX_JOBS_PER_OWNER = owner_limit
+            scheduler_module.MAX_JOBS_PER_SYSTEM = system_limit
+            scheduler_module.MAX_TOTAL_JOBS = total_limit
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-scheduler-stress",
+        scenario_metadata=getattr(run_interest_scheduler_stress_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-scheduler-duplicate-key",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Duplicate-key scheduler validation is structural and should not fail on environment-specific latency.",
+    },
+)
+def run_interest_scheduler_duplicate_key_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.metrics import snapshot_metrics
+        from world.systems.scheduler import cancel, flush_due, get_scheduler_snapshot, schedule
+
+        key_prefix = "diretest:scheduler-duplicate"
+        replace_key = f"{key_prefix}:replace"
+        reject_key = f"{key_prefix}:reject"
+        callback_hits = []
+
+        try:
+            schedule(0, lambda: callback_hits.append("first"), key=replace_key, owner="owner:replace", system="diretest.scheduler_duplicate")
+            schedule(0, lambda: callback_hits.append("second"), key=replace_key, owner="owner:replace", system="diretest.scheduler_duplicate")
+
+            replace_snapshot = get_scheduler_snapshot() or {}
+            replace_jobs = [job for job in list(replace_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "") == replace_key]
+            if len(replace_jobs) != 1:
+                raise AssertionError(f"Duplicate-key replace path left an unexpected queue state: {replace_snapshot}")
+
+            executed_replace = ctx.direct(flush_due)
+            if int(executed_replace or 0) != 1 or callback_hits != ["second"]:
+                raise AssertionError(f"Duplicate-key replace path did not preserve only the latest job: {callback_hits}")
+
+            schedule(0, lambda: callback_hits.append("keep"), key=reject_key, owner="owner:reject", system="diretest.scheduler_duplicate")
+            rejected_job = schedule(
+                0,
+                lambda: callback_hits.append("reject"),
+                key=reject_key,
+                owner="owner:reject",
+                system="diretest.scheduler_duplicate",
+                key_conflict="reject",
+            )
+            if rejected_job is not None:
+                raise AssertionError("Duplicate-key reject path returned a scheduled job instead of rejecting it.")
+
+            reject_snapshot = get_scheduler_snapshot() or {}
+            reject_jobs = [job for job in list(reject_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "") == reject_key]
+            if len(reject_jobs) != 1:
+                raise AssertionError(f"Duplicate-key reject path corrupted the queue state: {reject_snapshot}")
+
+            executed_reject = ctx.direct(flush_due)
+            if int(executed_reject or 0) != 1 or callback_hits != ["second", "keep"]:
+                raise AssertionError(f"Duplicate-key reject path executed the wrong callback set: {callback_hits}")
+
+            runtime_metrics = dict(snapshot_metrics() or {})
+            counters = dict((runtime_metrics.get("counters", {}) or {}))
+            reject_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("scheduler.reject", {}) or {}).get("entries", []) or [])
+            if int(counters.get("scheduler.reject.duplicate-key", 0) or 0) != 1:
+                raise AssertionError(f"Duplicate-key scenario did not record the reject counter: {runtime_metrics}")
+            if not any(str(((entry or {}).get("metadata", {}) or {}).get("reason", "") or "") == "duplicate-key" for entry in reject_entries):
+                raise AssertionError(f"Duplicate-key scenario did not record reject metadata: {runtime_metrics}")
+
+            return {
+                "commands": list(ctx.command_log),
+                "executed_jobs": int(counters.get("scheduler.execute", 0) or 0),
+                "duplicate_rejections": int(counters.get("scheduler.reject.duplicate-key", 0) or 0),
+                "output_log": list(ctx.output_log),
+            }
+        finally:
+            cancel(replace_key)
+            cancel(reject_key)
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-scheduler-duplicate-key",
+        scenario_metadata=getattr(run_interest_scheduler_duplicate_key_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-scheduler-quota-violation",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Quota enforcement validation is structural and should not fail on environment-specific latency.",
+    },
+)
+def run_interest_scheduler_quota_violation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import world.systems.scheduler as scheduler_module
+
+        from world.systems.metrics import snapshot_metrics
+        from world.systems.scheduler import cancel, flush_due, get_scheduler_snapshot, schedule
+
+        key_prefix = "diretest:scheduler-quota"
+        owner_limit = scheduler_module.MAX_JOBS_PER_OWNER
+        system_limit = scheduler_module.MAX_JOBS_PER_SYSTEM
+        total_limit = scheduler_module.MAX_TOTAL_JOBS
+        owner_behavior = scheduler_module.OWNER_QUOTA_BEHAVIOR
+        system_behavior = scheduler_module.SYSTEM_QUOTA_BEHAVIOR
+        global_behavior = scheduler_module.GLOBAL_QUOTA_BEHAVIOR
+        scheduled_keys = []
+
+        def _assert_reject_entry(entries, reason, scope, limit):
+            for entry in entries:
+                metadata = dict(((entry or {}).get("metadata", {}) or {}))
+                if str(metadata.get("reason", "") or "") != reason:
+                    continue
+                if str(metadata.get("quota_scope", "") or "") != scope:
+                    continue
+                if int(metadata.get("quota_limit", 0) or 0) != limit:
+                    continue
+                return True
+            return False
+
+        try:
+            scheduler_module.OWNER_QUOTA_BEHAVIOR = "reject"
+            scheduler_module.SYSTEM_QUOTA_BEHAVIOR = "reject"
+            scheduler_module.GLOBAL_QUOTA_BEHAVIOR = "reject"
+            scheduler_module.MAX_JOBS_PER_OWNER = 1
+            scheduler_module.MAX_JOBS_PER_SYSTEM = 2
+            scheduler_module.MAX_TOTAL_JOBS = 10
+
+            owner_key = f"{key_prefix}:owner:1"
+            owner_reject_key = f"{key_prefix}:owner:2"
+            system_key = f"{key_prefix}:system:1"
+            system_reject_key = f"{key_prefix}:system:2"
+            scheduled_keys.extend([owner_key, owner_reject_key, system_key, system_reject_key])
+
+            schedule(5, lambda: None, key=owner_key, owner="owner:quota-a", system="diretest.scheduler_quota")
+            owner_reject = schedule(5, lambda: None, key=owner_reject_key, owner="owner:quota-a", system="diretest.scheduler_quota")
+            schedule(5, lambda: None, key=system_key, owner="owner:quota-b", system="diretest.scheduler_quota")
+            system_reject = schedule(5, lambda: None, key=system_reject_key, owner="owner:quota-c", system="diretest.scheduler_quota")
+
+            if owner_reject is not None or system_reject is not None:
+                raise AssertionError("Quota scenario failed to reject owner or system overflow.")
+
+            owner_system_snapshot = get_scheduler_snapshot() or {}
+            owner_system_jobs = [
+                job for job in list(owner_system_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "").startswith(key_prefix)
+            ]
+            if len(owner_system_jobs) != 2:
+                raise AssertionError(f"Quota scenario retained an unexpected job count after owner/system rejections: {owner_system_snapshot}")
+
+            cancel(owner_key)
+            cancel(system_key)
+
+            scheduler_module.MAX_JOBS_PER_OWNER = 10
+            scheduler_module.MAX_JOBS_PER_SYSTEM = 10
+            scheduler_module.MAX_TOTAL_JOBS = 2
+
+            global_key_a = f"{key_prefix}:global:1"
+            global_key_b = f"{key_prefix}:global:2"
+            global_key_c = f"{key_prefix}:global:3"
+            scheduled_keys.extend([global_key_a, global_key_b, global_key_c])
+
+            schedule(5, lambda: None, key=global_key_a, owner="owner:global-a", system="diretest.scheduler_quota_a")
+            schedule(5, lambda: None, key=global_key_b, owner="owner:global-b", system="diretest.scheduler_quota_b")
+            global_reject = schedule(5, lambda: None, key=global_key_c, owner="owner:global-c", system="diretest.scheduler_quota_c")
+            if global_reject is not None:
+                raise AssertionError("Quota scenario failed to reject global queue overflow.")
+
+            global_snapshot = get_scheduler_snapshot() or {}
+            global_jobs = [
+                job for job in list(global_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "").startswith(key_prefix)
+            ]
+            if len(global_jobs) != 2:
+                raise AssertionError(f"Quota scenario retained an unexpected job count after global rejection: {global_snapshot}")
+
+            runtime_metrics = dict(snapshot_metrics() or {})
+            counters = dict((runtime_metrics.get("counters", {}) or {}))
+            reject_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("scheduler.reject", {}) or {}).get("entries", []) or [])
+            if int(counters.get("scheduler.reject.owner-quota", 0) or 0) != 1:
+                raise AssertionError(f"Quota scenario did not record the owner quota rejection: {runtime_metrics}")
+            if int(counters.get("scheduler.reject.system-quota", 0) or 0) != 1:
+                raise AssertionError(f"Quota scenario did not record the system quota rejection: {runtime_metrics}")
+            if int(counters.get("scheduler.reject.global-quota", 0) or 0) != 1:
+                raise AssertionError(f"Quota scenario did not record the global quota rejection: {runtime_metrics}")
+            if not _assert_reject_entry(reject_entries, "owner-quota", "owner", 1):
+                raise AssertionError(f"Quota scenario did not preserve owner quota metadata on reject events: {runtime_metrics}")
+            if not _assert_reject_entry(reject_entries, "system-quota", "system", 2):
+                raise AssertionError(f"Quota scenario did not preserve system quota metadata on reject events: {runtime_metrics}")
+            if not _assert_reject_entry(reject_entries, "global-quota", "global", 2):
+                raise AssertionError(f"Quota scenario did not preserve global quota metadata on reject events: {runtime_metrics}")
+
+            replace_oldest_key_a = f"{key_prefix}:replace:1"
+            replace_oldest_key_b = f"{key_prefix}:replace:2"
+            replace_oldest_key_c = f"{key_prefix}:replace:3"
+            scheduled_keys.extend([replace_oldest_key_a, replace_oldest_key_b, replace_oldest_key_c])
+
+            cancel(global_key_a)
+            cancel(global_key_b)
+
+            scheduler_module.OWNER_QUOTA_BEHAVIOR = "replace_oldest"
+            scheduler_module.SYSTEM_QUOTA_BEHAVIOR = "reject"
+            scheduler_module.GLOBAL_QUOTA_BEHAVIOR = "reject"
+            scheduler_module.MAX_JOBS_PER_OWNER = 2
+            scheduler_module.MAX_JOBS_PER_SYSTEM = 10
+            scheduler_module.MAX_TOTAL_JOBS = 10
+
+            replace_hits = []
+            schedule(5, lambda: replace_hits.append("oldest"), key=replace_oldest_key_a, owner="owner:replace", system="diretest.scheduler_replace")
+            schedule(5, lambda: replace_hits.append("middle"), key=replace_oldest_key_b, owner="owner:replace", system="diretest.scheduler_replace")
+            replacement_job = schedule(
+                0,
+                lambda: replace_hits.append("newest"),
+                key=replace_oldest_key_c,
+                owner="owner:replace",
+                system="diretest.scheduler_replace",
+            )
+            if replacement_job is None:
+                raise AssertionError("Quota scenario did not admit the replacement job when owner replace_oldest was enabled.")
+
+            replacement_snapshot = get_scheduler_snapshot() or {}
+            replacement_jobs = [
+                job for job in list(replacement_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "").startswith(f"{key_prefix}:replace:")
+            ]
+            replacement_keys = sorted(str(job.get("key", "") or "") for job in replacement_jobs)
+            expected_replacement_keys = sorted([replace_oldest_key_b, replace_oldest_key_c])
+            if replacement_keys != expected_replacement_keys:
+                raise AssertionError(f"Quota scenario did not evict the oldest owner job during replacement: {replacement_snapshot}")
+
+            ctx.direct(scheduler_module.flush_due)
+            if replace_hits != ["newest"]:
+                raise AssertionError(f"Quota scenario did not execute the replacement job correctly: {replace_hits}")
+
+            runtime_metrics = dict(snapshot_metrics() or {})
+            counters = dict((runtime_metrics.get("counters", {}) or {}))
+            replace_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("scheduler.replace", {}) or {}).get("entries", []) or [])
+            if int(counters.get("scheduler.replace.owner-quota", 0) or 0) != 1:
+                raise AssertionError(f"Quota scenario did not record the owner replacement counter: {runtime_metrics}")
+            if not any(
+                str(((entry or {}).get("metadata", {}) or {}).get("evicted_key", "") or "") == replace_oldest_key_a
+                and str(((entry or {}).get("metadata", {}) or {}).get("new_key", "") or "") == replace_oldest_key_c
+                for entry in replace_entries
+            ):
+                raise AssertionError(f"Quota scenario did not record replacement metadata: {runtime_metrics}")
+
+            delay_key_a = f"{key_prefix}:delay:1"
+            delay_key_b = f"{key_prefix}:delay:2"
+            scheduled_keys.extend([delay_key_a, delay_key_b])
+
+            cancel(replace_oldest_key_b)
+            cancel(replace_oldest_key_c)
+
+            scheduler_module.OWNER_QUOTA_BEHAVIOR = "delay"
+            scheduler_module.SYSTEM_QUOTA_BEHAVIOR = "reject"
+            scheduler_module.GLOBAL_QUOTA_BEHAVIOR = "reject"
+            scheduler_module.MAX_JOBS_PER_OWNER = 1
+            scheduler_module.MAX_JOBS_PER_SYSTEM = 10
+            scheduler_module.MAX_TOTAL_JOBS = 10
+
+            delay_hits = []
+            schedule(5, lambda: delay_hits.append("blocking"), key=delay_key_a, owner="owner:delay", system="diretest.scheduler_delay")
+            delayed_job = schedule(
+                0,
+                lambda: delay_hits.append("delayed"),
+                key=delay_key_b,
+                owner="owner:delay",
+                system="diretest.scheduler_delay",
+            )
+            if delayed_job is not None:
+                raise AssertionError("Quota scenario should not admit the overflow job immediately when delay backpressure is enabled.")
+
+            delayed_snapshot = get_scheduler_snapshot() or {}
+            delayed_jobs = [
+                job for job in list(delayed_snapshot.get("delayed_jobs", []) or []) if str(job.get("key", "") or "").startswith(f"{key_prefix}:delay:")
+            ]
+            if len(delayed_jobs) != 1 or str(delayed_jobs[0].get("key", "") or "") != delay_key_b:
+                raise AssertionError(f"Quota scenario did not retain the overflow job in the delayed queue: {delayed_snapshot}")
+            if int(delayed_snapshot.get("delayed_job_count", 0) or 0) != 1:
+                raise AssertionError(f"Quota scenario did not expose delayed queue counts: {delayed_snapshot}")
+
+            cancel(delay_key_a)
+            time.sleep(0.3)
+            ctx.direct(flush_due)
+
+            if delay_hits != ["delayed"]:
+                raise AssertionError(f"Quota scenario did not drain and execute the delayed job after capacity returned: {delay_hits}")
+
+            runtime_metrics = dict(snapshot_metrics() or {})
+            counters = dict((runtime_metrics.get("counters", {}) or {}))
+            delay_entries = list(dict((runtime_metrics.get("events", {}) or {}).get("scheduler.delay", {}) or {}).get("entries", []) or [])
+            if int(counters.get("scheduler.delay.owner-quota", 0) or 0) != 1:
+                raise AssertionError(f"Quota scenario did not record the owner delay counter: {runtime_metrics}")
+            if int(counters.get("scheduler.delay.execute", 0) or 0) != 1:
+                raise AssertionError(f"Quota scenario did not record delayed retry execution: {runtime_metrics}")
+            if not any(
+                str(((entry or {}).get("metadata", {}) or {}).get("key", "") or "") == delay_key_b
+                and str(((entry or {}).get("metadata", {}) or {}).get("quota_behavior", "") or "") == "delay"
+                for entry in delay_entries
+            ):
+                raise AssertionError(f"Quota scenario did not record delayed queue metadata: {runtime_metrics}")
+
+            return {
+                "commands": list(ctx.command_log),
+                "owner_quota_rejections": int(counters.get("scheduler.reject.owner-quota", 0) or 0),
+                "system_quota_rejections": int(counters.get("scheduler.reject.system-quota", 0) or 0),
+                "global_quota_rejections": int(counters.get("scheduler.reject.global-quota", 0) or 0),
+                "owner_quota_replacements": int(counters.get("scheduler.replace.owner-quota", 0) or 0),
+                "owner_quota_delays": int(counters.get("scheduler.delay.owner-quota", 0) or 0),
+                "output_log": list(ctx.output_log),
+            }
+        finally:
+            for key in scheduled_keys:
+                cancel(key)
+            scheduler_module.MAX_JOBS_PER_OWNER = owner_limit
+            scheduler_module.MAX_JOBS_PER_SYSTEM = system_limit
+            scheduler_module.MAX_TOTAL_JOBS = total_limit
+            scheduler_module.OWNER_QUOTA_BEHAVIOR = owner_behavior
+            scheduler_module.SYSTEM_QUOTA_BEHAVIOR = system_behavior
+            scheduler_module.GLOBAL_QUOTA_BEHAVIOR = global_behavior
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-scheduler-quota-violation",
+        scenario_metadata=getattr(run_interest_scheduler_quota_violation_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "interest-scheduler-queue-stability",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Queue stability validation is structural and should not fail on environment-specific latency.",
+    },
+)
+def run_interest_scheduler_queue_stability_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.metrics import snapshot_metrics
+        from world.systems.scheduler import cancel, flush_due, get_scheduler_snapshot, schedule
+
+        cycles = 12
+        jobs_per_cycle = 3
+        key_prefix = "diretest:scheduler-stability"
+        system_name = "diretest.scheduler_stability"
+        system_metric_key = "scheduler.queue.system.diretest_scheduler_stability"
+        callback_hits = []
+        scheduled_keys = []
+
+        try:
+            for cycle in range(cycles):
+                cycle_keys = []
+                for slot in range(jobs_per_cycle):
+                    key = f"{key_prefix}:{cycle}:{slot}"
+                    cycle_keys.append(key)
+                    scheduled_keys.append(key)
+                    schedule(
+                        0,
+                        lambda cycle_index=cycle, slot_index=slot: callback_hits.append((cycle_index, slot_index)),
+                        key=key,
+                        owner=f"owner:stability:{slot}",
+                        system=system_name,
+                    )
+
+                queued_snapshot = get_scheduler_snapshot() or {}
+                queued_jobs = [
+                    job for job in list(queued_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "") in cycle_keys
+                ]
+                if len(queued_jobs) != jobs_per_cycle:
+                    raise AssertionError(f"Queue stability scenario queued an unexpected cycle size: {queued_snapshot}")
+
+                executed = ctx.direct(flush_due)
+                if int(executed or 0) != jobs_per_cycle:
+                    raise AssertionError(f"Queue stability scenario executed {executed} jobs instead of {jobs_per_cycle} in cycle {cycle}.")
+
+                cycle_snapshot = get_scheduler_snapshot() or {}
+                lingering_jobs = [
+                    job for job in list(cycle_snapshot.get("active_jobs", []) or []) if str(job.get("key", "") or "") in cycle_keys
+                ]
+                if lingering_jobs:
+                    raise AssertionError(f"Queue stability scenario leaked jobs after cycle {cycle}: {cycle_snapshot}")
+
+            expected_jobs = cycles * jobs_per_cycle
+            if len(callback_hits) != expected_jobs:
+                raise AssertionError(f"Queue stability scenario lost callbacks across cycles: {callback_hits}")
+
+            runtime_metrics = dict(snapshot_metrics() or {})
+            counters = dict((runtime_metrics.get("counters", {}) or {}))
+            gauges = dict((runtime_metrics.get("gauges", {}) or {}))
+            if int(counters.get("scheduler.schedule", 0) or 0) != expected_jobs:
+                raise AssertionError(f"Queue stability scenario did not record schedule counters correctly: {runtime_metrics}")
+            if int(counters.get("scheduler.execute", 0) or 0) != expected_jobs:
+                raise AssertionError(f"Queue stability scenario did not record execute counters correctly: {runtime_metrics}")
+            if int(gauges.get("scheduler.queue.current", 0) or 0) != 0:
+                raise AssertionError(f"Queue stability scenario left the current queue gauge non-zero: {runtime_metrics}")
+            if int(gauges.get("scheduler.queue.peak", 0) or 0) > jobs_per_cycle:
+                raise AssertionError(f"Queue stability scenario exceeded the expected bounded queue peak: {runtime_metrics}")
+            if int(gauges.get(system_metric_key, 0) or 0) != 0:
+                raise AssertionError(f"Queue stability scenario left the per-system gauge non-zero: {runtime_metrics}")
+
+            final_snapshot = get_scheduler_snapshot() or {}
+            if int(final_snapshot.get("active_job_count", 0) or 0) != 0:
+                raise AssertionError(f"Queue stability scenario left the scheduler non-empty at the end: {final_snapshot}")
+            if int((final_snapshot.get("by_system", {}) or {}).get(system_name, 0) or 0) != 0:
+                raise AssertionError(f"Queue stability scenario left residual by-system counts: {final_snapshot}")
+
+            return {
+                "commands": list(ctx.command_log),
+                "cycles": cycles,
+                "jobs_per_cycle": jobs_per_cycle,
+                "executed_jobs": int(counters.get("scheduler.execute", 0) or 0),
+                "queue_peak": int(gauges.get("scheduler.queue.peak", 0) or 0),
+                "output_log": list(ctx.output_log),
+            }
+        finally:
+            for key in scheduled_keys:
+                cancel(key)
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="interest-scheduler-queue-stability",
+        scenario_metadata=getattr(run_interest_scheduler_queue_stability_scenario, "diretest_metadata", {}),
+    )
+
+
 @register_scenario("onboarding_lag")
 def run_onboarding_lag_scenario(args):
     _setup_django()
@@ -3043,6 +3568,24 @@ def build_parser():
 
     interest_scheduler_safe_skip_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-scheduler-safe-skip"))
     interest_scheduler_safe_skip_parser.set_defaults(handler=run_interest_scheduler_safe_skip_scenario)
+
+    interest_scheduler_stress_parser = _add_common_scenario_args(scenario_subparsers.add_parser("interest-scheduler-stress"))
+    interest_scheduler_stress_parser.set_defaults(handler=run_interest_scheduler_stress_scenario)
+
+    interest_scheduler_duplicate_key_parser = _add_common_scenario_args(
+        scenario_subparsers.add_parser("interest-scheduler-duplicate-key")
+    )
+    interest_scheduler_duplicate_key_parser.set_defaults(handler=run_interest_scheduler_duplicate_key_scenario)
+
+    interest_scheduler_quota_violation_parser = _add_common_scenario_args(
+        scenario_subparsers.add_parser("interest-scheduler-quota-violation")
+    )
+    interest_scheduler_quota_violation_parser.set_defaults(handler=run_interest_scheduler_quota_violation_scenario)
+
+    interest_scheduler_queue_stability_parser = _add_common_scenario_args(
+        scenario_subparsers.add_parser("interest-scheduler-queue-stability")
+    )
+    interest_scheduler_queue_stability_parser.set_defaults(handler=run_interest_scheduler_queue_stability_scenario)
 
     onboarding_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_full"))
     onboarding_parser.add_argument("--name", default="DireTestHero")

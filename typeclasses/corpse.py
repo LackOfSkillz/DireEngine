@@ -36,6 +36,58 @@ class Corpse(ObjectParent, DefaultObject):
     def get_decay_remaining(self):
         return max(0.0, float(getattr(self.db, "decay_time", 0.0) or 0.0) - time.time())
 
+    def _get_decay_schedule_key(self):
+        object_id = int(getattr(self, "id", 0) or 0)
+        if object_id > 0:
+            return f"corpse:decay:{object_id}"
+        dbref = str(getattr(self, "dbref", "") or "").strip().lstrip("#")
+        if dbref.isdigit():
+            return f"corpse:decay:{dbref}"
+        stable_name = str(getattr(self, "key", "corpse") or "corpse").strip().lower().replace(" ", "-")
+        return f"corpse:decay:{stable_name}"
+
+    def at_object_delete(self):
+        self.cancel_decay_transition()
+        return super().at_object_delete()
+
+    def cancel_decay_transition(self):
+        from world.systems.scheduler import cancel
+
+        return cancel(self._get_decay_schedule_key())
+
+    def schedule_decay_transition(self):
+        from world.systems.scheduler import schedule
+        from world.systems.time_model import SCHEDULED_EXPIRY
+
+        decay_time = float(getattr(self.db, "decay_time", 0.0) or 0.0)
+        if decay_time <= 0.0 or not getattr(self.db, "is_corpse", False):
+            self.cancel_decay_transition()
+            return None
+        delay_seconds = max(0.0, decay_time - time.time())
+        return schedule(
+            delay_seconds,
+            self._expire_decay_to_grave,
+            key=self._get_decay_schedule_key(),
+            system="world.corpse_decay",
+            timing_mode=SCHEDULED_EXPIRY,
+            expected_decay_time=decay_time,
+        )
+
+    def _expire_decay_to_grave(self, expected_decay_time=None):
+        if not getattr(self.db, "is_corpse", False):
+            return None
+        if hasattr(self, "is_orphaned") and self.is_orphaned():
+            self.delete()
+            return None
+        current_decay_time = float(getattr(self.db, "decay_time", 0.0) or 0.0)
+        if current_decay_time <= 0.0:
+            return None
+        if expected_decay_time is not None and current_decay_time > float(expected_decay_time or 0.0) + 0.01:
+            return None
+        if time.time() + 0.01 < current_decay_time:
+            return None
+        return self.decay_to_grave()
+
     def get_memory_remaining(self):
         return max(0.0, float(getattr(self.db, "memory_time", 0.0) or 0.0) - time.time())
 
@@ -202,6 +254,7 @@ class Corpse(ObjectParent, DefaultObject):
     def decay_to_grave(self):
         if not getattr(self.db, "is_corpse", False):
             return None
+        self.cancel_decay_transition()
         location = self.location
         owner = self.get_owner()
         existing_grave = None

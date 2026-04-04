@@ -1,0 +1,208 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7667,
+        "is_dead": false,
+        "key": "TEST_TRAP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_TRAP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 7668,
+          "key": "TEST_TRAP_DEVICE",
+          "location": "TEST_TRAP_CHAR",
+          "typeclass": "typeclasses.trap_device.TrapDevice"
+        }
+      ],
+      "label": "carried",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 7666,
+            "key": "TEST_TRAP_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 7667,
+            "key": "TEST_TRAP_CHAR",
+            "location": "TEST_TRAP_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 7668,
+            "key": "TEST_TRAP_DEVICE",
+            "location": "TEST_TRAP_CHAR",
+            "typeclass": "typeclasses.trap_device.TrapDevice"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_TRAP_CHAR"
+        ],
+        "exits": [],
+        "id": 7666,
+        "key": "TEST_TRAP_ROOM"
+      },
+      "snapshot_label": "carried",
+      "timestamp": 1774976628.3524683
+    },
+    "label": "carried"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7667,
+        "is_dead": false,
+        "key": "TEST_TRAP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_TRAP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "deployed",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_TRAP_CHAR",
+          "TEST_TRAP_DEVICE"
+        ],
+        "exits": [],
+        "id": 7666,
+        "key": "TEST_TRAP_ROOM"
+      },
+      "snapshot_label": "deployed",
+      "timestamp": 1774976629.200328
+    },
+    "label": "deployed"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7667,
+        "is_dead": false,
+        "key": "TEST_TRAP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_TRAP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "expired",
+      "object_deltas": {
+        "created": [],
+        "deleted": [
+          {
+            "id": 7668,
+            "key": "TEST_TRAP_DEVICE",
+            "location": "TEST_TRAP_ROOM",
+            "typeclass": "typeclasses.trap_device.TrapDevice"
+          }
+        ]
+      },
+      "room": {
+        "contents": [
+          "TEST_TRAP_CHAR"
+        ],
+        "exits": [],
+        "id": 7666,
+        "key": "TEST_TRAP_ROOM"
+      },
+      "snapshot_label": "expired",
+      "timestamp": 1774976630.1891682
+    },
+    "label": "expired"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 7667,
+        "is_dead": false,
+        "key": "TEST_TRAP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_TRAP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_TRAP_CHAR"
+        ],
+        "exits": [],
+        "id": 7666,
+        "key": "TEST_TRAP_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774976630.5263476
+    },
+    "label": "final"
+  }
+]

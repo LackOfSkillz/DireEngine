@@ -1,0 +1,294 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 4,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT set_roundtime",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 108.38769999099895,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "triggered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "advance",
+      "first_response_ms": 398.1987999868579,
+      "kind": "command",
+      "ms": 398.28649995615706,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "blocked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 63.13590001082048,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "advance",
+      "first_response_ms": 143.49699998274446,
+      "kind": "command",
+      "ms": 143.56310002040118,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    }
+  ],
+  "command_timings_ms": [
+    108.38769999099895,
+    398.28649995615706,
+    63.13590001082048,
+    143.56310002040118
+  ],
+  "commands": {
+    "count": 4,
+    "max_ms": 398.2671999838203,
+    "timings_ms": [
+      108.38769999099895,
+      398.28649995615706,
+      63.13590001082048,
+      143.56310002040118
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1774976579.4684458,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 270.8478999848012,
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 178.34329999459442,
+    "jitter": 150.27885690992497,
+    "max_ms": 398.28649995615706,
+    "min_ms": 63.13590001082048,
+    "p95_ms": 360.07798996579356,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT set_roundtime",
+      "ms": 108.38769999099895,
+      "snapshot": "triggered"
+    },
+    {
+      "command": "advance",
+      "ms": 398.28649995615706,
+      "snapshot": "blocked"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 63.13590001082048,
+      "snapshot": "recovered"
+    },
+    {
+      "command": "advance",
+      "ms": 143.56310002040118,
+      "snapshot": "recovered"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 398.2671999838203,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "RETURN 1774976575.3836522",
+    "You must wait 1.26 seconds before acting.",
+    "RETURN 1",
+    "Advance toward what?"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT set_roundtime",
+      "advance",
+      "DIRECT flush_due",
+      "advance"
+    ],
+    "output_log": [
+      "RETURN 1774976575.3836522",
+      "You must wait 1.26 seconds before acting.",
+      "RETURN 1",
+      "Advance toward what?"
+    ],
+    "remaining_roundtime": 0,
+    "snapshot_count": 5,
+    "snapshot_labels": [
+      "initial",
+      "triggered",
+      "blocked",
+      "recovered",
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 9974,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "events": 1,
+    "flush_executed_total": 1,
+    "flush_total": 1,
+    "job_key_breakdown": {
+      "combat:roundtime:7665": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "system_counts": {
+      "combat.roundtime": 1
+    },
+    "systems_exercised": [
+      "combat.roundtime"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 1
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 1,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "advance",
+      "ms": 398.28649995615706
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "triggered",
+    "blocked",
+    "recovered",
+    "final"
+  ],
+  "started_at": 1774976568.9572372,
+  "state_transition_count": 4,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 1,
+      "flush_total": 1
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Structural roundtime validation should still emit lag telemetry without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "combat:roundtime:7665": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 270.90589998988435,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 398.2671999838203,
+          "metadata": {
+            "character": "TEST_RT_CHAR",
+            "command": "advance"
+          },
+          "timestamp": 1774976574.1204295
+        },
+        {
+          "duration_ms": 143.54459999594837,
+          "metadata": {
+            "character": "TEST_RT_CHAR",
+            "command": "advance"
+          },
+          "timestamp": 1774976575.7078164
+        }
+      ],
+      "max_ms": 398.2671999838203,
+      "total_ms": 541.8117999797687
+    },
+    "scheduler_execute": {
+      "avg_ms": 63.07480001123622,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 63.07480001123622,
+          "metadata": {
+            "delay_s": 2.0,
+            "key": "combat:roundtime:7665",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1774976575.5010638
+        }
+      ],
+      "max_ms": 63.07480001123622,
+      "total_ms": 63.07480001123622
+    }
+  },
+  "xp_delta": 0
+}

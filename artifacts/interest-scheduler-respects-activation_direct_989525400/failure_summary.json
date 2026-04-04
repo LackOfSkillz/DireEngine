@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "IndentationError: expected an indented block after function definition on line 235",
+  "mode": "direct",
+  "scenario": "interest-scheduler-respects-activation",
+  "seed": 989525400
+}

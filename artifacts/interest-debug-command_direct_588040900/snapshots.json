@@ -1,0 +1,72 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8017,
+        "is_dead": false,
+        "key": "TEST_INTEREST_DEBUG_CALLER",
+        "life_state": "ALIVE",
+        "location": "TEST_INTEREST_DEBUG_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 0.0,
+        "target": "TEST_INTEREST_DEBUG_TARGET",
+        "target_summary": {
+          "hp": 100,
+          "id": 8018,
+          "in_combat": false,
+          "key": "TEST_INTEREST_DEBUG_TARGET",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8016,
+            "key": "TEST_INTEREST_DEBUG_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8017,
+            "key": "TEST_INTEREST_DEBUG_CALLER",
+            "location": "TEST_INTEREST_DEBUG_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8018,
+            "key": "TEST_INTEREST_DEBUG_TARGET",
+            "location": "TEST_INTEREST_DEBUG_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_INTEREST_DEBUG_CALLER",
+          "TEST_INTEREST_DEBUG_TARGET"
+        ],
+        "exits": [],
+        "id": 8016,
+        "key": "TEST_INTEREST_DEBUG_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1774984380.0195866
+    },
+    "label": "final"
+  }
+]

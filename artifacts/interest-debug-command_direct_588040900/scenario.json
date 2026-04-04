@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Structural interest-debug command validation should report lag without failing on environment-specific latency."
+  },
+  "mode": "direct",
+  "name": "interest-debug-command",
+  "seed": 588040900,
+  "started_at": 1774984369.545183
+}

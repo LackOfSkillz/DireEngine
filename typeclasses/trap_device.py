@@ -1,6 +1,7 @@
 import random
 import time
 
+from django.db import close_old_connections
 from evennia.objects.objects import DefaultObject
 
 
@@ -17,20 +18,102 @@ class TrapDevice(DefaultObject):
         self.db.concealment = 0
         self.db.detected_by = []
 
+    def at_init(self):
+        super().at_init()
+        if getattr(self.db, "is_trap_device", False):
+            self.schedule_expiry()
+
+    def at_object_delete(self):
+        self.cancel_expiry()
+        return super().at_object_delete()
+
+    def _get_expiry_schedule_key(self):
+        object_id = int(getattr(self, "id", 0) or 0)
+        if object_id > 0:
+            return f"trap:expiry:{object_id}"
+        dbref = str(getattr(self, "dbref", "") or "").strip().lstrip("#")
+        if dbref.isdigit():
+            return f"trap:expiry:{dbref}"
+        stable_name = str(getattr(self, "key", "trap") or "trap").strip().lower().replace(" ", "-")
+        return f"trap:expiry:{stable_name}"
+
+    def get_expiry_timestamp(self):
+        placed_time = float(getattr(self.db, "placed_time", 0.0) or 0.0)
+        expire_time = float(getattr(self.db, "expire_time", 0.0) or 0.0)
+        if placed_time <= 0.0 or expire_time <= 0.0:
+            return 0.0
+        return placed_time + expire_time
+
+    def cancel_expiry(self):
+        from world.systems.scheduler import cancel
+
+        return cancel(self._get_expiry_schedule_key())
+
+    def schedule_expiry(self):
+        from world.systems.scheduler import schedule
+        from world.systems.time_model import SCHEDULED_EXPIRY
+
+        if not getattr(self.db, "is_trap_device", False):
+            self.cancel_expiry()
+            return None
+        expiry_at = self.get_expiry_timestamp()
+        if expiry_at <= 0.0 or not bool(getattr(self.db, "armed", False)) or bool(getattr(self.db, "triggered", False)):
+            self.cancel_expiry()
+            return None
+        delay_seconds = max(0.0, expiry_at - time.time())
+        return schedule(
+            delay_seconds,
+            self._expire_if_due,
+            key=self._get_expiry_schedule_key(),
+            system="world.trap_expiry",
+            timing_mode=SCHEDULED_EXPIRY,
+            expected_expiry_time=expiry_at,
+        )
+
+    def _expire_if_due(self, expected_expiry_time=None):
+        if not getattr(self.db, "is_trap_device", False):
+            return None
+        current_expiry = self.get_expiry_timestamp()
+        if current_expiry <= 0.0:
+            return None
+        if expected_expiry_time is not None and current_expiry > float(expected_expiry_time or 0.0) + 0.01:
+            return None
+        if time.time() + 0.01 < current_expiry:
+            return None
+        if bool(getattr(self.db, "triggered", False)):
+            return None
+        close_old_connections()
+        try:
+            self.delete()
+        except Exception as error:
+            if "database is locked" in str(error or "").lower():
+                from world.systems.scheduler import schedule
+                from world.systems.time_model import SCHEDULED_EXPIRY
+
+                schedule(
+                    0.1,
+                    self._expire_if_due,
+                    key=self._get_expiry_schedule_key(),
+                    system="world.trap_expiry",
+                    timing_mode=SCHEDULED_EXPIRY,
+                    expected_expiry_time=current_expiry,
+                )
+                return False
+            raise
+        return True
+
     def has_expired(self):
-        placed_time = self.db.placed_time
-        expire_time = int(self.db.expire_time or 0)
-        if placed_time is None or expire_time <= 0:
+        expiry_at = self.get_expiry_timestamp()
+        if expiry_at <= 0.0:
             return False
-        return (time.time() - float(placed_time)) > expire_time
+        return time.time() >= expiry_at
 
     def at_tick(self, **kwargs):
-        if self.has_expired():
-            self.delete()
+        return self._expire_if_due(expected_expiry_time=self.get_expiry_timestamp())
 
     def is_active(self):
         if self.has_expired():
-            self.delete()
+            self._expire_if_due(expected_expiry_time=self.get_expiry_timestamp())
             return False
         return bool(self.db.armed) and not bool(self.db.triggered)
 
@@ -61,6 +144,7 @@ class TrapDevice(DefaultObject):
         if not self.is_active() or not target:
             return False
 
+        self.cancel_expiry()
         self.db.triggered = True
         self.db.armed = False
 

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Interest debug command output missing 'Interest Debug': You are not permitted to use @engine.",
+  "mode": "direct",
+  "scenario": "interest-debug-command",
+  "seed": 588040900
+}
