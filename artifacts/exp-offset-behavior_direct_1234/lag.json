@@ -1,0 +1,244 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 0.0,
+  "lag": {
+    "avg_ms": 0.024239996855612844,
+    "jitter": 0.020613975601899436,
+    "max_ms": 0.08169999637175351,
+    "min_ms": 0.012999997125007212,
+    "p95_ms": 0.05690499747288408,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.08169999637175351,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.022299995180219412,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.016699996194802225,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.016399993910454214,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.014499993994832039,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.014200006262399256,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.012999997125007212,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.020399995264597237,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.016599995433352888,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.026599998818710446,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.016469997353851795,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.08169999637175351,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.060699996538460255,
+      "script_delay_sources": [
+        {
+          "ms": 0.060699996538460255,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.022299995180219412,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.01309999788645655,
+      "script_delay_sources": [
+        {
+          "ms": 0.01309999788645655,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.016699996194802225,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.010500007192604244,
+      "script_delay_sources": [
+        {
+          "ms": 0.010500007192604244,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.016399993910454214,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.011099997209385037,
+      "script_delay_sources": [
+        {
+          "ms": 0.011099997209385037,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.014499993994832039,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.009799987310543656,
+      "script_delay_sources": [
+        {
+          "ms": 0.009799987310543656,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.014200006262399256,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.008499991963617504,
+      "script_delay_sources": [
+        {
+          "ms": 0.008499991963617504,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.012999997125007212,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.007999988156370819,
+      "script_delay_sources": [
+        {
+          "ms": 0.007999988156370819,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.020399995264597237,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.011600001016631722,
+      "script_delay_sources": [
+        {
+          "ms": 0.011600001016631722,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.016599995433352888,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.010200004908256233,
+      "script_delay_sources": [
+        {
+          "ms": 0.010200004908256233,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.026599998818710446,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.021200001356191933,
+      "script_delay_sources": [
+        {
+          "ms": 0.021200001356191933,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9402,
+        "is_dead": false,
+        "key": "TEST_EXP_STEALTH_PRACTICE_16",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_STEALTH_PRACTICE_16_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9397,
+            "key": "TEST_EXP_STEALTH_PRACTICE_5_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9398,
+            "key": "TEST_EXP_STEALTH_PRACTICE_5",
+            "location": "TEST_EXP_STEALTH_PRACTICE_5_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9399,
+            "key": "TEST_EXP_STEALTH_PRACTICE_12_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9400,
+            "key": "TEST_EXP_STEALTH_PRACTICE_12",
+            "location": "TEST_EXP_STEALTH_PRACTICE_12_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9401,
+            "key": "TEST_EXP_STEALTH_PRACTICE_16_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9402,
+            "key": "TEST_EXP_STEALTH_PRACTICE_16",
+            "location": "TEST_EXP_STEALTH_PRACTICE_16_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_STEALTH_PRACTICE_16"
+        ],
+        "exits": [],
+        "id": 9401,
+        "key": "TEST_EXP_STEALTH_PRACTICE_16_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775391647.6112802
+    },
+    "label": "final"
+  }
+]

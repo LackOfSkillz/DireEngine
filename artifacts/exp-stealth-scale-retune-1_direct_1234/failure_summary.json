@@ -1,0 +1,8 @@
+{
+  "failure_type": "leak_failure",
+  "lag_status": "ok",
+  "message": "1 test objects were not cleaned up.",
+  "mode": "direct",
+  "scenario": "exp-stealth-scale-retune-1",
+  "seed": 1234
+}

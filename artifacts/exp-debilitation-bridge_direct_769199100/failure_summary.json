@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: exp did not show debilitation after spell casts: You are not currently learning anything.",
+  "mode": "direct",
+  "scenario": "exp-debilitation-bridge",
+  "seed": 769199100
+}

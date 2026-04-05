@@ -4,6 +4,9 @@ extends Control
 const WEBSOCKET_URL := "ws://127.0.0.1:4008"
 
 var socket := WebSocketPeer.new()
+var command_history: Array[String] = []
+var command_history_index := -1
+var command_history_draft := ""
 
 
 func _ready() -> void:
@@ -14,7 +17,10 @@ func _ready() -> void:
 		set_process(false)
 		return
 
+	$CommandInput.focus_mode = Control.FOCUS_ALL
+	$CommandInput.grab_focus()
 	$CommandInput.text_submitted.connect(_on_command_input_text_submitted)
+	$CommandInput.gui_input.connect(_on_command_input_gui_input)
 	$MapPanel.room_clicked.connect(_on_room_clicked)
 	$InventoryPanel.item_action.connect(_on_item_action)
 	$CharacterPanel.equip_item.connect(_on_equip_item)
@@ -97,14 +103,79 @@ func send_command(command_text: String) -> void:
 	$TextLog.add_line("> " + command_text)
 	socket.send_text(payload)
 
+func _remember_command(command_text: String) -> void:
+	var trimmed := command_text.strip_edges()
+	if trimmed.is_empty():
+		return
+	command_history.append(trimmed)
+	if command_history.size() > 100:
+		command_history = command_history.slice(command_history.size() - 100, command_history.size())
+	command_history_index = -1
+	command_history_draft = ""
+
+
+func _set_command_input_text(value: String) -> void:
+	$CommandInput.text = value
+	$CommandInput.caret_column = value.length()
+
+
+func _navigate_command_history(direction: int) -> bool:
+	if command_history.is_empty():
+		return false
+
+	if direction < 0:
+		if command_history_index == -1:
+			command_history_draft = $CommandInput.text
+			command_history_index = command_history.size() - 1
+		elif command_history_index > 0:
+			command_history_index -= 1
+		_set_command_input_text(command_history[command_history_index])
+		return true
+
+	if command_history_index == -1:
+		return false
+
+	if command_history_index < command_history.size() - 1:
+		command_history_index += 1
+		_set_command_input_text(command_history[command_history_index])
+		return true
+
+	command_history_index = -1
+	_set_command_input_text(command_history_draft)
+	command_history_draft = ""
+	return true
+
 
 func _on_command_input_text_submitted(new_text: String) -> void:
 	var trimmed := new_text.strip_edges()
 	if trimmed.is_empty():
 		return
 
+	_remember_command(trimmed)
 	send_command(trimmed)
 	$CommandInput.clear()
+	command_history_draft = ""
+
+func _on_command_input_gui_input(event: InputEvent) -> void:
+	if not (event is InputEventKey):
+		return
+
+	var key_event := event as InputEventKey
+	if not key_event.pressed or key_event.echo:
+		return
+
+	if key_event.keycode == KEY_UP:
+		if _navigate_command_history(-1):
+			$CommandInput.accept_event()
+		return
+
+	if key_event.keycode == KEY_DOWN:
+		if _navigate_command_history(1):
+			$CommandInput.accept_event()
+		return
+
+	if command_history_index == -1:
+		command_history_draft = $CommandInput.text
 
 
 func _on_room_clicked(room_id: int) -> void:

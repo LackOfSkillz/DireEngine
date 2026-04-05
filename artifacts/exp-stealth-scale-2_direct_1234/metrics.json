@@ -1,0 +1,1213 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 24,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 4.218199988827109,
+      "kind": "command",
+      "ms": 44.86550000729039,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 27.026600000681356,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.944700012449175,
+      "kind": "command",
+      "ms": 48.43949998030439,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 21.27270001801662,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.9591999773401767,
+      "kind": "command",
+      "ms": 37.29100001510233,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 29.292200022609904,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.459899988025427,
+      "kind": "command",
+      "ms": 30.007900000782683,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 20.65670001320541,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.9116999940015376,
+      "kind": "command",
+      "ms": 31.016699998872355,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 23.42099999077618,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.066800010856241,
+      "kind": "command",
+      "ms": 31.065399991348386,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 26.643399993190542,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 4.542799986666068,
+      "kind": "command",
+      "ms": 40.847199998097494,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 22.801099985372275,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.389400004176423,
+      "kind": "command",
+      "ms": 29.83039998798631,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 23.998500022571534,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 5.188699986319989,
+      "kind": "command",
+      "ms": 39.29109999444336,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 23.165299993706867,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.6999000110663474,
+      "kind": "command",
+      "ms": 46.456599986413494,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 21.132499998202547,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.109300014330074,
+      "kind": "command",
+      "ms": 39.32609999901615,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 19.825900002615526,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.2770999930799007,
+      "kind": "command",
+      "ms": 27.561099996091798,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 24.44179999292828,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    44.86550000729039,
+    27.026600000681356,
+    48.43949998030439,
+    21.27270001801662,
+    37.29100001510233,
+    29.292200022609904,
+    30.007900000782683,
+    20.65670001320541,
+    31.016699998872355,
+    23.42099999077618,
+    31.065399991348386,
+    26.643399993190542,
+    40.847199998097494,
+    22.801099985372275,
+    29.83039998798631,
+    23.998500022571534,
+    39.29109999444336,
+    23.165299993706867,
+    46.456599986413494,
+    21.132499998202547,
+    39.32609999901615,
+    19.825900002615526,
+    27.561099996091798,
+    24.44179999292828
+  ],
+  "commands": {
+    "count": 24,
+    "max_ms": 48.42740000458434,
+    "timings_ms": [
+      44.86550000729039,
+      27.026600000681356,
+      48.43949998030439,
+      21.27270001801662,
+      37.29100001510233,
+      29.292200022609904,
+      30.007900000782683,
+      20.65670001320541,
+      31.016699998872355,
+      23.42099999077618,
+      31.065399991348386,
+      26.643399993190542,
+      40.847199998097494,
+      22.801099985372275,
+      29.83039998798631,
+      23.998500022571534,
+      39.29109999444336,
+      23.165299993706867,
+      46.456599986413494,
+      21.132499998202547,
+      39.32609999901615,
+      19.825900002615526,
+      27.561099996091798,
+      24.44179999292828
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775391290.361428,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 3.2306416639282056,
+  "interest": {
+    "active_object_count": 5,
+    "active_object_peak": 5,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 24,
+      "zone": 0
+    },
+    "source_count_current": 13,
+    "source_count_peak": 13,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 24,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 3,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 3
+    },
+    "transition_total": 3
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 30.403174999567756,
+    "jitter": 8.735565761447278,
+    "max_ms": 48.43949998030439,
+    "min_ms": 19.825900002615526,
+    "p95_ms": 46.21793498954503,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "hide",
+      "ms": 44.86550000729039,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 27.026600000681356,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 48.43949998030439,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 21.27270001801662,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 37.29100001510233,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 29.292200022609904,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 30.007900000782683,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 20.65670001320541,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 31.016699998872355,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 23.42099999077618,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 31.065399991348386,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 26.643399993190542,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 40.847199998097494,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 22.801099985372275,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 29.83039998798631,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 23.998500022571534,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 39.29109999444336,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 23.165299993706867,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 46.456599986413494,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 21.132499998202547,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 39.32609999901615,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 19.825900002615526,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 27.561099996091798,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 24.44179999292828,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 48.42740000458434,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You prepare to hide...",
+    "You fail to find concealment.",
+    "RETURN 2"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "attempts": [
+      {
+        "attempt": 1,
+        "gain": 2.276,
+        "hidden_after_command": true,
+        "margin": 22,
+        "outcome": "success"
+      },
+      {
+        "attempt": 2,
+        "gain": 1.138,
+        "hidden_after_command": true,
+        "margin": 5,
+        "outcome": "partial"
+      },
+      {
+        "attempt": 3,
+        "gain": 0.059,
+        "hidden_after_command": false,
+        "margin": -78,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 4,
+        "gain": 0.121,
+        "hidden_after_command": false,
+        "margin": -30,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 5,
+        "gain": 0.204,
+        "hidden_after_command": false,
+        "margin": -9,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 6,
+        "gain": 0.035,
+        "hidden_after_command": false,
+        "margin": -60,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 7,
+        "gain": 0.031,
+        "hidden_after_command": false,
+        "margin": -69,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 8,
+        "gain": 0.14,
+        "hidden_after_command": false,
+        "margin": -2,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 9,
+        "gain": 0.063,
+        "hidden_after_command": false,
+        "margin": -21,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 10,
+        "gain": 0.515,
+        "hidden_after_command": true,
+        "margin": 52,
+        "outcome": "strong"
+      },
+      {
+        "attempt": 11,
+        "gain": 0.053,
+        "hidden_after_command": false,
+        "margin": -44,
+        "outcome": "fail"
+      },
+      {
+        "attempt": 12,
+        "gain": 0.098,
+        "hidden_after_command": false,
+        "margin": -1,
+        "outcome": "fail"
+      }
+    ],
+    "bands": {
+      "-49 to -10": 3,
+      "-9 to -1": 3,
+      "<= -50": 3,
+      ">= 0": 3
+    },
+    "final_pool": 4.734,
+    "observer_count": 2,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 35900,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 24,
+    "flush_executed_total": 24,
+    "flush_total": 12,
+    "job_key_breakdown": {
+      "combat:roundtime:9386": 12,
+      "exp:stealth-award:9386-1775391257579-192": 1,
+      "exp:stealth-award:9386-1775391259770-185": 1,
+      "exp:stealth-award:9386-1775391261947-117": 1,
+      "exp:stealth-award:9386-1775391264105-738": 1,
+      "exp:stealth-award:9386-1775391266259-193": 1,
+      "exp:stealth-award:9386-1775391268414-615": 1,
+      "exp:stealth-award:9386-1775391270579-654": 1,
+      "exp:stealth-award:9386-1775391272735-191": 1,
+      "exp:stealth-award:9386-1775391274895-944": 1,
+      "exp:stealth-award:9386-1775391277069-592": 1,
+      "exp:stealth-award:9386-1775391279245-304": 1,
+      "exp:stealth-award:9386-1775391281395-620": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 2.0,
+    "reschedule_total": 0,
+    "scheduled_total": 24,
+    "skip_total": 0,
+    "system_counts": {
+      "combat.roundtime": 12,
+      "exp.stealth": 12
+    },
+    "systems_exercised": [
+      "combat.roundtime",
+      "exp.stealth"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 24
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 24,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775391254.05071,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 24,
+      "flush_total": 12
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Controlled stealth observer-scaling probe."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "combat:roundtime:9386": 12,
+      "exp:stealth-award:9386-1775391257579-192": 1,
+      "exp:stealth-award:9386-1775391259770-185": 1,
+      "exp:stealth-award:9386-1775391261947-117": 1,
+      "exp:stealth-award:9386-1775391264105-738": 1,
+      "exp:stealth-award:9386-1775391266259-193": 1,
+      "exp:stealth-award:9386-1775391268414-615": 1,
+      "exp:stealth-award:9386-1775391270579-654": 1,
+      "exp:stealth-award:9386-1775391272735-191": 1,
+      "exp:stealth-award:9386-1775391274895-944": 1,
+      "exp:stealth-award:9386-1775391277069-592": 1,
+      "exp:stealth-award:9386-1775391279245-304": 1,
+      "exp:stealth-award:9386-1775391281395-620": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 37.15292499449182,
+      "count": 12,
+      "entries": [
+        {
+          "duration_ms": 44.85150001710281,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391257.5944796
+        },
+        {
+          "duration_ms": 48.42740000458434,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391259.78756
+        },
+        {
+          "duration_ms": 37.27679999428801,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391261.9626052
+        },
+        {
+          "duration_ms": 29.99649997218512,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391264.1225896
+        },
+        {
+          "duration_ms": 31.005899974843487,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391266.2758453
+        },
+        {
+          "duration_ms": 31.041599984746426,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391268.4304512
+        },
+        {
+          "duration_ms": 40.83159999572672,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391270.5987399
+        },
+        {
+          "duration_ms": 29.819299990776926,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391272.7519243
+        },
+        {
+          "duration_ms": 39.276600000448525,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391274.916241
+        },
+        {
+          "duration_ms": 46.444499981589615,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391277.0869765
+        },
+        {
+          "duration_ms": 39.31270001339726,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391279.2642758
+        },
+        {
+          "duration_ms": 27.55070000421256,
+          "metadata": {
+            "character": "TEST_STEALTH_SCALE_2_ACTOR",
+            "command": "hide"
+          },
+          "timestamp": 1775391281.4123034
+        }
+      ],
+      "max_ms": 48.42740000458434,
+      "total_ms": 445.8350999339018
+    },
+    "scheduler_execute": {
+      "avg_ms": 11.236520832123157,
+      "count": 24,
+      "entries": [
+        {
+          "duration_ms": 18.15270000952296,
+          "metadata": {
+            "created_at": 1775391257.5871947,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391257579-192",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391259.7136128
+        },
+        {
+          "duration_ms": 8.053400000790134,
+          "metadata": {
+            "created_at": 1775391257.5944796,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391259.7218628
+        },
+        {
+          "duration_ms": 11.586500011617318,
+          "metadata": {
+            "created_at": 1775391259.7780387,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391259770-185",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391261.899902
+        },
+        {
+          "duration_ms": 8.343299996340647,
+          "metadata": {
+            "created_at": 1775391259.7865427,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391261.9093294
+        },
+        {
+          "duration_ms": 16.462999978102744,
+          "metadata": {
+            "created_at": 1775391261.9555185,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391261947-117",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391264.080785
+        },
+        {
+          "duration_ms": 11.538899998413399,
+          "metadata": {
+            "created_at": 1775391261.9626052,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391264.0925975
+        },
+        {
+          "duration_ms": 10.083300003316253,
+          "metadata": {
+            "created_at": 1775391264.1141288,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391264105-738",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391266.2347872
+        },
+        {
+          "duration_ms": 9.237399994162843,
+          "metadata": {
+            "created_at": 1775391264.1225896,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391266.2443597
+        },
+        {
+          "duration_ms": 12.9538000037428,
+          "metadata": {
+            "created_at": 1775391266.266047,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391266259-193",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391268.3895643
+        },
+        {
+          "duration_ms": 9.506200003670529,
+          "metadata": {
+            "created_at": 1775391266.2758453,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391268.399678
+        },
+        {
+          "duration_ms": 16.999099985696375,
+          "metadata": {
+            "created_at": 1775391268.422463,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391268414-615",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391270.5489037
+        },
+        {
+          "duration_ms": 8.451700006844476,
+          "metadata": {
+            "created_at": 1775391268.4304512,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391270.5579035
+        },
+        {
+          "duration_ms": 13.033399998676032,
+          "metadata": {
+            "created_at": 1775391270.5903704,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391270579-654",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391272.7125926
+        },
+        {
+          "duration_ms": 8.784000005107373,
+          "metadata": {
+            "created_at": 1775391270.5987399,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391272.721754
+        },
+        {
+          "duration_ms": 13.873999996576458,
+          "metadata": {
+            "created_at": 1775391272.74393,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391272735-191",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391274.8672137
+        },
+        {
+          "duration_ms": 8.623400004580617,
+          "metadata": {
+            "created_at": 1775391272.7519243,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391274.8760836
+        },
+        {
+          "duration_ms": 13.082899997243658,
+          "metadata": {
+            "created_at": 1775391274.9058092,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391274895-944",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391277.0303116
+        },
+        {
+          "duration_ms": 9.016900003189221,
+          "metadata": {
+            "created_at": 1775391274.916241,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391277.0400689
+        },
+        {
+          "duration_ms": 11.182699992787093,
+          "metadata": {
+            "created_at": 1775391277.07797,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391277069-592",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391279.1991334
+        },
+        {
+          "duration_ms": 8.952200005296618,
+          "metadata": {
+            "created_at": 1775391277.0859828,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391279.2084455
+        },
+        {
+          "duration_ms": 11.36529998620972,
+          "metadata": {
+            "created_at": 1775391279.255269,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391279245-304",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391281.376284
+        },
+        {
+          "duration_ms": 7.591400004457682,
+          "metadata": {
+            "created_at": 1775391279.2642758,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391281.384114
+        },
+        {
+          "duration_ms": 14.199099998222664,
+          "metadata": {
+            "created_at": 1775391281.4039438,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9386-1775391281395-620",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391283.5272863
+        },
+        {
+          "duration_ms": 8.601899986388162,
+          "metadata": {
+            "created_at": 1775391281.4112906,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9386",
+            "owner": "#9386",
+            "owner_label": "#9386",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391283.5362847
+        }
+      ],
+      "max_ms": 18.15270000952296,
+      "total_ms": 269.6764999709558
+    }
+  },
+  "xp_delta": 0
+}

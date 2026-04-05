@@ -1,0 +1,340 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 116.7213000007905,
+  "command_count": 6,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.426799987209961,
+      "kind": "command",
+      "ms": 37.550500012002885,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 0.2033999771811068,
+      "kind": "direct",
+      "ms": 0.2978999982587993,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT prepare_spell",
+      "first_response_ms": 14.619499997934327,
+      "kind": "direct",
+      "ms": 21.457099996041507,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT cast_spell",
+      "first_response_ms": 3.240399993956089,
+      "kind": "direct",
+      "ms": 63.81999998120591,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": 116.7213000007905,
+      "command": "attack TEST_EXP_COMMAND_VISIBILITY",
+      "first_response_ms": 25.574400002369657,
+      "kind": "command",
+      "ms": 178.22669999441132,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp",
+      "first_response_ms": 2.7786999999079853,
+      "kind": "command",
+      "ms": 2.8156999906059355,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    37.550500012002885,
+    0.2978999982587993,
+    21.457099996041507,
+    63.81999998120591,
+    178.22669999441132,
+    2.8156999906059355
+  ],
+  "commands": {
+    "count": 6,
+    "max_ms": 178.21109999204054,
+    "timings_ms": [
+      37.550500012002885,
+      0.2978999982587993,
+      21.457099996041507,
+      63.81999998120591,
+      178.22669999441132,
+      2.8156999906059355
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775350822.035162,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 8.307199993093187,
+  "interest": {
+    "active_object_count": 3,
+    "active_object_peak": 4,
+    "active_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 4,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_count_current": 10,
+    "source_count_peak": 10,
+    "source_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 4,
+      "deactivate": 1
+    },
+    "transition_event_counts": {
+      "activate": 4,
+      "deactivate": 1
+    },
+    "transition_total": 5
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 50.69464999542106,
+    "jitter": 66.7780321090509,
+    "max_ms": 178.22669999441132,
+    "min_ms": 0.2978999982587993,
+    "p95_ms": 149.62502499110997,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "hide",
+      "ms": 37.550500012002885,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 0.2978999982587993,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT prepare_spell",
+      "ms": 21.457099996041507,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT cast_spell",
+      "ms": 63.81999998120591,
+      "snapshot": "final"
+    },
+    {
+      "command": "attack TEST_EXP_COMMAND_VISIBILITY",
+      "ms": 178.22669999441132,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp",
+      "ms": 2.8156999906059355,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 178.21109999204054,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "           Skill        Rank/% -> Mindstate      Bits (pool / max)\n           Appraisal:    1 00% dabbling     (1/34)         (53/1017)\n             Evasion:   20 00% dabbling     (1/34)         (46/1326)\n      Targeted Magic:   80 00% dabbling     (1/34)         (120/2224)\n\nTotal Ranks Displayed: 101"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 8809,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775350816.0701113,
+        "delay_s": 2.0,
+        "due_at": 1775350818.0701113,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "visibilityfoe",
+        "job_id": "7ec85909ffef45b99be10c13bc3dda6e",
+        "key": "combat:roundtime:9267",
+        "owner": "#9267",
+        "owner_label": "visibilityfoe",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "attack TEST_EXP_COMMAND_VISIBILITY",
+      "ms": 178.22669999441132
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775350812.8634276,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 72.84953333631468,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 37.53649999271147,
+          "metadata": {
+            "character": "TEST_EXP_COMMAND_VISIBILITY",
+            "command": "hide"
+          },
+          "timestamp": 1775350815.7758496
+        },
+        {
+          "duration_ms": 178.21109999204054,
+          "metadata": {
+            "character": "visibilityfoe",
+            "command": "attack"
+          },
+          "timestamp": 1775350816.0701113
+        },
+        {
+          "duration_ms": 2.801000024192035,
+          "metadata": {
+            "character": "TEST_EXP_COMMAND_VISIBILITY",
+            "command": "exp"
+          },
+          "timestamp": 1775350816.0731132
+        }
+      ],
+      "max_ms": 178.21109999204054,
+      "total_ms": 218.54860000894405
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

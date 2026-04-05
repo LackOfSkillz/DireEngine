@@ -1,0 +1,296 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 3.8305333243139708,
+  "lag": {
+    "avg_ms": 21.68890624852793,
+    "jitter": 13.99831914847244,
+    "max_ms": 48.523400007979944,
+    "min_ms": 2.5791999942157418,
+    "p95_ms": 39.771275005477946,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "hide",
+      "ms": 33.01330000977032,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 48.523400007979944,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 7.314099988434464,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 27.515800000401214,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 36.85390000464395,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 6.401299993740395,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 29.247900005429983,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 15.140100003918633,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 8.293299993965775,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 24.281199992401525,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 34.77030000067316,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 6.760799995390698,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 26.024799997685477,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 32.757499982835725,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 7.5456000049598515,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp all",
+      "ms": 2.5791999942157418,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 4.253199993399903,
+      "kind": "command",
+      "ms": 33.01330000977032,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 48.523400007979944,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 7.314099988434464,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.1008999794721603,
+      "kind": "command",
+      "ms": 27.515800000401214,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 36.85390000464395,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 6.401299993740395,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 7.305599981918931,
+      "kind": "command",
+      "ms": 29.247900005429983,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 15.140100003918633,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 8.293299993965775,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.0682999931741506,
+      "kind": "command",
+      "ms": 24.281199992401525,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 34.77030000067316,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 6.760799995390698,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.716799994232133,
+      "kind": "command",
+      "ms": 26.024799997685477,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 32.757499982835725,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 7.5456000049598515,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp all",
+      "first_response_ms": 2.5384000036865473,
+      "kind": "command",
+      "ms": 2.5791999942157418,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

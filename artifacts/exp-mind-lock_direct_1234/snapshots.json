@@ -1,0 +1,58 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8826,
+        "is_dead": false,
+        "key": "TEST_EXP_MIND_LOCK_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_MIND_LOCK_CHAR_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8825,
+            "key": "TEST_EXP_MIND_LOCK_CHAR_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8826,
+            "key": "TEST_EXP_MIND_LOCK_CHAR",
+            "location": "TEST_EXP_MIND_LOCK_CHAR_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_MIND_LOCK_CHAR"
+        ],
+        "exits": [],
+        "id": 8825,
+        "key": "TEST_EXP_MIND_LOCK_CHAR_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775335238.1043515
+    },
+    "label": "final"
+  }
+]

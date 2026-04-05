@@ -1,0 +1,748 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 16,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 4.253199993399903,
+      "kind": "command",
+      "ms": 33.01330000977032,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 48.523400007979944,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 7.314099988434464,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.1008999794721603,
+      "kind": "command",
+      "ms": 27.515800000401214,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 36.85390000464395,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 6.401299993740395,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 7.305599981918931,
+      "kind": "command",
+      "ms": 29.247900005429983,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 15.140100003918633,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 8.293299993965775,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.0682999931741506,
+      "kind": "command",
+      "ms": 24.281199992401525,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 34.77030000067316,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 6.760799995390698,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 2.716799994232133,
+      "kind": "command",
+      "ms": 26.024799997685477,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 32.757499982835725,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT break_stealth",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 7.5456000049598515,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp all",
+      "first_response_ms": 2.5384000036865473,
+      "kind": "command",
+      "ms": 2.5791999942157418,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    33.01330000977032,
+    48.523400007979944,
+    7.314099988434464,
+    27.515800000401214,
+    36.85390000464395,
+    6.401299993740395,
+    29.247900005429983,
+    15.140100003918633,
+    8.293299993965775,
+    24.281199992401525,
+    34.77030000067316,
+    6.760799995390698,
+    26.024799997685477,
+    32.757499982835725,
+    7.5456000049598515,
+    2.5791999942157418
+  ],
+  "commands": {
+    "count": 16,
+    "max_ms": 32.997500005876645,
+    "timings_ms": [
+      33.01330000977032,
+      48.523400007979944,
+      7.314099988434464,
+      27.515800000401214,
+      36.85390000464395,
+      6.401299993740395,
+      29.247900005429983,
+      15.140100003918633,
+      8.293299993965775,
+      24.281199992401525,
+      34.77030000067316,
+      6.760799995390698,
+      26.024799997685477,
+      32.757499982835725,
+      7.5456000049598515,
+      2.5791999942157418
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775391671.833006,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 3.8305333243139708,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 2,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 10,
+      "zone": 0
+    },
+    "source_count_current": 4,
+    "source_count_peak": 4,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 10,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 2,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 2
+    },
+    "transition_total": 2
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 21.68890624852793,
+    "jitter": 13.99831914847244,
+    "max_ms": 48.523400007979944,
+    "min_ms": 2.5791999942157418,
+    "p95_ms": 39.771275005477946,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "hide",
+      "ms": 33.01330000977032,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 48.523400007979944,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 7.314099988434464,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 27.515800000401214,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 36.85390000464395,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 6.401299993740395,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 29.247900005429983,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 15.140100003918633,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 8.293299993965775,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 24.281199992401525,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 34.77030000067316,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 6.760799995390698,
+      "snapshot": "final"
+    },
+    {
+      "command": "hide",
+      "ms": 26.024799997685477,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 32.757499982835725,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT break_stealth",
+      "ms": 7.5456000049598515,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp all",
+      "ms": 2.5791999942157418,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 32.997500005876645,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Showing all skills with field experience.\n\n           Skill        Rank/% -> Mindstate      Bits (pool / max)\n           Appraisal:    1 00% clear        (0/34)         (0/1017)\n              Arcana:    1 00% clear        (0/34)         (0/1017)\n           Athletics:    1 00% clear        (0/34)         (0/1017)\n              Attack:    0 00% clear        (0/34)         (0/1000)\n          Attunement:    1 00% clear        (0/34)         (0/1017)\n               Blunt:    0 00% clear        (0/34)         (0/1000)\n          Brigandine:    0 00% clear        (0/34)         (0/1000)\n         Chain Armor:    0 00% clear        (0/34)         (0/1000)\n              Combat:    0 00% clear        (0/34)         (0/1000)\n        Debilitation:    0 00% clear        (0/34)         (0/1000)\n           Disengage:    0 00% clear        (0/34)         (0/1000)\n             Empathy:    0 00% clear        (0/34)         (0/1000)\n             Evasion:    1 00% clear        (0/34)         (0/1017)\n           First Aid:    0 00% clear        (0/34)         (0/1000)\n        Hand-To-Hand:    0 00% clear        (0/34)         (0/1000)\n          Heavy Edge:    0 00% clear        (0/34)         (0/1000)\n         Light Armor:    0 00% clear        (0/34)         (0/1000)\n         Light-Edged:    0 00% clear        (0/34)         (0/1000)\n         Lockpicking:    0 00% clear        (0/34)         (0/1000)\n     Outdoorsmanship:    0 00% clear        (0/34)         (0/1000)\n          Perception:    1 00% clear        (0/34)         (0/1017)\n         Plate Armor:    0 00% clear        (0/34)         (0/1000)\n             Polearm:    0 00% clear        (0/34)         (0/1000)\n         Scholarship:    0 00% clear        (0/34)         (0/1000)\n            Skinning:    0 00% clear        (0/34)         (0/1000)\n             Stealth:   13 00% clear        (0/34)         (0/1214)\n             Tactics:    0 00% clear        (0/34)         (0/1000)\n      Targeted Magic:    0 00% clear        (0/34)         (0/1000)\n             Trading:    1 00% clear        (0/34)         (0/1017)\n\nTotal Ranks Displayed: 20"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "attempt_count": 5,
+    "commands": [
+      "hide",
+      "DIRECT flush_due",
+      "DIRECT break_stealth",
+      "hide",
+      "DIRECT flush_due",
+      "DIRECT break_stealth",
+      "hide",
+      "DIRECT flush_due",
+      "DIRECT break_stealth",
+      "hide",
+      "DIRECT flush_due",
+      "DIRECT break_stealth",
+      "hide",
+      "DIRECT flush_due",
+      "DIRECT break_stealth",
+      "exp all"
+    ],
+    "final_mindstate": 0,
+    "final_pool": 0.3950196010739845,
+    "gains": [
+      0.12705671698652313,
+      0.09075479784751653,
+      0.07058706499251283,
+      0.05775305317569235,
+      0.048867968071739654
+    ],
+    "last_contest": {
+      "action": "hide",
+      "contest_occurred": false,
+      "difficulty": 10,
+      "margin": null,
+      "outcome": "success",
+      "recorded_at": 1775391667.5571904,
+      "target_bucket": "target:9403"
+    },
+    "output_log": [
+      "Showing all skills with field experience.\n\n           Skill        Rank/% -> Mindstate      Bits (pool / max)\n           Appraisal:    1 00% clear        (0/34)         (0/1017)\n              Arcana:    1 00% clear        (0/34)         (0/1017)\n           Athletics:    1 00% clear        (0/34)         (0/1017)\n              Attack:    0 00% clear        (0/34)         (0/1000)\n          Attunement:    1 00% clear        (0/34)         (0/1017)\n               Blunt:    0 00% clear        (0/34)         (0/1000)\n          Brigandine:    0 00% clear        (0/34)         (0/1000)\n         Chain Armor:    0 00% clear        (0/34)         (0/1000)\n              Combat:    0 00% clear        (0/34)         (0/1000)\n        Debilitation:    0 00% clear        (0/34)         (0/1000)\n           Disengage:    0 00% clear        (0/34)         (0/1000)\n             Empathy:    0 00% clear        (0/34)         (0/1000)\n             Evasion:    1 00% clear        (0/34)         (0/1017)\n           First Aid:    0 00% clear        (0/34)         (0/1000)\n        Hand-To-Hand:    0 00% clear        (0/34)         (0/1000)\n          Heavy Edge:    0 00% clear        (0/34)         (0/1000)\n         Light Armor:    0 00% clear        (0/34)         (0/1000)\n         Light-Edged:    0 00% clear        (0/34)         (0/1000)\n         Lockpicking:    0 00% clear        (0/34)         (0/1000)\n     Outdoorsmanship:    0 00% clear        (0/34)         (0/1000)\n          Perception:    1 00% clear        (0/34)         (0/1017)\n         Plate Armor:    0 00% clear        (0/34)         (0/1000)\n             Polearm:    0 00% clear        (0/34)         (0/1000)\n         Scholarship:    0 00% clear        (0/34)         (0/1000)\n            Skinning:    0 00% clear        (0/34)         (0/1000)\n             Stealth:   13 00% clear        (0/34)         (0/1214)\n             Tactics:    0 00% clear        (0/34)         (0/1000)\n      Targeted Magic:    0 00% clear        (0/34)         (0/1000)\n             Trading:    1 00% clear        (0/34)         (0/1017)\n\nTotal Ranks Displayed: 20"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "success_count": 5
+  },
+  "scenario_duration_ms": 14219,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 10,
+    "flush_executed_total": 10,
+    "flush_total": 5,
+    "job_key_breakdown": {
+      "combat:roundtime:9404": 5,
+      "exp:stealth-award:9404-1775391658882-896": 1,
+      "exp:stealth-award:9404-1775391661067-551": 1,
+      "exp:stealth-award:9404-1775391663242-219": 1,
+      "exp:stealth-award:9404-1775391665394-107": 1,
+      "exp:stealth-award:9404-1775391667557-192": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 2.0,
+    "reschedule_total": 0,
+    "scheduled_total": 10,
+    "skip_total": 0,
+    "system_counts": {
+      "combat.roundtime": 5,
+      "exp.stealth": 5
+    },
+    "systems_exercised": [
+      "combat.roundtime",
+      "exp.stealth"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 10
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 10,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775391657.2644608,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 10,
+      "flush_total": 5
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Stealth feel probes measure delayed no-observer pacing and should not fail on host timing drift."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "combat:roundtime:9404": 5,
+      "exp:stealth-award:9404-1775391658882-896": 1,
+      "exp:stealth-award:9404-1775391661067-551": 1,
+      "exp:stealth-award:9404-1775391663242-219": 1,
+      "exp:stealth-award:9404-1775391665394-107": 1,
+      "exp:stealth-award:9404-1775391667557-192": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 23.760600000969134,
+      "count": 6,
+      "entries": [
+        {
+          "duration_ms": 32.997500005876645,
+          "metadata": {
+            "character": "TEST_EXP_STEALTH_EMPTY_ROOM_CHAR",
+            "command": "hide"
+          },
+          "timestamp": 1775391658.900761
+        },
+        {
+          "duration_ms": 27.493300003698096,
+          "metadata": {
+            "character": "TEST_EXP_STEALTH_EMPTY_ROOM_CHAR",
+            "command": "hide"
+          },
+          "timestamp": 1775391661.0843785
+        },
+        {
+          "duration_ms": 29.229899984784424,
+          "metadata": {
+            "character": "TEST_EXP_STEALTH_EMPTY_ROOM_CHAR",
+            "command": "hide"
+          },
+          "timestamp": 1775391663.2574198
+        },
+        {
+          "duration_ms": 24.26700000069104,
+          "metadata": {
+            "character": "TEST_EXP_STEALTH_EMPTY_ROOM_CHAR",
+            "command": "hide"
+          },
+          "timestamp": 1775391665.4055243
+        },
+        {
+          "duration_ms": 26.01090000825934,
+          "metadata": {
+            "character": "TEST_EXP_STEALTH_EMPTY_ROOM_CHAR",
+            "command": "hide"
+          },
+          "timestamp": 1775391667.5741913
+        },
+        {
+          "duration_ms": 2.5650000025052577,
+          "metadata": {
+            "character": "TEST_EXP_STEALTH_EMPTY_ROOM_CHAR",
+            "command": "exp"
+          },
+          "timestamp": 1775391669.7168949
+        }
+      ],
+      "max_ms": 32.997500005876645,
+      "total_ms": 142.5636000058148
+    },
+    "scheduler_execute": {
+      "avg_ms": 16.19779000757262,
+      "count": 10,
+      "entries": [
+        {
+          "duration_ms": 39.18049999629147,
+          "metadata": {
+            "created_at": 1775391658.8924124,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9404-1775391658882-896",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391661.0409832
+        },
+        {
+          "duration_ms": 7.887200015829876,
+          "metadata": {
+            "created_at": 1775391658.900761,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9404",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391661.0489817
+        },
+        {
+          "duration_ms": 28.600499994354323,
+          "metadata": {
+            "created_at": 1775391661.0743825,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9404-1775391661067-551",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391663.2144737
+        },
+        {
+          "duration_ms": 6.9447999994736165,
+          "metadata": {
+            "created_at": 1775391661.0843785,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9404",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391663.2214732
+        },
+        {
+          "duration_ms": 8.015900006284937,
+          "metadata": {
+            "created_at": 1775391663.2498384,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9404-1775391663242-219",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391665.3669584
+        },
+        {
+          "duration_ms": 6.029100011801347,
+          "metadata": {
+            "created_at": 1775391663.2574198,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9404",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391665.3731558
+        },
+        {
+          "duration_ms": 24.31460001389496,
+          "metadata": {
+            "created_at": 1775391665.4005322,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9404-1775391665394-107",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391667.5310483
+        },
+        {
+          "duration_ms": 9.269700007280335,
+          "metadata": {
+            "created_at": 1775391665.4055243,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9404",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391667.5413632
+        },
+        {
+          "duration_ms": 24.277100019389763,
+          "metadata": {
+            "created_at": 1775391667.5661922,
+            "delay_s": 2.0,
+            "key": "exp:stealth-award:9404-1775391667557-192",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "exp.stealth",
+            "system": "exp.stealth",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391669.6996326
+        },
+        {
+          "duration_ms": 7.4585000111255795,
+          "metadata": {
+            "created_at": 1775391667.5741913,
+            "delay_s": 2.0,
+            "key": "combat:roundtime:9404",
+            "owner": "#9404",
+            "owner_label": "#9404",
+            "source": "combat.roundtime",
+            "system": "combat.roundtime",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775391669.707539
+        }
+      ],
+      "max_ms": 39.18049999629147,
+      "total_ms": 161.9779000757262
+    }
+  },
+  "xp_delta": 0
+}

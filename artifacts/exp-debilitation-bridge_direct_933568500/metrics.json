@@ -1,0 +1,302 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT prepare_spell",
+      "first_response_ms": 16.925200005061924,
+      "kind": "direct",
+      "ms": 28.446300013456494,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT cast_spell",
+      "first_response_ms": 4.579800006467849,
+      "kind": "direct",
+      "ms": 49.04840001836419,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT prepare_spell",
+      "first_response_ms": 14.619299996411428,
+      "kind": "direct",
+      "ms": 22.485699999378994,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT cast_spell",
+      "first_response_ms": 1.3189000019337982,
+      "kind": "direct",
+      "ms": 190.19409999600612,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp all",
+      "first_response_ms": 3.768299997318536,
+      "kind": "command",
+      "ms": 3.821799997240305,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    28.446300013456494,
+    49.04840001836419,
+    22.485699999378994,
+    190.19409999600612,
+    3.821799997240305
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 3.806699998676777,
+    "timings_ms": [
+      28.446300013456494,
+      49.04840001836419,
+      22.485699999378994,
+      190.19409999600612,
+      3.821799997240305
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775345824.4385026,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 8.242300001438707,
+  "interest": {
+    "active_object_count": 3,
+    "active_object_peak": 4,
+    "active_source_types": [
+      "room"
+    ],
+    "exercised_source_types": [
+      "direct",
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 7,
+    "source_count_peak": 8,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 1,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 4,
+      "deactivate": 1
+    },
+    "transition_event_counts": {
+      "activate": 4,
+      "deactivate": 1
+    },
+    "transition_total": 5
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 58.79926000488922,
+    "jitter": 75.20335959280006,
+    "max_ms": 190.19409999600612,
+    "min_ms": 3.821799997240305,
+    "p95_ms": 161.9649600004777,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT prepare_spell",
+      "ms": 28.446300013456494,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT cast_spell",
+      "ms": 49.04840001836419,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT prepare_spell",
+      "ms": 22.485699999378994,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT cast_spell",
+      "ms": 190.19409999600612,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp all",
+      "ms": 3.821799997240305,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 3.806699998676777,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "|wSkill                Rank   Mindstate|n\n---------------------------------------------\nappraisal                1    0/34 (clear)\narcana                   1    0/34 (clear)\nathletics                1    0/34 (clear)\nattack                   0    0/34 (clear)\nattunement              80    0/34 (clear)\nblunt                    0    0/34 (clear)\nbrawling                 0    0/34 (clear)\nbrigandine               0    0/34 (clear)\nchain armor              0    0/34 (clear)\ncombat                   0    0/34 (clear)\ndebilitation            80    0/34 (clear)\ndisengage                0    0/34 (clear)\nempathy                  0    0/34 (clear)\nevasion                  1    0/34 (clear)\nfirst aid                0    0/34 (clear)\nheavy edge               0    0/34 (clear)\nlight armor              0    0/34 (clear)\nlight edge               0    0/34 (clear)\nlocksmithing             0    0/34 (clear)\noutdoorsmanship          0    0/34 (clear)\nperception               1    0/34 (clear)\nplate armor              0    0/34 (clear)\npolearm                  0    0/34 (clear)\nscholarship              0    0/34 (clear)\nskinning                 0    0/34 (clear)\nstealth                  0    0/34 (clear)\ntactics                  0    0/34 (clear)\ntargeted magic           0    0/34 (clear)\ntrading                  1    0/34 (clear)\n\nTotal Skills: 29"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "after_hit": 18.685714285714287,
+    "after_resist": 29.89714285714286,
+    "commands": [
+      "DIRECT prepare_spell",
+      "DIRECT cast_spell",
+      "DIRECT prepare_spell",
+      "DIRECT cast_spell",
+      "exp all"
+    ],
+    "output_log": [
+      "|wSkill                Rank   Mindstate|n\n---------------------------------------------\nappraisal                1    0/34 (clear)\narcana                   1    0/34 (clear)\nathletics                1    0/34 (clear)\nattack                   0    0/34 (clear)\nattunement              80    0/34 (clear)\nblunt                    0    0/34 (clear)\nbrawling                 0    0/34 (clear)\nbrigandine               0    0/34 (clear)\nchain armor              0    0/34 (clear)\ncombat                   0    0/34 (clear)\ndebilitation            80    0/34 (clear)\ndisengage                0    0/34 (clear)\nempathy                  0    0/34 (clear)\nevasion                  1    0/34 (clear)\nfirst aid                0    0/34 (clear)\nheavy edge               0    0/34 (clear)\nlight armor              0    0/34 (clear)\nlight edge               0    0/34 (clear)\nlocksmithing             0    0/34 (clear)\noutdoorsmanship          0    0/34 (clear)\nperception               1    0/34 (clear)\nplate armor              0    0/34 (clear)\npolearm                  0    0/34 (clear)\nscholarship              0    0/34 (clear)\nskinning                 0    0/34 (clear)\nstealth                  0    0/34 (clear)\ntactics                  0    0/34 (clear)\ntargeted magic           0    0/34 (clear)\ntrading                  1    0/34 (clear)\n\nTotal Skills: 29"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 9452,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT cast_spell",
+      "ms": 190.19409999600612
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775345814.6319206,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 3.806699998676777,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 3.806699998676777,
+          "metadata": {
+            "character": "TEST_EXP_DEBIL_CASTER",
+            "command": "exp"
+          },
+          "timestamp": 1775345818.047142
+        }
+      ],
+      "max_ms": 3.806699998676777,
+      "total_ms": 3.806699998676777
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

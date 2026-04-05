@@ -86,7 +86,7 @@ class CmdHelp(EvenniaCmdHelp):
             ("Economy & Trade", ("buy", "sell", "haggle", "appraise", "compare")),
             ("Social & Network", ("page", "who", "ic", "ooc", "discord2chan", "irc2chan", "ircstatus", "grapevine2chan")),
             ("System / Core", ("quit", "reload", "shutdown", "reset", "option", "password", "sessions", "userpassword")),
-            ("Training & Lore", ("guild", "join", "profession", "study", "teach", "train", "endteach", "recall", "assessstance")),
+            ("Training & Lore", ("guild", "join", "profession", "skilldebug", "study", "teach", "train", "endteach", "recall", "assessstance")),
         )
     )
 

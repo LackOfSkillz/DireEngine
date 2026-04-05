@@ -1,0 +1,246 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "skilldebug tick",
+      "first_response_ms": 92.79489998880308,
+      "kind": "command",
+      "ms": 92.87310000217985,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.06710000161547214,
+      "script_delay_sources": [
+        {
+          "ms": 0.06710000161547214,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    92.87310000217985
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 92.85699999600183,
+    "timings_ms": [
+      92.87310000217985
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775335285.9847097,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 92.79489998880308,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 2,
+    "active_source_types": [
+      "room"
+    ],
+    "exercised_source_types": [
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 2,
+    "source_count_peak": 2,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 2,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 2
+    },
+    "transition_total": 2
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 92.87310000217985,
+    "jitter": 0.0,
+    "max_ms": 92.87310000217985,
+    "min_ms": 92.87310000217985,
+    "p95_ms": 92.87310000217985,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "skilldebug tick",
+      "ms": 92.87310000217985,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 92.85699999600183,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Tick executed"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "skilldebug tick"
+    ],
+    "global_tick": 20,
+    "output_log": [
+      "Tick executed"
+    ],
+    "remaining_pool": 933.0,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 6299,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.06710000161547214,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775335279.2319853,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.06710000161547214,
+    "count": 1,
+    "execution_count": 1,
+    "max_ms": 0.06710000161547214,
+    "performance": {
+      "exp_pulse_tick": {
+        "avg_ms": 0.06710000161547214,
+        "count": 1,
+        "max_ms": 0.06710000161547214,
+        "total_ms": 0.06710000161547214
+      }
+    },
+    "sources": [
+      {
+        "count": 1,
+        "source": "ticker:exp_pulse_tick",
+        "total_ms": 0.06710000161547214
+      }
+    ],
+    "total_ms": 0.06710000161547214
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.06710000161547214,
+      "count": 1,
+      "execution_count": 1,
+      "max_ms": 0.06710000161547214,
+      "performance": {
+        "exp_pulse_tick": {
+          "avg_ms": 0.06710000161547214,
+          "count": 1,
+          "max_ms": 0.06710000161547214,
+          "total_ms": 0.06710000161547214
+        }
+      },
+      "sources": [
+        {
+          "count": 1,
+          "source": "ticker:exp_pulse_tick",
+          "total_ms": 0.06710000161547214
+        }
+      ],
+      "total_ms": 0.06710000161547214
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 92.85699999600183,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 92.85699999600183,
+          "metadata": {
+            "character": "TEST_EXP_SINGLE_TICK_CHAR",
+            "command": "skilldebug"
+          },
+          "timestamp": 1775335282.6433094
+        }
+      ],
+      "max_ms": 92.85699999600183,
+      "total_ms": 92.85699999600183
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

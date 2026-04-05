@@ -1,0 +1,247 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 199.13692856997451,
+  "lag": {
+    "avg_ms": 255.83040000128676,
+    "jitter": 185.74567793352892,
+    "max_ms": 423.6405999981798,
+    "min_ms": 0.04400000034365803,
+    "p95_ms": 423.38919499889016,
+    "slow_count": 5,
+    "spike_count": 5,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 418.27949999424163,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 422.92230000020936,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 423.6405999981798,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 361.20940001273993,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 308.1955000088783,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp",
+      "ms": 60.82369999785442,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.04400000034365803,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp",
+      "ms": 51.52819999784697,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.003974999344791286,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 418.27949999424163
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 422.92230000020936
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 423.6405999981798
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 361.20940001273993
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 308.1955000088783
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 364.9721999972826,
+      "kind": "direct",
+      "ms": 418.27949999424163,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 248.5296999948332,
+      "kind": "direct",
+      "ms": 422.92230000020936,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 207.79079999192618,
+      "kind": "direct",
+      "ms": 423.6405999981798,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 233.23440000240225,
+      "kind": "direct",
+      "ms": 361.20940001273993,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 227.20480000134557,
+      "kind": "direct",
+      "ms": 308.1955000088783,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 364.9721999972826,
+      "kind": "direct",
+      "ms": 418.27949999424163,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 248.5296999948332,
+      "kind": "direct",
+      "ms": 422.92230000020936,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 207.79079999192618,
+      "kind": "direct",
+      "ms": 423.6405999981798,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 233.23440000240225,
+      "kind": "direct",
+      "ms": 361.20940001273993,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 227.20480000134557,
+      "kind": "direct",
+      "ms": 308.1955000088783,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp",
+      "first_response_ms": 60.75330000021495,
+      "kind": "command",
+      "ms": 60.82369999785442,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.04400000034365803,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.031799994758330286,
+      "script_delay_sources": [
+        {
+          "ms": 0.031799994758330286,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp",
+      "first_response_ms": 51.473300001816824,
+      "kind": "command",
+      "ms": 51.52819999784697,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

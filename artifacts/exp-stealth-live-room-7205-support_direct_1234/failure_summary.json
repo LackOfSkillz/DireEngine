@@ -1,0 +1,8 @@
+{
+  "failure_type": "leak_failure",
+  "lag_status": "critical",
+  "message": "5 test objects were not cleaned up.",
+  "mode": "direct",
+  "scenario": "exp-stealth-live-room-7205-support",
+  "seed": 1234
+}

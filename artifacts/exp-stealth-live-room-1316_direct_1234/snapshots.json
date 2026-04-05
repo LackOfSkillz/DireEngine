@@ -1,0 +1,56 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9380,
+        "is_dead": false,
+        "key": "TEST_LIVE_STEALTH_PROBE_1316",
+        "life_state": "ALIVE",
+        "location": "Knifering Pit",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9380,
+            "key": "TEST_LIVE_STEALTH_PROBE_1316",
+            "location": "Knifering Pit",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "Jekar",
+          "south",
+          "TEST_LIVE_STEALTH_PROBE_1316"
+        ],
+        "exits": [
+          "south"
+        ],
+        "id": 1316,
+        "key": "Knifering Pit"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775390724.1666417
+    },
+    "label": "final"
+  }
+]

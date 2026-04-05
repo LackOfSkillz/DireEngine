@@ -1,5 +1,6 @@
 {
   "failure_type": null,
+  "lag_status": "critical",
   "message": "",
   "mode": "direct",
   "scenario": "combat-basic",

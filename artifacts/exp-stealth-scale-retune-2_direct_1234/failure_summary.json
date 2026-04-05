@@ -1,0 +1,8 @@
+{
+  "failure_type": "leak_failure",
+  "lag_status": "ok",
+  "message": "Preexisting leaked TEST_ objects blocked scenario start.",
+  "mode": "direct",
+  "scenario": "exp-stealth-scale-retune-2",
+  "seed": 1234
+}

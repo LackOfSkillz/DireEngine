@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4778, in scenario
+    raise AssertionError(f"exp missing active skill {skill_name}: {active_transcript}")
+AssertionError: exp missing active skill stealth:            Skill        Rank/% -> Mindstate      Bits (pool / max)
+           Appraisal:    1 00% dabbling     (1/34)         (0/1017)
+             Evasion:   20 00% dabbling     (1/34)         (0/1326)
+             Stealth:   20 00% dabbling     (1/34)         (0/1326)
+      Targeted Magic:   80 00% dabbling     (1/34)         (0/2224)
+
+Total Ranks Displayed: 121

@@ -1,0 +1,75 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9160,
+        "is_dead": false,
+        "key": "TEST_EXP_DEBIL_CASTER",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_DEBIL_CASTER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "cooldown_hinder": {
+            "duration": 2
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9159,
+            "key": "TEST_EXP_DEBIL_CASTER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9160,
+            "key": "TEST_EXP_DEBIL_CASTER",
+            "location": "TEST_EXP_DEBIL_CASTER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9161,
+            "key": "debilhit",
+            "location": "TEST_EXP_DEBIL_CASTER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9162,
+            "key": "debilresist",
+            "location": "TEST_EXP_DEBIL_CASTER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_DEBIL_CASTER",
+          "debilhit",
+          "debilresist"
+        ],
+        "exits": [],
+        "id": 9159,
+        "key": "TEST_EXP_DEBIL_CASTER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775345549.6294825
+    },
+    "label": "final"
+  }
+]

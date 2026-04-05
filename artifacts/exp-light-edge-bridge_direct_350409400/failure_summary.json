@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Successful light-edge attack did not train light edge.",
+  "mode": "direct",
+  "scenario": "exp-light-edge-bridge",
+  "seed": 350409400
+}

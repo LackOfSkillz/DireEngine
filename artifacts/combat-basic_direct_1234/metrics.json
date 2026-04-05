@@ -1,15 +1,116 @@
 {
   "coin_delta": 0,
+  "combat_responsiveness_ms": 1645.3719000031317,
   "command_count": 3,
-  "command_timings_ms": [
-    221,
-    4743,
-    608
+  "command_timing_entries": [
+    {
+      "combat_response_ms": 214.3021000083536,
+      "command": "target TEST_COMBAT_DEFENDER",
+      "first_response_ms": 214.27710000716615,
+      "kind": "command",
+      "ms": 214.37140001216903,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "engaged"
+    },
+    {
+      "combat_response_ms": 4102.071200002683,
+      "command": "attack",
+      "first_response_ms": 4102.071200002683,
+      "kind": "command",
+      "ms": 5024.014299997361,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "damaged"
+    },
+    {
+      "combat_response_ms": 619.7423999983585,
+      "command": "disengage",
+      "first_response_ms": 554.1190999938408,
+      "kind": "command",
+      "ms": 619.8422000015853,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "disengaged"
+    }
   ],
+  "command_timings_ms": [
+    214.37140001216903,
+    5024.014299997361,
+    619.8422000015853
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 5024.001500001759,
+    "timings_ms": [
+      214.37140001216903,
+      5024.014299997361,
+      619.8422000015853
+    ]
+  },
   "deletion_failures": [],
-  "ended_at": 1774955515.696367,
+  "ended_at": 1775335492.0950491,
   "exit_code": 0,
   "failure_type": null,
+  "first_response_ms": 1623.4891333345633,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 3,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 3,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_count_current": 5,
+    "source_count_peak": 7,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 4,
+      "deactivate": 2
+    },
+    "transition_event_counts": {
+      "activate": 4,
+      "deactivate": 2
+    },
+    "transition_total": 6
+  },
   "invariant_results": [
     {
       "message": "Character exists.",
@@ -23,8 +124,38 @@
     }
   ],
   "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 1952.7426333370386,
+    "jitter": 2667.514551081938,
+    "max_ms": 5024.014299997361,
+    "min_ms": 214.37140001216903,
+    "p95_ms": 4583.597089997784,
+    "slow_count": 3,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "target TEST_COMBAT_DEFENDER",
+      "ms": 214.37140001216903,
+      "snapshot": "engaged"
+    },
+    {
+      "command": "attack",
+      "ms": 5024.014299997361,
+      "snapshot": "damaged"
+    },
+    {
+      "command": "disengage",
+      "ms": 619.8422000015853,
+      "snapshot": "disengaged"
+    }
+  ],
+  "lag_status": "critical",
   "leaks": [],
+  "max_command_time_ms": 5024.001500001759,
   "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
   "output_log": [
     "You feel unprepared for what may come.",
     "You focus on TEST_COMBAT_DEFENDER.",
@@ -32,6 +163,7 @@
     "You lose your rhythm.",
     "You step back and disengage."
   ],
+  "payload_timing_ms": 0.0,
   "preexisting_cleanup_failures": [],
   "preexisting_leaks": [],
   "result": {
@@ -71,7 +203,7 @@
         "in_combat_after": true,
         "in_combat_before": true,
         "range_changed": false,
-        "roundtime_after": 1.77,
+        "roundtime_after": 1.62,
         "roundtime_before": 0.0,
         "target_after": "TEST_COMBAT_DEFENDER",
         "target_assigned": false,
@@ -134,8 +266,8 @@
         "in_combat_after": false,
         "in_combat_before": true,
         "range_changed": true,
-        "roundtime_after": 2.83,
-        "roundtime_before": 1.77,
+        "roundtime_after": 2.71,
+        "roundtime_before": 1.62,
         "target_after": null,
         "target_assigned": false,
         "target_before": "TEST_COMBAT_DEFENDER",
@@ -246,7 +378,64 @@
     ],
     "target_hp": 49
   },
-  "scenario_duration_ms": 16525,
+  "scenario_duration_ms": 17951,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775335486.486416,
+        "delay_s": 3.0,
+        "due_at": 1775335489.486416,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_COMBAT_ATTACKER",
+        "job_id": "8115838af1df448ca2ccf63be4e09c3b",
+        "key": "combat:roundtime:8884",
+        "owner": "#8884",
+        "owner_label": "TEST_COMBAT_ATTACKER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "target TEST_COMBAT_DEFENDER",
+      "ms": 214.37140001216903
+    },
+    {
+      "cmd": "attack",
+      "ms": 5024.014299997361
+    },
+    {
+      "cmd": "disengage",
+      "ms": 619.8422000015853
+    }
+  ],
   "snapshot_labels": [
     "initial",
     "engaged",
@@ -254,7 +443,78 @@
     "disengaged",
     "final"
   ],
-  "started_at": 1774955499.1705089,
+  "started_at": 1775335473.816428,
   "state_transition_count": 4,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Structural combat sanity validation should report lag without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 1952.728833333822,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 214.35660000133794,
+          "metadata": {
+            "character": "TEST_COMBAT_ATTACKER",
+            "command": "target"
+          },
+          "timestamp": 1775335480.2193298
+        },
+        {
+          "duration_ms": 5024.001500001759,
+          "metadata": {
+            "character": "TEST_COMBAT_ATTACKER",
+            "command": "attack"
+          },
+          "timestamp": 1775335485.4921033
+        },
+        {
+          "duration_ms": 619.8283999983687,
+          "metadata": {
+            "character": "TEST_COMBAT_ATTACKER",
+            "command": "disengage"
+          },
+          "timestamp": 1775335486.486416
+        }
+      ],
+      "max_ms": 5024.001500001759,
+      "total_ms": 5858.186500001466
+    },
+    "scheduler_execute": {}
+  },
   "xp_delta": 0
 }

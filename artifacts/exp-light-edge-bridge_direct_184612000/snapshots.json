@@ -1,0 +1,85 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9215,
+        "is_dead": false,
+        "key": "TEST_EXP_LIGHT_EDGE_ATTACKER",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_LIGHT_EDGE_ATTACKER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 1.98,
+        "target": "lightedgedummy",
+        "target_summary": {
+          "hp": 68,
+          "id": 9216,
+          "in_combat": true,
+          "key": "lightedgedummy",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 9217,
+          "key": "training knife",
+          "location": "TEST_EXP_LIGHT_EDGE_ATTACKER",
+          "typeclass": "typeclasses.weapons.Weapon"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9214,
+            "key": "TEST_EXP_LIGHT_EDGE_ATTACKER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9215,
+            "key": "TEST_EXP_LIGHT_EDGE_ATTACKER",
+            "location": "TEST_EXP_LIGHT_EDGE_ATTACKER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9216,
+            "key": "lightedgedummy",
+            "location": "TEST_EXP_LIGHT_EDGE_ATTACKER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9217,
+            "key": "training knife",
+            "location": "TEST_EXP_LIGHT_EDGE_ATTACKER",
+            "typeclass": "typeclasses.weapons.Weapon"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_LIGHT_EDGE_ATTACKER",
+          "lightedgedummy"
+        ],
+        "exits": [],
+        "id": 9214,
+        "key": "TEST_EXP_LIGHT_EDGE_ATTACKER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775345796.363233
+    },
+    "label": "final"
+  }
+]

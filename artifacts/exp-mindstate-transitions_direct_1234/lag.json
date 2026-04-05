@@ -1,0 +1,92 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 0.02052499621640891,
+  "lag": {
+    "avg_ms": 0.030924999009585008,
+    "jitter": 0.017295541359872716,
+    "max_ms": 0.05669999518431723,
+    "min_ms": 0.020699997548945248,
+    "p95_ms": 0.051959996199002476,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT award_xp",
+      "ms": 0.05669999518431723,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT award_xp",
+      "ms": 0.02510000194888562,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT award_xp",
+      "ms": 0.021200001356191933,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT award_xp",
+      "ms": 0.020699997548945248,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT award_xp",
+      "first_response_ms": 0.03579999611247331,
+      "kind": "direct",
+      "ms": 0.05669999518431723,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT award_xp",
+      "first_response_ms": 0.01720000000204891,
+      "kind": "direct",
+      "ms": 0.02510000194888562,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT award_xp",
+      "first_response_ms": 0.014999997802078724,
+      "kind": "direct",
+      "ms": 0.021200001356191933,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT award_xp",
+      "first_response_ms": 0.01409999094903469,
+      "kind": "direct",
+      "ms": 0.020699997548945248,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

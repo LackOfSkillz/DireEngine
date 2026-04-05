@@ -1241,7 +1241,13 @@ def run_inventory_scenario(args):
     return _run_registered_scenario(args, scenario, auto_snapshot=True, name="inventory")
 
 
-@register_scenario("combat-basic")
+@register_scenario(
+    "combat-basic",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Structural combat sanity validation should report lag without failing on environment-specific latency.",
+    },
+)
 def run_combat_basic_scenario(args):
     _setup_django()
 
@@ -1308,7 +1314,13 @@ def run_combat_basic_scenario(args):
             "target_hp": int(getattr(defender.db, "hp", 0) or 0),
         }
 
-    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="combat-basic")
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="combat-basic",
+        scenario_metadata=getattr(run_combat_basic_scenario, "diretest_metadata", {}),
+    )
 
 
 @register_scenario("death-loop")
@@ -3231,6 +3243,2213 @@ def run_onboarding_no_heal_scenario(args):
     return _run_onboarding_failure_case(args, "no_heal")
 
 
+def _build_exp_test_character(ctx, *, key):
+    room = ctx.harness.create_test_room(key=f"{key}_ROOM")
+    character = ctx.harness.create_test_character(room=room, key=key)
+    character.permissions.add("Developer")
+    ctx.character = character
+    ctx.room = room
+    return character
+
+
+@register_scenario("exp-xp-injection")
+def run_exp_xp_injection_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import award_xp
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_INJECT_CHAR")
+        skill = character.exp_skills.get("evasion")
+        gained = ctx.direct(award_xp, skill, 100)
+        if gained <= 0 or skill.pool <= 0:
+            raise AssertionError(f"XP injection did not increase the pool: gained={gained}, pool={skill.pool}")
+
+        ctx.cmd("skilldebug evasion")
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "gained": gained,
+            "pool": skill.pool,
+            "mindstate": skill.mindstate,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-xp-injection")
+
+
+@register_scenario("exp-hard-stop")
+def run_exp_hard_stop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import award_xp
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_HARD_STOP_CHAR")
+        skill = character.exp_skills.get("evasion")
+        first_gain = ctx.direct(award_xp, skill, skill.max_pool)
+        before_pool = skill.pool
+        second_gain = ctx.direct(award_xp, skill, 1000)
+        if first_gain <= 0:
+            raise AssertionError("Hard-stop scenario failed to fill the skill pool.")
+        if second_gain != 0 or skill.pool != before_pool:
+            raise AssertionError(f"Mind lock hard stop failed: second_gain={second_gain}, before={before_pool}, after={skill.pool}")
+
+        ctx.cmd("skilldebug evasion")
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "first_gain": first_gain,
+            "second_gain": second_gain,
+            "pool": skill.pool,
+            "mindstate": skill.mindstate,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-hard-stop")
+
+
+@register_scenario("exp-difficulty-curve")
+def run_exp_difficulty_curve_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import SkillState, train
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_DIFFICULTY_CHAR")
+        skill = SkillState("evasion")
+        skill.rank = 50
+        skill.recalc_pool()
+
+        optimal_gain = ctx.direct(train, skill, 50)
+        skill.pool = 0.0
+        skill.update_mindstate()
+        easy_gain = ctx.direct(train, skill, 10)
+        skill.pool = 0.0
+        skill.update_mindstate()
+        hard_gain = ctx.direct(train, skill, 120)
+
+        if not (optimal_gain > easy_gain and optimal_gain > hard_gain):
+            raise AssertionError(
+                f"Difficulty curve did not peak at matching rank: optimal={optimal_gain}, easy={easy_gain}, hard={hard_gain}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "rank": skill.rank,
+            "optimal_gain": optimal_gain,
+            "easy_gain": easy_gain,
+            "hard_gain": hard_gain,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-difficulty-curve")
+
+
+@register_scenario("exp-low-rank-boost")
+def run_exp_low_rank_boost_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import calculate_xp
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_LOW_RANK_CHAR")
+        low_skill = character.exp_skills.get("evasion")
+        low_skill.rank = 0
+        low_skill.recalc_pool()
+        low_xp = ctx.direct(calculate_xp, low_skill, 10)
+
+        high_skill = character.exp_skills.get("appraisal")
+        high_skill.rank = 100
+        high_skill.recalc_pool()
+        high_xp = ctx.direct(calculate_xp, high_skill, 10)
+
+        if low_xp <= high_xp:
+            raise AssertionError(f"Low rank bonus did not increase XP: low={low_xp}, high={high_xp}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "low_rank_xp": low_xp,
+            "high_rank_xp": high_xp,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-low-rank-boost")
+
+
+@register_scenario("exp-miss-learning")
+def run_exp_miss_learning_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import train
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_MISS_CHAR")
+        skill = character.exp_skills.get("evasion")
+        hit_gain = ctx.direct(train, skill, 20, True)
+        skill.pool = 0.0
+        skill.update_mindstate()
+        miss_gain = ctx.direct(train, skill, 20, False)
+
+        if miss_gain <= 0 or miss_gain >= hit_gain:
+            raise AssertionError(f"Miss learning modifier was invalid: hit={hit_gain}, miss={miss_gain}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "hit_gain": hit_gain,
+            "miss_gain": miss_gain,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-miss-learning")
+
+
+@register_scenario("exp-outcome-learning")
+def run_exp_outcome_learning_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import award_exp_skill
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_OUTCOME_CHAR")
+        skill = character.exp_skills.get("stealth")
+        skill.rank = 13
+        skill.recalc_pool()
+
+        fail_gain = ctx.direct(award_exp_skill, character, "stealth", 20, False, "fail")
+        skill.pool = 0.0
+        skill.update_mindstate()
+
+        partial_gain = ctx.direct(award_exp_skill, character, "stealth", 20, True, "partial")
+        skill.pool = 0.0
+        skill.update_mindstate()
+
+        success_gain = ctx.direct(award_exp_skill, character, "stealth", 20, True, "success")
+
+        if fail_gain <= 0.0:
+            raise AssertionError(f"Failure learning should still grant some XP: {fail_gain}")
+        if not (fail_gain < partial_gain < success_gain):
+            raise AssertionError(
+                f"Outcome learning gains were not ordered failure < partial < success: fail={fail_gain}, partial={partial_gain}, success={success_gain}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "fail_gain": fail_gain,
+            "partial_gain": partial_gain,
+            "success_gain": success_gain,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-outcome-learning")
+
+
+@register_scenario("exp-event-weight")
+def run_exp_event_weight_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import SkillState, calculate_xp
+
+        locksmith_skill = SkillState("locksmithing")
+        locksmith_skill.rank = 25
+        locksmith_skill.recalc_pool()
+
+        lockpick_easy = ctx.direct(calculate_xp, locksmith_skill, 10, True, "success", "locksmithing")
+        lockpick_equal = ctx.direct(calculate_xp, locksmith_skill, 25, True, "success", "locksmithing")
+        trap_disarm_equal = ctx.direct(calculate_xp, locksmith_skill, 25, True, "success", "trap_disarm")
+        trap_disarm_hard = ctx.direct(calculate_xp, locksmith_skill, 80, True, "success", "trap_disarm")
+
+        combat_skill = SkillState("evasion")
+        combat_skill.rank = 25
+        combat_skill.recalc_pool()
+        evasion_equal = ctx.direct(calculate_xp, combat_skill, 25, True, "success", "evasion")
+
+        if lockpick_equal <= lockpick_easy:
+            raise AssertionError(
+                f"Difficulty weighting did not reward an on-rank locksmithing event over an easy one: easy={lockpick_easy}, equal={lockpick_equal}"
+            )
+        if trap_disarm_equal <= lockpick_equal:
+            raise AssertionError(
+                f"Trap-disarm event weight did not exceed standard locksmithing event weight: trap={trap_disarm_equal}, lockpick={lockpick_equal}"
+            )
+        if trap_disarm_hard >= trap_disarm_equal:
+            raise AssertionError(
+                f"Very hard rare-event training should still fall below optimal difficulty: hard={trap_disarm_hard}, equal={trap_disarm_equal}"
+            )
+        if lockpick_equal <= evasion_equal:
+            raise AssertionError(
+                f"Rare locksmithing event did not exceed routine combat event at equal rank/difficulty: locksmithing={lockpick_equal}, evasion={evasion_equal}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "lockpick_easy": lockpick_easy,
+            "lockpick_equal": lockpick_equal,
+            "trap_disarm_equal": trap_disarm_equal,
+            "trap_disarm_hard": trap_disarm_hard,
+            "evasion_equal": evasion_equal,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-event-weight")
+
+
+@register_scenario("exp-mind-lock")
+def run_exp_mind_lock_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import train
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_MIND_LOCK_CHAR")
+        skill = character.exp_skills.get("evasion")
+        iterations = 0
+        previous_pool = skill.pool
+        while skill.mindstate < 34 and iterations < 200:
+            ctx.direct(train, skill, 20)
+            if skill.pool < previous_pool:
+                raise AssertionError("Mind lock scenario decreased the pool unexpectedly.")
+            previous_pool = skill.pool
+            iterations += 1
+
+        before = skill.pool
+        extra_gain = ctx.direct(train, skill, 20)
+        if skill.mindstate != 34:
+            raise AssertionError(f"Mind lock scenario did not reach 34: {skill.mindstate}")
+        if extra_gain != 0 or skill.pool != before:
+            raise AssertionError(f"Mind lock scenario kept gaining XP after lock: extra_gain={extra_gain}, before={before}, after={skill.pool}")
+
+        ctx.cmd("skilldebug evasion")
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "iterations": iterations,
+            "pool": skill.pool,
+            "mindstate": skill.mindstate,
+            "extra_gain": extra_gain,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-mind-lock")
+
+
+@register_scenario("exp-time-to-lock")
+def run_exp_time_to_lock_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import train
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_TIME_LOCK_CHAR")
+        skill = character.exp_skills.get("evasion")
+        gains = []
+        for _ in range(30):
+            gains.append(ctx.direct(train, skill, 20))
+            if skill.mindstate >= 34:
+                break
+
+        if skill.mindstate < 34:
+            raise AssertionError(f"Time-to-lock simulation did not reach mind lock in range: {skill.mindstate}")
+        if len(gains) > 30:
+            raise AssertionError(f"Time-to-lock simulation exceeded expected iterations: {len(gains)}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "iterations": len(gains),
+            "gains": gains,
+            "mindstate": skill.mindstate,
+            "pool": skill.pool,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-time-to-lock")
+
+
+@register_scenario("exp-rank-scaling")
+def run_exp_rank_scaling_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import SkillState, calculate_xp, rank_scaling, skill_gain_modifier
+
+        low_rank_perception = SkillState("perception")
+        low_rank_perception.rank = 1
+        low_rank_perception.recalc_pool()
+
+        mid_rank_stealth = SkillState("stealth")
+        mid_rank_stealth.rank = 13
+        mid_rank_stealth.recalc_pool()
+
+        perception_xp = ctx.direct(calculate_xp, low_rank_perception, 10, True)
+        stealth_xp = ctx.direct(calculate_xp, mid_rank_stealth, 10, True)
+
+        if rank_scaling(low_rank_perception.rank) <= rank_scaling(mid_rank_stealth.rank):
+            raise AssertionError(
+                f"Rank scaling did not favor lower rank skill: {rank_scaling(low_rank_perception.rank)} <= {rank_scaling(mid_rank_stealth.rank)}"
+            )
+        if skill_gain_modifier("stealth") >= skill_gain_modifier("perception"):
+            raise AssertionError(
+                f"Stealth modifier should stay below perception modifier: {skill_gain_modifier('stealth')} >= {skill_gain_modifier('perception')}"
+            )
+        if stealth_xp >= perception_xp:
+            raise AssertionError(
+                f"Rank-sensitive XP did not reduce mid-rank stealth below low-rank perception: stealth={stealth_xp}, perception={perception_xp}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "perception_rank": low_rank_perception.rank,
+            "perception_xp": perception_xp,
+            "perception_scale": rank_scaling(low_rank_perception.rank),
+            "stealth_rank": mid_rank_stealth.rank,
+            "stealth_xp": stealth_xp,
+            "stealth_scale": rank_scaling(mid_rank_stealth.rank),
+            "perception_modifier": skill_gain_modifier("perception"),
+            "stealth_modifier": skill_gain_modifier("stealth"),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-rank-scaling")
+
+
+@register_scenario("exp-drain-timing")
+def run_exp_drain_timing_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import pulse
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_DRAIN_CHAR")
+        skill = character.exp_skills.get("evasion")
+        skill.pool = 1000.0
+        skill.update_mindstate()
+
+        drains = []
+        for _ in range(15):
+            drains.append(ctx.direct(pulse, skill))
+
+        if skill.pool > 5.0:
+            raise AssertionError(f"Drain timing scenario left too much pool after 15 pulses: {skill.pool}")
+        if skill.rank_progress <= 0:
+            raise AssertionError("Drain timing scenario did not convert drained pool into rank progress.")
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "drains": drains,
+            "final_pool": skill.pool,
+            "rank_progress": skill.rank_progress,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-drain-timing")
+
+
+@register_scenario("exp-rank-gain")
+def run_exp_rank_gain_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import award_xp, pulse
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_RANK_GAIN_CHAR")
+        skill = character.exp_skills.get("evasion")
+        before_rank = skill.rank
+        skill.rank_progress = 500.0
+        ctx.direct(award_xp, skill, skill.max_pool)
+        for _ in range(20):
+            ctx.direct(pulse, skill)
+            if skill.rank > before_rank:
+                break
+
+        if skill.rank <= before_rank:
+            raise AssertionError(f"Rank gain scenario did not increase rank: before={before_rank}, after={skill.rank}")
+
+        ctx.cmd("skilldebug evasion")
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "before_rank": before_rank,
+            "after_rank": skill.rank,
+            "rank_progress": skill.rank_progress,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-rank-gain")
+
+
+@register_scenario("exp-skillset-drain")
+def run_exp_skillset_drain_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import SkillState, drain_skill
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_SKILLSET_DRAIN_CHAR")
+        primary = SkillState("evasion")
+        secondary = SkillState("athletics")
+        tertiary = SkillState("perception")
+
+        primary.skillset = "primary"
+        secondary.skillset = "secondary"
+        tertiary.skillset = "tertiary"
+
+        for skill in (primary, secondary, tertiary):
+            skill.pool = 1000.0
+            skill.rank_progress = 0.0
+            skill.recalc_pool()
+            skill.pool = 1000.0
+            skill.update_mindstate()
+
+        primary_drain = ctx.direct(drain_skill, primary)
+        secondary_drain = ctx.direct(drain_skill, secondary)
+        tertiary_drain = ctx.direct(drain_skill, tertiary)
+
+        if not (primary_drain > secondary_drain > tertiary_drain):
+            raise AssertionError(
+                f"Skillset drain rates were not ordered primary > secondary > tertiary: {primary_drain}, {secondary_drain}, {tertiary_drain}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "primary_drain": primary_drain,
+            "secondary_drain": secondary_drain,
+            "tertiary_drain": tertiary_drain,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-skillset-drain")
+
+
+@register_scenario("exp-wisdom-drain")
+def run_exp_wisdom_drain_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import drain_skill
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_WISDOM_DRAIN_CHAR")
+        normal_skill = character.exp_skills.get("evasion")
+        high_wis_skill = character.exp_skills.get("athletics")
+
+        for skill in (normal_skill, high_wis_skill):
+            skill.skillset = "primary"
+            skill.pool = 1000.0
+            skill.rank_progress = 0.0
+            skill.recalc_pool()
+            skill.pool = 1000.0
+            skill.update_mindstate()
+
+        normal_drain = ctx.direct(drain_skill, normal_skill, 30)
+        high_wis_drain = ctx.direct(drain_skill, high_wis_skill, 60)
+
+        if high_wis_drain <= normal_drain:
+            raise AssertionError(f"Wisdom modifier did not increase drain: normal={normal_drain}, high={high_wis_drain}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "normal_drain": normal_drain,
+            "high_wis_drain": high_wis_drain,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-wisdom-drain")
+
+
+@register_scenario("exp-single-tick")
+def run_exp_single_tick_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems import exp_pulse
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_SINGLE_TICK_CHAR")
+        skill = character.exp_skills.get("stealth")
+        skill.pool = 1000.0
+        skill.last_trained = time.time()
+        skill.update_mindstate()
+
+        exp_pulse.GLOBAL_TICK = 0
+        ctx.cmd("skilldebug tick")
+
+        if exp_pulse.GLOBAL_TICK != exp_pulse.PULSE_TICK:
+            raise AssertionError(f"Single tick scenario did not advance global tick: {exp_pulse.GLOBAL_TICK}")
+        if skill.pool >= 1000.0:
+            raise AssertionError(f"Single tick scenario did not drain eligible offset skill: {skill.pool}")
+        if "Tick executed" not in "\n".join(ctx.output_log):
+            raise AssertionError(f"Single tick scenario did not emit tick confirmation: {ctx.output_log}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "global_tick": exp_pulse.GLOBAL_TICK,
+            "remaining_pool": skill.pool,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-single-tick")
+
+
+@register_scenario("exp-offset-behavior")
+def run_exp_offset_behavior_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems import exp_pulse
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_OFFSET_CHAR")
+        evasion = character.exp_skills.get("evasion")
+        stealth = character.exp_skills.get("stealth")
+
+        evasion.pool = 1000.0
+        stealth.pool = 1000.0
+        evasion.last_trained = time.time()
+        stealth.last_trained = time.time()
+        evasion.update_mindstate()
+        stealth.update_mindstate()
+        exp_pulse.GLOBAL_TICK = 0
+
+        evasion_pools = []
+        stealth_pools = []
+        ticks = []
+        for _ in range(10):
+            ticks.append(ctx.direct(exp_pulse.exp_pulse_tick))
+            evasion_pools.append(evasion.pool)
+            stealth_pools.append(stealth.pool)
+
+        if evasion_pools[0] != 1000.0:
+            raise AssertionError(f"Offset behavior drained evasion before offset 0: {evasion_pools}")
+        if stealth_pools[0] >= 1000.0:
+            raise AssertionError(f"Offset behavior did not drain stealth at offset 20: {stealth_pools}")
+        if evasion_pools[8] != 1000.0:
+            raise AssertionError(f"Offset behavior drained evasion before the full cycle completed: {evasion_pools}")
+        if evasion_pools[9] >= 1000.0:
+            raise AssertionError(f"Offset behavior did not drain evasion at offset 0 after full cycle: {evasion_pools}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "ticks": ticks,
+            "evasion_pools": evasion_pools,
+            "stealth_pools": stealth_pools,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-offset-behavior")
+
+
+@register_scenario("exp-multi-skill-tick")
+def run_exp_multi_skill_tick_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems import exp_pulse
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_MULTI_TICK_CHAR")
+        evasion = character.exp_skills.get("evasion")
+        stealth = character.exp_skills.get("stealth")
+        appraisal = character.exp_skills.get("appraisal")
+
+        for skill in (evasion, stealth, appraisal):
+            skill.pool = 1000.0
+            skill.last_trained = time.time()
+            skill.update_mindstate()
+
+        exp_pulse.GLOBAL_TICK = 0
+        tick_states = []
+        for _ in range(10):
+            current_tick = ctx.direct(exp_pulse.exp_pulse_tick)
+            tick_states.append(
+                {
+                    "tick": current_tick,
+                    "evasion": evasion.pool,
+                    "stealth": stealth.pool,
+                    "appraisal": appraisal.pool,
+                }
+            )
+
+        tick_20 = tick_states[0]
+        tick_40 = tick_states[1]
+        tick_0 = tick_states[9]
+
+        if not (tick_20["stealth"] < 1000.0 and tick_20["evasion"] == 1000.0 and tick_20["appraisal"] == 1000.0):
+            raise AssertionError(f"Multi-skill tick scenario failed staggered drain at tick 20: {tick_20}")
+        if not (tick_40["appraisal"] < 1000.0 and tick_40["evasion"] == 1000.0):
+            raise AssertionError(f"Multi-skill tick scenario failed staggered drain at tick 40: {tick_40}")
+        if not (tick_0["evasion"] < 1000.0 and tick_0["stealth"] < 1000.0 and tick_0["appraisal"] < 1000.0):
+            raise AssertionError(f"Multi-skill tick scenario failed to reach evasion offset by full cycle: {tick_0}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "tick_states": tick_states,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-multi-skill-tick")
+
+
+@register_scenario("exp-inactive-skill")
+def run_exp_inactive_skill_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems import exp_pulse
+        from world.systems.skills import ACTIVE_WINDOW, GRACE_WINDOW, train
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_INACTIVE_CHAR")
+        skill = character.exp_skills.get("stealth")
+        ctx.direct(train, skill, 20)
+        before_pool = skill.pool
+        skill.last_trained = time.time() - (ACTIVE_WINDOW + GRACE_WINDOW + 1)
+
+        exp_pulse.GLOBAL_TICK = 0
+        current_tick = ctx.direct(exp_pulse.exp_pulse_tick)
+
+        if current_tick != 20:
+            raise AssertionError(f"Inactive skill scenario did not advance global tick as expected: {current_tick}")
+        if skill.pool != before_pool:
+            raise AssertionError(f"Inactive skill drained outside the activity window: before={before_pool}, after={skill.pool}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "before_pool": before_pool,
+            "after_pool": skill.pool,
+            "last_trained": skill.last_trained,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-inactive-skill")
+
+
+@register_scenario("exp-active-skill-only")
+def run_exp_active_skill_only_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems import exp_pulse
+        from world.systems.skills import ACTIVE_WINDOW, GRACE_WINDOW, train
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_ACTIVE_ONLY_CHAR")
+        active_skill = character.exp_skills.get("stealth")
+        inactive_skill = character.exp_skills.get("locksmithing")
+
+        ctx.direct(train, active_skill, 20)
+        inactive_skill.pool = active_skill.pool
+        inactive_skill.update_mindstate()
+        inactive_skill.last_trained = time.time() - (ACTIVE_WINDOW + GRACE_WINDOW + 1)
+
+        before_active = active_skill.pool
+        before_inactive = inactive_skill.pool
+        exp_pulse.GLOBAL_TICK = 0
+        ctx.direct(exp_pulse.exp_pulse_tick)
+
+        if active_skill.pool >= before_active:
+            raise AssertionError(f"Active-skill-only scenario did not drain the active skill: before={before_active}, after={active_skill.pool}")
+        if inactive_skill.pool != before_inactive:
+            raise AssertionError(f"Active-skill-only scenario drained the inactive skill: before={before_inactive}, after={inactive_skill.pool}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "before_active": before_active,
+            "after_active": active_skill.pool,
+            "before_inactive": before_inactive,
+            "after_inactive": inactive_skill.pool,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-active-skill-only")
+
+
+@register_scenario("exp-mindstate-transitions")
+def run_exp_mindstate_transitions_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import SkillState, award_xp
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_MINDSTATE_TRANSITIONS_CHAR")
+        skill = SkillState("evasion", owner=character)
+
+        ctx.direct(award_xp, skill, 35)
+        skill.last_feedback_time = 0.0
+        ctx.direct(award_xp, skill, 115)
+        skill.last_feedback_time = 0.0
+        ctx.direct(award_xp, skill, 440)
+        skill.last_feedback_time = 0.0
+        ctx.direct(award_xp, skill, 410)
+
+        transcript = "\n".join(ctx.output_log)
+        expected_messages = [
+            "You feel your evasion settling into dabbling.",
+            "You feel your evasion settling into thinking.",
+            "You feel your evasion settling into absorbed.",
+            "Your evasion is fully absorbed. You can learn no more.",
+        ]
+        for message in expected_messages:
+            if message not in transcript:
+                raise AssertionError(f"Missing mindstate transition message: {message}\nTranscript:\n{transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "mindstate": skill.mindstate,
+            "mindstate_name": skill.mindstate_name(),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-mindstate-transitions")
+
+
+@register_scenario("exp-no-spam")
+def run_exp_no_spam_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems.skills import pulse
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_NO_SPAM_CHAR")
+        skill = character.exp_skills.get("evasion")
+        skill.pool = 500.0
+        skill.last_trained = time.time()
+        skill.update_mindstate()
+        skill.last_mindstate_name = skill.mindstate_name()
+        ctx.output_log.clear()
+
+        skill.last_feedback_time = 0.0
+        ctx.direct(pulse, skill)
+        skill.last_feedback_time = 0.0
+        ctx.direct(pulse, skill)
+        skill.last_feedback_time = 0.0
+        ctx.direct(pulse, skill)
+
+        attentive_message = "You feel your evasion settling into attentive."
+        attentive_count = sum(1 for entry in ctx.output_log if attentive_message in str(entry))
+        if attentive_count != 1:
+            raise AssertionError(f"Expected one attentive transition message, got {attentive_count}: {ctx.output_log}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "final_mindstate": skill.mindstate,
+            "final_mindstate_name": skill.mindstate_name(),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-no-spam")
+
+
+@register_scenario("exp-command-active")
+def run_exp_command_active_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import award_xp
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_COMMAND_ACTIVE_CHAR")
+        evasion = character.exp_skills.get("evasion")
+        stealth = character.exp_skills.get("stealth")
+        stealth.rank = 18
+        stealth.recalc_pool()
+        ctx.direct(award_xp, evasion, 120)
+
+        ctx.cmd("experience")
+        transcript = "\n".join(ctx.output_log)
+        if "evasion" not in transcript:
+            raise AssertionError(f"experience did not show active skill: {transcript}")
+        if "stealth" in transcript:
+            raise AssertionError(f"experience showed inactive skill: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-command-active")
+
+
+@register_scenario("exp-command-all")
+def run_exp_command_all_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.skills import award_xp
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_COMMAND_ALL_CHAR")
+        evasion = character.exp_skills.get("evasion")
+        stealth = character.exp_skills.get("stealth")
+        evasion.rank = 25
+        stealth.rank = 18
+        evasion.recalc_pool()
+        stealth.recalc_pool()
+        ctx.direct(award_xp, evasion, 120)
+
+        ctx.cmd("experience all")
+        transcript = "\n".join(ctx.output_log).lower()
+        if "evasion" not in transcript or "stealth" not in transcript:
+            raise AssertionError(f"experience all did not show all skills: {transcript}")
+        if "total ranks displayed:" not in transcript:
+            raise AssertionError(f"experience all did not include footer: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="exp-command-all")
+
+
+@register_scenario(
+    "exp-stealth-bridge",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_stealth_bridge_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from typeclasses.abilities import get_ability
+        from world.systems.scheduler import flush_due
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_STEALTH_BRIDGE_CHAR")
+        observer = ctx.harness.create_test_character(room=ctx.room, key="TEST_EXP_STEALTH_OBSERVER")
+        observer.ensure_core_defaults()
+        observer.update_skill("perception", rank=12, mindstate=0)
+        character.update_skill("stealth", rank=20, mindstate=0)
+
+        ctx.cmd("hide")
+
+        stealth_skill = character.exp_skills.get("stealth")
+        legacy_mindstate = int(((character.db.skills or {}).get("stealth") or {}).get("mindstate", 0) or 0)
+        if stealth_skill.pool != 0:
+            raise AssertionError(f"Hide paid stealth XP before roundtime resolved: pool={stealth_skill.pool}")
+
+        time.sleep(2.1)
+        ctx.direct(flush_due)
+
+        if stealth_skill.pool <= 0:
+            raise AssertionError(f"Hide did not train stealth in exp_skills after roundtime resolution: pool={stealth_skill.pool}")
+        if legacy_mindstate != 0:
+            raise AssertionError(f"Legacy stealth mindstate remained authoritative: legacy={legacy_mindstate}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        transcript = "\n".join(ctx.output_log)
+        if "stealth" not in transcript.lower():
+            raise AssertionError(f"exp all did not show stealth after hide: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "stealth_pool": stealth_skill.pool,
+            "legacy_mindstate": legacy_mindstate,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-bridge",
+        scenario_metadata=getattr(run_exp_stealth_bridge_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-stealth-no-observer",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate delayed stealth routing and should not fail on host timing drift.",
+    },
+)
+def run_exp_stealth_no_observer_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.scheduler import flush_due
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_STEALTH_NO_OBSERVER_CHAR")
+        character.update_skill("stealth", rank=5, mindstate=0)
+
+        ctx.cmd("hide")
+
+        stealth_skill = character.exp_skills.get("stealth")
+        if stealth_skill.pool != 0:
+            raise AssertionError(f"No-observer hide paid stealth XP before roundtime resolved: pool={stealth_skill.pool}")
+
+        time.sleep(2.1)
+        ctx.direct(flush_due)
+
+        if stealth_skill.pool <= 0:
+            raise AssertionError(f"Low-rank no-observer hide did not pay any delayed stealth XP: pool={stealth_skill.pool}")
+        if stealth_skill.mindstate != 0:
+            raise AssertionError(
+                f"Low-rank no-observer hide should remain sub-threshold after one hide: pool={stealth_skill.pool}, mindstate={stealth_skill.mindstate}"
+            )
+
+        learning_state = dict(getattr(character.db, "stealth_learning", None) or {})
+        last_contest = dict(learning_state.get("last_contest") or {})
+        if bool(last_contest.get("contest_occurred", False)):
+            raise AssertionError(f"No-observer hide incorrectly recorded a contest: {last_contest}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        transcript = "\n".join(ctx.output_log).lower()
+        if "stealth" not in transcript:
+            raise AssertionError(f"exp all did not show stealth after no-observer hide: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "stealth_pool": stealth_skill.pool,
+            "mindstate": stealth_skill.mindstate,
+            "last_contest": last_contest,
+            "rank": stealth_skill.rank,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-no-observer",
+        scenario_metadata=getattr(run_exp_stealth_no_observer_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-stealth-practice-cap",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Practice-cap probes validate the solo-learning threshold rather than environment-dependent command latency.",
+    },
+)
+def run_exp_stealth_practice_cap_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.scheduler import flush_due
+
+        def run_single(rank):
+            character = _build_exp_test_character(ctx, key=f"TEST_EXP_STEALTH_PRACTICE_{rank}")
+            character.update_skill("stealth", rank=rank, mindstate=0)
+            stealth_skill = character.exp_skills.get("stealth")
+
+            before_pool = stealth_skill.pool
+            ctx.output_log.clear()
+            ctx.cmd("hide")
+            if not character.is_hidden():
+                transcript = "\n".join(ctx.output_log)
+                raise AssertionError(f"Practice hide unexpectedly failed at rank {rank}: {transcript}")
+
+            time.sleep(2.1)
+            ctx.direct(flush_due)
+            gain = stealth_skill.pool - before_pool
+            last_contest = dict((dict(getattr(character.db, "stealth_learning", None) or {})).get("last_contest") or {})
+            ctx.direct(character.break_stealth)
+            return gain, last_contest, stealth_skill.rank
+
+        low_gain, low_contest, low_rank = run_single(5)
+        mid_gain, mid_contest, mid_rank = run_single(12)
+        cap_gain, cap_contest, cap_rank = run_single(16)
+
+        if low_gain <= 0:
+            raise AssertionError(f"Low-rank solo practice did not award XP: gain={low_gain}")
+        if mid_gain <= 0:
+            raise AssertionError(f"Mid-rank solo practice did not award XP below the cap: gain={mid_gain}")
+        if low_gain <= mid_gain:
+            raise AssertionError(f"Solo practice did not decay toward the cap: low={low_gain}, mid={mid_gain}")
+        if cap_gain != 0:
+            raise AssertionError(f"Solo practice did not hard-stop above the cap: gain={cap_gain}")
+        if bool(low_contest.get("contest_occurred", False)) or bool(mid_contest.get("contest_occurred", False)) or bool(cap_contest.get("contest_occurred", False)):
+            raise AssertionError(
+                f"Practice-cap probe incorrectly recorded contests: low={low_contest}, mid={mid_contest}, cap={cap_contest}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "low_rank": low_rank,
+            "low_gain": low_gain,
+            "mid_rank": mid_rank,
+            "mid_gain": mid_gain,
+            "cap_rank": cap_rank,
+            "cap_gain": cap_gain,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-practice-cap",
+        scenario_metadata=getattr(run_exp_stealth_practice_cap_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-stealth-empty-room-loop",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Stealth feel probes measure delayed no-observer pacing and should not fail on host timing drift.",
+    },
+)
+def run_exp_stealth_empty_room_loop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.scheduler import flush_due
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_STEALTH_EMPTY_ROOM_CHAR")
+        character.update_skill("stealth", rank=13, mindstate=0)
+
+        stealth_skill = character.exp_skills.get("stealth")
+        gains = []
+        success_count = 0
+
+        for attempt in range(5):
+            ctx.output_log.clear()
+            before_pool = stealth_skill.pool
+            ctx.cmd("hide")
+            if not character.is_hidden():
+                transcript = "\n".join(ctx.output_log)
+                raise AssertionError(f"Empty-room hide unexpectedly failed on attempt {attempt + 1}: {transcript}")
+
+            success_count += 1
+            time.sleep(2.1)
+            ctx.direct(flush_due)
+            after_pool = stealth_skill.pool
+            gains.append(after_pool - before_pool)
+            ctx.direct(character.break_stealth)
+
+        if any(gain <= 0 for gain in gains):
+            raise AssertionError(f"Empty-room hide loop produced a non-positive delayed gain: {gains}")
+        if gains[-1] >= gains[0]:
+            raise AssertionError(f"Empty-room hide loop did not diminish over repeated no-observer attempts: {gains}")
+
+        learning_state = dict(getattr(character.db, "stealth_learning", None) or {})
+        last_contest = dict(learning_state.get("last_contest") or {})
+        if bool(last_contest.get("contest_occurred", False)):
+            raise AssertionError(f"Empty-room hide loop incorrectly recorded a contest: {last_contest}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "success_count": success_count,
+            "attempt_count": 5,
+            "gains": gains,
+            "final_pool": stealth_skill.pool,
+            "final_mindstate": stealth_skill.mindstate,
+            "last_contest": last_contest,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-empty-room-loop",
+        scenario_metadata=getattr(run_exp_stealth_empty_room_loop_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-stealth-failure-margins",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Failure-margin probes validate stealth payout ordering rather than environment-dependent command latency.",
+    },
+)
+def run_exp_stealth_failure_margins_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.scheduler import flush_due
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_STEALTH_FAILURE_MARGIN_CHAR")
+        character.update_skill("stealth", rank=20, mindstate=0)
+        stealth_skill = character.exp_skills.get("stealth")
+
+        gains = {}
+        for label, margin in (("terrible", -60), ("moderate", -20), ("near_miss", -5)):
+            before_pool = stealth_skill.pool
+            ctx.direct(
+                character.record_stealth_contest,
+                "hide",
+                20,
+                result={"outcome": "fail", "diff": margin},
+                target=ctx.room,
+                roundtime=0.0,
+                event_key="stealth",
+                require_hidden=False,
+            )
+            ctx.direct(flush_due)
+            gains[label] = stealth_skill.pool - before_pool
+
+        if not (gains["terrible"] < gains["moderate"] < gains["near_miss"]):
+            raise AssertionError(f"Failure margin scaling did not increase with closer misses: {gains}")
+
+        command_room = ctx.harness.create_test_room(key="TEST_EXP_STEALTH_FAILURE_COMMAND_ROOM")
+        command_character = ctx.harness.create_test_character(room=command_room, key="TEST_EXP_STEALTH_FAILURE_COMMAND_CHAR")
+        observer = ctx.harness.create_test_character(room=command_room, key="TEST_EXP_STEALTH_FAILURE_COMMAND_OBSERVER")
+        command_character.permissions.add("Developer")
+        command_character.ensure_core_defaults()
+        observer.ensure_core_defaults()
+        command_character.update_skill("stealth", rank=13, mindstate=0)
+        observer.update_skill("perception", rank=80, mindstate=0)
+        command_character.db.stats["agility"] = 20
+        command_character.db.stats["reflex"] = 20
+        observer.db.stats["agility"] = 40
+        observer.db.stats["reflex"] = 40
+
+        command_skill = command_character.exp_skills.get("stealth")
+        before_command_pool = command_skill.pool
+        ctx.character = command_character
+        ctx.room = command_room
+        ctx.output_log.clear()
+        ctx.cmd("hide")
+        if command_character.is_hidden():
+            transcript = "\n".join(ctx.output_log)
+            raise AssertionError(f"Crowded failure probe unexpectedly hid the actor: {transcript}")
+
+        time.sleep(2.1)
+        ctx.direct(flush_due)
+        command_gain = command_skill.pool - before_command_pool
+        learning_state = dict(getattr(command_character.db, "stealth_learning", None) or {})
+        last_contest = dict(learning_state.get("last_contest") or {})
+        if str(last_contest.get("outcome", "") or "") != "fail":
+            raise AssertionError(f"Crowded failure probe did not record a failed hide: {last_contest}")
+        if command_gain <= 0:
+            raise AssertionError(
+                f"Failed hide through the real command path did not award delayed stealth XP: gain={command_gain}, contest={last_contest}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "gains": gains,
+            "command_fail_gain": command_gain,
+            "command_fail_contest": last_contest,
+            "final_pool": stealth_skill.pool,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-failure-margins",
+        scenario_metadata=getattr(run_exp_stealth_failure_margins_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-stealth-perception-dual",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_stealth_perception_dual_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from typeclasses.abilities import get_ability
+        from world.systems.scheduler import flush_due
+
+        room = ctx.harness.create_test_room(key="TEST_EXP_STEALTH_PERCEPTION_ROOM")
+        stealth_actor = ctx.harness.create_test_character(room=room, key="TEST_EXP_STEALTH_ACTOR")
+        observer = ctx.harness.create_test_character(room=room, key="TEST_EXP_PERCEPTION_ACTOR")
+        ctx.character = stealth_actor
+        ctx.room = room
+
+        stealth_actor.ensure_core_defaults()
+        observer.ensure_core_defaults()
+        stealth_actor.update_skill("stealth", rank=25, mindstate=0)
+        observer.update_skill("perception", rank=25, mindstate=0)
+
+        ctx.cmd("hide")
+        ctx.direct(get_ability("search", observer).execute, observer)
+
+        if stealth_actor.exp_skills.get("stealth").pool != 0:
+            raise AssertionError("Stealth actor gained hide XP before roundtime resolution.")
+
+        time.sleep(2.1)
+        ctx.direct(flush_due)
+
+        stealth_pool = stealth_actor.exp_skills.get("stealth").pool
+        perception_pool = observer.exp_skills.get("perception").pool
+        if stealth_pool <= 0:
+            raise AssertionError(f"Stealth actor did not train in exp_skills: {stealth_pool}")
+        if perception_pool <= 0:
+            raise AssertionError(f"Observer did not train perception in exp_skills: {perception_pool}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "stealth_pool": stealth_pool,
+            "perception_pool": perception_pool,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-perception-dual",
+        scenario_metadata=getattr(run_exp_stealth_perception_dual_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-stealth-observer-aggregation",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Observer aggregation probes validate strongest-watcher weighting rather than environment-dependent command latency.",
+    },
+)
+def run_exp_stealth_observer_aggregation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.scheduler import flush_due
+
+        def run_case(case_name, actor_rank, actor_stats, observer_specs, attempts=8):
+            room = ctx.harness.create_test_room(key=f"TEST_STEALTH_AGG_{case_name}_ROOM")
+            actor = ctx.harness.create_test_character(room=room, key=f"TEST_STEALTH_AGG_{case_name}_ACTOR")
+            actor.permissions.add("Developer")
+            actor.ensure_core_defaults()
+            actor.update_skill("stealth", rank=actor_rank, mindstate=0)
+            actor.db.stats["agility"] = int(actor_stats.get("agility", 20))
+            actor.db.stats["reflex"] = int(actor_stats.get("reflex", 20))
+            ctx.character = actor
+            ctx.room = room
+
+            for index, spec in enumerate(list(observer_specs or [])):
+                observer = ctx.harness.create_test_character(room=room, key=f"TEST_STEALTH_AGG_{case_name}_OBS_{index}")
+                observer.ensure_core_defaults()
+                observer.update_skill("perception", rank=int(spec.get("rank", 1) or 1), mindstate=0)
+                observer.db.stats["agility"] = int(spec.get("agility", 10) or 10)
+                observer.db.stats["reflex"] = int(spec.get("reflex", 10) or 10)
+
+            skill = actor.exp_skills.get("stealth")
+            margins = []
+            outcomes = []
+            observer_pressures = []
+            support_pressures = []
+            crowd_penalties = []
+            success_count = 0
+            severe_fail_count = 0
+
+            for _ in range(attempts):
+                ctx.output_log.clear()
+                ctx.cmd("hide")
+                time.sleep(2.1)
+                ctx.direct(flush_due)
+                last_contest = dict((dict(getattr(actor.db, "stealth_learning", None) or {})).get("last_contest") or {})
+                margin = int(last_contest.get("margin", 0) or 0)
+                outcome = str(last_contest.get("outcome", "fail") or "fail")
+                margins.append(margin)
+                outcomes.append(outcome)
+                observer_pressures.append(float(last_contest.get("observer_pressure", 0.0) or 0.0))
+                support_pressures.append(float(last_contest.get("support_pressure", 0.0) or 0.0))
+                crowd_penalties.append(float(last_contest.get("crowd_penalty", 0.0) or 0.0))
+                if outcome != "fail":
+                    success_count += 1
+                if margin <= -50:
+                    severe_fail_count += 1
+                actor.break_stealth()
+
+            return {
+                "case": case_name,
+                "attempts": attempts,
+                "margins": margins,
+                "outcomes": outcomes,
+                "success_count": success_count,
+                "severe_fail_count": severe_fail_count,
+                "avg_observer_pressure": sum(observer_pressures) / max(1, len(observer_pressures)),
+                "avg_support_pressure": sum(support_pressures) / max(1, len(support_pressures)),
+                "avg_crowd_penalty": sum(crowd_penalties) / max(1, len(crowd_penalties)),
+            }
+
+        single_strong = run_case(
+            "single_strong",
+            actor_rank=10,
+            actor_stats={"agility": 10, "reflex": 10},
+            observer_specs=[{"rank": 100, "agility": 40, "reflex": 40}],
+        )
+        many_weak = run_case(
+            "many_weak",
+            actor_rank=200,
+            actor_stats={"agility": 20, "reflex": 20},
+            observer_specs=[{"rank": 5, "agility": 5, "reflex": 5} for _ in range(12)],
+        )
+        strong_cluster = run_case(
+            "strong_cluster",
+            actor_rank=200,
+            actor_stats={"agility": 20, "reflex": 20},
+            observer_specs=[
+                {"rank": 180, "agility": 30, "reflex": 30},
+                {"rank": 120, "agility": 20, "reflex": 20},
+                {"rank": 120, "agility": 20, "reflex": 20},
+                *[{"rank": 10, "agility": 5, "reflex": 5} for _ in range(8)],
+            ],
+        )
+
+        if single_strong["success_count"] != 0 or single_strong["severe_fail_count"] < 4:
+            raise AssertionError(f"Single strong observer should produce mostly severe failures: {single_strong}")
+        if many_weak["success_count"] <= 0 or many_weak["severe_fail_count"] >= many_weak["attempts"]:
+            raise AssertionError(f"Many weak observers should remain beatable for elite stealth: {many_weak}")
+        if strong_cluster["success_count"] <= 0 or strong_cluster["severe_fail_count"] >= strong_cluster["attempts"]:
+            raise AssertionError(f"Strong observer cluster should be hard but not impossible: {strong_cluster}")
+        if many_weak["avg_observer_pressure"] >= strong_cluster["avg_observer_pressure"]:
+            raise AssertionError(
+                f"Many weak observers should add less total pressure than a strong cluster: weak={many_weak}, cluster={strong_cluster}"
+            )
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "single_strong": single_strong,
+            "many_weak": many_weak,
+            "strong_cluster": strong_cluster,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-observer-aggregation",
+        scenario_metadata=getattr(run_exp_stealth_observer_aggregation_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-stealth-state-machine",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Stealth scheduling validation depends on short roundtime waits and should report lag without failing on host timing drift.",
+    },
+)
+def run_exp_stealth_state_machine_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.scheduler import flush_due
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_STEALTH_STATE_MACHINE_CHAR")
+        observer = ctx.harness.create_test_character(room=ctx.room, key="TEST_EXP_STEALTH_STATE_MACHINE_OBSERVER")
+        observer.ensure_core_defaults()
+        observer.update_skill("perception", rank=12, mindstate=0)
+        character.update_skill("stealth", rank=25, mindstate=0)
+
+        ctx.cmd("hide")
+        stealth_skill = character.exp_skills.get("stealth")
+        if stealth_skill.pool != 0:
+            raise AssertionError(f"Stealth state machine paid XP before roundtime: {stealth_skill.pool}")
+
+        time.sleep(2.1)
+        ctx.direct(flush_due)
+        first_gain = stealth_skill.pool
+        if first_gain <= 0:
+            raise AssertionError(f"Stealth state machine did not pay after maintained concealment: {first_gain}")
+
+        ctx.direct(character.break_stealth)
+        ctx.cmd("hide")
+        cancelled_before = stealth_skill.pool
+        ctx.direct(character.break_stealth)
+        time.sleep(2.1)
+        ctx.direct(flush_due)
+        cancelled_after = stealth_skill.pool
+        if cancelled_after != cancelled_before:
+            raise AssertionError(
+                f"Stealth state machine paid despite broken concealment: before={cancelled_before}, after={cancelled_after}"
+            )
+
+        ctx.cmd("hide")
+        time.sleep(2.1)
+        ctx.direct(flush_due)
+        repeated_total = stealth_skill.pool
+        repeated_gain = repeated_total - cancelled_after
+        if repeated_gain <= 0:
+            raise AssertionError(f"Repeated maintained hide did not pay any XP: total={repeated_total}, prior={cancelled_after}")
+        if repeated_gain >= first_gain:
+            raise AssertionError(f"Repeated hide did not diminish against the same observer context: first={first_gain}, repeated={repeated_gain}")
+
+        learning_state = dict(getattr(character.db, "stealth_learning", None) or {})
+        last_contest = dict(learning_state.get("last_contest") or {})
+        if not bool(last_contest.get("contest_occurred", False)):
+            raise AssertionError(f"Stealth state machine did not persist contest context: {learning_state}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "first_gain": first_gain,
+            "cancelled_gain": cancelled_after - cancelled_before,
+            "repeated_gain": repeated_gain,
+            "last_contest": last_contest,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-stealth-state-machine",
+        scenario_metadata=getattr(run_exp_stealth_state_machine_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-appraisal-loop",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_appraisal_loop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems import exp_pulse
+        from world.systems.skills import ACTIVE_WINDOW, GRACE_WINDOW
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_APPRAISAL_CHAR")
+        gem = ctx.harness.create_test_object(
+            key="testgem",
+            location=character,
+            is_gem=True,
+            gem_type="quartz",
+            size_tier=2,
+            quality_tier=2,
+            item_value=25,
+            value=25,
+        )
+        weapon = ctx.harness.create_test_object(
+            key="testweapon",
+            location=character,
+            item_type="weapon",
+            weapon_type="brawling",
+            skill="brawling",
+            damage=4,
+            damage_min=1,
+            damage_max=3,
+            item_value=40,
+            value=40,
+        )
+        armor = ctx.harness.create_test_object(
+            key="testarmor",
+            location=character,
+            item_type="armor",
+            armor_type="chain",
+            protection=3,
+            hindrance=1,
+            item_value=35,
+            value=35,
+        )
+        creature = ctx.harness.create_test_character(room=ctx.room, key="testbeast")
+
+        for target in (gem, weapon, armor, creature, gem):
+            ctx.direct(character.appraise_target, target)
+            character.set_roundtime(0)
+
+        appraisal_skill = character.exp_skills.get("appraisal")
+        if appraisal_skill.pool <= 0:
+            raise AssertionError(f"Appraisal actions did not train appraisal: {appraisal_skill.pool}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp")
+        active_transcript = "\n".join(ctx.output_log)
+        if "appraisal" not in active_transcript:
+            raise AssertionError(f"exp did not show appraisal while active: {active_transcript}")
+
+        before_pool = appraisal_skill.pool
+        appraisal_skill.last_trained = time.time() - (ACTIVE_WINDOW + GRACE_WINDOW + 1)
+        exp_pulse.GLOBAL_TICK = 20
+        ctx.direct(exp_pulse.exp_pulse_tick)
+        if appraisal_skill.pool != before_pool:
+            raise AssertionError(f"Inactive appraisal still drained: before={before_pool}, after={appraisal_skill.pool}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp")
+        inactive_transcript = "\n".join(ctx.output_log)
+        if "appraisal" in inactive_transcript:
+            raise AssertionError(f"Inactive appraisal still showed in exp: {inactive_transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "appraisal_pool": appraisal_skill.pool,
+            "before_pool": before_pool,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-appraisal-loop",
+        scenario_metadata=getattr(run_exp_appraisal_loop_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-targeted-magic-bridge",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_targeted_magic_bridge_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        caster = _build_exp_test_character(ctx, key="TEST_EXP_TM_CASTER")
+        target_hit = ctx.harness.create_test_character(room=ctx.room, key="tmhit")
+        target_miss = ctx.harness.create_test_character(room=ctx.room, key="tmmiss")
+
+        caster.set_profession("warrior_mage")
+        caster.ensure_core_defaults()
+        caster.update_skill("targeted_magic", rank=80, mindstate=0)
+        caster.update_skill("attunement", rank=80, mindstate=0)
+
+        target_hit.ensure_core_defaults()
+        target_miss.ensure_core_defaults()
+        target_hit.update_skill("evasion", rank=1, mindstate=0)
+        target_hit.db.stats["reflex"] = 1
+        target_miss.update_skill("evasion", rank=220, mindstate=0)
+        target_miss.db.stats["reflex"] = 220
+
+        ctx.direct(caster.prepare_spell, "flare 10")
+        ctx.direct(caster.cast_spell, "tmhit")
+        after_hit = caster.exp_skills.get("targeted_magic").pool
+        if after_hit <= 0:
+            raise AssertionError("Successful targeted cast did not train targeted magic.")
+
+        caster.clear_state("cooldown_flare")
+        ctx.direct(caster.prepare_spell, "flare 10")
+        ctx.direct(caster.cast_spell, "tmmiss")
+        after_miss = caster.exp_skills.get("targeted_magic").pool
+        if after_miss <= after_hit:
+            raise AssertionError(f"Missed targeted cast did not add EXP: hit={after_hit}, miss={after_miss}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "after_hit": after_hit,
+            "after_miss": after_miss,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-targeted-magic-bridge",
+        scenario_metadata=getattr(run_exp_targeted_magic_bridge_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-athletics-bridge",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_athletics_bridge_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_EXP_ATHLETICS_CHAR")
+
+        character.ensure_core_defaults()
+        character.update_skill("athletics", rank=80, mindstate=0)
+        character.db.stats["agility"] = 40
+        character.db.stats["strength"] = 40
+        character.db.stats["stamina"] = 40
+        ctx.room.db.climbable = True
+        ctx.room.db.climb_difficulty = 20
+        ctx.room.db.swimmable = True
+        ctx.room.db.swim_difficulty = 20
+
+        ctx.direct(character.attempt_climb)
+        after_climb = character.exp_skills.get("athletics").pool
+        if after_climb <= 0:
+            raise AssertionError("Climb attempt did not train athletics.")
+
+        ctx.direct(character.attempt_swim)
+        after_swim = character.exp_skills.get("athletics").pool
+        if after_swim <= after_climb:
+            raise AssertionError(f"Swim attempt did not add athletics EXP: climb={after_climb}, swim={after_swim}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        all_transcript = "\n".join(ctx.output_log)
+        if "athletics" not in all_transcript:
+            raise AssertionError(f"exp all did not show athletics after terrain actions: {all_transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "after_climb": after_climb,
+            "after_swim": after_swim,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-athletics-bridge",
+        scenario_metadata=getattr(run_exp_athletics_bridge_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-locksmithing-bridge",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_locksmithing_bridge_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_EXP_LOCKSMITH_CHAR")
+        box = ctx.harness.create_test_object(key="practice box", location=ctx.room)
+        pick = ctx.harness.create_test_object(key="training pick", location=character)
+
+        character.ensure_core_defaults()
+        character.update_skill("locksmithing", rank=80, mindstate=0)
+        character.db.stats["intelligence"] = 40
+
+        box.db.is_box = True
+        box.db.locked = True
+        box.db.lock_difficulty = 20
+        box.db.trap_present = True
+        box.db.trap_difficulty = 20
+        box.db.trap_type = "needle"
+        box.db.disarmed = False
+        box.db.last_disarmed_trap = None
+
+        pick.db.is_lockpick = True
+        pick.db.grade = "fine"
+        pick.db.quality = 5
+        pick.db.durability = 20
+
+        ctx.direct(character.inspect_box, box)
+        after_inspect = character.exp_skills.get("locksmithing").pool
+        if after_inspect <= 0:
+            raise AssertionError("Inspect box did not train locksmithing.")
+
+        ctx.direct(character.disarm_box, box)
+        after_disarm = character.exp_skills.get("locksmithing").pool
+        if not bool(getattr(box.db, "disarmed", False)):
+            raise AssertionError("Disarm box did not complete successfully in locksmithing bridge scenario.")
+        if after_disarm <= after_inspect:
+            raise AssertionError(f"Disarm box did not add locksmithing EXP: inspect={after_inspect}, disarm={after_disarm}")
+
+        ctx.direct(character.pick_box, box, pick)
+        after_pick = character.exp_skills.get("locksmithing").pool
+        if bool(getattr(box.db, "locked", True)):
+            raise AssertionError("Pick box did not unlock the practice box.")
+        if after_pick <= after_disarm:
+            raise AssertionError(f"Pick box did not add locksmithing EXP: disarm={after_disarm}, pick={after_pick}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        transcript = "\n".join(ctx.output_log)
+        if "locksmithing" not in transcript:
+            raise AssertionError(f"exp all did not show locksmithing after box workflow: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "after_inspect": after_inspect,
+            "after_disarm": after_disarm,
+            "after_pick": after_pick,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-locksmithing-bridge",
+        scenario_metadata=getattr(run_exp_locksmithing_bridge_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-debilitation-bridge",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_debilitation_bridge_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        caster = _build_exp_test_character(ctx, key="TEST_EXP_DEBIL_CASTER")
+        target_hit = ctx.harness.create_test_character(room=ctx.room, key="debilhit")
+        target_resist = ctx.harness.create_test_character(room=ctx.room, key="debilresist")
+
+        caster.set_profession("warrior_mage")
+        caster.ensure_core_defaults()
+        caster.update_skill("debilitation", rank=80, mindstate=0)
+        caster.update_skill("attunement", rank=80, mindstate=0)
+
+        target_hit.ensure_core_defaults()
+        target_resist.ensure_core_defaults()
+        target_hit.update_skill("warding", rank=1, mindstate=0)
+        target_hit.db.stats["discipline"] = 1
+        target_resist.update_skill("warding", rank=220, mindstate=0)
+        target_resist.db.stats["discipline"] = 220
+
+        ctx.direct(caster.prepare_spell, "hinder 10")
+        ctx.direct(caster.cast_spell, "debilhit")
+        after_hit = caster.exp_skills.get("debilitation").pool
+        if after_hit <= 0:
+            raise AssertionError("Successful debilitation cast did not train debilitation.")
+        if not target_hit.get_state("debilitated"):
+            raise AssertionError("Successful debilitation cast did not apply the debuff state.")
+
+        caster.clear_state("cooldown_hinder")
+        ctx.direct(caster.prepare_spell, "hinder 10")
+        ctx.direct(caster.cast_spell, "debilresist")
+        after_resist = caster.exp_skills.get("debilitation").pool
+        if after_resist <= after_hit:
+            raise AssertionError(f"Resisted debilitation cast did not add EXP: hit={after_hit}, resist={after_resist}")
+        if target_resist.get_state("debilitated"):
+            raise AssertionError("Resisted debilitation cast should not apply the debuff state.")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        transcript = "\n".join(ctx.output_log)
+        if "debilitation" not in transcript:
+            raise AssertionError(f"exp all did not show debilitation after spell casts: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "after_hit": after_hit,
+            "after_resist": after_resist,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-debilitation-bridge",
+        scenario_metadata=getattr(run_exp_debilitation_bridge_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-light-edge-bridge",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_light_edge_bridge_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        attacker = _build_exp_test_character(ctx, key="TEST_EXP_LIGHT_EDGE_ATTACKER")
+        target = ctx.harness.create_test_character(room=ctx.room, key="lightedgedummy")
+        weapon = ctx.harness.create_test_object(
+            key="training knife",
+            location=attacker,
+            typeclass="typeclasses.weapons.Weapon",
+        )
+
+        attacker.ensure_core_defaults()
+        target.ensure_core_defaults()
+        attacker.update_skill("light_edge", rank=40, mindstate=0)
+        attacker.db.stats["reflex"] = 10
+        attacker.db.stats["agility"] = 10
+        target.update_skill("evasion", rank=20, mindstate=0)
+        target.db.stats["reflex"] = 15
+        target.db.stats["agility"] = 15
+
+        weapon.db.skill = "light_edge"
+        weapon.db.weapon_type = "light_edge"
+        weapon.db.damage_type = "slice"
+        weapon.db.damage_types = {"slice": 1, "impact": 0, "puncture": 0}
+        weapon.db.weapon_profile = {
+            "type": "light_edge",
+            "skill": "light_edge",
+            "damage": 5,
+            "balance": 50,
+            "speed": 2.0,
+            "damage_min": 2,
+            "damage_max": 5,
+            "roundtime": 2.0,
+        }
+        if hasattr(weapon, "sync_profile_fields"):
+            weapon.sync_profile_fields()
+        attacker.db.equipped_weapon = weapon
+
+        light_edge_pool = 0.0
+        for _ in range(5):
+            ctx.cmd("attack lightedgedummy")
+            light_edge_pool = attacker.exp_skills.get("light_edge").pool
+            if light_edge_pool > 0:
+                break
+            attacker.set_roundtime(0)
+        if light_edge_pool <= 0:
+            raise AssertionError("Successful light-edge attack did not train light edge.")
+        if attacker.exp_skills.get("brawling").pool != 0:
+            raise AssertionError("Weapon attack incorrectly trained brawling instead of light edge.")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        transcript = "\n".join(ctx.output_log)
+        if "light edge" not in transcript:
+            raise AssertionError(f"exp all did not show light edge after armed attack: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "light_edge_pool": light_edge_pool,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-light-edge-bridge",
+        scenario_metadata=getattr(run_exp_light_edge_bridge_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-second-wave-command-visibility",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_second_wave_command_visibility_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import time
+
+        from world.systems.skills import ACTIVE_WINDOW, GRACE_WINDOW
+
+        character = _build_exp_test_character(ctx, key="TEST_EXP_SECOND_WAVE_VIS")
+        spell_target = ctx.harness.create_test_character(room=ctx.room, key="waveward")
+        box = ctx.harness.create_test_object(key="wave box", location=ctx.room)
+        pick = ctx.harness.create_test_object(key="wave pick", location=character)
+
+        character.set_profession("warrior_mage")
+        character.ensure_core_defaults()
+        spell_target.ensure_core_defaults()
+
+        character.update_skill("athletics", rank=60, mindstate=0)
+        character.update_skill("locksmithing", rank=60, mindstate=0)
+        character.update_skill("debilitation", rank=80, mindstate=0)
+        character.update_skill("light_edge", rank=27, mindstate=0)
+        character.update_skill("attunement", rank=80, mindstate=0)
+        character.update_skill("brawling", rank=25, mindstate=0)
+        spell_target.update_skill("warding", rank=1, mindstate=0)
+        spell_target.db.stats["discipline"] = 1
+
+        character.db.stats["agility"] = 40
+        character.db.stats["strength"] = 40
+        character.db.stats["intelligence"] = 40
+
+        ctx.room.db.climbable = True
+        ctx.room.db.climb_difficulty = 20
+
+        box.db.is_box = True
+        box.db.locked = True
+        box.db.lock_difficulty = 20
+        box.db.trap_present = False
+
+        pick.db.is_lockpick = True
+        pick.db.grade = "fine"
+        pick.db.quality = 5
+        pick.db.durability = 20
+
+        ctx.direct(character.attempt_climb)
+        ctx.direct(character.pick_box, box, pick)
+        ctx.direct(character.prepare_spell, "hinder 10")
+        ctx.direct(character.cast_spell, "waveward")
+
+        for skill_name in ("athletics", "locksmithing", "debilitation"):
+            skill = character.exp_skills.get(skill_name)
+            skill.pool = max(float(skill.pool or 0.0), float(skill.max_pool / 34.0) + 1.0)
+            skill.update_mindstate()
+
+        light_edge_skill = character.exp_skills.get("light_edge")
+        light_edge_skill.last_trained = time.time() - (ACTIVE_WINDOW + GRACE_WINDOW + 1)
+
+        ctx.output_log.clear()
+        ctx.cmd("exp")
+        active_transcript = "\n".join(ctx.output_log).lower()
+        for skill_name in ("athletics", "lockpicking", "debilitation"):
+            if skill_name not in active_transcript:
+                raise AssertionError(f"exp missing active second-wave skill {skill_name}: {active_transcript}")
+        for skill_name in ("light-edged", "hand-to-hand", "perception"):
+            if skill_name in active_transcript:
+                raise AssertionError(f"exp showed inactive skill {skill_name}: {active_transcript}")
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        all_transcript = "\n".join(ctx.output_log).lower()
+        for skill_name in ("athletics", "lockpicking", "debilitation", "light-edged"):
+            if skill_name not in all_transcript:
+                raise AssertionError(f"exp all missing seeded second-wave skill {skill_name}: {all_transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-second-wave-command-visibility",
+        scenario_metadata=getattr(run_exp_second_wave_command_visibility_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-brawling-bridge",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_brawling_bridge_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        attacker = _build_exp_test_character(ctx, key="TEST_EXP_BRAWL_ATTACKER")
+        target = ctx.harness.create_test_character(room=ctx.room, key="brawldummy")
+        gem = ctx.harness.create_test_object(
+            key="brawlgem",
+            location=attacker,
+            is_gem=True,
+            gem_type="quartz",
+            size_tier=1,
+            quality_tier=1,
+            item_value=10,
+            value=10,
+        )
+
+        attacker.ensure_core_defaults()
+        target.ensure_core_defaults()
+        attacker.update_skill("brawling", rank=100, mindstate=0)
+        attacker.db.stats["reflex"] = 5
+        attacker.db.stats["agility"] = 5
+        target.update_skill("evasion", rank=80, mindstate=0)
+        target.db.stats["reflex"] = 40
+        target.db.stats["agility"] = 40
+
+        ctx.direct(attacker.appraise_target, gem)
+        attacker.set_roundtime(0)
+        if attacker.exp_skills.get("brawling").pool != 0:
+            raise AssertionError("Brawling trained outside the unarmed attack path.")
+
+        ctx.cmd("attack brawldummy")
+        brawling_pool = attacker.exp_skills.get("brawling").pool
+        if brawling_pool <= 0:
+            raise AssertionError("Successful unarmed attack did not train brawling.")
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        transcript = "\n".join(ctx.output_log)
+        if "brawling" not in transcript:
+            raise AssertionError(f"exp all did not show brawling after unarmed attack: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "brawling_pool": brawling_pool,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-brawling-bridge",
+        scenario_metadata=getattr(run_exp_brawling_bridge_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-evasion-passive",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_evasion_passive_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        attacker = _build_exp_test_character(ctx, key="TEST_EXP_EVASION_ATTACKER")
+        defender = ctx.harness.create_test_character(room=ctx.room, key="evadee")
+
+        attacker.ensure_core_defaults()
+        defender.ensure_core_defaults()
+        attacker.update_skill("brawling", rank=40, mindstate=0)
+        attacker.db.stats["reflex"] = 10
+        attacker.db.stats["agility"] = 10
+        defender.update_skill("evasion", rank=20, mindstate=0)
+        defender.db.stats["reflex"] = 40
+        defender.db.stats["agility"] = 40
+
+        ctx.cmd("attack evadee")
+        evasion_pool = defender.exp_skills.get("evasion").pool
+        if evasion_pool <= 0:
+            raise AssertionError("Incoming combat pressure did not train evasion.")
+        original_character = ctx.character
+        original_room = ctx.room
+        ctx.character = defender
+        ctx.room = defender.location
+        try:
+            ctx.output_log.clear()
+            ctx.cmd("exp all")
+        finally:
+            ctx.character = original_character
+            ctx.room = original_room
+
+        transcript = "\n".join(ctx.output_log)
+        if "evasion" not in transcript:
+            raise AssertionError(f"exp all did not show evasion after defensive engagement: {transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "evasion_pool": evasion_pool,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-evasion-passive",
+        scenario_metadata=getattr(run_exp_evasion_passive_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "exp-command-visibility",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency.",
+    },
+)
+def run_exp_command_visibility_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_EXP_COMMAND_VISIBILITY")
+        attacker = ctx.harness.create_test_character(room=ctx.room, key="visibilityfoe")
+        spell_target = ctx.harness.create_test_character(room=ctx.room, key="visibilitytarget")
+        gem = ctx.harness.create_test_object(
+            key="visibilitygem",
+            location=character,
+            is_gem=True,
+            gem_type="quartz",
+            size_tier=1,
+            quality_tier=1,
+            item_value=15,
+            value=15,
+        )
+
+        character.set_profession("warrior_mage")
+        character.ensure_core_defaults()
+        attacker.ensure_core_defaults()
+        spell_target.ensure_core_defaults()
+        attacker.permissions.add("Developer")
+
+        character.update_skill("evasion", rank=20, mindstate=0)
+        character.update_skill("stealth", rank=20, mindstate=0)
+        character.update_skill("targeted_magic", rank=80, mindstate=0)
+        character.update_skill("attunement", rank=80, mindstate=0)
+        attacker.update_skill("brawling", rank=40, mindstate=0)
+        character.db.stats["reflex"] = 40
+        character.db.stats["agility"] = 40
+        attacker.db.stats["reflex"] = 5
+        attacker.db.stats["agility"] = 5
+        spell_target.update_skill("evasion", rank=60, mindstate=0)
+        spell_target.db.stats["reflex"] = 20
+
+        evasion_skill = character.exp_skills.get("evasion")
+        evasion_skill.pool = max(0.0, (evasion_skill.max_pool / 34.0) - 1.0)
+        evasion_skill.update_mindstate()
+        stealth_skill = character.exp_skills.get("stealth")
+        stealth_skill.pool = max(0.0, (stealth_skill.max_pool / 34.0) - 1.0)
+        stealth_skill.update_mindstate()
+        targeted_magic_skill = character.exp_skills.get("targeted_magic")
+        targeted_magic_skill.pool = max(0.0, (targeted_magic_skill.max_pool / 34.0) - 1.0)
+        targeted_magic_skill.update_mindstate()
+
+        ctx.cmd("hide")
+        character.set_roundtime(0)
+        ctx.direct(character.appraise_target, gem)
+        character.set_roundtime(0)
+        ctx.direct(character.prepare_spell, "flare 10")
+        ctx.direct(character.cast_spell, "visibilitytarget")
+        character.set_target(attacker)
+
+        original_character = ctx.character
+        original_room = ctx.room
+        ctx.character = attacker
+        ctx.room = attacker.location
+        try:
+            ctx.cmd("attack TEST_EXP_COMMAND_VISIBILITY")
+        finally:
+            ctx.character = original_character
+            ctx.room = original_room
+
+        ctx.output_log.clear()
+        ctx.cmd("exp")
+        active_transcript = "\n".join(ctx.output_log).lower()
+        for skill_name in ("stealth", "appraisal", "targeted magic", "evasion"):
+            if skill_name not in active_transcript:
+                raise AssertionError(f"exp missing active skill {skill_name}: {active_transcript}")
+        for skill_name in ("hand-to-hand", "perception"):
+            if skill_name in active_transcript:
+                raise AssertionError(f"exp showed inactive skill {skill_name}: {active_transcript}")
+        for skill_name in ("stealth", "appraisal", "targeted magic", "evasion"):
+            for line in active_transcript.splitlines():
+                if skill_name not in line:
+                    continue
+                if "clear" in line:
+                    raise AssertionError(f"exp showed active skill {skill_name} as clear: {line}")
+                if ")         (0/" in line:
+                    raise AssertionError(f"exp showed active skill {skill_name} with zero displayed pool bits: {line}")
+                break
+
+        ctx.output_log.clear()
+        ctx.cmd("exp all")
+        all_transcript = "\n".join(ctx.output_log).lower()
+        for skill_name in ("evasion", "stealth", "perception", "hand-to-hand", "targeted magic", "appraisal"):
+            if skill_name not in all_transcript:
+                raise AssertionError(f"exp all missing seeded template skill {skill_name}: {all_transcript}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="exp-command-visibility",
+        scenario_metadata=getattr(run_exp_command_visibility_scenario, "diretest_metadata", {}),
+    )
+
+
 def _ensure_scenario_seed(args):
     seed = getattr(args, "seed", None)
     if seed is None:
@@ -3605,6 +5824,129 @@ def build_parser():
     onboarding_no_heal_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_no_heal"))
     onboarding_no_heal_parser.add_argument("--name", default="DireTestHero")
     onboarding_no_heal_parser.set_defaults(handler=run_onboarding_no_heal_scenario)
+
+    exp_xp_injection_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-xp-injection"))
+    exp_xp_injection_parser.set_defaults(handler=run_exp_xp_injection_scenario)
+
+    exp_hard_stop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-hard-stop"))
+    exp_hard_stop_parser.set_defaults(handler=run_exp_hard_stop_scenario)
+
+    exp_difficulty_curve_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-difficulty-curve"))
+    exp_difficulty_curve_parser.set_defaults(handler=run_exp_difficulty_curve_scenario)
+
+    exp_low_rank_boost_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-low-rank-boost"))
+    exp_low_rank_boost_parser.set_defaults(handler=run_exp_low_rank_boost_scenario)
+
+    exp_miss_learning_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-miss-learning"))
+    exp_miss_learning_parser.set_defaults(handler=run_exp_miss_learning_scenario)
+
+    exp_outcome_learning_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-outcome-learning"))
+    exp_outcome_learning_parser.set_defaults(handler=run_exp_outcome_learning_scenario)
+
+    exp_event_weight_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-event-weight"))
+    exp_event_weight_parser.set_defaults(handler=run_exp_event_weight_scenario)
+
+    exp_mind_lock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-mind-lock"))
+    exp_mind_lock_parser.set_defaults(handler=run_exp_mind_lock_scenario)
+
+    exp_time_to_lock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-time-to-lock"))
+    exp_time_to_lock_parser.set_defaults(handler=run_exp_time_to_lock_scenario)
+
+    exp_rank_scaling_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-rank-scaling"))
+    exp_rank_scaling_parser.set_defaults(handler=run_exp_rank_scaling_scenario)
+
+    exp_drain_timing_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-drain-timing"))
+    exp_drain_timing_parser.set_defaults(handler=run_exp_drain_timing_scenario)
+
+    exp_rank_gain_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-rank-gain"))
+    exp_rank_gain_parser.set_defaults(handler=run_exp_rank_gain_scenario)
+
+    exp_skillset_drain_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-skillset-drain"))
+    exp_skillset_drain_parser.set_defaults(handler=run_exp_skillset_drain_scenario)
+
+    exp_wisdom_drain_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-wisdom-drain"))
+    exp_wisdom_drain_parser.set_defaults(handler=run_exp_wisdom_drain_scenario)
+
+    exp_single_tick_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-single-tick"))
+    exp_single_tick_parser.set_defaults(handler=run_exp_single_tick_scenario)
+
+    exp_offset_behavior_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-offset-behavior"))
+    exp_offset_behavior_parser.set_defaults(handler=run_exp_offset_behavior_scenario)
+
+    exp_multi_skill_tick_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-multi-skill-tick"))
+    exp_multi_skill_tick_parser.set_defaults(handler=run_exp_multi_skill_tick_scenario)
+
+    exp_inactive_skill_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-inactive-skill"))
+    exp_inactive_skill_parser.set_defaults(handler=run_exp_inactive_skill_scenario)
+
+    exp_active_skill_only_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-active-skill-only"))
+    exp_active_skill_only_parser.set_defaults(handler=run_exp_active_skill_only_scenario)
+
+    exp_mindstate_transitions_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-mindstate-transitions"))
+    exp_mindstate_transitions_parser.set_defaults(handler=run_exp_mindstate_transitions_scenario)
+
+    exp_no_spam_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-no-spam"))
+    exp_no_spam_parser.set_defaults(handler=run_exp_no_spam_scenario)
+
+    exp_command_active_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-command-active"))
+    exp_command_active_parser.set_defaults(handler=run_exp_command_active_scenario)
+
+    exp_command_all_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-command-all"))
+    exp_command_all_parser.set_defaults(handler=run_exp_command_all_scenario)
+
+    exp_stealth_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-bridge"))
+    exp_stealth_bridge_parser.set_defaults(handler=run_exp_stealth_bridge_scenario)
+
+    exp_stealth_no_observer_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-no-observer"))
+    exp_stealth_no_observer_parser.set_defaults(handler=run_exp_stealth_no_observer_scenario)
+
+    exp_stealth_practice_cap_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-practice-cap"))
+    exp_stealth_practice_cap_parser.set_defaults(handler=run_exp_stealth_practice_cap_scenario)
+
+    exp_stealth_empty_room_loop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-empty-room-loop"))
+    exp_stealth_empty_room_loop_parser.set_defaults(handler=run_exp_stealth_empty_room_loop_scenario)
+
+    exp_stealth_failure_margins_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-failure-margins"))
+    exp_stealth_failure_margins_parser.set_defaults(handler=run_exp_stealth_failure_margins_scenario)
+
+    exp_stealth_observer_aggregation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-observer-aggregation"))
+    exp_stealth_observer_aggregation_parser.set_defaults(handler=run_exp_stealth_observer_aggregation_scenario)
+
+    exp_stealth_perception_dual_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-perception-dual"))
+    exp_stealth_perception_dual_parser.set_defaults(handler=run_exp_stealth_perception_dual_scenario)
+
+    exp_stealth_state_machine_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-stealth-state-machine"))
+    exp_stealth_state_machine_parser.set_defaults(handler=run_exp_stealth_state_machine_scenario)
+
+    exp_appraisal_loop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-appraisal-loop"))
+    exp_appraisal_loop_parser.set_defaults(handler=run_exp_appraisal_loop_scenario)
+
+    exp_targeted_magic_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-targeted-magic-bridge"))
+    exp_targeted_magic_bridge_parser.set_defaults(handler=run_exp_targeted_magic_bridge_scenario)
+
+    exp_athletics_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-athletics-bridge"))
+    exp_athletics_bridge_parser.set_defaults(handler=run_exp_athletics_bridge_scenario)
+
+    exp_locksmithing_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-locksmithing-bridge"))
+    exp_locksmithing_bridge_parser.set_defaults(handler=run_exp_locksmithing_bridge_scenario)
+
+    exp_debilitation_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-debilitation-bridge"))
+    exp_debilitation_bridge_parser.set_defaults(handler=run_exp_debilitation_bridge_scenario)
+
+    exp_light_edge_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-light-edge-bridge"))
+    exp_light_edge_bridge_parser.set_defaults(handler=run_exp_light_edge_bridge_scenario)
+
+    exp_brawling_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-brawling-bridge"))
+    exp_brawling_bridge_parser.set_defaults(handler=run_exp_brawling_bridge_scenario)
+
+    exp_evasion_passive_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-evasion-passive"))
+    exp_evasion_passive_parser.set_defaults(handler=run_exp_evasion_passive_scenario)
+
+    exp_command_visibility_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-command-visibility"))
+    exp_command_visibility_parser.set_defaults(handler=run_exp_command_visibility_scenario)
+
+    exp_second_wave_command_visibility_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-second-wave-command-visibility"))
+    exp_second_wave_command_visibility_parser.set_defaults(handler=run_exp_second_wave_command_visibility_scenario)
 
     return parser
 

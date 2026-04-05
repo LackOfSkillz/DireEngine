@@ -1,0 +1,58 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 28.774300000804942,
+  "lag": {
+    "avg_ms": 28.823099994042423,
+    "jitter": 40.66627667487179,
+    "max_ms": 57.57849999645259,
+    "min_ms": 0.06769999163225293,
+    "p95_ms": 54.702959996211575,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT award_xp",
+      "ms": 0.06769999163225293,
+      "snapshot": "final"
+    },
+    {
+      "command": "skilldebug evasion",
+      "ms": 57.57849999645259,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT award_xp",
+      "first_response_ms": 0.041799998143687844,
+      "kind": "direct",
+      "ms": 0.06769999163225293,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "skilldebug evasion",
+      "first_response_ms": 57.506800003466196,
+      "kind": "command",
+      "ms": 57.57849999645259,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

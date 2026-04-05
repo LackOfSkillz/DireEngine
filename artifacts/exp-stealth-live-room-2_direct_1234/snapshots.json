@@ -1,0 +1,84 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9379,
+        "is_dead": false,
+        "key": "TEST_LIVE_STEALTH_PROBE_2",
+        "life_state": "ALIVE",
+        "location": "Limbo",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9379,
+            "key": "TEST_LIVE_STEALTH_PROBE_2",
+            "location": "Limbo",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "north",
+          "training dummy",
+          "south",
+          "east",
+          "west",
+          "northeast",
+          "northwest",
+          "southeast",
+          "southwest",
+          "up",
+          "down",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "basic lockpick",
+          "TEST_LIVE_STEALTH_PROBE_2"
+        ],
+        "exits": [
+          "north",
+          "south",
+          "east",
+          "west",
+          "northeast",
+          "northwest",
+          "southeast",
+          "southwest",
+          "up",
+          "down"
+        ],
+        "id": 2,
+        "key": "Limbo"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775390694.399104
+    },
+    "label": "final"
+  }
+]

@@ -1,0 +1,379 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 112.1110999956727,
+  "command_count": 7,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 3.848700027447194,
+      "kind": "command",
+      "ms": 36.26769999391399,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 0.20260000019334257,
+      "kind": "direct",
+      "ms": 0.295300007564947,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT prepare_spell",
+      "first_response_ms": 16.077699983725324,
+      "kind": "direct",
+      "ms": 23.88779999455437,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT cast_spell",
+      "first_response_ms": 3.7243000115267932,
+      "kind": "direct",
+      "ms": 69.6120000211522,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": 112.1110999956727,
+      "command": "attack TEST_EXP_COMMAND_VISIBILITY",
+      "first_response_ms": 28.776100021786988,
+      "kind": "command",
+      "ms": 112.22379998071119,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp",
+      "first_response_ms": 3.4632000024430454,
+      "kind": "command",
+      "ms": 3.5229000204708427,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp all",
+      "first_response_ms": 3.015499998582527,
+      "kind": "command",
+      "ms": 3.0620000034105033,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    36.26769999391399,
+    0.295300007564947,
+    23.88779999455437,
+    69.6120000211522,
+    112.22379998071119,
+    3.5229000204708427,
+    3.0620000034105033
+  ],
+  "commands": {
+    "count": 7,
+    "max_ms": 112.210999999661,
+    "timings_ms": [
+      36.26769999391399,
+      0.295300007564947,
+      23.88779999455437,
+      69.6120000211522,
+      112.22379998071119,
+      3.5229000204708427,
+      3.0620000034105033
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775349618.4974203,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 8.444014292243603,
+  "interest": {
+    "active_object_count": 3,
+    "active_object_peak": 4,
+    "active_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 4,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_count_current": 10,
+    "source_count_peak": 10,
+    "source_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 4,
+      "deactivate": 1
+    },
+    "transition_event_counts": {
+      "activate": 4,
+      "deactivate": 1
+    },
+    "transition_total": 5
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 35.553071431682575,
+    "jitter": 41.83242867594722,
+    "max_ms": 112.22379998071119,
+    "min_ms": 0.295300007564947,
+    "p95_ms": 99.44025999284347,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "hide",
+      "ms": 36.26769999391399,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 0.295300007564947,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT prepare_spell",
+      "ms": 23.88779999455437,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT cast_spell",
+      "ms": 69.6120000211522,
+      "snapshot": "final"
+    },
+    {
+      "command": "attack TEST_EXP_COMMAND_VISIBILITY",
+      "ms": 112.22379998071119,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp",
+      "ms": 3.5229000204708427,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp all",
+      "ms": 3.0620000034105033,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 112.210999999661,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Showing all skills with field experience.\n\n           Skill        Rank/% -> Mindstate      Bits (pool / max)\n           Appraisal:    1 00% dabbling     (1/34)         (0/1017)\n              Arcana:    1 00% clear        (0/34)         (0/1017)\n           Athletics:    1 00% clear        (0/34)         (0/1017)\n              Attack:    0 00% clear        (0/34)         (0/1000)\n          Attunement:   80 00% clear        (0/34)         (0/2224)\n               Blunt:    0 00% clear        (0/34)         (0/1000)\n          Brigandine:    0 00% clear        (0/34)         (0/1000)\n         Chain Armor:    0 00% clear        (0/34)         (0/1000)\n              Combat:    0 00% clear        (0/34)         (0/1000)\n        Debilitation:    0 00% clear        (0/34)         (0/1000)\n           Disengage:    0 00% clear        (0/34)         (0/1000)\n             Empathy:    0 00% clear        (0/34)         (0/1000)\n             Evasion:   20 00% dabbling     (1/34)         (0/1326)\n           First Aid:    0 00% clear        (0/34)         (0/1000)\n        Hand-To-Hand:    0 00% clear        (0/34)         (0/1000)\n          Heavy Edge:    0 00% clear        (0/34)         (0/1000)\n         Light Armor:    0 00% clear        (0/34)         (0/1000)\n         Light-Edged:    0 00% clear        (0/34)         (0/1000)\n         Lockpicking:    0 00% clear        (0/34)         (0/1000)\n     Outdoorsmanship:    0 00% clear        (0/34)         (0/1000)\n          Perception:    1 00% clear        (0/34)         (0/1017)\n         Plate Armor:    0 00% clear        (0/34)         (0/1000)\n             Polearm:    0 00% clear        (0/34)         (0/1000)\n         Scholarship:    0 00% clear        (0/34)         (0/1000)\n            Skinning:    0 00% clear        (0/34)         (0/1000)\n             Stealth:   20 00% dabbling     (1/34)         (0/1326)\n             Tactics:    0 00% clear        (0/34)         (0/1000)\n      Targeted Magic:   80 00% dabbling     (1/34)         (0/2224)\n             Trading:    1 00% clear        (0/34)         (0/1017)\n\nTotal Ranks Displayed: 205"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "hide",
+      "DIRECT appraise_target",
+      "DIRECT prepare_spell",
+      "DIRECT cast_spell",
+      "attack TEST_EXP_COMMAND_VISIBILITY",
+      "exp",
+      "exp all"
+    ],
+    "output_log": [
+      "Showing all skills with field experience.\n\n           Skill        Rank/% -> Mindstate      Bits (pool / max)\n           Appraisal:    1 00% dabbling     (1/34)         (0/1017)\n              Arcana:    1 00% clear        (0/34)         (0/1017)\n           Athletics:    1 00% clear        (0/34)         (0/1017)\n              Attack:    0 00% clear        (0/34)         (0/1000)\n          Attunement:   80 00% clear        (0/34)         (0/2224)\n               Blunt:    0 00% clear        (0/34)         (0/1000)\n          Brigandine:    0 00% clear        (0/34)         (0/1000)\n         Chain Armor:    0 00% clear        (0/34)         (0/1000)\n              Combat:    0 00% clear        (0/34)         (0/1000)\n        Debilitation:    0 00% clear        (0/34)         (0/1000)\n           Disengage:    0 00% clear        (0/34)         (0/1000)\n             Empathy:    0 00% clear        (0/34)         (0/1000)\n             Evasion:   20 00% dabbling     (1/34)         (0/1326)\n           First Aid:    0 00% clear        (0/34)         (0/1000)\n        Hand-To-Hand:    0 00% clear        (0/34)         (0/1000)\n          Heavy Edge:    0 00% clear        (0/34)         (0/1000)\n         Light Armor:    0 00% clear        (0/34)         (0/1000)\n         Light-Edged:    0 00% clear        (0/34)         (0/1000)\n         Lockpicking:    0 00% clear        (0/34)         (0/1000)\n     Outdoorsmanship:    0 00% clear        (0/34)         (0/1000)\n          Perception:    1 00% clear        (0/34)         (0/1017)\n         Plate Armor:    0 00% clear        (0/34)         (0/1000)\n             Polearm:    0 00% clear        (0/34)         (0/1000)\n         Scholarship:    0 00% clear        (0/34)         (0/1000)\n            Skinning:    0 00% clear        (0/34)         (0/1000)\n             Stealth:   20 00% dabbling     (1/34)         (0/1326)\n             Tactics:    0 00% clear        (0/34)         (0/1000)\n      Targeted Magic:   80 00% dabbling     (1/34)         (0/2224)\n             Trading:    1 00% clear        (0/34)         (0/1017)\n\nTotal Ranks Displayed: 205"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 9218,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775349611.3733723,
+        "delay_s": 2.0,
+        "due_at": 1775349613.3733723,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "visibilityfoe",
+        "job_id": "fcdba25dee5d436d98b192b262da3541",
+        "key": "combat:roundtime:9257",
+        "owner": "#9257",
+        "owner_label": "visibilityfoe",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775349607.683599,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 38.75602499465458,
+      "count": 4,
+      "entries": [
+        {
+          "duration_ms": 36.25459998147562,
+          "metadata": {
+            "character": "TEST_EXP_COMMAND_VISIBILITY",
+            "command": "hide"
+          },
+          "timestamp": 1775349611.1364253
+        },
+        {
+          "duration_ms": 112.210999999661,
+          "metadata": {
+            "character": "visibilityfoe",
+            "command": "attack"
+          },
+          "timestamp": 1775349611.3743675
+        },
+        {
+          "duration_ms": 3.5100999812129885,
+          "metadata": {
+            "character": "TEST_EXP_COMMAND_VISIBILITY",
+            "command": "exp"
+          },
+          "timestamp": 1775349611.3773694
+        },
+        {
+          "duration_ms": 3.0484000162687153,
+          "metadata": {
+            "character": "TEST_EXP_COMMAND_VISIBILITY",
+            "command": "exp"
+          },
+          "timestamp": 1775349611.3807309
+        }
+      ],
+      "max_ms": 112.210999999661,
+      "total_ms": 155.02409997861832
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

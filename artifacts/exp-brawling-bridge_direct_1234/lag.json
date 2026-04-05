@@ -1,0 +1,109 @@
+{
+  "combat_responsiveness_ms": 4577.846999993199,
+  "first_response_ms": 359.82786666621297,
+  "lag": {
+    "avg_ms": 2140.632633328399,
+    "jitter": 3132.9519125156085,
+    "max_ms": 5744.684399993275,
+    "min_ms": 67.50559998909011,
+    "p95_ms": 5231.18674999423,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 609.7079000028316,
+      "snapshot": "final"
+    },
+    {
+      "command": "attack brawldummy",
+      "ms": 5744.684399993275,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp all",
+      "ms": 67.50559998909011,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 609.7079000028316
+    },
+    {
+      "cmd": "attack brawldummy",
+      "ms": 5744.684399993275
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 525.0855000049341,
+      "kind": "direct",
+      "ms": 609.7079000028316,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": 4577.846999993199,
+      "command": "attack brawldummy",
+      "first_response_ms": 486.9583999970928,
+      "kind": "command",
+      "ms": 5744.684399993275,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 525.0855000049341,
+      "kind": "direct",
+      "ms": 609.7079000028316,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": 4577.846999993199,
+      "command": "attack brawldummy",
+      "first_response_ms": 486.9583999970928,
+      "kind": "command",
+      "ms": 5744.684399993275,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp all",
+      "first_response_ms": 67.43969999661203,
+      "kind": "command",
+      "ms": 67.50559998909011,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

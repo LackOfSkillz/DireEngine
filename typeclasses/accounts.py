@@ -464,6 +464,9 @@ class Account(DefaultAccount):
         character.move_to(room, quiet=True, use_destination=False)
         self.route_character_to_onboarding(character, create=False)
 
+    def at_server_reload(self):
+        return
+
 
 class Guest(DefaultGuest):
     """
@@ -471,4 +474,5 @@ class Guest(DefaultGuest):
     characters are deleted after disconnection.
     """
 
-    pass
+    def at_server_reload(self):
+        return

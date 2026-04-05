@@ -1,0 +1,72 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8876,
+        "is_dead": false,
+        "key": "TEST_EXP_EVASION_ATTACKER",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_EVASION_ATTACKER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 1.69,
+        "target": "evadee",
+        "target_summary": {
+          "hp": 100,
+          "id": 8877,
+          "in_combat": true,
+          "key": "evadee",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8875,
+            "key": "TEST_EXP_EVASION_ATTACKER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8876,
+            "key": "TEST_EXP_EVASION_ATTACKER",
+            "location": "TEST_EXP_EVASION_ATTACKER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8877,
+            "key": "evadee",
+            "location": "TEST_EXP_EVASION_ATTACKER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_EVASION_ATTACKER",
+          "evadee"
+        ],
+        "exits": [],
+        "id": 8875,
+        "key": "TEST_EXP_EVASION_ATTACKER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775335441.6881833
+    },
+    "label": "final"
+  }
+]

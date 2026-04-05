@@ -1,3 +1,3 @@
 """Gameplay systems package."""
 
-__all__ = ["metrics", "scheduler", "tick_audit"]
+__all__ = ["exp_pulse", "metrics", "scheduler", "skills", "tick_audit"]

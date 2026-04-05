@@ -114,6 +114,7 @@ from world.systems.interest import (
     sync_direct_interest,
     sync_subject_interest,
 )
+from world.systems.skills import MINDSTATE_MAX, SkillHandler, TEMPLATE_EXP_SKILLS, award_exp_skill, is_active
 
 from .objects import ObjectParent
 
@@ -143,6 +144,8 @@ DEAD_STATE_ALLOWED_COMMANDS = {
     "consent",
     "death",
     "depart",
+    "exp",
+    "experience",
     "favor",
     "health",
     "help",
@@ -281,6 +284,23 @@ SURVIVAL_TRAINING_HOOKS = {
     "skinning": ["skin"],
     "stealth": ["hide", "sneak", "stalk"],
 }
+
+STEALTH_PRACTICE_CAPS = {
+    "stealth": 15,
+}
+STEALTH_PRACTICE_BASE_MULTIPLIER = 0.4
+STEALTH_PRACTICE_MIN_MULTIPLIER = 0.1
+STEALTH_MARGIN_DIVISOR = 100.0
+STEALTH_MARGIN_MIN = 0.5
+STEALTH_MARGIN_MAX = 1.5
+STEALTH_FAILURE_TERRIBLE_MARGIN = -50.0
+STEALTH_FAILURE_NEAR_MISS_MARGIN = -10.0
+STEALTH_FAILURE_TERRIBLE_MODIFIER = 0.1
+STEALTH_FAILURE_MODERATE_MODIFIER = 0.25
+STEALTH_FAILURE_NEAR_MISS_MODIFIER = 0.5
+STEALTH_FATIGUE_STEP = 0.4
+STEALTH_FATIGUE_WINDOW = 90.0
+STEALTH_MOVE_ROUNDTIME = 0.5
 
 DEFAULT_INJURIES = {
     "head": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 100, "vital": True},
@@ -756,6 +776,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.last_disarmed_trap_difficulty = 0
         self.db.last_disarmed_trap_source = None
         apply_race(self, DEFAULT_RACE, sync=False)
+        self._ensure_exp_skill_handler(refresh=True)
         self.get_subsystem()
         for skill_name, baseline_rank in AVAILABLE_SKILL_BASELINES.items():
             self.learn_skill(skill_name, {"rank": baseline_rank, "mindstate": 0})
@@ -795,6 +816,33 @@ class Character(ObjectParent, DefaultCharacter):
         super().at_post_unpuppet(*args, **kwargs)
         clear_subject_interest(self)
         self.reset_thief_pressure_states()
+
+    def _ensure_exp_skill_handler(self, refresh=False):
+        handler = getattr(self, "exp_skills", None)
+        if refresh or not isinstance(handler, SkillHandler) or getattr(handler, "obj", None) is not self:
+            self.exp_skills = SkillHandler(self)
+        return self.exp_skills
+
+    def _sync_exp_skill_state(self, skill_name, legacy_entry=None):
+        handler = self._ensure_exp_skill_handler()
+        skill = handler.get(skill_name)
+        if legacy_entry is None:
+            legacy_entry = ((self.db.skills or {}) if isinstance(self.db.skills, Mapping) else {}).get(skill_name, {})
+        if not isinstance(legacy_entry, Mapping):
+            legacy_entry = {}
+
+        skill.rank = max(0, int(legacy_entry.get("rank", skill.rank) or 0))
+        skill.skillset = self.get_skillset(skill_name)
+        skill.recalc_pool()
+        return skill
+
+    def _seed_template_exp_skills(self):
+        self.ensure_skill_defaults()
+        handler = self._ensure_exp_skill_handler()
+        current_skills = self.db.skills if isinstance(self.db.skills, Mapping) else {}
+        for skill_name in TEMPLATE_EXP_SKILLS:
+            self._sync_exp_skill_state(skill_name, current_skills.get(skill_name, {}))
+        return handler
 
     def at_after_move(self, source_location, **kwargs):
         super().at_after_move(source_location, **kwargs)
@@ -1348,6 +1396,10 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.skills = skills
 
     def ensure_core_defaults(self):
+        if bool(getattr(self.ndb, "_core_defaults_ready", False)):
+            return
+
+        self._ensure_exp_skill_handler()
         self.ensure_identity_defaults()
         self.ensure_stat_defaults()
         self.ensure_race_defaults()
@@ -1355,12 +1407,19 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_combat_defaults()
         self.ensure_equipment_defaults()
         self.ensure_injury_defaults()
-        self.ensure_skill_defaults()
         self.ensure_starter_skills()
+        self.ensure_skill_defaults()
+        self._seed_template_exp_skills()
+        if getattr(self.db, "exp_feedback", None) is None:
+            self.db.exp_feedback = True
         if "awareness" not in (self.db.states or {}):
             states = dict(self.db.states or {})
             states["awareness"] = "normal"
             self.db.states = states
+        if not isinstance(getattr(self.db, "stealth_learning", None), Mapping):
+            self.db.stealth_learning = {"pending": [], "attempts": {}, "last_contest": {}, "combat_state": False}
+
+        self.ndb._core_defaults_ready = True
 
     def ensure_appearance_defaults(self):
         self.ensure_identity_defaults()
@@ -4815,6 +4874,248 @@ class Character(ObjectParent, DefaultCharacter):
             total += self.get_ranger_stealth_bonus()
         return total
 
+    def _get_stealth_learning_store(self):
+        self.ensure_core_defaults()
+        store = dict(getattr(self.db, "stealth_learning", None) or {})
+        pending = [dict(entry or {}) for entry in list(store.get("pending") or []) if isinstance(entry, Mapping)]
+        attempts = dict(store.get("attempts") or {})
+        now = time.time()
+        current_combat_state = bool(self.is_in_combat())
+        if bool(store.get("combat_state", current_combat_state)) != current_combat_state:
+            attempts = {}
+
+        pruned_attempts = {}
+        for bucket, payload in attempts.items():
+            if not isinstance(payload, Mapping):
+                continue
+            last_at = float(payload.get("last_at", 0.0) or 0.0)
+            if now - last_at > STEALTH_FATIGUE_WINDOW:
+                continue
+            pruned_attempts[str(bucket)] = {
+                "count": max(0, int(payload.get("count", 0) or 0)),
+                "last_at": last_at,
+            }
+
+        store["pending"] = pending
+        store["attempts"] = pruned_attempts
+        store["last_contest"] = dict(store.get("last_contest") or {})
+        store["combat_state"] = current_combat_state
+        self.db.stealth_learning = store
+        return store
+
+    def _save_stealth_learning_store(self, store):
+        self.db.stealth_learning = dict(store or {})
+
+    def _build_stealth_award_schedule_key(self, nonce):
+        object_id = int(getattr(self, "id", 0) or 0)
+        if object_id > 0:
+            return f"exp:stealth-award:{object_id}-{nonce}"
+        dbref = str(getattr(self, "dbref", "") or "").strip().lstrip("#")
+        if dbref.isdigit():
+            return f"exp:stealth-award:{dbref}-{nonce}"
+        stable_name = str(getattr(self, "key", "character") or "character").strip().lower().replace(" ", "-")
+        return f"exp:stealth-award:{stable_name}-{nonce}"
+
+    def _get_stealth_target_bucket(self, target=None):
+        if target is not None and getattr(target, "id", None):
+            return f"target:{int(target.id)}"
+        if self.location is not None and getattr(self.location, "id", None):
+            return f"room:{int(self.location.id)}"
+        return "global"
+
+    def _pop_pending_stealth_learning(self, nonce):
+        store = self._get_stealth_learning_store()
+        pending = []
+        match = None
+        for entry in list(store.get("pending") or []):
+            if str((entry or {}).get("nonce", "") or "") == str(nonce or "") and match is None:
+                match = dict(entry or {})
+                continue
+            pending.append(dict(entry or {}))
+        store["pending"] = pending
+        self._save_stealth_learning_store(store)
+        return match
+
+    def _get_stealth_position_modifier(self, pending):
+        modifier = 1.0
+        position_state = str((pending or {}).get("position_state", "neutral") or "neutral").strip().lower()
+        if position_state == "advantaged":
+            modifier *= 1.2
+        elif position_state == "exposed":
+            modifier *= 0.8
+
+        if str((pending or {}).get("range_band", "") or "").strip().lower() == "melee":
+            modifier *= 0.7
+        return modifier
+
+    def _get_stealth_failure_margin_modifier(self, margin):
+        if margin is None:
+            return 1.0
+
+        margin_value = float(margin)
+        if margin_value < STEALTH_FAILURE_TERRIBLE_MARGIN:
+            return STEALTH_FAILURE_TERRIBLE_MODIFIER
+        if margin_value < STEALTH_FAILURE_NEAR_MISS_MARGIN:
+            return STEALTH_FAILURE_MODERATE_MODIFIER
+        return STEALTH_FAILURE_NEAR_MISS_MODIFIER
+
+    def _get_stealth_practice_context(self, skill_name):
+        normalized_skill = str(skill_name or "stealth").strip().lower() or "stealth"
+        practice_cap = int(STEALTH_PRACTICE_CAPS.get(normalized_skill, 0) or 0)
+        skill = getattr(getattr(self, "exp_skills", None), "get", lambda *_: None)(normalized_skill)
+        skill_rank = int(getattr(skill, "rank", 0) or 0)
+        if practice_cap <= 0 or skill_rank >= practice_cap:
+            return False, 0.0, skill_rank, practice_cap
+
+        progress = float(skill_rank) / float(practice_cap)
+        practice_scale = max(STEALTH_PRACTICE_MIN_MULTIPLIER, 1.0 - progress)
+        return True, STEALTH_PRACTICE_BASE_MULTIPLIER * practice_scale, skill_rank, practice_cap
+
+    def _emit_stealth_learning_debug(self, pending, *, xp_mod=1.0, context_multiplier=1.0, gained=0.0, practice_mode=False):
+        if not self.check_permstring("Developer"):
+            return
+
+        print(
+            "[STEALTH] "
+            f"action={pending.get('action', 'stealth')} "
+            f"outcome={pending.get('outcome', 'success')} "
+            f"margin={pending.get('margin')} "
+            f"observer_count={int(pending.get('observer_count', 0) or 0)} "
+            f"observer_pressure={float(pending.get('observer_pressure', 0.0) or 0.0):.3f} "
+            f"support_pressure={float(pending.get('support_pressure', 0.0) or 0.0):.3f} "
+            f"crowd_penalty={float(pending.get('crowd_penalty', 0.0) or 0.0):.3f} "
+            f"practice_mode={bool(practice_mode)} "
+            f"xp_mod={float(xp_mod):.3f} "
+            f"context={float(context_multiplier):.3f} "
+            f"gained={float(gained):.3f}"
+        )
+
+    def record_stealth_contest(self, action, difficulty, result=None, target=None, roundtime=0.0, event_key="stealth", require_hidden=True):
+        from world.systems.scheduler import schedule
+        from world.systems.time_model import SCHEDULED_EXPIRY
+
+        store = self._get_stealth_learning_store()
+        now = time.time()
+        bucket = self._get_stealth_target_bucket(target=target)
+        attempts = dict(store.get("attempts") or {})
+        payload = dict(attempts.get(bucket) or {})
+        attempt_count = max(0, int(payload.get("count", 0) or 0)) + 1
+        attempts[bucket] = {"count": attempt_count, "last_at": now}
+        store["attempts"] = attempts
+
+        contest_result = dict(result or {}) if isinstance(result, Mapping) else {}
+        difficulty_value = max(1, int(difficulty or 1))
+        nonce = f"{int(now * 1000)}-{random.randint(100, 999)}"
+        range_band = None
+        if target is not None and hasattr(self, "get_range"):
+            try:
+                range_band = self.get_range(target)
+            except Exception:
+                range_band = None
+
+        pending_entry = {
+            "nonce": nonce,
+            "action": str(action or "stealth").strip().lower() or "stealth",
+            "difficulty": difficulty_value,
+            "event_key": str(event_key or "stealth").strip().lower() or "stealth",
+            "contest_occurred": bool(contest_result),
+            "outcome": str(contest_result.get("outcome", "success") or "success").strip().lower(),
+            "margin": contest_result.get("diff"),
+            "observer_count": int(contest_result.get("observer_count", 0) or 0),
+            "observer_pressure": float(contest_result.get("observer_pressure", 0.0) or 0.0),
+            "support_pressure": float(contest_result.get("support_pressure", 0.0) or 0.0),
+            "crowd_penalty": float(contest_result.get("crowd_penalty", 0.0) or 0.0),
+            "target_bucket": bucket,
+            "attempt_count": attempt_count,
+            "position_state": str(getattr(self.db, "position_state", "neutral") or "neutral"),
+            "range_band": range_band,
+            "require_hidden": bool(require_hidden),
+            "created_at": now,
+        }
+        pending = list(store.get("pending") or [])
+        pending.append(pending_entry)
+        store["pending"] = pending
+        store["last_contest"] = {
+            "action": pending_entry["action"],
+            "target_bucket": bucket,
+            "margin": pending_entry["margin"],
+            "outcome": pending_entry["outcome"],
+            "difficulty": difficulty_value,
+            "contest_occurred": pending_entry["contest_occurred"],
+            "observer_count": pending_entry["observer_count"],
+            "observer_pressure": pending_entry["observer_pressure"],
+            "support_pressure": pending_entry["support_pressure"],
+            "crowd_penalty": pending_entry["crowd_penalty"],
+            "recorded_at": now,
+        }
+        self._save_stealth_learning_store(store)
+
+        delay_seconds = max(0.0, float(roundtime or 0.0))
+        schedule(
+            delay_seconds,
+            self.finalize_stealth_learning,
+            key=self._build_stealth_award_schedule_key(nonce),
+            system="exp.stealth",
+            timing_mode=SCHEDULED_EXPIRY,
+            nonce=nonce,
+        )
+        return pending_entry
+
+    def finalize_stealth_learning(self, nonce=None):
+        pending = self._pop_pending_stealth_learning(nonce)
+        if not pending:
+            return 0.0
+
+        if bool(pending.get("require_hidden", True)) and not self.is_hidden():
+            return 0.0
+
+        context_multiplier = 1.0
+        xp_mod = 1.0
+        practice_mode = False
+        if not bool(pending.get("contest_occurred", False)):
+            practice_mode, practice_multiplier, _, _ = self._get_stealth_practice_context("stealth")
+            if not practice_mode:
+                self._emit_stealth_learning_debug(
+                    pending,
+                    xp_mod=0.0,
+                    context_multiplier=0.0,
+                    gained=0.0,
+                    practice_mode=False,
+                )
+                return 0.0
+            context_multiplier *= practice_multiplier
+
+        outcome = str(pending.get("outcome", "success") or "success").strip().lower()
+        margin = pending.get("margin")
+        if margin is not None:
+            if outcome == "fail":
+                xp_mod = self._get_stealth_failure_margin_modifier(margin)
+            else:
+                xp_mod = max(STEALTH_MARGIN_MIN, min(STEALTH_MARGIN_MAX, float(margin) / STEALTH_MARGIN_DIVISOR))
+            context_multiplier *= xp_mod
+
+        attempt_count = max(1, int(pending.get("attempt_count", 1) or 1))
+        context_multiplier *= 1.0 / (1.0 + max(0, attempt_count - 1) * STEALTH_FATIGUE_STEP)
+        context_multiplier *= self._get_stealth_position_modifier(pending)
+
+        gained = award_exp_skill(
+            self,
+            "stealth",
+            max(1, int(pending.get("difficulty", 1) or 1)),
+            success=outcome != "fail",
+            outcome=outcome,
+            event_key=pending.get("event_key", "stealth"),
+            context_multiplier=context_multiplier,
+        )
+        self._emit_stealth_learning_debug(
+            pending,
+            xp_mod=xp_mod,
+            context_multiplier=context_multiplier,
+            gained=gained,
+            practice_mode=practice_mode,
+        )
+        return gained
+
     def get_awareness(self):
         return self.get_state("awareness") or "normal"
 
@@ -5010,24 +5311,33 @@ class Character(ObjectParent, DefaultCharacter):
                 self.db.active_warrior_berserk = None
                 self.db.war_tempo = 0
                 self.update_war_tempo_state()
-                self.sync_client_state()
                 self.msg(active_berserk.get("end_message") or "The fury fades, leaving you exposed.")
                 changed = True
             else:
-                self.set_war_tempo(current_tempo - drain)
+                before_tempo = current_tempo
+                self.set_war_tempo(current_tempo - drain, sync=False)
+                changed = changed or self.get_war_tempo() != before_tempo
                 sustain = int((EXHAUSTION_GAIN_RATES.get("berserk_tick") or {}).get(active_berserk.get("key"), 0) or 0)
                 if sustain > 0:
-                    self.add_exhaustion(sustain, emit_messages=False)
+                    before_exhaustion = self.get_exhaustion()
+                    self.add_exhaustion(sustain, emit_messages=False, sync=False)
+                    changed = changed or self.get_exhaustion() != before_exhaustion
 
         if getattr(self.db, "in_combat", False):
-            self.add_exhaustion(int(EXHAUSTION_GAIN_RATES.get("combat_tick", 0) or 0), emit_messages=False)
+            before_exhaustion = self.get_exhaustion()
+            self.add_exhaustion(int(EXHAUSTION_GAIN_RATES.get("combat_tick", 0) or 0), emit_messages=False, sync=False)
+            changed = changed or self.get_exhaustion() != before_exhaustion
         else:
-            self.set_exhaustion(self.get_exhaustion() - int(RECOVERY_RATES.get("out_of_combat", 0) or 0), emit_messages=False)
+            before_exhaustion = self.get_exhaustion()
+            self.set_exhaustion(self.get_exhaustion() - int(RECOVERY_RATES.get("out_of_combat", 0) or 0), emit_messages=False, sync=False)
+            changed = changed or self.get_exhaustion() != before_exhaustion
 
         if frenzy_ended:
             spike = int(EXHAUSTION_GAIN_RATES.get("frenzy_end_spike", 0) or 0)
             if spike > 0:
-                self.add_exhaustion(spike)
+                before_exhaustion = self.get_exhaustion()
+                self.add_exhaustion(spike, sync=False)
+                changed = changed or self.get_exhaustion() != before_exhaustion
                 self.msg("The frenzy leaves your body shaking with exhaustion.")
 
         active_roars = dict(getattr(self.db, "active_warrior_roars", None) or {})
@@ -5049,12 +5359,13 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.warrior_roar_effects = roar_effects
 
         if now - float(getattr(self.db, "last_combat_action_at", 0) or 0) > 10 and int(getattr(self.db, "combat_streak", 0) or 0) > 0:
-            self.break_combat_rhythm(show_message=True)
+            changed = self.break_combat_rhythm(show_message=True, sync=False) or changed
 
         pressure = self.get_pressure_level() if hasattr(self, "get_pressure_level") else 0
         if pressure > 0 and not getattr(self.db, "in_combat", False):
             decay = 8 if not getattr(self.db, "target", None) else 5
-            self.set_pressure_level(pressure - decay, emit_messages=False)
+            updated_pressure = self.set_pressure_level(pressure - decay, emit_messages=False, sync=False)
+            changed = changed or updated_pressure != pressure
 
         if changed:
             self.db.states = states
@@ -5239,12 +5550,13 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You notice no obvious sign of a trap.")
 
-        self.use_skill(
+        award_exp_skill(
+            self,
             "locksmithing",
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-            difficulty=max(10, int(box.db.lock_difficulty or 0)),
+            max(10, int(box.db.lock_difficulty or 0)),
+            success=True,
+            outcome="success",
+            event_key="locksmithing",
         )
 
     def locksmith_contest(self, difficulty, stat="intelligence"):
@@ -5276,12 +5588,13 @@ class Character(ObjectParent, DefaultCharacter):
 
         if outcome == "partial":
             self.msg("You think you understand part of the trap, but not enough to safely disarm it.")
-            self.use_skill(
+            award_exp_skill(
+                self,
                 "locksmithing",
-                apply_roundtime=False,
-                emit_placeholder=False,
-                require_known=False,
-                difficulty=max(10, int(box.db.trap_difficulty or 0)),
+                max(10, int(box.db.trap_difficulty or 0)),
+                success=False,
+                outcome="partial",
+                event_key="trap_disarm",
             )
             return
 
@@ -5292,12 +5605,13 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.last_disarmed_trap_difficulty = int(box.db.trap_difficulty or 0)
             self.db.last_disarmed_trap_source = getattr(box, "id", None)
             self.msg("You successfully disarm the trap.")
-            self.use_skill(
+            award_exp_skill(
+                self,
                 "locksmithing",
-                apply_roundtime=False,
-                emit_placeholder=False,
-                require_known=False,
-                difficulty=max(10, int(box.db.trap_difficulty or 0)),
+                max(10, int(box.db.trap_difficulty or 0)),
+                success=True,
+                outcome=outcome,
+                event_key="trap_disarm",
             )
 
     def trigger_box_trap(self, box):
@@ -5376,12 +5690,13 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You cannot determine its exact function.")
 
-        self.use_skill(
+        award_exp_skill(
+            self,
             "locksmithing",
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-            difficulty=max(10, int(box.db.trap_difficulty or 0)),
+            max(10, int(box.db.trap_difficulty or 0)),
+            success=True,
+            outcome="success",
+            event_key="trap_disarm",
         )
 
     def create_trap_component(self, trap_type):
@@ -5418,19 +5733,27 @@ class Character(ObjectParent, DefaultCharacter):
         if outcome == "partial":
             self.msg("You recover a few damaged components.")
             self.create_trap_component_with_tier(trap, "low", rare=False)
+            award_exp_skill(
+                self,
+                "locksmithing",
+                max(10, int(box.db.trap_difficulty or 0)),
+                success=False,
+                outcome="partial",
+                event_key="trap_disarm",
+            )
         elif outcome in ("success", "strong"):
             self.msg("You successfully recover useful trap components.")
             tier = "standard" if outcome == "success" else "high"
             rare = random.random() < 0.1
             self.create_trap_component_with_tier(trap, tier, rare=rare)
-
-        self.use_skill(
-            "locksmithing",
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-            difficulty=max(10, int(box.db.trap_difficulty or 0)),
-        )
+            award_exp_skill(
+                self,
+                "locksmithing",
+                max(10, int(box.db.trap_difficulty or 0)),
+                success=True,
+                outcome=outcome,
+                event_key="trap_disarm",
+            )
         box.db.last_disarmed_trap = None
         if getattr(self.db, "last_disarmed_trap_source", None) == getattr(box, "id", None):
             self.db.last_disarmed_trap = None
@@ -5480,12 +5803,13 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.last_disarmed_trap = None
         self.db.last_disarmed_trap_difficulty = 0
         self.db.last_disarmed_trap_source = None
-        self.use_skill(
+        award_exp_skill(
+            self,
             "locksmithing",
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-            difficulty=difficulty,
+            difficulty,
+            success=outcome != "partial",
+            outcome=outcome,
+            event_key="trap_disarm",
         )
 
     def deploy_trap(self):
@@ -6233,13 +6557,13 @@ class Character(ObjectParent, DefaultCharacter):
             quality_name = QUALITY_NAMES.get(int(getattr(target.db, "quality_tier", 2) or 2), "average")
             gem_type = str(getattr(target.db, "gem_type", "quartz") or "quartz")
             self.msg(f"This appears to be a {size_name} {gem_type} of {quality_name} make.")
-            self.use_skill("appraisal", apply_roundtime=False, emit_placeholder=False, require_known=False)
+            award_exp_skill(self, "appraisal", 10)
             return
 
         if getattr(target.db, "is_box", False):
             if bool(getattr(target.db, "strict_loot_box", False)):
                 self.msg("This appears to be a locked container of moderate weight.")
-                self.use_skill("appraisal", apply_roundtime=False, emit_placeholder=False, require_known=False)
+                award_exp_skill(self, "appraisal", 10)
                 return
             lock_desc = self.describe_lock_difficulty(int(getattr(target.db, "lock_difficulty", 0) or 0))
             if tier == "vague":
@@ -6279,7 +6603,7 @@ class Character(ObjectParent, DefaultCharacter):
             else:
                 self.msg(f"You judge it to be worth about {self.format_coins(value)}.")
 
-        self.use_skill("appraisal", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        award_exp_skill(self, "appraisal", 10)
         self.set_roundtime(5)
 
     def compare_items(self, first_item, second_item):
@@ -6299,7 +6623,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("They seem roughly equal in value.")
 
-        self.use_skill("appraisal", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        award_exp_skill(self, "appraisal", 10)
         self.set_roundtime(5)
 
     def is_vendor_target(self, obj):
@@ -6821,7 +7145,10 @@ class Character(ObjectParent, DefaultCharacter):
                 return False
             self.set_spell_cooldown(spell_name, max(2, int(total_power / 10)))
             self.msg(f"You sustain {spell_name}.")
-            self.use_skill(category, apply_roundtime=False, emit_placeholder=False, require_known=False)
+            if category == "targeted_magic":
+                award_exp_skill(self, "targeted_magic", max(10, int(total_power)), success=True)
+            else:
+                self.use_skill(category, apply_roundtime=False, emit_placeholder=False, require_known=False)
             self.clear_state("prepared_spell")
             return True
 
@@ -6849,12 +7176,13 @@ class Character(ObjectParent, DefaultCharacter):
             return False
 
         self.set_spell_cooldown(spell_name, max(2, int(total_power / 10)))
-        self.use_skill(
-            category,
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-        )
+        if category != "targeted_magic":
+            self.use_skill(
+                category,
+                apply_roundtime=False,
+                emit_placeholder=False,
+                require_known=False,
+            )
         self.clear_state("prepared_spell")
         return True
 
@@ -6946,24 +7274,26 @@ class Character(ObjectParent, DefaultCharacter):
 
         if outcome == "partial":
             self.msg("You make a little progress, but the lock still resists you.")
-            self.use_skill(
+            award_exp_skill(
+                self,
                 "locksmithing",
-                apply_roundtime=False,
-                emit_placeholder=False,
-                require_known=False,
-                difficulty=max(10, int(box.db.lock_difficulty or 0)),
+                max(10, int(box.db.lock_difficulty or 0)),
+                success=False,
+                outcome="partial",
+                event_key="locksmithing",
             )
             return
 
         if outcome in ("success", "strong"):
             box.db.locked = False
             self.msg("You successfully pick the lock.")
-            self.use_skill(
+            award_exp_skill(
+                self,
                 "locksmithing",
-                apply_roundtime=False,
-                emit_placeholder=False,
-                require_known=False,
-                difficulty=max(10, int(box.db.lock_difficulty or 0)),
+                max(10, int(box.db.lock_difficulty or 0)),
+                success=True,
+                outcome=outcome,
+                event_key="locksmithing",
             )
 
     def unlock_box(self, box):
@@ -7290,13 +7620,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You climb successfully.")
 
-        self.use_skill(
-            "athletics",
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-            difficulty=difficulty,
-        )
+        award_exp_skill(self, "athletics", difficulty, success=result["outcome"] != "fail")
         return True
 
     def attempt_swim(self, raw_target=""):
@@ -7315,13 +7639,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You swim successfully.")
 
-        self.use_skill(
-            "athletics",
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-            difficulty=difficulty,
-        )
+        award_exp_skill(self, "athletics", difficulty, success=result["outcome"] != "fail")
         return True
 
     def split_numbered_query(self, query):
@@ -7662,6 +7980,7 @@ class Character(ObjectParent, DefaultCharacter):
         current.update(updates)
         skills[skill_name] = current
         self.db.skills = skills
+        self._sync_exp_skill_state(skill_name, current)
 
     def get_mindstate_label(self, value):
         if value <= 0:
@@ -9563,7 +9882,7 @@ class Character(ObjectParent, DefaultCharacter):
     def get_exhaustion_stage(self):
         return str(self.get_exhaustion_profile().get("key", "fresh") or "fresh")
 
-    def set_exhaustion(self, value, emit_messages=True):
+    def set_exhaustion(self, value, emit_messages=True, sync=True):
         previous = self.get_exhaustion_profile()
         amount = max(0, min(100, int(value or 0)))
         self.db.exhaustion = amount
@@ -9589,11 +9908,12 @@ class Character(ObjectParent, DefaultCharacter):
             if message:
                 self.msg(message)
 
-        self.sync_client_state()
+        if sync:
+            self.sync_client_state()
         return amount
 
-    def add_exhaustion(self, amount, emit_messages=True):
-        return self.set_exhaustion(self.get_exhaustion() + int(amount or 0), emit_messages=emit_messages)
+    def add_exhaustion(self, amount, emit_messages=True, sync=True):
+        return self.set_exhaustion(self.get_exhaustion() + int(amount or 0), emit_messages=emit_messages, sync=sync)
 
     def get_exhaustion_fatigue_multiplier(self):
         return float(self.get_exhaustion_profile().get("fatigue_multiplier", 1.0) or 1.0)
@@ -9671,7 +9991,7 @@ class Character(ObjectParent, DefaultCharacter):
             return "medium"
         return "low"
 
-    def set_pressure_level(self, value, emit_messages=True):
+    def set_pressure_level(self, value, emit_messages=True, sync=True):
         previous_state = self.get_pressure_state()
         self.db.pressure_level = max(0, min(100, int(value or 0)))
         current_state = self.get_pressure_state()
@@ -9685,11 +10005,12 @@ class Character(ObjectParent, DefaultCharacter):
             message = messages.get(current_state)
             if message:
                 self.msg(message)
-        self.sync_client_state()
+        if sync:
+            self.sync_client_state()
         return self.get_pressure_level()
 
-    def add_pressure(self, amount, emit_messages=True):
-        return self.set_pressure_level(self.get_pressure_level() + int(amount or 0), emit_messages=emit_messages)
+    def add_pressure(self, amount, emit_messages=True, sync=True):
+        return self.set_pressure_level(self.get_pressure_level() + int(amount or 0), emit_messages=emit_messages, sync=sync)
 
     def get_pressure_accuracy_penalty(self):
         penalties = {"low": 0, "medium": 4, "high": 9, "extreme": 14}
@@ -9750,7 +10071,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.combat_streak = min(10, self.get_combat_streak() + increment)
         self.db.last_combat_action_at = time.time()
 
-    def break_combat_rhythm(self, show_message=True):
+    def break_combat_rhythm(self, show_message=True, sync=True):
         if self.get_combat_streak() <= 0:
             return False
         self.db.combat_streak = 0
@@ -9758,7 +10079,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.rhythm_break_until = time.time() + 10
         if show_message:
             self.msg("You lose your rhythm.")
-        self.sync_client_state()
+        if sync:
+            self.sync_client_state()
         return True
 
     def activate_warrior_roar(self, roar_key, target_name=""):
@@ -9876,11 +10198,12 @@ class Character(ObjectParent, DefaultCharacter):
         self.msg(profile.get("start_message") or "You give yourself over to the rhythm of battle.")
         return True, f"You enter the {profile.get('name', 'Unknown')} berserk."
 
-    def set_war_tempo(self, value):
+    def set_war_tempo(self, value, sync=True):
         maximum = self.get_max_war_tempo()
         self.db.war_tempo = max(0, min(maximum, int(value or 0)))
         self.update_war_tempo_state()
-        self.sync_client_state()
+        if sync:
+            self.sync_client_state()
 
     def gain_war_tempo(self, amount):
         if not self.is_profession("warrior"):
@@ -10560,9 +10883,14 @@ class Character(ObjectParent, DefaultCharacter):
 
         hit_quality = self.resolve_hit_quality(offense, defense)
         if hit_quality == "miss":
+            award_exp_skill(self, "targeted_magic", max(10, int(defense)), success=False)
+            award_exp_skill(target, "evasion", max(10, int(offense)), success=True)
             self.msg(f"Your {name} misses {target.key}.")
             target.msg(f"{self.key}'s {name} misses you.")
             return True
+
+        award_exp_skill(self, "targeted_magic", max(10, int(defense)), success=True)
+        award_exp_skill(target, "evasion", max(10, int(offense)), success=False)
 
         multiplier = {"graze": 0.5, "hit": 1.0, "strong": 1.5}[hit_quality]
         if quality == "weak":
@@ -10615,7 +10943,10 @@ class Character(ObjectParent, DefaultCharacter):
             defense = max(1, defense - pressure_penalty)
             hit_quality = self.resolve_hit_quality(offense, defense)
             if hit_quality == "miss":
+                award_exp_skill(target, "evasion", max(10, int(offense)), success=True)
                 continue
+
+            award_exp_skill(target, "evasion", max(10, int(offense)), success=False)
 
             multiplier = {"graze": 0.5, "hit": 1.0, "strong": 1.5}[hit_quality]
             if quality == "weak":
@@ -10634,6 +10965,8 @@ class Character(ObjectParent, DefaultCharacter):
                 target.set_hp((target.db.hp or 0) - damage)
             if getattr(target, "account", None):
                 target.msg(f"{self.key}'s {name} washes over you!")
+
+        award_exp_skill(self, "targeted_magic", max(10, int(effective_power)), success=hit_any)
 
         return True
 
@@ -10679,6 +11012,7 @@ class Character(ObjectParent, DefaultCharacter):
         if ratio < 0.7:
             self.msg(f"{target.key} resists your {name}.")
             target.msg(f"You resist {self.key}'s {name}.")
+            award_exp_skill(self, "debilitation", max(10, int(defense)), success=False)
             return True
 
         penalty = int(effective_power / 10)
@@ -10701,12 +11035,14 @@ class Character(ObjectParent, DefaultCharacter):
                 self.apply_exposed_state(target, duration=6)
                 self.msg(f"Your {name} reinforces the lingering hindrance on {target.key}.")
                 target.msg(f"{self.key}'s {name} intensifies the pressure already on you.")
+                award_exp_skill(self, "debilitation", max(10, int(defense)), success=True)
                 return True
 
         target.set_state("debilitated", {"penalty": penalty, "duration": duration, "type": debuff_type})
         self.apply_exposed_state(target, duration=6)
         self.msg(f"Your {name} hampers {target.key}.")
         target.msg(f"You feel your movements hindered by {self.key}'s {name}.")
+        award_exp_skill(self, "debilitation", max(10, int(defense)), success=True)
         return True
 
     def resolve_warding_spell(self, name, power, spell_def, quality):
@@ -10824,6 +11160,7 @@ class Character(ObjectParent, DefaultCharacter):
         return dict(sorted(hidden.items(), key=lambda item: self.format_skill_name(item[0]).lower()))
 
     def get_skill_detail_entry(self, skill_name):
+        self.ensure_core_defaults()
         normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
         if not normalized:
             return None
@@ -10833,14 +11170,19 @@ class Character(ObjectParent, DefaultCharacter):
             return None
 
         metadata = self.get_skill_metadata(normalized)
-        points = (self.db.skills or {}).get(normalized, {}).get("mindstate", 0)
+        legacy_skills = self.db.skills if isinstance(self.db.skills, Mapping) else {}
+        legacy_entry = legacy_skills.get(normalized, {})
+        if not isinstance(legacy_entry, Mapping):
+            legacy_entry = {}
+        exp_skill = self._sync_exp_skill_state(normalized, legacy_entry)
+        points = int(exp_skill.mindstate or 0)
         return {
             "skill": normalized,
             "display": self.format_skill_name(normalized),
-            "rank": self.get_skill_rank(normalized),
+            "rank": int(exp_skill.rank or self.get_skill_rank(normalized) or 0),
             "mindstate": points,
-            "label": self.get_mindstate_label(points),
-            "cap": self.get_mindstate_cap(),
+            "label": exp_skill.mindstate_name(),
+            "cap": MINDSTATE_MAX,
             "category": metadata.get("category", "general"),
             "visibility": metadata.get("visibility", "shared"),
             "description": metadata.get("description", "No description is available yet."),
@@ -10848,31 +11190,33 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_skill_entries(self, include_zero=False):
         self.ensure_core_defaults()
-        cap = self.get_mindstate_cap()
+        cap = MINDSTATE_MAX
         entries = []
+        legacy_skills = self.db.skills if isinstance(self.db.skills, Mapping) else {}
 
-        skill_names = list(self.get_available_skills().keys()) if include_zero else list((self.db.skills or {}).keys())
+        skill_names = list(self.get_available_skills().keys()) if include_zero else list(legacy_skills.keys())
 
         for skill_name in skill_names:
             if skill_name == "tend":
                 continue
 
-            data = dict((self.db.skills or {}).get(skill_name, {}))
+            data = dict(legacy_skills.get(skill_name, {}))
             rank = data.get("rank", 0)
             if not include_zero and rank <= 0:
                 continue
 
-            points = data.get("mindstate", 0)
+            exp_skill = self._sync_exp_skill_state(skill_name, data)
+            points = int(exp_skill.mindstate or 0)
             metadata = self.get_skill_metadata(skill_name)
             entries.append(
                 {
                     "skill": skill_name,
                     "display": self.format_skill_name(skill_name),
-                    "rank": rank,
+                    "rank": int(exp_skill.rank or rank or 0),
                     "mindstate": points,
-                    "label": self.get_mindstate_label(points),
+                    "label": exp_skill.mindstate_name(),
                     "cap": cap,
-                    "active": points > 0,
+                    "active": points > 0 and is_active(exp_skill),
                     "category": metadata.get("category", "general"),
                     "visibility": metadata.get("visibility", "shared"),
                     "description": metadata.get("description", "No description is available yet."),
@@ -10883,7 +11227,7 @@ class Character(ObjectParent, DefaultCharacter):
         return entries
 
     def get_active_learning_entries(self):
-        entries = [entry for entry in self.get_skill_entries(include_zero=False) if entry.get("mindstate", 0) > 0]
+        entries = [entry for entry in self.get_skill_entries(include_zero=False) if entry.get("active")]
         entries.sort(key=lambda entry: (-entry.get("mindstate", 0), entry.get("display", entry.get("skill", "")).lower()))
         return entries
 
@@ -10919,27 +11263,9 @@ class Character(ObjectParent, DefaultCharacter):
         return self.get_learning_gain(band), band
 
     def process_learning_pulse(self):
-        skills = dict(self.db.skills or {})
-        changed = False
-        drain = self.get_learning_drain()
-
-        for skill_name, data in skills.items():
-            current = dict(data)
-            mindstate = current.get("mindstate", 0)
-            if mindstate <= 0:
-                continue
-            if mindstate < 5:
-                continue
-
-            old_rank = current.get("rank", 1)
-            gain = max(1, mindstate // 20)
-            current["rank"] = old_rank + gain
-            current["mindstate"] = max(0, mindstate - drain)
-            skills[skill_name] = current
-            changed = True
-
-        if changed:
-            self.db.skills = skills
+        # Legacy mindstate/rank pulse is retired. Active learning now drains and
+        # progresses through the transient exp_skills ticker in world.systems.exp_pulse.
+        return
 
     def get_inactive_skill_entries(self):
         self.ensure_core_defaults()
@@ -11444,10 +11770,20 @@ class Character(ObjectParent, DefaultCharacter):
             reveal_ids = []
             partial_ids = []
             self.ndb.sneak_move_active = True
+            outcome_rank = {"fail": 0, "partial": 1, "success": 2, "strong": 3}
+            aggregate_outcome = "strong"
+            lowest_margin = None
+            highest_difficulty = 10
 
             for observer in self.get_room_observers():
                 result = run_contest(self.get_stealth_total(), observer.get_perception_total(), attacker=self, defender=observer)
                 outcome = result["outcome"]
+                highest_difficulty = max(highest_difficulty, int(observer.get_perception_total() or 0))
+                margin = int(result.get("diff", 0) or 0)
+                if lowest_margin is None or margin < lowest_margin:
+                    lowest_margin = margin
+                if outcome_rank.get(outcome, 0) < outcome_rank.get(aggregate_outcome, 0):
+                    aggregate_outcome = outcome
 
                 if outcome == "fail":
                     reveal_ids.append(observer.id)
@@ -11458,6 +11794,8 @@ class Character(ObjectParent, DefaultCharacter):
 
             self.ndb.sneak_reveal_observer_ids = reveal_ids
             self.ndb.sneak_partial_observer_ids = partial_ids
+            self.ndb.sneak_result = {"outcome": aggregate_outcome, "diff": lowest_margin if lowest_margin is not None else 0}
+            self.ndb.sneak_difficulty = highest_difficulty
         return True
 
     def announce_move_from(self, destination, **kwargs):
@@ -11516,7 +11854,15 @@ class Character(ObjectParent, DefaultCharacter):
         if self.ndb.sneak_move_active and self.is_sneaking() and direction:
             self.msg(f"You move quietly to the {direction}.")
             self.set_fatigue((self.db.fatigue or 0) + 2)
-            self.use_skill("stealth", apply_roundtime=False, emit_placeholder=False)
+            self.record_stealth_contest(
+                "sneak",
+                max(10, int(getattr(self.ndb, "sneak_difficulty", 10) or 10)),
+                result=getattr(self.ndb, "sneak_result", None),
+                target=source_location,
+                roundtime=STEALTH_MOVE_ROUNDTIME,
+                event_key="stealth",
+                require_hidden=True,
+            )
 
         if self.is_stalking():
             target_id = self.get_stalk_target_id()
@@ -11539,6 +11885,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.ndb.sneak_move_active = False
         self.ndb.sneak_partial_observer_ids = []
         self.ndb.sneak_reveal_observer_ids = []
+        self.ndb.sneak_result = None
+        self.ndb.sneak_difficulty = 0
         self.ndb.last_traverse_direction = None
 
     def get_status(self):

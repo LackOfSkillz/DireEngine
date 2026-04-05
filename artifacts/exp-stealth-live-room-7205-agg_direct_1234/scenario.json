@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Live-room crowded stealth margin probe after aggregation change."
+  },
+  "mode": "direct",
+  "name": "exp-stealth-live-room-7205-agg",
+  "seed": 1234,
+  "started_at": 1775392197.2187526
+}

@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": "critical",
+  "message": "",
+  "mode": "direct",
+  "scenario": "exp-stealth-live-room-7205-margin-soften-v3",
+  "seed": 1234
+}

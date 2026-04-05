@@ -13,6 +13,9 @@
     inventoryLookup: new Map(),
     abilityLookup: new Map(),
     initialRefreshSent: false,
+    commandHistory: [],
+    commandHistoryIndex: -1,
+    commandHistoryDraft: "",
   };
 
   const HOTBAR_STORAGE_KEY = "dragonsire.hotbar";
@@ -70,6 +73,52 @@
     if (roomContext && targetId === "messagewindow") {
       roomContext.textContent = `Live session • ${target.children.length} lines`;
     }
+  }
+
+  function rememberCommand(command) {
+    const normalized = String(command || "").trim();
+    if (!normalized) return;
+    state.commandHistory.push(normalized);
+    if (state.commandHistory.length > 100) {
+      state.commandHistory = state.commandHistory.slice(-100);
+    }
+    state.commandHistoryIndex = -1;
+    state.commandHistoryDraft = "";
+  }
+
+  function setInputValue(input, value) {
+    input.value = value;
+    const caret = input.value.length;
+    if (typeof input.setSelectionRange === "function") {
+      input.setSelectionRange(caret, caret);
+    }
+  }
+
+  function navigateCommandHistory(input, direction) {
+    if (!state.commandHistory.length) return false;
+
+    if (direction < 0) {
+      if (state.commandHistoryIndex === -1) {
+        state.commandHistoryDraft = input.value || "";
+        state.commandHistoryIndex = state.commandHistory.length - 1;
+      } else if (state.commandHistoryIndex > 0) {
+        state.commandHistoryIndex -= 1;
+      }
+      setInputValue(input, state.commandHistory[state.commandHistoryIndex] || "");
+      return true;
+    }
+
+    if (state.commandHistoryIndex === -1) return false;
+    if (state.commandHistoryIndex < state.commandHistory.length - 1) {
+      state.commandHistoryIndex += 1;
+      setInputValue(input, state.commandHistory[state.commandHistoryIndex] || "");
+      return true;
+    }
+
+    state.commandHistoryIndex = -1;
+    setInputValue(input, state.commandHistoryDraft || "");
+    state.commandHistoryDraft = "";
+    return true;
   }
 
   function handleText(args, kwargs) {
@@ -614,6 +663,7 @@
     const submitInput = () => {
       const value = input.value || "";
       if (!value.trim()) return;
+      rememberCommand(value);
       sendCommand(value);
       input.value = "";
       input.focus();
@@ -625,9 +675,25 @@
     });
 
     input.addEventListener("keydown", (event) => {
+      if (!event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+        if (event.key === "ArrowUp" && navigateCommandHistory(input, -1)) {
+          event.preventDefault();
+          return;
+        }
+        if (event.key === "ArrowDown" && navigateCommandHistory(input, 1)) {
+          event.preventDefault();
+          return;
+        }
+      }
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
         submitInput();
+      }
+    });
+
+    input.addEventListener("input", () => {
+      if (state.commandHistoryIndex === -1) {
+        state.commandHistoryDraft = input.value || "";
       }
     });
   }

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 3417, in scenario
+    fail_gain = ctx.direct(award_exp_skill, character, "stealth", 20, False, "fail")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\tools\diretest\core\context.py", line 241, in direct
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\skills.py", line 228, in award_exp_skill
+    return train(skill, difficulty, success=success, outcome=outcome)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\skills.py", line 214, in train
+    xp_amount = calculate_xp(skill, difficulty, success=success, outcome=outcome)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\skills.py", line 209, in calculate_xp
+    print("[XP] %s | outcome=%s | xp=%.2f" % [skill.name, normalized_outcome, xp_amount])
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: not enough arguments for format string

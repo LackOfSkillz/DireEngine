@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: exp missing active second-wave skill athletics: You are not currently learning anything.",
+  "mode": "direct",
+  "scenario": "exp-second-wave-command-visibility",
+  "seed": 370387300
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9374,
+        "is_dead": false,
+        "key": "TEST_EXP_STEALTH_MARGIN_PROBE",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9373,
+            "key": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9374,
+            "key": "TEST_EXP_STEALTH_MARGIN_PROBE",
+            "location": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9375,
+            "key": "TEST_EXP_PROBE_OBSERVER_0",
+            "location": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9376,
+            "key": "TEST_EXP_PROBE_OBSERVER_1",
+            "location": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9377,
+            "key": "TEST_EXP_PROBE_OBSERVER_2",
+            "location": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9378,
+            "key": "TEST_EXP_PROBE_OBSERVER_3",
+            "location": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_STEALTH_MARGIN_PROBE",
+          "TEST_EXP_PROBE_OBSERVER_0",
+          "TEST_EXP_PROBE_OBSERVER_1",
+          "TEST_EXP_PROBE_OBSERVER_2",
+          "TEST_EXP_PROBE_OBSERVER_3"
+        ],
+        "exits": [],
+        "id": 9373,
+        "key": "TEST_EXP_STEALTH_MARGIN_PROBE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775390503.9259343
+    },
+    "label": "final"
+  }
+]

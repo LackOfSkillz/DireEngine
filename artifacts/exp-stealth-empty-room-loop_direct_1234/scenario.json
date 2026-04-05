@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Stealth feel probes measure delayed no-observer pacing and should not fail on host timing drift."
+  },
+  "mode": "direct",
+  "name": "exp-stealth-empty-room-loop",
+  "seed": 1234,
+  "started_at": 1775391657.2644608
+}

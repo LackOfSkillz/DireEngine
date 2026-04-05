@@ -1,0 +1,58 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 0.0,
+  "lag": {
+    "avg_ms": 0.01679999695625156,
+    "jitter": 0.00989948799818673,
+    "max_ms": 0.02379999205004424,
+    "min_ms": 0.009800001862458885,
+    "p95_ms": 0.02309999254066497,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT drain_skill",
+      "ms": 0.02379999205004424,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT drain_skill",
+      "ms": 0.009800001862458885,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT drain_skill",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.02379999205004424,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT drain_skill",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.009800001862458885,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

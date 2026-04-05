@@ -1,0 +1,88 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9249,
+        "is_dead": false,
+        "key": "TEST_EXP_SECOND_WAVE_VIS",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_SECOND_WAVE_VIS_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "cooldown_hinder": {
+            "duration": 2
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 9252,
+          "key": "wave pick",
+          "location": "TEST_EXP_SECOND_WAVE_VIS",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9248,
+            "key": "TEST_EXP_SECOND_WAVE_VIS_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9249,
+            "key": "TEST_EXP_SECOND_WAVE_VIS",
+            "location": "TEST_EXP_SECOND_WAVE_VIS_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9250,
+            "key": "waveward",
+            "location": "TEST_EXP_SECOND_WAVE_VIS_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9251,
+            "key": "wave box",
+            "location": "TEST_EXP_SECOND_WAVE_VIS_ROOM",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 9252,
+            "key": "wave pick",
+            "location": "TEST_EXP_SECOND_WAVE_VIS",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_SECOND_WAVE_VIS",
+          "waveward",
+          "wave box"
+        ],
+        "exits": [],
+        "id": 9248,
+        "key": "TEST_EXP_SECOND_WAVE_VIS_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775348314.503373
+    },
+    "label": "final"
+  }
+]

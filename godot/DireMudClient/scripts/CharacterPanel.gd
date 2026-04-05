@@ -4,6 +4,10 @@ extends Control
 signal equip_item(item_name)
 
 
+func _style_dynamic_label(label: Label) -> void:
+	label.add_theme_color_override("font_color", Color("#f5e6d3"))
+
+
 func update_character(data: Dictionary) -> void:
 	$NameLabel.text = str(data.get("name", "Unknown"))
 
@@ -26,6 +30,7 @@ func update_equipment(data: Dictionary) -> void:
 	for slot in data.keys():
 		var label := Label.new()
 		label.text = "%s: %s" % [slot, str(data[slot])]
+		_style_dynamic_label(label)
 		$EquipmentList.add_child(label)
 
 
@@ -35,6 +40,7 @@ func update_status(status_list: Array) -> void:
 	for status in status_list:
 		var label := Label.new()
 		label.text = str(status)
+		_style_dynamic_label(label)
 		$StatusList.add_child(label)
 
 

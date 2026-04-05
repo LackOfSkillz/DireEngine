@@ -1,5 +1,5 @@
 from typeclasses.abilities import Ability, register_ability
-from utils.contests import run_contest
+from utils.contests import run_contest, run_group_contest_against_best
 from utils.survival_messaging import msg_actor, msg_detecting_observers, react_or_message_target
 
 
@@ -25,25 +25,37 @@ class HideAbility(Ability):
         if not observers:
             user.set_state("hidden", {"strength": 50, "source": "hide"})
             msg_actor(user, "You slip into hiding.")
-            user.use_skill("stealth", apply_roundtime=False, emit_placeholder=False)
+            if hasattr(user, "record_stealth_contest"):
+                user.record_stealth_contest(
+                    "hide",
+                    10,
+                    result=None,
+                    target=user.location,
+                    roundtime=self.roundtime,
+                    event_key="stealth",
+                    require_hidden=True,
+                )
             return
 
         stealth_bonus = 10 if user.is_stalking() else 0
-        outcome_rank = {"fail": 0, "partial": 1, "success": 2, "strong": 3}
-        best_outcome = "strong"
         partial_detectors = []
         strong_detectors = []
+        highest_difficulty = 10
+        contest_result = run_group_contest_against_best(
+            user.get_stealth_total() + stealth_bonus,
+            [observer.get_perception_total() for observer in observers],
+            attacker=user,
+            defenders=observers,
+        )
+        best_outcome = str(contest_result.get("outcome", "fail") or "fail")
+        final_margin = int(contest_result.get("diff", 0) or 0)
 
-        for observer in observers:
-            result = run_contest(
-                user.get_stealth_total() + stealth_bonus,
-                observer.get_perception_total(),
-                attacker=user,
-                defender=observer,
-            )
-            outcome = result["outcome"]
-            if outcome_rank[outcome] < outcome_rank[best_outcome]:
-                best_outcome = outcome
+        for observer_entry in list(contest_result.get("individual_results") or []):
+            observer = observer_entry.get("defender")
+            if observer is None:
+                continue
+            highest_difficulty = max(highest_difficulty, int(observer.get_perception_total() or 0))
+            outcome = str(observer_entry.get("outcome", "success") or "success")
             if outcome == "fail":
                 strong_detectors.append(observer)
             elif outcome == "partial":
@@ -65,7 +77,16 @@ class HideAbility(Ability):
             if hasattr(user, "set_position_state"):
                 user.set_position_state("exposed")
             msg_actor(user, "You fail to find concealment.")
-            user.use_skill("stealth", apply_roundtime=False, emit_placeholder=False)
+            if hasattr(user, "record_stealth_contest"):
+                user.record_stealth_contest(
+                    "hide",
+                    highest_difficulty,
+                    result=contest_result,
+                    target=user.location,
+                    roundtime=self.roundtime,
+                    event_key="stealth",
+                    require_hidden=False,
+                )
             return
 
         strength_map = {
@@ -83,7 +104,16 @@ class HideAbility(Ability):
             msg_actor(user, "You struggle to conceal yourself.")
         else:
             msg_actor(user, "You slip into hiding.")
-        user.use_skill("stealth", apply_roundtime=False, emit_placeholder=False)
+        if hasattr(user, "record_stealth_contest"):
+            user.record_stealth_contest(
+                "hide",
+                highest_difficulty,
+                result=contest_result,
+                target=user.location,
+                roundtime=self.roundtime,
+                event_key="stealth",
+                require_hidden=True,
+            )
 
 
 class SneakAbility(Ability):
@@ -140,7 +170,16 @@ class StalkAbility(Ability):
             react_or_message_target(target, player_text=f"You spot {user.key} shadowing you.", awareness="alert")
         elif result["outcome"] == "partial":
             react_or_message_target(target, player_text="You sense someone following you.", awareness="alert")
-        user.use_skill("stealth", apply_roundtime=False, emit_placeholder=False)
+        if hasattr(user, "record_stealth_contest"):
+            user.record_stealth_contest(
+                "stalk",
+                max(10, int(defender_total or 0)),
+                result=result,
+                target=target,
+                roundtime=self.roundtime,
+                event_key="stealth",
+                require_hidden=True,
+            )
 
 
 class AmbushAbility(Ability):
@@ -170,7 +209,6 @@ class AmbushAbility(Ability):
     def execute(self, user, target=None):
         user.set_state("ambush_target", target.id)
         msg_actor(user, f"You prepare to ambush {target.key}.")
-        user.use_skill("stealth", apply_roundtime=False, emit_placeholder=False)
 
 
 register_ability(HideAbility())

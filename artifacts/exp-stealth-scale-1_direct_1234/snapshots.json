@@ -1,0 +1,65 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9383,
+        "is_dead": false,
+        "key": "TEST_STEALTH_SCALE_1_ACTOR",
+        "life_state": "ALIVE",
+        "location": "TEST_STEALTH_SCALE_1_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9381,
+            "key": "TEST_STEALTH_SCALE_1_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9383,
+            "key": "TEST_STEALTH_SCALE_1_ACTOR",
+            "location": "TEST_STEALTH_SCALE_1_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9384,
+            "key": "TEST_STEALTH_SCALE_1_OBS_0",
+            "location": "TEST_STEALTH_SCALE_1_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_STEALTH_SCALE_1_ACTOR",
+          "TEST_STEALTH_SCALE_1_OBS_0"
+        ],
+        "exits": [],
+        "id": 9381,
+        "key": "TEST_STEALTH_SCALE_1_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775391246.5165386
+    },
+    "label": "final"
+  }
+]

@@ -1,0 +1,71 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9469,
+        "is_dead": false,
+        "key": "TEST_LIVE_STEALTH_PROBE_7205_SUPPORT_ENGAGE",
+        "life_state": "ALIVE",
+        "location": "Outer Gate",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9469,
+            "key": "TEST_LIVE_STEALTH_PROBE_7205_SUPPORT_ENGAGE",
+            "location": "Outer Gate",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "down",
+          "out",
+          "leave",
+          "DireDhbh",
+          "DireDhca",
+          "DireDhcq",
+          "DireDhdg",
+          "DireDino",
+          "DireDiqs",
+          "DireDluh",
+          "DireDlwq",
+          "Marshal Vey",
+          "Pip the Gremlin",
+          "TEST_LIVE_STEALTH_PROBE_7205_SUPPORT_ENGAGE"
+        ],
+        "exits": [
+          "west",
+          "down",
+          "out",
+          "leave"
+        ],
+        "id": 7205,
+        "key": "Outer Gate"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775394409.6833029
+    },
+    "label": "final"
+  }
+]

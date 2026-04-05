@@ -1,0 +1,230 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 144.01300001190975,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": 144.01300001190975,
+      "command": "attack lightedgedummy",
+      "first_response_ms": 29.82300001895055,
+      "kind": "command",
+      "ms": 197.7539999934379,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    197.7539999934379
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 197.73449999047443,
+    "timings_ms": [
+      197.7539999934379
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775345670.907868,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 29.82300001895055,
+  "interest": {
+    "active_object_count": 3,
+    "active_object_peak": 3,
+    "active_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 7,
+    "source_count_peak": 7,
+    "source_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 3,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 3
+    },
+    "transition_total": 3
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 197.7539999934379,
+    "jitter": 0.0,
+    "max_ms": 197.7539999934379,
+    "min_ms": 197.7539999934379,
+    "p95_ms": 197.7539999934379,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "attack lightedgedummy",
+      "ms": 197.7539999934379,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 197.73449999047443,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You feel unprepared for what may come.",
+    "You carve lightedgedummy's left leg with a devastating hit.",
+    "Your weapon moves like an extension of your will."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 5994,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775345666.8948677,
+        "delay_s": 2.0,
+        "due_at": 1775345668.8948677,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EXP_LIGHT_EDGE_ATTACKER",
+        "job_id": "d577c78f370c455baa0986407902c142",
+        "key": "combat:roundtime:9183",
+        "owner": "#9183",
+        "owner_label": "TEST_EXP_LIGHT_EDGE_ATTACKER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "attack lightedgedummy",
+      "ms": 197.7539999934379
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775345664.5627775,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 197.73449999047443,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 197.73449999047443,
+          "metadata": {
+            "character": "TEST_EXP_LIGHT_EDGE_ATTACKER",
+            "command": "attack"
+          },
+          "timestamp": 1775345666.8948677
+        }
+      ],
+      "max_ms": 197.73449999047443,
+      "total_ms": 197.73449999047443
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

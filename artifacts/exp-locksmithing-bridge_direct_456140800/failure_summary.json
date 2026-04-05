@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: exp did not show locksmithing after box workflow: You are not currently learning anything.",
+  "mode": "direct",
+  "scenario": "exp-locksmithing-bridge",
+  "seed": 456140800
+}

@@ -1,0 +1,686 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 22,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": 0.038700003642588854,
+      "kind": "direct",
+      "ms": 0.060999998822808266,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.02060001133941114,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.01720000000204891,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.015300000086426735,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.014299992471933365,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.01410000550094992,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.012499993317760527,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.017400001524947584,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.01720000000204891,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.011299998732283711,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.010399991879239678,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.0168999977177009,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.01069999416358769,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.00960000033956021,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.031099989428184927,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.021700005163438618,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.024199995095841587,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.011299998732283711,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.011399999493733048,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.01679999695625156,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT train",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.0092999980552122,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "skilldebug evasion",
+      "first_response_ms": 231.8431000021519,
+      "kind": "command",
+      "ms": 231.9158000027528,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    0.060999998822808266,
+    0.02060001133941114,
+    0.01720000000204891,
+    0.015300000086426735,
+    0.014299992471933365,
+    0.01410000550094992,
+    0.012499993317760527,
+    0.017400001524947584,
+    0.01720000000204891,
+    0.011299998732283711,
+    0.010399991879239678,
+    0.0168999977177009,
+    0.01069999416358769,
+    0.00960000033956021,
+    0.031099989428184927,
+    0.021700005163438618,
+    0.024199995095841587,
+    0.011299998732283711,
+    0.011399999493733048,
+    0.01679999695625156,
+    0.0092999980552122,
+    231.9158000027528
+  ],
+  "commands": {
+    "count": 22,
+    "max_ms": 231.89360000833403,
+    "timings_ms": [
+      0.060999998822808266,
+      0.02060001133941114,
+      0.01720000000204891,
+      0.015300000086426735,
+      0.014299992471933365,
+      0.01410000550094992,
+      0.012499993317760527,
+      0.017400001524947584,
+      0.01720000000204891,
+      0.011299998732283711,
+      0.010399991879239678,
+      0.0168999977177009,
+      0.01069999416358769,
+      0.00960000033956021,
+      0.031099989428184927,
+      0.021700005163438618,
+      0.024199995095841587,
+      0.011299998732283711,
+      0.011399999493733048,
+      0.01679999695625156,
+      0.0092999980552122,
+      231.9158000027528
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775335240.9100928,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 115.94090000289725,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 2,
+    "active_source_types": [
+      "room"
+    ],
+    "exercised_source_types": [
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 2,
+    "source_count_peak": 2,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 2,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 2
+    },
+    "transition_total": 2
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 10.55864090779902,
+    "jitter": 49.440815869438,
+    "max_ms": 231.9158000027528,
+    "min_ms": 0.0092999980552122,
+    "p95_ms": 0.05950499835307708,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT train",
+      "ms": 0.060999998822808266,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.02060001133941114,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.01720000000204891,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.015300000086426735,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.014299992471933365,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.01410000550094992,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.012499993317760527,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.017400001524947584,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.01720000000204891,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.011299998732283711,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.010399991879239678,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.0168999977177009,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.01069999416358769,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.00960000033956021,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.031099989428184927,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.021700005163438618,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.024199995095841587,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.011299998732283711,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.011399999493733048,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.01679999695625156,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT train",
+      "ms": 0.0092999980552122,
+      "snapshot": "final"
+    },
+    {
+      "command": "skilldebug evasion",
+      "ms": 231.9158000027528,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 231.89360000833403,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You feel your evasion settling into dabbling.",
+    "RETURN 53.37402885682575",
+    "RETURN 53.37402885682575",
+    "RETURN 53.374028856825745",
+    "RETURN 53.37402885682576",
+    "RETURN 53.37402885682573",
+    "RETURN 53.37402885682576",
+    "RETURN 53.37402885682576",
+    "RETURN 53.37402885682576",
+    "RETURN 53.37402885682576",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 53.3740288568257",
+    "RETURN 2.5416204217540326",
+    "RETURN 0.0",
+    "Skill Debug: evasion\nRank: 1\nRank Progress: 0.0\nPool: 1016.6\nMax Pool: 1016.6\nPercent: 100.0%\nSkillset: primary\nLast Trained: 1775335237.648296\nActive: True\nMindstate: 34/34 (mind lock)"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "DIRECT train",
+      "skilldebug evasion"
+    ],
+    "extra_gain": 0.0,
+    "iterations": 20,
+    "mindstate": 34,
+    "output_log": [
+      "You feel your evasion settling into dabbling.",
+      "RETURN 53.37402885682575",
+      "RETURN 53.37402885682575",
+      "RETURN 53.374028856825745",
+      "RETURN 53.37402885682576",
+      "RETURN 53.37402885682573",
+      "RETURN 53.37402885682576",
+      "RETURN 53.37402885682576",
+      "RETURN 53.37402885682576",
+      "RETURN 53.37402885682576",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 53.3740288568257",
+      "RETURN 2.5416204217540326",
+      "RETURN 0.0",
+      "Skill Debug: evasion\nRank: 1\nRank Progress: 0.0\nPool: 1016.6\nMax Pool: 1016.6\nPercent: 100.0%\nSkillset: primary\nLast Trained: 1775335237.648296\nActive: True\nMindstate: 34/34 (mind lock)"
+    ],
+    "pool": 1016.6481687014428,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 5596,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "skilldebug evasion",
+      "ms": 231.9158000027528
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775335234.8002634,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 231.89360000833403,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 231.89360000833403,
+          "metadata": {
+            "character": "TEST_EXP_MIND_LOCK_CHAR",
+            "command": "skilldebug"
+          },
+          "timestamp": 1775335237.8799326
+        }
+      ],
+      "max_ms": 231.89360000833403,
+      "total_ms": 231.89360000833403
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -4,6 +4,7 @@ from collections.abc import Mapping
 
 from evennia import Command
 from world.systems.ranger import RANGER_SNIPE_CONFIG
+from world.systems.skills import award_exp_skill
 
 from utils.contests import run_contest
 from utils.survival_messaging import msg_room, react_or_message_target
@@ -195,6 +196,7 @@ class CmdAttack(Command):
         ambush = False
         strong_ambush = False
         partial_ambush = False
+        ambush_result = None
         ambush_accuracy_bonus = 0
         ambush_damage_multiplier = 1.0
         if self.caller.is_hidden() and self.caller.is_ambushing():
@@ -221,6 +223,16 @@ class CmdAttack(Command):
                     if getattr(self.caller.db, "position_state", "neutral") == "advantaged":
                         ambush_rt -= 1
                     ambush_rt = max(1, min(ambush_rt + 1, 5))
+                    if hasattr(self.caller, "record_stealth_contest"):
+                        self.caller.record_stealth_contest(
+                            "ambush",
+                            max(10, int(target.get_perception_total() or 0)),
+                            result=ambush_result,
+                            target=target,
+                            roundtime=ambush_rt,
+                            event_key="stealth",
+                            require_hidden=False,
+                        )
                     self.caller.apply_thief_roundtime(ambush_rt)
                     return
                 ambush = True
@@ -422,6 +434,8 @@ class CmdAttack(Command):
 
         final_chance = max(10, accuracy - evasion)
         final_chance = min(95, final_chance)
+        if final_chance < 95:
+            award_exp_skill(target, "evasion", max(10, int(accuracy)), success=hit_roll > final_chance)
         damage_profile = dict(profile.get("damage_types") or {})
         if not damage_profile:
             fallback_damage_type = (profile.get("damage_type") or "impact").lower()
@@ -601,16 +615,23 @@ class CmdAttack(Command):
         damage = max(0, int(damage))
         if final_chance < 95:
             difficulty = target.get_stat("reflex") + target.get_stat("agility")
-            _, band = self.caller.get_learning_amount(skill_name, difficulty)
-            if band != "trivial":
-                self.caller.use_skill(
-                    skill_name,
-                    apply_roundtime=False,
-                    emit_placeholder=False,
-                    require_known=False,
-                    difficulty=difficulty,
-                    return_learning=True,
-                )
+            if skill_name == "brawling":
+                brawling_difficulty = max(10, int(target.get_skill("evasion") + difficulty))
+                award_exp_skill(self.caller, "brawling", brawling_difficulty, success=True)
+            elif skill_name == "light_edge":
+                light_edge_difficulty = max(10, int(target.get_skill("evasion") + difficulty))
+                award_exp_skill(self.caller, "light_edge", light_edge_difficulty, success=True)
+            else:
+                _, band = self.caller.get_learning_amount(skill_name, difficulty)
+                if band != "trivial":
+                    self.caller.use_skill(
+                        skill_name,
+                        apply_roundtime=False,
+                        emit_placeholder=False,
+                        require_known=False,
+                        difficulty=difficulty,
+                        return_learning=True,
+                    )
         if hasattr(target, "apply_incoming_damage"):
             target.apply_incoming_damage(hit_location, damage, attack_context["damage_type"])
         else:
@@ -723,6 +744,16 @@ class CmdAttack(Command):
             if partial_ambush:
                 action_roundtime += 1
             action_roundtime = max(1, min(action_roundtime, 5))
+            if hasattr(self.caller, "record_stealth_contest"):
+                self.caller.record_stealth_contest(
+                    "ambush",
+                    max(10, int(target.get_perception_total() or 0)),
+                    result=ambush_result,
+                    target=target,
+                    roundtime=action_roundtime,
+                    event_key="stealth",
+                    require_hidden=False,
+                )
             self.caller.apply_thief_roundtime(action_roundtime)
         else:
             self.caller.set_roundtime(action_roundtime)

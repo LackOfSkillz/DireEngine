@@ -32,6 +32,7 @@ from typeclasses.objects import BountyBoard
 from utils.contests import run_contest
 from world.systems.metrics import increment_counter, record_event
 from world.systems.timing_audit import register_ticker_metadata, unregister_ticker_metadata
+from world.systems.exp_pulse import EXP_TICKER_IDSTRING, PULSE_TICK, exp_pulse_tick, start_exp_ticker
 from world.the_landing import build_the_landing
 
 
@@ -121,8 +122,11 @@ def _npc_needs_status_tick(npc):
 
     if bool(getattr(npc.db, "in_combat", False)) or bool(getattr(npc.db, "target", None)):
         return True
-    if bool(states.get("last_seen_target")) or bool(states.get("empath_manipulated")) or bool(states.get("combat_timer")):
-        return True
+    has_pending_ai_state = bool(states.get("last_seen_target")) or bool(states.get("empath_manipulated")) or bool(states.get("combat_timer"))
+    if has_pending_ai_state:
+        next_ai_tick_at = float(getattr(getattr(npc, "ndb", None), "next_ai_tick_at", 0.0) or 0.0)
+        if time.time() >= next_ai_tick_at:
+            return True
     if awareness != "normal" or observing:
         return True
 
@@ -917,6 +921,12 @@ def at_server_start():
         pass
 
     try:
+        TICKER_HANDLER.remove(PULSE_TICK, exp_pulse_tick, idstring=EXP_TICKER_IDSTRING, persistent=True)
+        unregister_ticker_metadata(PULSE_TICK, idstring=EXP_TICKER_IDSTRING, persistent=True)
+    except Exception:
+        pass
+
+    try:
         from world.systems.tick_audit import scan_for_tick_violations
 
         for warning in scan_for_tick_violations()[:25]:
@@ -929,6 +939,7 @@ def at_server_start():
     if getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
         TICKER_HANDLER.add(1, process_status_tick, idstring="global_status_tick", persistent=True)
         TICKER_HANDLER.add(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
+        start_exp_ticker()
         register_ticker_metadata(
             1,
             process_status_tick,

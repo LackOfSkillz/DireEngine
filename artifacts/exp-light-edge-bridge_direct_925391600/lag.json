@@ -1,0 +1,46 @@
+{
+  "combat_responsiveness_ms": 144.01300001190975,
+  "first_response_ms": 29.82300001895055,
+  "lag": {
+    "avg_ms": 197.7539999934379,
+    "jitter": 0.0,
+    "max_ms": 197.7539999934379,
+    "min_ms": 197.7539999934379,
+    "p95_ms": 197.7539999934379,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "attack lightedgedummy",
+      "ms": 197.7539999934379,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "attack lightedgedummy",
+      "ms": 197.7539999934379
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": 144.01300001190975,
+      "command": "attack lightedgedummy",
+      "first_response_ms": 29.82300001895055,
+      "kind": "command",
+      "ms": 197.7539999934379,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

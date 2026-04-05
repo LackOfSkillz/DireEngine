@@ -156,6 +156,11 @@ body {
   opacity: 0.85;
 }
 
+.panel-subtitle {
+  color: #dbc8a5;
+  opacity: 1;
+}
+
 .meter {
   width: 100%;
   height: 12px;
@@ -209,6 +214,7 @@ body {
   padding: 8px 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
+  color: #f3e7cb;
 }
 
 .ability-item {
@@ -266,8 +272,17 @@ body {
 }
 
 .inventory-item {
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
+  border: 1px solid rgba(214, 176, 97, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff1cf;
+  text-align: left;
+  font-weight: 600;
+  line-height: 1.25;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
 }
 
 .inventory-item[draggable="true"] {
@@ -279,6 +294,18 @@ body {
 #compass button:hover {
   background: rgba(214, 176, 97, 0.2);
   transform: translateY(-1px);
+}
+
+.inventory-item:hover,
+.inventory-item:focus-visible,
+.inventory-item:active {
+  color: #fff1cf;
+}
+
+.equipment-item {
+  border: 1px solid rgba(214, 176, 97, 0.18);
+  color: #eadab7;
+  line-height: 1.25;
 }
 
 .hotbar-button.on-cooldown {
@@ -667,16 +694,31 @@ body {
 
 .action-row button {
   border: 1px solid rgba(214, 176, 97, 0.25);
-  background: linear-gradient(180deg, rgba(88, 63, 43, 0.9), rgba(39, 28, 21, 0.95));
-  color: #ebddbf;
+  background: linear-gradient(180deg, rgba(120, 86, 53, 0.96), rgba(63, 43, 28, 0.98));
+  color: #fff1cf;
   border-radius: 8px;
   padding: 8px 10px;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 239, 196, 0.12);
 }
 
 .inventory-item.is-selected,
 .action-row button.active {
   background: rgba(214, 176, 97, 0.24);
   border-color: rgba(241, 210, 149, 0.45);
+}
+
+.inventory-item.is-selected {
+  color: #fff4dc;
+  box-shadow: inset 0 0 0 1px rgba(255, 230, 176, 0.12);
+}
+
+.action-row button:hover,
+.action-row button:focus-visible {
+  background: linear-gradient(180deg, rgba(148, 108, 67, 0.98), rgba(78, 54, 34, 1));
+  color: #fff7e4;
+  border-color: rgba(255, 220, 153, 0.52);
 }
 
 .hotbar-button.is-editing {

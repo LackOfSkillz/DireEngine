@@ -1,0 +1,99 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8879,
+        "is_dead": false,
+        "key": "TEST_EXP_COMMAND_VISIBILITY",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_COMMAND_VISIBILITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "cooldown_flare": {
+            "duration": 2
+          },
+          "hidden": {
+            "source": "hide",
+            "strength": 40
+          }
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 0.0,
+        "target": "visibilityfoe",
+        "target_summary": {
+          "hp": 100,
+          "id": 8880,
+          "in_combat": true,
+          "key": "visibilityfoe",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 8882,
+          "key": "visibilitygem",
+          "location": "TEST_EXP_COMMAND_VISIBILITY",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8878,
+            "key": "TEST_EXP_COMMAND_VISIBILITY_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8879,
+            "key": "TEST_EXP_COMMAND_VISIBILITY",
+            "location": "TEST_EXP_COMMAND_VISIBILITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8880,
+            "key": "visibilityfoe",
+            "location": "TEST_EXP_COMMAND_VISIBILITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8881,
+            "key": "visibilitytarget",
+            "location": "TEST_EXP_COMMAND_VISIBILITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8882,
+            "key": "visibilitygem",
+            "location": "TEST_EXP_COMMAND_VISIBILITY",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_COMMAND_VISIBILITY",
+          "visibilityfoe",
+          "visibilitytarget"
+        ],
+        "exits": [],
+        "id": 8878,
+        "key": "TEST_EXP_COMMAND_VISIBILITY_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775335464.2471478
+    },
+    "label": "final"
+  }
+]

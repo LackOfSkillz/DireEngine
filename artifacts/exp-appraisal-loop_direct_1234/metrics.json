@@ -1,0 +1,417 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 8,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 364.9721999972826,
+      "kind": "direct",
+      "ms": 418.27949999424163,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 248.5296999948332,
+      "kind": "direct",
+      "ms": 422.92230000020936,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 207.79079999192618,
+      "kind": "direct",
+      "ms": 423.6405999981798,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 233.23440000240225,
+      "kind": "direct",
+      "ms": 361.20940001273993,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 227.20480000134557,
+      "kind": "direct",
+      "ms": 308.1955000088783,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp",
+      "first_response_ms": 60.75330000021495,
+      "kind": "command",
+      "ms": 60.82369999785442,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT exp_pulse_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.04400000034365803,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.031799994758330286,
+      "script_delay_sources": [
+        {
+          "ms": 0.031799994758330286,
+          "source": "ticker:exp_pulse_tick"
+        }
+      ],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp",
+      "first_response_ms": 51.473300001816824,
+      "kind": "command",
+      "ms": 51.52819999784697,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    418.27949999424163,
+    422.92230000020936,
+    423.6405999981798,
+    361.20940001273993,
+    308.1955000088783,
+    60.82369999785442,
+    0.04400000034365803,
+    51.52819999784697
+  ],
+  "commands": {
+    "count": 8,
+    "max_ms": 60.80859999929089,
+    "timings_ms": [
+      418.27949999424163,
+      422.92230000020936,
+      423.6405999981798,
+      361.20940001273993,
+      308.1955000088783,
+      60.82369999785442,
+      0.04400000034365803,
+      51.52819999784697
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775335391.451807,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 199.13692856997451,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 2,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 3,
+      "zone": 0
+    },
+    "source_count_current": 5,
+    "source_count_peak": 5,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 3,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 2,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 2
+    },
+    "transition_total": 2
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 255.83040000128676,
+    "jitter": 185.74567793352892,
+    "max_ms": 423.6405999981798,
+    "min_ms": 0.04400000034365803,
+    "p95_ms": 423.38919499889016,
+    "slow_count": 5,
+    "spike_count": 5,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 418.27949999424163,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 422.92230000020936,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 423.6405999981798,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 361.20940001273993,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 308.1955000088783,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp",
+      "ms": 60.82369999785442,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT exp_pulse_tick",
+      "ms": 0.04400000034365803,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp",
+      "ms": 51.52819999784697,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 60.80859999929089,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You are not currently learning anything."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "appraisal_pool": 266.87014428412874,
+    "before_pool": 266.87014428412874,
+    "commands": [
+      "DIRECT appraise_target",
+      "DIRECT appraise_target",
+      "DIRECT appraise_target",
+      "DIRECT appraise_target",
+      "DIRECT appraise_target",
+      "exp",
+      "DIRECT exp_pulse_tick",
+      "exp"
+    ],
+    "output_log": [
+      "You are not currently learning anything."
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 12307,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 3,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.003974999344791286,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 418.27949999424163
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 422.92230000020936
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 423.6405999981798
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 361.20940001273993
+    },
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 308.1955000088783
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775335378.6839294,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.031799994758330286,
+    "count": 1,
+    "execution_count": 1,
+    "max_ms": 0.031799994758330286,
+    "performance": {
+      "exp_pulse_tick": {
+        "avg_ms": 0.031799994758330286,
+        "count": 1,
+        "max_ms": 0.031799994758330286,
+        "total_ms": 0.031799994758330286
+      }
+    },
+    "sources": [
+      {
+        "count": 1,
+        "source": "ticker:exp_pulse_tick",
+        "total_ms": 0.031799994758330286
+      }
+    ],
+    "total_ms": 0.031799994758330286
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.031799994758330286,
+      "count": 1,
+      "execution_count": 1,
+      "max_ms": 0.031799994758330286,
+      "performance": {
+        "exp_pulse_tick": {
+          "avg_ms": 0.031799994758330286,
+          "count": 1,
+          "max_ms": 0.031799994758330286,
+          "total_ms": 0.031799994758330286
+        }
+      },
+      "sources": [
+        {
+          "count": 1,
+          "source": "ticker:exp_pulse_tick",
+          "total_ms": 0.031799994758330286
+        }
+      ],
+      "total_ms": 0.031799994758330286
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 56.16139999619918,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 60.80859999929089,
+          "metadata": {
+            "character": "TEST_EXP_APPRAISAL_CHAR",
+            "command": "exp"
+          },
+          "timestamp": 1775335385.8799858
+        },
+        {
+          "duration_ms": 51.51419999310747,
+          "metadata": {
+            "character": "TEST_EXP_APPRAISAL_CHAR",
+            "command": "exp"
+          },
+          "timestamp": 1775335385.9313266
+        }
+      ],
+      "max_ms": 60.80859999929089,
+      "total_ms": 112.32279999239836
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

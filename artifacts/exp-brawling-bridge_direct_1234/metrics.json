@@ -1,0 +1,292 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 4577.846999993199,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT appraise_target",
+      "first_response_ms": 525.0855000049341,
+      "kind": "direct",
+      "ms": 609.7079000028316,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": 4577.846999993199,
+      "command": "attack brawldummy",
+      "first_response_ms": 486.9583999970928,
+      "kind": "command",
+      "ms": 5744.684399993275,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "exp all",
+      "first_response_ms": 67.43969999661203,
+      "kind": "command",
+      "ms": 67.50559998909011,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    609.7079000028316,
+    5744.684399993275,
+    67.50559998909011
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 5744.6709999931045,
+    "timings_ms": [
+      609.7079000028316,
+      5744.684399993275,
+      67.50559998909011
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775335431.2575498,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 359.82786666621297,
+  "interest": {
+    "active_object_count": 3,
+    "active_object_peak": 3,
+    "active_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 7,
+    "source_count_peak": 7,
+    "source_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 3,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 3
+    },
+    "transition_total": 3
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 2140.632633328399,
+    "jitter": 3132.9519125156085,
+    "max_ms": 5744.684399993275,
+    "min_ms": 67.50559998909011,
+    "p95_ms": 5231.18674999423,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT appraise_target",
+      "ms": 609.7079000028316,
+      "snapshot": "final"
+    },
+    {
+      "command": "attack brawldummy",
+      "ms": 5744.684399993275,
+      "snapshot": "final"
+    },
+    {
+      "command": "exp all",
+      "ms": 67.50559998909011,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 5744.6709999931045,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "|wSkill                Rank   Mindstate|n\n---------------------------------------------\nappraisal                1    1/34 (dabbling)\narcana                   1    0/34 (clear)\nathletics                1    0/34 (clear)\nattack                   0    0/34 (clear)\nattunement               1    0/34 (clear)\nblunt                    0    0/34 (clear)\nbrawling               100    0/34 (clear)\nbrigandine               0    0/34 (clear)\nchain armor              0    0/34 (clear)\ncombat                   0    0/34 (clear)\ndisengage                0    0/34 (clear)\nempathy                  0    0/34 (clear)\nevasion                  1    0/34 (clear)\nfirst aid                0    0/34 (clear)\nheavy edge               0    0/34 (clear)\nlight armor              0    0/34 (clear)\nlight edge               0    0/34 (clear)\nlocksmithing             0    0/34 (clear)\noutdoorsmanship          0    0/34 (clear)\nperception               1    0/34 (clear)\nplate armor              0    0/34 (clear)\npolearm                  0    0/34 (clear)\nscholarship              0    0/34 (clear)\nskinning                 0    0/34 (clear)\nstealth                  0    0/34 (clear)\ntactics                  0    0/34 (clear)\ntargeted magic           0    0/34 (clear)\ntrading                  1    0/34 (clear)\n\nTotal Skills: 28"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "brawling_pool": 26.250000000000004,
+    "commands": [
+      "DIRECT appraise_target",
+      "attack brawldummy",
+      "exp all"
+    ],
+    "output_log": [
+      "|wSkill                Rank   Mindstate|n\n---------------------------------------------\nappraisal                1    1/34 (dabbling)\narcana                   1    0/34 (clear)\nathletics                1    0/34 (clear)\nattack                   0    0/34 (clear)\nattunement               1    0/34 (clear)\nblunt                    0    0/34 (clear)\nbrawling               100    0/34 (clear)\nbrigandine               0    0/34 (clear)\nchain armor              0    0/34 (clear)\ncombat                   0    0/34 (clear)\ndisengage                0    0/34 (clear)\nempathy                  0    0/34 (clear)\nevasion                  1    0/34 (clear)\nfirst aid                0    0/34 (clear)\nheavy edge               0    0/34 (clear)\nlight armor              0    0/34 (clear)\nlight edge               0    0/34 (clear)\nlocksmithing             0    0/34 (clear)\noutdoorsmanship          0    0/34 (clear)\nperception               1    0/34 (clear)\nplate armor              0    0/34 (clear)\npolearm                  0    0/34 (clear)\nscholarship              0    0/34 (clear)\nskinning                 0    0/34 (clear)\nstealth                  0    0/34 (clear)\ntactics                  0    0/34 (clear)\ntargeted magic           0    0/34 (clear)\ntrading                  1    0/34 (clear)\n\nTotal Skills: 28"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 16689,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775335425.8710115,
+        "delay_s": 2.0,
+        "due_at": 1775335427.8710115,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EXP_BRAWL_ATTACKER",
+        "job_id": "7479fea66a194182a71033ee2221a21a",
+        "key": "combat:roundtime:8872",
+        "owner": "#8872",
+        "owner_label": "TEST_EXP_BRAWL_ATTACKER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT appraise_target",
+      "ms": 609.7079000028316
+    },
+    {
+      "cmd": "attack brawldummy",
+      "ms": 5744.684399993275
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775335414.2297041,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Bridge scenarios validate EXP routing rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 2906.081599998288,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 5744.6709999931045,
+          "metadata": {
+            "character": "TEST_EXP_BRAWL_ATTACKER",
+            "command": "attack"
+          },
+          "timestamp": 1775335425.8710115
+        },
+        {
+          "duration_ms": 67.49220000347123,
+          "metadata": {
+            "character": "TEST_EXP_BRAWL_ATTACKER",
+            "command": "exp"
+          },
+          "timestamp": 1775335425.939023
+        }
+      ],
+      "max_ms": 5744.6709999931045,
+      "total_ms": 5812.163199996576
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

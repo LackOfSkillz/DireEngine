@@ -1,0 +1,8 @@
+{
+  "failure_type": "direct_execution_failure",
+  "lag_status": "ok",
+  "message": "not enough arguments for format string",
+  "mode": "direct",
+  "scenario": "exp-outcome-learning",
+  "seed": 273337700
+}

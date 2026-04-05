@@ -1,0 +1,69 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9441,
+        "is_dead": false,
+        "key": "TEST_EXP_STEALTH_ACTOR",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_STEALTH_PERCEPTION_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "hidden": {
+            "source": "hide",
+            "strength": 25
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9440,
+            "key": "TEST_EXP_STEALTH_PERCEPTION_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9441,
+            "key": "TEST_EXP_STEALTH_ACTOR",
+            "location": "TEST_EXP_STEALTH_PERCEPTION_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9442,
+            "key": "TEST_EXP_PERCEPTION_ACTOR",
+            "location": "TEST_EXP_STEALTH_PERCEPTION_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_STEALTH_ACTOR",
+          "TEST_EXP_PERCEPTION_ACTOR"
+        ],
+        "exits": [],
+        "id": 9440,
+        "key": "TEST_EXP_STEALTH_PERCEPTION_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775392143.1729646
+    },
+    "label": "final"
+  }
+]

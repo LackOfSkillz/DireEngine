@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Ad hoc balance probe."
+  },
+  "mode": "direct",
+  "name": "exp-stealth-margin-probe",
+  "seed": 1234,
+  "started_at": 1775390473.4809873
+}

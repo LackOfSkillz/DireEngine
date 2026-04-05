@@ -39,6 +39,12 @@ def get_difficulty_band(diff):
     return "trivial"
 
 
+def soften_extreme_failure_margin(diff, threshold=-30.0, target=-20.0, scale=0.6):
+    if diff >= threshold:
+        return diff
+    return target + ((diff - threshold) * float(scale))
+
+
 def run_contest(attacker_value, defender_value, attacker=None, defender=None):
     attacker_value = _apply_character_modifier(attacker, attacker_value)
     defender_value = _apply_character_modifier(defender, defender_value)
@@ -55,6 +61,91 @@ def run_contest(attacker_value, defender_value, attacker=None, defender=None):
         "diff": diff,
         "outcome": outcome,
         "difficulty": band,
+    }
+
+
+def run_group_contest_against_best(
+    attacker_value,
+    defender_values,
+    *,
+    attacker=None,
+    defenders=None,
+    support_slots=3,
+    support_scale=0.09,
+    crowd_penalty_per_observer=1.2,
+    crowd_penalty_cap=10.0,
+):
+    attacker_value = _apply_character_modifier(attacker, attacker_value)
+    attacker_roll = attacker_value + random.randint(1, 100)
+
+    defender_entries = []
+    defender_list = list(defenders or [])
+    for index, defender_value in enumerate(list(defender_values or [])):
+        defender = defender_list[index] if index < len(defender_list) else None
+        adjusted_defender_value = _apply_character_modifier(defender, defender_value)
+        defender_roll = adjusted_defender_value + random.randint(1, 100)
+        individual_diff = attacker_roll - defender_roll
+        defender_entries.append(
+            {
+                "defender": defender,
+                "defender_value": adjusted_defender_value,
+                "defender_roll": defender_roll,
+                "diff": individual_diff,
+                "outcome": resolve_outcome(individual_diff),
+                "difficulty": get_difficulty_band(individual_diff),
+            }
+        )
+
+    if not defender_entries:
+        diff = attacker_roll
+        return {
+            "attacker_roll": attacker_roll,
+            "defender_roll": 0.0,
+            "effective_defender_roll": 0.0,
+            "primary_pressure": 0.0,
+            "support_pressure": 0.0,
+            "crowd_penalty": 0.0,
+            "observer_pressure": 0.0,
+            "observer_count": 0,
+            "diff": diff,
+            "outcome": resolve_outcome(diff),
+            "difficulty": get_difficulty_band(diff),
+            "individual_results": [],
+        }
+
+    sorted_entries = sorted(defender_entries, key=lambda entry: entry["defender_roll"], reverse=True)
+    observer_count = len(sorted_entries)
+    primary_pressure = float(sorted_entries[0]["defender_roll"])
+    support_pressure = 0.0
+    for entry in sorted_entries[1 : 1 + max(0, int(support_slots or 0))]:
+        base_support = max(0.0, float(entry["defender_roll"]) - (primary_pressure * 0.5))
+        engagement = random.uniform(0.35, 1.0) if observer_count >= 6 else 1.0
+        support_pressure += base_support * float(support_scale or 0.0) * engagement
+    crowd_penalty = min(
+        float(crowd_penalty_cap or 0.0),
+        max(0, observer_count - 1) * float(crowd_penalty_per_observer or 0.0),
+    )
+    effective_defender_roll = primary_pressure + support_pressure
+    if observer_count >= 6:
+        effective_defender_roll *= 0.92
+    diff = attacker_roll - effective_defender_roll - crowd_penalty
+    diff = soften_extreme_failure_margin(diff)
+    outcome = resolve_outcome(diff)
+    band = get_difficulty_band(diff)
+
+    return {
+        "attacker_roll": attacker_roll,
+        "defender_roll": primary_pressure,
+        "effective_defender_roll": effective_defender_roll,
+        "primary_pressure": primary_pressure,
+        "support_pressure": support_pressure,
+        "crowd_penalty": crowd_penalty,
+        "observer_pressure": effective_defender_roll + crowd_penalty,
+        "observer_count": observer_count,
+        "diff": diff,
+        "outcome": outcome,
+        "difficulty": band,
+        "individual_results": sorted_entries,
     }
 
 

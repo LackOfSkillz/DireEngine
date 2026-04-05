@@ -1,0 +1,78 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9198,
+        "is_dead": false,
+        "key": "TEST_EXP_LOCKSMITH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_LOCKSMITH_CHAR_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 9200,
+          "key": "training pick",
+          "location": "TEST_EXP_LOCKSMITH_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9197,
+            "key": "TEST_EXP_LOCKSMITH_CHAR_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9198,
+            "key": "TEST_EXP_LOCKSMITH_CHAR",
+            "location": "TEST_EXP_LOCKSMITH_CHAR_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9199,
+            "key": "practice box",
+            "location": "TEST_EXP_LOCKSMITH_CHAR_ROOM",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 9200,
+            "key": "training pick",
+            "location": "TEST_EXP_LOCKSMITH_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_LOCKSMITH_CHAR",
+          "practice box"
+        ],
+        "exits": [],
+        "id": 9197,
+        "key": "TEST_EXP_LOCKSMITH_CHAR_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775345741.0582159
+    },
+    "label": "final"
+  }
+]

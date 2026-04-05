@@ -1,0 +1,86 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9390,
+        "is_dead": false,
+        "key": "TEST_STEALTH_SCALE_4_ACTOR",
+        "life_state": "ALIVE",
+        "location": "TEST_STEALTH_SCALE_4_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9389,
+            "key": "TEST_STEALTH_SCALE_4_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9390,
+            "key": "TEST_STEALTH_SCALE_4_ACTOR",
+            "location": "TEST_STEALTH_SCALE_4_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9391,
+            "key": "TEST_STEALTH_SCALE_4_OBS_0",
+            "location": "TEST_STEALTH_SCALE_4_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9392,
+            "key": "TEST_STEALTH_SCALE_4_OBS_1",
+            "location": "TEST_STEALTH_SCALE_4_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9393,
+            "key": "TEST_STEALTH_SCALE_4_OBS_2",
+            "location": "TEST_STEALTH_SCALE_4_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9394,
+            "key": "TEST_STEALTH_SCALE_4_OBS_3",
+            "location": "TEST_STEALTH_SCALE_4_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_STEALTH_SCALE_4_ACTOR",
+          "TEST_STEALTH_SCALE_4_OBS_0",
+          "TEST_STEALTH_SCALE_4_OBS_1",
+          "TEST_STEALTH_SCALE_4_OBS_2",
+          "TEST_STEALTH_SCALE_4_OBS_3"
+        ],
+        "exits": [],
+        "id": 9389,
+        "key": "TEST_STEALTH_SCALE_4_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775391322.1383982
+    },
+    "label": "final"
+  }
+]

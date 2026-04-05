@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Controlled stealth 4-observer probe after crowd-penalty retune."
+  },
+  "mode": "direct",
+  "name": "exp-stealth-scale-retune-4",
+  "seed": 1234,
+  "started_at": 1775393292.2565792
+}

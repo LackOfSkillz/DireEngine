@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Outer Gate probe after margin softening."
+  },
+  "mode": "direct",
+  "name": "exp-stealth-live-room-7205-margin-soften",
+  "seed": 1234,
+  "started_at": 1775393770.5096607
+}

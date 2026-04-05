@@ -1,0 +1,102 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8862,
+        "is_dead": false,
+        "key": "TEST_EXP_APPRAISAL_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_APPRAISAL_CHAR_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 8863,
+          "key": "testgem",
+          "location": "TEST_EXP_APPRAISAL_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 8864,
+          "key": "testweapon",
+          "location": "TEST_EXP_APPRAISAL_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 8865,
+          "key": "testarmor",
+          "location": "TEST_EXP_APPRAISAL_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8861,
+            "key": "TEST_EXP_APPRAISAL_CHAR_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8862,
+            "key": "TEST_EXP_APPRAISAL_CHAR",
+            "location": "TEST_EXP_APPRAISAL_CHAR_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8863,
+            "key": "testgem",
+            "location": "TEST_EXP_APPRAISAL_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8864,
+            "key": "testweapon",
+            "location": "TEST_EXP_APPRAISAL_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8865,
+            "key": "testarmor",
+            "location": "TEST_EXP_APPRAISAL_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 8866,
+            "key": "testbeast",
+            "location": "TEST_EXP_APPRAISAL_CHAR_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_APPRAISAL_CHAR",
+          "testbeast"
+        ],
+        "exits": [],
+        "id": 8861,
+        "key": "TEST_EXP_APPRAISAL_CHAR_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775335386.0852592
+    },
+    "label": "final"
+  }
+]

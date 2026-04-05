@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "total ranks displayed: 101",
+  "mode": "direct",
+  "scenario": "exp-command-visibility",
+  "seed": 341133700
+}

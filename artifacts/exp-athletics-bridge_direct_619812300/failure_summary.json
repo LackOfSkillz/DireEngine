@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: exp did not show athletics after terrain actions: You are not currently learning anything.",
+  "mode": "direct",
+  "scenario": "exp-athletics-bridge",
+  "seed": 619812300
+}

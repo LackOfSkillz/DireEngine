@@ -1,0 +1,525 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 15,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.025999994250014424,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.017099999240599573,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.011299998732283711,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.012900010915473104,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.007700000423938036,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.013500000932253897,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.006799993570894003,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.015400000847876072,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.011900003300979733,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.011199997970834374,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.009200011845678091,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.013600001693703234,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.009099996532313526,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.008899995009414852,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT pulse",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.006300004315562546,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    0.025999994250014424,
+    0.017099999240599573,
+    0.011299998732283711,
+    0.012900010915473104,
+    0.007700000423938036,
+    0.013500000932253897,
+    0.006799993570894003,
+    0.015400000847876072,
+    0.011900003300979733,
+    0.011199997970834374,
+    0.009200011845678091,
+    0.013600001693703234,
+    0.009099996532313526,
+    0.008899995009414852,
+    0.006300004315562546
+  ],
+  "commands": {
+    "count": 15,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.025999994250014424,
+      0.017099999240599573,
+      0.011299998732283711,
+      0.012900010915473104,
+      0.007700000423938036,
+      0.013500000932253897,
+      0.006799993570894003,
+      0.015400000847876072,
+      0.011900003300979733,
+      0.011199997970834374,
+      0.009200011845678091,
+      0.013600001693703234,
+      0.009099996532313526,
+      0.008899995009414852,
+      0.006300004315562546
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775335255.7720993,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 2,
+    "active_source_types": [
+      "room"
+    ],
+    "exercised_source_types": [
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 2,
+    "source_count_peak": 2,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 2,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 2
+    },
+    "transition_total": 2
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.012060000638787946,
+    "jitter": 0.0049580804669479665,
+    "max_ms": 0.025999994250014424,
+    "min_ms": 0.006300004315562546,
+    "p95_ms": 0.019769997743424018,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.025999994250014424,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.017099999240599573,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.011299998732283711,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.012900010915473104,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.007700000423938036,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.013500000932253897,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.006799993570894003,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.015400000847876072,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.011900003300979733,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.011199997970834374,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.009200011845678091,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.013600001693703234,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.009099996532313526,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.008899995009414852,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT pulse",
+      "ms": 0.006300004315562546,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "RETURN 68.11542730299668",
+    "RETURN 68.11542730299668",
+    "RETURN 68.11542730299668",
+    "RETURN 69.22838137472284",
+    "RETURN 69.22838137472284",
+    "RETURN 69.22838137472284",
+    "RETURN 70.3388704318937",
+    "RETURN 70.3388704318937",
+    "RETURN 70.3388704318937",
+    "RETURN 71.44690265486727",
+    "RETURN 71.44690265486727",
+    "RETURN 71.44690265486727",
+    "RETURN 72.5524861878453",
+    "RETURN 72.5524861878453",
+    "RETURN 17.506282330867947"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse",
+      "DIRECT pulse"
+    ],
+    "drains": [
+      68.11542730299668,
+      68.11542730299668,
+      68.11542730299668,
+      69.22838137472284,
+      69.22838137472284,
+      69.22838137472284,
+      70.3388704318937,
+      70.3388704318937,
+      70.3388704318937,
+      71.44690265486727,
+      71.44690265486727,
+      71.44690265486727,
+      72.5524861878453,
+      72.5524861878453,
+      17.506282330867947
+    ],
+    "final_pool": 0.0,
+    "output_log": [
+      "RETURN 68.11542730299668",
+      "RETURN 68.11542730299668",
+      "RETURN 68.11542730299668",
+      "RETURN 69.22838137472284",
+      "RETURN 69.22838137472284",
+      "RETURN 69.22838137472284",
+      "RETURN 70.3388704318937",
+      "RETURN 70.3388704318937",
+      "RETURN 70.3388704318937",
+      "RETURN 71.44690265486727",
+      "RETURN 71.44690265486727",
+      "RETURN 71.44690265486727",
+      "RETURN 72.5524861878453",
+      "RETURN 72.5524861878453",
+      "RETURN 17.506282330867947"
+    ],
+    "rank_progress": 190.0,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 4662,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775335250.7704008,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

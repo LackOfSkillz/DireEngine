@@ -63,6 +63,7 @@ from commands.cmd_draw import CmdDraw
 from commands.cmd_endteach import CmdEndTeach
 from commands.cmd_engine import CmdEngine
 from commands.cmd_enterpassage import CmdEnterPassage
+from commands.cmd_experience import CmdExperience
 from commands.cmd_findpassage import CmdFindPassage
 from commands.cmd_fire import CmdFire
 from commands.cmd_favor import CmdFavor
@@ -144,6 +145,7 @@ from commands.cmd_sensesoul import CmdSenseSoul
 from commands.cmd_settrap import CmdSetTrap
 from commands.cmd_setcircle import CmdSetCircle
 from commands.cmd_setrace import CmdSetRace
+from commands.cmd_skilldebug import CmdSkillDebug
 from commands.cmd_selfreturn import CmdSelfReturn
 from commands.cmd_skin import CmdSkin
 from commands.cmd_skills import CmdSkills
@@ -339,6 +341,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSetTrap())
         self.add(CmdSetCircle())
         self.add(CmdSetRace())
+        self.add(CmdExperience())
+        self.add(CmdSkillDebug())
         self.add(CmdRetreat())
         self.add(CmdSacrifice())
         self.add(CmdSkin())

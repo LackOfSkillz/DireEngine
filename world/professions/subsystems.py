@@ -149,7 +149,7 @@ class WarriorSubsystem(ProfessionSubsystem):
         maximum = int(getattr(character.db, self._db_max_key(), self.default_max) or self.default_max)
         if current > maximum:
             if hasattr(character, "set_war_tempo"):
-                character.set_war_tempo(maximum)
+                character.set_war_tempo(maximum, sync=False)
             else:
                 setattr(character.db, self._db_key(), maximum)
             return True
@@ -162,7 +162,7 @@ class WarriorSubsystem(ProfessionSubsystem):
         if hasattr(character, "has_warrior_passive") and character.has_warrior_passive("tempo_decay_1"):
             decay = 3
         if hasattr(character, "set_war_tempo"):
-            character.set_war_tempo(max(0, current - decay))
+            character.set_war_tempo(max(0, current - decay), sync=False)
         else:
             setattr(character.db, self._db_key(), max(0, current - decay))
         return True

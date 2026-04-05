@@ -1,0 +1,85 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 8872,
+        "is_dead": false,
+        "key": "TEST_EXP_BRAWL_ATTACKER",
+        "life_state": "ALIVE",
+        "location": "TEST_EXP_BRAWL_ATTACKER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": true,
+        "roundtime": 1.69,
+        "target": "brawldummy",
+        "target_summary": {
+          "hp": 84,
+          "id": 8873,
+          "in_combat": true,
+          "key": "brawldummy",
+          "max_hp": 100,
+          "range": "melee"
+        }
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 8874,
+          "key": "brawlgem",
+          "location": "TEST_EXP_BRAWL_ATTACKER",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 8871,
+            "key": "TEST_EXP_BRAWL_ATTACKER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 8872,
+            "key": "TEST_EXP_BRAWL_ATTACKER",
+            "location": "TEST_EXP_BRAWL_ATTACKER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8873,
+            "key": "brawldummy",
+            "location": "TEST_EXP_BRAWL_ATTACKER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 8874,
+            "key": "brawlgem",
+            "location": "TEST_EXP_BRAWL_ATTACKER",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EXP_BRAWL_ATTACKER",
+          "brawldummy"
+        ],
+        "exits": [],
+        "id": 8871,
+        "key": "TEST_EXP_BRAWL_ATTACKER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775335426.1746585
+    },
+    "label": "final"
+  }
+]

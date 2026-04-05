@@ -1,0 +1,237 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 9428,
+        "is_dead": false,
+        "key": "TEST_STEALTH_AGG_strong_cluster_ACTOR",
+        "life_state": "ALIVE",
+        "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 9410,
+            "key": "TEST_STEALTH_AGG_single_strong_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9411,
+            "key": "TEST_STEALTH_AGG_single_strong_ACTOR",
+            "location": "TEST_STEALTH_AGG_single_strong_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9412,
+            "key": "TEST_STEALTH_AGG_single_strong_OBS_0",
+            "location": "TEST_STEALTH_AGG_single_strong_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9413,
+            "key": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9414,
+            "key": "TEST_STEALTH_AGG_many_weak_ACTOR",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9415,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_0",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9416,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_1",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9417,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_2",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9418,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_3",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9419,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_4",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9420,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_5",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9421,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_6",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9422,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_7",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9423,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_8",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9424,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_9",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9425,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_10",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9426,
+            "key": "TEST_STEALTH_AGG_many_weak_OBS_11",
+            "location": "TEST_STEALTH_AGG_many_weak_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9427,
+            "key": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 9428,
+            "key": "TEST_STEALTH_AGG_strong_cluster_ACTOR",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9429,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_0",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9430,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_1",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9431,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_2",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9432,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_3",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9433,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_4",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9434,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_5",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9435,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_6",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9436,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_7",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9437,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_8",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9438,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_9",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 9439,
+            "key": "TEST_STEALTH_AGG_strong_cluster_OBS_10",
+            "location": "TEST_STEALTH_AGG_strong_cluster_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_STEALTH_AGG_strong_cluster_ACTOR",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_0",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_1",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_2",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_3",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_4",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_5",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_6",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_7",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_8",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_9",
+          "TEST_STEALTH_AGG_strong_cluster_OBS_10"
+        ],
+        "exits": [],
+        "id": 9427,
+        "key": "TEST_STEALTH_AGG_strong_cluster_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775392083.86563
+    },
+    "label": "final"
+  }
+]
