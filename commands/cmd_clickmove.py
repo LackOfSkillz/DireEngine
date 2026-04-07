@@ -1,4 +1,5 @@
 from commands.command import Command
+from commands.navigation import traverse_named_exit
 
 
 class CmdClickMove(Command):
@@ -15,4 +16,6 @@ class CmdClickMove(Command):
             return
 
         self.caller.msg(f"> {direction}")
+        if traverse_named_exit(self.caller, direction):
+            return
         self.caller.execute_cmd(direction)

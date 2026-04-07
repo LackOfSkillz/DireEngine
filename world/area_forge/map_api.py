@@ -76,6 +76,35 @@ def _empty_map_payload():
     return {"rooms": [], "edges": [], "exits": [], "player_room_id": None, "zone": None}
 
 
+def _room_has_tag(room, tag_key, category=None):
+    if not room or not hasattr(room, "tags") or not tag_key:
+        return False
+    try:
+        return bool(room.tags.has(tag_key, category=category))
+    except Exception:
+        return False
+
+
+def _room_has_any_tag(room, tag_keys):
+    return any(_room_has_tag(room, tag_key) for tag_key in list(tag_keys or []))
+
+
+def _room_map_flags(room):
+    poi_tags = ("poi_bank", "poi_town_green", "poi_guild_empath", "poi_guild_ranger", "poi_market")
+    has_poi = bool(
+        _room_has_any_tag(room, poi_tags)
+        or getattr(getattr(room, "db", None), "poi_anchor", None)
+        or getattr(getattr(room, "db", None), "poi_exit_name", None)
+    )
+    has_guild_entrance = _room_has_any_tag(room, ("guild_access_empath", "guild_access_ranger"))
+    return {
+        "has_poi": has_poi,
+        "has_guild_entrance": has_guild_entrance,
+        "type": "guild_entrance" if has_guild_entrance else ("poi" if has_poi else "room"),
+        "map_color": "#f0d45f" if has_guild_entrance else ("#69b8ff" if has_poi else "#5f8f57"),
+    }
+
+
 def _get_cached_zone_template(area_tag):
     now = time.time()
     cached = _ZONE_MAP_TEMPLATE_CACHE.get(area_tag)
@@ -109,6 +138,10 @@ def _get_cached_zone_template(area_tag):
                 "x": room["x"],
                 "y": room["y"],
                 "name": room["name"],
+                "has_poi": bool(room.get("has_poi")),
+                "has_guild_entrance": bool(room.get("has_guild_entrance")),
+                "type": room.get("type") or "room",
+                "map_color": room.get("map_color") or "#5f8f57",
             }
             for room in serialized_rooms
         ],
@@ -263,6 +296,7 @@ def _serialize_room(room, *, x_offset=0, y_offset=0, current_room_id=None, fallb
     room_id = getattr(room, "id", None)
     coordinates = _room_relative_coordinates(room, x_offset=x_offset, y_offset=y_offset)
     room_x, room_y = coordinates if coordinates is not None else (fallback_position or (0, 0))
+    flags = _room_map_flags(room)
     return {
         "id": room_id,
         "x": room_x,
@@ -270,6 +304,10 @@ def _serialize_room(room, *, x_offset=0, y_offset=0, current_room_id=None, fallb
         "name": room.key,
         "current": room_id == current_room_id,
         "is_player": room_id == current_room_id,
+        "has_poi": bool(flags["has_poi"]),
+        "has_guild_entrance": bool(flags["has_guild_entrance"]),
+        "type": flags["type"],
+        "map_color": flags["map_color"],
     }
 
 
@@ -388,6 +426,10 @@ def get_zone_map(character):
             "name": room["name"],
             "current": room["id"] == origin.id,
             "is_player": room["id"] == origin.id,
+            "has_poi": bool(room.get("has_poi")),
+            "has_guild_entrance": bool(room.get("has_guild_entrance")),
+            "type": room.get("type") or "room",
+            "map_color": room.get("map_color") or "#5f8f57",
         }
         for room in template["rooms"]
     ]

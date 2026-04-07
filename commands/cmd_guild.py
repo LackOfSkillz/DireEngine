@@ -1,5 +1,6 @@
 ﻿from evennia import Command
 
+from commands.navigation import traverse_named_exit
 from typeclasses.characters import VALID_GUILDS
 
 
@@ -20,6 +21,8 @@ class CmdGuild(Command):
         args = (self.args or "").strip()
 
         if not args:
+            if traverse_named_exit(caller, "guild"):
+                return
             current = caller.get_guild() if hasattr(caller, "get_guild") else None
             if not current:
                 caller.msg("You do not currently have a guild affiliation.")

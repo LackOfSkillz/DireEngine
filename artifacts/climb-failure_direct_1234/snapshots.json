@@ -1,0 +1,61 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14075,
+        "is_dead": false,
+        "key": "TEST_CLIMB_FAILURE",
+        "life_state": "ALIVE",
+        "location": "DireTest Rope Walk",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.48,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14074,
+            "key": "TEST_CLIMB_FAILURE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14075,
+            "key": "TEST_CLIMB_FAILURE",
+            "location": "DireTest Rope Walk",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "up",
+          "TEST_CLIMB_FAILURE"
+        ],
+        "exits": [
+          "up"
+        ],
+        "id": 14076,
+        "key": "DireTest Rope Walk"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775501686.7843845
+    },
+    "label": "final"
+  }
+]

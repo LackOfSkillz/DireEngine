@@ -161,6 +161,18 @@ def validate_appearance_complete(state):
     return True, None
 
 
+def validate_identity(identity):
+    if not isinstance(identity, Mapping):
+        return False, "Identity must be a mapping."
+    if not str(identity.get("race") or "").strip():
+        return False, "Identity requires a race."
+    if not str(identity.get("gender") or "").strip():
+        return False, "Identity requires a gender."
+    if not isinstance(identity.get("appearance"), Mapping):
+        return False, "Identity requires an appearance mapping."
+    return True, None
+
+
 def build_description_from_appearance(state):
     ok, error = validate_appearance_complete(state)
     if not ok:

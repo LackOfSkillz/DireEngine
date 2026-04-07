@@ -16,6 +16,11 @@ class CmdInventory(Command):
     help_category = "Equipment"
 
     def func(self):
+        try:
+            from systems import onboarding
+        except Exception:
+            onboarding = None
+
         coin_text = self.caller.format_coins(int(getattr(self.caller.db, "coins", 0) or 0)) if hasattr(self.caller, "format_coins") else f"{int(getattr(self.caller.db, 'coins', 0) or 0)} coins"
         weight_text = None
         encumbrance_text = None
@@ -38,6 +43,11 @@ class CmdInventory(Command):
             if race_text:
                 lines.append(race_text)
             self.caller.msg("\n".join(lines))
+            if onboarding:
+                try:
+                    onboarding.note_inventory_action(self.caller)
+                except Exception:
+                    pass
             return
 
         lines = ["You are carrying:", f"Coins: {coin_text}"]
@@ -50,3 +60,8 @@ class CmdInventory(Command):
         for item in carried:
             lines.append(f" {item.key}")
         self.caller.msg("\n".join(lines))
+        if onboarding:
+            try:
+                onboarding.note_inventory_action(self.caller)
+            except Exception:
+                pass

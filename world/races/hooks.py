@@ -1,6 +1,8 @@
 import logging
 from collections.abc import Mapping
 
+from world.languages import get_languages_for_race
+
 from .definitions import DEFAULT_RACE
 from .utils import get_race_base_carry_weight, get_race_profile, resolve_race_name
 
@@ -34,6 +36,8 @@ def apply_race(character, race_name, sync=True, emit_messages=False):
     character.db.size = state["size"]
     character.db.carry_modifier = float(state["carry_modifier"])
     character.db.max_carry_weight = float(state["max_carry_weight"])
+    character.db.languages = {language_name: 1.0 for language_name in get_languages_for_race(state["race"])}
+    character.db.active_language = "common"
 
     clamp_method = getattr(character, "clamp_stats_to_race", None)
     if callable(clamp_method):

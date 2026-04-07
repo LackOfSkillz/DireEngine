@@ -5,8 +5,9 @@ from django.conf import settings
 from evennia.utils.create import create_object
 from evennia.objects.models import ObjectDB
 
+from systems.appearance.normalizer import normalize_identity_data
 from systems.chargen.state import CharacterBlueprint
-from systems.chargen.validators import is_name_available, validate_name
+from systems.chargen.validators import is_name_available, validate_identity, validate_name
 from world.professions.professions import DEFAULT_PROFESSION, PROFESSION_PROFILES, resolve_profession_name
 from world.races import DEFAULT_RACE, RACE_DEFINITIONS, RACE_STATS, apply_race, resolve_race_name
 
@@ -18,6 +19,11 @@ BLUEPRINT_FIELDS = (
     "profession",
     "stats",
     "description",
+)
+
+OPTIONAL_BLUEPRINT_FIELDS = (
+    "appearance",
+    "identity",
 )
 
 PROFESSION_STARTER_SKILLS = {
@@ -58,9 +64,12 @@ RACE_STARTER_KIT = {
     "dwarf": {"container": "stout field pack", "clothing": "wool tunic", "accessory": "copper torque"},
     "halfling": {"container": "belt pouch", "clothing": "short vest", "accessory": "bright scarf pin"},
     "gnome": {"container": "tool satchel", "clothing": "neat jacket", "accessory": "brass charm"},
-    "gor_togh": {"container": "broad travel pack", "clothing": "heavy vest", "accessory": "carved wristband"},
-    "s_kra_mur": {"container": "scaled satchel", "clothing": "desert wrap", "accessory": "shell bracelet"},
-    "kaldar": {"container": "fur-lined pack", "clothing": "sturdy tunic", "accessory": "iron armlet"},
+    "volgrin": {"container": "broad travel pack", "clothing": "heavy vest", "accessory": "carved wristband"},
+    "saurathi": {"container": "scaled satchel", "clothing": "desert wrap", "accessory": "shell bracelet"},
+    "valran": {"container": "fur-lined pack", "clothing": "sturdy tunic", "accessory": "iron armlet"},
+    "aethari": {"container": "ink-stained satchel", "clothing": "layered robe", "accessory": "etched focus ring"},
+    "felari": {"container": "supple shoulder satchel", "clothing": "tailored vest", "accessory": "polished claw charm"},
+    "lunari": {"container": "weathered travel satchel", "clothing": "moon-gray tunic", "accessory": "crescent clasp"},
 }
 
 
@@ -121,6 +130,19 @@ def _normalize_stats(stats):
     return normalized
 
 
+def _normalize_identity_payload(race, gender, *, appearance=None, identity=None):
+    normalized_identity = normalize_identity_data(
+        identity,
+        fallback_race=race,
+        fallback_gender=gender,
+        fallback_appearance=appearance,
+    )
+    ok, error = validate_identity(normalized_identity)
+    if not ok:
+        raise CharacterCreationError(error)
+    return normalized_identity
+
+
 def normalize_creation_blueprint(blueprint, validate_name_availability=True, allow_reserved_name=False):
     if isinstance(blueprint, CharacterBlueprint):
         raw_blueprint = blueprint.to_dict()
@@ -131,15 +153,16 @@ def normalize_creation_blueprint(blueprint, validate_name_availability=True, all
 
     provided_keys = set(raw_blueprint.keys())
     expected_keys = set(BLUEPRINT_FIELDS)
-    if provided_keys != expected_keys:
-        missing = sorted(expected_keys - provided_keys)
-        extra = sorted(provided_keys - expected_keys)
+    optional_keys = set(OPTIONAL_BLUEPRINT_FIELDS)
+    missing = sorted(expected_keys - provided_keys)
+    extra = sorted(provided_keys - expected_keys - optional_keys)
+    if missing or extra:
         details = []
         if missing:
             details.append(f"missing: {', '.join(missing)}")
         if extra:
             details.append(f"unexpected: {', '.join(extra)}")
-        raise CharacterCreationError("Blueprint must contain exactly the locked v1 fields (" + "; ".join(details) + ").")
+        raise CharacterCreationError("Blueprint must contain the required creation fields (" + "; ".join(details) + ").")
 
     name = _normalize_text(raw_blueprint.get("name"))
     ok, error = validate_name(
@@ -157,6 +180,13 @@ def normalize_creation_blueprint(blueprint, validate_name_availability=True, all
     profession = _normalize_profession_choice(raw_blueprint.get("profession"))
     stats = _normalize_stats(raw_blueprint.get("stats"))
     description = str(raw_blueprint.get("description") or "").strip() or "An unremarkable person."
+    appearance = dict(raw_blueprint.get("appearance") or {}) if isinstance(raw_blueprint.get("appearance"), Mapping) else {}
+    identity = _normalize_identity_payload(
+        race,
+        gender.lower(),
+        appearance=appearance,
+        identity=raw_blueprint.get("identity"),
+    )
 
     return {
         "name": name,
@@ -165,6 +195,8 @@ def normalize_creation_blueprint(blueprint, validate_name_availability=True, all
         "profession": profession,
         "stats": stats,
         "description": description,
+        "appearance": appearance,
+        "identity": identity,
     }
 
 
@@ -173,7 +205,7 @@ def resolve_creation_start_room(start_room=None):
         return start_room
 
     tutorial_room = ObjectDB.objects.filter(
-        db_key="Wake Room",
+        db_key="Intake Chamber",
         db_typeclass_path="typeclasses.rooms.Room",
     ).first()
     if tutorial_room:
@@ -187,7 +219,7 @@ def resolve_creation_start_room(start_room=None):
 
 
 def is_onboarding_start_room(room):
-    return bool(room and getattr(getattr(room, "db", None), "is_tutorial", False))
+    return bool(room and (getattr(getattr(room, "db", None), "is_onboarding", False) or getattr(getattr(room, "db", None), "is_tutorial", False)))
 
 
 def apply_character_stats(character, stats):
@@ -421,6 +453,7 @@ def finalize_character_creation(
     stats=None,
     description=None,
     start_room=None,
+    activate_onboarding=True,
     emit_messages=False,
 ):
     if not character:
@@ -436,10 +469,12 @@ def finalize_character_creation(
     selected_profession = normalized_blueprint["profession"] if normalized_blueprint else profession
     selected_stats = normalized_blueprint["stats"] if normalized_blueprint else stats
     selected_description = normalized_blueprint["description"] if normalized_blueprint else description
+    selected_identity = normalized_blueprint["identity"] if normalized_blueprint else None
 
     selected_race = _normalize_race_choice(selected_race)
     selected_gender = str(selected_gender or getattr(character.db, "gender", "neutral")).strip().lower()
     selected_profession = _normalize_profession_choice(selected_profession)
+    selected_identity = _normalize_identity_payload(selected_race, selected_gender, identity=selected_identity)
 
     if hasattr(character, "ensure_core_defaults"):
         character.ensure_core_defaults()
@@ -447,6 +482,11 @@ def finalize_character_creation(
     if selected_description is not None:
         character.db.desc = str(selected_description or "").strip() or "An unremarkable person."
     character.db.gender = selected_gender or "neutral"
+    character.db.identity = normalize_identity_data(
+        selected_identity,
+        fallback_race=selected_race,
+        fallback_gender=selected_gender,
+    )
 
     if hasattr(character, "set_race"):
         character.set_race(selected_race, sync=False, emit_messages=emit_messages)
@@ -463,6 +503,9 @@ def finalize_character_creation(
     if selected_stats is not None:
         apply_character_stats(character, selected_stats)
 
+    if hasattr(character, "get_rendered_desc"):
+        character.db.desc = character.get_rendered_desc()
+
     room = resolve_creation_start_room(start_room=start_room)
     if not is_onboarding_start_room(room):
         apply_starting_gear(character)
@@ -472,10 +515,8 @@ def finalize_character_creation(
         character.home = room
         character.location = room
         if is_onboarding_start_room(room):
-            state = dict(getattr(character.db, "onboarding_state", None) or {})
-            state["active"] = True
-            state["complete"] = False
-            character.db.onboarding_state = state
+            character.db.onboarding_step = "start" if activate_onboarding else None
+            character.db.onboarding_complete = False
 
     if hasattr(character, "update_encumbrance_state"):
         character.update_encumbrance_state()
@@ -512,6 +553,10 @@ def create_character_from_blueprint(account, blueprint, **kwargs):
         create_kwargs["permissions"] = kwargs["permissions"]
     if kwargs.get("ip") is not None:
         create_kwargs["ip"] = kwargs["ip"]
+    if kwargs.get("skip_post_create_setup") is not None:
+        create_kwargs["skip_post_create_setup"] = kwargs["skip_post_create_setup"]
+    if kwargs.get("activate_onboarding") is not None:
+        create_kwargs["activate_onboarding"] = kwargs["activate_onboarding"]
 
     character, errors = account.create_character(**create_kwargs)
     return character, errors

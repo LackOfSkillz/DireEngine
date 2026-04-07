@@ -9,7 +9,7 @@ class CmdSetRace(Command):
 
     Examples:
         setrace kier = elf
-        setrace kier = s'kra mur
+        setrace kier = saurathi
     """
 
     key = "setrace"

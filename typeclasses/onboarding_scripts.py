@@ -68,6 +68,42 @@ class OnboardingRoleplayScript(Script):
         self._track_repeat_timing("script:OnboardingRoleplayScript", _run)
 
 
+class OnboardingGuidePromptScript(Script):
+    def at_script_creation(self):
+        self.key = "onboarding_guide_prompt"
+        self.interval = 6
+        self.start_delay = True
+        self.repeats = 0
+        self.persistent = True
+
+    def is_valid(self):
+        obj = self.obj
+        return bool(obj and getattr(getattr(obj, "db", None), "is_onboarding_guide", False))
+
+    def at_repeat(self):
+        def _run():
+            obj = self.obj
+            room = getattr(obj, "location", None)
+            if not obj or not room:
+                return
+            from systems.chargen import mirror as chargen_mirror
+            from systems import onboarding
+
+            for occupant in list(getattr(room, "contents", []) or []):
+                if not getattr(occupant, "has_account", False):
+                    continue
+                if chargen_mirror.is_chargen_active(occupant):
+                    if chargen_mirror.maybe_nudge_if_idle(occupant, idle_threshold=5.0, minimum_interval=6.0):
+                        break
+                    continue
+                if not onboarding.is_onboarding_character(occupant):
+                    continue
+                if onboarding.remind_objective_if_idle(occupant, idle_threshold=5.0, minimum_interval=5.0):
+                    break
+
+        self._track_repeat_timing("script:OnboardingGuidePromptScript", _run)
+
+
 class OnboardingInvasionScript(Script):
     def at_script_creation(self):
         self.key = "onboarding_invasion"

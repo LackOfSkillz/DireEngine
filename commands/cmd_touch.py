@@ -1,4 +1,5 @@
 from commands.command import Command
+from systems.chargen.mirror import cycle_current_option, is_chargen_active
 
 
 class CmdTouch(Command):
@@ -15,6 +16,15 @@ class CmdTouch(Command):
 
     def func(self):
         caller = self.caller
+        if is_chargen_active(caller) and self.args and self.args.strip().lower() == "mirror":
+            result = cycle_current_option(caller)
+            if result.get("error"):
+                caller.msg(result["error"])
+            if result.get("message"):
+                caller.msg(result["message"])
+            if result.get("prompt"):
+                caller.msg(result["prompt"])
+            return
         if not caller.is_empath():
             caller.msg("You lack the sensitivity to establish that sort of link.")
             return

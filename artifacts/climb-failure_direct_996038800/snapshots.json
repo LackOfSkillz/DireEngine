@@ -1,0 +1,61 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 13835,
+        "is_dead": false,
+        "key": "TEST_CLIMB_FAILURE",
+        "life_state": "ALIVE",
+        "location": "DireTest Ground",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.25,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 13834,
+            "key": "TEST_CLIMB_FAILURE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 13835,
+            "key": "TEST_CLIMB_FAILURE",
+            "location": "DireTest Ground",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "up",
+          "TEST_CLIMB_FAILURE"
+        ],
+        "exits": [
+          "up"
+        ],
+        "id": 13838,
+        "key": "DireTest Ground"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775499439.1582386
+    },
+    "label": "final"
+  }
+]

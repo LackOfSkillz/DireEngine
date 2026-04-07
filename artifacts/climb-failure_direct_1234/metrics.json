@@ -1,0 +1,243 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "climb up",
+      "first_response_ms": 426.93070002133027,
+      "kind": "command",
+      "ms": 485.85619998630136,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    485.85619998630136
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 485.7829000102356,
+    "timings_ms": [
+      485.85619998630136
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775501693.9459417,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 426.93070002133027,
+  "interest": {
+    "active_object_count": 6,
+    "active_object_peak": 6,
+    "active_source_types": [
+      "proximity",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "proximity",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 3,
+      "room": 5,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 7,
+    "source_count_peak": 7,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 3,
+      "room": 3,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 3,
+      "room": 3,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 1,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 7,
+      "deactivate": 1
+    },
+    "transition_event_counts": {
+      "activate": 7,
+      "deactivate": 1
+    },
+    "transition_total": 8
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 485.85619998630136,
+    "jitter": 0.0,
+    "max_ms": 485.85619998630136,
+    "min_ms": 485.85619998630136,
+    "p95_ms": 485.85619998630136,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "climb up",
+      "ms": 485.85619998630136,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 485.7829000102356,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "The lower climb turns under you and you fall back to the start.",
+    "You feel your balance improve."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "climb up"
+    ],
+    "location": "DireTest Rope Walk",
+    "output_log": [
+      "The lower climb turns under you and you fall back to the start.",
+      "You feel your balance improve."
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 12698,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775501686.7793713,
+        "delay_s": 2.5,
+        "due_at": 1775501689.2793713,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_CLIMB_FAILURE",
+        "job_id": "d2366b8065a24bb4bd6ef0f7242d6a89",
+        "key": "combat:roundtime:14075",
+        "owner": "#14075",
+        "owner_label": "TEST_CLIMB_FAILURE",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "climb up",
+      "ms": 485.85619998630136
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775501679.5309656,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 485.7829000102356,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 485.7829000102356,
+          "metadata": {
+            "character": "TEST_CLIMB_FAILURE",
+            "command": "climb"
+          },
+          "timestamp": 1775501686.78037
+        }
+      ],
+      "max_ms": 485.7829000102356,
+      "total_ms": 485.7829000102356
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

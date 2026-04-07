@@ -1,0 +1,414 @@
+{
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775499438.9401627,
+        "delay_s": 2.5,
+        "due_at": 1775499441.441167,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": "#13835",
+        "interest_object_label": "TEST_CLIMB_FAILURE",
+        "job_id": "cf6809bb01f344c8ad5c58902083aeb3",
+        "key": "combat:roundtime:13835",
+        "owner": "#13835",
+        "owner_label": "TEST_CLIMB_FAILURE",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "breakdown": {
+      "by_key": {
+        "combat:roundtime:13835": 1
+      },
+      "by_system": {
+        "combat.roundtime": 1
+      },
+      "by_timing_mode": {
+        "scheduled_expiry": 1
+      }
+    },
+    "by_owner": {
+      "#13835": 1
+    },
+    "by_system": {
+      "combat.roundtime": 1
+    },
+    "delayed_job_count": 0,
+    "delayed_jobs": [],
+    "quota_policy": {
+      "global": {
+        "behavior": "reject",
+        "limit": 1000
+      },
+      "owner": {
+        "behavior": "reject",
+        "limit": 5
+      },
+      "system": {
+        "behavior": "reject",
+        "limit": 100
+      }
+    },
+    "total_jobs": 1
+  },
+  "scripts": {
+    "active_script_count": 9,
+    "active_scripts": [
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6826,
+        "object_key": "corpse of evenniaadmin_owner_550232",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "controller",
+        "classification": "controller",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_invasion",
+        "object_id": 7204,
+        "object_key": "Breach Corridor",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingInvasionScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 5,
+        "is_active": true,
+        "key": "onboarding_roleplay",
+        "object_id": 9595,
+        "object_key": "Marshal Vey",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingRoleplayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 5,
+        "is_active": true,
+        "key": "onboarding_roleplay",
+        "object_id": 9596,
+        "object_key": "Pip the Gremlin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingRoleplayScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9684,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9685,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9686,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "first_area_vendor_prompt",
+        "object_id": 9707,
+        "object_key": "Street Vendor",
+        "persistent": true,
+        "typeclass_path": "typeclasses.first_area_scripts.FirstAreaVendorPromptScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 7200,
+        "is_active": true,
+        "key": "grave_maintenance",
+        "object_id": 11585,
+        "object_key": "grave of Jekar",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.GraveMaintenanceScript"
+      }
+    ],
+    "unclassified_scripts": [
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9684,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9685,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9686,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "first_area_vendor_prompt",
+        "object_id": 9707,
+        "object_key": "Street Vendor",
+        "persistent": true,
+        "typeclass_path": "typeclasses.first_area_scripts.FirstAreaVendorPromptScript"
+      }
+    ]
+  },
+  "tick_audit_warnings": [
+    {
+      "kind": "tick_function",
+      "line": 2755,
+      "message": "suspicious tick-like function: run_ticker_execution_scenario",
+      "path": "C:\\Users\\gary\\dragonsire\\diretest.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 7462,
+      "message": "suspicious tick-like function: run_exp_single_tick_scenario",
+      "path": "C:\\Users\\gary\\dragonsire\\diretest.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 7546,
+      "message": "suspicious tick-like function: run_exp_multi_skill_tick_scenario",
+      "path": "C:\\Users\\gary\\dragonsire\\diretest.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 89,
+      "message": "suspicious tick-like function: _get_cached_tick_npcs",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 105,
+      "message": "suspicious tick-like function: _npc_needs_status_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 151,
+      "message": "suspicious tick-like function: _iter_tick_characters",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 1022,
+      "message": "suspicious tick-like function: _log_slow_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 1058,
+      "message": "suspicious tick-like function: process_status_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 1231,
+      "message": "suspicious tick-like function: process_learning_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "time_loop",
+      "line": 581,
+      "message": "time-based loop pattern detected",
+      "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
+    },
+    {
+      "kind": "time_loop",
+      "line": 630,
+      "message": "time-based loop pattern detected",
+      "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
+    },
+    {
+      "kind": "while_true",
+      "line": 1035,
+      "message": "while True loop found in gameplay code",
+      "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 159,
+      "message": "suspicious tick-like function: _build_ticker_performance",
+      "path": "C:\\Users\\gary\\dragonsire\\tools\\diretest\\core\\metrics.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 2197,
+      "message": "suspicious tick-like function: process_cleric_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 2341,
+      "message": "suspicious tick-like function: process_soul_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 2471,
+      "message": "suspicious tick-like function: process_resurrection_recovery_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 4434,
+      "message": "suspicious tick-like function: process_empath_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 5430,
+      "message": "suspicious tick-like function: process_justice_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 5458,
+      "message": "suspicious tick-like function: process_thief_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 5516,
+      "message": "suspicious tick-like function: process_warrior_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 5609,
+      "message": "suspicious tick-like function: process_ranger_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 8867,
+      "message": "suspicious tick-like function: process_combat_range_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 84,
+      "message": "suspicious tick-like function: ai_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\npcs.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 213,
+      "message": "suspicious tick-like function: npc_combat_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\npcs.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 111,
+      "message": "suspicious tick-like function: at_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\trap_device.py"
+    }
+  ],
+  "tickers": {
+    "performance": {},
+    "registered_ticker_count": 0,
+    "registered_tickers": []
+  },
+  "unclassified_registrations": [
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "onboarding_guide_prompt",
+      "kind": "script",
+      "object_id": 9684,
+      "object_key": "Intake Guide",
+      "persistent": true,
+      "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+    },
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "onboarding_guide_prompt",
+      "kind": "script",
+      "object_id": 9685,
+      "object_key": "Intake Guide",
+      "persistent": true,
+      "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+    },
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "onboarding_guide_prompt",
+      "kind": "script",
+      "object_id": 9686,
+      "object_key": "Intake Guide",
+      "persistent": true,
+      "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+    },
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "first_area_vendor_prompt",
+      "kind": "script",
+      "object_id": 9707,
+      "object_key": "Street Vendor",
+      "persistent": true,
+      "typeclass_path": "typeclasses.first_area_scripts.FirstAreaVendorPromptScript"
+    }
+  ]
+}

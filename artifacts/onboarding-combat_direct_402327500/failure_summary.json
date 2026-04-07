@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "    evennia.contrib.utils.typeclasses.npcs.onboarding_guide.OnboardingGuide",
+  "mode": "direct",
+  "scenario": "onboarding-combat",
+  "seed": 402327500
+}

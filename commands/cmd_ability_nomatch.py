@@ -3,6 +3,26 @@ from evennia import Command, syscmdkeys
 from typeclasses.abilities import get_ability
 
 
+def _soft_nomatch_message(caller):
+    try:
+        from systems import onboarding
+
+        if onboarding.is_in_onboarding(caller):
+            return "That doesn't mean anything here."
+    except Exception:
+        pass
+
+    try:
+        from systems import aftermath
+
+        if aftermath.is_new_player(caller):
+            return "That doesn't mean anything here."
+    except Exception:
+        pass
+
+    return "You hesitate, but nothing comes of it."
+
+
 class CmdAbilityNoMatch(Command):
     """
     Fallback handler for unmatched ability input.
@@ -23,10 +43,10 @@ class CmdAbilityNoMatch(Command):
 
         ability = get_ability(ability_key, self.caller)
         if not ability:
-            self.caller.msg(f"Command '{ability_key}' is not available.")
+            self.caller.msg(_soft_nomatch_message(self.caller))
             return
         if hasattr(self.caller, "is_hidden_warrior_ability") and self.caller.is_hidden_warrior_ability(ability):
-            self.caller.msg(f"Command '{ability_key}' is not available.")
+            self.caller.msg(_soft_nomatch_message(self.caller))
             return
 
         self.caller.execute_ability_input(ability_key, target_name=target_name)

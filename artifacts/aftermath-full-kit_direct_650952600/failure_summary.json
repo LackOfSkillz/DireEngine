@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: corpse search did not resolve in aftermath_full_kit_2_320322",
+  "mode": "direct",
+  "scenario": "aftermath-full-kit",
+  "seed": 650952600
+}

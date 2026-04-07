@@ -231,7 +231,7 @@ max_carry_weight
     "size": "small",
     "carry_modifier": 0.9
 }
-🐺 GOR'TOGH
+🐺 VOLGRIN
 {
     "stat_modifiers": {
         "strength": +2,
@@ -259,7 +259,7 @@ max_carry_weight
     "size": "large",
     "carry_modifier": 1.3
 }
-🐉 S’KRA MUR
+🐉 SAURATHI
 {
     "stat_modifiers": {
         "strength": +1,
@@ -287,7 +287,7 @@ max_carry_weight
     "size": "medium",
     "carry_modifier": 1.1
 }
-🐾 KALDAR
+🐾 VALRAN
 {
     "stat_modifiers": {
         "strength": +2,
@@ -314,6 +314,90 @@ max_carry_weight
     },
     "size": "medium",
     "carry_modifier": 1.15
+}
+✨ AETHARI
+{
+    "stat_modifiers": {
+        "strength": -1,
+        "agility": 0,
+        "reflex": 0,
+        "intelligence": +2,
+        "wisdom": +1,
+        "stamina": -1
+    },
+    "stat_caps": {
+        "strength": 95,
+        "agility": 100,
+        "reflex": 100,
+        "intelligence": 110,
+        "wisdom": 105,
+        "stamina": 95
+    },
+    "learning_modifiers": {
+        "combat": 0.9,
+        "survival": 0.95,
+        "magic": 1.15,
+        "stealth": 0.95,
+        "lore": 1.05
+    },
+    "size": "medium",
+    "carry_modifier": 0.9
+}
+🐈 FELARI
+{
+    "stat_modifiers": {
+        "strength": 0,
+        "agility": +2,
+        "reflex": +1,
+        "intelligence": -1,
+        "wisdom": 0,
+        "stamina": -1
+    },
+    "stat_caps": {
+        "strength": 100,
+        "agility": 110,
+        "reflex": 108,
+        "intelligence": 95,
+        "wisdom": 100,
+        "stamina": 95
+    },
+    "learning_modifiers": {
+        "combat": 1.0,
+        "survival": 1.05,
+        "magic": 0.95,
+        "stealth": 1.1,
+        "lore": 0.9
+    },
+    "size": "medium",
+    "carry_modifier": 0.95
+}
+🌙 LUNARI
+{
+    "stat_modifiers": {
+        "strength": +1,
+        "agility": 0,
+        "reflex": +1,
+        "intelligence": -1,
+        "wisdom": +1,
+        "stamina": 0
+    },
+    "stat_caps": {
+        "strength": 105,
+        "agility": 100,
+        "reflex": 105,
+        "intelligence": 95,
+        "wisdom": 105,
+        "stamina": 100
+    },
+    "learning_modifiers": {
+        "combat": 1.05,
+        "survival": 1.1,
+        "magic": 0.9,
+        "stealth": 1.05,
+        "lore": 0.9
+    },
+    "size": "medium",
+    "carry_modifier": 1.05
 }
 ⚠️ FINAL SYSTEM RULES
 ❌ No race:
@@ -1480,9 +1564,12 @@ TEST_RACES = [
     "dwarf",
     "halfling",
     "gnome",
-    "gor_togh",
-    "s_kra_mur",
-    "kaldar"
+    "volgrin",
+    "saurathi",
+    "valran",
+    "aethari",
+    "felari",
+    "lunari"
 ]
 
 Used in:

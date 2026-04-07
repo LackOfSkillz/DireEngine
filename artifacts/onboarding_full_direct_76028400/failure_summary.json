@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AttributeError: module 'systems.onboarding' has no attribute '_default_state'",
+  "mode": "direct",
+  "scenario": "onboarding_full",
+  "seed": 76028400
+}

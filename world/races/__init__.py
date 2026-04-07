@@ -7,6 +7,7 @@ from .definitions import (
     RACE_STATS,
     SIZE_CATEGORIES,
 )
+from .descriptors import AGE_BRACKETS, DEFAULT_AGE, RACE_AGE_DESCRIPTORS, get_race_age_descriptor, resolve_age_bracket
 from .hooks import apply_race, build_race_state
 from .utils import (
     TEST_RACES,
@@ -27,9 +28,12 @@ from .utils import (
 )
 
 __all__ = [
+    "AGE_BRACKETS",
     "BASE_CARRY_WEIGHT",
     "BASE_STAT_CAP",
+    "DEFAULT_AGE",
     "DEFAULT_RACE",
+    "RACE_AGE_DESCRIPTORS",
     "RACE_DEFINITIONS",
     "RACE_LEARNING_CATEGORIES",
     "RACE_STATS",
@@ -39,6 +43,7 @@ __all__ = [
     "apply_race_modifiers_to_stats",
     "build_race_state",
     "get_race_base_carry_weight",
+    "get_race_age_descriptor",
     "get_race_carry_modifier",
     "get_race_debug_payload",
     "get_race_description",
@@ -49,6 +54,7 @@ __all__ = [
     "get_race_stat_cap",
     "get_race_stat_modifier",
     "normalize_learning_category",
+    "resolve_age_bracket",
     "resolve_race_name",
     "validate_race_application",
 ]

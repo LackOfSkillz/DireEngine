@@ -17,6 +17,13 @@ class CmdSearch(Command):
     def func(self):
         caller = self.caller
         args = (self.args or "").strip()
+        try:
+            from systems import aftermath
+
+            if args and aftermath.handle_search(caller, args):
+                return
+        except Exception:
+            pass
         if args:
             target = caller.search(args, location=caller.location)
             if not target:

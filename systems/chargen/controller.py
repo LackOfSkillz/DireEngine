@@ -111,6 +111,7 @@ class ChargenController:
             if not ok:
                 self.state.last_validation_error = error
                 return {"ok": False, "error": error, "step": self.state.current_step, "prompt": render_step_prompt(self.state)}
+            self.state.blueprint.appearance = dict(self.state.appearance or {})
             self.state.blueprint.description = build_description_from_appearance(self.state)
             self.advance()
             return {"ok": True, "step": self.state.current_step, "prompt": render_step_prompt(self.state), "blueprint": self.state.blueprint.to_dict()}
@@ -194,6 +195,7 @@ class ChargenController:
             self.state.last_validation_error = error
             return {"ok": False, "error": error, "step": self.state.current_step, "prompt": render_step_prompt(self.state)}
         self.state.appearance[str(field).strip().lower()] = str(args or "").strip().lower()
+        self.state.blueprint.appearance = dict(self.state.appearance or {})
         if all(self.state.appearance.get(part) for part in APPEARANCE_FIELDS):
             self.state.blueprint.description = build_description_from_appearance(self.state)
         self.state.last_validation_error = None

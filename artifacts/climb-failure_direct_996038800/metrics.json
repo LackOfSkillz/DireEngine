@@ -1,0 +1,247 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "climb up",
+      "first_response_ms": 155.96210001967847,
+      "kind": "command",
+      "ms": 404.9511000048369,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    404.9511000048369
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 404.91759998258203,
+    "timings_ms": [
+      404.9511000048369
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775499445.0780342,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 155.96210001967847,
+  "interest": {
+    "active_object_count": 5,
+    "active_object_peak": 5,
+    "active_source_types": [
+      "proximity",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "proximity",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 4,
+      "room": 8,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 6,
+    "source_count_peak": 6,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 2,
+      "room": 3,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 2,
+      "room": 3,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 2,
+      "room": 3,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 10,
+      "deactivate": 5
+    },
+    "transition_event_counts": {
+      "activate": 10,
+      "deactivate": 5
+    },
+    "transition_total": 15
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 404.9511000048369,
+    "jitter": 0.0,
+    "max_ms": 404.9511000048369,
+    "min_ms": 404.9511000048369,
+    "p95_ms": 404.9511000048369,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "climb up",
+      "ms": 404.9511000048369,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 404.91759998258203,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Your footing gives way and you fall back down.",
+    "You begin to read the holds more cleanly.",
+    "|cDireTest Ground(#13838)|n\nThe floor below the practice climb.\n|wExits:|n |lc__clickmove__ up|lt|yup|n|le",
+    "OPTIONS {'type': 'look'}"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "climb up"
+    ],
+    "location": "DireTest Ground",
+    "output_log": [
+      "Your footing gives way and you fall back down.",
+      "You begin to read the holds more cleanly.",
+      "|cDireTest Ground(#13838)|n\nThe floor below the practice climb.\n|wExits:|n |lc__clickmove__ up|lt|yup|n|le",
+      "OPTIONS {'type': 'look'}"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 9645,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775499438.9401627,
+        "delay_s": 2.5,
+        "due_at": 1775499441.441167,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": "#13835",
+        "interest_object_label": "TEST_CLIMB_FAILURE",
+        "job_id": "cf6809bb01f344c8ad5c58902083aeb3",
+        "key": "combat:roundtime:13835",
+        "owner": "#13835",
+        "owner_label": "TEST_CLIMB_FAILURE",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "climb up",
+      "ms": 404.9511000048369
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775499434.4005837,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 404.91759998258203,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 404.91759998258203,
+          "metadata": {
+            "character": "TEST_CLIMB_FAILURE",
+            "command": "climb"
+          },
+          "timestamp": 1775499439.1552408
+        }
+      ],
+      "max_ms": 404.91759998258203,
+      "total_ms": 404.91759998258203
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

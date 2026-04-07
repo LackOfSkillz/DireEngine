@@ -42,6 +42,16 @@ class CmdGet(Command):
             caller.msg("You can't get yourself.")
             return
 
+        try:
+            from systems import onboarding
+
+            block_message = onboarding.get_pickup_block(caller, obj)
+            if block_message:
+                caller.msg(block_message)
+                return
+        except Exception:
+            pass
+
         if not obj.access(caller, "get"):
             caller.msg(obj.db.get_err_msg if obj.db.get_err_msg else "You can't get that.")
             return
@@ -57,4 +67,18 @@ class CmdGet(Command):
         obj.at_get(caller)
         if hasattr(caller, "update_encumbrance_state"):
             caller.update_encumbrance_state()
-        room.msg_contents(f"$You() $conj(pick) up {obj.key}.", from_obj=caller)
+        try:
+            from systems import onboarding
+
+            handled, _message = onboarding.note_item_pickup(caller, obj)
+            if not handled:
+                try:
+                    from systems import first_area
+
+                    handled, _message = first_area.note_item_pickup(caller, obj)
+                except Exception:
+                    handled = False
+            if not handled:
+                room.msg_contents(f"$You() $conj(pick) up {obj.key}.", from_obj=caller)
+        except Exception:
+            room.msg_contents(f"$You() $conj(pick) up {obj.key}.", from_obj=caller)

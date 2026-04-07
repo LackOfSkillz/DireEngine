@@ -1,0 +1,247 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "climb up",
+      "first_response_ms": 375.6123000057414,
+      "kind": "command",
+      "ms": 818.4858000022359,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    818.4858000022359
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 818.4190999600105,
+    "timings_ms": [
+      818.4858000022359
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775501674.9809978,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 375.6123000057414,
+  "interest": {
+    "active_object_count": 9,
+    "active_object_peak": 9,
+    "active_source_types": [
+      "proximity",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "proximity",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 8,
+      "room": 9,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 10,
+    "source_count_peak": 10,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 5,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 5,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 3,
+      "room": 3,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 12,
+      "deactivate": 3
+    },
+    "transition_event_counts": {
+      "activate": 12,
+      "deactivate": 3
+    },
+    "transition_total": 15
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 818.4858000022359,
+    "jitter": 0.0,
+    "max_ms": 818.4858000022359,
+    "min_ms": 818.4858000022359,
+    "p95_ms": 818.4858000022359,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "climb up",
+      "ms": 818.4858000022359,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 818.4190999600105,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "The lower route yields to you and you climb up cleanly.",
+    "You feel your balance improve.",
+    "|cDireTest Low Blind(#14065)|n\nThe first blind above the rope walk.\n|wExits:|n |lc__clickmove__ down|lt|ydown|n|le\n|wActions:|n |lc__clickmove__ climb up|lt|yclimb up|n|le",
+    "OPTIONS {'type': 'look'}"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "climb up"
+    ],
+    "location": "DireTest Low Blind",
+    "output_log": [
+      "The lower route yields to you and you climb up cleanly.",
+      "You feel your balance improve.",
+      "|cDireTest Low Blind(#14065)|n\nThe first blind above the rope walk.\n|wExits:|n |lc__clickmove__ down|lt|ydown|n|le\n|wActions:|n |lc__clickmove__ climb up|lt|yclimb up|n|le",
+      "OPTIONS {'type': 'look'}"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 14413,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775501665.5902185,
+        "delay_s": 1.0,
+        "due_at": 1775501666.5902185,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": "#14063",
+        "interest_object_label": "TEST_CLIMB_SUCCESS",
+        "job_id": "39a104ac03c742b69e6fa8692fb1a72a",
+        "key": "combat:roundtime:14063",
+        "owner": "#14063",
+        "owner_label": "TEST_CLIMB_SUCCESS",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "climb up",
+      "ms": 818.4858000022359
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775501658.886812,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 818.4190999600105,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 818.4190999600105,
+          "metadata": {
+            "character": "TEST_CLIMB_SUCCESS",
+            "command": "climb"
+          },
+          "timestamp": 1775501666.0218058
+        }
+      ],
+      "max_ms": 818.4190999600105,
+      "total_ms": 818.4190999600105
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -112,6 +112,18 @@ class CmdAttack(Command):
             self.caller.msg("Attacking yourself would accomplish very little.")
             return
 
+        try:
+            from systems import onboarding
+
+            block_message = onboarding.get_attack_block(self.caller, target)
+            if block_message:
+                self.caller.msg(block_message)
+                return
+            if onboarding.resolve_training_attack(self.caller, target):
+                return
+        except Exception:
+            pass
+
         if getattr(getattr(target, "db", None), "is_corpse", False):
             self.caller.msg("There is no life left there to fight.")
             return

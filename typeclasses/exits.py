@@ -35,4 +35,15 @@ class Exit(ObjectParent, DefaultExit):
                     return False
             except Exception:
                 pass
+            try:
+                if bool(getattr(self.db, "climb_contest", False)) and hasattr(traversing_object, "resolve_climb_exit"):
+                    return traversing_object.resolve_climb_exit(self, target_location)
+            except Exception:
+                pass
         return super().at_traverse(traversing_object, target_location, **kwargs)
+
+    def get_display_name(self, looker=None, **kwargs):
+        custom_name = str(getattr(self.db, "exit_display_name", "") or "").strip()
+        if custom_name:
+            return custom_name
+        return super().get_display_name(looker, **kwargs)

@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency."
+  },
+  "mode": "direct",
+  "name": "climb-failure",
+  "seed": 996038800,
+  "started_at": 1775499434.4005837
+}

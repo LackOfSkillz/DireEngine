@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 9149, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4106, in run_onboarding_full_scenario
+    output = _build_onboarding_full_output(args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 1618, in _build_onboarding_full_output
+    character = _create_test_onboarding_character(create_object, rooms, created_objects, onboarding)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 318, in _create_test_onboarding_character
+    character.db.onboarding_state = onboarding._default_state()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'systems.onboarding' has no attribute '_default_state'

@@ -31,8 +31,7 @@ from evennia.accounts.accounts import DefaultAccount, DefaultGuest
 from evennia.objects.models import ObjectDB
 from evennia.utils.utils import mod_import
 
-from systems.chargen.controller import ChargenController
-from systems.chargen.flow import format_chargen_summary, render_step_prompt
+from systems.chargen.mirror import begin_mirror_chargen, cancel_mirror_chargen, get_active_chargen_character, is_chargen_active
 from systems.chargen.validators import release_name
 from systems.character.creation import CharacterCreationError, finalize_character_creation, is_onboarding_start_room, resolve_creation_start_room
 
@@ -223,10 +222,8 @@ class Account(DefaultAccount):
     def route_character_to_onboarding(self, character, create=False):
         if not character or bool(getattr(getattr(character, "db", None), "is_npc", False)):
             return False
-        state = getattr(character.db, "onboarding_state", None)
-        if not isinstance(state, Mapping):
-            return False
-        if bool(state.get("complete", False)):
+        onboarding_step = str(getattr(character.db, "onboarding_step", "") or "").strip().lower()
+        if not onboarding_step or onboarding_step == "complete":
             return False
 
         room = getattr(character, "location", None)
@@ -247,15 +244,7 @@ class Account(DefaultAccount):
         return True
 
     def get_chargen_controller(self, create=False, reset=False):
-        state = getattr(self.ndb, "chargen_state", None)
-        if state is None and not create and not reset:
-            return None
-        controller = ChargenController(state=state, account=self)
-        if state is None or reset:
-            controller.start(reset=reset)
-            self.ndb.chargen_state = controller.state
-            return controller
-        return controller
+        return None
 
     def clear_chargen_state(self):
         state = getattr(self.ndb, "chargen_state", None)
@@ -264,21 +253,36 @@ class Account(DefaultAccount):
         if hasattr(self.ndb, "chargen_state"):
             del self.ndb.chargen_state
 
+    def _complete_post_create_character_setup(self, character):
+        if is_chargen_active(character):
+            return
+        room = self.get_onboarding_entry_room(create=True)
+        if not room:
+            return
+        try:
+            from systems import onboarding
+
+            onboarding.activate_onboarding(character)
+        except Exception:
+            character.db.onboarding_step = "start"
+            character.db.onboarding_complete = False
+        character.home = room
+        character.move_to(room, quiet=True, use_destination=False)
+        self.route_character_to_onboarding(character, create=False)
+
     def handle_chargen_input(self, command, args=None):
-        controller = self.get_chargen_controller(create=command in {"charcreate", "chargen"})
-        if not controller:
-            return {"ok": False, "error": "No active character creation session. Use 'charcreate' to begin."}
-        result = controller.handle_input(command, args=args)
-        self.ndb.chargen_state = controller.state
-        if result.get("step") in {"complete", "cancelled"}:
-            self.clear_chargen_state()
-        return result
+        normalized = str(command or "").strip().lower()
+        if normalized in {"charcreate", "chargen"}:
+            return begin_mirror_chargen(self, args)
+        if normalized in {"cancel", "chargencancel"}:
+            return cancel_mirror_chargen(self)
+        return {"ok": False, "error": "That part happens in the mirror now. Use charcreate <name> to begin."}
 
     def render_chargen_prompt(self):
-        controller = self.get_chargen_controller(create=False)
-        if not controller:
+        character = get_active_chargen_character(self)
+        if not character:
             return None
-        return render_step_prompt(controller.state)
+        return f"Chargen is active on {character.key}. Use ic {character.key} to resume if needed."
 
     def at_look(self, target=None, session=None, **kwargs):
         if target and not isinstance(target, (list, tuple)):
@@ -304,21 +308,21 @@ class Account(DefaultAccount):
 
         manager_lines = [
             "|wManager Commands:|n",
-            "  |wcharcreate|n begins or restarts character creation.",
+            "  |wcharcreate <name>|n begins character creation.",
             "  |wlook|n refreshes this manager screen.",
             "  |wic <name>|n enters the world with a character.",
         ]
-        controller = self.get_chargen_controller(create=False)
-        if controller:
+        chargen_character = get_active_chargen_character(self)
+        if chargen_character:
             manager_lines.append("")
             manager_lines.append("|wChargen In Progress:|n")
-            manager_lines.append(render_step_prompt(controller.state))
-            manager_lines.append(format_chargen_summary(controller.state))
+            manager_lines.append(f"{chargen_character.key} is waiting in the Intake Chamber.")
+            manager_lines.append("Use |wic <name>|n to resume if you are not already inside the body.")
         else:
             manager_lines.append("")
             manager_lines.append("|wNo active chargen session.|n")
             if not characters:
-                manager_lines.append("Create your first character with |wcharcreate|n.")
+                manager_lines.append("Create your first character with |wcharcreate <name>|n.")
         manager_lines.append("")
         manager_lines.append("|wCareer Flow:|n new characters arrive as Commoners. Profession choice happens later in the world.")
         txt_manager = "\n".join(manager_lines)
@@ -421,8 +425,23 @@ class Account(DefaultAccount):
         stats = kwargs.pop("stats", None)
         description = kwargs.pop("description", None)
         start_room = kwargs.pop("start_room", None)
+        activate_onboarding = kwargs.pop("activate_onboarding", True)
+        skip_post_create_setup = bool(kwargs.pop("skip_post_create_setup", False))
 
-        character, errors = super().create_character(*args, **kwargs)
+        if "location" not in kwargs:
+            kwargs["location"] = None
+
+        suspended_setup_depth = int(getattr(self.ndb, "_suspend_post_create_setup", 0) or 0)
+        self.ndb._suspend_post_create_setup = suspended_setup_depth + 1
+
+        try:
+            character, errors = super().create_character(*args, **kwargs)
+        finally:
+            remaining_depth = max(0, int(getattr(self.ndb, "_suspend_post_create_setup", 1) or 1) - 1)
+            if remaining_depth:
+                self.ndb._suspend_post_create_setup = remaining_depth
+            elif hasattr(self.ndb, "_suspend_post_create_setup"):
+                del self.ndb._suspend_post_create_setup
         if errors or not character:
             return character, errors
 
@@ -436,6 +455,7 @@ class Account(DefaultAccount):
                 stats=stats,
                 description=description,
                 start_room=start_room,
+                activate_onboarding=activate_onboarding,
             )
         except CharacterCreationError as exc:
             character.delete()
@@ -444,25 +464,16 @@ class Account(DefaultAccount):
             character.delete()
             return None, [f"Character creation failed during finalization: {exc}"]
 
+        if not skip_post_create_setup:
+            self._complete_post_create_character_setup(character)
+
         return character, errors
 
     def at_post_create_character(self, character, **kwargs):
         super().at_post_create_character(character, **kwargs)
-        room = self.get_onboarding_entry_room(create=True)
-        if not room:
+        if int(getattr(self.ndb, "_suspend_post_create_setup", 0) or 0) > 0:
             return
-        try:
-            from systems import onboarding
-
-            state = onboarding.ensure_onboarding_state(character)
-            state["active"] = True
-            state["complete"] = False
-            character.db.onboarding_state = state
-        except Exception:
-            character.db.onboarding_state = {"active": True, "complete": False}
-        character.home = room
-        character.move_to(room, quiet=True, use_destination=False)
-        self.route_character_to_onboarding(character, create=False)
+        self._complete_post_create_character_setup(character)
 
     def at_server_reload(self):
         return

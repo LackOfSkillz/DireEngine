@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "django.db.utils.OperationalError: database is locked",
+  "mode": "direct",
+  "scenario": "chargen-finalize-lock",
+  "seed": 467377600
+}

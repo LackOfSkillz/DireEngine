@@ -13,6 +13,8 @@ import re
 
 from evennia.objects.objects import DefaultObject
 
+from systems.chargen.mirror import MIRROR_KEY, is_chargen_active, render_mirror
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -169,3 +171,19 @@ class BountyBoard(Object):
         super().at_object_creation()
         self.db.desc = "Names, crude likenesses, and reward notices are nailed here in overlapping layers."
         self.db.stealable = False
+
+
+class ChargenMirror(Object):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.desc = "A tall mirror in a blackened frame. It reflects more than posture and less than mercy."
+        self.db.is_chargen_mirror = True
+        self.db.stealable = False
+        self.aliases.add("mirror")
+        self.aliases.add("glass")
+        self.aliases.add("reflection")
+
+    def return_appearance(self, looker, **kwargs):
+        if is_chargen_active(looker):
+            return render_mirror(looker)
+        return super().return_appearance(looker, **kwargs)

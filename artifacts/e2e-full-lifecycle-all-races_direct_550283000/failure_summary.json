@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": null,
+  "message": "",
+  "mode": "direct",
+  "scenario": "e2e-full-lifecycle-all-races",
+  "seed": 550283000
+}

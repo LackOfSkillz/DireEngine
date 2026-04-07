@@ -1,6 +1,63 @@
 from evennia import Command
 
 
+def _bond_flavor(profile_label):
+    tones = {
+        "Wildbound": "deeply rooted",
+        "Attuned": "in step with the land",
+        "Distant": "the pull is faint",
+        "Disconnected": "no connection yet",
+    }
+    return tones.get(str(profile_label or "").strip(), str(profile_label or "").strip().lower())
+
+
+def _environment_flavor(value):
+    tones = {
+        "urban": "you feel out of place",
+        "wild": "the land answers easily",
+        "forest": "the trees feel close",
+        "outdoors": "the air sits better on you",
+        "indoor": "walls blunt your edge",
+    }
+    normalized = str(value or "").strip().lower()
+    tone = tones.get(normalized)
+    return f"{str(value or '').title()} ({tone})" if tone else str(value or "").title()
+
+
+def _terrain_flavor(value):
+    tones = {
+        "urban": "stone underfoot, little give",
+        "forest": "cover comes naturally",
+        "plains": "nothing hides you for long",
+        "hills": "the ground rises to meet you",
+        "swamp": "every step drags",
+    }
+    normalized = str(value or "").strip().lower()
+    tone = tones.get(normalized)
+    return f"{str(value or '').title()} ({tone})" if tone else str(value or "").title()
+
+
+def _nature_focus_flavor(value):
+    amount = max(0, int(value or 0))
+    if amount >= 75:
+        return "ready"
+    if amount >= 35:
+        return "gathering"
+    if amount > 0:
+        return "faint"
+    return "quiet"
+
+
+def _companion_flavor(companion):
+    state = str((companion or {}).get("state", "inactive") or "inactive").strip().lower()
+    bond = int((companion or {}).get("bond", 0) or 0)
+    if state != "active" and bond <= 0:
+        return "not yet bonded"
+    if state != "active":
+        return f"bond {bond}/100"
+    return f"active, bond {bond}/100"
+
+
 class CmdStats(Command):
     """
     Review your condition, attributes, and current learning.
@@ -64,17 +121,20 @@ class CmdStats(Command):
             if active_berserk:
                 lines.insert(8, f"Active Berserk: {str(active_berserk.get('name') or active_berserk.get('key') or '').title()}")
         elif hasattr(char, "is_profession") and char.is_profession("ranger"):
-            lines.insert(2, f"Wilderness Bond: {char.get_wilderness_bond()}/100 ({char.get_wilderness_bond_profile().get('label', 'Attuned')})")
-            lines.insert(3, f"Instinct: {char.get_ranger_instinct()}")
+            bond_profile = char.get_wilderness_bond_profile().get('label', 'Attuned')
+            nature_focus = char.get_nature_focus() if hasattr(char, "get_nature_focus") else 0
+            lines.insert(2, f"Circle: {char.get_circle()}")
+            lines.insert(3, f"Wilderness Bond: {char.get_wilderness_bond()}/100 ({_bond_flavor(bond_profile)})")
+            lines.insert(4, f"Instinct: {char.get_ranger_instinct()}")
             if hasattr(char, "get_nature_focus"):
-                lines.insert(4, f"Nature Focus: {char.get_nature_focus()}/100")
+                lines.insert(5, f"Nature Focus: {nature_focus}/100 ({_nature_focus_flavor(nature_focus)})")
             if getattr(char, "location", None) and hasattr(char.location, "get_environment_type"):
-                lines.insert(5, f"Environment: {char.location.get_environment_type().title()}")
+                lines.insert(6, f"Environment: {_environment_flavor(char.location.get_environment_type())}")
             if getattr(char, "location", None) and hasattr(char.location, "get_terrain_type"):
-                lines.insert(6, f"Terrain: {char.location.get_terrain_type().title()}")
+                lines.insert(7, f"Terrain: {_terrain_flavor(char.location.get_terrain_type())}")
             if hasattr(char, "get_ranger_companion"):
                 companion = char.get_ranger_companion()
-                lines.insert(7, f"Companion: {char.get_ranger_companion_label()} [{companion.get('state', 'inactive')}] {int(companion.get('bond', 0) or 0)}/100")
+                lines.insert(8, f"Companion: {char.get_ranger_companion_label()} ({_companion_flavor(companion)})")
         elif hasattr(char, "is_profession") and char.is_profession("empath"):
             lines.insert(2, f"Empathic Shock: {char.get_empath_shock()}/100")
             if hasattr(char, "is_empath_overdrawn") and char.is_empath_overdrawn():
@@ -133,3 +193,9 @@ class CmdStats(Command):
             lines.append(f"Active Learning: clear [0/{char.get_mindstate_cap()}]")
 
         char.msg("\n".join(lines))
+        try:
+            from systems import onboarding
+
+            onboarding.note_stats_action(char)
+        except Exception:
+            pass

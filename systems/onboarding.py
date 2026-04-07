@@ -2,466 +2,737 @@ import time
 from collections.abc import Mapping
 
 from evennia.objects.models import ObjectDB
+from evennia.utils import delay
 from evennia.utils.create import create_object
 
-from systems.chargen.validators import validate_name
-from world.races import RACE_DEFINITIONS, resolve_race_name
 
+STEP_START = "start"
+STEP_MOVEMENT = "movement"
+STEP_POSSESSION = "possession"
+STEP_PREPARATION = "preparation"
+STEP_COMBAT = "combat"
+STEP_ESCALATION = "escalation"
+STEP_COLLAPSE = "collapse"
+STEP_TRANSPORT = "transport"
+STEP_LEARNING = "learning"
+STEP_FAILURE = "failure"
+STEP_RECOVERY = "recovery"
+STEP_DEPART = "depart"
+STEP_COMPLETE = "complete"
 
-GENDER_OPTIONS = ("male", "female", "neutral")
-APPEARANCE_OPTIONS = {
-    "hair_style": ("short", "long", "tied", "shaved"),
-    "hair_color": ("black", "brown", "blonde", "red"),
-    "build": ("lean", "average", "broad"),
-    "height": ("short", "average", "tall"),
-    "eyes": ("brown", "blue", "green", "gray"),
+ONBOARDING_STEPS = (
+    STEP_START,
+    STEP_MOVEMENT,
+    STEP_POSSESSION,
+    STEP_PREPARATION,
+    STEP_COMBAT,
+    STEP_ESCALATION,
+    STEP_COLLAPSE,
+    STEP_TRANSPORT,
+    STEP_LEARNING,
+    STEP_FAILURE,
+    STEP_RECOVERY,
+    STEP_DEPART,
+    STEP_COMPLETE,
+)
+
+INTAKE_CHAMBER = "Intake Chamber"
+TRAINING_HALL = "Training Hall"
+PRACTICE_YARD = "Practice Yard"
+ONBOARDING_ROOM_NAMES = {INTAKE_CHAMBER, TRAINING_HALL, PRACTICE_YARD}
+EMPATH_GUILD_ROOM = "Empath Guild"
+EMPATH_GUILD_ENTRY_ROOM = "Larkspur Lane, Midway"
+EMPATH_GUILD_ENTRY_DBREF = 4280
+RECOVERY_FALLBACK_ROOM = "Outer Yard"
+
+TRAINING_SWORD_KEY = "training sword"
+TRAINING_VEST_KEY = "training vest"
+GUIDE_KEY = "Intake Guide"
+TRIAGE_EMPATH_KEY = "Triage Empath"
+WARD_CLERIC_KEY = "Ward Cleric"
+
+BLOCKED_COMMAND_MESSAGE = "Not yet. Try what's in front of you."
+EARLY_BLOCKED_COMMAND_MESSAGE = "Not yet. Start by moving east."
+INVALID_COMMAND_MESSAGE = "Not that. Try what's in front of you."
+
+MOVEMENT_COMMANDS = {
+    "north",
+    "south",
+    "east",
+    "west",
+    "n",
+    "s",
+    "e",
+    "w",
+    "northeast",
+    "northwest",
+    "southeast",
+    "southwest",
+    "ne",
+    "nw",
+    "se",
+    "sw",
+    "up",
+    "down",
+    "u",
+    "d",
+    "out",
+    "leave",
 }
-REQUIRED_APPEARANCE_FIELDS = tuple(APPEARANCE_OPTIONS.keys())
-FORWARD_REQUIREMENTS = {
-    "Lineup Platform": ("gender", "You need to choose your gender before moving on. Try: male, female, or neutral."),
-    "Mirror Alcove": ("race", "You need to choose your race before moving on. Try: human, elf, or dwarf."),
-    "Gear Rack Room": ("appearance", "You need to finish your appearance first. Try: hair short, hair black, build lean, height tall, eyes green."),
-}
-RELEASE_STEPS = ("gender", "race", "appearance", "gear", "weapon", "combat", "healing", "economy", "breach", "name")
-ACTION_FLAG_DEFAULTS = {
-    "gear_items": [],
-    "weapon_wielded": False,
-    "combat_started": False,
-    "combat_won": False,
-    "healing_success": False,
-    "economy_buy": False,
-    "economy_sell": False,
-    "breach_started": False,
-    "breach_cleared": False,
-}
-EVENT_FLAG_DEFAULTS = {
-    "gear_delay_scene": False,
-    "almost_failure_scene": False,
-    "breach_warning": False,
-    "breach_break": False,
-    "breach_stabilized": False,
-}
-STEP_FAILURE_REACTIONS = {
-    "gender": {
-        "mentor": "Answer the intake question before you drift any farther.",
-        "gremlin": "You can absolutely outrun paperwork right up until the paperwork catches you.",
-    },
-    "race": {
-        "mentor": "Pick a station and own it.",
-        "gremlin": "The platform only gets more confusing if you keep circling it.",
-    },
-    "appearance": {
-        "mentor": "Use the mirror properly. The city will judge what it sees.",
-        "gremlin": "Half-finished faces make people nervous. Sometimes that's useful. Not today.",
-    },
-    "gear": {
-        "mentor": "Wear your kit before you try to prove anything.",
-        "gremlin": "Boots first, heroics later. That's my professional view.",
-    },
-    "weapon": {
-        "mentor": "Arm yourself before you enter the yard.",
-        "gremlin": "Fists are free, but the goblins are still overpriced.",
-    },
-    "combat": {
-        "mentor": "Finish the fight in the yard before you look for the next lesson.",
-        "gremlin": "The goblin is not going to grade itself.",
-    },
-    "healing": {
-        "mentor": "Patch the bleeding before you move on.",
-        "gremlin": "Leaking is a bad long-term strategy.",
-    },
-    "economy": {
-        "mentor": "Buy once and sell once. Learn the cost both ways.",
-        "gremlin": "Quartermaster Nella charges for mistakes and refunds for smaller ones.",
-    },
-    "breach": {
-        "mentor": "Hold the breach before you ask the gate to open.",
-        "gremlin": "Those sounds mean someone forgot to keep goblins on the other side.",
-    },
-    "name": {
-        "mentor": "Put a name on yourself before you leave this place.",
-        "gremlin": "Names help us return your body to the correct ledger.",
-    },
-}
-ROLE_KEYS = {
-    "mentor": "Marshal Vey",
-    "gremlin": "Pip the Gremlin",
-}
-ROLE_CUES = {
-    "wake_room": {
-        "mentor": "Up. You're late, which means you move now or you die tired.",
-        "gremlin": "I brought forms. I dropped most of them, but the important panic survived.",
-    },
-    "gender": {
-        "mentor": "Make the call and keep moving.",
-        "gremlin": "See? Easy. Unless I wrote it down backward again.",
-    },
-    "race": {
-        "mentor": "Good. Better to choose plainly than pretend badly.",
-        "gremlin": "We could still swap boots between stations if you want excitement.",
-    },
-    "appearance": {
-        "mentor": "Good. That's what strangers get first. Make it count.",
-        "gremlin": "I liked the messier version, personally.",
-    },
-    "gear": {
-        "mentor": "Wear what keeps you breathing, not what flatters you.",
-        "gremlin": "I only handed out one left glove by mistake this time.",
-    },
-    "weapon": {
-        "mentor": "Pick a weapon you can actually recover with after the first bad swing.",
-        "gremlin": "The spear looked dramatic. I respect drama.",
-    },
-    "combat": {
-        "mentor": "It bleeds. So will you, if you drift.",
-        "gremlin": "If it bites you, try not to take it personally.",
-    },
-    "healing": {
-        "mentor": "Patch yourself fast and get back on your feet.",
-        "gremlin": "I sorted the bandages by least suspicious stain.",
-    },
-    "economy": {
-        "mentor": "Count your money before someone else does it for you.",
-        "gremlin": "If you overpay, call it an investment in morale.",
-    },
-    "breach": {
-        "mentor": "That noise is why we stopped pretending this was a lesson.",
-        "gremlin": "Technically it is still a lesson. Just louder now.",
-    },
-    "outer_gate": {
-        "mentor": "Put a name on yourself before you step into a city that will remember it.",
-        "gremlin": "Try a good one. Bad names travel faster.",
-    },
-    "name": {
-        "mentor": "Good. Keep it if you can.",
-        "gremlin": "Excellent choice. I would have picked something less pronounceable.",
-    },
-    "release": {
-        "mentor": "You are as ready as anyone ever is. Move.",
-        "gremlin": "If you come back missing anything, label it first.",
-    },
-}
-ROLE_NUDGES = {
-    "Wake Room": {
-        "mentor": "On your feet. Intake is waiting.",
-        "gremlin": "If you lie there much longer, I might inventory you.",
-    },
-    "Intake Hall": {
-        "mentor": "Gender first. Simple answer, fast feet.",
-        "gremlin": "I can guess if you'd rather regret that.",
-    },
-    "Lineup Platform": {
-        "mentor": "Stand at the station that fits what you are.",
-        "gremlin": "We could mix them. We should not. But we could.",
-    },
-    "Mirror Alcove": {
-        "mentor": "Set your traits and stop wasting mirror light.",
-        "gremlin": "The shaved option has conviction.",
-    },
-    "Outer Gate": {
-        "mentor": "Choose your name. Then leave.",
-        "gremlin": "No pressure. Only your whole future.",
-    },
+STEP_ALLOWED_COMMANDS = {
+    STEP_START: set(MOVEMENT_COMMANDS),
+    STEP_MOVEMENT: set(MOVEMENT_COMMANDS) | {"get", "grab", "take"},
+    STEP_PREPARATION: set(MOVEMENT_COMMANDS) | {"get", "grab", "take", "inventory", "inv", "i", "wear", "wea", "wield", "wie", "equip"},
+    STEP_COMBAT: set(MOVEMENT_COMMANDS) | {"attack", "att", "hit", "kill", "slice", "bash", "jab"},
+    STEP_ESCALATION: {"attack", "att", "hit", "kill", "slice", "bash", "jab"},
+    STEP_LEARNING: set(MOVEMENT_COMMANDS) | {"experience", "exp"},
+    STEP_RECOVERY: set(MOVEMENT_COMMANDS) | {"stats", "health", "hp", "sta", "score"},
+    STEP_DEPART: set(MOVEMENT_COMMANDS) | {"depart"},
 }
 
-STEP_EXAMPLES = {
-    "gender": ("male", "female", "neutral"),
-    "race": ("human", "elf", "dwarf"),
-    "appearance": ("hair short", "hair black", "build lean", "height tall", "eyes green"),
-    "name": ("name Aric",),
+STATE_DIALOGUE = {
+    STEP_START: (
+        ("speech", "You're awake. Good."),
+        ("text", "A brief glance toward the archway."),
+        ("speech", "Start moving."),
+    ),
+    STEP_MOVEMENT: (
+        ("text", "Weapons line the walls. Nothing polished. Nothing ceremonial.\n\nEverything here has been used."),
+        ("speech", "Take something."),
+    ),
+    STEP_PREPARATION: (
+        ("speech", "Good enough."),
+        ("speech", "Move."),
+    ),
+    STEP_COMBAT: (
+        ("text", "The yard is already in motion.\n\nSteel. Movement. Voices overlapping.\n\nThis isn't for you.\n\nIt doesn't matter."),
+        ("speech", "Don't think. Strike."),
+    ),
+    STEP_ESCALATION: (
+        ("text", "Something changes.\n\nNot louder. Heavier."),
+        ("text", "A body hits the ground hard enough to be felt.\n\nThen another."),
+        ("text", "The goblin steps through the far side of the yard, larger than the rest, armored in pieces that do not match."),
+        ("speech", "...move."),
+    ),
+    "combat_complete": (
+        ("speech", "There it is."),
+        ("speech", "Enough."),
+    ),
+    STEP_COMPLETE: (
+        ("speech", "You can stand."),
+        ("speech", "Go on."),
+    ),
 }
 
-STEP_MENTOR_HINTS = {
-    "gender": "Answer plainly. Try: male.",
-    "race": "Pick a station. Try: human.",
-    "appearance": "Do the mirror work one trait at a time. Try: hair short.",
-    "name": "Pick the name you intend to keep. Try: name Aric.",
+IDLE_ESCALATIONS = {
+    STEP_START: (
+        'The guide\'s eyes settle on the archway.\n\n"Now."',
+        'A low note carries through the stone--distant, but not harmless.\n\n"If you\'re still here when it arrives--"\n\nA brief pause.\n\n"Move."',
+    ),
+    STEP_MOVEMENT: (
+        'The guide glances at you, then at the rack.\n\n"Don\'t hesitate."',
+        'A sound cuts through the space.\n\nDistant at first--then sharper.\n\nBells.',
+        'The guide doesn\'t look at you this time.\n\n"If you\'re standing there when it reaches you--"\n\nA brief pause.\n\n"It won\'t matter what you meant to do."',
+    ),
+    STEP_PREPARATION: (
+        'The guide glances at what you\'re holding.\n\n"Good enough."',
+        'The guide\'s eyes flick toward the yard entrance.\n\n"Move."',
+        'The space ahead is quiet in the wrong way.\n\n"If you\'re still fumbling when it starts--"\n\nA slight shake of the head.\n\n"You won\'t have time to fix it."',
+    ),
+    STEP_COMBAT: (
+        'A shout cuts across the space ahead.\n\nNot instruction. Warning.',
+    ),
+    STEP_ESCALATION: (
+        'The bow comes up already drawn.\n\nIf you move now, you are late.',
+    ),
+    STEP_RECOVERY: (
+        'Pain settles back into your limbs.\n\n(Type stats.)',
+    ),
 }
 
-STEP_GREMLIN_HINTS = {
-    "gender": "Three choices. You only need one of them.",
-    "race": "Human works if you are feeling traditional.",
-    "appearance": "Hair first. It makes the mirror feel involved.",
-    "name": "Names are easier when they fit on paperwork.",
-}
+SWORD_PICKUP_MESSAGE = "The weight settles into your hand.\n\nNot balanced. Not comfortable.\n\nReal."
+INVENTORY_HINT = "The guide gives the weapon a short glance and dismisses the rest of your uncertainty."
+EQUIP_COMPLETION_MESSAGE = "The fit is rough, but it settles into place."
+COMBAT_TRANSITION_LINE = "A shout cuts across the space ahead.\n\nNot instruction. Warning."
+COMBAT_FEEDBACK = (
+    "One breaks from the edge of the chaos, smaller and faster, already coming at you.\n\n"
+    "Your strike lands--not clean, not perfect--but enough.\n\n"
+    "The goblin collapses hard and stays there.\n\n"
+    "The yard barely notices."
+)
+ESCALATION_FEEDBACK = "A guard rushes the larger goblin and is thrown aside like it meant nothing. Another tries to flank and never gets close."
+ESCALATION_OBJECTIVE = "Attack the goblin."
+COLLAPSE_LINE = 'A thought--distant, thin:\n\n"That was... real."'
+BETWEEN_STATE_INTRO = (
+    "You are still there.\n\n"
+    "Not standing. Not breathing.\n\n"
+    "But not gone."
+)
+BETWEEN_STATE_OBSERVER = "You can see them.\n\nAnd they cannot see you."
+RECOVERY_PROMPT = "(Type stats.)"
+DEPART_PROMPT = "(Type depart if needed.)"
+RECOVERY_HP_RATIO = 0.55
+IGNORE_INPUT_COMMAND = "__onboarding_ignore__"
+CLERIC_KEY = "Old Cleric"
+EMPATH_KEY = "Old Empath"
+BETWEEN_SEQUENCE_BEATS = (
+    (0.45, "voices"),
+    (1.1, "cleric"),
+    (1.8, "empath"),
+    (2.7, "work"),
+    (3.65, "pull"),
+    (4.55, "return"),
+    (5.45, "body"),
+)
+TRANSPORT_SEQUENCE_BEATS = (
+    (0.45, "empath_hold"),
+    (0.95, "cleric_clear"),
+    (1.55, "lunar_arrival"),
+    (2.15, "instruction"),
+    (2.85, "gate"),
+    (3.55, "transition"),
+    (4.1, "move"),
+    (4.55, "arrival"),
+    (5.15, "final"),
+)
 
 
-def _format_examples(step):
-    examples = STEP_EXAMPLES.get(step) or ()
-    if not examples:
-        return ""
-    return " Try: " + ", ".join(examples) + "."
+def _room_key(room):
+    return str(getattr(room, "key", "") or "")
 
 
-def _get_failure_counts(state):
-    return dict(state.get("failure_counts") or {})
+def _gender_value(character):
+    identity = getattr(getattr(character, "db", None), "identity", None) or {}
+    if isinstance(identity, Mapping):
+        gender = str(identity.get("gender", "") or "").strip().lower()
+        if gender:
+            return gender
+    return str(getattr(getattr(character, "db", None), "gender", "") or "").strip().lower()
 
 
-def _increment_failure_count(state, step):
-    failure_counts = _get_failure_counts(state)
-    new_count = int(failure_counts.get(str(step), 0) or 0) + 1
-    failure_counts[str(step)] = new_count
-    state["failure_counts"] = failure_counts
-    return new_count
+def _pronouns(character):
+    gender = _gender_value(character)
+    if gender in {"male", "man", "masculine"}:
+        return {"subject": "he", "object": "him", "possessive": "his"}
+    if gender in {"female", "woman", "feminine"}:
+        return {"subject": "she", "object": "her", "possessive": "her"}
+    return {"subject": "they", "object": "them", "possessive": "their"}
 
 
-def _reset_failure_count(state, step):
-    failure_counts = _get_failure_counts(state)
-    if str(step) in failure_counts:
-        failure_counts[str(step)] = 0
-        state["failure_counts"] = failure_counts
-    return state
-
-
-def _queue_hint_lines(character, step, count):
-    if int(count or 0) < 2:
-        return False
-    mentor_line = STEP_MENTOR_HINTS.get(step)
-    gremlin_line = STEP_GREMLIN_HINTS.get(step)
-    if mentor_line:
-        _queue_roleplay(character, "mentor", mentor_line)
-    if gremlin_line:
-        _queue_roleplay(character, "gremlin", gremlin_line)
-    return bool(mentor_line or gremlin_line)
-
-
-def _normalize_input(raw_string):
-    return " ".join(str(raw_string or "").strip().lower().split())
-
-
-def _extract_choice(raw, prefixes):
-    if raw in prefixes:
-        return ""
-    for prefix in prefixes:
-        if raw.startswith(f"{prefix} "):
-            return raw[len(prefix):].strip()
-    return None
-
-
-def _remap_gender_input(raw):
-    candidate = _extract_choice(raw, ("gender", "choose", "pick", "select", "i am", "im", "i'm"))
-    if raw in GENDER_OPTIONS:
-        candidate = raw
-    if candidate in GENDER_OPTIONS:
-        return f"gender {candidate}"
-    return None
-
-
-def _remap_race_input(raw):
-    candidate = _extract_choice(raw, ("race", "choose", "pick", "select", "stand", "stand at", "go to", "station"))
-    if raw in {"human", "elf", "dwarf"}:
-        candidate = raw
-    if candidate:
-        candidate = candidate.replace("station", "").strip()
-    normalized = resolve_race_name(candidate or "", default=None)
-    if normalized in RACE_DEFINITIONS:
-        return f"stand at {normalized}"
-    return None
-
-
-def _remap_appearance_input(raw):
-    mirror_verbs = {
-        "mirror",
-        "look mirror",
-        "look at mirror",
-        "touch mirror",
-        "use mirror",
-        "look into mirror",
-    }
-    if raw in mirror_verbs:
-        return None, "The mirror only responds to clear choices." + _format_examples("appearance")
-
-    tokens = raw.split()
-    if not tokens:
-        return None, None
-
-    if tokens[0] in {"set", "choose", "pick", "select"}:
-        tokens = tokens[1:]
-    if not tokens:
-        return None, None
-
-    if len(tokens) >= 2 and tokens[0] == "hair":
-        if tokens[1] == "style" and len(tokens) >= 3 and tokens[2] in APPEARANCE_OPTIONS["hair_style"]:
-            return f"set hair style {tokens[2]}", None
-        if tokens[1] == "color" and len(tokens) >= 3 and tokens[2] in APPEARANCE_OPTIONS["hair_color"]:
-            return f"set hair color {tokens[2]}", None
-        value = tokens[1]
-        if value in APPEARANCE_OPTIONS["hair_style"]:
-            return f"set hair style {value}", None
-        if value in APPEARANCE_OPTIONS["hair_color"]:
-            return f"set hair color {value}", None
-
-    if len(tokens) >= 2 and tokens[0] in {"build", "height", "eyes"}:
-        trait = tokens[0]
-        value = tokens[1]
-        if value in APPEARANCE_OPTIONS[trait]:
-            return f"set {trait} {value}", None
-
-    if tokens[0] in {"hair", "build", "height", "eyes", "mirror"}:
-        return None, "Use one clear mirror trait at a time." + _format_examples("appearance")
-    return None, None
-
-
-def remap_onboarding_input(character, raw_string):
-    if not is_onboarding_character(character):
-        return None, None
-    raw = _normalize_input(raw_string)
-    if not raw:
-        return None, None
-
-    room_key = str(getattr(getattr(character, "location", None), "key", "") or "")
+def _update_state(character, **updates):
     state = ensure_onboarding_state(character)
-    completed = set(state.get("completed_steps") or [])
-
-    remapped = None
-    immediate_message = None
-    step = None
-
-    if room_key == "Intake Hall" and "gender" not in completed:
-        step = "gender"
-        remapped = _remap_gender_input(raw)
-    elif room_key == "Lineup Platform" and "race" not in completed:
-        step = "race"
-        remapped = _remap_race_input(raw)
-    elif room_key == "Mirror Alcove" and "appearance" not in completed:
-        step = "appearance"
-        remapped, immediate_message = _remap_appearance_input(raw)
-    elif room_key == "Outer Gate" and "name" not in completed and raw.startswith("call me "):
-        step = "name"
-        remapped = f"name {raw[8:].strip()}"
-
-    if remapped:
-        return remapped, None
-    if immediate_message:
-        count = _increment_failure_count(state, step)
-        _persist_state(character, state)
-        _queue_hint_lines(character, step, count)
-        _emit_objective_line(character, _sync_current_objective(character, state=state), state, force=False, minimum_interval=6.0)
-        return None, immediate_message
-
-    likely_failed = False
-    if step == "gender":
-        likely_failed = raw in {"man", "woman"} or raw.startswith(("choose ", "pick ", "select ", "gender "))
-    elif step == "race":
-        likely_failed = raw.startswith(("race ", "choose ", "pick ", "select ", "stand ")) or raw in {"human", "elf", "dwarf"}
-    elif step == "appearance":
-        likely_failed = raw.startswith(("hair", "build", "height", "eyes", "set hair", "set build", "set height", "set eyes", "choose hair", "choose build", "choose height", "choose eyes"))
-    elif step == "name":
-        likely_failed = raw.startswith("call me ")
-
-    if likely_failed and step:
-        count = _increment_failure_count(state, step)
-        _persist_state(character, state)
-        _queue_hint_lines(character, step, count)
-        _emit_objective_line(character, _sync_current_objective(character, state=state), state, force=False, minimum_interval=6.0)
-        return None, f"That doesn't lock in yet.{_format_examples(step)}"
-
-    return None, None
-
-
-def _default_state():
-    return {
-        "active": True,
-        "complete": False,
-        "completed_steps": [],
-        "action_flags": dict(ACTION_FLAG_DEFAULTS),
-        "appearance": {field: None for field in REQUIRED_APPEARANCE_FIELDS},
-        "current_objective": None,
-        "objective_updated_at": 0.0,
-        "last_progress_at": 0.0,
-        "room_entered_at": 0.0,
-        "tokens": 0,
-        "visited_rooms": [],
-        "event_flags": dict(EVENT_FLAG_DEFAULTS),
-        "pending_roleplay": [],
-        "reward_claimed": False,
-        "final_name": None,
-        "failure_counts": {},
-        "last_roleplay": {},
-    }
-
-
-def ensure_onboarding_state(character):
-    state = getattr(character.db, "onboarding_state", None)
-    if not isinstance(state, Mapping):
-        state = _default_state()
-    else:
-        normalized = _default_state()
-        normalized.update(state)
-        appearance = dict(normalized.get("appearance") or {})
-        normalized["appearance"] = {field: appearance.get(field) for field in REQUIRED_APPEARANCE_FIELDS}
-        action_flags = dict(ACTION_FLAG_DEFAULTS)
-        action_flags.update(dict(normalized.get("action_flags") or {}))
-        action_flags["gear_items"] = [str(item) for item in (action_flags.get("gear_items") or []) if item]
-        normalized["action_flags"] = action_flags
-        event_flags = dict(EVENT_FLAG_DEFAULTS)
-        event_flags.update(dict(normalized.get("event_flags") or {}))
-        normalized["event_flags"] = event_flags
-        normalized["completed_steps"] = [str(step) for step in (normalized.get("completed_steps") or [])]
-        normalized["visited_rooms"] = [str(room) for room in (normalized.get("visited_rooms") or [])]
-        normalized["pending_roleplay"] = list(normalized.get("pending_roleplay") or [])
-        normalized["failure_counts"] = dict(normalized.get("failure_counts") or {})
-        normalized["current_objective"] = str(normalized.get("current_objective") or "") or None
-        normalized["objective_updated_at"] = float(normalized.get("objective_updated_at", 0.0) or 0.0)
-        normalized["last_progress_at"] = float(normalized.get("last_progress_at", 0.0) or 0.0)
-        normalized["room_entered_at"] = float(normalized.get("room_entered_at", 0.0) or 0.0)
-        normalized["last_roleplay"] = dict(normalized.get("last_roleplay") or {})
-        state = normalized
+    state.update(updates)
     character.db.onboarding_state = state
     return state
 
 
-def is_onboarding_character(character):
-    if not character or bool(getattr(getattr(character, "db", None), "is_npc", False)):
+def _schedule_pending_scene(character, scene_name, delay_seconds, token):
+    return _update_state(
+        character,
+        pending_scene=str(scene_name or ""),
+        pending_scene_at=time.time() + max(0.0, float(delay_seconds or 0.0)),
+        scene_token=int(token or 0),
+    )
+
+
+def _clear_pending_scene(character):
+    return _update_state(character, pending_scene="", pending_scene_at=0.0)
+
+
+def _new_scene_token(character):
+    token = int(time.time() * 1000)
+    _update_state(character, scene_token=token)
+    return token
+
+
+def _scene_token_matches(character, token):
+    if not character or not getattr(character, "pk", None):
         return False
     state = ensure_onboarding_state(character)
-    has_player_binding = bool(getattr(character, "has_account", False) or getattr(character, "account", None))
-    if not has_player_binding and not isinstance(state, Mapping):
+    return int(state.get("scene_token", 0) or 0) == int(token or 0)
+
+
+def _queue_pending_scene(character, scene_name, delay_seconds, token):
+    _schedule_pending_scene(character, scene_name, delay_seconds, token)
+    delay(max(0.05, float(delay_seconds or 0.0)), _process_pending_scene, character)
+    return True
+
+
+def _is_training_dummy(target):
+    if not target:
         return False
-    if bool(state.get("complete", False)):
+    if bool(getattr(getattr(target, "db", None), "is_training_dummy", False)):
+        return True
+    role = str(getattr(getattr(target, "db", None), "onboarding_enemy_role", "") or "").strip().lower()
+    return role in {"training", "dummy", "training_dummy"}
+
+
+def _is_training_goblin(target):
+    if not target:
         return False
-    location = getattr(character, "location", None)
-    return bool(getattr(getattr(location, "db", None), "is_tutorial", False) or state.get("active", False))
+    role = str(getattr(getattr(target, "db", None), "onboarding_enemy_role", "") or "").strip().lower()
+    return role == "training_goblin" or str(getattr(target, "key", "") or "").strip().lower() == "training goblin"
 
 
-def _calculate_onboarding_objective(state):
-    completed = set(state.get("completed_steps") or [])
-    action_flags = dict(state.get("action_flags") or {})
-    if "gender" not in completed:
-        return "Choose your gender in Intake Hall." + _format_examples("gender")
-    if "race" not in completed:
-        return "Choose your race at the Lineup Platform." + _format_examples("race")
-    if "appearance" not in completed:
-        return "Set all five mirror traits in the Mirror Alcove." + _format_examples("appearance")
-    if "gear" not in completed:
-        return "Wear at least two pieces of starter gear in the Gear Rack Room."
-    if "weapon" not in completed:
-        return "Wield a weapon in the Weapon Cage."
-    if "combat" not in completed:
-        if not bool(action_flags.get("combat_started", False)):
-            return "Attack the training goblin in the Training Yard."
-        return "Bring down the training goblin in the Training Yard."
-    if "healing" not in completed:
-        return "Use tend in the Supply Shack to stop your bleeding. Try: tend."
-    if "economy" not in completed:
-        if not bool(action_flags.get("economy_buy", False)):
-            return "Buy one item from Quartermaster Nella in the Vendor Stall."
-        return "Sell one item back in the Vendor Stall so you learn both sides of trade."
-    if "breach" not in completed:
-        return "Hold the Breach Corridor until the way out is secure."
-    if "name" not in completed:
-        return "Choose your final name at the Outer Gate." + _format_examples("name")
-    return "Leave through the gate and take your chances in The Landing."
+def _cleanup_room_training_goblins(room):
+    if not room:
+        return 0
+    removed = 0
+    for obj in list(getattr(room, "contents", []) or []):
+        if not _is_training_goblin(obj):
+            continue
+        try:
+            obj.delete()
+            removed += 1
+        except Exception:
+            pass
+    return removed
 
 
-def get_onboarding_objective(character):
+def _find_room_by_key(room_key):
+    if not room_key:
+        return None
+    return ObjectDB.objects.filter(db_key__iexact=str(room_key)).first()
+
+
+def _find_room_by_tag(tag_key):
+    if not tag_key:
+        return None
+    for room in ObjectDB.objects.filter(db_typeclass_path="typeclasses.rooms.Room"):
+        try:
+            if room.tags.has(str(tag_key)):
+                return room
+        except Exception:
+            continue
+    return None
+
+
+def _find_room_by_dbref(dbref):
+    try:
+        return ObjectDB.objects.get_id(int(dbref or 0))
+    except Exception:
+        return None
+
+
+def _recovery_room_fallback():
+    return _find_room_by_key(RECOVERY_FALLBACK_ROOM)
+
+
+def _resolve_recovery_destination():
+    guild_room = _resolve_empath_guild_room()
+    if guild_room:
+        return guild_room
+    destination = _find_room_by_dbref(EMPATH_GUILD_ENTRY_DBREF)
+    if destination and str(getattr(destination, "key", "") or "") == EMPATH_GUILD_ENTRY_ROOM:
+        return destination
+    destination = _find_room_by_key(EMPATH_GUILD_ENTRY_ROOM)
+    if destination:
+        return destination
+    return _recovery_room_fallback()
+
+
+def _resolve_empath_guild_room():
+    lane_room = _find_room_by_dbref(EMPATH_GUILD_ENTRY_DBREF)
+    if lane_room:
+        for exit_obj in list(getattr(lane_room, "exits", []) or []):
+            key = str(getattr(exit_obj, "key", "") or "").strip().lower()
+            aliases = {str(alias or "").strip().lower() for alias in getattr(getattr(exit_obj, "aliases", None), "all", lambda: [])()}
+            if key not in {"guild", "north"} and "guild" not in aliases:
+                continue
+            destination = getattr(exit_obj, "destination", None)
+            if destination:
+                return destination
+    tagged_room = _find_room_by_tag("guild_empath")
+    if tagged_room:
+        return tagged_room
+    return _find_room_by_key(EMPATH_GUILD_ROOM)
+
+
+def _ensure_recovery_staff(room):
+    if not room:
+        return []
+    staff_specs = (
+        (
+            TRIAGE_EMPATH_KEY,
+            "An empath works close to the bedspace with precise, economical movements, attention fixed on triage rather than conversation.",
+            ["empath", "triage empath"],
+        ),
+        (
+            WARD_CLERIC_KEY,
+            "A cleric remains near the far wall with the stillness of someone listening for changes that matter more than words.",
+            ["cleric", "ward cleric"],
+        ),
+    )
+    present = []
+    for key, desc, aliases in staff_specs:
+        npc = ObjectDB.objects.filter(db_key__iexact=key, db_location=room).first()
+        if not npc:
+            npc = create_object("typeclasses.npcs.NPC", key=key, location=room, home=room)
+        npc.db.is_npc = True
+        npc.db.desc = desc
+        npc.db.is_onboarding_staff = True
+        for alias in aliases:
+            npc.aliases.add(alias)
+        present.append(npc)
+    return present
+
+
+def _find_scripted_enemy(character):
     state = ensure_onboarding_state(character)
-    return _calculate_onboarding_objective(state)
+    enemy_id = int(state.get("scripted_enemy_id", 0) or 0)
+    if enemy_id > 0:
+        enemy = ObjectDB.objects.filter(id=enemy_id).first()
+        if enemy:
+            return enemy
+    room = getattr(character, "location", None)
+    if not room:
+        return None
+    for obj in list(getattr(room, "contents", []) or []):
+        if _is_training_goblin(obj):
+            return obj
+    return None
 
 
-def _persist_state(character, state):
+def _cleanup_scripted_enemy(character):
+    enemy = _find_scripted_enemy(character)
+    if enemy:
+        try:
+            _clear_combat_state(character, enemy)
+        except Exception:
+            pass
+        try:
+            enemy.delete()
+        except Exception:
+            pass
+    _update_state(character, scripted_enemy_id=0)
+    return True
+
+
+def _spawn_training_goblin(character):
+    room = getattr(character, "location", None)
+    if not room:
+        return None
+    goblin = _find_scripted_enemy(character)
+    if not goblin:
+        goblin = create_object("typeclasses.npcs.NPC", key="training goblin", location=room, home=room)
+    elif getattr(goblin, "location", None) != room:
+        goblin.move_to(room, quiet=True, use_destination=False)
+    goblin.db.desc = "A larger goblin moves through the yard like everything else is in the way, bow already in hand beneath armor that does not match from piece to piece."
+    goblin.db.is_npc = True
+    goblin.db.is_tutorial_enemy = True
+    goblin.db.onboarding_enemy_role = "training_goblin"
+    goblin.db.hp = 18
+    goblin.db.max_hp = 18
+    goblin.db.balance = 80
+    goblin.db.max_balance = 80
+    goblin.db.fatigue = 0
+    goblin.db.in_combat = False
+    goblin.db.target = None
+    goblin.aliases.add("goblin")
+    _update_state(character, scripted_enemy_id=int(getattr(goblin, "id", 0) or 0))
+    return goblin
+
+
+def _set_scripted_resources(character, *, hp_ratio=None, balance_ratio=None, fatigue_ratio=None):
+    if hasattr(character, "ensure_core_defaults"):
+        character.ensure_core_defaults()
+    if hp_ratio is not None and hasattr(character, "set_hp"):
+        max_hp = max(1, int(getattr(character.db, "max_hp", 1) or 1))
+        character.set_hp(max(1, int(round(max_hp * float(hp_ratio)))))
+    if balance_ratio is not None and hasattr(character, "set_balance"):
+        max_balance = max(1, int(getattr(character.db, "max_balance", 1) or 1))
+        character.set_balance(max(0, int(round(max_balance * float(balance_ratio)))))
+    if fatigue_ratio is not None and hasattr(character, "set_fatigue"):
+        max_fatigue = max(1, int(getattr(character.db, "max_fatigue", 1) or 1))
+        character.set_fatigue(max(0, int(round(max_fatigue * float(fatigue_ratio)))))
+
+
+def _clear_scripted_wounds(character):
+    wounds = dict(getattr(character.db, "wounds", None) or {})
+    if wounds:
+        for key in list(wounds.keys()):
+            wounds[key] = 0
+        character.db.wounds = wounds
+    injuries = getattr(character.db, "injuries", None)
+    if isinstance(injuries, Mapping):
+        cleaned = {}
+        for part_name, payload in dict(injuries).items():
+            part_data = dict(payload or {})
+            part_data["bleed"] = 0
+            part_data["internal"] = 0
+            part_data["external"] = 0
+            cleaned[part_name] = part_data
+        character.db.injuries = cleaned
+
+
+def _set_between_state(character, active):
+    character.db.training_between = bool(active)
+    return bool(character.db.training_between)
+
+
+def _set_training_collapse(character, active):
+    character.db.training_collapse = bool(active)
+    return bool(character.db.training_collapse)
+
+
+def _emit_between_beat(character, beat_name):
+    if not character:
+        return False
+    pronouns = _pronouns(character)
+    if beat_name == "voices":
+        emit_named_line(character, CLERIC_KEY, f"Hold {pronouns['object']}.")
+        emit_named_line(character, EMPATH_KEY, f"I have {pronouns['object']}.")
+        return True
+    if beat_name == "cleric":
+        emit_named_line(character, CLERIC_KEY, "The spirit's slipping.")
+        emit_text(character, "")
+        emit_named_line(character, CLERIC_KEY, "Not yet.")
+        return True
+    if beat_name == "empath":
+        emit_text(character, "Hands--or something like hands--press against what you no longer feel.")
+        return True
+    if beat_name == "work":
+        emit_named_line(character, EMPATH_KEY, "I'm taking the deeper damage.")
+        emit_named_line(character, CLERIC_KEY, "Be quick.")
+        emit_text(character, "Pressure--\n\nthen absence--\n\nthen something pulling you back toward a shape you remember.")
+        return True
+    if beat_name == "pull":
+        emit_text(character, "The pull does not ask you whether you are ready.")
+        return True
+    if beat_name == "return":
+        emit_named_line(character, CLERIC_KEY, "Now.")
+        emit_text(character, "Light--sharp, brief--\n\nand then--")
+        return True
+    if beat_name == "body":
+        _cleanup_scripted_enemy(character)
+        _set_scripted_resources(character, hp_ratio=RECOVERY_HP_RATIO, balance_ratio=0.5, fatigue_ratio=0.2)
+        _clear_scripted_wounds(character)
+        character.db.position = "sitting"
+        _touch_progress(character)
+        emit_text(character, "Breath returns like it was forced into you.\n\nNot gently.\n\nNot kindly.\n\nThe world follows after.")
+        trigger_transport_sequence(character)
+        return True
+    return False
+
+
+def _emit_transport_beat(character, beat_name):
+    if not character:
+        return False
+    if beat_name == "empath_hold":
+        emit_named_line(character, EMPATH_KEY, "They'll hold.")
+        emit_named_line(character, EMPATH_KEY, "For now.")
+        return True
+    if beat_name == "cleric_clear":
+        emit_named_line(character, CLERIC_KEY, "Then move them.")
+        return True
+    if beat_name == "lunar_arrival":
+        emit_text(character, "The space beside you shifts--not opening, just no longer staying where it was.")
+        return True
+    if beat_name == "instruction":
+        emit_text(character, "You feel it take you.\n\nNo step.\nNo motion.\nJust absence--")
+        return True
+    if beat_name == "gate":
+        emit_text(character, "The world does not open. It simply stops being where you were.")
+        return True
+    if beat_name == "transition":
+        emit_text(character, "No step.\n\nNo motion.\n\nAnd then--")
+        return True
+    if beat_name == "move":
+        destination = _resolve_recovery_destination()
+        if not destination:
+            destination = _recovery_room_fallback()
+        guild_room = _resolve_empath_guild_room()
+        if guild_room:
+            _ensure_recovery_staff(guild_room)
+        if destination:
+            character.move_to(destination, quiet=True, use_destination=False)
+        return True
+    if beat_name == "arrival":
+        emit_text(character, "Stone beneath you.\n\nClean air. Linen. Low voices kept behind their teeth.\n\nYou are somewhere else.")
+        return True
+    if beat_name == "final":
+        _clear_pending_scene(character)
+        _set_between_state(character, False)
+        _set_training_collapse(character, False)
+        set_onboarding_step(character, STEP_COMPLETE)
+        _touch_progress(character)
+        try:
+            from systems import aftermath
+
+            aftermath.activate_new_player_state(character)
+            aftermath.note_room_entry(character, getattr(character, "location", None))
+        except Exception:
+            pass
+        return True
+    return False
+
+
+def _process_transport_sequence(character, *, force=False):
+    if not character:
+        return False
+    state = ensure_onboarding_state(character)
+    token = int(state.get("scene_token", 0) or 0)
+    if not _scene_token_matches(character, token):
+        return False
+    started_at = float(state.get("transport_started_at", 0.0) or 0.0)
+    if started_at <= 0:
+        return False
+    beat_index = int(state.get("transport_sequence_index", 0) or 0)
+    now = time.time()
+    progressed = False
+    while beat_index < len(TRANSPORT_SEQUENCE_BEATS):
+        beat_at, beat_name = TRANSPORT_SEQUENCE_BEATS[beat_index]
+        if not force and now < started_at + float(beat_at):
+            break
+        _emit_transport_beat(character, beat_name)
+        progressed = True
+        beat_index += 1
+        state = ensure_onboarding_state(character)
+        state["transport_sequence_index"] = beat_index
+        character.db.onboarding_state = state
+    if beat_index >= len(TRANSPORT_SEQUENCE_BEATS):
+        state = ensure_onboarding_state(character)
+        if str(state.get("pending_scene", "") or "").strip().lower() == "transport_sequence":
+            _clear_pending_scene(character)
+        return progressed
+    next_at = started_at + float(TRANSPORT_SEQUENCE_BEATS[beat_index][0])
+    state = ensure_onboarding_state(character)
+    state["transport_sequence_index"] = beat_index
+    state["pending_scene"] = "transport_sequence"
+    state["pending_scene_at"] = 0.0 if force else next_at
     character.db.onboarding_state = state
-    return state
+    if not force:
+        delay(max(0.05, next_at - time.time()), _process_pending_scene, character)
+    return progressed
+
+
+def trigger_transport_sequence(character):
+    if not character:
+        return False
+    token = _new_scene_token(character)
+    set_onboarding_step(character, STEP_TRANSPORT)
+    _update_state(character, transport_started_at=time.time(), transport_sequence_index=0)
+    _queue_pending_scene(character, "transport_sequence", float(TRANSPORT_SEQUENCE_BEATS[0][0]), token)
+    return True
+
+
+def _process_between_sequence(character, *, force=False):
+    if not character:
+        return False
+    state = ensure_onboarding_state(character)
+    token = int(state.get("scene_token", 0) or 0)
+    if not _scene_token_matches(character, token):
+        return False
+    started_at = float(state.get("between_started_at", 0.0) or 0.0)
+    if started_at <= 0:
+        return False
+    beat_index = int(state.get("between_sequence_index", 0) or 0)
+    now = time.time()
+    progressed = False
+    while beat_index < len(BETWEEN_SEQUENCE_BEATS):
+        beat_at, beat_name = BETWEEN_SEQUENCE_BEATS[beat_index]
+        if not force and now < started_at + float(beat_at):
+            break
+        _emit_between_beat(character, beat_name)
+        progressed = True
+        beat_index += 1
+        state = ensure_onboarding_state(character)
+        state["between_sequence_index"] = beat_index
+        character.db.onboarding_state = state
+    if beat_index >= len(BETWEEN_SEQUENCE_BEATS):
+        state = ensure_onboarding_state(character)
+        if str(state.get("pending_scene", "") or "").strip().lower() == "between_sequence":
+            _clear_pending_scene(character)
+        return progressed
+    next_at = started_at + float(BETWEEN_SEQUENCE_BEATS[beat_index][0])
+    state = ensure_onboarding_state(character)
+    state["between_sequence_index"] = beat_index
+    state["pending_scene"] = "between_sequence"
+    state["pending_scene_at"] = 0.0 if force else next_at
+    character.db.onboarding_state = state
+    if not force:
+        delay(max(0.05, next_at - time.time()), _process_pending_scene, character)
+    return progressed
+
+
+def _begin_escalation(character, target):
+    if not character or get_onboarding_step(character) != STEP_COMBAT or not _is_training_dummy(target):
+        return False
+    goblin = _spawn_training_goblin(character)
+    if not goblin:
+        return False
+    set_onboarding_step(character, STEP_ESCALATION)
+    token = _new_scene_token(character)
+    _update_state(character, combat_exchange_count=0, release_scheduled=False, stats_reviewed=False, depart_hint_shown=False)
+    _touch_progress(character)
+    emit_text(character, COMBAT_FEEDBACK)
+    emit_text(character, ESCALATION_FEEDBACK)
+    emit_npc_line(character, _find_room_guide(character) or GUIDE_KEY, "...move.")
+    emit_state_dialogue(character, STEP_ESCALATION)
+    if hasattr(character, "set_target"):
+        character.set_target(goblin)
+    if hasattr(goblin, "set_target"):
+        goblin.set_target(character)
+    character.db.in_combat = True
+    goblin.db.in_combat = True
+    _update_state(character, scene_token=token)
+    return True
+
+
+def _complete_depart_awareness(character, token):
+    if not character or get_onboarding_step(character) != STEP_DEPART or not _scene_token_matches(character, token):
+        return False
+    _clear_pending_scene(character)
+    emit_npc_line(character, _find_room_guide(character) or GUIDE_KEY, "You can stand. Go on.")
+    return release_to_world(character)[0]
+
+
+def _schedule_release(character):
+    state = ensure_onboarding_state(character)
+    if bool(state.get("release_scheduled", False)):
+        return False
+    token = _new_scene_token(character)
+    _update_state(character, release_scheduled=True, depart_hint_shown=True)
+    _queue_pending_scene(character, "release", 1.0, token)
+    return True
+
+
+def _trigger_controlled_loss(character, target):
+    if not character:
+        return False
+    set_onboarding_step(character, STEP_COLLAPSE)
+    token = _new_scene_token(character)
+    _clear_combat_state(character, target)
+    _set_scripted_resources(character, hp_ratio=0.08, balance_ratio=0.0, fatigue_ratio=0.75)
+    character.db.position = "prone"
+    _set_between_state(character, True)
+    _set_training_collapse(character, True)
+    _touch_progress(character)
+    emit_text(character, "It doesn't rush you.\n\nIt doesn't need to.")
+    emit_text(character, "The yard is already losing.")
+    emit_text(character, "Then its eyes find you.")
+    emit_text(character, "The bow comes up already drawn.\n\nYou understand--too late--that this is not a fight.")
+    emit_text(character, "The arrow leaves before you can move.\n\nNo sound.\n\nJust impact.\n\nIt hits you in the chest hard enough to erase everything else.")
+    emit_text(character, "The ground finds you.\n\nOr you find it.\n\nIt's unclear.")
+    emit_text(character, "The noise fades first.\n\nThen the weight.\n\nThen everything else.")
+    emit_text(character, COLLAPSE_LINE)
+    emit_text(character, BETWEEN_STATE_INTRO)
+    emit_text(character, BETWEEN_STATE_OBSERVER)
+    _update_state(character, between_started_at=time.time(), between_sequence_index=0)
+    _queue_pending_scene(character, "between_sequence", float(BETWEEN_SEQUENCE_BEATS[0][0]), token)
+    return True
+
+
+def _resolve_scripted_exchange(character, target):
+    state = ensure_onboarding_state(character)
+    exchange_count = int(state.get("combat_exchange_count", 0) or 0)
+    if exchange_count <= 0:
+        _touch_progress(character)
+        emit_text(character, "You move first, but not fast enough.\n\nThe distance never closes the way you want it to.")
+        _update_state(character, combat_exchange_count=1)
+        return _trigger_controlled_loss(character, target)
+    _update_state(character, combat_exchange_count=exchange_count + 1)
+    return _trigger_controlled_loss(character, target)
 
 
 def _remember_recent_line(character, text, limit=25):
@@ -479,838 +750,639 @@ def get_recent_lines(character):
     return list(getattr(character.ndb, "_recent_lines", None) or [])
 
 
-def _emit_objective_line(character, objective, state, force=False, minimum_interval=10.0):
-    if not hasattr(character, "msg"):
-        return False
-    now = time.time()
-    last_roleplay = dict(state.get("last_roleplay") or {})
-    last_objective = float(last_roleplay.get("system:objective", 0.0) or 0.0)
-    last_objective_text = str(last_roleplay.get("system:objective_text", "") or "")
-    repeated_objective_window = max(float(minimum_interval or 0.0), 30.0)
-    if not force and last_objective_text == str(objective or "") and now - last_objective < repeated_objective_window:
-        return False
-    if not force and now - last_objective < float(minimum_interval or 0.0):
-        return False
-    line = f"[Objective] {objective}"
-    character.msg(line)
-    _remember_recent_line(character, line)
-    last_roleplay["system:objective"] = now
-    last_roleplay["system:objective_text"] = str(objective or "")
-    last_roleplay["system:prompt_pause"] = now
-    state["last_roleplay"] = last_roleplay
-    _persist_state(character, state)
-    return True
+def _completed_steps_for(step):
+    order = {
+        STEP_START: [],
+        STEP_MOVEMENT: [STEP_MOVEMENT],
+        STEP_POSSESSION: [STEP_MOVEMENT, STEP_POSSESSION],
+        STEP_PREPARATION: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION],
+        STEP_COMBAT: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT],
+        STEP_ESCALATION: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_ESCALATION],
+        STEP_COLLAPSE: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_ESCALATION, STEP_COLLAPSE],
+        STEP_TRANSPORT: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_ESCALATION, STEP_COLLAPSE, STEP_TRANSPORT],
+        STEP_LEARNING: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_LEARNING],
+        STEP_FAILURE: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_LEARNING, STEP_FAILURE],
+        STEP_RECOVERY: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_ESCALATION, STEP_COLLAPSE, STEP_RECOVERY],
+        STEP_DEPART: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_ESCALATION, STEP_COLLAPSE, STEP_RECOVERY, STEP_DEPART],
+        STEP_COMPLETE: [STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_ESCALATION, STEP_COLLAPSE, STEP_TRANSPORT, STEP_COMPLETE],
+    }
+    return list(order.get(str(step or "").strip().lower(), []))
 
 
-def _ensure_healing_wound(character, state=None):
+def get_onboarding_step(character):
+    if bool(getattr(getattr(character, "db", None), "chargen_active", False)):
+        return None
+    step = str(getattr(getattr(character, "db", None), "onboarding_step", "") or "").strip().lower()
+    if step in ONBOARDING_STEPS:
+        return step
+    if bool(getattr(getattr(character, "db", None), "onboarding_complete", False)):
+        return STEP_COMPLETE
+    room = getattr(character, "location", None)
+    if bool(getattr(getattr(room, "db", None), "is_onboarding", False)):
+        return STEP_START
+    return None
+
+
+def set_onboarding_step(character, step):
+    normalized = str(step or "").strip().lower()
+    if normalized not in ONBOARDING_STEPS:
+        normalized = STEP_START
+    character.db.onboarding_step = normalized
+    character.db.onboarding_complete = normalized == STEP_COMPLETE
+    ensure_onboarding_state(character)
+    return normalized
+
+
+def activate_onboarding(character):
     if not character:
-        return False
-    state = state or ensure_onboarding_state(character)
-    completed = set(state.get("completed_steps") or [])
-    if "combat" not in completed or "healing" in completed:
-        return False
-    room_key = str(getattr(getattr(character, "location", None), "key", "") or "")
-    if room_key != "Supply Shack":
-        return False
-    if hasattr(character, "get_first_bleeding_part") and character.get_first_bleeding_part():
-        return False
-
-    part_key = "left_arm"
-    body_part = character.get_body_part(part_key) if hasattr(character, "get_body_part") else None
-    if not body_part:
-        return False
-
-    body_part["external"] = max(int(body_part.get("external", 0) or 0), 4)
-    body_part["bleed"] = max(int(body_part.get("bleed", 0) or 0), 2)
-    body_part["tended"] = False
-    body_part["tend"] = {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}
-    if hasattr(character, "update_bleed_state"):
-        character.update_bleed_state()
-    return True
+        return None
+    return set_onboarding_step(character, STEP_START)
 
 
-def emit_room_line(character, text, exclude=None):
-    room = getattr(character, "location", None)
-    if room:
-        room.msg_contents(str(text), exclude=exclude or [])
-    _remember_recent_line(character, text)
+def start_onboarding(character):
+    if not character:
+        return None
+    return activate_onboarding(character)
+
+
+def ensure_onboarding_state(character):
+    step = get_onboarding_step(character)
+    active = step in {STEP_START, STEP_MOVEMENT, STEP_POSSESSION, STEP_PREPARATION, STEP_COMBAT, STEP_ESCALATION, STEP_COLLAPSE, STEP_TRANSPORT, STEP_LEARNING, STEP_FAILURE, STEP_RECOVERY, STEP_DEPART}
+    state = getattr(getattr(character, "db", None), "onboarding_state", None)
+    if not isinstance(state, Mapping):
+        state = {}
+    normalized = {
+        "active": active,
+        "complete": step == STEP_COMPLETE,
+        "completed_steps": _completed_steps_for(step),
+        "current_objective": get_onboarding_objective(character) if step else None,
+        "last_progress_at": float(state.get("last_progress_at", 0.0) or 0.0),
+        "room_entered_at": float(getattr(character.db, "onboarding_room_entered_at", 0.0) or 0.0),
+        "visited_rooms": list(state.get("visited_rooms") or []),
+        "inventory_checked": bool(state.get("inventory_checked", False)),
+        "wore_training_gear": bool(state.get("wore_training_gear", False)),
+        "wielded_training_weapon": bool(state.get("wielded_training_weapon", False)),
+        "idle_prompt_step": str(state.get("idle_prompt_step", step or "") or step or ""),
+        "idle_prompt_stage": int(state.get("idle_prompt_stage", 0) or 0),
+        "combat_exchange_count": int(state.get("combat_exchange_count", 0) or 0),
+        "scripted_enemy_id": int(state.get("scripted_enemy_id", 0) or 0),
+        "scene_token": int(state.get("scene_token", 0) or 0),
+        "stats_reviewed": bool(state.get("stats_reviewed", False)),
+        "depart_hint_shown": bool(state.get("depart_hint_shown", False)),
+        "release_scheduled": bool(state.get("release_scheduled", False)),
+        "pending_scene": str(state.get("pending_scene", "") or ""),
+        "pending_scene_at": float(state.get("pending_scene_at", 0.0) or 0.0),
+        "between_started_at": float(state.get("between_started_at", 0.0) or 0.0),
+        "between_sequence_index": int(state.get("between_sequence_index", 0) or 0),
+        "transport_started_at": float(state.get("transport_started_at", 0.0) or 0.0),
+        "transport_sequence_index": int(state.get("transport_sequence_index", 0) or 0),
+    }
+    character.db.onboarding_state = normalized
+    return normalized
+
+
+def is_in_onboarding(character):
+    return get_onboarding_step(character) != STEP_COMPLETE and get_onboarding_step(character) is not None
+
+
+def is_onboarding_character(character):
+    if not character or bool(getattr(getattr(character, "db", None), "is_npc", False)):
+        return False
+    return is_in_onboarding(character)
+
+
+def get_onboarding_objective(character):
+    step = get_onboarding_step(character)
+    if step == STEP_START:
+        return "Move east."
+    if step == STEP_MOVEMENT:
+        return "Get the sword."
+    if step == STEP_PREPARATION:
+        return "Wear your gear and carry the sword properly."
+    if step == STEP_COMBAT:
+        return "Attack the dummy."
+    if step == STEP_ESCALATION:
+        return ESCALATION_OBJECTIVE
+    if step == STEP_COLLAPSE:
+        return "Hold on."
+    if step == STEP_TRANSPORT:
+        return "Hold still."
+    if step == STEP_LEARNING:
+        return "Review your experience."
+    if step == STEP_RECOVERY:
+        return "Check your condition."
+    if step == STEP_DEPART:
+        return "Remember how to return."
+    if step == STEP_COMPLETE:
+        return "Go on."
+    return ""
+
+
+def get_status_lines(character):
+    step = get_onboarding_step(character)
+    if not step:
+        return ["You are not in onboarding."]
+    return [f"Onboarding step: {step}", f"Objective: {get_onboarding_objective(character)}"]
+
+
+def format_token_feedback(state):
+    return ""
+
+
+def _touch_progress(character):
     state = ensure_onboarding_state(character)
-    last_roleplay = dict(state.get("last_roleplay") or {})
-    last_roleplay["system:prompt_pause"] = time.time()
-    state["last_roleplay"] = last_roleplay
-    _persist_state(character, state)
-    return True
+    state["last_progress_at"] = time.time()
+    state["idle_prompt_step"] = get_onboarding_step(character) or ""
+    state["idle_prompt_stage"] = 0
+    character.db.onboarding_state = state
+    return state
 
 
-def emit_npc_line(character, npc, line, exclude=None):
-    if not character or not npc or not line:
-        return False
+def _find_room_guide(character):
     room = getattr(character, "location", None)
-    if room and getattr(npc, "location", None) != room:
-        npc.move_to(room, quiet=True)
-    speaker = str(getattr(npc, "key", "Someone") or "Someone")
-    text = f'{speaker} says, "{line}"'
-    return emit_room_line(character, text, exclude=exclude)
+    if not room:
+        return None
+    for obj in list(getattr(room, "contents", []) or []):
+        if bool(getattr(getattr(obj, "db", None), "is_onboarding_guide", False)):
+            return obj
+    return None
+
+
+def emit_text(character, text):
+    if not character or not text:
+        return False
+    character.msg(str(text))
+    if hasattr(character, "ndb"):
+        character.ndb.onboarding_prompt_at = time.time()
+    _remember_recent_line(character, text)
+    return True
 
 
 def emit_named_line(character, speaker, line, exclude=None):
     if not character or not speaker or not line:
         return False
-    text = f'{str(speaker)} says, "{line}"'
-    return emit_room_line(character, text, exclude=exclude)
+    room = getattr(character, "location", None)
+    text = f'{str(speaker)} says, "{str(line)}"'
+    if room:
+        room.msg_contents(text, exclude=exclude or [])
+    else:
+        character.msg(text)
+    if hasattr(character, "ndb"):
+        character.ndb.onboarding_prompt_at = time.time()
+    _remember_recent_line(character, text)
+    return True
 
 
-def _sync_current_objective(character, state=None, announce=False, force=False, minimum_interval=10.0):
-    state = state or ensure_onboarding_state(character)
-    objective = _calculate_onboarding_objective(state)
-    previous = str(state.get("current_objective") or "") or None
-    changed = previous != objective
-    if changed:
-        state["current_objective"] = objective
-        state["objective_updated_at"] = time.time()
-        _persist_state(character, state)
-    tutorial = dict(getattr(character.db, "tutorial", None) or {})
-    if tutorial.get("current_objective") != objective:
-        tutorial["current_objective"] = objective
-        character.db.tutorial = tutorial
-        changed = True
-    if announce and (changed or force):
-        _emit_objective_line(character, objective, state, force=force or changed, minimum_interval=minimum_interval)
-    return objective
+def emit_npc_line(character, npc, line, exclude=None):
+    speaker = str(getattr(npc, "key", GUIDE_KEY) or GUIDE_KEY)
+    return emit_named_line(character, speaker, line, exclude=exclude)
+
+
+def emit_state_dialogue(character, step=None):
+    if not character:
+        return False
+    guide = _find_room_guide(character)
+    dialogue = STATE_DIALOGUE.get(step or get_onboarding_step(character)) or ()
+    if not dialogue:
+        return False
+    for entry_type, line in dialogue:
+        if entry_type == "speech" and guide:
+            emit_npc_line(character, guide, line)
+            continue
+        emit_text(character, line)
+    return True
+
+
+def get_room_prompt(character, room=None):
+    step = get_onboarding_step(character)
+    dialogue = STATE_DIALOGUE.get(step) or ()
+    return dialogue[-1][1] if dialogue else None
+
+
+def prompt_spacing_active(character, minimum_interval=2.5):
+    last_prompt_at = float(getattr(getattr(character, "ndb", None), "onboarding_prompt_at", 0.0) or 0.0)
+    return (time.time() - last_prompt_at) < float(minimum_interval or 0.0)
+
+
+def emit_idle_nudge(character):
+    step = get_onboarding_step(character)
+    if not step:
+        return False
+    state = ensure_onboarding_state(character)
+    step_key = str(state.get("idle_prompt_step", "") or "")
+    if step_key != step:
+        state["idle_prompt_step"] = step
+        state["idle_prompt_stage"] = 0
+        character.db.onboarding_state = state
+    sequence = list(IDLE_ESCALATIONS.get(step) or [])
+    if not sequence:
+        return False
+    stage = int(state.get("idle_prompt_stage", 0) or 0)
+    if stage >= len(sequence):
+        return False
+    text = sequence[stage]
+    state["idle_prompt_stage"] = stage + 1
+    character.db.onboarding_state = state
+    return emit_text(character, text)
 
 
 def announce_objective(character, force=False):
-    return _sync_current_objective(character, announce=True, force=force)
+    if not force and prompt_spacing_active(character, minimum_interval=5.0):
+        return False
+    return emit_idle_nudge(character)
 
 
-def remind_objective_if_idle(character, idle_threshold=5.0, minimum_interval=12.0):
-    if not is_onboarding_character(character):
+def remind_objective_if_idle(character, idle_threshold=5.0, minimum_interval=5.0):
+    if not is_in_onboarding(character):
         return False
     state = ensure_onboarding_state(character)
-    idle_for = time.time() - max(
+    now = time.time()
+    last_progress = max(
         float(state.get("last_progress_at", 0.0) or 0.0),
         float(state.get("room_entered_at", 0.0) or 0.0),
     )
-    if idle_for < float(idle_threshold or 0.0):
+    if (now - last_progress) < float(idle_threshold or 0.0):
         return False
-    objective = _sync_current_objective(character, state=state)
-    return _emit_objective_line(character, objective, state, force=False, minimum_interval=minimum_interval)
-
-
-def format_token_feedback(state):
-    return f"You've learned something. (+1 Token, {int(state.get('tokens', 0) or 0)} total.)"
-
-
-def _complete_step(character, step, tokens=1):
-    state = ensure_onboarding_state(character)
-    completed = list(state.get("completed_steps") or [])
-    awarded = False
-    if step not in completed:
-        completed.append(step)
-        state["completed_steps"] = completed
-        state["last_progress_at"] = time.time()
-        if int(tokens or 0) > 0:
-            state["tokens"] = int(state.get("tokens", 0) or 0) + int(tokens or 0)
-            awarded = True
-    _persist_state(character, state)
-    _sync_current_objective(character, state=state, announce=awarded, force=awarded)
-    return state, awarded
-
-
-def _set_action_flag(state, key, value):
-    action_flags = dict(state.get("action_flags") or {})
-    action_flags[key] = value
-    state["action_flags"] = action_flags
-    return state
-
-
-def _set_event_flag(state, key, value):
-    event_flags = dict(state.get("event_flags") or {})
-    event_flags[key] = bool(value)
-    state["event_flags"] = event_flags
-    return state
-
-
-def get_event_flag(character, key):
-    state = ensure_onboarding_state(character)
-    return bool(dict(state.get("event_flags") or {}).get(key, False))
-
-
-def set_event_flag(character, key, value=True):
-    state = ensure_onboarding_state(character)
-    _set_event_flag(state, key, value)
-    _persist_state(character, state)
-    return bool(value)
-
-
-def _append_action_flag_value(state, key, value):
-    action_flags = dict(state.get("action_flags") or {})
-    values = [str(entry) for entry in (action_flags.get(key) or []) if entry]
-    if value not in values:
-        values.append(value)
-    action_flags[key] = values
-    state["action_flags"] = action_flags
-    return state
-
-
-def _queue_roleplay(character, role, line):
-    if role not in ROLE_KEYS or not line:
+    if prompt_spacing_active(character, minimum_interval=minimum_interval):
         return False
-    state = ensure_onboarding_state(character)
-    pending = list(state.get("pending_roleplay") or [])
-    entry = {"role": str(role), "line": str(line)}
-    if entry not in pending:
-        pending.append(entry)
-        state["pending_roleplay"] = pending
-        _persist_state(character, state)
-        return True
-    return False
+    return emit_idle_nudge(character)
 
 
-def queue_roleplay_line(character, role, line):
-    return _queue_roleplay(character, role, line)
-
-
-def pop_pending_roleplay(character, role):
-    state = ensure_onboarding_state(character)
-    pending = list(state.get("pending_roleplay") or [])
-    for index, entry in enumerate(pending):
-        if str(entry.get("role", "") or "") != str(role):
-            continue
-        pending.pop(index)
-        state["pending_roleplay"] = pending
-        _persist_state(character, state)
-        return str(entry.get("line", "") or "")
+def get_roleplay_nudge(obj, character):
     return None
 
 
-def note_step_failure(character, step):
-    if not is_onboarding_character(character):
-        return False
-    state = ensure_onboarding_state(character)
-    reaction = STEP_FAILURE_REACTIONS.get(step)
-    if not reaction:
-        return False
-    _queue_roleplay(character, "mentor", reaction.get("mentor"))
-    _queue_roleplay(character, "gremlin", reaction.get("gremlin"))
-    count = _increment_failure_count(state, step)
-    _queue_hint_lines(character, step, count)
-    objective = _sync_current_objective(character, state=state)
-    _emit_objective_line(character, objective, state, force=False, minimum_interval=6.0)
-    return True
+def trigger_gear_delay_scene(character):
+    return False
+
+
+def trigger_almost_failure_scene(character):
+    return False
 
 
 def note_hesitation(character, context=None):
-    if not is_onboarding_character(character):
+    return emit_idle_nudge(character)
+
+
+def note_step_failure(character, step):
+    return emit_idle_nudge(character)
+
+
+def _process_pending_scene(character, force=False):
+    if not character or not is_in_onboarding(character):
         return False
-    objective = get_onboarding_objective(character)
-    mentor_line = "Standing still won't help you."
-    gremlin_line = "Still thinking? The goblins are very action-oriented."
-    normalized = str(context or "").strip().lower()
-    if normalized == "combat":
-        mentor_line = "Standing still won't help you. Hit it."
-        gremlin_line = "It is still there. I checked by looking at all the teeth."
-    elif normalized == "gear":
-        mentor_line = "Standing still won't help you. Dress for the hit before it lands."
-        gremlin_line = "You do look dramatically unarmored."
-    elif normalized == "healing":
-        mentor_line = "Fix it. Now."
-        gremlin_line = "The floor is noticing how much of you is on it."
-    _queue_roleplay(character, "mentor", mentor_line)
-    _queue_roleplay(character, "gremlin", gremlin_line)
-    _emit_objective_line(character, objective, ensure_onboarding_state(character), force=True)
-    return True
+    progressed = False
+    while True:
+        state = ensure_onboarding_state(character)
+        scene_name = str(state.get("pending_scene", "") or "").strip().lower()
+        scene_at = float(state.get("pending_scene_at", 0.0) or 0.0)
+        token = int(state.get("scene_token", 0) or 0)
+        if not scene_name:
+            return progressed
+        if not force and scene_at > 0 and time.time() < scene_at:
+            return progressed
+        if scene_name == "between_sequence":
+            changed = _process_between_sequence(character, force=force)
+        elif scene_name == "transport_sequence":
+            changed = _process_transport_sequence(character, force=force)
+        elif scene_name == "release":
+            changed = _complete_depart_awareness(character, token)
+        else:
+            changed = False
+        progressed = progressed or bool(changed)
+        if not force:
+            return progressed
+        next_state = ensure_onboarding_state(character)
+        if str(next_state.get("pending_scene", "") or "").strip().lower() == scene_name and not changed:
+            return progressed
 
 
-def _record_room_visit(character, room_key):
+def remap_onboarding_input(character, raw_string):
+    if not is_in_onboarding(character):
+        return None, None
+    _process_pending_scene(character)
+    if not is_in_onboarding(character):
+        return None, None
+    if bool(getattr(getattr(character, "db", None), "training_between", False)):
+        return IGNORE_INPUT_COMMAND, None
+    raw = str(raw_string or "").strip()
+    if not raw:
+        return None, None
+    parts = raw.split(None, 1)
+    command_name = parts[0].lower()
+    arguments = parts[1] if len(parts) > 1 else ""
+    step = get_onboarding_step(character)
+
+    if command_name == "take" and step in {STEP_MOVEMENT, STEP_PREPARATION}:
+        return f"get {arguments}".strip(), None
+
+    if command_name == "equip" and step == STEP_PREPARATION:
+        lowered = arguments.strip().lower()
+        if lowered in {"sword", "weapon", TRAINING_SWORD_KEY}:
+            return f"wield {arguments}".strip(), None
+        return f"wear {arguments}".strip() if arguments.strip() else "wear", None
+
+    if command_name in set(STEP_ALLOWED_COMMANDS.get(step, set())):
+        return None, None
+    if step == STEP_START:
+        return None, EARLY_BLOCKED_COMMAND_MESSAGE
+    return None, BLOCKED_COMMAND_MESSAGE
+
+
+def _is_training_sword(item):
+    return str(getattr(item, "key", "") or "").strip().lower() == TRAINING_SWORD_KEY
+
+
+def _is_training_gear(item):
+    item_key = str(getattr(item, "key", "") or "").strip().lower()
+    return bool(getattr(getattr(item, "db", None), "is_onboarding_training_gear", False)) or item_key == TRAINING_VEST_KEY
+
+
+def get_pickup_block(character, obj):
+    if not is_in_onboarding(character):
+        return None
+    step = get_onboarding_step(character)
+    room_key = str(getattr(getattr(character, "location", None), "key", "") or "")
+    if room_key != TRAINING_HALL:
+        return INVALID_COMMAND_MESSAGE
+    if step == STEP_MOVEMENT and _is_training_sword(obj):
+        return None
+    if step == STEP_PREPARATION and (_is_training_sword(obj) or _is_training_gear(obj)):
+        return None
+    return INVALID_COMMAND_MESSAGE
+
+
+def get_attack_block(character, target):
+    if not is_in_onboarding(character):
+        return None
+    step = get_onboarding_step(character)
+    if step not in {STEP_COMBAT, STEP_ESCALATION}:
+        return INVALID_COMMAND_MESSAGE
+    if str(getattr(getattr(character, "location", None), "key", "") or "") != PRACTICE_YARD:
+        return INVALID_COMMAND_MESSAGE
+    if step == STEP_COMBAT and _is_training_dummy(target):
+        return None
+    if step == STEP_ESCALATION and _is_training_goblin(target):
+        return None
+    return INVALID_COMMAND_MESSAGE
+
+
+def get_traverse_block(exit_obj, character, target_location):
+    if not character or not is_in_onboarding(character):
+        return None
+    destination_key = str(getattr(target_location, "key", "") or "")
+    step = get_onboarding_step(character)
+    if step in {STEP_ESCALATION, STEP_COLLAPSE, STEP_TRANSPORT, STEP_RECOVERY, STEP_DEPART}:
+        return INVALID_COMMAND_MESSAGE
+    if destination_key not in ONBOARDING_ROOM_NAMES:
+        if step != STEP_COMPLETE:
+            return INVALID_COMMAND_MESSAGE
+        return None
+    if destination_key == TRAINING_HALL and step != STEP_START:
+        return None
+    if destination_key == PRACTICE_YARD and step not in {STEP_COMBAT, STEP_ESCALATION, STEP_COLLAPSE, STEP_LEARNING, STEP_FAILURE, STEP_RECOVERY, STEP_DEPART, STEP_COMPLETE}:
+        return INVALID_COMMAND_MESSAGE
+    if destination_key == INTAKE_CHAMBER:
+        return INVALID_COMMAND_MESSAGE
+    return None
+
+
+def handle_room_entry(character):
+    if not character:
+        return
+    if bool(getattr(getattr(character, "db", None), "chargen_active", False)):
+        return
+    room = getattr(character, "location", None)
+    if not room or not bool(getattr(getattr(room, "db", None), "is_onboarding", False)):
+        return
+    if not get_onboarding_step(character):
+        activate_onboarding(character)
+    character.db.onboarding_room_entered_at = time.time()
     state = ensure_onboarding_state(character)
+    room_key = str(getattr(room, "key", "") or "")
     visited = list(state.get("visited_rooms") or [])
     if room_key not in visited:
         visited.append(room_key)
         state["visited_rooms"] = visited
-        _persist_state(character, state)
-        return True
-    return False
+    character.db.onboarding_state = state
+    if room_key == INTAKE_CHAMBER and get_onboarding_step(character) == STEP_START:
+        _touch_progress(character)
+        emit_state_dialogue(character, STEP_START)
+        return
+    if room_key == TRAINING_HALL and get_onboarding_step(character) == STEP_START:
+        set_onboarding_step(character, STEP_MOVEMENT)
+        _touch_progress(character)
+        emit_state_dialogue(character, STEP_MOVEMENT)
+        return
+    if room_key == PRACTICE_YARD and get_onboarding_step(character) == STEP_COMBAT:
+        _cleanup_room_training_goblins(room)
+        _touch_progress(character)
+        emit_state_dialogue(character, STEP_COMBAT)
 
 
-def _find_role_npc(role):
-    return ObjectDB.objects.filter(db_key__iexact=ROLE_KEYS[role]).first()
+def note_item_pickup(character, item):
+    if not is_in_onboarding(character):
+        return False, ""
+    room_key = str(getattr(getattr(character, "location", None), "key", "") or "")
+    if room_key != TRAINING_HALL:
+        return False, ""
+    if get_onboarding_step(character) == STEP_MOVEMENT and _is_training_sword(item):
+        emit_text(character, SWORD_PICKUP_MESSAGE)
+        emit_text(character, INVENTORY_HINT)
+        set_onboarding_step(character, STEP_PREPARATION)
+        state = ensure_onboarding_state(character)
+        state["idle_prompt_step"] = STEP_PREPARATION
+        state["idle_prompt_stage"] = 0
+        character.db.onboarding_state = state
+        _touch_progress(character)
+        emit_state_dialogue(character, STEP_PREPARATION)
+        return True, SWORD_PICKUP_MESSAGE
+    if get_onboarding_step(character) == STEP_PREPARATION and _is_training_gear(item):
+        _touch_progress(character)
+    return False, ""
+
+
+def note_inventory_action(character):
+    if not is_in_onboarding(character):
+        return False
+    if get_onboarding_step(character) != STEP_PREPARATION:
+        return False
+    state = ensure_onboarding_state(character)
+    state["inventory_checked"] = True
+    state["idle_prompt_stage"] = max(1, int(state.get("idle_prompt_stage", 0) or 0))
+    character.db.onboarding_state = state
+    _touch_progress(character)
+    return True
+
+
+def _resolve_preparation_progress(character):
+    state = ensure_onboarding_state(character)
+    if not (state.get("wore_training_gear") and state.get("wielded_training_weapon")):
+        return False, None
+    if get_onboarding_step(character) != STEP_PREPARATION:
+        return False, None
+    set_onboarding_step(character, STEP_COMBAT)
+    _touch_progress(character)
+    message = f"{EQUIP_COMPLETION_MESSAGE}\n\n{COMBAT_TRANSITION_LINE}"
+    if hasattr(character, "ndb"):
+        character.ndb.onboarding_prompt_at = time.time()
+    _remember_recent_line(character, message)
+    return True, message
+
+
+def note_equipment_action(character, item):
+    if not is_in_onboarding(character):
+        return False, None
+    if get_onboarding_step(character) != STEP_PREPARATION:
+        return False, None
+    if not _is_training_gear(item):
+        return False, None
+    state = ensure_onboarding_state(character)
+    state["wore_training_gear"] = True
+    character.db.onboarding_state = state
+    _touch_progress(character)
+    return _resolve_preparation_progress(character)
+
+
+def note_weapon_action(character, item):
+    if not is_in_onboarding(character):
+        return False, None
+    if get_onboarding_step(character) != STEP_PREPARATION:
+        return False, None
+    if not _is_training_sword(item):
+        return False, None
+    state = ensure_onboarding_state(character)
+    state["wielded_training_weapon"] = True
+    character.db.onboarding_state = state
+    _touch_progress(character)
+    return _resolve_preparation_progress(character)
 
 
 def is_training_enemy(target):
     if not target:
         return False
-    role = str(getattr(getattr(target, "db", None), "onboarding_enemy_role", "") or "").lower()
-    if role in {"training", "breach"}:
-        return True
-    return bool(getattr(getattr(target, "db", None), "is_tutorial_enemy", False))
-
-
-def _deliver_role_line(character, cue_key, role, force=False):
-    npc = _find_role_npc(role)
-    if not npc or not getattr(character, "location", None):
-        return False
-    if getattr(npc, "location", None) != character.location:
-        npc.move_to(character.location, quiet=True)
-    state = ensure_onboarding_state(character)
-    throttle_key = f"{role}:{cue_key}"
-    last_roleplay = dict(state.get("last_roleplay") or {})
-    now = time.time()
-    if not force and now - float(last_roleplay.get(throttle_key, 0.0) or 0.0) < 8.0:
-        return False
-    line = ROLE_CUES.get(cue_key, {}).get(role)
-    if not line:
-        return False
-    emit_npc_line(character, npc, line)
-    last_roleplay[throttle_key] = now
-    state["last_roleplay"] = last_roleplay
-    _persist_state(character, state)
-    return True
-
-
-def emit_progress_cue(character, cue_key):
-    _deliver_role_line(character, cue_key, "mentor", force=True)
-    _deliver_role_line(character, cue_key, "gremlin", force=True)
-
-
-def build_description(character):
-    state = ensure_onboarding_state(character)
-    appearance = dict(state.get("appearance") or {})
-    race_key = str(getattr(character.db, "race", "person") or "person").replace("_", " ")
-    return (
-        f"A {appearance['height']}, {appearance['build']} {race_key} with {appearance['hair_style']} "
-        f"{appearance['hair_color']} hair and {appearance['eyes']} eyes."
-    )
-
-
-def set_gender(character, value):
-    if not is_onboarding_character(character):
-        return False, "You are not in an intake sequence."
-    room = getattr(character.location, "key", None)
-    if room != "Intake Hall":
-        note_step_failure(character, "gender")
-        return False, "You must choose your gender in Intake Hall."
-    normalized = str(value or "").strip().lower()
-    if normalized not in GENDER_OPTIONS:
-        return False, f"Choose one of: {', '.join(GENDER_OPTIONS)}."
-    character.db.gender = normalized
-    state, awarded = _complete_step(character, "gender", tokens=1)
-    _reset_failure_count(state, "gender")
-    _persist_state(character, state)
-    emit_progress_cue(character, "gender")
-    message = f"You set your intake gender to {normalized}."
-    if awarded:
-        message = f"{message} {format_token_feedback(state)}"
-    return True, message
-
-
-def select_race(character, value):
-    if not is_onboarding_character(character):
-        return False, "You are not in an intake sequence."
-    room = getattr(character.location, "key", None)
-    if room != "Lineup Platform":
-        note_step_failure(character, "race")
-        return False, "You must choose your race at the Lineup Platform."
-    state = ensure_onboarding_state(character)
-    if "race" in set(state.get("completed_steps") or []):
-        return False, "Your intake race has already been locked in."
-    raw = str(value or "").strip().lower()
-    if raw.startswith("at "):
-        raw = raw[3:].strip()
-    normalized = resolve_race_name(raw.replace(" station", ""), default=None)
-    if normalized not in RACE_DEFINITIONS:
-        return False, "Choose one of the marked stations: human, elf, or dwarf."
-    if hasattr(character, "set_race"):
-        character.set_race(normalized, sync=False, emit_messages=False)
-    else:
-        character.db.race = normalized
-    state, awarded = _complete_step(character, "race", tokens=1)
-    _reset_failure_count(state, "race")
-    _persist_state(character, state)
-    emit_progress_cue(character, "race")
-    message = f"You take your place at the {normalized.replace('_', ' ')} station."
-    if awarded:
-        message = f"{message} {format_token_feedback(state)}"
-    return True, message
-
-
-def set_trait(character, trait, value):
-    if not is_onboarding_character(character):
-        return False, "You are not in an intake sequence."
-    room = getattr(character.location, "key", None)
-    if room != "Mirror Alcove":
-        note_step_failure(character, "appearance")
-        return False, "You must set your appearance in the Mirror Alcove."
-    normalized_trait = str(trait or "").strip().lower().replace(" ", "_")
-    normalized_value = str(value or "").strip().lower()
-    if normalized_trait not in APPEARANCE_OPTIONS:
-        return False, "Choose one of these traits: hair style, hair color, build, height, eyes."
-    if normalized_value not in APPEARANCE_OPTIONS[normalized_trait]:
-        choices = ", ".join(APPEARANCE_OPTIONS[normalized_trait])
-        return False, f"Choose one of these {normalized_trait.replace('_', ' ')} values: {choices}."
-    state = ensure_onboarding_state(character)
-    appearance = dict(state.get("appearance") or {})
-    appearance[normalized_trait] = normalized_value
-    state["appearance"] = appearance
-    character.db.onboarding_state = state
-    character.db.appearance = dict(appearance)
-    _reset_failure_count(state, "appearance")
-    if all(appearance.get(field) for field in REQUIRED_APPEARANCE_FIELDS):
-        character.db.desc = build_description(character)
-        state, awarded = _complete_step(character, "appearance", tokens=1)
-        _persist_state(character, state)
-        emit_progress_cue(character, "appearance")
-        message = f"You settle your reflection into focus. {character.db.desc}"
-        if awarded:
-            message = f"{message} {format_token_feedback(state)}"
-        return True, message
-    missing = [field.replace("_", " ") for field in REQUIRED_APPEARANCE_FIELDS if not appearance.get(field)]
-    _persist_state(character, state)
-    return True, "You adjust your reflection. Remaining traits: " + ", ".join(missing) + "."
-
-
-def set_final_name(character, value):
-    if not is_onboarding_character(character):
-        return False, "You are not in an intake sequence."
-    room = getattr(character.location, "key", None)
-    if room != "Outer Gate":
-        note_step_failure(character, "name")
-        return False, "You choose your final name at the Outer Gate."
-    normalized = str(value or "").strip()
-    if not normalized:
-        return False, "Choose a name."
-    if normalized.lower() != str(getattr(character, "key", "") or "").lower():
-        ok, error = validate_name(normalized)
-        if not ok:
-            return False, error
-    old_key = character.key
-    character.key = normalized
-    character.save()
-    state, awarded = _complete_step(character, "name", tokens=1)
-    state["final_name"] = normalized
-    _reset_failure_count(state, "name")
-    _persist_state(character, state)
-    emit_progress_cue(character, "name")
-    message = f"You take the name {normalized}."
-    if old_key != normalized:
-        message = f"{message} The old intake tag is gone."
-    if awarded:
-        message = f"{message} {format_token_feedback(state)}"
-    return True, message
-
-
-def can_exit_to_world(character):
-    state = ensure_onboarding_state(character)
-    completed = set(state.get("completed_steps") or [])
-    missing = [step for step in RELEASE_STEPS if step not in completed]
-    if missing:
-        if "name" in missing:
-            return False, "Marshal Vey says, 'Put a name on yourself before you step beyond this gate.'"
-        return False, "You are not ready to leave yet. " + get_onboarding_objective(character)
-    return True, ""
-
-
-def release_to_world(character):
-    ok, error = can_exit_to_world(character)
-    if not ok:
-        return False, error
-    state = ensure_onboarding_state(character)
-    if not bool(state.get("reward_claimed", False)):
-        tokens = int(state.get("tokens", 0) or 0)
-        character.add_coins(40 + (tokens * 3))
-        tonic = create_object("typeclasses.objects.Object", key="field tonic", location=character, home=character)
-        tonic.db.weight = 0.2
-        tonic.db.desc = "A sharp-smelling tonic from the Last Intake compound. It is meant to get you moving again, not comfort you."
-        chit = create_object("typeclasses.objects.Object", key="last intake token-bundle", location=character, home=character)
-        chit.db.weight = 0.1
-        chit.db.desc = "A tied bundle of stamped intake tokens showing you survived the compound's last rushed intake."
-        cloak = create_object("typeclasses.wearables.Wearable", key="compound issue cloak", location=character, home=character)
-        cloak.db.slot = "torso"
-        cloak.db.item_type = "armor"
-        cloak.db.armor_type = "light_armor"
-        cloak.db.protection = 2
-        cloak.db.hindrance = 0
-        cloak.db.coverage = ["torso", "left_arm", "right_arm"]
-        cloak.db.weight = 1.5
-        cloak.db.desc = "A reinforced intake cloak with stitched interior plates, issued only to survivors of the compound's last rushed intake."
-        state["reward_claimed"] = True
-    state["active"] = False
-    state["complete"] = True
-    _persist_state(character, state)
-    emit_progress_cue(character, "release")
-    return True, "Marshal Vey gives a curt nod, tosses you a plated intake cloak and a heavier purse, and waves you through. The intake is over."
-
-
-def prompt_spacing_active(character, minimum_interval=2.5):
-    state = ensure_onboarding_state(character)
-    last_roleplay = dict(state.get("last_roleplay") or {})
-    last_prompt = float(last_roleplay.get("system:prompt_pause", 0.0) or 0.0)
-    return (time.time() - last_prompt) < float(minimum_interval or 0.0)
-
-
-def get_traverse_block(exit_obj, character, target_location):
-    if not character or not is_onboarding_character(character):
-        return None
-    destination_key = str(getattr(target_location, "key", "") or "")
-    requirement = FORWARD_REQUIREMENTS.get(destination_key)
-    if requirement:
-        step, message = requirement
-        state = ensure_onboarding_state(character)
-        if step not in set(state.get("completed_steps") or []):
-            note_step_failure(character, step)
-            return message
-    current_room = getattr(character.location, "key", None)
-    leaving_tutorial = bool(getattr(getattr(character.location, "db", None), "is_tutorial", False)) and not bool(getattr(getattr(target_location, "db", None), "is_tutorial", False))
-    if leaving_tutorial or (current_room == "Outer Gate" and str(getattr(exit_obj, "key", "")).lower() in {"out", "leave"}) or (current_room == "Secret Tunnel" and str(getattr(exit_obj, "key", "")).lower() == "crawl"):
-        ok, error = can_exit_to_world(character)
-        if not ok:
-            missing = [step for step in RELEASE_STEPS if step not in set(ensure_onboarding_state(character).get("completed_steps") or [])]
-            if missing:
-                note_step_failure(character, missing[0])
-            return error
-        release_to_world(character)
-    return None
-
-
-def handle_room_entry(character):
-    if not is_onboarding_character(character):
-        return
-    room = getattr(character, "location", None)
-    if not room:
-        return
-    state = ensure_onboarding_state(character)
-    if bool(state.get("complete", False)):
-        return
-    room_key = str(getattr(room, "key", "") or "")
-    state["room_entered_at"] = time.time()
-    _persist_state(character, state)
-    first_visit = _record_room_visit(character, room_key)
-    _ensure_healing_wound(character, state=state)
-    if first_visit and room_key == "Wake Room":
-        emit_progress_cue(character, "wake_room")
-    elif first_visit and room_key == "Outer Gate":
-        emit_progress_cue(character, "outer_gate")
-    _sync_current_objective(character, state=state)
-
-
-def note_equipment_action(character, item):
-    if not is_onboarding_character(character):
-        return False, False
-    if "appearance" not in set(ensure_onboarding_state(character).get("completed_steps") or []):
-        note_step_failure(character, "appearance")
-        return False, False
-    state = ensure_onboarding_state(character)
-    item_key = str(getattr(item, "key", "gear") or "gear")
-    _append_action_flag_value(state, "gear_items", item_key)
-    state["last_progress_at"] = time.time()
-    _persist_state(character, state)
-    worn_count = len(getattr(character, "get_worn_items", lambda: [])() or [])
-    if worn_count < 2:
-        _queue_roleplay(character, "mentor", "Good. One more.")
-        _sync_current_objective(character, state=state)
-        return False, False
-    state, awarded = _complete_step(character, "gear", tokens=1)
-    if awarded:
-        emit_progress_cue(character, "gear")
-    return True, awarded
-
-
-def note_weapon_action(character, item):
-    if not is_onboarding_character(character):
-        return False, False
-    state = ensure_onboarding_state(character)
-    if "gear" not in set(state.get("completed_steps") or []):
-        note_step_failure(character, "gear")
-        return False, False
-    _set_action_flag(state, "weapon_wielded", True)
-    state["last_progress_at"] = time.time()
-    _persist_state(character, state)
-    state, awarded = _complete_step(character, "weapon", tokens=1)
-    if awarded:
-        emit_progress_cue(character, "weapon")
-    return True, awarded
+    return _is_training_dummy(target) or _is_training_goblin(target) or bool(getattr(getattr(target, "db", None), "is_tutorial_enemy", False))
 
 
 def note_combat_start(character, target):
-    if not is_onboarding_character(character) or not is_training_enemy(target):
+    if not is_in_onboarding(character) or not is_training_enemy(target):
         return False
-    state = ensure_onboarding_state(character)
-    _set_action_flag(state, "combat_started", True)
-    state["last_progress_at"] = time.time()
-    _persist_state(character, state)
-    _queue_roleplay(character, "mentor", "Good. Again.")
-    return True
+    step = get_onboarding_step(character)
+    if step == STEP_COMBAT:
+        return _is_training_dummy(target)
+    if step == STEP_ESCALATION:
+        return _is_training_goblin(target)
+    return False
+
+
+def _clear_combat_state(character, target):
+    if hasattr(character, "set_target"):
+        character.set_target(None)
+    if hasattr(target, "set_target"):
+        target.set_target(None)
+    character.db.in_combat = False
+    target.db.in_combat = False
 
 
 def note_combat_win(character, target):
-    if not is_onboarding_character(character) or not is_training_enemy(target):
+    if not is_in_onboarding(character) or not is_training_enemy(target):
         return False, False
-    enemy_role = str(getattr(getattr(target, "db", None), "onboarding_enemy_role", "") or "training").lower()
-    state = ensure_onboarding_state(character)
-    _set_action_flag(state, "combat_started", True)
-    state["last_progress_at"] = time.time()
-    if enemy_role == "breach":
-        _set_action_flag(state, "breach_started", True)
-        _set_action_flag(state, "breach_cleared", True)
-        _persist_state(character, state)
-        state, awarded = _complete_step(character, "breach", tokens=1)
-        if awarded:
-            emit_progress_cue(character, "breach")
-        return True, awarded
-    _set_action_flag(state, "combat_won", True)
-    _persist_state(character, state)
-    state, awarded = _complete_step(character, "combat", tokens=1)
-    if awarded:
-        emit_progress_cue(character, "combat")
-    return True, awarded
+    if get_onboarding_step(character) == STEP_COMPLETE:
+        return False, False
+    if get_onboarding_step(character) == STEP_COMBAT and _is_training_dummy(target):
+        return _begin_escalation(character, target), False
+    return False, False
+
+
+def resolve_training_attack(character, target):
+    started = note_combat_start(character, target)
+    if not started:
+        return False
+    step = get_onboarding_step(character)
+    if step == STEP_COMBAT and _is_training_dummy(target):
+        _begin_escalation(character, target)
+        return True
+    if step == STEP_ESCALATION and _is_training_goblin(target):
+        _resolve_scripted_exchange(character, target)
+        return True
+    return True
 
 
 def note_healing_action(character, patient=None, part=None):
-    if not is_onboarding_character(character):
-        return False, False
-    state = ensure_onboarding_state(character)
-    if "combat" not in set(state.get("completed_steps") or []):
-        note_step_failure(character, "combat")
-        return False, False
-    _set_action_flag(state, "healing_success", True)
-    state["last_progress_at"] = time.time()
-    _persist_state(character, state)
-    state, awarded = _complete_step(character, "healing", tokens=1)
-    if awarded:
-        emit_progress_cue(character, "healing")
-    return True, awarded
+    return False, False
+
+
+def note_stats_action(character):
+    if not is_in_onboarding(character):
+        return False
+    if get_onboarding_step(character) != STEP_RECOVERY:
+        return False
+    set_onboarding_step(character, STEP_DEPART)
+    _touch_progress(character)
+    _update_state(character, stats_reviewed=True)
+    emit_named_line(character, "Old Cleric", "Hold.")
+    emit_text(character, "A quick check. Efficient. Final.")
+    emit_named_line(character, "Old Cleric", "You'll hold.")
+    emit_text(character, "A glance toward the door.")
+    emit_named_line(character, "Old Cleric", "If something's been left behind--take it.")
+    emit_named_line(character, "Old Cleric", "No one else will.")
+    emit_text(character, DEPART_PROMPT)
+    _schedule_release(character)
+    return True
+
+
+def note_depart_action(character):
+    if not is_in_onboarding(character):
+        return False, None
+    if get_onboarding_step(character) != STEP_DEPART:
+        return False, None
+    _schedule_release(character)
+    return True, "You are breathing again. Remember the command for the next time death leaves you alone."
 
 
 def note_trade_action(character, action):
-    if not is_onboarding_character(character):
-        return False, False
-    normalized = str(action or "").strip().lower()
-    state = ensure_onboarding_state(character)
-    if "healing" not in set(state.get("completed_steps") or []):
-        note_step_failure(character, "healing")
-        return False, False
-    if normalized == "buy":
-        _set_action_flag(state, "economy_buy", True)
-    elif normalized == "sell":
-        _set_action_flag(state, "economy_sell", True)
-    else:
-        return False, False
-    state["last_progress_at"] = time.time()
-    _persist_state(character, state)
-    action_flags = dict(state.get("action_flags") or {})
-    if not (bool(action_flags.get("economy_buy", False)) and bool(action_flags.get("economy_sell", False))):
-        return False, False
-    state, awarded = _complete_step(character, "economy", tokens=1)
-    if awarded:
-        emit_progress_cue(character, "economy")
-    return True, awarded
+    return False, False
 
 
 def note_breach_progress(character, action):
-    if not is_onboarding_character(character):
-        return False, False
-    state = ensure_onboarding_state(character)
-    if "economy" not in set(state.get("completed_steps") or []):
-        note_step_failure(character, "economy")
-        return False, False
-    normalized = str(action or "").strip().lower()
-    if normalized == "start":
-        _set_action_flag(state, "breach_started", True)
-        state["last_progress_at"] = time.time()
-        _persist_state(character, state)
-        return True, False
-    if normalized != "clear":
-        return False, False
-    _set_action_flag(state, "breach_started", True)
-    _set_action_flag(state, "breach_cleared", True)
-    state["last_progress_at"] = time.time()
-    _persist_state(character, state)
-    state, awarded = _complete_step(character, "breach", tokens=1)
-    if awarded:
-        emit_progress_cue(character, "breach")
-    return True, awarded
+    return False, False
 
 
-def _get_contextual_roleplay_line(role, character):
-    state = ensure_onboarding_state(character)
-    completed = set(state.get("completed_steps") or [])
-    action_flags = dict(state.get("action_flags") or {})
-    now = time.time()
-    room_key = str(getattr(getattr(character, "location", None), "key", "") or "")
-    hp = int(getattr(getattr(character, "db", None), "hp", 0) or 0)
-    max_hp = max(1, int(getattr(getattr(character, "db", None), "max_hp", 1) or 1))
-    if (hp / max_hp) <= 0.5 and "healing" not in completed:
-        return "Fix it. Now." if role == "mentor" else "You are very visibly losing this argument with your blood."
-    objective_age = now - float(state.get("objective_updated_at", 0.0) or 0.0)
-    if objective_age > 18.0 and "name" not in completed:
-        return "Standing still won't help you." if role == "mentor" else "I admire the pause. The goblins won't."
-    mentor_lines = {
-        "Intake Hall": "Gender first. Keep it simple and keep moving.",
-        "Lineup Platform": "Choose the station that matches what you are.",
-        "Mirror Alcove": "Finish the mirror work before you touch the kit.",
-        "Gear Rack Room": "Wear at least two pieces. I want to hear cloth, not excuses.",
-        "Weapon Cage": "Wield something before you step into the yard.",
-        "Training Yard": "Start the fight clean and finish it faster.",
-        "Supply Shack": "Tend the wound. Survivors learn before the scar sets.",
-        "Vendor Stall": "Buy once. Sell once. Know what your mistakes cost.",
-        "Breach Corridor": "Hold this corridor. No one is opening the gate for panic.",
-        "Outer Gate": "Name yourself, then leave.",
-    }
-    gremlin_lines = {
-        "Intake Hall": "Three options. Only one of them is 'keep staring at me.'",
-        "Lineup Platform": "Pick a station before I alphabetize you incorrectly.",
-        "Mirror Alcove": "The mirror likes commitment.",
-        "Gear Rack Room": "Boots and trousers are both stronger when they are on you.",
-        "Weapon Cage": "A weapon in hand looks much more intentional.",
-        "Training Yard": "The goblin is having a far worse morning than you. Keep it that way.",
-        "Supply Shack": "Bandages are cheaper than replacement limbs.",
-        "Vendor Stall": "Quartermaster Nella enjoys exact change and mild suffering.",
-        "Breach Corridor": "That noise is the sound of scheduling problems with knives.",
-        "Outer Gate": "I recommend a name you can shout while running.",
-    }
-    if room_key == "Training Yard" and "combat" not in completed:
-        if not bool(action_flags.get("weapon_wielded", False)):
-            return STEP_FAILURE_REACTIONS["weapon"].get(role)
-        if not bool(action_flags.get("combat_started", False)):
-            return mentor_lines[room_key] if role == "mentor" else gremlin_lines[room_key]
-        return "Finish the goblin before you drift." if role == "mentor" else "You are doing the dangerous part. Commit." 
-    if room_key == "Vendor Stall" and "economy" not in completed:
-        if not bool(action_flags.get("economy_buy", False)):
-            return "Buy something small and remember the price." if role == "mentor" else "Spend a little. Educational regret builds character."
-        return "Sell something back and learn the other half." if role == "mentor" else "Now sell something before the lesson becomes philosophy."
-    if room_key == "Breach Corridor" and "breach" not in completed:
-        return mentor_lines[room_key] if role == "mentor" else gremlin_lines[room_key]
-    if "gender" not in completed:
-        return mentor_lines.get("Intake Hall") if role == "mentor" else gremlin_lines.get("Intake Hall")
-    if "race" not in completed:
-        return mentor_lines.get("Lineup Platform") if role == "mentor" else gremlin_lines.get("Lineup Platform")
-    if "appearance" not in completed:
-        return mentor_lines.get("Mirror Alcove") if role == "mentor" else gremlin_lines.get("Mirror Alcove")
-    if "gear" not in completed:
-        return mentor_lines.get("Gear Rack Room") if role == "mentor" else gremlin_lines.get("Gear Rack Room")
-    if "weapon" not in completed:
-        return mentor_lines.get("Weapon Cage") if role == "mentor" else gremlin_lines.get("Weapon Cage")
-    if "combat" not in completed:
-        return mentor_lines.get("Training Yard") if role == "mentor" else gremlin_lines.get("Training Yard")
-    if "healing" not in completed:
-        return mentor_lines.get("Supply Shack") if role == "mentor" else gremlin_lines.get("Supply Shack")
-    if "economy" not in completed:
-        return mentor_lines.get("Vendor Stall") if role == "mentor" else gremlin_lines.get("Vendor Stall")
-    if "breach" not in completed:
-        return mentor_lines.get("Breach Corridor") if role == "mentor" else gremlin_lines.get("Breach Corridor")
-    if "name" not in completed:
-        return mentor_lines.get("Outer Gate") if role == "mentor" else gremlin_lines.get("Outer Gate")
-    return None
+def can_exit_to_world(character):
+    if get_onboarding_step(character) == STEP_COMPLETE:
+        return True, ""
+    return False, INVALID_COMMAND_MESSAGE
 
 
-def get_roleplay_nudge(npc, character):
-    room = getattr(character, "location", None)
-    if not room:
-        return None
-    room_key = str(getattr(room, "key", "") or "")
-    role = str(getattr(getattr(npc, "db", None), "onboarding_role", "") or "").lower()
-    if role not in {"mentor", "gremlin"}:
-        return None
-    pending = pop_pending_roleplay(character, role)
-    if pending:
-        return pending
-    contextual = _get_contextual_roleplay_line(role, character)
-    if contextual:
-        return contextual
-    return ROLE_NUDGES.get(room_key, {}).get(role)
+def release_to_world(character):
+    _cleanup_scripted_enemy(character)
+    _set_between_state(character, False)
+    _set_training_collapse(character, False)
+    set_onboarding_step(character, STEP_COMPLETE)
+    destination = _resolve_recovery_destination() or _recovery_room_fallback()
+    if destination and getattr(character, "location", None) != destination:
+        character.move_to(destination, quiet=True, use_destination=False)
+    try:
+        from systems import aftermath
+
+        aftermath.activate_new_player_state(character)
+        aftermath.note_room_entry(character, getattr(character, "location", None))
+    except Exception:
+        pass
+    return True, ""
 
 
-def trigger_gear_delay_scene(character):
-    if not is_onboarding_character(character) or get_event_flag(character, "gear_delay_scene"):
-        return False
-    state = ensure_onboarding_state(character)
-    if "appearance" not in set(state.get("completed_steps") or []):
-        return False
-    if "gear" in set(state.get("completed_steps") or []):
-        return False
-    if str(getattr(getattr(character, "location", None), "key", "") or "") != "Gear Rack Room":
-        return False
-    set_event_flag(character, "gear_delay_scene", True)
-    gremlin = _find_role_npc("gremlin")
-    mentor = _find_role_npc("mentor")
-    room = getattr(character, "location", None)
-    if gremlin and getattr(gremlin, "location", None) != room:
-        gremlin.move_to(room, quiet=True)
-    if mentor and getattr(mentor, "location", None) != room:
-        mentor.move_to(room, quiet=True)
-    if room:
-        if gremlin:
-            emit_npc_line(character, gremlin, "Handled!")
-        else:
-            emit_named_line(character, ROLE_KEYS["gremlin"], "Handled!")
-        if mentor:
-            emit_npc_line(character, mentor, "...no.")
-            emit_npc_line(character, mentor, "Wear something that stops a blade.")
-        else:
-            emit_named_line(character, ROLE_KEYS["mentor"], "...no.")
-            emit_named_line(character, ROLE_KEYS["mentor"], "Wear something that stops a blade.")
-    announce_objective(character, force=True)
-    return True
+def set_gender(character, value):
+    return False, "Gender is chosen during character creation now."
 
 
-def trigger_almost_failure_scene(character):
-    if not is_onboarding_character(character) or get_event_flag(character, "almost_failure_scene"):
-        return False
-    state = ensure_onboarding_state(character)
-    if "weapon" not in set(state.get("completed_steps") or []):
-        return False
-    if bool(dict(state.get("action_flags") or {}).get("combat_started", False)):
-        return False
-    if str(getattr(getattr(character, "location", None), "key", "") or "") != "Training Yard":
-        return False
-    set_event_flag(character, "almost_failure_scene", True)
-    room = getattr(character, "location", None)
-    gremlin = _find_role_npc("gremlin")
-    mentor = _find_role_npc("mentor")
-    if gremlin and getattr(gremlin, "location", None) != room:
-        gremlin.move_to(room, quiet=True)
-    if mentor and getattr(mentor, "location", None) != room:
-        mentor.move_to(room, quiet=True)
-    if room:
-        if gremlin:
-            emit_npc_line(character, gremlin, "Threat handled.")
-        else:
-            emit_named_line(character, ROLE_KEYS["gremlin"], "Threat handled.")
-    if hasattr(character, "apply_damage"):
-        character.apply_damage("left_arm", 4, damage_type="slice")
-    if hasattr(character, "msg"):
-        line = "A goblin lunges out of the dust and clips your arm before you can settle."
-        character.msg(line)
-        _remember_recent_line(character, line)
-    if room:
-        emit_room_line(character, f"A goblin lunges out of the yard haze and clips {character.key} before they can settle.", exclude=[character])
-        if mentor:
-            emit_npc_line(character, mentor, "Stop listening. Start acting.")
-        else:
-            emit_named_line(character, ROLE_KEYS["mentor"], "Stop listening. Start acting.")
-    announce_objective(character, force=True)
-    return True
+def select_race(character, value):
+    return False, "Race is chosen during character creation now."
 
 
-def get_status_lines(character):
-    state = ensure_onboarding_state(character)
-    completed = set(state.get("completed_steps") or [])
-    appearance = dict(state.get("appearance") or {})
-    action_flags = dict(state.get("action_flags") or {})
-    remaining_traits = [field.replace("_", " ") for field in REQUIRED_APPEARANCE_FIELDS if not appearance.get(field)]
-    return [
-        f"Objective: {_sync_current_objective(character, state=state)}",
-        f"Tokens: {int(state.get('tokens', 0) or 0)}",
-        "Completed: " + (", ".join(sorted(completed)) if completed else "none"),
-        "Action flags: " + ", ".join(
-            [
-                f"gear={len(action_flags.get('gear_items') or [])}",
-                f"weapon={'yes' if action_flags.get('weapon_wielded') else 'no'}",
-                f"combat={'won' if action_flags.get('combat_won') else ('started' if action_flags.get('combat_started') else 'no')}",
-                f"healing={'yes' if action_flags.get('healing_success') else 'no'}",
-                f"economy={'buy/sell' if action_flags.get('economy_buy') and action_flags.get('economy_sell') else ('buy' if action_flags.get('economy_buy') else ('sell' if action_flags.get('economy_sell') else 'no'))}",
-                f"breach={'clear' if action_flags.get('breach_cleared') else ('started' if action_flags.get('breach_started') else 'no')}",
-            ]
-        ),
-        "Remaining appearance: " + (", ".join(remaining_traits) if remaining_traits else "none"),
-    ]
+def set_trait(character, trait, value):
+    return False, "Appearance is chosen during character creation now."
+
+
+def set_final_name(character, value):
+    return False, "Your name is already set. Keep moving."

@@ -1,0 +1,66 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 42,
+        "hp": 100,
+        "id": 14137,
+        "is_dead": false,
+        "key": "TEST_RANGER_SHOPPER",
+        "life_state": "ALIVE",
+        "location": "TEST_RANGER_SHOPPER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 14139,
+          "key": "basic cloak",
+          "location": "TEST_RANGER_SHOPPER",
+          "typeclass": "typeclasses.wearables.Wearable"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14136,
+            "key": "TEST_RANGER_SHOPPER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14137,
+            "key": "TEST_RANGER_SHOPPER",
+            "location": "TEST_RANGER_SHOPPER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_RANGER_SHOPPER",
+          "Quartermaster"
+        ],
+        "exits": [],
+        "id": 14136,
+        "key": "TEST_RANGER_SHOPPER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775501785.9815946
+    },
+    "label": "final"
+  }
+]

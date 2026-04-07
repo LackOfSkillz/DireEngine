@@ -1,0 +1,66 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 62,
+        "hp": 100,
+        "id": 14141,
+        "is_dead": false,
+        "key": "TEST_HIGH_HIDE_SHOPPER",
+        "life_state": "ALIVE",
+        "location": "TEST_HIGH_HIDE_SHOPPER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 14143,
+          "key": "balanced climbing gloves",
+          "location": "TEST_HIGH_HIDE_SHOPPER",
+          "typeclass": "typeclasses.wearables.Wearable"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14140,
+            "key": "TEST_HIGH_HIDE_SHOPPER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14141,
+            "key": "TEST_HIGH_HIDE_SHOPPER",
+            "location": "TEST_HIGH_HIDE_SHOPPER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_HIGH_HIDE_SHOPPER",
+          "Lysa Windstep"
+        ],
+        "exits": [],
+        "id": 14140,
+        "key": "TEST_HIGH_HIDE_SHOPPER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775501808.174799
+    },
+    "label": "final"
+  }
+]

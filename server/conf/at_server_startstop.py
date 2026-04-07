@@ -187,6 +187,76 @@ def _ensure_room(key, desc, aliases=None, home=None):
     return room
 
 
+def _find_tagged_room(tag_key):
+    if not tag_key:
+        return None
+    for room in ObjectDB.objects.filter(db_typeclass_path=ROOM_TYPECLASS):
+        try:
+            if room.tags.has(str(tag_key)):
+                return room
+        except Exception:
+            continue
+    return None
+
+
+def _find_exit(room, *names):
+    if not room:
+        return None
+    wanted = {str(name or "").strip().lower() for name in names if str(name or "").strip()}
+    if not wanted:
+        return None
+    for exit_obj in list(getattr(room, "exits", []) or []):
+        key = str(getattr(exit_obj, "key", "") or "").strip().lower()
+        aliases = {str(alias or "").strip().lower() for alias in getattr(getattr(exit_obj, "aliases", None), "all", lambda: [])()}
+        if key in wanted or aliases.intersection(wanted):
+            return exit_obj
+    return None
+
+
+def _find_empath_guild_duplicates():
+    rooms = []
+    seen_ids = set()
+    for room in ObjectDB.objects.filter(db_typeclass_path=ROOM_TYPECLASS, db_key__iexact="Empath Guild"):
+        if room.id in seen_ids:
+            continue
+        rooms.append(room)
+        seen_ids.add(room.id)
+    tagged_room = _find_tagged_room("guild_empath")
+    if tagged_room and tagged_room.id not in seen_ids:
+        rooms.append(tagged_room)
+        seen_ids.add(tagged_room.id)
+
+    larkspur_lane_room = ObjectDB.objects.get_id(4280)
+    lane_guild_exit = None
+    if larkspur_lane_room and str(getattr(larkspur_lane_room, "key", "") or "") == "Larkspur Lane, Midway":
+        lane_guild_exit = _find_exit(larkspur_lane_room, "guild", "north")
+
+    canonical_room = getattr(lane_guild_exit, "destination", None) or tagged_room
+    duplicates = [room for room in rooms if canonical_room and room.id != canonical_room.id]
+    non_room_matches = list(
+        ObjectDB.objects.filter(db_key__iexact="Empath Guild").exclude(db_typeclass_path=ROOM_TYPECLASS)
+    )
+    return canonical_room, duplicates, non_room_matches
+
+
+def _warn_empath_guild_duplicates():
+    canonical_room, duplicates, non_room_matches = _find_empath_guild_duplicates()
+    if not duplicates and not non_room_matches:
+        return
+
+    canonical_label = "missing"
+    if canonical_room:
+        canonical_label = f"{canonical_room.key}(#{canonical_room.id})"
+    duplicate_labels = ", ".join(f"{room.key}(#{room.id})" for room in duplicates)
+    collision_labels = ", ".join(
+        f"{obj.key}(#{obj.id}, {obj.db_typeclass_path})" for obj in non_room_matches
+    )
+    logger.log_warn(
+        f"Empath Guild duplicate rooms detected. Canonical room: {canonical_label}. Duplicate rooms: {duplicate_labels}. "
+        f"Same-name non-room objects: {collision_labels}. Use tools/empath_guild_maintenance.py to deprecate or delete duplicates in a controlled pass."
+    )
+
+
 def _ensure_exit(src, direction, dest):
     exit_obj = ObjectDB.objects.filter(db_key__iexact=direction, db_location=src).first()
     if not exit_obj:
@@ -202,6 +272,39 @@ def _ensure_exit(src, direction, dest):
         exit_obj.destination = dest
         for alias in DIR_ALIASES.get(direction, []):
             exit_obj.aliases.add(alias)
+    return exit_obj
+
+
+def _ensure_custom_exit(src, key, dest, aliases=None, desc=None, existing_keys=None):
+    exit_obj = None
+    for candidate in [key, *(list(existing_keys or []))]:
+        exit_obj = ObjectDB.objects.filter(db_key__iexact=candidate, db_location=src).first()
+        if exit_obj:
+            break
+    if not exit_obj:
+        exit_obj = create_object(
+            EXIT_TYPECLASS,
+            key=key,
+            aliases=list(aliases or []),
+            location=src,
+            destination=dest,
+            home=src,
+        )
+    else:
+        exit_obj.key = key
+        exit_obj.destination = dest
+        exit_obj.aliases.clear()
+        for alias in list(aliases or []):
+            exit_obj.aliases.add(alias)
+    if not exit_obj.aliases.all():
+        for alias in list(aliases or []):
+            exit_obj.aliases.add(alias)
+    if desc:
+        exit_obj.db.desc = desc
+    for candidate in list(existing_keys or []):
+        duplicate = ObjectDB.objects.filter(db_key__iexact=candidate, db_location=src).exclude(id=exit_obj.id).first()
+        if duplicate:
+            duplicate.delete()
     return exit_obj
 
 
@@ -361,6 +464,21 @@ def _ensure_named_object(key, location, desc, aliases=None, typeclass="typeclass
     return obj
 
 
+def _ensure_named_npc(key, location, desc, aliases=None, typeclass="typeclasses.npcs.NPC"):
+    npc = ObjectDB.objects.filter(db_key__iexact=key).first()
+    if not npc:
+        npc = create_object(typeclass, key=key, location=location, home=location)
+    elif getattr(npc, "location", None) != location:
+        npc.move_to(location, quiet=True, use_destination=False)
+    npc.home = location
+    npc.db.desc = desc
+    npc.db.is_npc = True
+    if aliases:
+        for alias in aliases:
+            npc.aliases.add(alias)
+    return npc
+
+
 def _resolve_landing_arrival_room():
     preferred_regions = {"Central Crossing", "Upper Crossing", "North Crossing", "Lower Crossing"}
     landing_rooms = []
@@ -434,216 +552,543 @@ def _cleanup_tutorial_helper_characters(rooms):
 
 
 def _ensure_new_player_tutorial():
+    from typeclasses.objects import ChargenMirror, Object
+    from systems import aftermath
+
     room_specs = {
-        "Wake Room": {
-            "aliases": ["wake room", "intake start"],
-            "desc": "You wake on a narrow cot in a stone chamber that smells of lamp oil, wet leather, and old readiness. Someone has been moving people through here in a hurry, and judging by the distant hammer of alarm bells, they are almost out of time.",
+        "Intake Chamber": {
+            "aliases": ["intake", "chamber"],
+            "desc": "Lantern light settles across slate floors scored with old lines, as if many have stood here before you and been measured the same way.\n\nThe air smells faintly of oil and leather.\n\nA lone figure waits, watching.\n\nThe only open path leads east.",
         },
-        "Intake Hall": {
-            "aliases": ["hall", "gender hall"],
-            "desc": "Lanterns burn low over slate boards, stacked intake ledgers, and floor markings worn by nervous pacing. This is where the compound sorts who you are before it decides what to hand you.",
+        "Training Hall": {
+            "aliases": ["hall", "training"],
+            "desc": "The space opens, but only slightly.\n\nWeapons line the walls. Nothing polished. Nothing ceremonial.\n\nEverything here has been used.",
         },
-        "Lineup Platform": {
-            "aliases": ["platform", "lineup"],
-            "desc": "A raised stone platform marked with faded sigils dominates the chamber. Different sets of gear rest at each position, sized and shaped with deliberate intent. Someone expected choice here, just not this late.",
-        },
-        "Mirror Alcove": {
-            "aliases": ["alcove", "mirror room"],
-            "desc": "A tight alcove lined with mirrors forces every glance back on itself. The silvered glass is polished too often to be decorative; this is a place for deciding what people will see before the world has time to decide for you.",
-        },
-        "Gear Rack Room": {
-            "aliases": ["gear room", "rack room"],
-            "desc": "Armor stands, folded clothing, and open crates pack the room in orderly rows. It looks less like generosity than triage: wear something useful and move on.",
-        },
-        "Weapon Cage": {
-            "aliases": ["cage", "weapon room"],
-            "desc": "Iron latticework separates neat rows of training weapons from the rest of the room. Whatever order once governed this cage is breaking down into urgency, but the choices are still clear enough to matter.",
-        },
-        "Training Yard": {
-            "aliases": ["yard", "combat yard"],
-            "desc": "The yard is all churned dust, battered posts, and hard angles meant to teach movement under pressure. It feels like a lesson already half interrupted by the noise rising beyond the compound walls.",
-        },
-        "Supply Shack": {
-            "aliases": ["shack", "supply room"],
-            "desc": "Shelves of bandages, salves, waterskins, and rough field kits crowd this cramped shack. It exists for the moment after a mistake, when someone still has time to keep the next one from being fatal.",
-        },
-        "Vendor Stall": {
-            "aliases": ["stall", "vendor room"],
-            "desc": "A cramped stall has been thrown together from crates, ledgers, and hanging hooks of practical goods. Even under threat, someone here is still counting what survival costs.",
-        },
-        "Breach Corridor": {
-            "aliases": ["corridor", "breach"],
-            "desc": "A long stone corridor runs toward the outer defenses, littered with dropped tools, scrape marks, and the first signs that something small and vicious has already gotten inside.",
-        },
-        "Outer Gate": {
-            "aliases": ["gate", "exit"],
-            "desc": "The gate stands open to the road beyond, its timbers splintered but not yet fallen. Beyond it lies The Landing, the wider world, and no more controlled lessons.",
-        },
-        "Secret Tunnel": {
-            "aliases": ["tunnel", "secret"],
-            "desc": "A narrow service tunnel twists behind the gate wall, half-hidden by broken crates and old canvas. It smells of dust, damp mortar, and the sort of shortcut people remember only when time runs out.",
+        "Practice Yard": {
+            "aliases": ["yard", "practice"],
+            "desc": "The yard is already in motion. Steel, movement, and overlapping voices turn the space from drill ground into something closer to a breach that never fully ended.\n\nThe only open path leads east.",
         },
     }
 
     rooms = {}
     for key, spec in room_specs.items():
         room = _ensure_room(key, spec["desc"], aliases=spec["aliases"])
-        room.db.area = "New Player Tutorial"
-        room.db.region_name = "Tutorial"
+        room.db.area = "New Player Onboarding"
+        room.db.region_name = "Onboarding"
         room.db.is_tutorial = True
+        room.db.is_onboarding = True
         rooms[key] = room
 
-    links = [
-        ("Wake Room", "east", "Intake Hall", "west"),
-        ("Intake Hall", "east", "Lineup Platform", "west"),
-        ("Lineup Platform", "east", "Mirror Alcove", "west"),
-        ("Mirror Alcove", "east", "Gear Rack Room", "west"),
-        ("Gear Rack Room", "east", "Weapon Cage", "west"),
-        ("Weapon Cage", "east", "Training Yard", "west"),
-        ("Training Yard", "east", "Supply Shack", "west"),
-        ("Supply Shack", "east", "Vendor Stall", "west"),
-        ("Vendor Stall", "east", "Breach Corridor", "west"),
-        ("Breach Corridor", "east", "Outer Gate", "west"),
-    ]
-    for src, direction, dest, reverse in links:
-        _ensure_exit(rooms[src], direction, rooms[dest])
-        _ensure_exit(rooms[dest], reverse, rooms[src])
-    _ensure_exit(rooms["Outer Gate"], "down", rooms["Secret Tunnel"])
-    _ensure_exit(rooms["Secret Tunnel"], "up", rooms["Outer Gate"])
+    _ensure_exit(rooms["Intake Chamber"], "east", rooms["Training Hall"])
+    _ensure_exit(rooms["Training Hall"], "east", rooms["Practice Yard"])
 
-    mentor = ObjectDB.objects.filter(db_key__iexact="Marshal Vey", db_location=rooms["Wake Room"]).first()
-    if not mentor:
-        mentor = create_object(
-            "typeclasses.npcs.NPC",
-            key="Marshal Vey",
-            location=rooms["Wake Room"],
-            home=rooms["Wake Room"],
-        )
-    mentor.db.desc = "Marshal Vey has the clipped focus of someone running out of time but not out of control. Nothing about the veteran suggests warmth, only competence and the expectation that you will keep up."
-    for alias in ["mentor", "marshal", "vey"]:
-        mentor.aliases.add(alias)
-    mentor.db.onboarding_role = "mentor"
-    if not mentor.scripts.get("onboarding_roleplay"):
-        mentor.scripts.add("typeclasses.onboarding_scripts.OnboardingRoleplayScript")
-
-    gremlin = ObjectDB.objects.filter(db_key__iexact="Pip the Gremlin", db_location=rooms["Intake Hall"]).first()
-    if not gremlin:
-        gremlin = create_object(
-            "typeclasses.npcs.NPC",
-            key="Pip the Gremlin",
-            location=rooms["Intake Hall"],
-            home=rooms["Intake Hall"],
-        )
-    gremlin.db.desc = "Pip moves too quickly for the amount of confidence involved, arms full of forms, straps, and badly timed enthusiasm. The gremlin looks useful only in the way sparks are useful near dry straw."
-    for alias in ["gremlin", "pip"]:
-        gremlin.aliases.add(alias)
-    gremlin.db.onboarding_role = "gremlin"
-    if not gremlin.scripts.get("onboarding_roleplay"):
-        gremlin.scripts.add("typeclasses.onboarding_scripts.OnboardingRoleplayScript")
-
-    _cleanup_tutorial_helper_characters(rooms)
-
-    _ensure_named_object(
-        "silvered mirror",
-        rooms["Mirror Alcove"],
-        "A flawless standing mirror gleams here. Its frame is worn smooth where generations of nervous fingers have tapped and rubbed at it while deciding how they wish to appear.",
-        aliases=["mirror"],
-    )
-    _ensure_named_object(
-        "clothing rack",
-        rooms["Gear Rack Room"],
-        "A broad rack displays simple shirts, trousers, skirts, cloaks, and boots sized for new travelers.",
-        aliases=["rack"],
-    )
-    _ensure_named_object(
-        "weapon rack",
-        rooms["Weapon Cage"],
-        "A sturdy rack holds plain training weapons ready for first choices and first mistakes.",
-        aliases=["rack"],
-    )
-    _ensure_named_object(
-        "supply table",
-        rooms["Supply Shack"],
-        "Bundled travel items sit here in careful stacks: maps, charms, satchels, and other necessities for a new arrival.",
-        aliases=["table"],
-    )
-    for race_name, desc in [
-        ("human station", "A balanced set of practical gear rests here, built for adaptability rather than spectacle."),
-        ("elf station", "Long-fingered gloves and narrow-cut kit suggest reach, precision, and a little impatience with cramped design."),
-        ("dwarf station", "Stockier gear and reinforced fittings wait here, plain in shape and unapologetic in purpose."),
-    ]:
-        _ensure_named_object(race_name, rooms["Lineup Platform"], desc, aliases=[race_name.split()[0]])
-    _ensure_tutorial_vendor(rooms["Vendor Stall"])
-    training_goblin = _ensure_tutorial_goblin(rooms["Training Yard"])
-    training_goblin.db.is_tutorial_enemy = True
-    training_goblin.db.onboarding_enemy_role = "training"
-    if not rooms["Breach Corridor"].scripts.get("onboarding_invasion"):
-        rooms["Breach Corridor"].scripts.add("typeclasses.onboarding_scripts.OnboardingInvasionScript")
-
-    from typeclasses.objects import Object
-    from typeclasses.wearables import Wearable
-
-    clothing_room = rooms["Gear Rack Room"]
-    for key, slot, desc in [
-        ("plain shirt", "torso", "A simple shirt meant for a new traveler."),
-        ("traveler's trousers", "legs", "A practical pair of trousers with room to move."),
-        ("simple boots", "feet", "Serviceable boots made for long roads rather than style."),
-    ]:
-        item = ObjectDB.objects.filter(db_key=key, db_location=clothing_room).first()
-        if not item:
-            item = create_object(Wearable, key=key, location=clothing_room, home=clothing_room)
-        item.db.slot = slot
-        item.db.weight = 1.0
-        item.db.desc = desc
-        if key == "plain shirt":
-            item.aliases.add("shirt")
-        elif key == "traveler's trousers":
-            for alias in ["trousers", "pants"]:
-                item.aliases.add(alias)
-        elif key == "simple boots":
-            for alias in ["boots", "boot"]:
-                item.aliases.add(alias)
-
-    armory = rooms["Weapon Cage"]
-    starter_weapons = {
-        "training sword": {"weapon_type": "light_edge", "skill": "light_edge", "damage_type": "slice"},
-        "training mace": {"weapon_type": "blunt", "skill": "blunt", "damage_type": "impact"},
-        "training spear": {"weapon_type": "polearm", "skill": "polearm", "damage_type": "puncture"},
-    }
-    for key, profile in starter_weapons.items():
-        weapon = ObjectDB.objects.filter(db_key=key, db_location=armory).first()
-        if not weapon:
-            weapon = create_object(Object, key=key, location=armory, home=armory)
-        weapon.db.item_type = "weapon"
-        weapon.db.weight = 3.0
-        weapon.db.weapon_type = profile["weapon_type"]
-        weapon.db.skill = profile["skill"]
-        weapon.db.damage_type = profile["damage_type"]
-        weapon.db.damage_types = {"slice": 0.0, "impact": 0.0, "puncture": 0.0}
-        weapon.db.damage_types[profile["damage_type"]] = 1.0
-        weapon.db.damage = 4
-        weapon.db.damage_min = 2
-        weapon.db.damage_max = 5
-        weapon.db.roundtime = 3.0
-        weapon.db.weapon_profile = {
-            "type": profile["weapon_type"],
-            "skill": profile["skill"],
-            "damage": 4,
-            "damage_min": 2,
-            "damage_max": 5,
-            "roundtime": 3.0,
-        }
-        weapon.db.desc = f"A plain {key.replace('training ', '')} intended for first lessons and little else."
-        weapon.aliases.add(key.replace("training ", ""))
-
-    outer_gate = rooms["Outer Gate"]
     landing_room = _resolve_landing_arrival_room()
-    if landing_room:
-        _ensure_exit(outer_gate, "out", landing_room)
-        _ensure_exit(outer_gate, "leave", landing_room)
-        _ensure_exit(rooms["Secret Tunnel"], "crawl", landing_room)
 
-    return rooms["Wake Room"]
+    threshold_specs = {
+        "Outer Yard": {
+            "aliases": ["yard", "outer"],
+            "desc": "The space opens wider than the rooms behind you.\n\nStone gives way to packed earth, worn by movement rather than training.\n\nA few figures pass through without stopping. No one watches you here.\n\nThe path continues east. A narrower passage cuts north.",
+        },
+        "Market Approach": {
+            "aliases": ["market", "approach"],
+            "desc": "The air shifts as you move forward--voices, movement, the low hum of trade.\n\nStalls line the edges of the street, loosely arranged but well-worn.\n\nNo one stops you. No one guides you.",
+        },
+        "Side Passage": {
+            "aliases": ["passage", "side"],
+            "desc": "The passage narrows, the sound of the yard fading behind you.\n\nLess traffic here. Fewer eyes.\n\nThe ground is uneven, marked by use but not care.",
+        },
+    }
+    threshold_rooms = {}
+    for key, spec in threshold_specs.items():
+        room = _ensure_room(key, spec["desc"], aliases=spec["aliases"])
+        room.db.area = "Threshold Zone"
+        room.db.region_name = "Threshold"
+        room.db.is_first_area = True
+        threshold_rooms[key] = room
+
+    larkspur_lane_room = ObjectDB.objects.get_id(4280)
+    lane_guild_exit = None
+    if larkspur_lane_room and str(getattr(larkspur_lane_room, "key", "") or "") == "Larkspur Lane, Midway":
+        lane_guild_exit = _find_exit(larkspur_lane_room, "guild", "north")
+
+    empath_guild = getattr(lane_guild_exit, "destination", None) or _find_tagged_room("guild_empath")
+    if not empath_guild:
+        empath_guild = _ensure_room(
+            "Empath Guild",
+            "The air is clean in a way that feels deliberate.\n\nStone floors, worn smooth, are marked by careful movement rather than traffic. Tables are spaced with intention, not comfort. Instruments rest where they are needed\u2014never where they are convenient.\n\nVoices are low. Focused. No one lingers without purpose.\n\nThis is not a place for recovery.\n\nIt is a place for those who have not yet died.",
+        )
+
+    empath_guild.key = "Empath Guild"
+    empath_guild.db.desc = aftermath.append_guild_triage_detail(
+        "The air is clean in a way that feels deliberate.\n\nStone floors, worn smooth, are marked by careful movement rather than traffic. Tables are spaced with intention, not comfort. Instruments rest where they are needed\u2014never where they are convenient.\n\nVoices are low. Focused. No one lingers without purpose.\n\nThis is not a place for recovery.\n\nIt is a place for those who have not yet died."
+    )
+    empath_guild.db.area = "Empath Guild"
+    empath_guild.db.region_name = "The Landing"
+    empath_guild.tags.add("guild_empath")
+    aftermath.ensure_empath_orderly(empath_guild)
+
+    if larkspur_lane_room and str(getattr(larkspur_lane_room, "key", "") or "") == "Larkspur Lane, Midway":
+        larkspur_lane_room.tags.add("guild_access_empath")
+        lane_to_guild = _ensure_custom_exit(
+            larkspur_lane_room,
+            "north",
+            empath_guild,
+            aliases=["empath", "empath guild", "door", "guild"],
+            desc="A narrow doorway set into the north side of the lane, marked only by a worn lintel.",
+            existing_keys=["guild"],
+        )
+        lane_to_guild.db.exit_display_name = "Empaths Guild"
+        guild_to_lane = _ensure_custom_exit(
+            empath_guild,
+            "south",
+            larkspur_lane_room,
+            aliases=["street", "lane", "back", "out"],
+            existing_keys=["out"],
+        )
+        guild_to_lane.db.exit_display_name = "Larkspur Lane"
+
+    ranger_guild = _find_tagged_room("guild_ranger")
+    if not ranger_guild:
+        ranger_guild = _ensure_room(
+            "Ranger Guild",
+            "A tucked-away guild hall opens beneath sheltered beams and leaf-shadowed lantern light. A broad working table, weapon pegs, and neatly kept packs turn the room into equal parts camp and command post.",
+            aliases=["ranger hall", "guild hall"],
+        )
+
+    ranger_map_rooms = {
+        "Ranger Guild": {
+            "room": ranger_guild,
+            "desc": "A tucked-away guild hall opens beneath sheltered beams and leaf-shadowed lantern light. A broad working table, weapon pegs, and neatly kept packs turn the room into equal parts camp and command post.",
+            "aliases": ["guild hall", "hall"],
+            "coords": (0, 0),
+        },
+        "Ranger Guild Vestibule": {
+            "desc": "A narrow vestibule buffers the guild proper from the alley beyond. Boots dry by the wall, spare ropes hang from pegs, and the place smells faintly of rain and worked leather.",
+            "aliases": ["vestibule", "entry"],
+            "coords": (-1, 0),
+        },
+        "Quiet Court": {
+            "desc": "A small open court gives the guild a pocket of air and silence. Stone, timber, and trimmed greenery keep it hidden from the lane while still feeling close to the city around it.",
+            "aliases": ["court", "yard"],
+            "coords": (-2, 0),
+        },
+        "Storeroom": {
+            "desc": "Shelves of field gear, bundled herbs, cordage, spare arrows, and carefully wrapped supplies line the walls in precise order.",
+            "aliases": ["store", "storage"],
+            "coords": (0, -1),
+        },
+        "Rope Walk": {
+            "desc": "A narrow landing sits beside the first rise into the guild's climbing lanes. The low blind above looks reachable, but only if you stop fighting the rope and start reading it.",
+            "aliases": ["rope walk", "rope landing"],
+            "coords": (-1, -1),
+        },
+        "Low Blind": {
+            "desc": "A tucked platform of rough boards and netting gives the first true perch above the yard. The climb onward is tighter and less forgiving than the stretch below.",
+            "aliases": ["blind", "low blind"],
+            "coords": (-1, -2),
+        },
+        "Middle Fort": {
+            "desc": "A higher timber fort braces itself against the trunk and wind. From here, the final route narrows into a climb most people would rather admire than attempt. High above, the High Hide waits where not many reach it.",
+            "aliases": ["fort", "middle fort"],
+            "coords": (-1, -3),
+        },
+        "High Hide": {
+            "desc": "A compact hide is lashed high into the branches, half perch and half command post. The city spreads below in quiet lines, and every piece of gear here looks chosen by someone who had to carry it up themselves.",
+            "aliases": ["high hide", "hide", "lookout"],
+            "coords": (-1, -4),
+        },
+        "Tunnel Access": {
+            "desc": "A low stone corridor slips away from the main hall, quiet and dry, with enough space for a ranger to move gear without drawing notice.",
+            "aliases": ["tunnel", "corridor"],
+            "coords": (0, 1),
+        },
+        "Gate Walk": {
+            "desc": "The passage broadens near a stout gate and a concealed turn in the stonework, suggesting routes beyond the guild for those who know where to go.",
+            "aliases": ["gate walk", "gate"],
+            "coords": (0, 2),
+        },
+    }
+
+    ranger_build_tag = "ranger-guild-map"
+    for room_name, spec in ranger_map_rooms.items():
+        room = spec.get("room") or _ensure_room(room_name, spec["desc"], aliases=spec.get("aliases"))
+        spec["room"] = room
+        room.key = room_name
+        room.db.desc = spec["desc"]
+        room.db.area = "Ranger Guild"
+        room.db.region_name = "The Landing"
+        room.db.map_x = spec["coords"][0]
+        room.db.map_y = spec["coords"][1]
+        room.tags.add(ranger_build_tag, category="build")
+
+    ranger_guild = ranger_map_rooms["Ranger Guild"]["room"]
+    ranger_guild.db.guild_tag = "ranger_guildhall"
+    ranger_guild.tags.add("guild_ranger")
+    ranger_guild.tags.add("ranger_guild")
+    ranger_guild.tags.add("ranger_guildhall")
+    ranger_guild.tags.add("poi_guild_ranger")
+
+    cracked_bell_alley = ObjectDB.objects.get_id(4244)
+    if cracked_bell_alley and str(getattr(cracked_bell_alley, "key", "") or "") == "Cracked Bell Alley, East Reach":
+        cracked_bell_alley.tags.add("guild_access_ranger")
+        alley_to_guild = _ensure_custom_exit(
+            cracked_bell_alley,
+            "north",
+            ranger_guild,
+            aliases=["guild", "ranger", "ranger guild", "door"],
+            desc="A discreet guild door is worked into the quieter stonework here, easy to miss unless you know to look for it.",
+            existing_keys=["guild", "door"],
+        )
+        alley_to_guild.db.exit_display_name = ""
+        guild_to_alley = _ensure_custom_exit(
+            ranger_guild,
+            "south",
+            cracked_bell_alley,
+            aliases=["out", "street", "alley", "back"],
+            existing_keys=["out", "trail", "passage"],
+        )
+        guild_to_alley.db.exit_display_name = ""
+
+    side_passage = threshold_rooms.get("Side Passage")
+    if side_passage:
+        side_passage.tags.remove("guild_access_ranger")
+        old_ranger_exit = _find_exit(side_passage, "guild", "trail", "ranger")
+        if old_ranger_exit and getattr(old_ranger_exit, "destination", None) == ranger_guild:
+            old_ranger_exit.delete()
+
+    guild_rooms = ranger_map_rooms
+    vestibule = guild_rooms["Ranger Guild Vestibule"]["room"]
+    quiet_court = guild_rooms["Quiet Court"]["room"]
+    storeroom = guild_rooms["Storeroom"]["room"]
+    rope_walk = guild_rooms["Rope Walk"]["room"]
+    low_blind = guild_rooms["Low Blind"]["room"]
+    middle_fort = guild_rooms["Middle Fort"]["room"]
+    high_hide = guild_rooms["High Hide"]["room"]
+    tunnel_access = guild_rooms["Tunnel Access"]["room"]
+    gate_walk = guild_rooms["Gate Walk"]["room"]
+
+    quiet_court.db.ranger_resources = ["grass", "stick"]
+    low_blind.db.ranger_resources = ["stick"]
+    middle_fort.db.ranger_prestige_room = high_hide
+    middle_fort.db.ranger_prestige_presence_text = "You catch movement high above in the branches."
+
+    guild_to_vestibule = _ensure_custom_exit(ranger_guild, "west", vestibule, aliases=["door", "vestibule", "entry"], existing_keys=["door"])
+    guild_to_vestibule.db.exit_display_name = ""
+    vestibule_to_guild = _ensure_custom_exit(vestibule, "east", ranger_guild, aliases=["door", "guild", "hall"], existing_keys=["door"])
+    vestibule_to_guild.db.exit_display_name = ""
+
+    vestibule_to_court = _ensure_custom_exit(vestibule, "west", quiet_court, aliases=["court", "path"], existing_keys=[])
+    vestibule_to_court.db.exit_display_name = ""
+    court_to_vestibule = _ensure_custom_exit(quiet_court, "east", vestibule, aliases=["entry", "vestibule"], existing_keys=[])
+    court_to_vestibule.db.exit_display_name = ""
+
+    guild_to_store = _ensure_custom_exit(ranger_guild, "north", storeroom, aliases=["curtain", "curt", "storeroom", "store"], existing_keys=["curtain"])
+    guild_to_store.db.exit_display_name = ""
+    store_to_guild = _ensure_custom_exit(storeroom, "south", ranger_guild, aliases=["guild", "hall", "back"], existing_keys=[])
+    store_to_guild.db.exit_display_name = ""
+
+    vestibule_to_rope = _ensure_custom_exit(vestibule, "down", rope_walk, aliases=["rope", "climb", "climb rope"], existing_keys=["rope", "climb"])
+    vestibule_to_rope.db.exit_display_name = ""
+    rope_to_vestibule = _ensure_custom_exit(rope_walk, "up", vestibule, aliases=["climb up", "ascend", "rope"], existing_keys=["climb", "down"])
+    rope_to_vestibule.db.exit_display_name = ""
+
+    rope_to_low = _ensure_custom_exit(rope_walk, "down", low_blind, aliases=["blind", "low blind", "climb"], existing_keys=["ladder"])
+    rope_to_low.db.exit_display_name = ""
+    rope_to_low.db.climb_contest = True
+    rope_to_low.db.climb_tier = "low"
+    rope_to_low.db.climb_difficulty = 5
+    rope_to_low.db.climb_failure_destination = rope_walk
+    rope_to_low.db.climb_action_command = "climb up"
+    rope_to_low.db.climb_action_label = "climb up"
+    rope_to_low.db.climb_default_action = True
+    low_to_rope = _ensure_custom_exit(low_blind, "down", rope_walk, aliases=["climb down", "descend"], existing_keys=["climb"])
+    low_to_rope.db.exit_display_name = ""
+
+    low_to_middle = _ensure_custom_exit(low_blind, "up", middle_fort, aliases=["fort", "middle fort", "climb"], existing_keys=["oakladder"])
+    low_to_middle.db.exit_display_name = ""
+    low_to_middle.db.climb_contest = True
+    low_to_middle.db.climb_tier = "mid"
+    low_to_middle.db.climb_difficulty = 15
+    low_to_middle.db.climb_failure_destination = low_blind
+    low_to_middle.db.climb_action_command = "climb up"
+    low_to_middle.db.climb_action_label = "climb up"
+    low_to_middle.db.climb_default_action = True
+    middle_to_low = _ensure_custom_exit(middle_fort, "down", low_blind, aliases=["climb down", "descend", "climb"], existing_keys=["climb"])
+    middle_to_low.db.exit_display_name = ""
+
+    middle_to_high = _ensure_custom_exit(middle_fort, "up", high_hide, aliases=["hide", "high hide", "climb"], existing_keys=[])
+    middle_to_high.db.exit_display_name = ""
+    middle_to_high.db.climb_contest = True
+    middle_to_high.db.climb_tier = "high"
+    middle_to_high.db.climb_difficulty = 22
+    middle_to_high.db.climb_readiness_rank = 18
+    middle_to_high.db.climb_failure_destination = middle_fort
+    middle_to_high.db.climb_action_command = "climb up"
+    middle_to_high.db.climb_action_label = "climb up"
+    middle_to_high.db.climb_default_action = True
+    high_to_middle = _ensure_custom_exit(high_hide, "down", middle_fort, aliases=["climb down", "descend", "climb"], existing_keys=[])
+    high_to_middle.db.exit_display_name = ""
+
+    guild_to_tunnel = _ensure_custom_exit(ranger_guild, "east", tunnel_access, aliases=["tunnel", "corridor"], existing_keys=["tunnel"])
+    guild_to_tunnel.db.exit_display_name = ""
+    tunnel_to_guild = _ensure_custom_exit(tunnel_access, "west", ranger_guild, aliases=["guild", "hall", "back"], existing_keys=["north"])
+    tunnel_to_guild.db.exit_display_name = ""
+
+    tunnel_to_gate = _ensure_custom_exit(tunnel_access, "east", gate_walk, aliases=["gate"], existing_keys=["south"])
+    tunnel_to_gate.db.exit_display_name = ""
+    gate_to_tunnel = _ensure_custom_exit(gate_walk, "west", tunnel_access, aliases=["tunnel", "back"], existing_keys=["north"])
+    gate_to_tunnel.db.exit_display_name = ""
+
+    elarion = ObjectDB.objects.filter(db_key__iexact="Elarion", db_location=ranger_guild).first()
+    if not elarion:
+        elarion = create_object("typeclasses.npcs.RangerGuildmaster", key="Elarion", location=ranger_guild, home=ranger_guild)
+    elarion.db.is_npc = True
+    elarion.db.is_trainer = True
+    elarion.db.trains_profession = "ranger"
+    elarion.db.guild_role = "guildmaster"
+    elarion.db.desc = "A weathered ranger stands with the easy stillness of someone who trusts the woods more than walls. Every strap, knife, and bowstring on Elarion's gear looks worn by use rather than display."
+    for alias in ["elarion", "guildmaster", "ranger guildmaster"]:
+        elarion.aliases.add(alias)
+
+    bram = _ensure_named_npc(
+        "Bram Thornhand",
+        quiet_court,
+        "A broad-shouldered ranger with scarred hands and an easy stance watches the guild court like a man who has spent years learning what land will give and what it will take.",
+        aliases=["bram", "thornhand"],
+        typeclass="typeclasses.npcs.BramThornhand",
+    )
+    bram.db.is_trainer = True
+    bram.db.trains_profession = "ranger"
+    bram.db.guild_role = "mentor"
+    bram.db.mentor_domain = "survival"
+
+    serik = _ensure_named_npc(
+        "Serik Vale",
+        gate_walk,
+        "A lean ranger keeps his bow close and his words spare, every motion measured like a shot he has already decided to take.",
+        aliases=["serik", "vale"],
+        typeclass="typeclasses.npcs.SerikVale",
+    )
+    serik.db.is_trainer = True
+    serik.db.trains_profession = "ranger"
+    serik.db.guild_role = "mentor"
+    serik.db.mentor_domain = "hunting"
+
+    lysa = _ensure_named_npc(
+        "Lysa Windstep",
+        high_hide,
+        "A wiry ranger studies the lanes beyond the guild with patient attention, as if she is tracking movement no one else has noticed yet.",
+        aliases=["lysa", "windstep"],
+        typeclass="typeclasses.npcs.LysaWindstep",
+    )
+    lysa.db.is_trainer = True
+    lysa.db.trains_profession = "ranger"
+    lysa.db.guild_role = "mentor"
+    lysa.db.mentor_domain = "scouting"
+    lysa.db.is_vendor = True
+    lysa.db.is_shopkeeper = True
+    lysa.db.inventory = ["balanced climbing gloves", "lightweight ranger cloak", "reinforced rope", "fine skinning knife"]
+    lysa.db.price_map = {
+        "balanced climbing gloves": 18,
+        "lightweight ranger cloak": 16,
+        "reinforced rope": 14,
+        "fine skinning knife": 18,
+    }
+    lysa.db.browse_action_label = "browse goods"
+    lysa.db.browse_action_command = "shop"
+
+    quartermaster = _ensure_named_npc(
+        "Quartermaster",
+        ranger_guild,
+        "A practical quartermaster keeps the guild's everyday gear sorted in disciplined rows, with the look of someone who has no patience for wasted kit.",
+        aliases=["quartermaster", "quarter"],
+        typeclass="typeclasses.vendor.Vendor",
+    )
+    quartermaster.db.is_vendor = True
+    quartermaster.db.is_shopkeeper = True
+    quartermaster.db.inventory = ["basic cloak", "simple boots", "starter pack", "rope", "basic knife"]
+    quartermaster.db.price_map = {
+        "basic cloak": 8,
+        "simple boots": 6,
+        "starter pack": 9,
+        "rope": 5,
+        "basic knife": 6,
+    }
+    quartermaster.db.shop_intro_lines = ["The quartermaster cracks open a field chest and gestures across the starter kit with a curt nod."]
+    quartermaster.db.browse_action_label = "browse goods"
+    quartermaster.db.browse_action_command = "shop"
+
+    field_buyer = _ensure_named_npc(
+        "Field Buyer",
+        quiet_court,
+        "A compact trader in travel leathers weighs field goods with a quick eye and a quicker hand for coin.",
+        aliases=["buyer", "field buyer"],
+        typeclass="typeclasses.vendor.Vendor",
+    )
+    field_buyer.db.is_vendor = True
+    field_buyer.db.is_shopkeeper = True
+    field_buyer.db.vendor_type = "general"
+    field_buyer.db.accepted_item_types = ["bundle", "braid", "hide"]
+    field_buyer.db.sale_multiplier = 1.0
+    field_buyer.db.sale_message = "The field buyer checks {item}, nods once, and pays you {value}."
+
+    orren = _ensure_named_npc(
+        "Orren Mossbinder",
+        storeroom,
+        "A quiet ranger tends bundled herbs and field notes with the care of someone who treats old knowledge as a tool instead of a trophy.",
+        aliases=["orren", "mossbinder"],
+        typeclass="typeclasses.npcs.OrrenMossbinder",
+    )
+    orren.db.is_trainer = True
+    orren.db.trains_profession = "ranger"
+    orren.db.guild_role = "mentor"
+    orren.db.mentor_domain = "lore"
+
+    aftermath.ensure_poi_tags()
+
+    _ensure_exit(rooms["Practice Yard"], "out", threshold_rooms["Outer Yard"])
+    _ensure_exit(rooms["Practice Yard"], "leave", threshold_rooms["Outer Yard"])
+    _ensure_exit(threshold_rooms["Outer Yard"], "east", threshold_rooms["Market Approach"])
+    _ensure_exit(threshold_rooms["Outer Yard"], "north", threshold_rooms["Side Passage"])
+    _ensure_exit(threshold_rooms["Market Approach"], "west", threshold_rooms["Outer Yard"])
+    _ensure_exit(threshold_rooms["Side Passage"], "south", threshold_rooms["Outer Yard"])
+    if landing_room:
+        _ensure_exit(threshold_rooms["Market Approach"], "east", landing_room)
+
+    guide_descriptions = {
+        "Intake Chamber": "The Intake Guide watches new arrivals with calm, practiced attention and none of the patience required for wandering minds.",
+        "Training Hall": "The Intake Guide stands beside the weapon stand with the stillness of someone already listening for the next mistake.",
+        "Practice Yard": "The Intake Guide stays off the line of attack, watching the yard the way other people watch weather turning bad.",
+    }
+    for room_name, desc in guide_descriptions.items():
+        guide = ObjectDB.objects.filter(db_key__iexact="Intake Guide", db_location=rooms[room_name]).first()
+        if not guide:
+            guide = create_object(
+                "typeclasses.onboarding_guide.OnboardingGuide",
+                key="Intake Guide",
+                location=rooms[room_name],
+                home=rooms[room_name],
+            )
+        guide.db.desc = desc
+        guide.db.is_onboarding_guide = True
+        for alias in ["guide", "instructor"]:
+            guide.aliases.add(alias)
+        if not guide.scripts.get("onboarding_guide_prompt"):
+            guide.scripts.add("typeclasses.onboarding_scripts.OnboardingGuidePromptScript")
+
+    mirror = ObjectDB.objects.filter(db_key__iexact="assessment mirror", db_location=rooms["Intake Chamber"]).first()
+    if not mirror:
+        mirror = create_object(ChargenMirror, key="assessment mirror", location=rooms["Intake Chamber"], home=rooms["Intake Chamber"])
+    mirror.db.desc = "A tall mirror in a blackened frame. It reflects more than posture and less than mercy."
+    mirror.db.is_chargen_mirror = True
+    for alias in ["mirror", "glass", "reflection"]:
+        mirror.aliases.add(alias)
+
+    gremlin = ObjectDB.objects.filter(db_key__iexact="Intake Gremlin", db_location=rooms["Intake Chamber"]).first()
+    if not gremlin:
+        gremlin = create_object("typeclasses.npcs.NPC", key="Intake Gremlin", location=rooms["Intake Chamber"], home=rooms["Intake Chamber"])
+    gremlin.db.desc = "A narrow gremlin leans against the wall with the patience of someone hoping you choose badly and soon."
+    gremlin.db.is_npc = True
+    gremlin.db.onboarding_role = "gremlin"
+    for alias in ["gremlin"]:
+        gremlin.aliases.add(alias)
+
+    sword = ObjectDB.objects.filter(db_key__iexact="training sword", db_location=rooms["Training Hall"]).first()
+    if not sword:
+        sword = create_object(Object, key="training sword", location=rooms["Training Hall"], home=rooms["Training Hall"])
+    sword.db.item_type = "weapon"
+    sword.db.weight = 3.0
+    sword.db.weapon_type = "light_edge"
+    sword.db.skill = "light_edge"
+    sword.db.damage_type = "slice"
+    sword.db.damage_types = {"slice": 1.0, "impact": 0.0, "puncture": 0.0}
+    sword.db.damage = 4
+    sword.db.damage_min = 2
+    sword.db.damage_max = 5
+    sword.db.roundtime = 3.0
+    sword.db.weapon_profile = {
+        "type": "light_edge",
+        "skill": "light_edge",
+        "damage": 4,
+        "damage_min": 2,
+        "damage_max": 5,
+        "roundtime": 3.0,
+    }
+    sword.db.desc = "A blunt-edged training sword balanced for drills, not blood."
+    sword.aliases.add("sword")
+    sword.aliases.add("weapon")
+    sword.aliases.add("blade")
+
+    vest = ObjectDB.objects.filter(db_key__iexact="training vest", db_location=rooms["Training Hall"]).first()
+    if not vest:
+        vest = create_object("typeclasses.wearables.Wearable", key="training vest", location=rooms["Training Hall"], home=rooms["Training Hall"])
+    vest.db.slot = "torso"
+    vest.db.weight = 2.0
+    vest.db.desc = "A rough leather vest cut for drills and fast buckling, more practical than comfortable."
+    vest.db.is_onboarding_training_gear = True
+    for alias in ["vest", "armor", "leathers"]:
+        vest.aliases.add(alias)
+
+    dummy = ObjectDB.objects.filter(db_key__iexact="training dummy", db_location=rooms["Practice Yard"]).first()
+    if not dummy:
+        dummy = create_object("typeclasses.npcs.NPC", key="training dummy", location=rooms["Practice Yard"], home=rooms["Practice Yard"])
+    dummy.db.desc = "A battered hanging frame marks the edge of the yard, the sort of thing you hit only until something living takes its place."
+    dummy.db.is_npc = True
+    dummy.db.is_training_dummy = True
+    dummy.db.is_tutorial_enemy = True
+    dummy.db.onboarding_enemy_role = "training_dummy"
+    dummy.db.hp = 999
+    dummy.db.max_hp = 999
+    dummy.db.balance = 0
+    dummy.db.max_balance = 0
+    for alias in ["dummy", "post"]:
+        dummy.aliases.add(alias)
+
+    vendor = ObjectDB.objects.filter(db_key__iexact="Street Vendor", db_location=threshold_rooms["Market Approach"]).first()
+    if not vendor:
+        vendor = create_object("typeclasses.vendor.Vendor", key="Street Vendor", location=threshold_rooms["Market Approach"], home=threshold_rooms["Market Approach"])
+    vendor.db.desc = "A vendor stands beside a narrow stall with the patience of someone who has seen newcomers arrive before and will see more after you."
+    vendor.db.is_vendor = True
+    vendor.db.is_shopkeeper = True
+    vendor.db.is_threshold_vendor = True
+    vendor.db.vendor_type = "general"
+    vendor.db.inventory = ["trail bread", "book"]
+    vendor.db.price_map = {"trail bread": 0, "book": 20}
+    for alias in ["vendor", "merchant", "stallkeeper"]:
+        vendor.aliases.add(alias)
+    if not vendor.scripts.get("first_area_vendor_prompt"):
+        vendor.scripts.add("typeclasses.first_area_scripts.FirstAreaVendorPromptScript")
+
+    traveler = ObjectDB.objects.filter(db_key__iexact="Passing Traveler", db_location=threshold_rooms["Market Approach"]).first()
+    if not traveler:
+        traveler = create_object("typeclasses.npcs.NPC", key="Passing Traveler", location=threshold_rooms["Market Approach"], home=threshold_rooms["Market Approach"])
+    traveler.db.desc = "A traveler pauses only long enough to adjust a strap before moving on again, as if lingering here would count as a decision."
+    traveler.db.is_npc = True
+    for alias in ["traveler", "passerby"]:
+        traveler.aliases.add(alias)
+
+    _ensure_named_object(
+        "painted sign",
+        threshold_rooms["Market Approach"],
+        "A weathered signboard leans against the stall, its lettering rubbed soft by years of hands and weather. The market lies east. The yard remains west.",
+        aliases=["sign", "board"],
+    )
+    _ensure_named_object(
+        "broken crate",
+        threshold_rooms["Side Passage"],
+        "One side has split open and stayed that way. There is nothing hidden here now, only the suggestion that someone once left in a hurry.",
+        aliases=["crate", "debris"],
+    )
+    token = ObjectDB.objects.filter(db_key__iexact="wayfinder token", db_location=threshold_rooms["Side Passage"]).first()
+    if not token:
+        token = create_object(Object, key="wayfinder token", location=threshold_rooms["Side Passage"], home=threshold_rooms["Side Passage"])
+    token.db.weight = 0.1
+    token.db.item_value = 2
+    token.db.value = 2
+    token.db.desc = "A stamped brass token, worn almost smooth at the edges. It is worth very little, but not nothing."
+    token.aliases.add("token")
+
+    return rooms["Intake Chamber"]
 
 
 def _log_slow_tick(name, started_at, threshold):
@@ -973,6 +1418,13 @@ def at_server_start():
     tutorial_entry = _ensure_new_player_tutorial()
     if tutorial_entry:
         logger.log_info(f"New player tutorial ready at {tutorial_entry.key}(#{tutorial_entry.id}).")
+    try:
+        from systems import aftermath
+
+        aftermath.ensure_poi_tags()
+    except Exception:
+        logger.log_warn("[Aftermath] Failed to ensure POI tags during server start.")
+    _warn_empath_guild_duplicates()
     _configure_brookhollow_justice()
 
 

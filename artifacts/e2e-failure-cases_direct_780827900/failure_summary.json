@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": null,
+  "message": "",
+  "mode": "direct",
+  "scenario": "e2e-failure-cases",
+  "seed": 780827900
+}

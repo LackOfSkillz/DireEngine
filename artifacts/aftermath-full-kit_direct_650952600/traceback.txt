@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 8474, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 5923, in run_aftermath_full_kit_scenario
+    return _run_aftermath_case(args, "aftermath-full-kit")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 5805, in _run_aftermath_case
+    raise AssertionError(f"corpse search did not resolve in {getattr(room, 'key', None)}")
+AssertionError: corpse search did not resolve in aftermath_full_kit_2_320322

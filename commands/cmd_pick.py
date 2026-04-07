@@ -19,6 +19,14 @@ class CmdPick(Command):
             self.caller.msg("Pick what?")
             return
 
+        try:
+            from systems import aftermath
+
+            if aftermath.handle_pick(self.caller, self.args):
+                return
+        except Exception:
+            pass
+
         if " with " in self.args:
             target_part, pick_part = self.args.split(" with ", 1)
         else:

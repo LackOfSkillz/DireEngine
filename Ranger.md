@@ -1,977 +1,1242 @@
-Yes — I’ve got enough to start Ranger microtasks, and the deep-dive changes what I’d build first.
+# Ranger Research Brief
 
-The big correction is this: DragonRealms Rangers are not just “archers with pets.” They are a Survival-primary profession with Weapon and Armor as secondaries, and Magic/Lore as tertiaries. Their identity is built around wilderness attunement, tracking/Instinct, stealth archery, exclusive traversal, animal companionship, and nature-linked magic and beseeches.
+This file is the canonical brief for Aedan's DireLore research pass on Rangers.
 
-What the DR Ranger actually is
+Goal: produce an implementation-grade Ranger guild packet for Dragonsire.
 
-At the guild level, Ranger identity is anchored by several profession-specific systems: the Ranger bonus / Wilderness bonus, Instinct (formerly Scouting), animal companions, Life magic through three spellbooks, beseeches, bonus stance points, Dual Load, Snipe, Slip, Sign language, and later horse wrangling. Those are the real profession pillars, not just “use bows well.”
+## Verification Status
 
-Ranger gameplay loop in DR
+Verified on 2026-04-06 against the live `direlore` PostgreSQL database on port `5432` using the supplied credentials.
 
-In play, Rangers are a momentum class built around staying connected to the wild. Their wilderness bonus can improve or penalize performance depending on whether they maintain that connection; it affects survival skills broadly, and city time drags it down while out-of-town play restores it. That means the class has a built-in environmental rhythm, unlike Warrior’s combat rhythm.
+Confirmed from current DireLore data:
 
-Their exclusive guild skill, Instinct, is used to track creatures or players, read and create trailmarkers, use the Ranger Trail System, and train through commands like SCOUT, TRACK, HUNT, and POUNCE. The trail system itself is ranger-only fast traversal entered by scouting a trail and then going through it.
+- `canon_professions` contains a canonical `Ranger` profession row.
+- `profession_skills` confirms Ranger profession buckets as `survival`, `weapon`, `armor`, `magic`, and `lore`.
+- raw DireLore content confirms a Ranger command category with 17 Ranger-command pages.
+- raw DireLore content confirms Ranger ability pages including beseeches, dual load, personal trail markers, pounce, ranger cache, ranger signs, ranger trail system, scout awareness, sign command, slip, snipe, wilderness bonus, and ranger companion content.
+- raw DireLore content confirms Ranger spell coverage including `Animal Abilities` and `Nature Manipulation` spellbooks plus multiple named Ranger spells.
 
-Combat-wise, Rangers are strongly associated with stealth ranged combat. They gain Snipe at 40th circle, which lets them fire a bow or crossbow from hiding and remain hidden after the shot. With enough bow skill plus See the Wind, they can Dual Load and fire two arrows in one shot. That is a huge identity marker and should be treated as a late dopamine feature, not an early baseline.
+Not yet normalized enough in the current database to trust without targeted extraction:
 
-They also have noncombat identity systems that matter in moment-to-moment play. Sign lets Rangers communicate from adjacent rooms and while hidden without breaking hiding. Slip gives them limited stealth-object interactions at milestone circles. Animal companions currently include wolves and raccoons, and active companions help slow wilderness bonus decay.
+- join and induction flow
+- trainer and buyer mapping
+- exact early-circle advancement steps
+- exact implementation-ready command syntax for every Ranger mechanic
 
-Magic and supernatural layer
+This means the brief is directionally correct as a research packet, but Aedan still needs to extract the raw-page details for the sections above instead of assuming the normalized canon tables are complete.
 
-Ranger magic uses Life mana and is organized into Animal Abilities, Nature Manipulation, and Wilderness Survival spellbooks. Ranger spellcasting also has Environmental Efficacy — wilderness conditions affect how efficiently mana is used. That means a DR-faithful Ranger is not a pure martial like Warrior; the class has a real but nature-bound magic layer.
+This is not a lore exercise.
+This is not a flavor dump.
+This is not a wiki summary.
 
-Separate from spells, Rangers have beseeches, which are explicitly described as not magical. They are supernatural requests to natural forces, and they only work if the relevant natural condition is actually present; you cannot beseech sun where there is no sun, or wind where there is no air movement. That conditional “coax what exists, don’t create from nothing” logic is one of the class’s most distinctive design ideas.
+The output must be usable to build a Ranger vertical slice that proves guild join, profession identity, skill loops, economy loops, and early progression.
 
-What matters for your implementation
+## Why Ranger First
 
-For your game, the DR Ranger breaks into eight core systems:
+Ranger is the correct first profession slice because it proves:
 
-1. Wilderness attunement
-A Ranger-specific environment bond that rises and falls by location and behavior, buffing or penalizing survival-oriented play. This is the class’s foundation.
+- perception and track-style gating
+- gathering and resource loops
+- tool-gated interactions
+- clean sell loops and profession-specific economy
+- progression tied to action rather than abstract XP
 
-2. Instinct / tracking
-A profession-exclusive survival skill for scouting, tracking, reading trails, covering tracks, and eventually exclusive traversal.
+It also avoids Empath-specific edge cases and recovery mechanics that would distort the first guild implementation.
 
-3. Trail / path system
-A Ranger-only movement layer. In your game, this can become hidden routes, terrain shortcuts, or lower-risk travel.
+## Research Constraints
 
-4. Stealth archery
-The signature combat pattern is not just “shoot bow,” but “hide, track, line up, fire, stay hidden.” Snipe is central.
+The research must stay implementation-focused.
 
-5. Companion system
-Not just pets for damage — companions reinforce identity and wilderness maintenance.
+Do not return:
 
-6. Nature magic
-Buffs, mobility, perception, terrain interaction, and animal-flavored utility — not wizard-style artillery.
+- lore dumps
+- history summaries
+- long fiction excerpts
+- vague class fantasy language without mechanics
+- unstructured lists of abilities or spells
+- unsupported assumptions stated as fact
 
-7. Beseeches
-A second supernatural layer with environmental preconditions. This is distinct enough that I would not merge it into ordinary spellcasting.
+Every section must prioritize:
 
-8. Silent coordination
-Signs and adjacent-room communication matter because the Ranger fantasy includes scouting, stalking, and operating while hidden.
+- commands
+- mechanics
+- requirements
+- player-facing loops
+- gating
+- edge cases
+- confidence level
 
-What I would not copy literally
+If source material is incomplete, say so explicitly.
+If a mechanic is uncertain, label it speculative.
 
-I would not port DR one-to-one on a first pass. Some of its features are iconic but can become implementation traps early, especially full companion questing, all beseeches, and every niche utility command. Also, Slip is cross-guild and partially Thief-adjacent, so I would treat it as optional or defer it until your stealth/item interaction model is more mature.
+## Required Output
 
-Recommended build order for your Ranger
+Produce exactly this structure.
 
-To get the DR feel without overbuilding, I’d implement Ranger in this order:
+# RANGER GUILD PACKET v1
 
-Start with Wilderness Bond, Instinct, Track/Hunt/Scout, Ranger trails, and stealth archery hooks. Those give you the class skeleton immediately.
+## 1. Guild Identity
 
-Then add Snipe, sign language, and a basic companion framework. That creates the iconic feel.
+Provide:
 
-After that, layer in nature magic and only a small first set of beseeches with strict environmental checks.
+- guild name
+- core philosophy in 1 to 2 paragraphs maximum
+- role in world in mechanical terms, not lore fluff
 
-Keep Dual Load, advanced companion behavior, horse wrangling, and deeper utility later. Dual Load in particular is a milestone feature, not a starter system.
+## 2. Join / Induction Flow
 
-Bottom line
+Write the guild entry flow as a step-by-step sequence.
 
-We have enough to start microtasks cleanly.
+For each step include:
 
-The DR-faithful Ranger blueprint is:
+- where it happens
+- required NPCs
+- requirements such as skills, items, stats, or none
+- commands used
+- success conditions
+- failure cases
+- repeat-attempt rules
 
-environment bond + tracking + exclusive traversal + stealth archery + companion + nature magic
+This section must use this format:
 
-—not just “bow class.”
+Step 1:
+Step 2:
+Step 3:
 
-If you want, I’ll turn this into the first 20 Ranger microtasks for Aedan in the same format we used for Warrior.
+## 3. Circle Advancement Model
 
-RANGER MICRO TASKS (001–020)
+For each early circle, include:
 
-Phase: Wilderness Bond + Instinct + Tracking Core
+- required skill ranks by category if applicable
+- required actions if any
+- required items or tasks
+- trainer interaction
+- titles unlocked
 
-🥇 RANGER 001 — Create Ranger Profession Flag
-Add "ranger" to profession system
-Ensure compatibility with guild system
-🥇 RANGER 002 — Create Ranger Guild
-Add join logic
+If the source material does not support a full circle table, state the strongest verified advancement model available.
 
-Output:
+## 4. Skill System
 
-You are now recognized as a Ranger.
+List all skills used by Rangers.
 
-🥇 RANGER 003 — Ranger Data Structure
+For each skill provide:
 
-Add to character:
+- name
+- category: primary, secondary, or tertiary
+- what actions train it
+- what systems it affects
 
-wilderness_bond = 0–100
-instinct = 0–100   # placeholder until skill system hooks in
-🥇 RANGER 004 — Initialize Wilderness Bond
-On login / spawn:
-set baseline (e.g. 50)
-🥇 RANGER 005 — Environment Tagging System (FOUNDATION)
+Use this format:
 
-Rooms must have:
+Skill: Foraging
+Category: Primary
+Trained by: forage, gather
+Affects: resource discovery rate
 
-environment_type:
-    wilderness
-    urban
-    underground
-    coastal
+## 5. Abilities / Verbs
 
-👉 This drives EVERYTHING
+List all Ranger-specific commands.
 
-🥇 RANGER 006 — Wilderness Bond Gain
-In wilderness rooms:
-bond increases over time
-🥇 RANGER 007 — Wilderness Bond Decay
-In urban / non-wild:
-bond decreases over time
-🥇 RANGER 008 — Bond State Thresholds
+For each include:
 
-Map bond → states:
+- verb name
+- syntax
+- requirements
+- effect
+- cooldown or cost if known
 
-Bond	State
-0–20	Disconnected
-20–50	Distant
-50–80	Attuned
-80–100	Wildbound
-🥇 RANGER 009 — Bond Effects (FIRST PASS)
-High bond:
-stealth bonus
-perception bonus
-Low bond:
-penalties to tracking
-🥇 RANGER 010 — Bond Messaging
+Use this format:
 
-On change:
+Verb: TRACK
+Syntax: track <target>
+Requirements: if known
+Effect: reveals direction or history
+Cooldown/Cost: if known
 
-You feel closer to the wild.
-The city dulls your senses.
+## 6. Spell System
 
-👉 This is core feedback loop
+If Rangers have spells, provide:
 
-🥇 RANGER 011 — Instinct System Scaffold
+- spell list
+- prerequisites
+- slot system or spellbook structure
+- usage mechanics
+
+If spells are not applicable or incomplete in the source, state that clearly.
+
+## 7. Economy Loops
+
+This section is mandatory.
+
+Define how Rangers make money.
+
+Cover at minimum:
+
+- foraging and what items it yields
+- hunting and what drops it creates
+- skinning and what materials it yields
+- tracking and whether it has indirect economic value
+
+For each loop use this format:
+
+Loop Name:
+Discover:
+Interact:
+Transform:
+Sell:
+Skills Trained:
+
+## 8. Perception Model
+
+Define what Rangers can perceive that others cannot.
+
+Include at minimum:
+
+- tracks
+- animals
+- environmental cues
+- hidden resources
+
+Also include:
+
+- tool requirements if any
+- skill thresholds if any
+
+## 9. Tools and Equipment
+
+List required or typical tools.
+
+Examples include:
+
+- bow
+- skinning knife
+- traps
+- nets
+- profession-specific tools if any
+
+For each tool include what systems depend on it.
+
+## 10. NPC Ecosystem
+
+Identify:
+
+- guild leader or leaders
+- trainers
+- buyers and relevant merchants
+- special NPC interactions
+
+Buyers matter. Do not omit where Ranger outputs are converted into money or advancement.
+
+## 11. Restrictions / Identity Rules
+
+Document profession-specific penalties, expectations, or mechanical constraints.
+
+If none are supported by the source, explicitly write:
+
+none
+
+## 12. Edge Cases / Gotchas
+
+Document failure and friction points such as:
+
+- tracking failure conditions
+- skinning failure
+- resource depletion
+- environmental gating
+- conflicting systems
+- repeat-attempt restrictions
+
+## 13. Source Confidence
+
+For each section, rate confidence as one of:
+
+- high confidence
+- partial
+- speculative
+
+If possible, attach the reason for the rating.
+
+## Source Requirements
+
+Use DireLore and closely related DragonRealms source material to support the packet.
+
+For each section:
+
+- separate verified facts from inference
+- prefer command syntax, trainer flow, gating rules, and system descriptions over flavor
+- identify where the source is thin or contradictory
+
+If exact syntax differs by era or source, note that instead of collapsing variants into fake certainty.
+
+## Implementation Warning
+
+Do not recommend building profession-specific one-off systems as the long-term architecture.
+
+Do not frame the result as:
+
+- build a Ranger tracking system
+- build a Ranger foraging system
+- build a Ranger hunting system
+
+Instead, the packet must support a later conversion into generic systems with Ranger configuration layered on top.
+
+The research should help us build:
+
+- a generic perception gating system
+- a generic resource discovery system
+- a generic tool-gated interaction system
+- a generic profession progression model
+- a generic sell and buyer loop
+
+Ranger should prove the systems. Ranger should not hardcode the systems.
+
+## What Ranger Must Prove
+
+The packet must support an implementation that proves:
+
+- only Rangers or Ranger-gated perception can see certain tracks or cues
+- forage to bundle to sell works as a coherent loop
+- tool gating works, such as knife enabling skinning
+- Ranger income feels different from other professions
+- progression is tied to action, not abstract XP grinding
+
+## Success Criteria
+
+Ranger is considered done when a new player can:
+
+- join the guild
+- forage
+- hunt or skip hunting if the loop allows it
+- sell gathered goods
+- gain relevant skills
+- advance from circle 1 to circle 2
+
+Without:
+
+- admin help
+- debug commands
+- manual intervention
+
+## Deliverable Rules For Aedan
+
+- Keep each section compact and structured.
+- Prefer tables or repeated field blocks where useful.
+- Do not bury commands inside prose.
+- Do not hide missing information.
+- If a section lacks evidence, mark it partial or speculative instead of improvising.
+- If a mechanic seems iconic but dangerous to implement early, call that out.
+
+## Appendix: Prior Hypotheses To Verify, Not Assume
+
+These are useful starting ideas from prior notes, but they must be verified against source material rather than copied straight into implementation.
+
+- Rangers appear to be a survival-forward profession rather than simply an archery guild.
+- Tracking, scouting, trails, and wilderness perception are likely core identity systems.
+- Foraging, gathering, skinning, and related economy loops are likely central to early implementation value.
+- Wilderness attunement or environment-linked bonuses may be a profession identity hook.
+- Ranger magic may exist, but it should not displace the survival and economy core of the first slice.
+- Companions, advanced traversal, and deeper supernatural features may be important long-term but are likely poor first-slice targets.
+
+Treat every item in this appendix as a hypothesis to confirm, constrain, or reject.
+
+## Appendix: Partially Populated Ranger Guild Packet
+
+This section is a partial Ranger guild packet populated directly from the current DireLore database contents on 2026-04-06.
+
+It is intended to support implementation planning for guild joining and early training.
+
+It is not complete.
+
+### 1. Guild Identity
+
+Guild name:
+Ranger Guild
+
+Core identity:
+DireLore consistently presents Rangers as survival-first protectors of the wild. Their profession identity centers on tracking, hiding, foraging, ranged hunting, nature-oriented magic, and maintaining a meaningful relationship with wilderness rather than city life.
+
+Mechanical role in world:
+Rangers are expected to advance primarily through Survival skills, while also maintaining enough Weapon, Armor, Magic, and Lore to satisfy guild progression. DireLore repeatedly frames them as a broad-spectrum profession with especially strong ties to scouting, outdoorsmanship, perception, stealth, bows, and wilderness-dependent advantages.
+
+Source confidence:
+High.
+Supported by `canon_professions`, `profession_skills`, `Ranger new player guide`, `Ranger introduction speech`, and `Category:Ranger abilities`.
+
+### 2. Join / Induction Flow
+
+What DireLore currently supports:
+
+Step 1:
+Find a Ranger guildleader or guildhall.
+Crossing support is explicit: the Crossing guild hall is in a small glade just outside the walls, and Guild Leader Kalika tends young Rangers there. DireLore also lists multiple Ranger guild leaders in other regions.
+
+Step 2:
+Satisfy join eligibility.
+The `Attributes` page states that Rangers have joining stat requirements of: Strength 8, Stamina 8, Agility 8, Reflex 7, Intelligence 7, Charisma 6, Wisdom 6. It also states that a guildleader may refuse entry if any stat is below 8.
+
+Step 3:
+Use `JOIN`.
+The Ranger new player guide says players who have found the guild should use the `JOIN` command to become Rangers.
+
+Step 4:
+Induction speech and profession application.
+Kalika's introduction speech says: "To join us, you merely need to do just that. Just JOIN to become part of our ranks." The same speech then describes the player being appointed a Journeyman Ranger, tutored in Ranger lore and craft, returned to Kalika, and prepared for induction into the guild.
+
+Step 5:
+Post-induction orientation.
+DireLore implies that induction immediately grants guild membership and tutorial-style orientation. The new player guide assumes the player has already joined and begins explaining how to train as a Ranger from there.
+
+Best current implementation reading:
+The DireLore-backed join path is simpler than a quest-gated induction. The player appears to join by meeting minimum stat requirements, reaching a guildleader, and using `JOIN`. The narrative induction sequence happens as part of that acceptance, not as a separate multi-room quest.
+
+Failure cases currently supported:
+
+- insufficient joining stats
+- possibly being warned to be certain before choosing the path
+
+Failure cases not yet fully confirmed from current extraction:
+
+- exact rejection text for an ineligible commoner
+- whether joining requires a second confirmation `JOIN`
+- whether region-specific guildleaders alter the flow
+
+How the profession is applied to a commoner player:
+DireLore does not expose a normalized backend state transition, but the player-facing text is explicit that `JOIN` makes the player "become part of our ranks." For Dragonsire, the faithful implementation is: a Commoner meets Ranger join requirements, uses `JOIN` with the guildleader, then their profession changes to Ranger and their onboarding/tutorial state is updated to the Ranger training track.
+
+Source confidence:
+Partial.
+The command and induction speech are well-supported, but exact failure/retry behavior is not fully extracted yet.
+
+### 3. Guild Leader and Training NPCs
+
+Confirmed Ranger guild leaders and locations from DireLore:
+
+- Kalika: Crossing. Tends young Rangers in a small glade outside the walls.
+- Ievia: Riverhaven. Supports young Rangers under 20th circle.
+- Tolle: Langenfirth. Explicitly associated with Snipe and hunter's bows.
+- Tomma: Shard / western Ilithi border.
+- Marion: Aesry.
+- Paglar: Boar Clan.
+- Roopardua: Forfedhdar wanderer, no fixed guildhall listed.
+
+Confirmed training and register responsibilities from the `Ranger` page:
+
+- Kalika checks 7 different specific Survival skills plus Primary Magic.
+- Tolle checks a combination of all bow skills.
+- Tomma checks `AL` and foraging.
+- Marion checks 3 Stealth skills and Scouting.
+- Paglar checks Circle.
+
+Implementation value:
+This is enough to design a multi-mentor progression model instead of a single all-purpose trainer. Even if Dragonsire compresses the live DR structure, these registers give a canon-backed reason to split early Ranger progression across survival, stealth, ranged combat, and circle advancement.
+
+Source confidence:
+High.
+
+### 4. Circle Progression Model
+
+What DireLore currently confirms for advancement pressure:
+
+- Rangers are required to actively train at least 8 Survival skills to advance within the guild.
+- Scouting is explicitly required as the guild-specific skill.
+- Rangers must learn at least 2 weapon classes in addition to Parry.
+- For circles 1 through 10, Rangers can advance with a single armor skill plus their defending skill.
+- After that, Rangers must train 2 armor skills.
+- Rangers must move at least 2 Lore skills, though lore requirements are described as light.
+- Rangers have access to beseeches starting at 10th circle.
+- Snipe becomes learnable at 40th circle from Tolle.
+- Slip grows by circle with milestones at 30, 40, 50, 60, and 90.
+- Companions have circle gates at 13 for raccoon and 35 for wolf.
+
+Early advancement model Dragonsire can safely infer:
+
+- Circle 1 to 10: strong Survival focus, required Scouting growth, at least 2 weapon classes plus Parry, 1 armor skill, minimal Lore, starter Ranger magic.
+- Post-10: second armor requirement becomes relevant, more advanced ability gates start to appear, and Ranger-specific perks begin unlocking by circle and quest.
+
+Important limitation:
+The current extraction does not yet provide a clean circle-by-circle full requirement table from 1 upward. It provides advancement rules and circle-gated abilities, which is enough for a first-pass training model but not enough for a full canonical promotion matrix.
+
+Source confidence:
+Partial to high.
+High for the specific training rules above. Partial for a full circle table.
+
+### 5. Guild Titles
+
+DireLore contains a large Ranger title list with explicit requirement examples.
+
+Confirmed titles and requirements currently extracted:
+
+- `Tenderfoot`: at least 15 Evasion, 15 Skinning, 10 Scouting.
+- `Leaf Chaser`: at least 15 Scouting, 15 Outdoorsmanship, 15 Perception.
+- `Sojourner`: at least 20 Scouting, 20 Perception.
+- `Composter`: must know the Compost spell.
+- `Native`: must be at least circle 5.
+- `Wildling`: at least 25 Scouting and 25 Outdoorsmanship.
+- `Scout`: at least 25 Scouting, 25 Stealth, 25 Perception.
+- `Wayfarer`: at least 30 Scouting.
+- `Wanderer`: at least 30 Scouting and 30 Athletics.
+- `Awakener`: must know `Awaken Forest`.
+- `Sun Beseecher`: must know `Beseech the Sun to Dry`.
+- `Animal Caller`: at least 150 Outdoorsmanship and must have a companion.
+- `Feral`: at least 50 Scouting, 50 Outdoorsmanship, and `Wolf Scent`.
+- `Pathfinder`: at least 50 Scouting and 50 Perception.
+- `Wildflower`: at least circle 25 and 50 Outdoorsmanship.
+
+Implementation value:
+Titles are a useful secondary progression layer and can be added after join and promotion are working. The extracted titles are already strong enough to build a first Ranger title subsystem tied to skill and ability milestones.
+
+Source confidence:
+High for listed sample titles. Partial for the full title catalog until a dedicated extraction pass captures the rest cleanly.
+
+### 6. Circle-Gated Ranger Abilities
+
+DireLore-backed ability gates currently extracted:
+
+- 10th circle: `Beseech the Sun to Dry`
+- 15th circle: `Beseech Elanthia to Imbue`
+- 20th circle: `Beseech the Wind to Clean`
+- 25th circle: `Beseech Elanthia to Cradle`
+- 30th circle: `Beseech the Wind to Preserve` quest, Slip tier 1
+- 35th circle: wolf companion, `Beseech Elanthia to Petrify` quest
+- 40th circle: `Snipe`, `Beseech the Dark to Sing`, several horse-training milestones
+- 50th circle: `Beseech Elanthia to Seal`, advanced horse-training milestones, Slip tier 3
+- 55th circle: `Beseech the Water to Solidify`
+- 60th circle: `Beseech the Wind to Refresh`, Slip tier 4
+- 65th circle: `Beseech the Wind to Echo`
+- 90th circle: `Beseech Elanthia to Transfer`, Slip tier 5
+
+Other extracted thresholds:
+
+- `Scout Awareness`: 16 Scouting
+- `Scout Area`: 101 Scouting
+- `Personal Trail Markers`: 175 Scouting
+- `Cover my Trail`: 200 Scouting
+- `Dual Load`: 201 Bows plus Reflex + Agility = 60
+- `Snipe`: 40th circle
+
+Source confidence:
+High.
+This is strongly supported by `Category:Ranger_abilities`, `Ranger_Abilities_Chart`, and `Ranger quest walkthroughs`.
+
+### 7. Immediate Implementation Guidance For Dragonsire
+
+If the near-term goal is to accurately implement Ranger joining and early training, the DireLore-supported minimum viable guild flow is:
+
+1. A Commoner finds Kalika at the Crossing Ranger guild site.
+2. The game checks minimum Ranger join stats.
+3. The player uses `join`.
+4. The player is converted from Commoner to Ranger.
+5. The player receives Ranger induction text and a short guided tutorial pass.
+6. Early progression requires active training in Survival with mandatory Scouting, plus the minimal Weapon, Armor, Lore, and starter Magic expectations described above.
+7. Promotions can initially be routed through a simplified register model while keeping Kalika, Tolle, Tomma, Marion, and Paglar as distinct canon anchors.
+
+What is still missing before calling the packet complete:
+
+- exact rejection and retry messaging for failed joins
+- exact full circle requirement tables
+- a full normalized guild-title extraction
+- a raw-page pass over the Ranger quest pages for each quest-gated beseech and companion milestone
+
+### 8. Source Confidence Summary For This Partial Packet
+
+- Guild leader identity and locations: high confidence
+- Join command and basic induction flow: high confidence
+- Commoner-to-Ranger profession application: partial, but strongly implied by induction text
+- Early training and circle progression rules: high confidence for broad rules, partial for a full table
+- Guild titles: partial to high depending on title
+- Quest-gated Ranger abilities: high confidence
+
+## Appendix: Ranger 001-030 Microtasks (Locked)
+
+Goal:
+
+By task 030, a player can:
+
+- join Ranger guild
+- interact with renamed NPCs
+- forage and sell
+- perform a basic hunting loop
+- pass a simplified advancement check from Circle 1 to Circle 2
+
+### Phase R1 - Profession + Join System
+
+R-001 - Define Profession Enum / Registry
 
 Create:
 
-world/systems/ranger/instinct.py
-🥇 RANGER 012 — Track Command
-
-Command:
-
-track <target>
-🥇 RANGER 013 — Track Target Resolution
-Accept:
-NPCs
-players (future toggle)
-🥇 RANGER 014 — Track Success Calculation
-
-Based on:
-
-instinct level
-wilderness bond
-target difficulty
-🥇 RANGER 015 — Track Output (DIRECTIONAL)
-
-Output example:
-
-You find signs leading north.
-
-👉 NOT exact location
-
-🥇 RANGER 016 — Trail Persistence System
-When a target moves:
-leave trail markers
-🥇 RANGER 017 — Trail Decay
-Trails fade over time
-Faster decay in:
-urban environments
-🥇 RANGER 018 — Add Command: Hunt
-
-Command:
-
-hunt
-
-Effect:
-
-finds nearby creatures
-gives general direction
-🥇 RANGER 019 — Hunt Messaging
-
-You scan the area for signs of life.
-
-Output:
-
-vague but useful
-🥇 RANGER 020 — Tracking Test Scenario
-
-Test:
-
-Target moves rooms
-Ranger uses:
-track target
-hunt
-Verify:
-direction updates
-trail fades over time
-wilderness improves success
-🧭 What You Now Have
-
-After 20 tasks:
-
-✅ Ranger exists
-✅ Environment matters
-✅ Tracking loop works
-✅ Wilderness vs city matters
-✅ Player can find, not just fight
-
-RANGER MICRO TASKS (021–040)
-
-Phase: Trail Navigation + Stealth Hunt + Engagement Control
-
-🥇 RANGER 021 — Trail Data Structure
-Each room stores:
-trails = [
-    {target_id, direction, strength, timestamp}
-]
-🥇 RANGER 022 — Trail Strength System
-Strength based on:
-how recently target passed
-target stealth (future hook)
-🥇 RANGER 023 — Trail Visibility Logic
-Rangers see:
-stronger + older trails than others
-Non-rangers (future):
-limited/no visibility
-🥇 RANGER 024 — Improve Track Output (QUALITY)
-
-Instead of just direction:
-
-Fresh tracks lead north.
-Faint signs lead east.
-
-👉 communicates trail strength
-
-🥇 RANGER 025 — Add Command: Scout
-
-Command:
-
-scout
-
-Effect:
-
-reveals:
-all trails in current room
-environment info
-🥇 RANGER 026 — Scout Messaging
-
-You study the ground and surroundings carefully.
-
-Output:
-
-multiple trail directions
-environment cues
-🥇 RANGER 027 — Hidden Trail Bonus
-While hidden:
-improved trail detection
-Hook into stealth system
-
-👉 Ranger ≠ Thief, but overlaps here intentionally
-
-🥇 RANGER 028 — Add Command: Follow
-
-Command:
-
-follow trail <direction>
-
-Effect:
-
-moves player automatically along strongest trail
-🥇 RANGER 029 — Follow Accuracy Check
-Chance to:
-stay on trail
-lose trail
-
-Based on:
-
-instinct
-wilderness bond
-🥇 RANGER 030 — Lost Trail Handling
-
-You lose the trail.
-
-must re-scout or track
-🥇 RANGER 031 — Trail Bias Toward Wilderness
-Trails:
-last longer in wilderness
-degrade faster in cities
-
-👉 reinforces class identity
-
-🥇 RANGER 032 — Add Command: Cover Tracks
-
-Command:
-
-cover tracks
-
-Effect:
-
-reduces trail strength behind player
-🥇 RANGER 033 — Cover Tracks Logic
-modifies:
-future trail creation
-not retroactive
-🥇 RANGER 034 — Cover Tracks Messaging
-
-You obscure your passage as you move.
-
-🥇 RANGER 035 — Add Command: Pounce (Engagement Starter)
-
-Command:
-
-pounce <target>
-🥇 RANGER 036 — Pounce Requirements
-Requires:
-hidden state
-tracked target nearby
-🥇 RANGER 037 — Pounce Effect
-Initiates combat with:
-accuracy bonus
-positional advantage
-🥇 RANGER 038 — Pounce Failure Case
-
-You mistime your attack and reveal yourself.
-
-enters combat normally (no bonus)
-🥇 RANGER 039 — Add Ranged Hook: Aim (FOUNDATION)
-
-Command:
-
-aim <target>
-
-Effect:
-
-prepares next ranged attack
-increases accuracy
-🥇 RANGER 040 — Engagement Test Scenario
-
-Test:
-
-Target moves
-Ranger:
-scout
-follow
-hide
-pounce
-Verify:
-tracking leads to target
-stealth enhances engagement
-pounce gives advantage
-🧭 What You Now Have
-
-After 40 tasks:
-
-✅ Tracking is deeper (not just direction)
-✅ Trails are a real system
-✅ Ranger controls movement flow
-✅ Stealth integrates with tracking
-✅ First “hunter ambush” loop exists
-
-🔥 What Comes Next (041–060)
-
-Now Ranger becomes visibly different in combat:
-
-Bow system integration
-Snipe (core identity ability)
-Ranged positioning + distance
-First “don’t break stealth on attack” mechanics
-⚠️ Important Design Note
-
-Right now:
-
-Thief = steals initiative through stealth
-Ranger = earns initiative through tracking + positioning
-
-👉 That distinction must stay clean
-
-
-RANGER MICRO TASKS (041–060)
-
-Phase: Ranged Combat + Snipe System (CORE IDENTITY)
-
-🥇 RANGER 041 — Ranged Weapon Classification
-Add weapon types:
-bow
-crossbow
-(future: thrown)
-Tag weapons:
-weapon_range_type = "bow"
-🥇 RANGER 042 — Ammo System (FOUNDATION)
-Add:
-ammo_loaded = True/False
-ammo_type
-Require ammo for ranged attacks
-🥇 RANGER 043 — Load Command
-
-Command:
-
-load <weapon>
-sets ammo_loaded = True
-🥇 RANGER 044 — Fire Command (Baseline)
-
-Command:
-
-fire <target>
-consumes ammo
-standard ranged attack
-
-👉 This is NOT Ranger identity yet—just baseline
-
-🥇 RANGER 045 — Range Band System
-
-Add combat distance:
-
-range_band:
-    melee
-    near
-    far
-ranged attacks more effective at near/far
-🥇 RANGER 046 — Aim System (Upgrade)
-
-Expand from earlier:
-
-aim <target>
-builds aim stacks:
-higher stacks = better accuracy/damage
-🥇 RANGER 047 — Aim Persistence Rules
-Aim breaks on:
-movement
-being hit (chance-based)
-Aim persists while hidden
-
-👉 critical for Snipe loop
-
-🥇 RANGER 048 — Add Ability: “Snipe”
-
-Command:
-
-snipe <target>
-🥇 RANGER 049 — Snipe Requirements
-must be:
-hidden
-wielding ranged weapon
-ammo loaded
-
-Fail:
-
-You are not properly positioned to snipe.
-
-🥇 RANGER 050 — Snipe Core Effect
-high accuracy
-high damage
-uses aim bonus
-
-👉 THIS is Ranger’s signature attack
-
-🥇 RANGER 051 — Stealth Retention Check
-
-After snipe:
-
-chance to remain hidden
-
-Based on:
-
-wilderness bond
-stealth skill (future)
-target awareness (future)
-🥇 RANGER 052 — Reveal Failure Case
-
-Your shot gives away your position!
-
-exit stealth
-🥇 RANGER 053 — Snipe Messaging
-
-Player:
-
-You release a carefully placed shot from concealment.
-
-Room:
-
-An arrow flies from nowhere toward Corl.
-
-🥇 RANGER 054 — Snipe + Aim Interaction
-Higher aim:
-increases:
-hit chance
-remain-hidden chance
-
-👉 synergy loop
-
-🥇 RANGER 055 — Add “Reposition” Command
-
-Command:
-
-reposition
-
-Effect:
-
-attempt to:
-shift range band
-re-enter stealth (chance)
-🥇 RANGER 056 — Reposition Logic
-success based on:
-wilderness bond
-current pressure
-failure:
-no change OR partial
-🥇 RANGER 057 — Ranged vs Melee Interaction
-If enemy closes to melee:
-ranged penalties apply
-forces Ranger to:
-reposition or disengage
-🥇 RANGER 058 — Add “Keep Distance” Hook
-passive:
-Rangers slightly better at maintaining range
-
-👉 not guaranteed, just advantage
-
-🥇 RANGER 059 — Ammo Consumption + Recovery
-arrows:
-consumed on fire/snipe
-optional:
-chance to recover after fight (later expansion)
-🥇 RANGER 060 — Full Engagement Test
-
-Test loop:
-
-scout → track → follow
-hide
-aim
-snipe
-remain hidden OR reposition
-
-Verify:
-
-loop feels:
-deliberate
-controlled
-predatory
-🧭 What You Now Have
-
-After 60 tasks:
-
-✅ Real ranged combat exists
-✅ Snipe loop is functional
-✅ Stealth + combat integration works
-✅ Positioning matters
-✅ Ranger feels different from Warrior AND Thief
-
-⚖️ Identity Check (Important)
-Thief
-stealth → burst → escape
-Warrior
-pressure → control → endurance
-Ranger
-track → position → strike unseen
-
-👉 Now you have three distinct combat philosophies
-
-🔥 What Comes Next (061–080)
-
-Now we layer the true Ranger depth systems:
-
-Wilderness bond becomes more powerful
-First Nature Magic hooks
-First Companion system (light version)
-Environmental interaction (terrain advantage)
-⚠️ Critical Warning
-
-Do NOT:
-
-overtune snipe damage yet
-make stealth retention too easy
-ignore melee pressure
-
-👉 Ranger must feel powerful… but fragile if caught
-
-
-RANGER MICRO TASKS (061–080)
-
-Phase: Environment Power + Companion Foundation
-
-🥇 RANGER 061 — Expand Wilderness Bond Effects (CORE UPGRADE)
-
-Enhance bond impact:
-
-State	Effects
-Disconnected	tracking penalty, stealth penalty
-Distant	minor penalties
-Attuned	bonuses to tracking + stealth
-Wildbound	strong bonuses + special interactions
-🥇 RANGER 062 — Bond Affects Combat Directly
-High bond:
-better stealth retention after snipe
-improved aim stability
-Low bond:
-aim breaks more easily
-🥇 RANGER 063 — Bond Affects Tracking Depth
-High bond:
-clearer trail info
-slower trail decay (for Ranger only)
-Low bond:
-vague outputs
-🥇 RANGER 064 — Add Terrain Modifiers
-
-Extend room data:
-
-terrain_type:
-    forest
-    plains
-    swamp
-    mountain
-    urban
-🥇 RANGER 065 — Terrain Synergy with Bond
-In natural terrain:
-bond gains faster
-bonuses amplified
-In hostile terrain (urban):
-penalties amplified
-🥇 RANGER 066 — Add Ability: “Blend”
-
-Command:
-
-blend
-
-Effect:
-
-improves chance to:
-enter stealth
-remain hidden
-🥇 RANGER 067 — Blend Requirements
-stronger in:
-wilderness
-weaker in:
-urban
-🥇 RANGER 068 — Blend Messaging
-
-You draw into the natural cover around you.
-
-🥇 RANGER 069 — Add Ability: “Read the Land”
-
-Command:
-
-read land
-
-Effect:
-
-reveals:
-terrain bonuses
-creature presence hints
-environmental conditions
-🥇 RANGER 070 — Read the Land Output
-
-Example:
-
-The land is alive with subtle movement. Tracks are easier to follow here.
-
-🥇 RANGER 071 — Environmental Advantage Hook
-In favorable terrain:
-stealth ↑
-tracking ↑
-snipe retention ↑
-🥇 RANGER 072 — Add Companion System Scaffold
-
-Create:
-
-world/systems/ranger/companion.py
-🥇 RANGER 073 — Companion Data Model
-
-Each Ranger can have:
-
-companion = {
-    type: "wolf",
-    state: active/inactive,
-    bond: 0–100
+```python
+PROFESSIONS = {
+	"ranger": {
+		"name": "Ranger",
+		"perception_flags": ["tracks", "wild_resources"],
+	}
 }
-🥇 RANGER 074 — Add Command: “Call Companion”
+```
 
-Command:
+R-002 - Add Profession Field to Character
 
-companion call
+```python
+character.db.profession = None
+```
 
-Effect:
+Default = `commoner`
 
-summons companion (if available)
-🥇 RANGER 075 — Add Command: “Dismiss Companion”
+R-003 - Helper: `get_profession()`
 
-Command:
+```python
+def get_profession(character):
+	return character.db.profession or "commoner"
+```
 
-companion dismiss
-🥇 RANGER 076 — Companion Passive Effect (FIRST PASS)
+R-004 - Ranger Stat Gate Validator
 
-While active:
+```python
+def can_join_ranger(character):
+	return (
+		character.db.str >= 8 and
+		character.db.sta >= 8 and
+		character.db.agi >= 8 and
+		character.db.ref >= 7 and
+		character.db.int >= 7 and
+		character.db.cha >= 6 and
+		character.db.wis >= 6
+	)
+```
 
-slight:
-tracking bonus
-awareness bonus
+R-005 - Create Guild Location Tag
 
-👉 NOT combat pet yet
+Rooms:
 
-🥇 RANGER 077 — Companion + Wilderness Bond Interaction
-Active companion:
-slows bond decay
-increases bond gain slightly
+```python
+room.tags.add("ranger_guild")
+```
 
-👉 mirrors DR behavior
+R-006 - Create Guildmaster NPC (`Elarion`)
 
-🥇 RANGER 078 — Companion Messaging
+Typeclass:
 
-A wolf emerges from the brush and joins you.
+```python
+class RangerGuildmaster(NPC):
+	key = "Elarion"
+```
 
-🥇 RANGER 079 — Companion Limitation Rules
-Only 1 companion active
-Cannot summon in:
-urban zones (optional rule)
-🥇 RANGER 080 — Environment + Companion Test
+R-007 - Guildmaster Dialogue Hook
 
-Test:
+Supports:
 
-Enter wilderness
-call companion
-track target
-verify:
-tracking improves
-bond increases faster
-environment matters
-🧭 What You Now Have
+- `join`
+- `advance`
+- fallback dialogue
 
-After 80 tasks:
+R-008 - Implement `JOIN` Command
 
-✅ Wilderness is mechanically meaningful
-✅ Ranger power tied to environment
-✅ First nature-based abilities exist
-✅ Companion system is alive (light version)
-✅ Class identity is no longer “just combat”
+Syntax:
 
-⚖️ Identity Check (Now Fully Distinct)
-Warrior
-dominates through force
-Thief
-manipulates through stealth
-Ranger
-wins before the fight starts
-and gets stronger by being in the right place
-🔥 What Comes Next (081–100)
+```text
+join ranger
+```
 
-Final Ranger layer:
+Flow:
 
-Nature Magic (light spell system)
-Beseech-style abilities (conditional power)
-Advanced stealth archery (refinement)
-Group utility hooks
-⚠️ Critical Design Reminder
+- check location via guild tag
+- check stats
+- assign profession
+- send onboarding text
 
-Do NOT:
+R-009 - Assign Profession on Join
 
-turn companion into a combat DPS pet yet
-give Rangers raw damage boosts like Warrior
-ignore terrain dependency
+```python
+character.db.profession = "ranger"
+character.msg("You are now recognized as a Ranger.")
+```
 
-👉 Ranger power must feel earned through positioning + environment
+R-010 - Add Join Failure Messaging
 
-RANGER MICRO TASKS (081–100)
+Cases:
 
-Phase: Nature Power + Beseech System + Identity Completion
+- wrong location
+- insufficient stats
 
-🥇 RANGER 081 — Nature Ability Resource (Light System)
+### Phase R2 - Domain NPC System (Renamed)
 
-Add:
+R-011 - Create Domain NPC Base
 
-nature_focus = 0–100
-builds slowly in wilderness
-decays in urban
+```python
+class RangerMentor(NPC):
+	domain = None
+```
 
-👉 This is NOT full mana—keep it light
+R-012 - Create NPC: `Bram Thornhand`
 
-🥇 RANGER 082 — Nature Focus Gain Rules
-increases when:
-in wilderness
-tracking
-scouting
-bonus if:
-high wilderness bond
-🥇 RANGER 083 — Nature Focus Decay
-faster decay:
-urban
-slow decay:
-wilderness
-🥇 RANGER 084 — Add Command: “Focus”
+- domain: `survival`
+- handles: forage and skin validation
 
-Command:
+R-013 - Create NPC: `Serik Vale`
 
-focus
+- domain: `hunt`
+- handles: ranged weapon validation
 
-Effect:
+R-014 - Create NPC: `Lysa Windstep`
 
-small boost to nature_focus
-requires:
-not in combat (first pass)
-🥇 RANGER 085 — Beseech System Scaffold
+- domain: `stealth`
+- handles: scouting validation
 
-Create:
+R-015 - Create NPC: `Orren Mossbinder`
 
-world/systems/ranger/beseech.py
-🥇 RANGER 086 — Beseech Command
+- domain: `lore`
+- handles: magic and lore validation
 
-Command:
+R-016 - Dialogue Routing by Domain
 
-beseech <type>
+Each NPC responds differently to:
+
+```text
+ask <npc> about training
+```
+
+R-017 - Add Flavor Differentiation
+
+Each NPC must:
+
+- have unique tone
+- use different phrasing
+- avoid reused DragonRealms text
+
+### Phase R3 - Resource + Foraging Loop
+
+R-018 - Resource Node Framework (Generic)
+
+```python
+{
+	"type": "grass",
+	"visible_to": ["ranger"],
+}
+```
+
+R-019 - Render Resource in Room
+
+On `look`:
+
+- show resource if profession matches
+
+R-020 - Implement `FORAGE` Command
+
+```text
+forage
+```
+
+Flow:
+
+- check for resource
+- generate item
+- remove node or start cooldown
+
+R-021 - Create Resource Items
 
 Examples:
 
-beseech wind
-beseech earth
-beseech sky
-🥇 RANGER 087 — Beseech Validation (CRITICAL RULE)
-MUST check environment:
-wind → requires outdoor / airflow
-earth → requires natural terrain
-sky → requires open sky
+- `grass tuft`
+- `stick bundle`
 
-Fail:
+R-022 - Implement `BUNDLE` Command
 
-There is nothing here to answer your call.
+```text
+bundle grass
+```
 
-👉 This is core DR philosophy
+Converts:
 
-🥇 RANGER 088 — Beseech Cost System
-consumes:
-nature_focus
-fails if insufficient
-🥇 RANGER 089 — Beseech: Wind
+- raw to processed
 
-Effect:
+R-023 - Add Skill Gain Hook
 
-improves:
-ranged accuracy
-stealth retention after snipe
-🥇 RANGER 090 — Beseech: Earth
+```python
+gain_skill(character, "foraging")
+```
 
-Effect:
+### Phase R4 - Economy Loop
 
-improves:
-stealth entry
-tracking clarity
-🥇 RANGER 091 — Beseech: Sky
+R-024 - Create Buyer NPC
 
-Effect:
+Example:
 
-improves:
-perception
-target detection
-🥇 RANGER 092 — Beseech Duration System
-short duration buffs (10–20s)
-no stacking of same type
-🥇 RANGER 093 — Beseech Messaging
+```python
+class FieldBuyer(NPC):
+	accepts = ["grass", "bundle", "hide"]
+```
 
-You call to the wind, and it answers.
+R-025 - `SELL` Command
 
-Room:
+```text
+sell <item>
+```
 
-The air shifts subtly around Gary.
+Flow:
 
-🥇 RANGER 094 — Add “Snipe Mastery” Hook
-At high bond + focus:
-increased chance to:
-remain hidden after snipe
-critical hit
-🥇 RANGER 095 — Advanced Aim Scaling
-Aim now affected by:
-wilderness bond
-nature_focus
-higher synergy → stronger shots
-🥇 RANGER 096 — Add Group Utility: “Mark Target”
+- validate item
+- remove item
+- add currency
 
-Command:
+R-026 - Add Value Mapping
 
-mark <target>
+```python
+VALUES = {
+	"grass": 1,
+	"bundle": 3,
+}
+```
 
-Effect:
+R-027 - Add Skill Gain on Sell
 
-increases:
-group hit chance vs target
-🥇 RANGER 097 — Mark Target Logic
-applies debuff:
-target easier to track + hit
-duration-based
-🥇 RANGER 098 — Mark Messaging
+Optional but recommended:
 
-You mark your target, revealing its movements.
+```python
+gain_skill(character, "trading")
+```
 
-🥇 RANGER 099 — Full Ranger Loop Validation
+### Phase R5 - Basic Hunt Loop
 
-Test full loop:
+R-028 - Create Animal NPC
 
-Enter wilderness
-build bond + focus
-track → follow
-blend → aim
-beseech wind
-snipe
-reposition
+Examples:
 
-Verify:
+- `deer`
+- `rabbit`
 
-flow feels:
-deliberate
-environment-driven
-distinct from other classes
-🥇 RANGER 100 — Balance + Config Hooks
+R-029 - Skinning Command
 
-Centralize:
+```text
+skin <corpse>
+```
 
-bond gain/decay
-focus gain/decay
-beseech costs
-snipe modifiers
+Requires:
 
-👉 required for tuning later
+- knife check on equipped gear
 
-🧭 FINAL RESULT — RANGER (COMPLETE)
+Returns:
+
+- `hide`
+
+R-030 - Circle Advancement (1 -> 2)
+
+Via `Elarion`:
+
+```text
+ask elarion about advancement
+```
+
+Check:
+
+- foraging used
+- scouting >= minimal threshold
+- weapon used, or optional per design toggle
+
+If pass:
+
+```python
+character.db.circle = 2
+```
+
+### Required DireTest Coverage
+
+Create scenarios:
+
+- `ranger-join`: success and failure
+- `ranger-forage`: resource visibility and item creation
+- `ranger-economy`: sell loop works
+- `ranger-hunt`: kill to skin to item
+- `ranger-advance`: Circle 1 to 2
+
+### Design Checkpoint
+
+After R-030, verify:
+
+- nothing is hardcoded to Ranger only beyond configuration and profession flags
+- resource system is generic
+- NPC domains are reusable for other guilds
+- advancement is data-driven, not hand-scripted per profession
+
+### End State
+
+By R-030, Dragonsire should have:
+
+- a real profession system
+- a real guild join path
+- an original renamed NPC ecosystem
+- a functional Ranger economy loop
+- a validated early progression path
+
+## Appendix: Ranger 031-050 Patch-Level Implementation (Locked)
+
+This section defines the next controlled expansion after the initial Ranger vertical slice.
+
+Goal:
+
+Turn Ranger from:
+
+- can join
+
+Into:
+
+- can live as a Ranger
+
+### Rules For Aedan
+
+- Do not create new systems.
+- Do not duplicate logic.
+- Only extend existing code in `typeclasses/npcs.py`, `commands/cmd_ask.py`, `typeclasses/characters.py`, and existing forage, hunt, and skin logic.
+- Keep patches small and localized.
+
+### Phase R6 - Domain Mentors
+
+R-031 - Add Bram Thornhand (Survival)
+
+File:
+
+- `typeclasses/npcs.py`
+
+Add:
+
+```python
+class RangerMentor(NPC):
+	domain = None
+
+	def handle_inquiry(self, speaker, topic):
+		topic = topic.lower()
+
+		if topic in ("training", self.domain):
+			return self.training_response(speaker)
+
+		return None
+
+	def training_response(self, speaker):
+		return "You should not see this."
+```
+
+Add Bram:
+
+```python
+class BramThornhand(RangerMentor):
+	key = "Bram Thornhand"
+	domain = "survival"
+
+	def training_response(self, speaker):
+		return (
+			"The wild provides, if you know how to listen. "
+			"Start with forage. Learn what grows beneath your feet."
+		)
+```
+
+R-032 - Add Serik Vale (Hunt)
+
+```python
+class SerikVale(RangerMentor):
+	key = "Serik Vale"
+	domain = "hunting"
+
+	def training_response(self, speaker):
+		return (
+			"A clean shot ends suffering quickly. "
+			"Practice your aim. Respect your prey."
+		)
+```
+
+R-033 - Add Lysa Windstep (Stealth)
+
+```python
+class LysaWindstep(RangerMentor):
+	key = "Lysa Windstep"
+	domain = "scouting"
+
+	def training_response(self, speaker):
+		return (
+			"You are loud. The forest hears you coming. "
+			"Learn to move without being noticed."
+		)
+```
+
+R-034 - Add Orren Mossbinder (Lore)
+
+```python
+class OrrenMossbinder(RangerMentor):
+	key = "Orren Mossbinder"
+	domain = "lore"
+
+	def training_response(self, speaker):
+		return (
+			"There is power in the old ways. "
+			"Understanding comes before control."
+		)
+```
+
+R-035 - Hook Them Into `ask`
+
+File:
+
+- `commands/cmd_ask.py`
+
+Find where NPC inquiry is handled.
+
+Modify:
+
+```python
+response = target.handle_inquiry(caller, topic)
+if response:
+	caller.msg(f'{target.key} says, "{response}"')
+	return
+```
+
+No new system. Only ensure mentors respond through the existing inquiry path.
+
+### Phase R7 - Circle System
+
+R-036 - Add Circle Field
+
+File:
+
+- `typeclasses/characters.py`
+
+Inside character creation or initialization:
+
+```python
+if not self.db.circle:
+	self.db.circle = 1
+```
+
+R-037 - Add Advancement Check
+
+File:
+
+- `typeclasses/characters.py`
+
+Add:
+
+```python
+def can_advance_ranger(self):
+	if self.db.profession != "ranger":
+		return False, "You are not a Ranger."
+
+	forage_used = self.db.get("forage_uses", 0)
+	scouting = self.get_skill("scouting")
+
+	if forage_used < 1:
+		return False, "You have not yet learned to gather from the wild."
+
+	if scouting < 5:
+		return False, "Your awareness of the wild is still too shallow."
+
+	return True, None
+```
+
+R-038 - Hook Advancement Into Elarion
+
+File:
+
+- `typeclasses/npcs.py`
+
+Inside `RangerGuildmaster.handle_inquiry`:
+
+```python
+if topic == "advancement":
+	can, reason = speaker.can_advance_ranger()
+
+	if not can:
+		return reason
+
+	speaker.db.circle = 2
+	return "You have taken your first true step into the wilds."
+```
+
+R-039 - Sync State (Optional but Recommended)
+
+File:
+
+- `typeclasses/characters.py`
+
+After circle change:
+
+```python
+self.sync_client_state()
+```
+
+Only do this if client sync is already used elsewhere for equivalent character state updates.
+
+R-040 - Improve Failure Messaging
+
+Ensure `can_advance_ranger()` returns specific requirement failures instead of generic rejection.
+
+### Phase R8 - Forage Loop Upgrade
+
+R-041 - Add Profession Bonus
+
+File:
+
+- `commands/cmd_forage.py`
+
+Find yield logic.
+
+Modify:
+
+```python
+if caller.db.profession == "ranger":
+	yield_amount += 1
+```
+
+R-042 - Add Skill Influence
+
+```python
+foraging = caller.get_skill("foraging")
+yield_amount += foraging // 10
+```
+
+R-043 - Add Resource Variation
+
+Replace static output with:
+
+```python
+import random
+
+roll = random.random()
+
+if roll < 0.7:
+	item = "grass"
+elif roll < 0.95:
+	item = "stick"
+else:
+	item = "wild herb"
+```
+
+R-043.1 - Track Forage Usage
+
+Still in `commands/cmd_forage.py`:
+
+```python
+caller.db.forage_uses = caller.db.get("forage_uses", 0) + 1
+```
+
+### Phase R9 - Skinning Validation
+
+R-044 - Enforce Tool Requirement
+
+File:
+
+- `commands/cmd_skin.py`
+
+Add:
+
+```python
+if not caller.is_wielding("skinning knife"):
+	caller.msg("You need a skinning knife to do that.")
+	return
+```
+
+R-045 - Add Quality Outcome
+
+Replace static hide creation with:
+
+```python
+import random
+
+roll = random.random()
+
+if roll < 0.2:
+	quality = "poor"
+elif roll < 0.8:
+	quality = "normal"
+else:
+	quality = "fine"
+
+hide_name = f"{quality} hide"
+```
+
+### Phase R10 - DireTest Patches
+
+R-046 - `ranger-advance-success`
+
+File:
+
+- `diretest.py`
+
+Add scenario:
+
+```python
+@scenario(name="ranger-advance-success", tags=["ranger"])
+def ranger_advance_success(ctx):
+	p = ctx.player()
+
+	ctx.cmd("join ranger")
+
+	ctx.cmd("forage")
+	p.set_skill("scouting", 10)
+
+	ctx.cmd("ask elarion about advancement")
+
+	assert p.db.circle == 2
+```
+
+R-047 - `ranger-advance-fail`
+
+```python
+@scenario(name="ranger-advance-fail", tags=["ranger"])
+def ranger_advance_fail(ctx):
+	p = ctx.player()
+
+	ctx.cmd("join ranger")
+	ctx.cmd("ask elarion about advancement")
+
+	assert p.db.circle == 1
+```
+
+R-048 - `ranger-npc-inquiry`
+
+```python
+@scenario(name="ranger-npc-inquiry", tags=["ranger"])
+def ranger_npc_inquiry(ctx):
+	ctx.cmd("ask bram about training")
+	ctx.cmd("ask serik about hunting")
+	ctx.cmd("ask lysa about scouting")
+```
+
+R-049 - `ranger-forage-scaling`
+
+```python
+@scenario(name="ranger-forage-scaling", tags=["ranger"])
+def ranger_forage_scaling(ctx):
+	p = ctx.player()
+	ctx.cmd("join ranger")
+
+	before = p.inventory_count()
+
+	ctx.cmd("forage")
+
+	after = p.inventory_count()
+
+	assert after > before
+```
+
+R-050 - `ranger-skinning-tool`
+
+```python
+@scenario(name="ranger-skinning-tool", tags=["ranger"])
+def ranger_skinning_tool(ctx):
+	p = ctx.player()
+	ctx.cmd("join ranger")
+
+	ctx.cmd("skin deer")
+
+	ctx.give_item("skinning knife")
+	ctx.cmd("wield skinning knife")
+
+	ctx.cmd("skin deer")
+```
+
+### End State After This Patch Set
 
 You now have:
 
-🌿 Core Systems
-Environment Engine
-Wilderness Bond
-Terrain system
-Environmental bonuses
-Tracking Engine
-Instinct / tracking
-Trail system
-Follow + hunt loop
-Combat Identity
-Snipe (stealth ranged)
-Aim system
-Position control
-Nature Layer
-Nature Focus
-Beseech system (conditional power)
-Companion Layer
-Passive companion system
-⚖️ Final Class Identity
-Warrior
-dominates combat
-Thief
-manipulates encounters
-Ranger
-controls when combat happens
-and shapes it through environment
-🧠 Honest Comparison to DR Ranger
-
-You are now:
-
-👉 ~90–95% equivalent in SYSTEM DEPTH
-
-What’s intentionally deferred:
-
-full spellbooks
-advanced companions
-dual-load (late game dopamine)
-horse systems
-🚀 Where You Go Next
-
-Now you have 3 fully formed professions.
+- multi-NPC guild structure
+- advancement system
+- skill-based gating
+- economy loop scaling
+- tool-gated interaction
+- DireTest validation

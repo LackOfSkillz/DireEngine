@@ -1,10 +1,12 @@
 import argparse
+from collections.abc import Mapping
 import json
 import os
 from pathlib import Path
 import sys
 import time
 import traceback
+from unittest.mock import patch
 
 from tools.diretest.core.diff import diff_snapshots as build_snapshot_diff
 from tools.diretest.core.artifacts import write_artifacts
@@ -13,68 +15,43 @@ from tools.diretest.core.failures import build_failure_summary
 from tools.diretest.core.runner import run_scenario
 from tools.diretest.core.seed import set_seed
 
-
 SCENARIO_REGISTRY = {}
 
 
-def register_scenario(name, *, metadata=None):
+def register_scenario(name, metadata=None, aliases=None, **extra_metadata):
     scenario_name = str(name or "").strip()
     if not scenario_name:
-        raise ValueError("DireTest scenario name must be a non-empty string.")
+        raise ValueError("Scenario name cannot be empty.")
+
+    scenario_aliases = [str(alias or "").strip() for alias in list(aliases or []) if str(alias or "").strip()]
     scenario_metadata = dict(metadata or {})
+    scenario_metadata.update(dict(extra_metadata or {}))
 
     def decorator(func):
+        func.diretest_metadata = dict(getattr(func, "diretest_metadata", {}) or {}) | scenario_metadata
         SCENARIO_REGISTRY[scenario_name] = func
-        setattr(func, "diretest_scenario_name", scenario_name)
-        setattr(func, "diretest_metadata", scenario_metadata)
+        for alias in scenario_aliases:
+            SCENARIO_REGISTRY[alias] = func
         return func
 
     return decorator
 
 
-def _get_registered_scenario(name):
+def get_scenario_handler(name):
     return SCENARIO_REGISTRY.get(str(name or "").strip())
 
 
-def _write_cli_failure_artifact(scenario_name, seed, failure_type, message, mode="direct"):
-    run_id = f"{str(scenario_name or 'scenario').replace(' ', '_').lower()}_{str(mode or 'direct')}_{int(seed or 0)}"
-    artifact_dir = write_artifacts(
-        run_id,
-        {
-            "scenario": {
-                "name": str(scenario_name or "scenario"),
-                "mode": str(mode or "direct"),
-                "seed": int(seed or 0),
-            },
-            "seed": int(seed or 0),
-            "command_log": [],
-            "snapshots": [],
-            "diffs": [],
-            "metrics": {
-                "exit_code": 1,
-                "failure_type": str(failure_type or "unexpected_exception"),
-            },
-            "failure_summary": build_failure_summary(
-                failure_type=failure_type,
-                message=message,
-                scenario=scenario_name,
-                seed=seed,
-                mode=mode,
-            ),
-            "traceback": str(message or ""),
-        },
-    )
-    return str(artifact_dir)
+def _get_registered_scenario(name):
+    return get_scenario_handler(name)
 
 
 def _load_json_file(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def _load_snapshot_reference(reference):
-    raw = str(reference or "").strip()
+def _load_snapshot_input(raw):
     if not raw:
-        raise ValueError("Snapshot reference cannot be empty.")
+        return None
 
     path_text = raw
     label = None
@@ -101,11 +78,49 @@ def _load_snapshot_reference(reference):
     raise TypeError("Snapshot file must contain a snapshot entry, snapshot data dict, or snapshot-entry list.")
 
 
+def _load_snapshot_reference(raw):
+    snapshot = _load_snapshot_input(raw)
+    if snapshot is None:
+        raise ValueError("Snapshot reference is required.")
+    return snapshot
+
+
 def _parse_seed_text(seed_text):
     raw = str(seed_text or "").strip()
     if raw.startswith("seed="):
         raw = raw.split("=", 1)[1]
     return int(raw or 0)
+
+
+def _write_cli_failure_artifact(scenario_name, seed, failure_type, message, mode="direct", traceback_text=""):
+    artifact_dir = write_artifacts(
+        f"{str(scenario_name or 'scenario').replace(' ', '_').lower()}_{mode}_{int(seed or 0)}",
+        {
+            "scenario": {
+                "name": str(scenario_name or "scenario"),
+                "mode": str(mode or "direct"),
+                "seed": int(seed or 0),
+                "started_at": time.time(),
+            },
+            "seed": int(seed or 0),
+            "command_log": [],
+            "snapshots": [],
+            "diffs": [],
+            "metrics": {
+                "exit_code": 1,
+                "failure_type": str(failure_type or "scenario_failure"),
+            },
+            "failure_summary": build_failure_summary(
+                failure_type=failure_type,
+                message=message,
+                scenario=str(scenario_name or "scenario"),
+                seed=seed,
+                mode=mode,
+            ),
+            "traceback": str(traceback_text or ""),
+        },
+    )
+    return str(artifact_dir)
 
 
 def _load_artifact_metadata(artifact_path):
@@ -468,6 +483,979 @@ def run_race_balance_scenario(args):
             print(f"Invariant Status: {'PASS' if output['all_valid'] else 'FAIL'}")
         return 0 if output["all_valid"] else 1
     finally:
+        _cleanup_named_object(room_name)
+
+
+def _build_race_descriptor_snapshot(character):
+    return {
+        "name": getattr(character, "key", None),
+        "race": getattr(getattr(character, "db", None), "race", None),
+        "age": getattr(getattr(character, "db", None), "age", None),
+        "age_bracket": character.get_age_bracket(),
+        "descriptor": character.get_race_descriptor(),
+        "appearance": character.return_appearance(character),
+    }
+
+
+@register_scenario("race-descriptor-basic")
+def run_race_descriptor_basic_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_race_descriptor_basic")
+    character = None
+    try:
+        character = create_race_test_character(room, "volgrin", key="diretest_race_descriptor_basic")
+        character.db.age = 25
+        output = _build_race_descriptor_snapshot(character)
+        output["scenario"] = "race-descriptor-basic"
+        output["ok"] = output["age_bracket"] == "adult" and "volgrin" in str(output["descriptor"] or "").lower()
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: race-descriptor-basic")
+            print(f"Descriptor: {output['descriptor']}")
+            print(f"Age Bracket: {output['age_bracket']}")
+            print(f"Appearance Header: {str(output['appearance']).splitlines()[0]}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        if character:
+            try:
+                character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("race-descriptor-age-shift")
+def run_race_descriptor_age_shift_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_race_descriptor_age_shift")
+    character = None
+    try:
+        character = create_race_test_character(room, "felari", key="diretest_race_descriptor_age_shift")
+        character.db.age = 10
+        child_snapshot = _build_race_descriptor_snapshot(character)
+        character.db.age = 70
+        elder_snapshot = _build_race_descriptor_snapshot(character)
+        output = {
+            "scenario": "race-descriptor-age-shift",
+            "race": character.get_race(),
+            "child": child_snapshot,
+            "elder": elder_snapshot,
+            "ok": child_snapshot["age_bracket"] == "child"
+            and elder_snapshot["age_bracket"] == "elder"
+            and child_snapshot["descriptor"] != elder_snapshot["descriptor"],
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: race-descriptor-age-shift")
+            print(f"Child Descriptor: {child_snapshot['descriptor']}")
+            print(f"Elder Descriptor: {elder_snapshot['descriptor']}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        if character:
+            try:
+                character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("race-descriptor-no-race")
+def run_race_descriptor_no_race_scenario(args):
+    _setup_django()
+
+    from evennia.utils.create import create_object
+
+    character_name = f"diretest_race_descriptor_no_race_{str(int(time.time() * 1000))[-6:]}"
+    room_name, room = _create_temp_room("diretest_race_descriptor_no_race")
+    character = None
+    try:
+        character = create_object("typeclasses.characters.Character", key=character_name, location=room, home=room)
+        character.db.age = 25
+        character.db.race = "unknown_race"
+        output = {
+            "scenario": "race-descriptor-no-race",
+            "descriptor": character.get_race_descriptor(),
+            "race_reference": character.get_race_reference(),
+        }
+        output["ok"] = output["descriptor"] == "an unidentified figure" and output["race_reference"] == "an unidentified figure"
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: race-descriptor-no-race")
+            print(f"Descriptor: {output['descriptor']}")
+            print(f"Race Reference: {output['race_reference']}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        if character:
+            try:
+                character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+
+
+def _capture_object_messages(*objects):
+    captured = {}
+    originals = {}
+
+    for obj in objects:
+        if not obj:
+            continue
+        captured[obj] = []
+        originals[obj] = obj.msg
+
+        def _build_capture(target):
+            def _capture(text=None, **kwargs):
+                payload = text
+                if isinstance(payload, tuple) and payload:
+                    payload = payload[0]
+                captured[target].append(str(payload or ""))
+                return None
+
+            return _capture
+
+        obj.msg = _build_capture(obj)
+
+    return captured, originals
+
+
+def _restore_object_messages(originals):
+    for obj, original in dict(originals or {}).items():
+        obj.msg = original
+
+
+@register_scenario("language-basic")
+def run_language_basic_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_basic")
+    character = None
+    try:
+        character = create_race_test_character(room, "saurathi", key="diretest_language_basic")
+        known_languages = list(character.get_known_languages())
+        output = {
+            "scenario": "language-basic",
+            "race": character.get_race(),
+            "known_languages": known_languages,
+            "active_language": character.get_active_language(),
+            "ok": set(known_languages) == {"common", "saurathi"} and character.get_active_language() == "common",
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-basic")
+            print(f"Known Languages: {', '.join(known_languages)}")
+            print(f"Active Language: {output['active_language']}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        if character:
+            try:
+                character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-switch")
+def run_language_switch_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_switch")
+    character = None
+    try:
+        character = create_race_test_character(room, "lunari", key="diretest_language_switch")
+        changed = character.set_language("lunari")
+        output = {
+            "scenario": "language-switch",
+            "changed": bool(changed),
+            "active_language": character.get_active_language(),
+            "ok": bool(changed) and character.get_active_language() == "lunari",
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-switch")
+            print(f"Active Language: {output['active_language']}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        if character:
+            try:
+                character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-accent")
+def run_language_accent_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_accent")
+    speaker = None
+    observer = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_language_speaker")
+        observer = create_race_test_character(room, "human", key="diretest_language_observer")
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(speaker, observer)
+        speaker.execute_cmd("say sail south")
+        speaker_messages = list(captured.get(speaker) or [])
+        observer_messages = list(captured.get(observer) or [])
+        transformed = any("ssail ssouth" in message.lower() for message in speaker_messages + observer_messages)
+        output = {
+            "scenario": "language-accent",
+            "speaker_messages": speaker_messages,
+            "observer_messages": observer_messages,
+            "ok": transformed,
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-accent")
+            if speaker_messages:
+                print(f"Speaker Heard: {speaker_messages[0]}")
+            if observer_messages:
+                print(f"Observer Heard: {observer_messages[0]}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, observer):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-invalid")
+def run_language_invalid_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+def run_e2e_full_lifecycle_all_races_scenario(args):
+    _setup_django()
+
+    from world.races import TEST_RACES
+
+    results = []
+    failures = []
+    for index, race in enumerate(TEST_RACES):
+        print(f"\n=== E2E Lifecycle: {race} ===")
+        try:
+            result = _run_e2e_full_lifecycle_for_race(race, index)
+            results.append(result)
+            print(f"[{race}] onboarding complete")
+            print(f"[{race}] death triggered")
+            print(f"[{race}] resurrected")
+            print(f"[{race}] entered live game")
+        except Exception as exc:
+            failures.append({"race": str(race), "error": str(exc)})
+            results.append({"race": str(race), "ok": False, "error": str(exc)})
+
+    output = {
+        "scenario": "e2e-full-lifecycle-all-races",
+        "races": list(TEST_RACES),
+        "results": results,
+        "failures": failures,
+        "ok": not failures,
+    }
+
+    if args.json:
+        print(json.dumps(output, indent=2, sort_keys=True))
+    else:
+        print("\nDireTest Scenario: e2e-full-lifecycle-all-races")
+        print(f"Race Count: {len(TEST_RACES)}")
+        for result in results:
+            status = "PASS" if result.get("ok") else "FAIL"
+            detail = result.get("landing_room") or result.get("error") or "ok"
+            print(f"[{status}] {result.get('race')}: {detail}")
+        print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+    return 0 if output["ok"] else 1
+def run_language_comprehension_none_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_comprehension_none")
+    speaker = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_comp_none_speaker")
+        listener = create_race_test_character(room, "human", key="diretest_comp_none_listener")
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd("say sail south")
+        messages = list(captured.get(listener) or [])
+        perceived = messages[0] if messages else ""
+        output = {
+            "scenario": "language-comprehension-none",
+            "listener_message": perceived,
+            "ok": "ssail ssouth" not in perceived.lower() and any(symbol in perceived for symbol in ("?", "*", "#")),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-comprehension-none")
+            print(f"Listener Heard: {perceived}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-comprehension-full")
+def run_language_comprehension_full_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_comprehension_full")
+    speaker = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_comp_full_speaker")
+        listener = create_race_test_character(room, "saurathi", key="diretest_comp_full_listener")
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd("say sail south")
+        messages = list(captured.get(listener) or [])
+        perceived = messages[0] if messages else ""
+        output = {
+            "scenario": "language-comprehension-full",
+            "listener_message": perceived,
+            "ok": "ssail ssouth" in perceived.lower(),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-comprehension-full")
+            print(f"Listener Heard: {perceived}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-comprehension-partial")
+def run_language_comprehension_partial_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_comprehension_partial")
+    speaker = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_comp_partial_speaker")
+        listener = create_race_test_character(room, "human", key="diretest_comp_partial_listener")
+        listener.db.language_comprehension_overrides = {"saurathi": 0.5}
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd("say sail south quickly")
+        messages = list(captured.get(listener) or [])
+        perceived = messages[0] if messages else ""
+        lowered = perceived.lower()
+        output = {
+            "scenario": "language-comprehension-partial",
+            "listener_message": perceived,
+            "ok": "..." in perceived and any(word in lowered for word in ("ssail", "ssouth", "quickly")),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-comprehension-partial")
+            print(f"Listener Heard: {perceived}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-learning-basic")
+def run_language_learning_basic_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_learning_basic")
+    speaker = None
+    listener = None
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_learning_basic_speaker")
+        listener = create_race_test_character(room, "human", key="diretest_learning_basic_listener")
+        speaker.set_language("saurathi")
+
+        before = listener.get_language_proficiency("saurathi")
+        for _ in range(3):
+            speaker.execute_cmd("say sail south")
+        after = listener.get_language_proficiency("saurathi")
+        output = {
+            "scenario": "language-learning-basic",
+            "before": before,
+            "after": after,
+            "ok": round(before, 3) == 0.0 and round(after, 3) == 0.03,
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-learning-basic")
+            print(f"Before: {before:.3f}")
+            print(f"After: {after:.3f}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        for obj in (speaker, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-learning-cap")
+def run_language_learning_cap_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_learning_cap")
+    character = None
+    try:
+        character = create_race_test_character(room, "human", key="diretest_learning_cap")
+        character.db.languages = {"common": 1.0, "saurathi": 0.99}
+        result = character.learn_language("saurathi", 0.5)
+        output = {
+            "scenario": "language-learning-cap",
+            "proficiency": result,
+            "ok": round(result, 3) == 1.0,
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-learning-cap")
+            print(f"Proficiency: {result:.3f}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        if character:
+            try:
+                character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-learning-comprehension")
+def run_language_learning_comprehension_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_learning_comprehension")
+    speaker = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_learning_comp_speaker")
+        listener = create_race_test_character(room, "human", key="diretest_learning_comp_listener")
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd("say sail south quickly")
+        initial_message = (captured.get(listener) or [""])[-1]
+        captured[listener].clear()
+
+        for _ in range(20):
+            speaker.execute_cmd("say sail south quickly")
+
+        improved_message = (captured.get(listener) or [""])[-1]
+        lowered = improved_message.lower()
+        output = {
+            "scenario": "language-learning-comprehension",
+            "initial_message": initial_message,
+            "improved_message": improved_message,
+            "proficiency": listener.get_language_proficiency("saurathi"),
+            "ok": any(symbol in initial_message for symbol in ("?", "*", "#"))
+            and "..." in improved_message
+            and any(word in lowered for word in ("ssail", "ssouth", "quickly")),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-learning-comprehension")
+            print(f"Initial Heard: {initial_message}")
+            print(f"Improved Heard: {improved_message}")
+            print(f"Proficiency: {output['proficiency']:.3f}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("language-learning-eavesdrop")
+def run_language_learning_eavesdrop_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_language_learning_eavesdrop")
+    speaker = None
+    target = None
+    listener = None
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_learning_eaves_speaker")
+        target = create_race_test_character(room, "human", key="diretest_learning_eaves_target")
+        listener = create_race_test_character(room, "human", key="diretest_learning_eaves_listener")
+        speaker.set_language("saurathi")
+
+        for _ in range(3):
+            speaker.execute_cmd(f"whisper {target.key} = sail south")
+
+        target_proficiency = target.get_language_proficiency("saurathi")
+        listener_proficiency = listener.get_language_proficiency("saurathi")
+        output = {
+            "scenario": "language-learning-eavesdrop",
+            "target_proficiency": target_proficiency,
+            "listener_proficiency": listener_proficiency,
+            "ok": round(target_proficiency, 3) == 0.03 and round(listener_proficiency, 3) == 0.015,
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: language-learning-eavesdrop")
+            print(f"Target Proficiency: {target_proficiency:.3f}")
+            print(f"Listener Proficiency: {listener_proficiency:.3f}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        for obj in (speaker, target, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("whisper-basic")
+def run_whisper_basic_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_whisper_basic")
+    speaker = None
+    target = None
+    bystander = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "human", key="diretest_whisper_speaker")
+        target = create_race_test_character(room, "human", key="diretest_whisper_target")
+        bystander = create_race_test_character(room, "human", key="diretest_whisper_bystander")
+
+        captured, originals = _capture_object_messages(speaker, target, bystander)
+        speaker.execute_cmd(f"whisper {target.key} = keep moving")
+        speaker_messages = list(captured.get(speaker) or [])
+        target_messages = list(captured.get(target) or [])
+        bystander_messages = list(captured.get(bystander) or [])
+        output = {
+            "scenario": "whisper-basic",
+            "speaker_messages": speaker_messages,
+            "target_messages": target_messages,
+            "bystander_messages": bystander_messages,
+            "ok": bool(target_messages)
+            and all("whispers to you" in message.lower() for message in target_messages)
+            and all("you overhear" in message.lower() for message in bystander_messages),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: whisper-basic")
+            if speaker_messages:
+                print(f"Speaker Heard: {speaker_messages[0]}")
+            if target_messages:
+                print(f"Target Heard: {target_messages[0]}")
+            print(f"Bystander Messages: {len(bystander_messages)}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, target, bystander):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("whisper-language")
+def run_whisper_language_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_whisper_language")
+    speaker = None
+    target = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_whisper_lang_speaker")
+        target = create_race_test_character(room, "human", key="diretest_whisper_lang_target")
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(target)
+        speaker.execute_cmd(f"whisper {target.key} = sail south")
+        target_messages = list(captured.get(target) or [])
+        heard = target_messages[0] if target_messages else ""
+        output = {
+            "scenario": "whisper-language",
+            "target_message": heard,
+            "ok": "ssail ssouth" not in heard.lower() and any(symbol in heard for symbol in ("?", "*", "#")),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: whisper-language")
+            print(f"Target Heard: {heard}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, target):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("whisper-comprehension")
+def run_whisper_comprehension_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_whisper_comprehension")
+    speaker = None
+    target = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_whisper_comp_speaker")
+        target = create_race_test_character(room, "saurathi", key="diretest_whisper_comp_target")
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(target)
+        speaker.execute_cmd(f"whisper {target.key} = sail south")
+        target_messages = list(captured.get(target) or [])
+        heard = target_messages[0] if target_messages else ""
+        output = {
+            "scenario": "whisper-comprehension",
+            "target_message": heard,
+            "ok": "ssail ssouth" in heard.lower(),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: whisper-comprehension")
+            print(f"Target Heard: {heard}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, target):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("whisper-invalid")
+def run_whisper_invalid_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_whisper_invalid")
+    character = None
+    captured = {}
+    originals = {}
+    try:
+        character = create_race_test_character(room, "human", key="diretest_whisper_invalid")
+        captured, originals = _capture_object_messages(character)
+        character.execute_cmd("whisper")
+        messages = list(captured.get(character) or [])
+        output = {
+            "scenario": "whisper-invalid",
+            "messages": messages,
+            "ok": any("usage: whisper <target> = <message>" in message.lower() for message in messages),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: whisper-invalid")
+            if messages:
+                print(f"Message: {messages[0]}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        if character:
+            try:
+                character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("eavesdrop-basic")
+def run_eavesdrop_basic_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_eavesdrop_basic")
+    speaker = None
+    target = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "human", key="diretest_eavesdrop_speaker")
+        target = create_race_test_character(room, "human", key="diretest_eavesdrop_target")
+        listener = create_race_test_character(room, "human", key="diretest_eavesdrop_listener")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd(f"whisper {target.key} = keep moving")
+        messages = list(captured.get(listener) or [])
+        heard = messages[0] if messages else ""
+        output = {
+            "scenario": "eavesdrop-basic",
+            "listener_message": heard,
+            "ok": bool(messages) and "overhear" in heard.lower(),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: eavesdrop-basic")
+            print(f"Listener Heard: {heard}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, target, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("eavesdrop-none")
+def run_eavesdrop_none_scenario(args):
+    _setup_django()
+
+    from evennia.utils.create import create_object
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_eavesdrop_none")
+    remote_room_name, remote_room = _create_temp_room("diretest_eavesdrop_none_remote")
+    speaker = None
+    target = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "human", key="diretest_eavesdrop_none_speaker")
+        target = create_race_test_character(room, "human", key="diretest_eavesdrop_none_target")
+        listener = create_race_test_character(remote_room, "human", key="diretest_eavesdrop_none_listener")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd(f"whisper {target.key} = keep moving")
+        messages = list(captured.get(listener) or [])
+        output = {
+            "scenario": "eavesdrop-none",
+            "listener_messages": messages,
+            "ok": not messages,
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: eavesdrop-none")
+            print(f"Listener Messages: {len(messages)}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, target, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+        _cleanup_named_object(remote_room_name)
+
+
+@register_scenario("eavesdrop-degraded")
+def run_eavesdrop_degraded_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_eavesdrop_degraded")
+    speaker = None
+    target = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "human", key="diretest_eavesdrop_deg_speaker")
+        target = create_race_test_character(room, "human", key="diretest_eavesdrop_deg_target")
+        listener = create_race_test_character(room, "human", key="diretest_eavesdrop_deg_listener")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd(f"whisper {target.key} = keep moving quickly")
+        messages = list(captured.get(listener) or [])
+        heard = messages[0] if messages else ""
+        lowered = heard.lower()
+        output = {
+            "scenario": "eavesdrop-degraded",
+            "listener_message": heard,
+            "ok": "keep moving quickly" not in lowered and "..." in heard,
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: eavesdrop-degraded")
+            print(f"Listener Heard: {heard}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, target, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
+        _cleanup_named_object(room_name)
+
+
+@register_scenario("eavesdrop-comprehension")
+def run_eavesdrop_comprehension_scenario(args):
+    _setup_django()
+
+    from utils.diretest_race import create_race_test_character
+
+    room_name, room = _create_temp_room("diretest_eavesdrop_comprehension")
+    speaker = None
+    target = None
+    listener = None
+    captured = {}
+    originals = {}
+    try:
+        speaker = create_race_test_character(room, "saurathi", key="diretest_eavesdrop_comp_speaker")
+        target = create_race_test_character(room, "saurathi", key="diretest_eavesdrop_comp_target")
+        listener = create_race_test_character(room, "human", key="diretest_eavesdrop_comp_listener")
+        speaker.set_language("saurathi")
+
+        captured, originals = _capture_object_messages(listener)
+        speaker.execute_cmd(f"whisper {target.key} = sail south quickly")
+        messages = list(captured.get(listener) or [])
+        heard = messages[0] if messages else ""
+        lowered = heard.lower()
+        output = {
+            "scenario": "eavesdrop-comprehension",
+            "listener_message": heard,
+            "ok": bool(messages) and "ssail ssouth quickly" not in lowered and ("..." in heard or any(symbol in heard for symbol in ("?", "*", "#"))),
+        }
+        if args.json:
+            print(json.dumps(output, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: eavesdrop-comprehension")
+            print(f"Listener Heard: {heard}")
+            print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+        return 0 if output["ok"] else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in (speaker, target, listener):
+            if obj:
+                try:
+                    obj.delete()
+                except Exception:
+                    pass
         _cleanup_named_object(room_name)
 
 
@@ -3243,6 +4231,2725 @@ def run_onboarding_no_heal_scenario(args):
     return _run_onboarding_failure_case(args, "no_heal")
 
 
+def _get_locked_onboarding_room(ObjectDB, room_name):
+    for room in ObjectDB.objects.filter(db_key__iexact=room_name):
+        if bool(getattr(getattr(room, "db", None), "is_onboarding", False)):
+            return room
+    return None
+
+
+def _build_locked_onboarding_character(create_object, onboarding):
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+
+    _ensure_new_player_tutorial()
+    intake = _get_locked_onboarding_room(ObjectDB, "Intake Chamber")
+    training = _get_locked_onboarding_room(ObjectDB, "Training Hall")
+    practice = _get_locked_onboarding_room(ObjectDB, "Practice Yard")
+    if not intake or not training or not practice:
+        raise RuntimeError("Locked onboarding rooms are missing.")
+
+    character = create_object(
+        "typeclasses.characters.Character",
+        key=f"DireTest Onboarding {int(time.time() * 1000)}",
+        location=intake,
+        home=intake,
+    )
+    onboarding.activate_onboarding(character)
+    onboarding.handle_room_entry(character)
+
+    sword = ObjectDB.objects.filter(db_key__iexact="training sword", db_location=training).first()
+    vest = ObjectDB.objects.filter(db_key__iexact="training vest", db_location=training).first()
+    dummy = ObjectDB.objects.filter(db_key__iexact="training dummy", db_location=practice).first()
+    if not sword or not vest or not dummy:
+        character.delete()
+        raise RuntimeError("Locked onboarding training objects are missing.")
+
+    return {
+        "character": character,
+        "intake": intake,
+        "training": training,
+        "practice": practice,
+        "sword": sword,
+        "vest": vest,
+        "dummy": dummy,
+    }
+
+
+def _expected_recovery_room_key(onboarding):
+    destination = onboarding._resolve_recovery_destination() if hasattr(onboarding, "_resolve_recovery_destination") else None
+    if destination:
+        return getattr(destination, "key", None)
+    return getattr(onboarding, "EMPATH_GUILD_ROOM", None)
+
+
+def _build_chargen_mirror_character(create_object):
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from systems.chargen import mirror as chargen_mirror
+
+    _ensure_new_player_tutorial()
+    intake = _get_locked_onboarding_room(ObjectDB, "Intake Chamber")
+    if not intake:
+        raise RuntimeError("Intake Chamber is missing.")
+
+    mirror = ObjectDB.objects.filter(db_key__iexact=chargen_mirror.MIRROR_KEY, db_location=intake).first()
+    if not mirror:
+        raise RuntimeError("Chargen mirror is missing from Intake Chamber.")
+
+    character = create_object(
+        "typeclasses.characters.Character",
+        key=f"DireTest Mirror {int(time.time() * 1000)}",
+        location=intake,
+        home=intake,
+    )
+    chargen_mirror.initialize_chargen_character(character)
+    captured, originals = _capture_object_messages(character)
+    chargen_mirror.emit_step_prompt(character, force=True)
+    return {
+        "character": character,
+        "intake": intake,
+        "mirror": mirror,
+        "captured": captured,
+        "originals": originals,
+    }
+
+
+def _run_chargen_mirror_case(args, case_name):
+    _setup_django()
+
+    from systems import onboarding
+    from systems.chargen import mirror as chargen_mirror
+
+    created_character = None
+    extra_characters = []
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        ctx = _build_chargen_mirror_character(create_object)
+        character = ctx["character"]
+        created_character = character
+        mirror = ctx["mirror"]
+        captured = ctx["captured"]
+        originals = ctx["originals"]
+
+        ok = False
+        detail = ""
+
+        if case_name == "cycle":
+            captured[character].clear()
+            steps = len(chargen_mirror.STEP_OPTIONS["race"])
+            for _ in range(steps):
+                character.execute_cmd("touch mirror")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                getattr(character.db, "chargen_step", None) == "race"
+                and int(getattr(character.db, "chargen_index", 0)) == 0
+                and dict(getattr(character.db, "chargen_selections", {}) or {}).get("race") == chargen_mirror.STEP_OPTIONS["race"][0]
+                and "It waits. Not for approval, but for interruption." in messages
+            )
+            detail = messages or f"index={getattr(character.db, 'chargen_index', None)}"
+        elif case_name == "actions-visible":
+            appearance = ctx["intake"].return_appearance(character)
+            observer = create_object(
+                "typeclasses.characters.Character",
+                key=f"DireTest Mirror Observer {int(time.time() * 1000)}",
+                location=ctx["intake"],
+                home=ctx["intake"],
+            )
+            extra_characters.append(observer)
+            observer_view = ctx["intake"].return_appearance(observer)
+            ok = (
+                "|wActions:|n" in appearance
+                and "|wExits:|n" not in appearance
+                and "|wExits:|n" in observer_view
+                and "|wActions:|n" not in observer_view
+            )
+            detail = appearance
+        elif case_name == "actions-contextual":
+            race_view = ctx["intake"].return_appearance(character)
+            character.execute_cmd("accept")
+            build_view = ctx["intake"].return_appearance(character)
+            ok = (
+                "|lc__clickmove__ accept|lt|yaccept|n|le" in race_view
+                and "|lc__clickmove__ next|lt|ynext|n|le" in race_view
+                and "|lc__clickmove__ back|lt|yback|n|le" not in race_view
+                and "|lc__clickmove__ back|lt|yback|n|le" in build_view
+                and "|lc__clickmove__ finalize|lt|yfinalize|n|le" not in build_view
+            )
+            detail = build_view
+        elif case_name == "lock-flow":
+            captured[character].clear()
+            character.execute_cmd("next")
+            character.execute_cmd("accept")
+            character.execute_cmd("east")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                getattr(character.db, "chargen_step", None) == "height"
+                and getattr(getattr(character, "location", None), "key", None) == "Intake Chamber"
+                and chargen_mirror.BLOCKED_INPUT_MESSAGE in messages
+            )
+            detail = messages or f"step={getattr(character.db, 'chargen_step', None)}"
+        elif case_name == "race-lock":
+            captured[character].clear()
+            character.execute_cmd("touch mirror")
+            chosen_race = dict(getattr(character.db, "chargen_selections", {}) or {}).get("race")
+            character.execute_cmd("accept")
+            character.execute_cmd("back")
+            character.execute_cmd("touch mirror")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                chosen_race != dict(getattr(character.db, "chargen_selections", {}) or {}).get("race")
+                and getattr(character.db, "chargen_step", None) == "race"
+                and "The mirror gives the last choice back." in messages
+            )
+            detail = messages or f"race={chosen_race}"
+        elif case_name == "render":
+            character.execute_cmd("touch mirror")
+            appearance = mirror.return_appearance(character)
+            chosen_race = dict(getattr(character.db, "chargen_selections", {}) or {}).get("race")
+            ok = chosen_race in appearance.lower() and "It waits. Not for approval, but for interruption." in appearance
+            detail = appearance
+        elif case_name == "click-executes":
+            character.execute_cmd("accept")
+            build_view = ctx["intake"].return_appearance(character)
+            captured[character].clear()
+            character.execute_cmd("accept")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                "|lc__clickmove__ accept|lt|yaccept|n|le" in build_view
+                and getattr(character.db, "chargen_step", None) == "height"
+                and "The reflection settles." in messages
+            )
+            detail = messages or build_view
+        elif case_name == "back-navigation":
+            character.execute_cmd("touch mirror")
+            chosen_race = dict(getattr(character.db, "chargen_selections", {}) or {}).get("race")
+            character.execute_cmd("accept")
+            character.execute_cmd("touch mirror")
+            chosen_build = dict(getattr(character.db, "chargen_selections", {}) or {}).get("build")
+            captured[character].clear()
+            character.execute_cmd("back")
+            back_messages = "\n".join(captured.get(character) or [])
+            character.execute_cmd("back")
+            restored_race = dict(getattr(character.db, "chargen_selections", {}) or {}).get("race")
+            ok = (
+                getattr(character.db, "chargen_step", None) == "race"
+                and chosen_race == restored_race
+                and chosen_build == dict(getattr(character.db, "chargen_selections", {}) or {}).get("build")
+                and "The mirror gives the last choice back." in back_messages
+            )
+            detail = back_messages or f"step={getattr(character.db, 'chargen_step', None)}"
+        elif case_name == "confirmation-gate":
+            for _step in chargen_mirror.CHARGEN_STEPS:
+                character.execute_cmd("accept")
+            review_view = mirror.return_appearance(character)
+            captured[character].clear()
+            character.execute_cmd("finalize")
+            finalize_messages = "\n".join(captured.get(character) or [])
+            confirm_view = mirror.return_appearance(character)
+            ok = (
+                chargen_mirror.is_chargen_active(character)
+                and "The mirror holds what you've made of it." in review_view
+                and "The mirror waits for the last word." in finalize_messages
+                and "Decide now. It won't change after this." in confirm_view
+            )
+            detail = finalize_messages or confirm_view
+        elif case_name == "finalize-lock":
+            while chargen_mirror.is_chargen_active(character):
+                actions = chargen_mirror.get_available_actions(character)
+                finalize_action = next((entry for entry in actions if entry["label"] == "finalize"), None)
+                confirm_action = next((entry for entry in actions if entry["label"] == "confirm"), None)
+                accept_action = next((entry for entry in actions if entry["label"] == "accept"), None)
+                if confirm_action:
+                    character.execute_cmd(confirm_action["command"])
+                    break
+                if finalize_action:
+                    character.execute_cmd(finalize_action["command"])
+                    continue
+                if accept_action:
+                    character.execute_cmd(accept_action["command"])
+                    continue
+                break
+            ok = (
+                not chargen_mirror.is_chargen_active(character)
+                and onboarding.get_onboarding_step(character) == onboarding.STEP_START
+                and not bool(getattr(character.db, "chargen_active", False))
+            )
+            detail = f"chargen_active={chargen_mirror.is_chargen_active(character)} step={onboarding.get_onboarding_step(character)}"
+        elif case_name == "no-command-needed":
+            while chargen_mirror.is_chargen_active(character):
+                actions = chargen_mirror.get_available_actions(character)
+                if not actions:
+                    break
+                action = next(
+                    (entry for entry in actions if entry["label"] in {"accept", "finalize", "confirm", "next"}),
+                    None,
+                )
+                if not action:
+                    break
+                character.execute_cmd(action["command"])
+            ok = (
+                not chargen_mirror.is_chargen_active(character)
+                and onboarding.get_onboarding_step(character) == onboarding.STEP_START
+            )
+            detail = f"chargen_active={chargen_mirror.is_chargen_active(character)} step={onboarding.get_onboarding_step(character)}"
+        elif case_name == "no-exits":
+            appearance = ctx["intake"].return_appearance(character)
+            ok = "|wExits:|n" not in appearance and "|wActions:|n" in appearance
+            detail = appearance
+        elif case_name == "movement-blocked":
+            before_room = getattr(getattr(character, "location", None), "key", None)
+            captured[character].clear()
+            character.execute_cmd("east")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                getattr(getattr(character, "location", None), "key", None) == before_room
+                and chargen_mirror.MOVEMENT_BLOCKED_MESSAGE in messages
+            )
+            detail = messages or before_room
+        elif case_name == "exit-restored":
+            while chargen_mirror.is_chargen_active(character):
+                actions = chargen_mirror.get_available_actions(character)
+                action = next((entry for entry in actions if entry["label"] in {"accept", "finalize", "confirm"}), None)
+                if not action:
+                    break
+                character.execute_cmd(action["command"])
+            appearance = ctx["intake"].return_appearance(character)
+            ok = "|wExits:|n" in appearance and "|wActions:|n" not in appearance
+            detail = appearance
+        elif case_name == "no-softlock":
+            counts = []
+            labels = []
+            while chargen_mirror.is_chargen_active(character):
+                actions = chargen_mirror.get_available_actions(character)
+                counts.append(len(actions))
+                labels.append(",".join(entry["label"] for entry in actions))
+                action = next((entry for entry in actions if entry["label"] in {"accept", "finalize", "confirm"}), None)
+                if not action:
+                    break
+                character.execute_cmd(action["command"])
+            ok = bool(counts) and all(1 <= count <= 3 for count in counts)
+            detail = " | ".join(labels)
+        elif case_name == "transition":
+            captured[character].clear()
+            while chargen_mirror.is_chargen_active(character):
+                actions = chargen_mirror.get_available_actions(character)
+                action = next((entry for entry in actions if entry["label"] in {"accept", "finalize", "confirm"}), None)
+                if not action:
+                    break
+                character.execute_cmd(action["command"])
+            after_messages = "\n".join(captured.get(character) or [])
+            ok = (
+                not chargen_mirror.is_chargen_active(character)
+                and onboarding.get_onboarding_step(character) == onboarding.STEP_START
+                and getattr(getattr(character, "location", None), "key", None) == "Intake Chamber"
+                and "Move." in after_messages
+            )
+            detail = after_messages or f"step={onboarding.get_onboarding_step(character)}"
+        else:
+            raise RuntimeError(f"Unknown chargen mirror case: {case_name}")
+
+        payload = {
+            "scenario": f"chargen-{case_name}",
+            "ok": bool(ok),
+            "detail": detail,
+        }
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print(f"DireTest Scenario: chargen-{case_name}")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            if detail:
+                print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        for extra in extra_characters:
+            try:
+                extra.delete()
+            except Exception:
+                pass
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+def _run_locked_onboarding_case(args, case_name):
+    _setup_django()
+
+    from systems import onboarding
+
+    created_character = None
+    sword = None
+    vest = None
+    sword_home = None
+    vest_home = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        ctx = _build_locked_onboarding_character(create_object, onboarding)
+        character = ctx["character"]
+        created_character = character
+        training = ctx["training"]
+        practice = ctx["practice"]
+        sword = ctx["sword"]
+        vest = ctx["vest"]
+        dummy = ctx["dummy"]
+        sword_home = getattr(sword, "location", None)
+        vest_home = getattr(vest, "location", None)
+        expected_recovery_room = _expected_recovery_room_key(onboarding)
+        captured, originals = _capture_object_messages(character)
+
+        ok = False
+        detail = ""
+
+        if case_name == "movement":
+            captured[character].clear()
+            character.move_to(training, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            messages = "\n".join(captured.get(character) or [])
+            ok = onboarding.get_onboarding_step(character) == onboarding.STEP_MOVEMENT and "You'll need something in your hands." in messages
+            detail = messages or f"step={onboarding.get_onboarding_step(character)}"
+        elif case_name == "get":
+            captured[character].clear()
+            character.move_to(training, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            captured[character].clear()
+            character.execute_cmd("take sword")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                onboarding.get_onboarding_step(character) == onboarding.STEP_PREPARATION
+                and onboarding.SWORD_PICKUP_MESSAGE in messages
+                and onboarding.INVENTORY_HINT in messages
+                and "Wear what you can. Carry it properly." in messages
+            )
+            detail = messages or f"step={onboarding.get_onboarding_step(character)}"
+        elif case_name == "equip":
+            captured[character].clear()
+            character.move_to(training, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            character.execute_cmd("get sword")
+            character.execute_cmd("get vest")
+            character.execute_cmd("wear vest")
+            captured[character].clear()
+            character.execute_cmd("wield sword")
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                onboarding.get_onboarding_step(character) == onboarding.STEP_COMBAT
+                and onboarding.EQUIP_COMPLETION_MESSAGE in messages
+                and onboarding.COMBAT_TRANSITION_LINE in messages
+            )
+            detail = messages or f"step={onboarding.get_onboarding_step(character)}"
+        elif case_name == "equip-alias":
+            captured[character].clear()
+            character.move_to(training, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            character.execute_cmd("grab sword")
+            character.execute_cmd("get vest")
+            character.execute_cmd("wear vest")
+            captured[character].clear()
+            character.execute_cmd("equip sword")
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(onboarding.get_onboarding_step(character) == onboarding.STEP_COMBAT and onboarding.EQUIP_COMPLETION_MESSAGE in messages)
+            detail = messages or f"step={onboarding.get_onboarding_step(character)}"
+        elif case_name == "inventory-skip-nudge":
+            captured[character].clear()
+            character.move_to(training, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            character.execute_cmd("get sword")
+            state = onboarding.ensure_onboarding_state(character)
+            state["last_progress_at"] = time.time() - 8.0
+            state["idle_prompt_step"] = onboarding.STEP_PREPARATION
+            state["idle_prompt_stage"] = 0
+            character.db.onboarding_state = state
+            character.db.onboarding_room_entered_at = time.time() - 8.0
+            captured[character].clear()
+            prompted = onboarding.remind_objective_if_idle(character, idle_threshold=5.0, minimum_interval=0.0)
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(prompted and 'Know what you carry.' in messages)
+            detail = messages or f"prompted={prompted}"
+        elif case_name == "blocked-command":
+            _, message = onboarding.remap_onboarding_input(character, "inventory")
+            ok = message == onboarding.EARLY_BLOCKED_COMMAND_MESSAGE
+            detail = str(message or "")
+        elif case_name == "between-lock":
+            captured[character].clear()
+            character.move_to(training, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            character.execute_cmd("get sword")
+            character.execute_cmd("get vest")
+            character.execute_cmd("wear vest")
+            character.execute_cmd("wield sword")
+            character.move_to(practice, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            character.execute_cmd("attack dummy")
+            character.execute_cmd("attack goblin")
+            character.execute_cmd("attack goblin")
+            before_room = getattr(getattr(character, "location", None), "key", None)
+            captured[character].clear()
+            character.execute_cmd("inventory")
+            character.execute_cmd("east")
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                bool(getattr(character.db, "training_between", False))
+                and bool(getattr(character.db, "training_collapse", False))
+                and onboarding.get_onboarding_step(character) == onboarding.STEP_COLLAPSE
+                and getattr(getattr(character, "location", None), "key", None) == before_room
+                and not messages.strip()
+            )
+            detail = messages or f"step={onboarding.get_onboarding_step(character)} between={getattr(character.db, 'training_between', None)}"
+        elif case_name == "resurrection-sequence":
+            captured[character].clear()
+            _run_e2e_onboarding(character, onboarding)
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                _fragments_in_order(
+                    messages,
+                    [
+                        onboarding.COLLAPSE_LINE,
+                        onboarding.BETWEEN_STATE_INTRO,
+                        onboarding.BETWEEN_STATE_OBSERVER,
+                        'Hold',
+                        'The spirit is slipping.',
+                        'Footsteps. Quick. Close.',
+                        'Can you hold it?',
+                        'Pressure.',
+                        'Light',
+                        'Breath returns like it was forced into you.',
+                        "They'll hold.",
+                        "Then don't keep them here.",
+                        'A shift in the air',
+                        'Send them through.',
+                        'The space beside you folds',
+                        'Not a step.',
+                        'Stone beneath you.',
+                    ],
+                )
+                and getattr(getattr(character, "location", None), "key", None) == expected_recovery_room
+            )
+            detail = messages or f"step={onboarding.get_onboarding_step(character)}"
+        elif case_name == "recovery-state":
+            captured[character].clear()
+            character.move_to(training, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            character.execute_cmd("get sword")
+            character.execute_cmd("get vest")
+            character.execute_cmd("wear vest")
+            character.execute_cmd("wield sword")
+            character.move_to(practice, quiet=True, use_destination=False)
+            onboarding.handle_room_entry(character)
+            character.execute_cmd("attack dummy")
+            character.execute_cmd("attack goblin")
+            character.execute_cmd("attack goblin")
+            _advance_training_resurrection(character, onboarding, complete_release=False)
+            ok = bool(
+                onboarding.get_onboarding_step(character) == onboarding.STEP_COMPLETE
+                and not bool(getattr(character.db, "training_between", False))
+                and not bool(getattr(character.db, "training_collapse", False))
+                and int(getattr(character.db, "hp", 0) or 0) > 0
+                and getattr(getattr(character, "location", None), "key", None) == expected_recovery_room
+            )
+            detail = f"step={onboarding.get_onboarding_step(character)} hp={int(getattr(character.db, 'hp', 0) or 0)} between={bool(getattr(character.db, 'training_between', False))}"
+        elif case_name == "transport-sequence":
+            captured[character].clear()
+            _run_e2e_onboarding(character, onboarding)
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                _fragments_in_order(
+                    messages,
+                    [
+                        "They'll hold.",
+                        "For now.",
+                        "Then don't keep them here.",
+                        'A shift in the air',
+                        '"I\'m here."',
+                        '"Stable enough."',
+                        '"Send them through."',
+                        'The space beside you folds',
+                        'Not a step.',
+                        'Stone beneath you.',
+                    ],
+                )
+                and getattr(getattr(character, "location", None), "key", None) == expected_recovery_room
+            )
+            detail = messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"
+        elif case_name == "final-location":
+            captured[character].clear()
+            _run_e2e_onboarding(character, onboarding)
+            ok = getattr(getattr(character, "location", None), "key", None) == expected_recovery_room
+            detail = f"room={getattr(getattr(character, 'location', None), 'key', None)}"
+        elif case_name == "control-return":
+            captured[character].clear()
+            _run_e2e_onboarding(character, onboarding)
+            before_room = character.location
+            character.execute_cmd("look")
+            character.execute_cmd("guild")
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                onboarding.get_onboarding_step(character) == onboarding.STEP_COMPLETE
+                and not bool(getattr(character.db, "training_between", False))
+                and not bool(getattr(character.db, "training_collapse", False))
+                and getattr(before_room, "key", None) == expected_recovery_room
+                and getattr(getattr(character, "location", None), "key", None) == onboarding.EMPATH_GUILD_ROOM
+                and messages.strip()
+            )
+            detail = messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"
+        elif case_name == "npc-presence":
+            captured[character].clear()
+            _run_e2e_onboarding(character, onboarding)
+            character.execute_cmd("guild")
+            room = getattr(character, "location", None)
+            occupants = [str(getattr(obj, "key", "") or "") for obj in list(getattr(room, "contents", []) or []) if obj != character]
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                onboarding.TRIAGE_EMPATH_KEY in occupants
+                and onboarding.WARD_CLERIC_KEY in occupants
+                and "welcome" not in messages.lower()
+                and "hello" not in messages.lower()
+            )
+            detail = messages or ", ".join(occupants)
+        elif case_name == "complete":
+            captured[character].clear()
+            _run_e2e_onboarding(character, onboarding)
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                onboarding.get_onboarding_step(character) == onboarding.STEP_COMPLETE
+                and getattr(getattr(character, "location", None), "key", None) == expected_recovery_room
+                and onboarding.BETWEEN_STATE_INTRO in messages
+                and "Stone beneath you." in messages
+            )
+            detail = messages or f"step={onboarding.get_onboarding_step(character)} room={getattr(getattr(character, 'location', None), 'key', None)}"
+        else:
+            raise ValueError(f"Unknown locked onboarding case: {case_name}")
+
+        if args.json:
+            print(json.dumps({"scenario": f"onboarding-{case_name}", "ok": ok, "detail": detail}, indent=2, sort_keys=True))
+        else:
+            print(f"DireTest Scenario: onboarding-{case_name}")
+            print(f"Result: {'PASS' if ok else 'FAIL'}")
+            print(f"Detail: {detail}")
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if sword and sword_home and getattr(sword, "location", None) != sword_home:
+            try:
+                sword.move_to(sword_home, quiet=True, use_destination=False)
+            except Exception:
+                pass
+        if vest and vest_home and getattr(vest, "location", None) != vest_home:
+            try:
+                vest.move_to(vest_home, quiet=True, use_destination=False)
+            except Exception:
+                pass
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+def _get_room_exit(room, direction):
+    if not room:
+        return None
+    normalized = str(direction or "").strip().lower()
+    for obj in list(getattr(room, "contents", []) or []):
+        if not getattr(obj, "destination", None):
+            continue
+        if str(getattr(obj, "key", "") or "").strip().lower() == normalized:
+            return obj
+        aliases = {str(alias or "").strip().lower() for alias in getattr(getattr(obj, "aliases", None), "all", lambda: [])()}
+        if normalized in aliases:
+            return obj
+    return None
+
+
+def _build_alpha_suffix(seed_value, length=6):
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    seed = max(0, int(seed_value or 0))
+    chars = []
+    for _ in range(max(1, int(length or 1))):
+        chars.append(alphabet[seed % len(alphabet)])
+        seed //= len(alphabet)
+    return "".join(reversed(chars))
+
+
+def _build_e2e_unique_name(prefix, race, index, *, max_length=20):
+    race_fragment = "".join(ch for ch in str(race or "").title() if ch.isalpha())[:8] or "Race"
+    suffix_seed = int(time.time() * 1000) + (int(index or 0) * 97)
+    suffix = _build_alpha_suffix(suffix_seed, length=6)
+    raw = f"{prefix}{race_fragment}{suffix}"
+    return raw[: int(max_length or 20)]
+
+
+def _build_e2e_creation_blueprint(race, index):
+    return {
+        "name": _build_e2e_unique_name("Life", race, index),
+        "race": str(race or "human"),
+        "gender": "neutral",
+        "profession": "commoner",
+        "stats": {
+            "strength": 10,
+            "agility": 10,
+            "reflex": 10,
+            "intelligence": 10,
+            "wisdom": 10,
+            "stamina": 10,
+        },
+        "description": f"A deterministic lifecycle test character for {race}.",
+        "appearance": {
+            "build": "athletic",
+            "height": "average",
+            "hair": "brown",
+            "eyes": "gray",
+            "skin": "tan",
+        },
+    }
+
+
+def _create_e2e_account(create_account, race, index):
+    account_name = _build_e2e_unique_name("Acct", race, index)
+    return create_account(
+        account_name,
+        f"{account_name.lower()}@diretest.local",
+        "DiretestPass123!",
+        typeclass="typeclasses.accounts.Account",
+    )
+
+
+def _create_e2e_character(account, race, index):
+    from systems.character.creation import create_character_from_blueprint
+
+    blueprint = _build_e2e_creation_blueprint(race, index)
+    character, errors = create_character_from_blueprint(account, blueprint, allow_reserved_name=True)
+    if errors:
+        raise AssertionError(f"character creation errors: {'; '.join(str(error) for error in errors)}")
+    if not character:
+        raise AssertionError("character creation returned no character")
+    return character
+
+
+def _spawn_e2e_support_npcs(create_object, room, race, index):
+    helpers = []
+    suffix = _build_alpha_suffix(int(time.time() * 1000) + (int(index or 0) * 131), length=5)
+    specs = (("cleric", f"LifecycleCleric{suffix}"), ("empath", f"LifecycleEmpath{suffix}"))
+    for profession, key in specs:
+        helper = create_object(
+            "typeclasses.characters.Character",
+            key=key,
+            location=room,
+            home=room,
+        )
+        helper.ensure_core_defaults()
+        helper.db.is_npc = True
+        helper.db.gender = "neutral"
+        helper.set_race("human", sync=False, emit_messages=False)
+        if hasattr(helper, "set_profession"):
+            if helper.set_profession(profession) is False:
+                raise AssertionError(f"failed to assign helper profession: {profession}")
+        else:
+            helper.db.profession = profession
+            helper.db.guild = profession
+        helper.db.attunement = helper.db.max_attunement
+        helper.db.balance = helper.db.max_balance
+        helper.db.fatigue = 0
+        helper.sync_client_state(include_map=False)
+        helpers.append(helper)
+    return tuple(helpers)
+
+
+def _assert_e2e_spawn_state(character, race, onboarding):
+    if str(getattr(character.db, "race", "") or "") != str(race):
+        raise AssertionError(f"spawn race mismatch: {character.db.race} != {race}")
+    identity = getattr(character.db, "identity", None)
+    if not isinstance(identity, Mapping):
+        raise AssertionError("spawned without an identity object")
+    if str(identity.get("race", "") or "") != str(race):
+        raise AssertionError(f"identity race mismatch: {identity.get('race')} != {race}")
+    if not isinstance(identity.get("appearance"), Mapping):
+        raise AssertionError("spawned without an identity appearance mapping")
+    rendered = character.get_rendered_desc(character) if hasattr(character, "get_rendered_desc") else str(getattr(character.db, "desc", "") or "")
+    if not isinstance(rendered, str) or not rendered.strip():
+        raise AssertionError("spawned without a renderable description")
+    if int(getattr(character.db, "hp", 0) or 0) <= 0:
+        raise AssertionError("spawned with non-positive hp")
+    if getattr(getattr(character, "location", None), "key", None) != onboarding.INTAKE_CHAMBER:
+        raise AssertionError(f"spawn room mismatch: {getattr(getattr(character, 'location', None), 'key', None)}")
+    if onboarding.get_onboarding_step(character) != onboarding.STEP_START:
+        raise AssertionError(f"unexpected onboarding step at spawn: {onboarding.get_onboarding_step(character)}")
+    if not onboarding.is_in_onboarding(character):
+        raise AssertionError("character did not enter onboarding")
+
+
+def _run_e2e_onboarding(character, onboarding):
+    commands = ("east", "get sword", "get vest", "wear vest", "wield sword", "east", "attack dummy", "attack goblin", "attack goblin")
+    for command in commands:
+        character.execute_cmd(command)
+    onboarding._process_pending_scene(character, force=True)
+
+
+def _fragments_in_order(text, fragments):
+    cursor = 0
+    for fragment in fragments:
+        next_index = text.find(fragment, cursor)
+        if next_index < 0:
+            return False
+        cursor = next_index + len(fragment)
+    return True
+
+
+def _advance_training_resurrection(character, onboarding, *, complete_release=False):
+    onboarding._process_pending_scene(character, force=True)
+    if complete_release:
+        onboarding._process_pending_scene(character, force=True)
+
+
+def _snapshot_e2e_object(obj):
+    if not obj:
+        return None
+    return {
+        "id": int(getattr(obj, "id", 0) or 0),
+        "key": str(getattr(obj, "key", "") or ""),
+    }
+
+
+def _snapshot_e2e_inventory(character):
+    snapshot = []
+    for obj in list(getattr(character, "contents", []) or []):
+        snapshot.append(_snapshot_e2e_object(obj))
+    return sorted(snapshot, key=lambda entry: (int(entry.get("id", 0) or 0), str(entry.get("key", "") or "")))
+
+
+def _normalize_e2e_value(value):
+    if isinstance(value, Mapping):
+        return {str(key): _normalize_e2e_value(entry) for key, entry in dict(value).items()}
+    if isinstance(value, list):
+        return [_normalize_e2e_value(entry) for entry in value]
+    if isinstance(value, tuple):
+        return [_normalize_e2e_value(entry) for entry in value]
+    return value
+
+
+def _snapshot_e2e_identity(character):
+    payload = getattr(getattr(character, "db", None), "identity", None) or {}
+    return _normalize_e2e_value(payload)
+
+
+def _snapshot_e2e_equipment(character):
+    return {
+        "weapon": _snapshot_e2e_object(character.get_weapon() if hasattr(character, "get_weapon") else None),
+        "inventory": _snapshot_e2e_inventory(character),
+        "identity": _snapshot_e2e_identity(character),
+    }
+
+
+def _assert_e2e_onboarding_complete(character, onboarding):
+    if onboarding.get_onboarding_step(character) != onboarding.STEP_COMPLETE:
+        raise AssertionError(f"onboarding did not complete: {onboarding.get_onboarding_step(character)}")
+    if not bool(getattr(character.db, "onboarding_complete", False)):
+        raise AssertionError("onboarding_complete flag was not set")
+    expected_room = _expected_recovery_room_key(onboarding)
+    if getattr(getattr(character, "location", None), "key", None) != expected_room:
+        raise AssertionError(f"unexpected onboarding completion room: {getattr(getattr(character, 'location', None), 'key', None)}")
+    weapon = character.get_weapon() if hasattr(character, "get_weapon") else None
+    if not weapon or str(getattr(weapon, "key", "") or "").strip().lower() != onboarding.TRAINING_SWORD_KEY:
+        raise AssertionError("training sword is not wielded after onboarding")
+    worn_items = list(character.get_worn_items() if hasattr(character, "get_worn_items") else [])
+    if not any(str(getattr(item, "key", "") or "").strip().lower() == onboarding.TRAINING_VEST_KEY for item in worn_items):
+        raise AssertionError("training vest is not worn after onboarding")
+
+
+def _force_e2e_death(character):
+    character.set_hp(0)
+
+
+def _assert_e2e_dead(character, onboarding, expected_room=None):
+    corpse = character.get_death_corpse() if hasattr(character, "get_death_corpse") else None
+    if not character.is_dead():
+        raise AssertionError("character did not enter dead state")
+    if not corpse:
+        raise AssertionError("death did not produce a corpse")
+    target_room = expected_room or onboarding.PRACTICE_YARD
+    if getattr(getattr(corpse, "location", None), "key", None) != target_room:
+        raise AssertionError(f"corpse spawned in wrong room: {getattr(getattr(corpse, 'location', None), 'key', None)}")
+    weapon = character.get_weapon() if hasattr(character, "get_weapon") else None
+    if not weapon or str(getattr(weapon, "key", "") or "").strip().lower() != onboarding.TRAINING_SWORD_KEY:
+        raise AssertionError("weapon state broke on death")
+    worn_items = list(character.get_worn_items() if hasattr(character, "get_worn_items") else [])
+    if not any(str(getattr(item, "key", "") or "").strip().lower() == onboarding.TRAINING_VEST_KEY for item in worn_items):
+        raise AssertionError("worn gear state broke on death")
+    return corpse
+
+
+def _run_e2e_resurrection_pipeline(character, corpse, cleric, empath):
+    if hasattr(corpse, "adjust_condition"):
+        corpse.adjust_condition(-10)
+    stabilized, stabilize_message = empath.stabilize_corpse(corpse)
+    if not stabilized:
+        raise AssertionError(f"corpse stabilization failed: {stabilize_message}")
+    if not bool(getattr(getattr(corpse, "db", None), "stabilized", False)):
+        raise AssertionError("corpse stabilization did not set the stabilized flag")
+    resurrected, resurrect_message = character.force_resurrect(corpse=corpse, helper=cleric)
+    if not resurrected:
+        raise AssertionError(f"forced resurrection failed: {resurrect_message}")
+
+
+def _assert_e2e_resurrected(character, onboarding, expected_room=None):
+    if character.is_dead():
+        raise AssertionError("character is still dead after resurrection")
+    if not character.is_alive():
+        raise AssertionError("character is not alive after resurrection")
+    if character.get_death_corpse() is not None:
+        raise AssertionError("corpse link remained after resurrection")
+    if getattr(character.db, "last_recovery_type", None) != "resurrection":
+        raise AssertionError(f"unexpected recovery type: {getattr(character.db, 'last_recovery_type', None)}")
+    if int(getattr(character.db, "hp", 0) or 0) <= 0:
+        raise AssertionError("resurrection left hp at zero")
+    if int(getattr(character.db, "hp", 0) or 0) > int(getattr(character.db, "max_hp", 0) or 0):
+        raise AssertionError("resurrection exceeded max hp")
+    target_room = expected_room or onboarding.PRACTICE_YARD
+    if getattr(getattr(character, "location", None), "key", None) != target_room:
+        raise AssertionError(f"unexpected resurrection room: {getattr(getattr(character, 'location', None), 'key', None)}")
+
+
+def _assert_e2e_equipment_persistence(character, equipment_before):
+    weapon_before = dict((equipment_before or {}).get("weapon") or {})
+    inventory_before = list((equipment_before or {}).get("inventory") or [])
+    identity_before = dict((equipment_before or {}).get("identity") or {})
+    weapon_after = _snapshot_e2e_object(character.get_weapon() if hasattr(character, "get_weapon") else None)
+    inventory_after = _snapshot_e2e_inventory(character)
+    identity_after = _snapshot_e2e_identity(character)
+
+    if weapon_before and not weapon_after:
+        raise AssertionError("weapon missing after resurrection")
+    if weapon_before and int(weapon_after.get("id", 0) or 0) != int(weapon_before.get("id", 0) or 0):
+        raise AssertionError(f"weapon changed across death: {weapon_before} -> {weapon_after}")
+    if inventory_after != inventory_before:
+        raise AssertionError(f"inventory changed across death: {inventory_before} -> {inventory_after}")
+    if identity_after != identity_before:
+        raise AssertionError(f"identity changed across death: {identity_before} -> {identity_after}")
+
+
+def _enter_e2e_live_game(character):
+    return character
+
+
+def _assert_e2e_cleanup_state(character, onboarding):
+    raw_step = str(getattr(character.db, "onboarding_step", "") or "").strip().lower()
+    if raw_step not in {"", onboarding.STEP_COMPLETE}:
+        raise AssertionError(f"unexpected onboarding step after completion: {raw_step}")
+    if onboarding.is_in_onboarding(character):
+        raise AssertionError("character is still considered in onboarding after live entry")
+    state = onboarding.ensure_onboarding_state(character)
+    if bool(state.get("active", False)):
+        raise AssertionError("onboarding state still marked active")
+    if not bool(state.get("complete", False)):
+        raise AssertionError("onboarding state lost completion marker")
+    script_keys = [str(getattr(script, "key", "") or "") for script in list(character.scripts.all())] if hasattr(character, "scripts") else []
+    if any("onboarding" in key.lower() for key in script_keys):
+        raise AssertionError(f"onboarding scripts still attached to character: {script_keys}")
+
+
+def _assert_e2e_live_commands_unlocked(character, onboarding):
+    captured, originals = _capture_object_messages(character)
+    try:
+        before_room = character.location
+        character.execute_cmd("inventory")
+        character.execute_cmd("look")
+        character.execute_cmd("get nonexistent-diretest-item")
+        if character.location != before_room:
+            raise AssertionError("core commands changed location unexpectedly")
+        blocked_messages = {
+            str(onboarding.BLOCKED_COMMAND_MESSAGE or ""),
+            str(onboarding.EARLY_BLOCKED_COMMAND_MESSAGE or ""),
+            str(onboarding.INVALID_COMMAND_MESSAGE or ""),
+        }
+        messages = [str(message or "") for message in list(captured.get(character) or [])]
+        if any(message in blocked_messages for message in messages):
+            raise AssertionError(f"live-game command remained onboarding-blocked: {messages}")
+    finally:
+        _restore_object_messages(originals)
+
+
+def _assert_e2e_live_game_ready(character, onboarding, first_area):
+    expected_room = _expected_recovery_room_key(onboarding)
+    if getattr(getattr(character, "location", None), "key", None) != expected_room:
+        raise AssertionError(f"unexpected live-game landing room: {getattr(getattr(character, 'location', None), 'key', None)}")
+    exits = {str(getattr(obj, "key", "") or "").strip().lower() for obj in list(getattr(character.location, "contents", []) or []) if getattr(obj, "destination", None)}
+    expected_exits = {"east", "west", "path", "guild"} if expected_room == onboarding.EMPATH_GUILD_ENTRY_ROOM else {"out", "street"}
+    if exits != expected_exits:
+        raise AssertionError(f"unexpected live-game exits: {sorted(exits)}")
+    if not bool(getattr(character.db, "onboarding_complete", False)):
+        raise AssertionError("onboarding completion flag cleared before live entry")
+    if not character.is_alive():
+        raise AssertionError("character is not alive in live game")
+    weapon = character.get_weapon() if hasattr(character, "get_weapon") else None
+    if not weapon or str(getattr(weapon, "key", "") or "").strip().lower() != onboarding.TRAINING_SWORD_KEY:
+        raise AssertionError("equipped weapon did not survive into live game")
+    worn_items = list(character.get_worn_items() if hasattr(character, "get_worn_items") else [])
+    if not any(str(getattr(item, "key", "") or "").strip().lower() == onboarding.TRAINING_VEST_KEY for item in worn_items):
+        raise AssertionError("worn gear did not survive into live game")
+    rendered = character.get_rendered_desc(character) if hasattr(character, "get_rendered_desc") else str(getattr(character.db, "desc", "") or "")
+    if not isinstance(rendered, str) or not rendered.strip():
+        raise AssertionError("live character does not have a renderable description")
+    _assert_e2e_cleanup_state(character, onboarding)
+    _assert_e2e_live_commands_unlocked(character, onboarding)
+
+
+def _run_e2e_creation_flow(race, index):
+    from evennia.objects.models import ObjectDB
+    from evennia.utils.create import create_account
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from systems import first_area, onboarding
+
+    for obj in ObjectDB.objects.filter(db_key__istartswith="corpse of Life"):
+        try:
+            obj.delete()
+        except Exception:
+            pass
+    for prefix in ("Life", "LifecycleCleric", "LifecycleEmpath"):
+        for obj in ObjectDB.objects.filter(db_key__istartswith=prefix):
+            try:
+                obj.delete()
+            except Exception:
+                pass
+    for obj in ObjectDB.objects.filter(db_key__iexact=onboarding.TRAINING_SWORD_KEY):
+        location_key = str(getattr(getattr(obj, "location", None), "key", "") or "")
+        if location_key not in {onboarding.PRACTICE_YARD, first_area.OUTER_YARD, first_area.MARKET_APPROACH, first_area.SIDE_PASSAGE}:
+            continue
+        try:
+            obj.delete()
+        except Exception:
+            pass
+
+    _ensure_new_player_tutorial()
+    account = _create_e2e_account(create_account, race, index)
+    character = _create_e2e_character(account, race, index)
+    account.route_character_to_onboarding(character, create=True)
+    return account, character
+
+
+def _teardown_e2e_entities(account=None, character=None, helpers=None, extra_objects=None):
+    for helper in reversed(list(helpers or [])):
+        try:
+            helper.delete()
+        except Exception:
+            pass
+    for obj in reversed(list(extra_objects or [])):
+        try:
+            obj.delete()
+        except Exception:
+            pass
+    if character:
+        try:
+            character.delete()
+        except Exception:
+            pass
+    if account:
+        try:
+            account.delete()
+        except Exception:
+            pass
+
+
+def _run_invalid_onboarding_command_case(race, index):
+    from systems import onboarding
+
+    account = None
+    character = None
+    captured = {}
+    originals = {}
+    try:
+        account, character = _run_e2e_creation_flow(race, index)
+        _assert_e2e_spawn_state(character, race, onboarding)
+        captured, originals = _capture_object_messages(character)
+        for command in ("dance", "fly", "xyz"):
+            character.execute_cmd(command)
+        if onboarding.get_onboarding_step(character) != onboarding.STEP_START:
+            raise AssertionError(f"invalid commands corrupted onboarding step: {onboarding.get_onboarding_step(character)}")
+        if getattr(getattr(character, "location", None), "key", None) != onboarding.INTAKE_CHAMBER:
+            raise AssertionError("invalid commands changed onboarding location")
+        if not character.is_alive():
+            raise AssertionError("invalid commands broke character life state")
+        return {
+            "case": "invalid-commands",
+            "messages": list(captured.get(character) or []),
+        }
+    finally:
+        _restore_object_messages(originals)
+        _teardown_e2e_entities(account=account, character=character)
+
+
+def _run_skip_equip_case(race, index):
+    from systems import onboarding
+
+    account = None
+    character = None
+    try:
+        account, character = _run_e2e_creation_flow(race, index)
+        _assert_e2e_spawn_state(character, race, onboarding)
+        character.execute_cmd("east")
+        character.execute_cmd("get sword")
+        character.execute_cmd("east")
+        if onboarding.get_onboarding_step(character) != onboarding.STEP_PREPARATION:
+            raise AssertionError(f"skip-equip bypassed preparation state: {onboarding.get_onboarding_step(character)}")
+        if getattr(getattr(character, "location", None), "key", None) != onboarding.TRAINING_HALL:
+            raise AssertionError("skip-equip case advanced rooms unexpectedly")
+        if bool(getattr(character.db, "onboarding_complete", False)):
+            raise AssertionError("skip-equip case completed onboarding unexpectedly")
+        return {
+            "case": "skip-equip",
+            "step": onboarding.get_onboarding_step(character),
+            "room": getattr(getattr(character, "location", None), "key", None),
+        }
+    finally:
+        _teardown_e2e_entities(account=account, character=character)
+
+
+def _run_drop_weapon_before_death_case(race, index):
+    from evennia.utils.create import create_object
+    from systems import first_area, onboarding
+
+    account = None
+    character = None
+    helpers = []
+    extra_objects = []
+    try:
+        account, character = _run_e2e_creation_flow(race, index)
+        _assert_e2e_spawn_state(character, race, onboarding)
+        cleric, empath = _spawn_e2e_support_npcs(create_object, character.location, race, index)
+        helpers = [cleric, empath]
+
+        _run_e2e_onboarding(character, onboarding)
+        _assert_e2e_onboarding_complete(character, onboarding)
+
+        dropped_weapon = character.get_weapon() if hasattr(character, "get_weapon") else None
+        if not dropped_weapon:
+            raise AssertionError("drop-weapon case had no weapon to drop")
+        dropped_weapon_id = int(getattr(dropped_weapon, "id", 0) or 0)
+        character.execute_cmd(f"drop {dropped_weapon.key}")
+        if character.get_weapon() is not None:
+            raise AssertionError("drop-weapon case left the weapon equipped")
+        expected_recovery_room = _expected_recovery_room_key(onboarding)
+        if getattr(getattr(dropped_weapon, "location", None), "key", None) != expected_recovery_room:
+            raise AssertionError("dropped weapon did not remain in the room")
+
+        inventory_before = _snapshot_e2e_inventory(character)
+        _force_e2e_death(character)
+        corpse = character.get_death_corpse() if hasattr(character, "get_death_corpse") else None
+        extra_objects.extend([obj for obj in (dropped_weapon, corpse) if obj])
+        if not character.is_dead() or not corpse:
+            raise AssertionError("drop-weapon case did not produce a corpse")
+        if getattr(getattr(corpse, "location", None), "key", None) != expected_recovery_room:
+            raise AssertionError("drop-weapon corpse spawned in the wrong room")
+        worn_items = list(character.get_worn_items() if hasattr(character, "get_worn_items") else [])
+        if not any(str(getattr(item, "key", "") or "").strip().lower() == onboarding.TRAINING_VEST_KEY for item in worn_items):
+            raise AssertionError("drop-weapon case lost worn gear on death")
+        if getattr(getattr(dropped_weapon, "location", None), "key", None) != expected_recovery_room:
+            raise AssertionError("dropped weapon was moved by death processing")
+
+        cleric.move_to(corpse.location, quiet=True, use_destination=False)
+        empath.move_to(corpse.location, quiet=True, use_destination=False)
+        _run_e2e_resurrection_pipeline(character, corpse, cleric, empath)
+        _assert_e2e_resurrected(character, onboarding, expected_room=expected_recovery_room)
+        if _snapshot_e2e_inventory(character) != inventory_before:
+            raise AssertionError("inventory changed across dropped-weapon resurrection")
+        if character.get_weapon() is not None:
+            raise AssertionError("dropped weapon was incorrectly re-equipped after resurrection")
+        if getattr(getattr(dropped_weapon, "location", None), "key", None) != expected_recovery_room:
+            raise AssertionError("dropped weapon was lost or duplicated after resurrection")
+
+        character.execute_cmd(f"get {dropped_weapon.key}")
+        character.execute_cmd(f"wield {dropped_weapon.key}")
+        equipped = character.get_weapon() if hasattr(character, "get_weapon") else None
+        if int(getattr(equipped, "id", 0) or 0) != dropped_weapon_id:
+            raise AssertionError("recovered weapon identity did not match the dropped weapon")
+
+        _enter_e2e_live_game(character)
+        _assert_e2e_live_game_ready(character, onboarding, first_area)
+        return {
+            "case": "drop-weapon-before-death",
+            "weapon_id": dropped_weapon_id,
+            "landing_room": expected_recovery_room,
+        }
+    finally:
+        _teardown_e2e_entities(account=account, character=character, helpers=helpers, extra_objects=extra_objects)
+
+
+def _run_early_death_recovery_case(race, index):
+    from evennia.utils.create import create_object
+    from systems import first_area, onboarding
+
+    account = None
+    character = None
+    helpers = []
+    extra_objects = []
+    try:
+        account, character = _run_e2e_creation_flow(race, index)
+        _assert_e2e_spawn_state(character, race, onboarding)
+        expected_recovery_room = _expected_recovery_room_key(onboarding)
+        cleric, empath = _spawn_e2e_support_npcs(create_object, character.location, race, index)
+        helpers = [cleric, empath]
+
+        character.execute_cmd("east")
+        character.execute_cmd("get sword")
+        if onboarding.get_onboarding_step(character) != onboarding.STEP_PREPARATION:
+            raise AssertionError("early-death case did not reach preparation")
+        equipment_before = _snapshot_e2e_equipment(character)
+
+        _force_e2e_death(character)
+        corpse = character.get_death_corpse() if hasattr(character, "get_death_corpse") else None
+        extra_objects.extend([obj for obj in (corpse,) if obj])
+        if not character.is_dead() or not corpse:
+            raise AssertionError("early-death case did not produce a corpse")
+        if getattr(getattr(corpse, "location", None), "key", None) != onboarding.TRAINING_HALL:
+            raise AssertionError("early-death corpse spawned in the wrong room")
+
+        cleric.move_to(corpse.location, quiet=True, use_destination=False)
+        empath.move_to(corpse.location, quiet=True, use_destination=False)
+        _run_e2e_resurrection_pipeline(character, corpse, cleric, empath)
+        _assert_e2e_resurrected(character, onboarding, expected_room=onboarding.TRAINING_HALL)
+        if getattr(getattr(character, "location", None), "key", None) != onboarding.TRAINING_HALL:
+            raise AssertionError("early-death resurrection returned to the wrong room")
+        _assert_e2e_equipment_persistence(character, equipment_before)
+        if onboarding.get_onboarding_step(character) != onboarding.STEP_PREPARATION:
+            raise AssertionError(f"early-death case lost onboarding progress: {onboarding.get_onboarding_step(character)}")
+
+        character.execute_cmd("get vest")
+        character.execute_cmd("wear vest")
+        character.execute_cmd("wield sword")
+        character.execute_cmd("east")
+        character.execute_cmd("attack dummy")
+        character.execute_cmd("attack goblin")
+        character.execute_cmd("attack goblin")
+        _advance_training_resurrection(character, onboarding, complete_release=True)
+        _assert_e2e_onboarding_complete(character, onboarding)
+
+        _enter_e2e_live_game(character)
+        _assert_e2e_live_game_ready(character, onboarding, first_area)
+        return {
+            "case": "early-death-recovery",
+            "landing_room": expected_recovery_room,
+            "step_after_resurrection": onboarding.get_onboarding_step(character),
+        }
+    finally:
+        _teardown_e2e_entities(account=account, character=character, helpers=helpers, extra_objects=extra_objects)
+
+
+def _run_e2e_full_lifecycle_for_race(race, index):
+    from evennia.utils.create import create_object
+    from systems import first_area, onboarding
+
+    account = None
+    character = None
+    helpers = []
+    try:
+        account, character = _run_e2e_creation_flow(race, index)
+        _assert_e2e_spawn_state(character, race, onboarding)
+        expected_recovery_room = _expected_recovery_room_key(onboarding)
+
+        cleric, empath = _spawn_e2e_support_npcs(create_object, character.location, race, index)
+        helpers = [cleric, empath]
+
+        _run_e2e_onboarding(character, onboarding)
+        _assert_e2e_onboarding_complete(character, onboarding)
+        equipment_before = _snapshot_e2e_equipment(character)
+
+        _force_e2e_death(character)
+        corpse = _assert_e2e_dead(character, onboarding, expected_room=expected_recovery_room)
+
+        cleric.move_to(corpse.location, quiet=True, use_destination=False)
+        empath.move_to(corpse.location, quiet=True, use_destination=False)
+        _run_e2e_resurrection_pipeline(character, corpse, cleric, empath)
+        _assert_e2e_resurrected(character, onboarding, expected_room=expected_recovery_room)
+        _assert_e2e_equipment_persistence(character, equipment_before)
+
+        _enter_e2e_live_game(character)
+        _assert_e2e_live_game_ready(character, onboarding, first_area)
+
+        return {
+            "race": str(race),
+            "character": str(getattr(character, "key", "") or ""),
+            "account": str(getattr(account, "key", "") or ""),
+            "ok": True,
+            "spawn_room": onboarding.INTAKE_CHAMBER,
+            "onboarding_room": expected_recovery_room,
+            "landing_room": expected_recovery_room,
+            "recovery_type": str(getattr(character.db, "last_recovery_type", "") or ""),
+            "hp": int(getattr(character.db, "hp", 0) or 0),
+            "max_hp": int(getattr(character.db, "max_hp", 0) or 0),
+        }
+    finally:
+        _teardown_e2e_entities(account=account, character=character, helpers=helpers)
+
+
+def _build_first_area_character(create_object, onboarding):
+    ctx = _build_locked_onboarding_character(create_object, onboarding)
+    character = ctx["character"]
+    _run_e2e_onboarding(character, onboarding)
+
+    return ctx
+
+
+def _run_first_area_case(args, case_name):
+    _setup_django()
+
+    from systems import onboarding
+    from systems import first_area
+
+    created_character = None
+    sword = None
+    sword_home = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        ctx = _build_first_area_character(create_object, onboarding)
+        character = ctx["character"]
+        created_character = character
+        sword = ctx["sword"]
+        sword_home = getattr(sword, "home", None) or getattr(sword, "location", None)
+        captured, originals = _capture_object_messages(character)
+
+        expected_recovery_room = _expected_recovery_room_key(onboarding)
+        lane_room = character.location
+        if getattr(lane_room, "key", None) == onboarding.EMPATH_GUILD_ROOM:
+            character.execute_cmd("out")
+            lane_room = character.location
+        if getattr(lane_room, "key", None) != onboarding.EMPATH_GUILD_ENTRY_ROOM:
+            raise RuntimeError(f"Onboarding did not release into the first-area lane. room={getattr(lane_room, 'key', None)} recovery={expected_recovery_room}")
+        guild_room = _get_room_exit(lane_room, "guild").destination if _get_room_exit(lane_room, "guild") else None
+        east_room = _get_room_exit(lane_room, "east").destination if _get_room_exit(lane_room, "east") else None
+        west_room = _get_room_exit(lane_room, "west").destination if _get_room_exit(lane_room, "west") else None
+        path_room = _get_room_exit(lane_room, "path").destination if _get_room_exit(lane_room, "path") else None
+
+        ok = False
+        detail = ""
+
+        if case_name == "entry":
+            captured[character].clear()
+            character.execute_cmd("guild")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                getattr(character.location, "key", None) == onboarding.EMPATH_GUILD_ROOM
+                and "It is a place for those who have not yet died." in messages
+            )
+            detail = messages or str(getattr(getattr(character, "location", None), "key", ""))
+        elif case_name == "choice":
+            ok = bool(
+                guild_room
+                and east_room
+                and west_room
+                and path_room
+            )
+            detail = ", ".join(sorted(room.key for room in [guild_room, east_room, west_room, path_room] if room))
+        elif case_name == "interaction":
+            captured[character].clear()
+            character.execute_cmd("guild")
+            character.execute_cmd("out")
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                getattr(character.location, "key", None) == onboarding.EMPATH_GUILD_ENTRY_ROOM
+                and messages.strip()
+            )
+            detail = messages or "interaction"
+        elif case_name == "exploration":
+            captured[character].clear()
+            character.execute_cmd("east")
+            character.execute_cmd("west")
+            character.execute_cmd("path")
+            messages = "\n".join(captured.get(character) or [])
+            ok = (
+                getattr(character.location, "key", None) == getattr(path_room, "key", None)
+                and messages.strip()
+            )
+            detail = messages or str(getattr(getattr(character, "location", None), "key", ""))
+        elif case_name == "linger":
+            captured[character].clear()
+            character.execute_cmd("look")
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                getattr(getattr(character, "location", None), "key", None) == onboarding.EMPATH_GUILD_ENTRY_ROOM
+                and messages.strip()
+            )
+            detail = messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"
+        else:
+            raise ValueError(f"Unknown first area case: {case_name}")
+
+        if args.json:
+            print(json.dumps({"scenario": f"first-area-{case_name}", "ok": ok, "detail": detail}, indent=2, sort_keys=True))
+        else:
+            print(f"DireTest Scenario: first-area-{case_name}")
+            print(f"Result: {'PASS' if ok else 'FAIL'}")
+            print(f"Detail: {detail}")
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if sword and sword_home and getattr(sword, "location", None) != sword_home:
+            try:
+                sword.move_to(sword_home, quiet=True, use_destination=False)
+            except Exception:
+                pass
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("first-area-entry")
+def run_first_area_entry_scenario(args):
+    return _run_first_area_case(args, "entry")
+
+
+@register_scenario("first-area-choice")
+def run_first_area_choice_scenario(args):
+    return _run_first_area_case(args, "choice")
+
+@register_scenario("first-area-interaction")
+def run_first_area_interaction_scenario(args):
+    return _run_first_area_case(args, "interaction")
+
+
+@register_scenario("first-area-exploration")
+def run_first_area_exploration_scenario(args):
+    return _run_first_area_case(args, "exploration")
+
+
+@register_scenario("first-area-linger")
+def run_first_area_linger_scenario(args):
+    return _run_first_area_case(args, "linger")
+
+
+def _run_empath_guild_case(args, case_name):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from systems import onboarding
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        expected_recovery_room = _expected_recovery_room_key(onboarding)
+
+        lane_room = ObjectDB.objects.get_id(onboarding.EMPATH_GUILD_ENTRY_DBREF)
+        if not lane_room or getattr(lane_room, "key", None) != onboarding.EMPATH_GUILD_ENTRY_ROOM:
+            raise RuntimeError("Larkspur Lane, Midway (#4280) is missing.")
+        guild_room = next(
+            (
+                room for room in ObjectDB.objects.filter(db_key__iexact=onboarding.EMPATH_GUILD_ROOM)
+                if getattr(room, "db_typeclass_path", "") == "typeclasses.rooms.Room"
+            ),
+            None,
+        )
+        if not guild_room:
+            raise RuntimeError("Empath Guild room is missing.")
+
+        character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Empath Guild {int(time.time() * 1000)}",
+            location=lane_room,
+            home=lane_room,
+        )
+        character.ensure_core_defaults()
+        created_character = character
+        captured, originals = _capture_object_messages(character)
+
+        ok = False
+        detail = ""
+
+        if case_name == "entry":
+            character.execute_cmd("guild")
+            ok = getattr(getattr(character, "location", None), "key", None) == onboarding.EMPATH_GUILD_ROOM
+            detail = f"room={getattr(getattr(character, 'location', None), 'key', None)}"
+        elif case_name == "aliases":
+            results = []
+            for command in ["empath", "empath guild", "door"]:
+                character.move_to(lane_room, quiet=True, use_destination=False)
+                character.execute_cmd(command)
+                results.append((command, getattr(getattr(character, "location", None), "key", None)))
+            ok = all(room_key == onboarding.EMPATH_GUILD_ROOM for _, room_key in results)
+            detail = ", ".join(f"{command}->{room_key}" for command, room_key in results)
+        elif case_name == "return":
+            character.move_to(guild_room, quiet=True, use_destination=False)
+            character.execute_cmd("out")
+            out_room = getattr(getattr(character, "location", None), "key", None)
+            character.move_to(guild_room, quiet=True, use_destination=False)
+            character.execute_cmd("street")
+            street_room = getattr(getattr(character, "location", None), "key", None)
+            ok = out_room == onboarding.EMPATH_GUILD_ENTRY_ROOM and street_room == onboarding.EMPATH_GUILD_ENTRY_ROOM
+            detail = f"out={out_room}, street={street_room}"
+        elif case_name == "clickable":
+            appearance = lane_room.return_appearance(character)
+            character.execute_cmd("__clickmove__ north")
+            ok = (
+                "|lc__clickmove__ north|lt|ynorth|n|le" in appearance
+                and getattr(getattr(character, "location", None), "key", None) == onboarding.EMPATH_GUILD_ROOM
+            )
+            detail = appearance
+        elif case_name == "post-teleport-location":
+            from evennia.utils.create import create_object as onboarding_create_object
+
+            onboarding_ctx = _build_locked_onboarding_character(onboarding_create_object, onboarding)
+            onboarding_character = onboarding_ctx["character"]
+            try:
+                _run_e2e_onboarding(onboarding_character, onboarding)
+                ok = getattr(getattr(onboarding_character, "location", None), "key", None) == expected_recovery_room
+                detail = f"room={getattr(getattr(onboarding_character, 'location', None), 'key', None)}"
+            finally:
+                try:
+                    onboarding_character.delete()
+                except Exception:
+                    pass
+        else:
+            raise RuntimeError(f"Unknown empath guild case: {case_name}")
+
+        payload = {"scenario": f"empath-guild-{case_name}", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print(f"DireTest Scenario: empath-guild-{case_name}")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            if detail:
+                print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("empath-guild-entry")
+def run_empath_guild_entry_scenario(args):
+    return _run_empath_guild_case(args, "entry")
+
+
+@register_scenario("empath-guild-aliases")
+def run_empath_guild_aliases_scenario(args):
+    return _run_empath_guild_case(args, "aliases")
+
+
+@register_scenario("empath-guild-return")
+def run_empath_guild_return_scenario(args):
+    return _run_empath_guild_case(args, "return")
+
+
+@register_scenario("post-teleport-location")
+def run_post_teleport_location_scenario(args):
+    return _run_empath_guild_case(args, "post-teleport-location")
+
+
+@register_scenario("guild-clickable")
+def run_guild_clickable_scenario(args):
+    return _run_empath_guild_case(args, "clickable")
+
+
+@register_scenario("ranger-join")
+def run_ranger_join_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+
+        alley_room = ObjectDB.objects.get_id(4244)
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not alley_room or getattr(alley_room, "key", None) != "Cracked Bell Alley, East Reach":
+            raise RuntimeError("Cracked Bell Alley, East Reach (#4244) is missing.")
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        elarion = ObjectDB.objects.filter(db_key__iexact="Elarion", db_location=guild_room).first()
+        if not elarion:
+            raise RuntimeError("Elarion is missing from the Ranger Guild.")
+
+        character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Join {int(time.time() * 1000)}",
+            location=alley_room,
+            home=alley_room,
+        )
+        character.ensure_core_defaults()
+        created_character = character
+        captured, originals = _capture_object_messages(character)
+
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            character.set_stat(stat_name, minimum)
+
+        results = []
+
+        captured[character].clear()
+        character.execute_cmd("join ranger")
+        location_messages = "\n".join(captured.get(character) or [])
+        location_ok = character.get_profession() == "commoner" and "proper guildhall" in location_messages.lower()
+        results.append(("location", location_ok, location_messages or "missing location failure message"))
+
+        captured[character].clear()
+        character.execute_cmd("go guild")
+        go_guild_messages = "\n".join(captured.get(character) or [])
+        go_guild_ok = getattr(getattr(character, "location", None), "key", None) == "Ranger Guild"
+        results.append(("go-guild", go_guild_ok, go_guild_messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"))
+
+        character.move_to(alley_room, quiet=True, use_destination=False)
+        captured[character].clear()
+        character.execute_cmd("go ranger")
+        go_ranger_messages = "\n".join(captured.get(character) or [])
+        go_ranger_ok = getattr(getattr(character, "location", None), "key", None) == "Ranger Guild"
+        results.append(("go-ranger", go_ranger_ok, go_ranger_messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"))
+
+        captured[character].clear()
+        guild_appearance = guild_room.return_appearance(character)
+        exit_display_ok = all(fragment in guild_appearance.lower() for fragment in ["|wexits:|n", "north", "south", "east", "west"])
+        results.append(("exit-display", exit_display_ok, guild_appearance or "missing guild appearance"))
+
+        character.move_to(guild_room, quiet=True, use_destination=False)
+        stat_name, minimum, label = RANGER_JOIN_REQUIREMENTS[0]
+        character.set_stat(stat_name, minimum - 1)
+        captured[character].clear()
+        character.execute_cmd("join ranger")
+        stat_messages = "\n".join(captured.get(character) or [])
+        stat_ok = character.get_profession() == "commoner" and "not yet" in stat_messages.lower() and label.lower() in stat_messages.lower()
+        results.append(("stats", stat_ok, stat_messages or "missing stat failure message"))
+
+        for reset_name, reset_minimum, _reset_label in RANGER_JOIN_REQUIREMENTS:
+            character.set_stat(reset_name, reset_minimum)
+
+        captured[character].clear()
+        character.execute_cmd("ask elarion about join")
+        inquiry_messages = "\n".join(captured.get(character) or [])
+        inquiry_ok = "say it, and mean it" in inquiry_messages.lower() and "join ranger" not in inquiry_messages.lower()
+        results.append(("inquiry", inquiry_ok, inquiry_messages or "missing inquiry response"))
+
+        captured[character].clear()
+        character.execute_cmd("join ranger")
+        join_messages = "\n".join(captured.get(character) or [])
+        join_ok = (
+            character.get_profession() == "ranger"
+            and character.get_guild() == "ranger"
+            and "recognized as a ranger" in join_messages.lower()
+        )
+        results.append(("join", join_ok, join_messages or "missing join success message"))
+
+        captured[character].clear()
+        character.execute_cmd("stats")
+        stats_messages = "\n".join(captured.get(character) or [])
+        stats_ok = (
+            "wilderness bond:" in stats_messages.lower()
+            and "environment:" in stats_messages.lower()
+            and "terrain:" in stats_messages.lower()
+            and "companion:" in stats_messages.lower()
+            and "(" in stats_messages
+        )
+        results.append(("stats-tone", stats_ok, stats_messages or "missing ranger stats output"))
+
+        captured[character].clear()
+        character.execute_cmd("inf")
+        nomatch_messages = "\n".join(captured.get(character) or [])
+        nomatch_ok = "you hesitate, but nothing comes of it." in nomatch_messages.lower() and "command 'inf' is not available" not in nomatch_messages.lower()
+        results.append(("nomatch", nomatch_ok, nomatch_messages or "missing softened nomatch response"))
+
+        captured[character].clear()
+        for command in ["west", "down", "down", "up", "down", "down", "up", "east", "south"]:
+            character.execute_cmd(command)
+        treehouse_return_messages = "\n".join(captured.get(character) or [])
+        treehouse_return_ok = getattr(getattr(character, "location", None), "key", None) == "Cracked Bell Alley, East Reach"
+        results.append(("treehouse-return", treehouse_return_ok, treehouse_return_messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"))
+
+        character.move_to(guild_room, quiet=True, use_destination=False)
+        captured[character].clear()
+        character.execute_cmd("south")
+        out_messages = "\n".join(captured.get(character) or [])
+        out_ok = getattr(getattr(character, "location", None), "key", None) == "Cracked Bell Alley, East Reach"
+        results.append(("out", out_ok, out_messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"))
+
+        ok = all(passed for _name, passed, _detail in results)
+        detail = " | ".join(f"{name}={'PASS' if passed else 'FAIL'}:{detail}" for name, passed, detail in results)
+        payload = {"scenario": "ranger-join", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-join")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-npc-inquiry")
+def run_ranger_npc_inquiry_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Inquiry {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        character.ensure_core_defaults()
+        created_character = character
+        captured, originals = _capture_object_messages(character)
+
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            character.set_stat(stat_name, minimum)
+
+        character.execute_cmd("join ranger")
+
+        checks = [
+            ("bram", ["west", "west"], "ask bram about training", "forage"),
+            ("serik", ["east", "east"], "ask serik about hunting", "clean shot"),
+            ("lysa", ["west", "down", "down", "up"], "ask lysa about scouting", "move without being noticed"),
+            ("orren", ["north"], "ask orren about magic", "old ways"),
+        ]
+        results = []
+
+        for label, travel_commands, ask_command, expected_text in checks:
+            character.move_to(guild_room, quiet=True, use_destination=False)
+            captured[character].clear()
+            for command in travel_commands:
+                character.execute_cmd(command)
+            character.execute_cmd(ask_command)
+            messages = "\n".join(captured.get(character) or [])
+            ok = expected_text.lower() in messages.lower()
+            results.append((label, ok, messages or "missing mentor response"))
+
+        ok = all(passed for _name, passed, _detail in results)
+        detail = " | ".join(f"{name}={'PASS' if passed else 'FAIL'}:{detail}" for name, passed, detail in results)
+        payload = {"scenario": "ranger-npc-inquiry", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-npc-inquiry")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-circle-default")
+def run_ranger_circle_default_scenario(args):
+    _setup_django()
+
+    room_name = None
+    room = None
+    created_character = None
+    try:
+        from evennia.utils.create import create_object
+
+        room_name, room = _create_temp_room("diretest_ranger_circle_default")
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Circle {int(time.time() * 1000)}",
+            location=room,
+            home=room,
+        )
+        created_character.ensure_core_defaults()
+        ok = int(getattr(created_character.db, "circle", 0) or 0) == 1 and int(created_character.get_circle()) == 1
+        detail = f"circle={getattr(created_character.db, 'circle', None)} get_circle={created_character.get_circle()}"
+        payload = {"scenario": "ranger-circle-default", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-circle-default")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(room_name)
+        if room:
+            try:
+                room.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-advance-fail")
+def run_ranger_advance_fail_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Advance Fail {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+        captured, originals = _capture_object_messages(created_character)
+
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            created_character.set_stat(stat_name, minimum)
+
+        created_character.execute_cmd("join ranger")
+        captured[created_character].clear()
+        created_character.execute_cmd("ask elarion about advancement")
+        messages = "\n".join(captured.get(created_character) or [])
+        ok = created_character.get_circle() == 1 and "gather" in messages.lower() and "awareness" in messages.lower()
+        detail = messages or f"circle={created_character.get_circle()}"
+        payload = {"scenario": "ranger-advance-fail", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-advance-fail")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-advance-success")
+def run_ranger_advance_success_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Advance Success {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+        captured, originals = _capture_object_messages(created_character)
+
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            created_character.set_stat(stat_name, minimum)
+
+        created_character.execute_cmd("join ranger")
+        created_character.db.forage_uses = 1
+        created_character.learn_skill("perception", {"rank": 5, "mindstate": 0})
+
+        captured[created_character].clear()
+        created_character.execute_cmd("ask elarion about advancement")
+        messages = "\n".join(captured.get(created_character) or [])
+        ok = created_character.get_circle() == 2 and "first true step" in messages.lower()
+        detail = messages or f"circle={created_character.get_circle()}"
+        payload = {"scenario": "ranger-advance-success", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-advance-success")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-advance-feedback")
+def run_ranger_advance_feedback_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Advance Feedback {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+        captured, originals = _capture_object_messages(created_character)
+
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            created_character.set_stat(stat_name, minimum)
+
+        created_character.execute_cmd("join ranger")
+        captured[created_character].clear()
+        created_character.execute_cmd("ask elarion about advancement")
+        messages = "\n".join(captured.get(created_character) or [])
+        ok = ("gather" in messages.lower() or "wild" in messages.lower()) and "awareness" in messages.lower()
+        detail = messages or "missing advancement feedback"
+        payload = {"scenario": "ranger-advance-feedback", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-advance-feedback")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-forage-scaling")
+def run_ranger_forage_scaling_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    temp_room_name = None
+    temp_room = None
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        temp_room_name, temp_room = _create_temp_room("diretest_ranger_forage_scaling")
+        temp_room.db.forage_difficulty = 1
+
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Forage {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            created_character.set_stat(stat_name, minimum)
+        created_character.execute_cmd("join ranger")
+        created_character.learn_skill("outdoorsmanship", {"rank": 10, "mindstate": 0})
+        created_character.move_to(temp_room, quiet=True, use_destination=False)
+
+        before = len(list(created_character.get_visible_carried_items()))
+        created_character.execute_cmd("forage")
+        after_items = list(created_character.get_visible_carried_items())
+        after = len(after_items)
+        ok = after > before and (after - before) >= 2
+        detail = f"before={before} after={after} items={[item.key for item in after_items]}"
+        payload = {"scenario": "ranger-forage-scaling", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-forage-scaling")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(temp_room_name)
+        if temp_room:
+            try:
+                temp_room.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-forage-variation")
+def run_ranger_forage_variation_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    temp_room_name = None
+    temp_room = None
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        temp_room_name, temp_room = _create_temp_room("diretest_ranger_forage_variation")
+        temp_room.db.forage_difficulty = 1
+
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Forage Variation {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            created_character.set_stat(stat_name, minimum)
+        created_character.execute_cmd("join ranger")
+        created_character.learn_skill("outdoorsmanship", {"rank": 20, "mindstate": 0})
+        created_character.move_to(temp_room, quiet=True, use_destination=False)
+
+        results = set()
+        for _index in range(12):
+            created_character.execute_cmd("forage")
+            created_character.set_roundtime(0)
+        for item in list(created_character.get_visible_carried_items()):
+            kind = str(getattr(item.db, "forage_kind", "") or "").strip().lower()
+            if kind:
+                results.add(kind)
+
+        ok = len(results) > 1
+        detail = f"resource_kinds={sorted(results)}"
+        payload = {"scenario": "ranger-forage-variation", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-forage-variation")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+        _cleanup_named_object(temp_room_name)
+        if temp_room:
+            try:
+                temp_room.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-skin-fail")
+def run_ranger_skin_fail_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    corpse = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Skin Fail {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+        captured, originals = _capture_object_messages(created_character)
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            created_character.set_stat(stat_name, minimum)
+        created_character.execute_cmd("join ranger")
+
+        corpse = create_object("typeclasses.corpse.Corpse", key="deer", location=guild_room, home=guild_room)
+        corpse.locks.add("search:true();view:true()")
+        corpse.db.skinnable = True
+        corpse.db.skin_difficulty = 1
+        corpse.db.dead = True
+
+        created_character.skin_target(corpse)
+        messages = "\n".join(captured.get(created_character) or [])
+        ok = "need a skinning knife" in messages.lower()
+        detail = messages or "missing skinning failure message"
+        payload = {"scenario": "ranger-skin-fail", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-skin-fail")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if corpse:
+            try:
+                corpse.delete()
+            except Exception:
+                pass
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("ranger-skin-success")
+def run_ranger_skin_success_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+
+    created_character = None
+    corpse = None
+    knife = None
+    captured = {}
+    originals = {}
+    try:
+        from evennia.utils.create import create_object
+
+        _ensure_new_player_tutorial()
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Ranger Guild room is missing.")
+
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Ranger Skin Success {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+        captured, originals = _capture_object_messages(created_character)
+        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
+            created_character.set_stat(stat_name, minimum)
+        created_character.execute_cmd("join ranger")
+        created_character.learn_skill("skinning", {"rank": 20, "mindstate": 0})
+
+        corpse = create_object("typeclasses.corpse.Corpse", key="deer", location=guild_room, home=guild_room)
+        corpse.locks.add("search:true();view:true()")
+        corpse.db.skinnable = True
+        corpse.db.skin_difficulty = 1
+        corpse.db.dead = True
+
+        knife = create_object("typeclasses.objects.Object", key="skinning knife", location=created_character, home=created_character)
+        created_character.execute_cmd("wield skinning knife")
+        captured[created_character].clear()
+        created_character.skin_target(corpse)
+
+        carried = list(created_character.get_visible_carried_items())
+        hides = [item for item in carried if "hide bundle" in str(getattr(item, "key", "") or "").lower()]
+        ok = bool(hides) and str(getattr(hides[0].db, "skinning_quality", "") or "") in {"poor", "normal", "fine"}
+        detail = f"messages={' | '.join(captured.get(created_character) or [])} hides={[item.key for item in hides]}"
+        payload = {"scenario": "ranger-skin-success", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: ranger-skin-success")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if corpse:
+            try:
+                corpse.delete()
+            except Exception:
+                pass
+        if knife:
+            try:
+                knife.delete()
+            except Exception:
+                pass
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+def _run_aftermath_case(args, case_name):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from evennia.utils.create import create_object
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+    from systems import aftermath
+
+    created_objects = []
+    captured = {}
+    originals = {}
+    try:
+        _ensure_new_player_tutorial()
+        aftermath.ensure_poi_tags()
+
+        guild_room = ObjectDB.objects.filter(db_key__iexact=aftermath.GUILD_ROOM_KEY, db_typeclass_path="typeclasses.rooms.Room").first()
+        if not guild_room:
+            raise RuntimeError("Empath Guild room is missing.")
+
+        def build_character(room, label):
+            character = create_object(
+                "typeclasses.characters.Character",
+                key=f"DireTest Aftermath {label} {int(time.time() * 1000)}",
+                location=room,
+                home=room,
+            )
+            character.ensure_core_defaults()
+            created_objects.append(character)
+            return character
+
+        def build_temp_room(label, poi_tag=None):
+            _, room = _create_temp_room(f"aftermath_{label}")
+            created_objects.append(room)
+            if poi_tag:
+                room.tags.add(poi_tag)
+            return room
+
+        ok = False
+        detail = ""
+
+        if case_name == "recovery-orderly":
+            character = build_character(guild_room, "orderly")
+            aftermath.activate_new_player_state(character)
+            captured, originals = _capture_object_messages(character)
+            appearance = guild_room.return_appearance(character)
+            first_messages = "\n".join(captured.get(character) or [])
+            captured[character].clear()
+            guild_room.return_appearance(character)
+            repeat_messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                aftermath.ORDERLY_KEY in appearance
+                and _fragments_in_order(first_messages, [line for line in aftermath.ORDERLY_DIALOGUE if line])
+                and not repeat_messages.strip()
+                and bool(getattr(character.db, "aftermath_orderly_prompted", False))
+            )
+            detail = first_messages or appearance
+        elif case_name == "aftermath-per-player":
+            room = build_temp_room("per_player")
+            first = build_character(room, "per_player_a")
+            second = build_character(room, "per_player_b")
+            aftermath.activate_new_player_state(first)
+            aftermath.activate_new_player_state(second)
+            aftermath.note_room_entry(first, room)
+            aftermath.note_room_entry(second, room)
+            before_first = "\n".join(aftermath.get_room_render_lines(first, room))
+            before_second = "\n".join(aftermath.get_room_render_lines(second, room))
+            first_result = aftermath.handle_search(first, "raider")
+            after_first = "\n".join(aftermath.get_room_render_lines(first, room))
+            after_second = "\n".join(aftermath.get_room_render_lines(second, room))
+            second_result = aftermath.handle_search(second, "raider")
+            ok = bool(
+                first_result
+                and second_result
+                and "fallen goblin raider" in before_first
+                and "fallen goblin raider" in before_second
+                and "fallen goblin raider" not in after_first
+                and "fallen goblin raider" in after_second
+            )
+            detail = f"first_after={after_first!r} second_after={after_second!r}"
+        elif case_name == "aftermath-currency-cap":
+            room = build_temp_room("currency_cap")
+            character = build_character(room, "currency_cap")
+            captured, originals = _capture_object_messages(character)
+            aftermath.activate_new_player_state(character)
+            character.db.aftermath_currency_cap = 1
+            character.db.aftermath_currency_total = 0
+            character.db.coffer_room = int(getattr(room, "id", 0) or 0)
+            aftermath.note_room_entry(character, room)
+            corpse_result = aftermath.handle_search(character, "raider")
+            coffer_result = aftermath.handle_pick(character, "coffer")
+            messages = "\n".join(captured.get(character) or [])
+            ok = bool(
+                corpse_result
+                and coffer_result
+                and int(getattr(character.db, "aftermath_currency_total", 0) or 0) == 1
+                and bool(getattr(character.db, "coffer_looted", False))
+                and "1 copper" in messages.lower()
+            )
+            detail = messages or f"currency_total={getattr(character.db, 'aftermath_currency_total', None)}"
+        elif case_name == "aftermath-full-kit":
+            character = build_character(guild_room, "full_kit")
+            aftermath.activate_new_player_state(character)
+            rooms = [build_temp_room(f"full_kit_{index}") for index in range(2)]
+            character.db.coffer_room = int(getattr(rooms[0], "id", 0) or 0)
+            for room in rooms:
+                character.move_to(room, quiet=True, use_destination=False)
+                aftermath.note_room_entry(character, room)
+                if not aftermath.handle_search(character, "raider"):
+                    raise AssertionError(f"corpse search did not resolve in {getattr(room, 'key', None)}")
+
+            poi_room = None
+            for index in range(20):
+                candidate = build_temp_room(f"full_kit_poi_{index}", poi_tag="poi_market")
+                character.move_to(candidate, quiet=True, use_destination=False)
+                if aftermath.handle_search(character, "raider"):
+                    poi_room = candidate
+                    if not aftermath._missing_kit_items(character):
+                        break
+            missing = aftermath._missing_kit_items(character)
+            ok = bool(not missing and poi_room is not None)
+            detail = f"missing={missing} poi_room={getattr(poi_room, 'key', None)} inventory={[getattr(obj, 'key', None) for obj in list(getattr(character, 'contents', []) or [])]}"
+        elif case_name == "coffer-flow":
+            room = build_temp_room("coffer_flow")
+            character = build_character(room, "coffer_flow")
+            captured, originals = _capture_object_messages(character)
+            aftermath.activate_new_player_state(character)
+            character.db.coffer_room = int(getattr(room, "id", 0) or 0)
+            aftermath.note_room_entry(character, room)
+            locked_result = aftermath.handle_pick(character, "coffer")
+            locked_messages = "\n".join(captured.get(character) or [])
+            captured[character].clear()
+            corpse_result = aftermath.handle_search(character, "raider")
+            search_messages = "\n".join(captured.get(character) or [])
+            render_after_search = "\n".join(aftermath.get_room_render_lines(character, room))
+            captured[character].clear()
+            unlocked_result = aftermath.handle_pick(character, "coffer")
+            pick_messages = "\n".join(captured.get(character) or [])
+            render_after_pick = "\n".join(aftermath.get_room_render_lines(character, room))
+            ok = bool(
+                locked_result
+                and corpse_result
+                and unlocked_result
+                and "Locked." in locked_messages
+                and "basic lockpick" in search_messages
+                and "ironbound coffer" in render_after_search
+                and "A soft click." in pick_messages
+                and "ironbound coffer" not in render_after_pick
+            )
+            detail = "\n\n".join(filter(None, [locked_messages, search_messages, pick_messages]))
+        elif case_name == "coffer-single-instance":
+            room = build_temp_room("coffer_single")
+            first = build_character(room, "coffer_single_a")
+            second = build_character(room, "coffer_single_b")
+            aftermath.activate_new_player_state(first)
+            aftermath.activate_new_player_state(second)
+            first.db.coffer_room = int(getattr(room, "id", 0) or 0)
+            second.db.coffer_room = int(getattr(room, "id", 0) or 0)
+            aftermath._create_lockpicks(first)
+            aftermath._create_lockpicks(second)
+            before_first = "\n".join(aftermath.get_room_render_lines(first, room))
+            first_result = aftermath.handle_pick(first, "coffer")
+            after_first = "\n".join(aftermath.get_room_render_lines(first, room))
+            second_view = "\n".join(aftermath.get_room_render_lines(second, room))
+            ok = bool(
+                first_result
+                and "ironbound coffer" in before_first
+                and "ironbound coffer" not in after_first
+                and "ironbound coffer" in second_view
+            )
+            detail = f"first_after={after_first!r} second_view={second_view!r}"
+        elif case_name == "poi-spawn-weight":
+            ambient_room = build_temp_room("poi_ambient")
+            poi_room = build_temp_room("poi_weighted", poi_tag="poi_market")
+            ambient_hits = 0
+            poi_hits = 0
+            ambient_room_id = int(getattr(ambient_room, "id", 0) or 0)
+            poi_room_id = int(getattr(poi_room, "id", 0) or 0)
+            for index in range(24):
+                if aftermath._hash_float(f"corpse:{index + 1}:{ambient_room_id}") < aftermath.AMBIENT_SPAWN_CHANCE:
+                    ambient_hits += 1
+                if aftermath._hash_float(f"corpse:{index + 1}:{poi_room_id}") < aftermath.POI_SPAWN_CHANCE:
+                    poi_hits += 1
+            ok = bool(
+                aftermath.get_spawn_chance_for_room(None, ambient_room) == aftermath.AMBIENT_SPAWN_CHANCE
+                and aftermath.get_spawn_chance_for_room(None, poi_room) == aftermath.POI_SPAWN_CHANCE
+                and poi_hits > ambient_hits
+            )
+            detail = f"ambient_hits={ambient_hits} poi_hits={poi_hits} ambient={aftermath.AMBIENT_SPAWN_CHANCE} poi={aftermath.POI_SPAWN_CHANCE}"
+        else:
+            raise RuntimeError(f"Unknown aftermath case: {case_name}")
+
+        payload = {"scenario": case_name, "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print(f"DireTest Scenario: {case_name}")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            if detail:
+                print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        for obj in reversed(created_objects):
+            try:
+                obj.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("recovery-orderly")
+def run_recovery_orderly_scenario(args):
+    return _run_aftermath_case(args, "recovery-orderly")
+
+
+@register_scenario("aftermath-per-player")
+def run_aftermath_per_player_scenario(args):
+    return _run_aftermath_case(args, "aftermath-per-player")
+
+
+@register_scenario("aftermath-currency-cap")
+def run_aftermath_currency_cap_scenario(args):
+    return _run_aftermath_case(args, "aftermath-currency-cap")
+
+
+@register_scenario("aftermath-full-kit")
+def run_aftermath_full_kit_scenario(args):
+    return _run_aftermath_case(args, "aftermath-full-kit")
+
+
+@register_scenario("coffer-flow")
+def run_coffer_flow_scenario(args):
+    return _run_aftermath_case(args, "coffer-flow")
+
+
+@register_scenario("coffer-single-instance")
+def run_coffer_single_instance_scenario(args):
+    return _run_aftermath_case(args, "coffer-single-instance")
+
+
+@register_scenario("poi-spawn-weight")
+def run_poi_spawn_weight_scenario(args):
+    return _run_aftermath_case(args, "poi-spawn-weight")
+
+
+@register_scenario("e2e-full-lifecycle-all-races")
+def run_e2e_full_lifecycle_all_races_scenario(args):
+    _setup_django()
+
+    from world.races import TEST_RACES
+
+    results = []
+    failures = []
+    for index, race in enumerate(TEST_RACES):
+        print(f"\n=== E2E Lifecycle: {race} ===")
+        try:
+            result = _run_e2e_full_lifecycle_for_race(race, index)
+            results.append(result)
+            print(f"[{race}] onboarding complete")
+            print(f"[{race}] death triggered")
+            print(f"[{race}] resurrected")
+            print(f"[{race}] entered live game")
+        except Exception as exc:
+            failures.append({"race": str(race), "error": str(exc)})
+            results.append({"race": str(race), "ok": False, "error": str(exc)})
+
+    output = {
+        "scenario": "e2e-full-lifecycle-all-races",
+        "races": list(TEST_RACES),
+        "results": results,
+        "failures": failures,
+        "ok": not failures,
+    }
+
+    if args.json:
+        print(json.dumps(output, indent=2, sort_keys=True))
+    else:
+        print("\nDireTest Scenario: e2e-full-lifecycle-all-races")
+        print(f"Race Count: {len(TEST_RACES)}")
+        for result in results:
+            status = "PASS" if result.get("ok") else "FAIL"
+            detail = result.get("landing_room") or result.get("error") or "ok"
+            print(f"[{status}] {result.get('race')}: {detail}")
+        print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+    return 0 if output["ok"] else 1
+
+
+@register_scenario("e2e-failure-cases")
+def run_e2e_failure_cases_scenario(args):
+    _setup_django()
+
+    from world.races import TEST_RACES
+
+    results = []
+    failures = []
+    for index, race in enumerate(TEST_RACES):
+        print(f"\n=== E2E Failure Cases: {race} ===")
+        try:
+            race_results = [
+                _run_invalid_onboarding_command_case(race, (index * 10) + 1),
+                _run_skip_equip_case(race, (index * 10) + 2),
+                _run_drop_weapon_before_death_case(race, (index * 10) + 3),
+                _run_early_death_recovery_case(race, (index * 10) + 4),
+            ]
+            results.append({"race": str(race), "ok": True, "cases": race_results})
+            for case in race_results:
+                print(f"[{race}] {case.get('case')}: PASS")
+        except Exception as exc:
+            failures.append({"race": str(race), "error": str(exc)})
+            results.append({"race": str(race), "ok": False, "error": str(exc)})
+
+    output = {
+        "scenario": "e2e-failure-cases",
+        "races": list(TEST_RACES),
+        "results": results,
+        "failures": failures,
+        "ok": not failures,
+    }
+
+    if args.json:
+        print(json.dumps(output, indent=2, sort_keys=True))
+    else:
+        print("\nDireTest Scenario: e2e-failure-cases")
+        print(f"Race Count: {len(TEST_RACES)}")
+        for result in results:
+            status = "PASS" if result.get("ok") else "FAIL"
+            detail = result.get("error") or f"{len(list(result.get('cases') or []))} cases"
+            print(f"[{status}] {result.get('race')}: {detail}")
+        print(f"Status: {'PASS' if output['ok'] else 'FAIL'}")
+    return 0 if output["ok"] else 1
+
+
+@register_scenario("onboarding-movement")
+def run_onboarding_movement_scenario(args):
+    return _run_locked_onboarding_case(args, "movement")
+
+
+@register_scenario("training-move")
+def run_training_move_scenario(args):
+    return _run_locked_onboarding_case(args, "movement")
+
+
+@register_scenario("training-get")
+def run_training_get_scenario(args):
+    return _run_locked_onboarding_case(args, "get")
+
+
+@register_scenario("training-equip")
+def run_training_equip_scenario(args):
+    return _run_locked_onboarding_case(args, "equip")
+
+
+@register_scenario("training-equip-alias")
+def run_training_equip_alias_scenario(args):
+    return _run_locked_onboarding_case(args, "equip-alias")
+
+
+@register_scenario("training-inventory-skip-nudge")
+def run_training_inventory_skip_nudge_scenario(args):
+    return _run_locked_onboarding_case(args, "inventory-skip-nudge")
+
+
+@register_scenario("onboarding-interaction")
+def run_onboarding_interaction_scenario(args):
+    return _run_locked_onboarding_case(args, "get")
+
+
+@register_scenario("onboarding-combat")
+def run_onboarding_combat_scenario(args):
+    return _run_locked_onboarding_case(args, "equip")
+
+
+@register_scenario("onboarding-complete")
+def run_onboarding_complete_scenario(args):
+    return _run_locked_onboarding_case(args, "complete")
+
+
+@register_scenario("training-resurrection-sequence")
+def run_training_resurrection_sequence_scenario(args):
+    return _run_locked_onboarding_case(args, "resurrection-sequence")
+
+
+@register_scenario("training-between-state-lock")
+def run_training_between_state_lock_scenario(args):
+    return _run_locked_onboarding_case(args, "between-lock")
+
+
+@register_scenario("training-transport-sequence")
+def run_training_transport_sequence_scenario(args):
+    return _run_locked_onboarding_case(args, "transport-sequence")
+
+
+@register_scenario("training-final-location")
+def run_training_final_location_scenario(args):
+    return _run_locked_onboarding_case(args, "final-location")
+
+
+@register_scenario("training-control-return")
+def run_training_control_return_scenario(args):
+    return _run_locked_onboarding_case(args, "control-return")
+
+
+@register_scenario("training-npc-presence")
+def run_training_npc_presence_scenario(args):
+    return _run_locked_onboarding_case(args, "npc-presence")
+
+
+@register_scenario("training-recovery-state")
+def run_training_recovery_state_scenario(args):
+    return _run_locked_onboarding_case(args, "recovery-state")
+
+
+@register_scenario("chargen-mirror-cycle")
+def run_chargen_mirror_cycle_scenario(args):
+    return _run_chargen_mirror_case(args, "cycle")
+
+
+@register_scenario("chargen-lock-flow")
+def run_chargen_lock_flow_scenario(args):
+    return _run_chargen_mirror_case(args, "lock-flow")
+
+
+@register_scenario("chargen-race-lock")
+def run_chargen_race_lock_scenario(args):
+    return _run_chargen_mirror_case(args, "race-lock")
+
+
+@register_scenario("chargen-mirror-render")
+def run_chargen_mirror_render_scenario(args):
+    return _run_chargen_mirror_case(args, "render")
+
+
+@register_scenario("chargen-transition")
+def run_chargen_transition_scenario(args):
+    return _run_chargen_mirror_case(args, "transition")
+
+
+@register_scenario("chargen-actions-visible")
+def run_chargen_actions_visible_scenario(args):
+    return _run_chargen_mirror_case(args, "actions-visible")
+
+
+@register_scenario("chargen-actions-contextual")
+def run_chargen_actions_contextual_scenario(args):
+    return _run_chargen_mirror_case(args, "actions-contextual")
+
+
+@register_scenario("chargen-click-executes")
+def run_chargen_click_executes_scenario(args):
+    return _run_chargen_mirror_case(args, "click-executes")
+
+
+@register_scenario("chargen-back-navigation")
+def run_chargen_back_navigation_scenario(args):
+    return _run_chargen_mirror_case(args, "back-navigation")
+
+
+@register_scenario("chargen-confirmation-gate")
+def run_chargen_confirmation_gate_scenario(args):
+    return _run_chargen_mirror_case(args, "confirmation-gate")
+
+
+@register_scenario("chargen-finalize-lock")
+def run_chargen_finalize_lock_scenario(args):
+    return _run_chargen_mirror_case(args, "finalize-lock")
+
+
+@register_scenario("chargen-no-command-needed")
+def run_chargen_no_command_needed_scenario(args):
+    return _run_chargen_mirror_case(args, "no-command-needed")
+
+
+@register_scenario("chargen-no-exits")
+def run_chargen_no_exits_scenario(args):
+    return _run_chargen_mirror_case(args, "no-exits")
+
+
+@register_scenario("chargen-movement-blocked")
+def run_chargen_movement_blocked_scenario(args):
+    return _run_chargen_mirror_case(args, "movement-blocked")
+
+
+@register_scenario("chargen-exit-restored")
+def run_chargen_exit_restored_scenario(args):
+    return _run_chargen_mirror_case(args, "exit-restored")
+
+
+@register_scenario("chargen-no-softlock")
+def run_chargen_no_softlock_scenario(args):
+    return _run_chargen_mirror_case(args, "no-softlock")
+
+
+@register_scenario("onboarding-blocked-command")
+def run_onboarding_blocked_command_scenario(args):
+    return _run_locked_onboarding_case(args, "blocked-command")
+
+
 def _build_exp_test_character(ctx, *, key):
     room = ctx.harness.create_test_room(key=f"{key}_ROOM")
     character = ctx.harness.create_test_character(room=room, key=key)
@@ -4885,7 +8592,7 @@ def run_exp_athletics_bridge_scenario(args):
 
         ctx.output_log.clear()
         ctx.cmd("exp all")
-        all_transcript = "\n".join(ctx.output_log)
+        all_transcript = "\n".join(ctx.output_log).lower()
         if "athletics" not in all_transcript:
             raise AssertionError(f"exp all did not show athletics after terrain actions: {all_transcript}")
 
@@ -4903,6 +8610,528 @@ def run_exp_athletics_bridge_scenario(args):
         name="exp-athletics-bridge",
         scenario_metadata=getattr(run_exp_athletics_bridge_scenario, "diretest_metadata", {}),
     )
+
+
+def _build_climb_test_course(ctx):
+    from evennia.utils.create import create_object
+
+    rope_walk = create_object("typeclasses.rooms.Room", key="DireTest Rope Walk", nohome=True)
+    rope_walk.db.desc = "A test landing with the first rise into the climbing lanes above."
+    low_blind = create_object("typeclasses.rooms.Room", key="DireTest Low Blind", nohome=True)
+    low_blind.db.desc = "The first blind above the rope walk."
+    middle_fort = create_object("typeclasses.rooms.Room", key="DireTest Middle Fort", nohome=True)
+    middle_fort.db.desc = "A middle perch with the High Hide looming above."
+    high_hide = create_object("typeclasses.rooms.Room", key="DireTest High Hide", nohome=True)
+    high_hide.db.desc = "The top perch of the test climb."
+    middle_fort.db.ranger_prestige_room = high_hide
+    middle_fort.db.ranger_prestige_presence_text = "You catch movement high above in the branches."
+
+    low_exit = create_object(
+        "typeclasses.exits.Exit",
+        key="up",
+        aliases=["low blind", "blind"],
+        location=rope_walk,
+        destination=low_blind,
+        home=rope_walk,
+    )
+    low_exit.db.climb_contest = True
+    low_exit.db.climb_tier = "low"
+    low_exit.db.climb_difficulty = 5
+    low_exit.db.climb_failure_destination = rope_walk
+    low_exit.db.climb_action_command = "climb up"
+    low_exit.db.climb_action_label = "climb up"
+    low_exit.db.climb_default_action = True
+
+    create_object(
+        "typeclasses.exits.Exit",
+        key="down",
+        location=low_blind,
+        destination=rope_walk,
+        home=low_blind,
+    )
+
+    mid_exit = create_object(
+        "typeclasses.exits.Exit",
+        key="up",
+        aliases=["middle fort", "fort"],
+        location=low_blind,
+        destination=middle_fort,
+        home=low_blind,
+    )
+    mid_exit.db.climb_contest = True
+    mid_exit.db.climb_tier = "mid"
+    mid_exit.db.climb_difficulty = 15
+    mid_exit.db.climb_failure_destination = low_blind
+    mid_exit.db.climb_action_command = "climb up"
+    mid_exit.db.climb_action_label = "climb up"
+    mid_exit.db.climb_default_action = True
+    create_object(
+        "typeclasses.exits.Exit",
+        key="down",
+        location=middle_fort,
+        destination=low_blind,
+        home=middle_fort,
+    )
+
+    high_exit = create_object(
+        "typeclasses.exits.Exit",
+        key="up",
+        aliases=["high hide", "hide"],
+        location=middle_fort,
+        destination=high_hide,
+        home=middle_fort,
+    )
+    high_exit.db.climb_contest = True
+    high_exit.db.climb_tier = "high"
+    high_exit.db.climb_difficulty = 22
+    high_exit.db.climb_readiness_rank = 18
+    high_exit.db.climb_failure_destination = middle_fort
+    high_exit.db.climb_action_command = "climb up"
+    high_exit.db.climb_action_label = "climb up"
+    high_exit.db.climb_default_action = True
+    create_object(
+        "typeclasses.exits.Exit",
+        key="down",
+        location=high_hide,
+        destination=middle_fort,
+        home=high_hide,
+    )
+
+    return rope_walk, low_blind, middle_fort, high_hide, low_exit, mid_exit, high_exit
+
+
+@register_scenario(
+    "climb-success",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency.",
+    },
+)
+def run_climb_success_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_CLIMB_SUCCESS")
+        rope_walk, low_blind, _middle_fort, _high_hide, _low_exit, _mid_exit, _high_exit = _build_climb_test_course(ctx)
+        character.move_to(rope_walk, move_hooks=True)
+        character.ensure_core_defaults()
+        character.update_skill("athletics", rank=8, mindstate=0)
+        character.db.stats["agility"] = 10
+        character.db.stats["strength"] = 10
+
+        appearance = rope_walk.return_appearance(character)
+        if "|lc__clickmove__ climb up|lt|yclimb up|n|le" not in appearance:
+            raise AssertionError(f"Rope Walk did not expose climb action: {appearance}")
+        if "|lc__clickmove__ up|lt|yup|n|le" in appearance:
+            raise AssertionError(f"Contested climb exit still rendered as a plain exit: {appearance}")
+
+        ctx.cmd("climb up")
+
+        if getattr(character.location, "id", None) != getattr(low_blind, "id", None):
+            raise AssertionError("Successful climb did not advance the character.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "location": character.location.key,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="climb-success",
+        scenario_metadata=getattr(run_climb_success_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "climb-failure",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency.",
+    },
+)
+def run_climb_failure_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_CLIMB_FAILURE")
+        rope_walk, _low_blind, _middle_fort, _high_hide, _low_exit, _mid_exit, _high_exit = _build_climb_test_course(ctx)
+        character.move_to(rope_walk, move_hooks=True)
+        character.ensure_core_defaults()
+        character.update_skill("athletics", rank=2, mindstate=0)
+        character.db.stats["agility"] = 5
+        character.db.stats["strength"] = 5
+
+        ctx.cmd("climb up")
+
+        if getattr(character.location, "id", None) != getattr(rope_walk, "id", None):
+            raise AssertionError("Failed climb should drop the character back one level.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "location": character.location.key,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="climb-failure",
+        scenario_metadata=getattr(run_climb_failure_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "climb-partial",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency.",
+    },
+)
+def run_climb_partial_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_CLIMB_PARTIAL")
+        rope_walk, low_blind, _middle_fort, _high_hide, _low_exit, mid_exit, _high_exit = _build_climb_test_course(ctx)
+        character.move_to(low_blind, move_hooks=True)
+        character.ensure_core_defaults()
+        character.update_skill("athletics", rank=13, mindstate=0)
+        character.db.stats["agility"] = 10
+        character.db.stats["strength"] = 10
+
+        character.resolve_climb_exit(mid_exit)
+
+        if getattr(character.location, "id", None) != getattr(low_blind, "id", None):
+            raise AssertionError("Partial climb should not move the character.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "location": character.location.key,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="climb-partial",
+        scenario_metadata=getattr(run_climb_partial_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "climb-xp",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency.",
+    },
+)
+def run_climb_xp_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_CLIMB_XP")
+        rope_walk, low_blind, _middle_fort, _high_hide, _low_exit, mid_exit, _high_exit = _build_climb_test_course(ctx)
+        character.move_to(low_blind, move_hooks=True)
+        character.ensure_core_defaults()
+        character.update_skill("athletics", rank=13, mindstate=0)
+        character.db.stats["agility"] = 10
+        character.db.stats["strength"] = 10
+        before = character.exp_skills.get("athletics").pool
+
+        character.resolve_climb_exit(mid_exit)
+
+        after = character.exp_skills.get("athletics").pool
+        if after <= before:
+            raise AssertionError(f"Climb attempt did not award athletics EXP: before={before}, after={after}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "before": before,
+            "after": after,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="climb-xp",
+        scenario_metadata=getattr(run_climb_xp_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "climb-repeat-training",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Contest traversal scenarios validate climb outcomes rather than environment-dependent command latency.",
+    },
+)
+def run_climb_repeat_training_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        character = _build_exp_test_character(ctx, key="TEST_CLIMB_REPEAT")
+        rope_walk, low_blind, _middle_fort, _high_hide, low_exit, _mid_exit, _high_exit = _build_climb_test_course(ctx)
+        character.move_to(rope_walk, move_hooks=True)
+        character.ensure_core_defaults()
+        character.update_skill("athletics", rank=2, mindstate=0)
+        character.db.stats["agility"] = 10
+        character.db.stats["strength"] = 10
+
+        ctx.cmd("climb up")
+        if getattr(character.location, "id", None) != getattr(rope_walk, "id", None):
+            raise AssertionError("First practice climb should have stayed on the rope walk.")
+        character.set_roundtime(0)
+        if int(character._get_climb_practice_bonus(low_exit) or 0) != 3:
+            raise AssertionError("First failed practice climb did not add the expected practice bonus.")
+
+        ctx.cmd("climb up")
+        if getattr(character.location, "id", None) != getattr(rope_walk, "id", None):
+            raise AssertionError("Second practice climb should still be training the route.")
+        character.set_roundtime(0)
+        if int(character._get_climb_practice_bonus(low_exit) or 0) != 6:
+            raise AssertionError("Second failed practice climb did not stack practice bonus.")
+
+        ctx.cmd("climb up")
+
+        if getattr(character.location, "id", None) != getattr(low_blind, "id", None):
+            raise AssertionError("Repeated climb practice did not improve the eventual outcome.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "location": character.location.key,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="climb-repeat-training",
+        scenario_metadata=getattr(run_climb_repeat_training_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario("ranger-high-hide-visibility")
+def run_ranger_high_hide_visibility_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        ranger = _build_exp_test_character(ctx, key="TEST_RANGER_VISIBILITY")
+        watcher = _build_exp_test_character(ctx, key="TEST_HIGH_HIDE_WATCHER")
+        ranger.db.profession = "ranger"
+        _rope_walk, _low_blind, middle_fort, high_hide, _low_exit, _mid_exit, _high_exit = _build_climb_test_course(ctx)
+        ranger.move_to(middle_fort, move_hooks=True)
+
+        before = middle_fort.return_appearance(ranger)
+        if "High Hide looming above" not in before:
+            raise AssertionError(f"Middle Fort description did not advertise the High Hide: {before}")
+
+        watcher.move_to(high_hide, move_hooks=True)
+        after = middle_fort.return_appearance(ranger)
+        if "You catch movement high above in the branches." not in after:
+            raise AssertionError(f"High Hide presence signal did not render from below: {after}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="ranger-high-hide-visibility")
+
+
+@register_scenario(
+    "ranger-quartermaster-shop",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Shop scenarios validate inventory and purchase flow rather than environment-dependent command latency.",
+    },
+)
+def run_ranger_quartermaster_shop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.utils.create import create_object
+
+        character = _build_exp_test_character(ctx, key="TEST_RANGER_SHOPPER")
+        character.db.coins = 50
+        character.move_to(ctx.room, move_hooks=True)
+        quartermaster = create_object("typeclasses.vendor.Vendor", key="Quartermaster", location=ctx.room, home=ctx.room)
+        quartermaster.db.is_vendor = True
+        quartermaster.db.is_shopkeeper = True
+        quartermaster.db.inventory = ["basic cloak", "simple boots", "starter pack", "rope", "basic knife"]
+        quartermaster.db.price_map = {
+            "basic cloak": 8,
+            "simple boots": 6,
+            "starter pack": 9,
+            "rope": 5,
+            "basic knife": 6,
+        }
+        quartermaster.db.shop_intro_lines = ["The quartermaster cracks open a field chest and gestures across the starter kit with a curt nod."]
+
+        intro_lines = quartermaster.get_vendor_interaction_lines(character, action="shop")
+        if not intro_lines or "starter kit" not in intro_lines[0]:
+            raise AssertionError("Quartermaster did not expose the expected browse flavor.")
+
+        if character.list_vendor_inventory() is False:
+            raise AssertionError("Quartermaster did not present an inventory list.")
+
+        character.buy_item("basic cloak")
+        carried = [str(getattr(item, "key", "") or "").lower() for item in character.contents]
+        if "basic cloak" not in carried:
+            raise AssertionError("Buying from the Quartermaster did not create the purchased item.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "carried": carried,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="ranger-quartermaster-shop")
+
+
+@register_scenario(
+    "ranger-high-hide-shop",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Shop scenarios validate inventory and purchase flow rather than environment-dependent command latency.",
+    },
+)
+def run_ranger_high_hide_shop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.utils.create import create_object
+
+        character = _build_exp_test_character(ctx, key="TEST_HIGH_HIDE_SHOPPER")
+        character.db.coins = 80
+        character.move_to(ctx.room, move_hooks=True)
+        lysa = create_object("typeclasses.npcs.LysaWindstep", key="Lysa Windstep", location=ctx.room, home=ctx.room)
+        lysa.db.is_vendor = True
+        lysa.db.is_shopkeeper = True
+        lysa.db.inventory = ["balanced climbing gloves", "lightweight ranger cloak", "reinforced rope", "fine skinning knife"]
+        lysa.db.price_map = {
+            "balanced climbing gloves": 18,
+            "lightweight ranger cloak": 16,
+            "reinforced rope": 14,
+            "fine skinning knife": 18,
+        }
+
+        intro_lines = lysa.get_vendor_interaction_lines(character, action="shop")
+        if not intro_lines or "field-tuned gear" not in "\n".join(intro_lines):
+            raise AssertionError(f"Lysa did not present the flavored browse text: {intro_lines}")
+
+        if character.list_vendor_inventory() is False:
+            raise AssertionError("Lysa did not present an inventory list.")
+
+        character.buy_item("balanced climbing gloves")
+        carried = [str(getattr(item, "key", "") or "").lower() for item in character.contents]
+        if "balanced climbing gloves" not in carried:
+            raise AssertionError("Buying from Lysa did not create the purchased item.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "carried": carried,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="ranger-high-hide-shop")
+
+
+@register_scenario("ranger-resource-visibility")
+def run_ranger_resource_visibility_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        ranger = _build_exp_test_character(ctx, key="TEST_RANGER_RESOURCES")
+        outsider = _build_exp_test_character(ctx, key="TEST_OUTSIDER_RESOURCES")
+        ranger.db.profession = "ranger"
+        ctx.room.db.ranger_resources = ["grass", "stick"]
+        ranger.move_to(ctx.room, move_hooks=True)
+        outsider.move_to(ctx.room, move_hooks=True)
+
+        ranger_appearance = ctx.room.return_appearance(ranger)
+        outsider_appearance = ctx.room.return_appearance(outsider)
+        if "a patch of tall grass" not in ranger_appearance or "a fallen branch" not in ranger_appearance:
+            raise AssertionError(f"Ranger could not see the room resources: {ranger_appearance}")
+        if "gather grass" not in ranger_appearance or "gather stick" not in ranger_appearance:
+            raise AssertionError(f"Ranger did not receive clickable gather actions: {ranger_appearance}")
+        if "a patch of tall grass" in outsider_appearance or "gather grass" in outsider_appearance:
+            raise AssertionError(f"Non-ranger should not see Ranger-only resources: {outsider_appearance}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="ranger-resource-visibility")
+
+
+@register_scenario(
+    "ranger-resource-sell-loop",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Gather and sell loop scenarios validate item flow rather than environment-dependent command latency.",
+    },
+)
+def run_ranger_resource_sell_loop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.utils.create import create_object
+
+        ranger = _build_exp_test_character(ctx, key="TEST_RANGER_LOOP")
+        ranger.db.profession = "ranger"
+        ranger.move_to(ctx.room, move_hooks=True)
+        ctx.room.db.ranger_resources = ["grass", "stick"]
+
+        buyer = create_object("typeclasses.vendor.Vendor", key="Field Buyer", location=ctx.room, home=ctx.room)
+        buyer.db.is_vendor = True
+        buyer.db.is_shopkeeper = True
+        buyer.db.accepted_item_types = ["bundle", "braid", "hide"]
+        buyer.db.sale_multiplier = 1.0
+
+        starting_coins = int(getattr(ranger.db, "coins", 0) or 0)
+
+        ranger.gather_ranger_resource("stick")
+        ranger.gather_ranger_resource("grass")
+        after_gather = ctx.room.return_appearance(ranger)
+        if "gather stick" in after_gather or "gather grass" in after_gather:
+            raise AssertionError("Gathered resources should disappear for the Ranger after use.")
+
+        bundle_item = ranger.transform_ranger_resource("bundle", "sticks")
+        braid_item = ranger.transform_ranger_resource("braid", "grass")
+        if not bundle_item or not braid_item:
+            raise AssertionError("Ranger transforms did not create the expected sale goods.")
+
+        if not ranger.vendor_accepts_item(buyer, bundle_item) or not ranger.vendor_accepts_item(buyer, braid_item):
+            raise AssertionError("Field Buyer did not accept the crafted Ranger goods.")
+
+        bundle_value = max(1, int(ranger.get_item_value(bundle_item) * float(ranger.get_vendor_sale_multiplier(buyer, bundle_item) or 0)))
+        braid_value = max(1, int(ranger.get_item_value(braid_item) * float(ranger.get_vendor_sale_multiplier(buyer, braid_item) or 0)))
+        ranger.add_coins(bundle_value + braid_value)
+
+        ending_coins = int(getattr(ranger.db, "coins", 0) or 0)
+        if ending_coins <= starting_coins:
+            raise AssertionError("Field Buyer payout logic did not increase the Ranger's coin total.")
+
+        carried = [str(getattr(item, "key", "") or "").lower() for item in ranger.contents]
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "starting_coins": starting_coins,
+            "ending_coins": ending_coins,
+            "carried": carried,
+        }
+
+    return _run_registered_scenario(args, scenario, auto_snapshot=False, name="ranger-resource-sell-loop")
 
 
 @register_scenario(
@@ -5729,6 +9958,72 @@ def build_parser():
     race_balance_parser.add_argument("--base-xp", type=int, default=100)
     race_balance_parser.set_defaults(handler=run_race_balance_scenario)
 
+    race_descriptor_basic_parser = _add_common_scenario_args(scenario_subparsers.add_parser("race-descriptor-basic"))
+    race_descriptor_basic_parser.set_defaults(handler=run_race_descriptor_basic_scenario)
+
+    race_descriptor_age_shift_parser = _add_common_scenario_args(scenario_subparsers.add_parser("race-descriptor-age-shift"))
+    race_descriptor_age_shift_parser.set_defaults(handler=run_race_descriptor_age_shift_scenario)
+
+    race_descriptor_no_race_parser = _add_common_scenario_args(scenario_subparsers.add_parser("race-descriptor-no-race"))
+    race_descriptor_no_race_parser.set_defaults(handler=run_race_descriptor_no_race_scenario)
+
+    language_basic_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-basic"))
+    language_basic_parser.set_defaults(handler=run_language_basic_scenario)
+
+    language_switch_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-switch"))
+    language_switch_parser.set_defaults(handler=run_language_switch_scenario)
+
+    language_accent_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-accent"))
+    language_accent_parser.set_defaults(handler=run_language_accent_scenario)
+
+    language_invalid_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-invalid"))
+    language_invalid_parser.set_defaults(handler=run_language_invalid_scenario)
+
+    language_comprehension_none_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-comprehension-none"))
+    language_comprehension_none_parser.set_defaults(handler=run_language_comprehension_none_scenario)
+
+    language_comprehension_full_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-comprehension-full"))
+    language_comprehension_full_parser.set_defaults(handler=run_language_comprehension_full_scenario)
+
+    language_comprehension_partial_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-comprehension-partial"))
+    language_comprehension_partial_parser.set_defaults(handler=run_language_comprehension_partial_scenario)
+
+    language_learning_basic_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-learning-basic"))
+    language_learning_basic_parser.set_defaults(handler=run_language_learning_basic_scenario)
+
+    language_learning_cap_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-learning-cap"))
+    language_learning_cap_parser.set_defaults(handler=run_language_learning_cap_scenario)
+
+    language_learning_comprehension_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-learning-comprehension"))
+    language_learning_comprehension_parser.set_defaults(handler=run_language_learning_comprehension_scenario)
+
+    language_learning_eavesdrop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("language-learning-eavesdrop"))
+    language_learning_eavesdrop_parser.set_defaults(handler=run_language_learning_eavesdrop_scenario)
+
+    whisper_basic_parser = _add_common_scenario_args(scenario_subparsers.add_parser("whisper-basic"))
+    whisper_basic_parser.set_defaults(handler=run_whisper_basic_scenario)
+
+    whisper_language_parser = _add_common_scenario_args(scenario_subparsers.add_parser("whisper-language"))
+    whisper_language_parser.set_defaults(handler=run_whisper_language_scenario)
+
+    whisper_comprehension_parser = _add_common_scenario_args(scenario_subparsers.add_parser("whisper-comprehension"))
+    whisper_comprehension_parser.set_defaults(handler=run_whisper_comprehension_scenario)
+
+    whisper_invalid_parser = _add_common_scenario_args(scenario_subparsers.add_parser("whisper-invalid"))
+    whisper_invalid_parser.set_defaults(handler=run_whisper_invalid_scenario)
+
+    eavesdrop_basic_parser = _add_common_scenario_args(scenario_subparsers.add_parser("eavesdrop-basic"))
+    eavesdrop_basic_parser.set_defaults(handler=run_eavesdrop_basic_scenario)
+
+    eavesdrop_none_parser = _add_common_scenario_args(scenario_subparsers.add_parser("eavesdrop-none"))
+    eavesdrop_none_parser.set_defaults(handler=run_eavesdrop_none_scenario)
+
+    eavesdrop_degraded_parser = _add_common_scenario_args(scenario_subparsers.add_parser("eavesdrop-degraded"))
+    eavesdrop_degraded_parser.set_defaults(handler=run_eavesdrop_degraded_scenario)
+
+    eavesdrop_comprehension_parser = _add_common_scenario_args(scenario_subparsers.add_parser("eavesdrop-comprehension"))
+    eavesdrop_comprehension_parser.set_defaults(handler=run_eavesdrop_comprehension_scenario)
+
     movement_parser = _add_common_scenario_args(scenario_subparsers.add_parser("movement"))
     movement_parser.set_defaults(handler=run_movement_scenario)
 
@@ -5824,6 +10119,192 @@ def build_parser():
     onboarding_no_heal_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding_no_heal"))
     onboarding_no_heal_parser.add_argument("--name", default="DireTestHero")
     onboarding_no_heal_parser.set_defaults(handler=run_onboarding_no_heal_scenario)
+
+    onboarding_movement_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding-movement"))
+    onboarding_movement_parser.set_defaults(handler=run_onboarding_movement_scenario)
+
+    training_move_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-move"))
+    training_move_parser.set_defaults(handler=run_training_move_scenario)
+
+    training_get_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-get"))
+    training_get_parser.set_defaults(handler=run_training_get_scenario)
+
+    training_equip_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-equip"))
+    training_equip_parser.set_defaults(handler=run_training_equip_scenario)
+
+    training_equip_alias_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-equip-alias"))
+    training_equip_alias_parser.set_defaults(handler=run_training_equip_alias_scenario)
+
+    training_inventory_skip_nudge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-inventory-skip-nudge"))
+    training_inventory_skip_nudge_parser.set_defaults(handler=run_training_inventory_skip_nudge_scenario)
+
+    onboarding_interaction_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding-interaction"))
+    onboarding_interaction_parser.set_defaults(handler=run_onboarding_interaction_scenario)
+
+    onboarding_combat_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding-combat"))
+    onboarding_combat_parser.set_defaults(handler=run_onboarding_combat_scenario)
+
+    onboarding_complete_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding-complete"))
+    onboarding_complete_parser.set_defaults(handler=run_onboarding_complete_scenario)
+
+    training_resurrection_sequence_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-resurrection-sequence"))
+    training_resurrection_sequence_parser.set_defaults(handler=run_training_resurrection_sequence_scenario)
+
+    training_between_state_lock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-between-state-lock"))
+    training_between_state_lock_parser.set_defaults(handler=run_training_between_state_lock_scenario)
+
+    training_transport_sequence_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-transport-sequence"))
+    training_transport_sequence_parser.set_defaults(handler=run_training_transport_sequence_scenario)
+
+    training_final_location_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-final-location"))
+    training_final_location_parser.set_defaults(handler=run_training_final_location_scenario)
+
+    training_control_return_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-control-return"))
+    training_control_return_parser.set_defaults(handler=run_training_control_return_scenario)
+
+    training_npc_presence_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-npc-presence"))
+    training_npc_presence_parser.set_defaults(handler=run_training_npc_presence_scenario)
+
+    training_recovery_state_parser = _add_common_scenario_args(scenario_subparsers.add_parser("training-recovery-state"))
+    training_recovery_state_parser.set_defaults(handler=run_training_recovery_state_scenario)
+
+    onboarding_blocked_command_parser = _add_common_scenario_args(scenario_subparsers.add_parser("onboarding-blocked-command"))
+    onboarding_blocked_command_parser.set_defaults(handler=run_onboarding_blocked_command_scenario)
+
+    chargen_mirror_cycle_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-mirror-cycle"))
+    chargen_mirror_cycle_parser.set_defaults(handler=run_chargen_mirror_cycle_scenario)
+
+    chargen_lock_flow_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-lock-flow"))
+    chargen_lock_flow_parser.set_defaults(handler=run_chargen_lock_flow_scenario)
+
+    chargen_race_lock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-race-lock"))
+    chargen_race_lock_parser.set_defaults(handler=run_chargen_race_lock_scenario)
+
+    chargen_mirror_render_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-mirror-render"))
+    chargen_mirror_render_parser.set_defaults(handler=run_chargen_mirror_render_scenario)
+
+    chargen_transition_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-transition"))
+    chargen_transition_parser.set_defaults(handler=run_chargen_transition_scenario)
+
+    chargen_actions_visible_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-actions-visible"))
+    chargen_actions_visible_parser.set_defaults(handler=run_chargen_actions_visible_scenario)
+
+    chargen_actions_contextual_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-actions-contextual"))
+    chargen_actions_contextual_parser.set_defaults(handler=run_chargen_actions_contextual_scenario)
+
+    chargen_click_executes_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-click-executes"))
+    chargen_click_executes_parser.set_defaults(handler=run_chargen_click_executes_scenario)
+
+    chargen_back_navigation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-back-navigation"))
+    chargen_back_navigation_parser.set_defaults(handler=run_chargen_back_navigation_scenario)
+
+    chargen_confirmation_gate_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-confirmation-gate"))
+    chargen_confirmation_gate_parser.set_defaults(handler=run_chargen_confirmation_gate_scenario)
+
+    chargen_finalize_lock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-finalize-lock"))
+    chargen_finalize_lock_parser.set_defaults(handler=run_chargen_finalize_lock_scenario)
+
+    chargen_no_command_needed_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-no-command-needed"))
+    chargen_no_command_needed_parser.set_defaults(handler=run_chargen_no_command_needed_scenario)
+
+    chargen_no_exits_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-no-exits"))
+    chargen_no_exits_parser.set_defaults(handler=run_chargen_no_exits_scenario)
+
+    chargen_movement_blocked_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-movement-blocked"))
+    chargen_movement_blocked_parser.set_defaults(handler=run_chargen_movement_blocked_scenario)
+
+    chargen_exit_restored_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-exit-restored"))
+    chargen_exit_restored_parser.set_defaults(handler=run_chargen_exit_restored_scenario)
+
+    chargen_no_softlock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("chargen-no-softlock"))
+    chargen_no_softlock_parser.set_defaults(handler=run_chargen_no_softlock_scenario)
+
+    empath_guild_entry_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-guild-entry"))
+    empath_guild_entry_parser.set_defaults(handler=run_empath_guild_entry_scenario)
+
+    empath_guild_aliases_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-guild-aliases"))
+    empath_guild_aliases_parser.set_defaults(handler=run_empath_guild_aliases_scenario)
+
+    empath_guild_return_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-guild-return"))
+    empath_guild_return_parser.set_defaults(handler=run_empath_guild_return_scenario)
+
+    post_teleport_location_parser = _add_common_scenario_args(scenario_subparsers.add_parser("post-teleport-location"))
+    post_teleport_location_parser.set_defaults(handler=run_post_teleport_location_scenario)
+
+    guild_clickable_parser = _add_common_scenario_args(scenario_subparsers.add_parser("guild-clickable"))
+    guild_clickable_parser.set_defaults(handler=run_guild_clickable_scenario)
+
+    ranger_join_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-join"))
+    ranger_join_parser.set_defaults(handler=run_ranger_join_scenario)
+
+    ranger_npc_inquiry_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-npc-inquiry"))
+    ranger_npc_inquiry_parser.set_defaults(handler=run_ranger_npc_inquiry_scenario)
+
+    ranger_circle_default_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-circle-default"))
+    ranger_circle_default_parser.set_defaults(handler=run_ranger_circle_default_scenario)
+
+    ranger_advance_fail_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-advance-fail"))
+    ranger_advance_fail_parser.set_defaults(handler=run_ranger_advance_fail_scenario)
+
+    ranger_advance_success_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-advance-success"))
+    ranger_advance_success_parser.set_defaults(handler=run_ranger_advance_success_scenario)
+
+    ranger_advance_feedback_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-advance-feedback"))
+    ranger_advance_feedback_parser.set_defaults(handler=run_ranger_advance_feedback_scenario)
+
+    ranger_forage_scaling_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-forage-scaling"))
+    ranger_forage_scaling_parser.set_defaults(handler=run_ranger_forage_scaling_scenario)
+
+    ranger_forage_variation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-forage-variation"))
+    ranger_forage_variation_parser.set_defaults(handler=run_ranger_forage_variation_scenario)
+
+    ranger_skin_fail_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-skin-fail"))
+    ranger_skin_fail_parser.set_defaults(handler=run_ranger_skin_fail_scenario)
+
+    ranger_skin_success_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-skin-success"))
+    ranger_skin_success_parser.set_defaults(handler=run_ranger_skin_success_scenario)
+
+    recovery_orderly_parser = _add_common_scenario_args(scenario_subparsers.add_parser("recovery-orderly"))
+    recovery_orderly_parser.set_defaults(handler=run_recovery_orderly_scenario)
+
+    aftermath_per_player_parser = _add_common_scenario_args(scenario_subparsers.add_parser("aftermath-per-player"))
+    aftermath_per_player_parser.set_defaults(handler=run_aftermath_per_player_scenario)
+
+    aftermath_currency_cap_parser = _add_common_scenario_args(scenario_subparsers.add_parser("aftermath-currency-cap"))
+    aftermath_currency_cap_parser.set_defaults(handler=run_aftermath_currency_cap_scenario)
+
+    aftermath_full_kit_parser = _add_common_scenario_args(scenario_subparsers.add_parser("aftermath-full-kit"))
+    aftermath_full_kit_parser.set_defaults(handler=run_aftermath_full_kit_scenario)
+
+    coffer_flow_parser = _add_common_scenario_args(scenario_subparsers.add_parser("coffer-flow"))
+    coffer_flow_parser.set_defaults(handler=run_coffer_flow_scenario)
+
+    coffer_single_instance_parser = _add_common_scenario_args(scenario_subparsers.add_parser("coffer-single-instance"))
+    coffer_single_instance_parser.set_defaults(handler=run_coffer_single_instance_scenario)
+
+    poi_spawn_weight_parser = _add_common_scenario_args(scenario_subparsers.add_parser("poi-spawn-weight"))
+    poi_spawn_weight_parser.set_defaults(handler=run_poi_spawn_weight_scenario)
+
+    first_area_entry_parser = _add_common_scenario_args(scenario_subparsers.add_parser("first-area-entry"))
+    first_area_entry_parser.set_defaults(handler=run_first_area_entry_scenario)
+
+    first_area_choice_parser = _add_common_scenario_args(scenario_subparsers.add_parser("first-area-choice"))
+    first_area_choice_parser.set_defaults(handler=run_first_area_choice_scenario)
+
+    first_area_interaction_parser = _add_common_scenario_args(scenario_subparsers.add_parser("first-area-interaction"))
+    first_area_interaction_parser.set_defaults(handler=run_first_area_interaction_scenario)
+
+    first_area_exploration_parser = _add_common_scenario_args(scenario_subparsers.add_parser("first-area-exploration"))
+    first_area_exploration_parser.set_defaults(handler=run_first_area_exploration_scenario)
+
+    first_area_linger_parser = _add_common_scenario_args(scenario_subparsers.add_parser("first-area-linger"))
+    first_area_linger_parser.set_defaults(handler=run_first_area_linger_scenario)
+
+    e2e_full_lifecycle_all_races_parser = _add_common_scenario_args(scenario_subparsers.add_parser("e2e-full-lifecycle-all-races"))
+    e2e_full_lifecycle_all_races_parser.set_defaults(handler=run_e2e_full_lifecycle_all_races_scenario)
+
+    e2e_failure_cases_parser = _add_common_scenario_args(scenario_subparsers.add_parser("e2e-failure-cases"))
+    e2e_failure_cases_parser.set_defaults(handler=run_e2e_failure_cases_scenario)
 
     exp_xp_injection_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-xp-injection"))
     exp_xp_injection_parser.set_defaults(handler=run_exp_xp_injection_scenario)
@@ -5926,6 +10407,36 @@ def build_parser():
 
     exp_athletics_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-athletics-bridge"))
     exp_athletics_bridge_parser.set_defaults(handler=run_exp_athletics_bridge_scenario)
+
+    climb_success_parser = _add_common_scenario_args(scenario_subparsers.add_parser("climb-success"))
+    climb_success_parser.set_defaults(handler=run_climb_success_scenario)
+
+    climb_failure_parser = _add_common_scenario_args(scenario_subparsers.add_parser("climb-failure"))
+    climb_failure_parser.set_defaults(handler=run_climb_failure_scenario)
+
+    climb_partial_parser = _add_common_scenario_args(scenario_subparsers.add_parser("climb-partial"))
+    climb_partial_parser.set_defaults(handler=run_climb_partial_scenario)
+
+    climb_xp_parser = _add_common_scenario_args(scenario_subparsers.add_parser("climb-xp"))
+    climb_xp_parser.set_defaults(handler=run_climb_xp_scenario)
+
+    climb_repeat_training_parser = _add_common_scenario_args(scenario_subparsers.add_parser("climb-repeat-training"))
+    climb_repeat_training_parser.set_defaults(handler=run_climb_repeat_training_scenario)
+
+    ranger_high_hide_visibility_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-high-hide-visibility"))
+    ranger_high_hide_visibility_parser.set_defaults(handler=run_ranger_high_hide_visibility_scenario)
+
+    ranger_quartermaster_shop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-quartermaster-shop"))
+    ranger_quartermaster_shop_parser.set_defaults(handler=run_ranger_quartermaster_shop_scenario)
+
+    ranger_high_hide_shop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-high-hide-shop"))
+    ranger_high_hide_shop_parser.set_defaults(handler=run_ranger_high_hide_shop_scenario)
+
+    ranger_resource_visibility_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-resource-visibility"))
+    ranger_resource_visibility_parser.set_defaults(handler=run_ranger_resource_visibility_scenario)
+
+    ranger_resource_sell_loop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-resource-sell-loop"))
+    ranger_resource_sell_loop_parser.set_defaults(handler=run_ranger_resource_sell_loop_scenario)
 
     exp_locksmithing_bridge_parser = _add_common_scenario_args(scenario_subparsers.add_parser("exp-locksmithing-bridge"))
     exp_locksmithing_bridge_parser.set_defaults(handler=run_exp_locksmithing_bridge_scenario)

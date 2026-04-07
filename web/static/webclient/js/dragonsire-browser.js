@@ -445,10 +445,15 @@
   }
 
   function roomColor(room) {
+    if (room.map_color) return room.map_color;
     if (room.is_player) return "#df564a";
+    if (room.has_guild_entrance) return "#f0d45f";
+    if (room.has_poi) return "#69b8ff";
+    if (room.type === "guild_entrance") return "#f0d45f";
+    if (room.type === "poi") return "#69b8ff";
     if (room.type === "guild") return "#bc7eff";
-    if (room.type === "shop") return "#54a4ff";
-    return "#7fcf66";
+    if (room.type === "shop") return "#69b8ff";
+    return "#5f8f57";
   }
 
   function worldPosition(room, canvas) {

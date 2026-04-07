@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titleblock %} | Home{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="landing-messages">
+    {% include "website/messages.html" %}
+  </div>
+
+  <main class="landing-layout" id="main-content">
+    <aside class="landing-left panel parchment-panel">
+      <div class="portrait-frame hero-mark">
+        <div class="portrait-placeholder">DS</div>
+      </div>
+      <div class="crest-banner">Arrival Interface</div>
+      <div class="rail-block">
+        <h2 class="rail-title">First Steps</h2>
+        <div class="status-tag">Enter the world through the browser client.</div>
+        <div class="status-tag">Build identity through race, profession, and risk.</div>
+        <div class="status-tag">Learn by doing, not by menu grinding.</div>
+      </div>
+      <div class="rail-block">
+        <div class="subpanel-title">Current Tone</div>
+        <div class="tag-list">
+          <div class="status-tag">Grounded fantasy</div>
+          <div class="status-tag">System-heavy play</div>
+          <div class="status-tag">Consequence-first world</div>
+        </div>
+      </div>
+      <div class="rail-block">
+        <div class="subpanel-title">Quick Access</div>
+        <div class="action-stack">
+          <a href="{% url 'webclient:index' %}" class="action-pill action-pill-dark">Open Client</a>
+          <a href="{% url 'register' %}" class="action-pill action-pill-dark">Create Character</a>
+        </div>
+      </div>
+    </aside>
+
+    <section class="landing-stage panel obsidian-panel">
+      <div class="landing-stage-topbar">
+        <div class="title-cluster">
+          <div class="stage-title">Dragons Ire</div>
+          <div class="stage-subtitle">A living world shaped by skill, risk, and consequence.</div>
+        </div>
+        <div class="landing-stage-tabs">
+          <span class="chrome-tab active">World</span>
+          <span class="chrome-tab">Risk</span>
+          <span class="chrome-tab">Progression</span>
+          <span class="chrome-tab">Identity</span>
+        </div>
+      </div>
+      <div class="hero-feed">
+        <section class="hero-slider" data-hero-slider aria-label="Featured world art">
+          <div class="hero-slider-track" data-hero-track>
+            <figure class="hero-slide is-active" data-hero-slide role="img" aria-label="Dragons Ire hero art" style="background-image: url(&quot;{% static 'website/images/hero.png' %}&quot;);"></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Autumn warriors by the lake" style="background-image: url(&quot;{% static 'website/images/Autumn warriors by the lake (1).png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Fantasy city defenders" style="background-image: url(&quot;{% static 'website/images/ChatGPT Image Apr 6, 2026, 03_59_34 PM.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Dragons Ire concept art" style="background-image: url(&quot;{% static 'website/images/ChatGPT Image Apr 6, 2026, 06_28_08 PM.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Adventurers beneath stormy skies" style="background-image: url(&quot;{% static 'website/images/ChatGPT Image Apr 6, 2026, 07_07_15 PM.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Elothien defenders in a haunted graveyard" style="background-image: url(&quot;{% static 'website/images/Elothien defenders in a haunted graveyard.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Elven guardians of the spring city" style="background-image: url(&quot;{% static 'website/images/Elven guardians of the spring city.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Moonlit guardians of the hamlet" style="background-image: url(&quot;{% static 'website/images/Moonlit guardians of the hamlet.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Nightwatch atop the city rooftops" style="background-image: url(&quot;{% static 'website/images/Nightwatch atop the city rooftops.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Twilight market antics" style="background-image: url(&quot;{% static 'website/images/Twilight market antics.png' %}&quot;);" hidden></figure>
+            <figure class="hero-slide" data-hero-slide role="img" aria-label="Warriors of the fiery forge" style="background-image: url(&quot;{% static 'website/images/Warriors of the fiery forge.png' %}&quot;);" hidden></figure>
+          </div>
+          <div class="hero-slider-controls">
+            <button type="button" class="hero-slider-button" data-hero-prev aria-label="Previous featured image">Prev</button>
+            <div class="hero-slider-dots" data-hero-dots aria-label="Hero slide selector"></div>
+            <button type="button" class="hero-slider-button" data-hero-next aria-label="Next featured image">Next</button>
+          </div>
+        </section>
+          <div class="hero-copy-card">
+          <p class="hero-kicker">Persistent Fantasy Roleplay</p>
+          <h1>Distinct races, hard professions, and a world that answers what you do.</h1>
+          <p class="hero-tagline">
+            Step into a grounded fantasy world where scouting matters, wounds matter, and progress comes from what you attempt in the field.
+            Rangers climb and gather. Warriors force the line. Magic costs something. Survival is part of the shape of play.
+          </p>
+          <div class="hero-buttons">
+            <a href="{% url 'webclient:index' %}" class="action-pill action-pill-brass">Play Now</a>
+            <a href="{% url 'register' %}" class="action-pill action-pill-outline">Create Character</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="landing-right panel brass-panel">
+      <div class="rail-block">
+        <div class="subpanel-title">Session Entry</div>
+        <div class="status-tag">Web client access is the primary front door.</div>
+      </div>
+      <div class="rail-block">
+        <div class="subpanel-title">What Matters</div>
+        <div class="tag-list">
+          <div class="status-tag">Skill-based combat</div>
+          <div class="status-tag">Living world simulation</div>
+          <div class="status-tag">Player-driven economy</div>
+          <div class="status-tag">Recovery and consequence</div>
+        </div>
+      </div>
+      <div class="rail-block">
+        <div class="subpanel-title">Links</div>
+        <div class="action-stack">
+          <a href="/world" class="action-pill action-pill-light">World</a>
+          <a href="/guilds" class="action-pill action-pill-light">Guilds</a>
+        </div>
+      </div>
+    </aside>
+
+    <section class="landing-band panel obsidian-panel">
+      <div class="panel-title-row">
+        <div class="panel-title">What Makes This World Different</div>
+        <div class="panel-subtitle">Core Direction</div>
+      </div>
+      <div class="landing-grid">
+        <article class="landing-card">
+          <h3>Skill-Driven Play</h3>
+          <p>Advance through use, not menu grinding. Train through risk, repetition, and deliberate choices.</p>
+        </article>
+        <article class="landing-card">
+          <h3>World Consequence</h3>
+          <p>Travel, combat, resource loops, and recovery all push back. Actions leave a mark.</p>
+        </article>
+        <article class="landing-card">
+          <h3>Immediate Entry</h3>
+          <p>Create a character, enter the web client, and begin in a world built for live progression.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="path-section panel brass-panel">
+      <div class="panel-title-row">
+        <div class="panel-title">Choose Your Path</div>
+        <div class="panel-subtitle">Four directions. None of them safe.</div>
+      </div>
+      <div class="path-grid">
+        <article class="path-card">
+          <span class="path-icon">R</span>
+          <h3>Ranger</h3>
+          <p>Track, gather, climb, and outlast what the wild sends back.</p>
+        </article>
+        <article class="path-card">
+          <span class="path-icon">W</span>
+          <h3>Warrior</h3>
+          <p>Hold the line, absorb the pressure, and finish the fight in reach.</p>
+        </article>
+        <article class="path-card">
+          <span class="path-icon">T</span>
+          <h3>Thief</h3>
+          <p>Move unseen, choose the moment, and turn disorder into advantage.</p>
+        </article>
+        <article class="path-card">
+          <span class="path-icon">M</span>
+          <h3>Mage</h3>
+          <p>Power is coming. It will not be free, and it will not be gentle.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="world-section panel obsidian-panel" id="world-section">
+      <div class="panel-title-row">
+        <div class="panel-title">The World</div>
+        <div class="panel-subtitle">Roads remember.</div>
+      </div>
+      <div class="world-copy">
+        <h2>Roads remember. Cities calculate. The field keeps what you fail to carry back.</h2>
+        <p>
+          Dragons Ire is built around consequence instead of convenience. Advancement is earned through use. Travel is not filler.
+          Injury is not cosmetic. Recovery is part of the shape of play.
+        </p>
+      </div>
+    </section>
+
+    <section class="race-carousel-section panel obsidian-panel">
+      <div class="panel-title-row">
+        <div class="panel-title">Race Carousel</div>
+        <div class="panel-subtitle">Identity starts here.</div>
+      </div>
+      <section class="race-carousel" aria-label="Race showcase">
+        <div class="race-carousel-track" data-race-track></div>
+      </section>
+    </section>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'website/js/landing.js' %}?v=20260406d"></script>
+{% endblock %}

@@ -13,7 +13,7 @@ class CmdHelp(EvenniaCmdHelp):
 
     page_one_groups = OrderedDict(
         (
-            ("Communication", ("help", "look", "say", "whisper", "pose", "nick")),
+            ("Communication", ("help", "look", "say", "language", "whisper", "pose", "nick")),
             ("Character", ("abilities", "ability", "assess", "center", "circle", "commune", "corpse", "death", "depart", "diagnose", "favor", "heal", "injuries", "link", "manipulate", "mend", "mindstate", "perceive", "pray", "preserve", "purge", "race", "redirect", "release", "resurrect", "sacrifice", "sense soul", "selfreturn", "skills", "stabilize", "states", "stats", "take", "touch", "unity", "use", "xp")),
             ("Inventory & Equipment", ("inventory", "get", "give", "drop", "draw", "stow", "wear", "remove", "wield", "unwield", "slots")),
             ("Combat", ("attack", "aim", "berserk", "fire", "load", "pounce", "reposition", "recover", "roar", "snipe", "target", "stance", "advance", "retreat", "disengage", "tend")),

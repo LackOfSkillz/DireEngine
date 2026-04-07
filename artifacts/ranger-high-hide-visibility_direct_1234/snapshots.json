@@ -1,0 +1,68 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14125,
+        "is_dead": false,
+        "key": "TEST_HIGH_HIDE_WATCHER",
+        "life_state": "ALIVE",
+        "location": "DireTest High Hide",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14122,
+            "key": "TEST_RANGER_VISIBILITY_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14123,
+            "key": "TEST_RANGER_VISIBILITY",
+            "location": "DireTest Middle Fort",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 14124,
+            "key": "TEST_HIGH_HIDE_WATCHER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14125,
+            "key": "TEST_HIGH_HIDE_WATCHER",
+            "location": "DireTest High Hide",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [],
+        "exits": [],
+        "id": 14124,
+        "key": "TEST_HIGH_HIDE_WATCHER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775501762.0472345
+    },
+    "label": "final"
+  }
+]

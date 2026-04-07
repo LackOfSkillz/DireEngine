@@ -1,0 +1,72 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 2,
+        "hp": 100,
+        "id": 14149,
+        "is_dead": false,
+        "key": "TEST_RANGER_LOOP",
+        "life_state": "ALIVE",
+        "location": "TEST_RANGER_LOOP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 14151,
+          "key": "bundle",
+          "location": "TEST_RANGER_LOOP",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 14152,
+          "key": "braided grass",
+          "location": "TEST_RANGER_LOOP",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14148,
+            "key": "TEST_RANGER_LOOP_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14149,
+            "key": "TEST_RANGER_LOOP",
+            "location": "TEST_RANGER_LOOP_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_RANGER_LOOP",
+          "Field Buyer"
+        ],
+        "exits": [],
+        "id": 14148,
+        "key": "TEST_RANGER_LOOP_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775501861.3035543
+    },
+    "label": "final"
+  }
+]

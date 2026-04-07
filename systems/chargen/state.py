@@ -21,6 +21,8 @@ class CharacterBlueprint:
     profession: str | None = None
     stats: dict = field(default_factory=dict)
     description: str | None = None
+    appearance: dict = field(default_factory=dict)
+    identity: dict = field(default_factory=dict)
 
     def to_dict(self):
         return {
@@ -30,6 +32,8 @@ class CharacterBlueprint:
             "profession": self.profession,
             "stats": dict(self.stats or {}),
             "description": self.description,
+            "appearance": dict(self.appearance or {}),
+            "identity": dict(self.identity or {}),
         }
 
 

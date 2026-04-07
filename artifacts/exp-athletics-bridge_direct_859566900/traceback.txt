@@ -1,0 +1,40 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8597, in scenario
+    raise AssertionError(f"exp all did not show athletics after terrain actions: {all_transcript}")
+AssertionError: exp all did not show athletics after terrain actions: Showing all skills with field experience.
+
+           Skill        Rank/% -> Mindstate      Bits (pool / max)
+           Appraisal:    1 00% clear        (0/34)         (0/1017)
+              Arcana:    1 00% clear        (0/34)         (0/1017)
+           Athletics:   80 00% clear        (0/34)         (8/2224)
+              Attack:    0 00% clear        (0/34)         (0/1000)
+          Attunement:    1 00% clear        (0/34)         (0/1017)
+               Blunt:    0 00% clear        (0/34)         (0/1000)
+          Brigandine:    0 00% clear        (0/34)         (0/1000)
+         Chain Armor:    0 00% clear        (0/34)         (0/1000)
+              Combat:    0 00% clear        (0/34)         (0/1000)
+        Debilitation:    0 00% clear        (0/34)         (0/1000)
+           Disengage:    0 00% clear        (0/34)         (0/1000)
+             Empathy:    0 00% clear        (0/34)         (0/1000)
+             Evasion:    1 00% clear        (0/34)         (0/1017)
+           First Aid:    0 00% clear        (0/34)         (0/1000)
+        Hand-To-Hand:    0 00% clear        (0/34)         (0/1000)
+          Heavy Edge:    0 00% clear        (0/34)         (0/1000)
+         Light Armor:    0 00% clear        (0/34)         (0/1000)
+         Light-Edged:    0 00% clear        (0/34)         (0/1000)
+         Lockpicking:    0 00% clear        (0/34)         (0/1000)
+     Outdoorsmanship:    0 00% clear        (0/34)         (0/1000)
+          Perception:    1 00% clear        (0/34)         (0/1017)
+         Plate Armor:    0 00% clear        (0/34)         (0/1000)
+             Polearm:    0 00% clear        (0/34)         (0/1000)
+         Scholarship:    0 00% clear        (0/34)         (0/1000)
+            Skinning:    0 00% clear        (0/34)         (0/1000)
+             Stealth:    0 00% clear        (0/34)         (0/1000)
+             Tactics:    0 00% clear        (0/34)         (0/1000)
+      Targeted Magic:    0 00% clear        (0/34)         (0/1000)
+             Trading:    1 00% clear        (0/34)         (0/1017)
+
+Total Ranks Displayed: 86

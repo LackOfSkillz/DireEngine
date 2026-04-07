@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Repeated climb practice did not improve the eventual outcome.",
+  "mode": "direct",
+  "scenario": "climb-repeat-training",
+  "seed": 511834200
+}

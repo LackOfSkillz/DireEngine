@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titleblock %} | Lore{% endblock %}
+
+{% block content %}
+<div class="page-shell interior-shell">
+  <main class="interior-page panel obsidian-panel lore-page" data-lore-page data-help-api-url="/api/help/">
+    <div class="panel-title-row">
+      <div class="panel-title">Lore</div>
+      <div class="panel-subtitle">Living Help Index</div>
+    </div>
+
+    <section class="interior-hero lore-hero">
+      <p class="section-label">Game Help</p>
+      <h1>A live codex pulled from the game’s registered help topics.</h1>
+      <p>
+        This page updates from the same command and help sources the game uses. As new commands, spells, emotes,
+        and guides are registered, they appear here automatically.
+      </p>
+    </section>
+
+    <section class="lore-shell">
+      <aside class="lore-sidebar parchment-panel panel">
+        <div class="lore-sidebar-block">
+          <label class="subpanel-title lore-search-label" for="lore-search">Search Topics</label>
+          <input id="lore-search" class="lore-search-input" type="search" placeholder="attack, cast, guild, forage" data-lore-search>
+        </div>
+
+        <div class="lore-sidebar-block">
+          <div class="subpanel-title">Sections</div>
+          <div class="lore-tab-list" data-lore-tabs></div>
+        </div>
+
+        <div class="lore-sidebar-block">
+          <div class="subpanel-title">Categories</div>
+          <div class="lore-category-list" data-lore-categories></div>
+        </div>
+      </aside>
+
+      <section class="lore-content parchment-panel panel">
+        <div class="lore-content-topbar">
+          <div>
+            <p class="section-label" data-lore-active-section-label>Commands</p>
+            <h2 class="lore-content-title" data-lore-active-category-label>All Categories</h2>
+          </div>
+          <div class="status-tag" data-lore-result-count>Loading…</div>
+        </div>
+
+        <div class="lore-feedback" data-lore-feedback>Loading the game help index…</div>
+        <div class="lore-entry-list" data-lore-entries hidden></div>
+      </section>
+    </section>
+  </main>
+</div>
+{{ lore_help_payload|json_script:"lore-help-payload" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'website/js/lore.js' %}?v=20260407a"></script>
+{% endblock %}

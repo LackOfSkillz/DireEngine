@@ -210,6 +210,11 @@ c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario grave-rec
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario economy --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario bank --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario onboarding_lag --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario e2e-full-lifecycle-all-races
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario e2e-failure-cases
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe tools/empath_guild_maintenance.py --json
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe tools/empath_guild_maintenance.py --deprecate
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe tools/empath_guild_maintenance.py --delete
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py repro artifacts/bank_direct_1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py diff artifacts/bank_direct_1234/snapshots.json::initial artifacts/bank_direct_1234/snapshots.json::deposited
 ```

@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 6662, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4358, in run_onboarding_complete_scenario
+    return _run_locked_onboarding_case(args, "complete")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4267, in _run_locked_onboarding_case
+    ctx = _build_locked_onboarding_character(create_object, onboarding)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4224, in _build_locked_onboarding_character
+    _ensure_new_player_tutorial()
+  File "C:\Users\gary\dragonsire\server\conf\at_server_startstop.py", line 479, in _ensure_new_player_tutorial
+    guide = create_object(
+            ^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\utils\create.py", line 117, in create_object
+    return ObjectDB.objects.create_object(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\objects\manager.py", line 660, in create_object
+    typeclass = class_from_module(typeclass, settings.TYPECLASS_PATHS)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\utils\utils.py", line 1670, in class_from_module
+    raise ImportError(err)
+ImportError: 
+Could not load typeclass 'typeclasses.npcs.onboarding_guide.OnboardingGuide'
+Paths searched:
+    typeclasses.npcs.onboarding_guide.OnboardingGuide
+    typeclasses.typeclasses.npcs.onboarding_guide.OnboardingGuide
+    evennia.typeclasses.npcs.onboarding_guide.OnboardingGuide
+    evennia.contrib.typeclasses.npcs.onboarding_guide.OnboardingGuide
+    evennia.contrib.game_systems.typeclasses.npcs.onboarding_guide.OnboardingGuide
+    evennia.contrib.base_systems.typeclasses.npcs.onboarding_guide.OnboardingGuide
+    evennia.contrib.full_systems.typeclasses.npcs.onboarding_guide.OnboardingGuide
+    evennia.contrib.tutorials.typeclasses.npcs.onboarding_guide.OnboardingGuide
+    evennia.contrib.utils.typeclasses.npcs.onboarding_guide.OnboardingGuide

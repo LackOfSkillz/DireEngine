@@ -55,9 +55,9 @@ class CmdWield(Command):
         try:
             from systems import onboarding
 
-            completed, awarded = onboarding.note_weapon_action(self.caller, obj)
-            if completed and awarded:
-                message = f"{message} {onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self.caller))}"
+            completed, override_message = onboarding.note_weapon_action(self.caller, obj)
+            if completed and override_message:
+                message = override_message
         except Exception:
             pass
         self.caller.msg(message)

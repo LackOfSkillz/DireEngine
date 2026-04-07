@@ -28,6 +28,15 @@ class CmdDepart(Command):
         if not hasattr(caller, "depart_self"):
             caller.msg("You cannot depart from here.")
             return
+        try:
+            from systems import onboarding
+
+            handled, message = onboarding.note_depart_action(caller)
+            if handled:
+                caller.msg(message)
+                return
+        except Exception:
+            pass
         if not hasattr(caller, "is_dead") or not caller.is_dead():
             caller.msg("You are not dead.")
             return

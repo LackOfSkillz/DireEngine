@@ -357,6 +357,14 @@ class Room(ObjectParent, DefaultRoom):
         return f"Characters: {names}"
 
     def get_display_exits(self, looker, **kwargs):
+        try:
+            from systems.chargen import mirror as chargen_mirror
+
+            if looker and getattr(looker, "location", None) == self and chargen_mirror.is_chargen_active(looker):
+                return ""
+        except Exception:
+            pass
+
         def _sort_exits(exit_objects):
             exit_order = kwargs.get("exit_order")
             if not exit_order:
@@ -377,12 +385,138 @@ class Room(ObjectParent, DefaultRoom):
             return ""
 
         rendered = []
+        seen_labels = set()
         for exit_obj in _sort_exits(exits):
-            exit_name = str(exit_obj.get_display_name(looker, **kwargs))
             is_hidden = bool(getattr(exit_obj.db, "hidden_exit", False) or getattr(exit_obj.db, "secret", False))
             if is_hidden:
                 continue
-            rendered.append(f"|lc__clickmove__ {str(exit_obj.key)}|lt|y{exit_name}|n|le")
+            if bool(getattr(exit_obj.db, "climb_contest", False)) and str(getattr(exit_obj.db, "climb_action_command", "") or "").strip():
+                continue
+            exit_key = str(getattr(exit_obj, "key", "") or "").strip().lower()
+            if not exit_key or exit_key in seen_labels:
+                continue
+            seen_labels.add(exit_key)
+            rendered.append(f"|lc__clickmove__ {str(exit_obj.key)}|lt|y{exit_key}|n|le")
 
         exit_names = iter_to_str(rendered, endsep=_(", and"))
         return f"|w{_('Exits')}:|n {exit_names}" if exit_names else ""
+
+    def get_contextual_action_entries(self, looker, **kwargs):
+        if not looker or getattr(looker, "location", None) != self:
+            return []
+
+        entries = []
+        seen_commands = set()
+        exits = self.filter_visible(self.contents_get(content_type="exit"), looker, **kwargs)
+        for exit_obj in exits:
+            if not bool(getattr(exit_obj.db, "climb_contest", False)):
+                continue
+            command = str(getattr(exit_obj.db, "climb_action_command", "") or "").strip()
+            label = str(getattr(exit_obj.db, "climb_action_label", "") or command).strip()
+            if not command or not label:
+                continue
+            lowered = command.lower()
+            if lowered in seen_commands:
+                continue
+            seen_commands.add(lowered)
+            entries.append({"command": command, "label": label})
+
+        if hasattr(looker, "get_ranger_room_action_entries"):
+            for entry in list(looker.get_ranger_room_action_entries(self) or []):
+                command = str(entry.get("command", "") or "").strip()
+                label = str(entry.get("label", "") or command).strip()
+                if not command or not label:
+                    continue
+                lowered = command.lower()
+                if lowered in seen_commands:
+                    continue
+                seen_commands.add(lowered)
+                entries.append({"command": command, "label": label})
+
+        vendors = [
+            obj for obj in list(self.contents or [])
+            if bool(getattr(getattr(obj, "db", None), "is_vendor", False))
+        ]
+        for vendor in vendors:
+            inventory = list(getattr(vendor.db, "inventory", []) or [])
+            if inventory:
+                browse_command = str(getattr(vendor.db, "browse_action_command", "shop") or "shop").strip()
+                browse_label = str(getattr(vendor.db, "browse_action_label", "browse goods") or "browse goods").strip()
+                lowered = browse_command.lower()
+                if browse_command and browse_label and lowered not in seen_commands:
+                    seen_commands.add(lowered)
+                    entries.append({"command": browse_command, "label": browse_label})
+                for stock_name in inventory:
+                    command = f"buy {stock_name}"
+                    lowered = command.lower()
+                    if lowered in seen_commands:
+                        continue
+                    seen_commands.add(lowered)
+                    entries.append({"command": command, "label": command})
+        return entries
+
+    def get_display_actions(self, looker, **kwargs):
+        aftermath_entries = []
+        try:
+            from systems import aftermath
+
+            if looker and getattr(looker, "location", None) == self:
+                aftermath_entries = list(aftermath.get_room_action_entries(looker, self) or [])
+        except Exception:
+            aftermath_entries = []
+
+        try:
+            from systems.chargen import mirror as chargen_mirror
+
+            if not looker or getattr(looker, "location", None) != self:
+                actions = []
+            else:
+                actions = list(chargen_mirror.get_available_actions(looker) or [])
+        except Exception:
+            actions = []
+
+        actions.extend(self.get_contextual_action_entries(looker, **kwargs))
+        actions.extend(aftermath_entries)
+
+        if not actions:
+            return ""
+
+        rendered = [
+            f"|lc__clickmove__ {entry['command']}|lt|y{entry['label']}|n|le"
+            for entry in actions
+        ]
+        action_names = iter_to_str(rendered, endsep=_(", and"))
+        return f"|w{_('Actions')}:|n {action_names}" if action_names else ""
+
+    def get_display_footer(self, looker, **kwargs):
+        parent_footer = super().get_display_footer(looker, **kwargs)
+        aftermath_lines = []
+        prestige_lines = []
+        ranger_lines = []
+        try:
+            from systems import aftermath
+
+            if looker and getattr(looker, "location", None) == self:
+                aftermath.note_room_look(looker, self)
+                aftermath_lines = list(aftermath.get_room_render_lines(looker, self) or [])
+        except Exception:
+            aftermath_lines = []
+        if looker and getattr(looker, "location", None) == self:
+            prestige_room = getattr(getattr(self, "db", None), "ranger_prestige_room", None)
+            if prestige_room and hasattr(prestige_room, "contents"):
+                visible_presence = any(
+                    obj != looker and not bool(getattr(getattr(obj, "db", None), "is_npc", False))
+                    for obj in list(getattr(prestige_room, "contents", []) or [])
+                )
+                if visible_presence:
+                    signal = str(getattr(self.db, "ranger_prestige_presence_text", "") or "").strip()
+                    if signal:
+                        prestige_lines.append(signal)
+        if looker and getattr(looker, "location", None) == self and hasattr(looker, "get_ranger_room_render_lines"):
+            try:
+                ranger_lines = list(looker.get_ranger_room_render_lines(self) or [])
+            except Exception:
+                ranger_lines = []
+        actions = self.get_display_actions(looker, **kwargs)
+        parts = [part for part in [parent_footer, *aftermath_lines, *prestige_lines, *ranger_lines, actions] if part]
+        return "\n".join(parts)

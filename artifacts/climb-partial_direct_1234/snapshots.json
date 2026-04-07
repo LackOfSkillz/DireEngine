@@ -1,0 +1,56 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14087,
+        "is_dead": false,
+        "key": "TEST_CLIMB_PARTIAL",
+        "life_state": "ALIVE",
+        "location": "DireTest Low Blind",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.47,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14086,
+            "key": "TEST_CLIMB_PARTIAL_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14087,
+            "key": "TEST_CLIMB_PARTIAL",
+            "location": "DireTest Low Blind",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [],
+        "exits": [],
+        "id": 14086,
+        "key": "TEST_CLIMB_PARTIAL_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775501704.4974859
+    },
+    "label": "final"
+  }
+]

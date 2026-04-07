@@ -1,0 +1,61 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 13869,
+        "is_dead": false,
+        "key": "TEST_CLIMB_REPEAT",
+        "life_state": "ALIVE",
+        "location": "DireTest Ladder Platform",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.78,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 13868,
+            "key": "TEST_CLIMB_REPEAT_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 13869,
+            "key": "TEST_CLIMB_REPEAT",
+            "location": "DireTest Ladder Platform",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "down",
+          "TEST_CLIMB_REPEAT"
+        ],
+        "exits": [
+          "down"
+        ],
+        "id": 13871,
+        "key": "DireTest Ladder Platform"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775499559.5452142
+    },
+    "label": "final"
+  }
+]

@@ -17,7 +17,9 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 from evennia import default_cmds
 
 from commands.cmd_analyze import CmdAnalyze
+from commands.cmd_admin_identity import CmdCheckIdentityIntegrity, CmdHealIdentityIntegrity
 from commands.cmd_appraise import CmdAppraise
+from commands.cmd_ask import CmdAsk
 from commands.cmd_assess import CmdAssess
 from commands.cmd_assessstance import CmdAssessStance
 from commands.cmd_attack import CmdAttack
@@ -33,10 +35,16 @@ from commands.cmd_cast import CmdCast
 from commands.cmd_clickmove import CmdClickMove
 from commands.cmd_chargen import (
     CmdCharCreate,
+    CmdAcceptReflection,
     CmdChargenBack,
+    CmdChargenFinalize,
+    CmdChargenMirrorBack,
+    CmdChargenMirrorCancel,
+    CmdChargenMirrorConfirm,
     CmdChargenBuild,
     CmdChargenCancel,
     CmdChargenConfirm,
+    CmdChargenDone,
     CmdChargenEyes,
     CmdChargenGender,
     CmdChargenHair,
@@ -70,7 +78,9 @@ from commands.cmd_favor import CmdFavor
 from commands.cmd_focus import CmdFocus
 from commands.cmd_followtrail import CmdFollowTrail
 from commands.cmd_forage import CmdForage
+from commands.cmd_rangercraft import CmdBraid, CmdBundle, CmdGather
 from commands.cmd_get import CmdGet
+from commands.cmd_go import CmdGo
 from commands.cmd_guild import CmdGuild
 from commands.cmd_harvest import CmdHarvest
 from commands.cmd_khri import CmdKhri
@@ -96,6 +106,7 @@ from commands.cmd_acceptbounty import CmdAcceptBounty
 from commands.cmd_bribe import CmdBribe
 from commands.cmd_capture import CmdCapture
 from commands.cmd_laylow import CmdLayLow
+from commands.cmd_language import CmdLanguage
 from commands.cmd_load import CmdLoad
 from commands.cmd_loot import CmdLoot
 from commands.cmd_link import CmdLink
@@ -127,6 +138,7 @@ from commands.cmd_corpse import CmdCorpse
 from commands.cmd_redirect import CmdRedirect
 from commands.cmd_racemods import CmdRaceMods
 from commands.cmd_race import CmdRace
+from commands.cmd_races import CmdRaces
 from commands.cmd_release import CmdRelease
 from commands.cmd_resurrect import CmdResurrect
 from commands.cmd_readland import CmdReadLand
@@ -151,6 +163,8 @@ from commands.cmd_skin import CmdSkin
 from commands.cmd_skills import CmdSkills
 from commands.cmd_slots import CmdSlots
 from commands.cmd_sacrifice import CmdSacrifice
+from commands.cmd_say import CmdSay
+from commands.cmd_whisper import CmdWhisper
 from commands.cmd_spawnnpc import CmdSpawnNPC
 from commands.cmd_spawnsheath import CmdSpawnSheath
 from commands.cmd_spawnwearable import CmdSpawnWearable
@@ -221,7 +235,10 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         """
         super().at_cmdset_creation()
         self.add(CmdAnalyze())
+        self.add(CmdCheckIdentityIntegrity())
+        self.add(CmdHealIdentityIntegrity())
         self.add(CmdAppraise())
+        self.add(CmdAsk())
         self.add(CmdAssess())
         self.add(CmdAssessStance())
         self.add(CmdAdvance())
@@ -254,6 +271,12 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCorpse())
         self.add(CmdCoverTracks())
         self.add(CmdCreeper())
+        self.add(CmdChargenDone())
+        self.add(CmdAcceptReflection())
+        self.add(CmdChargenMirrorBack())
+        self.add(CmdChargenFinalize())
+        self.add(CmdChargenMirrorConfirm())
+        self.add(CmdChargenMirrorCancel())
         self.add(CmdDecayCorpse())
         self.add(CmdDisarm())
         self.add(CmdDraw())
@@ -273,9 +296,13 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdFire())
         self.add(CmdFocus())
         self.add(CmdForage())
+        self.add(CmdGather())
+        self.add(CmdBundle())
+        self.add(CmdBraid())
         self.add(CmdFindPassage())
         self.add(CmdFollowTrail())
         self.add(CmdGet())
+        self.add(CmdGo())
         self.add(CmdGuild())
         self.add(CmdHarvest())
         self.add(CmdHaggle())
@@ -289,6 +316,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdJustice())
         self.add(CmdJoin())
         self.add(CmdKhri())
+        self.add(CmdLanguage())
         self.add(CmdLayLow())
         self.add(CmdLink())
         self.add(CmdLoad())
@@ -320,6 +348,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdReposition())
         self.add(CmdReadLand())
         self.add(CmdRace())
+        self.add(CmdRaces())
         self.add(CmdRaceMods())
         self.add(CmdRecall())
         self.add(CmdRecover())
@@ -345,6 +374,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSkillDebug())
         self.add(CmdRetreat())
         self.add(CmdSacrifice())
+        self.add(CmdSay())
+        self.add(CmdWhisper())
         self.add(CmdSkin())
         self.add(CmdSkills())
         self.add(CmdSlots())

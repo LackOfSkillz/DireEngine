@@ -1,0 +1,71 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14147,
+        "is_dead": false,
+        "key": "TEST_OUTSIDER_RESOURCES",
+        "life_state": "ALIVE",
+        "location": "TEST_OUTSIDER_RESOURCES_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14144,
+            "key": "TEST_RANGER_RESOURCES_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14145,
+            "key": "TEST_RANGER_RESOURCES",
+            "location": "TEST_OUTSIDER_RESOURCES_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 14146,
+            "key": "TEST_OUTSIDER_RESOURCES_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14147,
+            "key": "TEST_OUTSIDER_RESOURCES",
+            "location": "TEST_OUTSIDER_RESOURCES_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_RANGER_RESOURCES",
+          "TEST_OUTSIDER_RESOURCES"
+        ],
+        "exits": [],
+        "id": 14146,
+        "key": "TEST_OUTSIDER_RESOURCES_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775501832.5920446
+    },
+    "label": "final"
+  }
+]

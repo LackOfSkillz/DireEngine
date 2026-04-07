@@ -1,0 +1,101 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 246.80716666625813,
+  "lag": {
+    "avg_ms": 351.025966675176,
+    "jitter": 222.9028691196148,
+    "max_ms": 605.4509000387043,
+    "min_ms": 190.09920000098646,
+    "p95_ms": 570.6585900334176,
+    "slow_count": 3,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "climb up",
+      "ms": 190.09920000098646,
+      "snapshot": "final"
+    },
+    {
+      "command": "climb up",
+      "ms": 257.5277999858372,
+      "snapshot": "final"
+    },
+    {
+      "command": "climb up",
+      "ms": 605.4509000387043,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "climb up",
+      "ms": 190.09920000098646
+    },
+    {
+      "cmd": "climb up",
+      "ms": 257.5277999858372
+    },
+    {
+      "cmd": "climb up",
+      "ms": 605.4509000387043
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "climb up",
+      "first_response_ms": 393.2020000065677,
+      "kind": "command",
+      "ms": 605.4509000387043,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "climb up",
+      "first_response_ms": 107.4440999655053,
+      "kind": "command",
+      "ms": 190.09920000098646,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "climb up",
+      "first_response_ms": 239.7754000267014,
+      "kind": "command",
+      "ms": 257.5277999858372,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "climb up",
+      "first_response_ms": 393.2020000065677,
+      "kind": "command",
+      "ms": 605.4509000387043,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

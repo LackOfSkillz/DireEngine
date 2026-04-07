@@ -46,12 +46,15 @@ from world.professions import (
     get_profession_social_standing,
     resolve_profession_name,
 )
+from world.languages import apply_accent, apply_comprehension, get_comprehension_level, get_language_display_name, get_languages_for_race, normalize_language_name
 from world.races import (
     BASE_CARRY_WEIGHT,
+    DEFAULT_AGE,
     DEFAULT_RACE,
     RACE_STATS,
     apply_race,
     build_race_state,
+    get_race_age_descriptor,
     get_race_carry_modifier,
     get_race_debug_payload,
     get_race_description,
@@ -61,6 +64,7 @@ from world.races import (
     get_race_stat_cap,
     get_race_stat_modifier,
     normalize_learning_category,
+    resolve_age_bracket,
     resolve_race_name,
     validate_race_application,
 )
@@ -136,6 +140,16 @@ DEFAULT_STATS = {
 
 VALID_GUILDS = tuple(PROFESSION_PROFILES.keys())
 
+RANGER_JOIN_REQUIREMENTS = (
+    ("strength", 8, "Strength"),
+    ("stamina", 8, "Stamina"),
+    ("agility", 8, "Agility"),
+    ("reflex", 7, "Reflex"),
+    ("intelligence", 7, "Intelligence"),
+    ("charisma", 6, "Charisma"),
+    ("wisdom", 6, "Wisdom"),
+)
+
 LIFE_STATE_ALIVE = "ALIVE"
 LIFE_STATE_DEAD = "DEAD"
 LIFE_STATE_DEPARTED = "DEPARTED"
@@ -163,6 +177,116 @@ DEAD_STATE_ALLOWED_COMMANDS = {
     "withdraw",
     "whisper",
     "xp",
+}
+
+CLIMB_OUTCOME_MESSAGES = {
+    "low": {
+        "success": (
+            "You catch the rhythm of the climb and pull yourself into the low blind.",
+            "The lower route yields to you and you climb up cleanly.",
+            "You find the easy holds and move into the blind above.",
+        ),
+        "partial": (
+            "You get partway up, then settle back onto the rope walk without losing ground.",
+            "The lower climb wobbles under you and you stop to steady yourself.",
+            "You test the route, but do not gain the blind this time.",
+        ),
+        "failure": (
+            "Your footing slips and you drop back onto the rope walk.",
+            "The lower climb turns under you and you fall back to the start.",
+            "You lose the easy hold and land back on the rope walk.",
+        ),
+    },
+    "mid": {
+        "success": (
+            "You work through the harder stretch and haul yourself into the middle fort.",
+            "The demanding route gives way a hold at a time and you climb higher.",
+            "You read the next sequence cleanly and reach the middle fort.",
+        ),
+        "partial": (
+            "The middle climb makes you earn every reach, and you stall short of the fort.",
+            "You gain a little height, then cling in place without finishing the climb.",
+            "You fight for the next hold, but the route keeps you where you are.",
+        ),
+        "failure": (
+            "The harder section throws you off and you drop back to the low blind.",
+            "A demanding hold slips away and you fall back one level.",
+            "You overreach on the middle climb and tumble back below.",
+        ),
+    },
+    "high": {
+        "success": (
+            "You force your way through the hardest stretch and pull onto the high hide.",
+            "The upper climb nearly turns you away, but you grind through and crest the perch.",
+            "Against the branches and the height, you find a path and reach the high hide.",
+        ),
+        "partial": (
+            "The high route holds you in place, refusing to give you the last reach.",
+            "You find a moment of balance, but the high hide stays out of reach.",
+            "You gain nothing on the upper climb but a sharper sense of where it beats you.",
+        ),
+        "failure": (
+            "The upper climb wins and sends you back to the middle fort.",
+            "You lose the high hold and fall back one level.",
+            "The last stretch breaks your rhythm and drops you below.",
+        ),
+    },
+}
+
+CLIMB_LEARNING_FEEDBACK = (
+    "You feel your balance improve.",
+    "The route starts to make more sense to you.",
+    "You begin to read the holds more cleanly.",
+)
+
+HIGH_HIDE_REJECTION_MESSAGE = "The climb rejects you immediately-you're not ready for it."
+HIGH_HIDE_RARE_SUCCESS_MESSAGE = "You shouldn't have made that climb-but you did."
+
+CLIMB_PRACTICE_STEP = 3
+CLIMB_PRACTICE_CAP = 9
+
+RANGER_RESOURCE_PROFILES = {
+    "grass": {
+        "room_label": "a patch of tall grass",
+        "action": "gather grass",
+        "key": "grass",
+        "desc": "A handful of tall grass gathered for braiding or bundling.",
+        "item_type": "raw_resource",
+        "value": 1,
+        "weight": 0.2,
+        "gather_message": "You gather a workable length of tall grass.",
+    },
+    "stick": {
+        "room_label": "a fallen branch",
+        "action": "gather stick",
+        "key": "stick",
+        "desc": "A straight, workable stick cut down to a portable length.",
+        "item_type": "raw_resource",
+        "value": 1,
+        "weight": 0.4,
+        "gather_message": "You pick out a usable stick from the branchfall.",
+    },
+}
+
+RANGER_RESOURCE_RECIPES = {
+    "bundle": {
+        "input": "stick",
+        "output_key": "bundle",
+        "output_desc": "A tight field bundle of cut sticks bound for sale or camp work.",
+        "output_type": "bundle",
+        "value": 3,
+        "weight": 0.8,
+        "success_message": "You bind the sticks into a saleable bundle.",
+    },
+    "braid": {
+        "input": "grass",
+        "output_key": "braided grass",
+        "output_desc": "A braid of tough grass woven tight enough to keep its shape.",
+        "output_type": "braid",
+        "value": 3,
+        "weight": 0.2,
+        "success_message": "You braid the grass into something a buyer might want.",
+    },
 }
 
 COPPER = 1
@@ -658,10 +782,20 @@ class Character(ObjectParent, DefaultCharacter):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.gender = "unknown"
+        self.db.age = DEFAULT_AGE
         self.db.race = DEFAULT_RACE
+        self.db.identity = {
+            "race": DEFAULT_RACE,
+            "gender": "unknown",
+            "appearance": {},
+        }
+        self.db.languages = {"common": 1.0}
+        self.db.active_language = "common"
+        self.db.race_respec_used = False
         self.db.guild = None
         self.db.profession = "commoner"
         self.db.profession_rank = 1
+        self.db.circle = 1
         self.db.wilderness_bond = 50
         self.db.ranger_instinct = 0
         self.db.nature_focus = 0
@@ -782,13 +916,11 @@ class Character(ObjectParent, DefaultCharacter):
             self.learn_skill(skill_name, {"rank": baseline_rank, "mindstate": 0})
 
     def _restore_onboarding_entry_if_needed(self):
-        state = getattr(self.db, "onboarding_state", None)
-        if not isinstance(state, Mapping):
-            return False
-        if bool(state.get("complete", False)):
+        step = str(getattr(self.db, "onboarding_step", "") or "").strip().lower()
+        if not step or step == "complete":
             return False
         room = getattr(self, "location", None)
-        room_is_tutorial = bool(getattr(getattr(room, "db", None), "is_tutorial", False))
+        room_is_tutorial = bool(getattr(getattr(room, "db", None), "is_onboarding", False) or getattr(getattr(room, "db", None), "is_tutorial", False))
         try:
             from server.conf.at_server_startstop import _ensure_new_player_tutorial
             from systems import onboarding
@@ -808,6 +940,13 @@ class Character(ObjectParent, DefaultCharacter):
         super().at_post_puppet(*args, **kwargs)
         self.ensure_core_defaults()
         self._restore_onboarding_entry_if_needed()
+        try:
+            from systems import aftermath
+
+            aftermath.refresh_new_player_state(self)
+            aftermath.note_room_entry(self, getattr(self, "location", None))
+        except Exception:
+            pass
         self.get_subsystem()
         sync_subject_interest(self)
         self.sync_client_state(include_map=True)
@@ -848,6 +987,13 @@ class Character(ObjectParent, DefaultCharacter):
         super().at_after_move(source_location, **kwargs)
         self.ndb.is_busy = False
         self.ndb.is_walking = False
+        try:
+            from systems import aftermath
+
+            aftermath.refresh_new_player_state(self)
+            aftermath.note_room_entry(self, getattr(self, "location", None))
+        except Exception:
+            pass
         if getattr(self.db, "slipping", False):
             self.db.slip_bonus = int(getattr(self.db, "slip_bonus", 0) or 0) + 5
             self.db.escape_chain = int(getattr(self.db, "escape_chain", 0) or 0) + 1
@@ -909,12 +1055,59 @@ class Character(ObjectParent, DefaultCharacter):
             self.sync_client_state()
 
     def ensure_identity_defaults(self):
+        from systems.appearance.normalizer import normalize_character_identity
+
         if self.db.gender is None:
             self.db.gender = "unknown"
+        if self.db.age is None:
+            self.db.age = DEFAULT_AGE
         if self.db.race is None:
             self.db.race = DEFAULT_RACE
+        normalize_character_identity(self)
+        stored_languages = getattr(self.db, "languages", None)
+        if isinstance(stored_languages, Mapping):
+            normalized_languages = {}
+            for language_name, proficiency in dict(stored_languages).items():
+                normalized = normalize_language_name(language_name, default=None)
+                if not normalized:
+                    continue
+                try:
+                    normalized_languages[normalized] = max(0.0, min(1.0, float(proficiency)))
+                except (TypeError, ValueError):
+                    normalized_languages[normalized] = 0.0
+        elif isinstance(stored_languages, list):
+            normalized_languages = {}
+            for language_name in list(stored_languages or []):
+                normalized = normalize_language_name(language_name, default=None)
+                if normalized:
+                    normalized_languages[normalized] = 1.0
+        else:
+            normalized_languages = {}
+
+        if not normalized_languages:
+            normalized_languages = {
+                language_name: 1.0 for language_name in get_languages_for_race(getattr(self.db, "race", DEFAULT_RACE))
+            }
+        if not isinstance(getattr(self.db, "language_comprehension_overrides", None), Mapping):
+            self.db.language_comprehension_overrides = {}
+        if "common" not in normalized_languages:
+            normalized_languages["common"] = 1.0
+        self.db.languages = normalized_languages
+        active_language = normalize_language_name(getattr(self.db, "active_language", None), default=None)
+        if active_language not in normalized_languages:
+            self.db.active_language = "common"
+        else:
+            self.db.active_language = active_language
+        if self.db.race_respec_used is None:
+            self.db.race_respec_used = False
         if self.db.onboarding_state is None:
             self.db.onboarding_state = None
+        if self.db.onboarding_step is None:
+            self.db.onboarding_step = None
+        if self.db.onboarding_complete is None:
+            self.db.onboarding_complete = False
+        if self.db.first_area_state is None:
+            self.db.first_area_state = None
         if self.db.guild is None:
             self.db.guild = None
         if self.db.profession is None:
@@ -1412,6 +1605,8 @@ class Character(ObjectParent, DefaultCharacter):
         self._seed_template_exp_skills()
         if getattr(self.db, "exp_feedback", None) is None:
             self.db.exp_feedback = True
+        if getattr(self.db, "circle", None) is None:
+            self.db.circle = 1
         if "awareness" not in (self.db.states or {}):
             states = dict(self.db.states or {})
             states["awareness"] = "normal"
@@ -1425,6 +1620,12 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_identity_defaults()
         self.ensure_resource_defaults()
         self.ensure_combat_defaults()
+
+    def get_rendered_desc(self, viewer=None):
+        from systems.appearance.renderer import render_appearance
+
+        self.ensure_identity_defaults()
+        return render_appearance(self, viewer)
 
     def get_hp(self):
         self.ensure_core_defaults()
@@ -4473,6 +4674,14 @@ class Character(ObjectParent, DefaultCharacter):
             return True
         return command_name in DEAD_STATE_ALLOWED_COMMANDS
 
+    def is_in_onboarding(self):
+        try:
+            from systems import onboarding
+
+            return onboarding.is_in_onboarding(self)
+        except Exception:
+            return False
+
     def execute_cmd(self, raw_string, session=None, **kwargs):
         from world.systems.metrics import increment_counter, measure
 
@@ -4491,12 +4700,24 @@ class Character(ObjectParent, DefaultCharacter):
                 self.msg("You are dead. You can still look, speak, check your state, depart, or wait for resurrection.")
                 return None
             try:
+                from systems import aftermath
+                from systems.chargen import mirror as chargen_mirror
+
+                aftermath.refresh_new_player_state(self)
+                remapped_command, immediate_message = chargen_mirror.gate_chargen_input(self, raw_string)
+                if immediate_message:
+                    self.msg(immediate_message)
+                    return None
+                if remapped_command is not None:
+                    raw_string = remapped_command
                 from systems import onboarding
 
                 if onboarding.is_onboarding_character(self):
                     remapped_command, immediate_message = onboarding.remap_onboarding_input(self, raw_string)
                     if immediate_message:
                         self.msg(immediate_message)
+                        return None
+                    if remapped_command == getattr(onboarding, "IGNORE_INPUT_COMMAND", None):
                         return None
                     if remapped_command:
                         raw_string = remapped_command
@@ -4612,19 +4833,116 @@ class Character(ObjectParent, DefaultCharacter):
     def get_race_profile(self):
         return get_race_profile(self.get_race())
 
+    def get_race_data(self):
+        return self.get_race_profile()
+
     def get_race_display_name(self):
         return get_race_display_name(self.get_race())
 
     def get_race_description(self):
         return get_race_description(self.get_race())
 
+    def get_age_bracket(self):
+        return resolve_age_bracket(getattr(self.db, "age", DEFAULT_AGE), default="adult")
+
+    def get_race_descriptor(self):
+        return get_race_age_descriptor(getattr(self.db, "race", None), getattr(self.db, "age", DEFAULT_AGE))
+
+    def get_known_languages(self):
+        self.ensure_identity_defaults()
+        languages = []
+        for language_name, proficiency in dict(self.db.languages or {"common": 1.0}).items():
+            try:
+                if float(proficiency) > 0.0:
+                    languages.append(language_name)
+            except (TypeError, ValueError):
+                continue
+        return tuple(languages or ["common"])
+
+    def get_language_proficiencies(self):
+        self.ensure_identity_defaults()
+        return dict(self.db.languages or {"common": 1.0})
+
+    def get_language_proficiency(self, language_name):
+        self.ensure_identity_defaults()
+        language_key = normalize_language_name(language_name, default=None)
+        if not language_key:
+            return 0.0
+        try:
+            return max(0.0, min(1.0, float((self.db.languages or {}).get(language_key, 0.0))))
+        except (TypeError, ValueError):
+            return 0.0
+
+    def knows_language(self, language_name):
+        language_key = normalize_language_name(language_name, default=None)
+        if not language_key:
+            return False
+        return self.get_language_proficiency(language_key) > 0.0
+
+    def learn_language(self, language_name, amount):
+        self.ensure_identity_defaults()
+        language_key = normalize_language_name(language_name, default=None)
+        if not language_key:
+            return 0.0
+
+        current = self.get_language_proficiency(language_key)
+        try:
+            delta = float(amount)
+        except (TypeError, ValueError):
+            delta = 0.0
+        new_value = max(0.0, min(1.0, current + delta))
+        languages = dict(self.db.languages or {"common": 1.0})
+        languages[language_key] = new_value
+        self.db.languages = languages
+        return new_value
+
+    def set_language(self, language_name):
+        language_key = normalize_language_name(language_name, default=None)
+        if not language_key or not self.knows_language(language_key):
+            return False
+        self.db.active_language = language_key
+        return True
+
+    def get_active_language(self):
+        self.ensure_identity_defaults()
+        active_language = normalize_language_name(getattr(self.db, "active_language", None), default="common")
+        if not self.knows_language(active_language):
+            active_language = "common"
+            self.db.active_language = active_language
+        return active_language
+
+    def get_active_language_display_name(self):
+        return get_language_display_name(self.get_active_language())
+
+    def render_spoken_text(self, text, language=None):
+        active_language = normalize_language_name(language, default=None) or self.get_active_language()
+        return apply_accent(text, active_language)
+
+    def get_language_comprehension(self, language_name):
+        self.ensure_identity_defaults()
+        return get_comprehension_level(self, language_name)
+
+    def perceive_spoken_text(self, text, language_name, speaker=None):
+        speaker_key = getattr(speaker, "id", None) or getattr(speaker, "key", "speaker")
+        seed = f"{speaker_key}:{getattr(self, 'id', None) or getattr(self, 'key', 'listener')}:{normalize_language_name(language_name, default='common')}"
+        return apply_comprehension(text, self.get_language_comprehension(language_name), seed=seed)
+
+    def can_change_race(self):
+        self.ensure_identity_defaults()
+        return not bool(getattr(self.db, "race_respec_used", False))
+
+    def mark_race_changed(self):
+        self.db.race_respec_used = True
+
     def get_race_reference(self, capitalized=False):
-        race_name = self.get_race_display_name().strip()
-        if not race_name:
-            race_name = "Human"
-        lower_name = race_name.lower()
-        article = "an" if lower_name[:1] in "aeiou" else "a"
-        phrase = f"{article} {lower_name}"
+        race_key = resolve_race_name(getattr(self.db, "race", None), default=None)
+        if not race_key:
+            phrase = self.get_race_descriptor()
+        else:
+            race_name = get_race_display_name(race_key).strip() or "Human"
+            lower_name = race_name.lower()
+            article = "an" if lower_name[:1] in "aeiou" else "a"
+            phrase = f"{article} {lower_name}"
         if capitalized:
             return phrase[:1].upper() + phrase[1:]
         return phrase
@@ -6711,6 +7029,23 @@ class Character(ObjectParent, DefaultCharacter):
         inventory = getattr(getattr(vendor, "db", None), "inventory", []) or []
         return [str(entry).strip() for entry in inventory if str(entry or "").strip()]
 
+    def get_vendor_price(self, vendor, item_name):
+        normalized = str(item_name or "").strip().lower()
+        custom_prices = getattr(getattr(vendor, "db", None), "price_map", None)
+        if isinstance(custom_prices, Mapping) and normalized in custom_prices:
+            try:
+                return max(0, int(custom_prices.get(normalized, 0) or 0))
+            except (TypeError, ValueError):
+                return 0
+
+        price_map = {
+            "lockpick": 20,
+            "trap kit": 20,
+            "book": 20,
+            "gem pouch": 25,
+        }
+        return max(1, int(price_map.get(normalized, 20)))
+
     def resolve_vendor_inventory_entry(self, vendor, item_name):
         entries = self.get_vendor_inventory_entries(vendor)
         base_query, index = self.split_numbered_query(item_name)
@@ -6761,18 +7096,21 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(f"{vendor.key} has nothing for sale right now.")
             return False
 
-        price_map = {
-            "lockpick": 20,
-            "trap kit": 20,
-            "book": 20,
-            "gem pouch": 25,
-        }
-        lines = [f"{vendor.key} offers:"]
+        lines = []
+        if hasattr(vendor, "get_vendor_interaction_lines"):
+            lines.extend(list(vendor.get_vendor_interaction_lines(self, action="shop") or []))
+        lines.append(f"{vendor.key} offers:")
         for entry in entries:
-            price = max(1, int(price_map.get(entry.lower(), 20)))
+            price = self.get_vendor_price(vendor, entry)
             lines.append(f" {entry} - {self.format_coins(price)}")
         lines.append("Use 'buy <item>' to purchase something.")
         self.msg("\n".join(lines))
+        try:
+            from systems import first_area
+
+            first_area.note_vendor_interaction(self, vendor=vendor, action="shop")
+        except Exception:
+            pass
         return True
 
     def sell_item(self, item_name):
@@ -6806,7 +7144,10 @@ class Character(ObjectParent, DefaultCharacter):
         base_value = self.get_item_value(item)
         value = max(1, int(base_value * float(multiplier)))
         self.add_coins(value)
-        self.msg(f"The shopkeeper hands you {self.format_coins(value)}.")
+        sale_message = None
+        if hasattr(vendor, "get_vendor_sale_message"):
+            sale_message = vendor.get_vendor_sale_message(self, item, value)
+        self.msg(sale_message or f"The shopkeeper hands you {self.format_coins(value)}.")
         if self.location:
             self.location.msg_contents(f"{self.key} sells {item.key}.", exclude=[self])
         item.delete()
@@ -6906,6 +7247,119 @@ class Character(ObjectParent, DefaultCharacter):
 
     def create_vendor_inventory_item(self, item_name):
         normalized = str(item_name or "").strip().lower()
+        if normalized == "basic cloak":
+            item = create_object("typeclasses.wearables.Wearable", key="basic cloak", location=self, home=self)
+            item.db.slot = "torso"
+            item.db.item_type = "armor"
+            item.db.armor_type = "light_armor"
+            item.db.protection = 1
+            item.db.hindrance = 0
+            item.db.weight = 1.5
+            item.db.item_value = 8
+            item.db.value = 8
+            item.db.desc = "A plain weather cloak cut for hard use rather than style."
+            item.aliases.add("cloak")
+            return item
+        if normalized == "lightweight ranger cloak":
+            item = create_object("typeclasses.wearables.Wearable", key="lightweight ranger cloak", location=self, home=self)
+            item.db.slot = "torso"
+            item.db.item_type = "armor"
+            item.db.armor_type = "light_armor"
+            item.db.protection = 2
+            item.db.hindrance = 0
+            item.db.weight = 1.0
+            item.db.item_value = 16
+            item.db.value = 16
+            item.db.desc = "A lighter cloak stitched to move quietly through brush and branches."
+            item.aliases.add("cloak")
+            item.aliases.add("ranger cloak")
+            return item
+        if normalized == "simple boots":
+            item = create_object("typeclasses.wearables.Wearable", key="simple boots", location=self, home=self)
+            item.db.slot = "feet"
+            item.db.weight = 1.0
+            item.db.item_value = 6
+            item.db.value = 6
+            item.db.desc = "A cheap pair of boots meant to survive mud and trail dust."
+            item.aliases.add("boots")
+            return item
+        if normalized == "balanced climbing gloves":
+            item = create_object("typeclasses.wearables.Wearable", key="balanced climbing gloves", location=self, home=self)
+            item.db.slot = "hands"
+            item.db.weight = 0.4
+            item.db.item_value = 18
+            item.db.value = 18
+            item.db.desc = "Supple gloves reinforced across the palm where rope and bark bite hardest."
+            item.aliases.add("gloves")
+            item.aliases.add("climbing gloves")
+            return item
+        if normalized == "starter pack":
+            item = create_simple_item(
+                self,
+                key="starter pack",
+                desc="A simple field pack with enough room for a beginner's tools and gathered goods.",
+                item_value=9,
+                value=9,
+                weight=1.2,
+                item_type="container",
+            )
+            item.aliases.add("pack")
+            return item
+        if normalized == "rope":
+            return create_simple_item(
+                self,
+                key="rope",
+                desc="A coil of plain rope with enough life left in it to stay useful.",
+                item_value=5,
+                value=5,
+                weight=1.5,
+                item_type="tool",
+            )
+        if normalized == "reinforced rope":
+            item = create_simple_item(
+                self,
+                key="reinforced rope",
+                desc="A better rope wrapped and stitched for repeated hard climbs.",
+                item_value=14,
+                value=14,
+                weight=1.4,
+                item_type="tool",
+            )
+            item.aliases.add("rope")
+            return item
+        if normalized == "basic knife":
+            item = create_object("typeclasses.objects.Object", key="basic knife", location=self, home=self)
+            item.db.item_type = "weapon"
+            item.db.weapon_type = "light_edge"
+            item.db.skill = "light_edge"
+            item.db.damage_type = "slice"
+            item.db.damage_types = {"slice": 1.0, "impact": 0.0, "puncture": 0.0}
+            item.db.damage_min = 1
+            item.db.damage_max = 3
+            item.db.roundtime = 2.5
+            item.db.weight = 0.5
+            item.db.item_value = 6
+            item.db.value = 6
+            item.db.desc = "A serviceable utility knife that can still pull field duty."
+            item.aliases.add("knife")
+            return item
+        if normalized == "fine skinning knife":
+            item = create_object("typeclasses.objects.Object", key="fine skinning knife", location=self, home=self)
+            item.db.item_type = "weapon"
+            item.db.weapon_type = "light_edge"
+            item.db.skill = "light_edge"
+            item.db.damage_type = "slice"
+            item.db.damage_types = {"slice": 1.0, "impact": 0.0, "puncture": 0.0}
+            item.db.damage_min = 1
+            item.db.damage_max = 4
+            item.db.roundtime = 2.0
+            item.db.weight = 0.4
+            item.db.item_value = 18
+            item.db.value = 18
+            item.db.desc = "A finely balanced knife made to separate hide from flesh with less waste."
+            item.aliases.add("knife")
+            item.aliases.add("skinning knife")
+            return item
         if normalized == "lockpick":
             item = create_object(Lockpick, key="basic lockpick", location=self, home=self)
             item.db.item_value = 10
@@ -6923,6 +7377,16 @@ class Character(ObjectParent, DefaultCharacter):
             return item
         if normalized == "gem pouch":
             item = create_object("typeclasses.items.gem_pouch.GemPouch", key="gem pouch", location=self, home=self)
+            return item
+        if normalized == "trail bread":
+            item = create_simple_item(
+                self,
+                key="trail bread",
+                desc="A dense heel of bread wrapped in paper, simple enough to be given away without ceremony.",
+                item_value=1,
+                value=1,
+                weight=0.2,
+            )
             return item
 
         item = create_simple_item(
@@ -6955,14 +7419,7 @@ class Character(ObjectParent, DefaultCharacter):
             return False
         normalized = stock_name.lower()
 
-        price_map = {
-            "lockpick": 20,
-            "trap kit": 20,
-            "book": 20,
-            "gem pouch": 25,
-        }
-        base_price = price_map.get(normalized, 20)
-        price = max(1, int(base_price))
+        price = self.get_vendor_price(vendor, normalized)
 
         if not self.has_coins(price):
             self.msg("You can't afford that.")
@@ -6970,7 +7427,10 @@ class Character(ObjectParent, DefaultCharacter):
 
         self.remove_coins(price)
         self.create_vendor_inventory_item(normalized)
-        self.msg(f"You purchase {stock_name} for {self.format_coins(price)}.")
+        purchase_message = None
+        if hasattr(vendor, "get_vendor_purchase_message"):
+            purchase_message = vendor.get_vendor_purchase_message(self, stock_name, price)
+        self.msg(purchase_message or f"You purchase {stock_name} for {self.format_coins(price)}.")
         self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
         try:
             from systems import onboarding
@@ -6978,6 +7438,12 @@ class Character(ObjectParent, DefaultCharacter):
             completed, awarded = onboarding.note_trade_action(self, "buy")
             if completed and awarded:
                 self.msg(onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self)))
+        except Exception:
+            pass
+        try:
+            from systems import first_area
+
+            first_area.note_vendor_interaction(self, vendor=vendor, action="buy")
         except Exception:
             pass
         return True
@@ -7551,6 +8017,10 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("You can't skin that.")
             return False
 
+        if not self.is_wielding("skinning knife"):
+            self.msg("You need a skinning knife to properly skin that.")
+            return False
+
         msg_room(self, f"{self.key} kneels over {target.key}, working carefully.", exclude=[self])
 
         skill_total = self.get_skill("skinning") + self.get_stat("agility") + self.get_stat("discipline")
@@ -7564,13 +8034,19 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             if outcome == "partial":
                 self.msg("You recover a few usable parts.")
-                quality = "rough"
+                quality = "poor"
             elif outcome == "success":
                 self.msg("You skillfully harvest useful materials.")
-                quality = "usable"
+                quality = "normal"
             else:
-                self.msg("You skillfully harvest useful materials.")
+                self.msg("You skillfully harvest exceptional materials.")
                 quality = "fine"
+
+            quality_values = {
+                "poor": 2,
+                "normal": 5,
+                "fine": 9,
+            }
 
             create_harvest_bundle(
                 self,
@@ -7578,6 +8054,9 @@ class Character(ObjectParent, DefaultCharacter):
                 desc=f"A {quality} bundle of materials harvested from {target.key}.",
                 harvested_from=target.key,
                 skinning_quality=quality,
+                item_type="hide",
+                item_value=quality_values.get(quality, 2),
+                value=quality_values.get(quality, 2),
             )
             target.db.skinned = True
 
@@ -7604,7 +8083,204 @@ class Character(ObjectParent, DefaultCharacter):
             return self.location
         return None
 
+    def _get_climb_exit_names(self, exit_obj):
+        names = set()
+        key = str(getattr(exit_obj, "key", "") or "").strip().lower()
+        if key:
+            names.add(key)
+
+        aliases = getattr(getattr(exit_obj, "aliases", None), "all", lambda: [])()
+        for alias in aliases:
+            alias_text = str(alias or "").strip().lower()
+            if alias_text:
+                names.add(alias_text)
+
+        action_command = str(getattr(exit_obj.db, "climb_action_command", "") or "").strip().lower()
+        if action_command:
+            names.add(action_command)
+            if action_command.startswith("climb "):
+                suffix = action_command.split(" ", 1)[1].strip()
+                if suffix:
+                    names.add(suffix)
+
+        return names
+
+    def _resolve_climb_exit(self, raw_target=""):
+        room = getattr(self, "location", None)
+        if not room:
+            return None
+
+        exits = [
+            exit_obj
+            for exit_obj in (room.contents_get(content_type="exit") or [])
+            if bool(getattr(exit_obj.db, "climb_contest", False))
+        ]
+        if not exits:
+            return None
+
+        target_name = str(raw_target or "").strip().lower()
+        if target_name:
+            for exit_obj in exits:
+                if target_name in self._get_climb_exit_names(exit_obj):
+                    return exit_obj
+            return None
+
+        for exit_obj in exits:
+            if bool(getattr(exit_obj.db, "climb_default_action", False)):
+                return exit_obj
+        return exits[0] if len(exits) == 1 else None
+
+    def _resolve_room_reference(self, value):
+        if not value:
+            return None
+        if hasattr(value, "id"):
+            return value
+
+        text = str(value or "").strip()
+        if not text:
+            return None
+        matches = search_object(text if text.startswith("#") else text)
+        return matches[0] if matches else None
+
+    def _get_climb_practice_key(self, exit_obj):
+        object_id = getattr(exit_obj, "id", None)
+        if object_id is not None:
+            return f"exit:{int(object_id)}"
+        return f"exit:{str(getattr(exit_obj, 'key', 'climb') or 'climb').strip().lower()}"
+
+    def _get_climb_practice_bonus(self, exit_obj):
+        practice = getattr(getattr(self, "ndb", None), "climb_practice", None) or {}
+        return int(practice.get(self._get_climb_practice_key(exit_obj), 0) or 0)
+
+    def _get_climb_tier(self, exit_obj):
+        tier = str(getattr(exit_obj.db, "climb_tier", "low") or "low").strip().lower()
+        return tier if tier in CLIMB_OUTCOME_MESSAGES else "low"
+
+    def _get_climb_skill_total(self, exit_obj):
+        athletics = int(self.get_skill("athletics") or 0)
+        agility = int(self.get_stat("agility") or 0)
+        strength = int(self.get_stat("strength") or 0)
+        practice_bonus = self._get_climb_practice_bonus(exit_obj)
+        stat_bonus = max(0, (agility + strength) // 10)
+        return athletics + stat_bonus + practice_bonus
+
+    def _set_climb_practice_bonus(self, exit_obj, value):
+        practice = dict(getattr(getattr(self, "ndb", None), "climb_practice", None) or {})
+        practice[self._get_climb_practice_key(exit_obj)] = max(0, min(CLIMB_PRACTICE_CAP, int(value or 0)))
+        self.ndb.climb_practice = practice
+
+    def _adjust_climb_practice_bonus(self, exit_obj, amount):
+        current = self._get_climb_practice_bonus(exit_obj)
+        self._set_climb_practice_bonus(exit_obj, current + int(amount or 0))
+
+    def _clear_climb_practice_bonus(self, exit_obj):
+        practice = dict(getattr(getattr(self, "ndb", None), "climb_practice", None) or {})
+        practice.pop(self._get_climb_practice_key(exit_obj), None)
+        self.ndb.climb_practice = practice
+
+    def _normalize_climb_outcome(self, outcome):
+        normalized = str(outcome or "fail").strip().lower()
+        if normalized == "strong":
+            return "success"
+        if normalized == "fail":
+            return "failure"
+        return normalized
+
+    def _resolve_climb_outcome(self, skill_total, difficulty):
+        if int(skill_total or 0) >= int(difficulty or 0) + 5:
+            return "success"
+        if int(skill_total or 0) >= int(difficulty or 0):
+            return "partial"
+        return "failure"
+
+    def _get_climb_message(self, exit_obj, outcome):
+        tier = self._get_climb_tier(exit_obj)
+        readiness_rank = int(getattr(exit_obj.db, "climb_readiness_rank", 0) or 0)
+        athletics = int(self.get_skill("athletics") or 0)
+        if tier == "high" and readiness_rank > 0 and athletics < readiness_rank:
+            if outcome == "failure":
+                return HIGH_HIDE_REJECTION_MESSAGE
+            if outcome == "success":
+                return HIGH_HIDE_RARE_SUCCESS_MESSAGE
+        pool = CLIMB_OUTCOME_MESSAGES.get(tier, {}).get(outcome, ())
+        if not pool:
+            return "You climb."
+        return random.choice(pool)
+
+    def _apply_climb_balance_penalty(self, amount):
+        self.ensure_core_defaults()
+        self.set_balance((self.db.balance or 0) - max(0, int(amount or 0)))
+
+    def _maybe_emit_climb_learning_feedback(self, gained, practice_bonus=0):
+        if float(gained or 0.0) <= 0.0:
+            return
+        if practice_bonus < 10 and random.random() > 0.3:
+            return
+        self.msg(random.choice(CLIMB_LEARNING_FEEDBACK))
+
+    def resolve_climb_exit(self, exit_obj, target_location=None):
+        if not exit_obj or not bool(getattr(exit_obj.db, "climb_contest", False)):
+            return None
+        if self.is_in_roundtime():
+            self.msg_roundtime_block()
+            return False
+
+        current_room = getattr(self, "location", None)
+        target_location = target_location or getattr(exit_obj, "destination", None)
+        difficulty = int(getattr(exit_obj.db, "climb_difficulty", 35) or 35)
+        contest_total = self._get_climb_skill_total(exit_obj)
+        outcome = self._resolve_climb_outcome(contest_total, difficulty)
+
+        gained = award_exp_skill(
+            self,
+            "athletics",
+            difficulty,
+            success=outcome != "failure",
+            outcome=outcome,
+            event_key="climbing",
+        )
+
+        if outcome == "success":
+            self._clear_climb_practice_bonus(exit_obj)
+            if current_room:
+                msg_room(self, f"{self.key} finds a hold and climbs on.", exclude=[self])
+            self.msg(self._get_climb_message(exit_obj, outcome))
+            self.set_roundtime(float(getattr(exit_obj.db, "climb_success_roundtime", 1.0) or 1.0))
+            self._maybe_emit_climb_learning_feedback(gained, practice_bonus=contest_total)
+            return self.move_to(target_location, move_hooks=True)
+
+        if outcome == "partial":
+            self._adjust_climb_practice_bonus(exit_obj, CLIMB_PRACTICE_STEP)
+            if current_room:
+                msg_room(self, f"{self.key} slips and catches before falling.", exclude=[self])
+            self.msg(self._get_climb_message(exit_obj, outcome))
+            self._apply_climb_balance_penalty(getattr(exit_obj.db, "climb_partial_balance_cost", 6))
+            self.set_roundtime(float(getattr(exit_obj.db, "climb_partial_roundtime", 1.5) or 1.5))
+            self._maybe_emit_climb_learning_feedback(gained, practice_bonus=self._get_climb_practice_bonus(exit_obj))
+            return False
+
+        self._adjust_climb_practice_bonus(exit_obj, CLIMB_PRACTICE_STEP)
+        if current_room:
+            msg_room(self, f"{self.key} loses their grip and drops back down.", exclude=[self])
+        self.msg(self._get_climb_message(exit_obj, outcome))
+        self._apply_climb_balance_penalty(getattr(exit_obj.db, "climb_failure_balance_cost", 12))
+        self.set_roundtime(float(getattr(exit_obj.db, "climb_failure_roundtime", 2.5) or 2.5))
+        self._maybe_emit_climb_learning_feedback(gained, practice_bonus=self._get_climb_practice_bonus(exit_obj))
+
+        failure_destination = self._resolve_room_reference(getattr(exit_obj.db, "climb_failure_destination", None))
+        if failure_destination and current_room and getattr(failure_destination, "id", None) != getattr(current_room, "id", None):
+            self.move_to(failure_destination, move_hooks=True)
+        return False
+
     def attempt_climb(self, raw_target=""):
+        climb_exit = self._resolve_climb_exit(raw_target)
+        if climb_exit:
+            return self.resolve_climb_exit(climb_exit, getattr(climb_exit, "destination", None))
+
+        if self.is_in_roundtime():
+            self.msg_roundtime_block()
+            return False
+
         target = self._resolve_terrain_target(raw_target, "climbable")
         if target is None or target is False:
             self.msg("There is nothing here to climb.")
@@ -7613,14 +8289,21 @@ class Character(ObjectParent, DefaultCharacter):
         msg_room(self, f"{self.key} attempts to climb.", exclude=[self])
         difficulty = int(getattr(target.db, "climb_difficulty", 35) or 35)
         result = run_contest(self.get_skill("athletics") + self.get_stat("agility") + self.get_stat("strength"), difficulty, attacker=self)
-        if result["outcome"] == "fail":
-            self.msg("You fail to make any progress climbing.")
-        elif result["outcome"] == "partial":
-            self.msg("You start climbing, but struggle to gain ground.")
+        outcome = self._normalize_climb_outcome(result.get("outcome"))
+        if outcome == "failure":
+            self.msg(random.choice(CLIMB_OUTCOME_MESSAGES["mid"]["failure"]))
+            self._apply_climb_balance_penalty(8)
+            self.set_roundtime(2.0)
+        elif outcome == "partial":
+            self.msg(random.choice(CLIMB_OUTCOME_MESSAGES["mid"]["partial"]))
+            self._apply_climb_balance_penalty(4)
+            self.set_roundtime(1.5)
         else:
-            self.msg("You climb successfully.")
+            self.msg(random.choice(CLIMB_OUTCOME_MESSAGES["mid"]["success"]))
+            self.set_roundtime(1.0)
 
-        award_exp_skill(self, "athletics", difficulty, success=result["outcome"] != "fail")
+        gained = award_exp_skill(self, "athletics", difficulty, success=outcome != "failure", outcome=outcome, event_key="athletics")
+        self._maybe_emit_climb_learning_feedback(gained)
         return True
 
     def attempt_swim(self, raw_target=""):
@@ -8094,6 +8777,151 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_core_defaults()
         return self.get_weapon()
 
+    def is_wielding(self, item_name):
+        weapon = self.get_wielded_weapon()
+        if not weapon:
+            return False
+
+        normalized = str(item_name or "").strip().lower()
+        if not normalized:
+            return False
+
+        known_names = {str(getattr(weapon, "key", "") or "").strip().lower()}
+        aliases = getattr(weapon, "aliases", None)
+        if aliases:
+            for alias in list(aliases.all() or []):
+                alias_text = str(alias or "").strip().lower()
+                if alias_text:
+                    known_names.add(alias_text)
+        return normalized in known_names
+
+    def _get_ranger_resource_state(self):
+        state = getattr(getattr(self, "ndb", None), "ranger_resource_state", None)
+        if not isinstance(state, dict):
+            state = {}
+            self.ndb.ranger_resource_state = state
+        return state
+
+    def _get_ranger_resource_state_key(self, room, resource_key):
+        room_id = getattr(room, "id", None) or str(getattr(room, "key", "room") or "room")
+        return f"{room_id}:{str(resource_key or '').strip().lower()}"
+
+    def get_room_ranger_resources(self, room=None):
+        room = room or getattr(self, "location", None)
+        resources = list(getattr(getattr(room, "db", None), "ranger_resources", []) or [])
+        normalized = []
+        for entry in resources:
+            key = str(entry or "").strip().lower()
+            if key in RANGER_RESOURCE_PROFILES and key not in normalized:
+                normalized.append(key)
+        return normalized
+
+    def get_available_ranger_resources(self, room=None):
+        room = room or getattr(self, "location", None)
+        if not room or not self.is_profession("ranger"):
+            return []
+        state = self._get_ranger_resource_state()
+        available = []
+        for resource_key in self.get_room_ranger_resources(room):
+            if state.get(self._get_ranger_resource_state_key(room, resource_key)):
+                continue
+            available.append(resource_key)
+        return available
+
+    def get_ranger_room_render_lines(self, room=None):
+        room = room or getattr(self, "location", None)
+        if not room:
+            return []
+
+        lines = []
+        for resource_key in self.get_available_ranger_resources(room):
+            label = str(RANGER_RESOURCE_PROFILES.get(resource_key, {}).get("room_label", "") or "").strip()
+            if label:
+                lines.append(label)
+
+        return lines
+
+    def get_ranger_room_action_entries(self, room=None):
+        room = room or getattr(self, "location", None)
+        entries = []
+        for resource_key in self.get_available_ranger_resources(room):
+            command = str(RANGER_RESOURCE_PROFILES.get(resource_key, {}).get("action", "") or "").strip()
+            if command:
+                entries.append({"command": command, "label": command})
+        return entries
+
+    def gather_ranger_resource(self, resource_name):
+        room = getattr(self, "location", None)
+        normalized = str(resource_name or "").strip().lower()
+        profile = RANGER_RESOURCE_PROFILES.get(normalized)
+        if not room or not profile:
+            self.msg("You don't find that here.")
+            return False
+        if normalized not in self.get_available_ranger_resources(room):
+            self.msg("You don't find that here.")
+            return False
+
+        create_simple_item(
+            self,
+            key=profile["key"],
+            desc=profile["desc"],
+            item_type=profile["item_type"],
+            ranger_resource_kind=normalized,
+            item_value=profile["value"],
+            value=profile["value"],
+            weight=profile["weight"],
+            forage_kind=normalized,
+        )
+        state = self._get_ranger_resource_state()
+        state[self._get_ranger_resource_state_key(room, normalized)] = True
+        self.ndb.ranger_resource_state = state
+        self.db.forage_uses = int(getattr(self.db, "forage_uses", 0) or 0) + 1
+        self.msg(profile["gather_message"])
+        if self.location:
+            self.location.msg_contents(f"{self.key} gathers {profile['key']}.", exclude=[self])
+        self.use_skill("outdoorsmanship", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=10)
+        return True
+
+    def _match_ranger_resource_item(self, item, resource_key):
+        if not item:
+            return False
+        normalized = str(resource_key or "").strip().lower()
+        item_kind = str(getattr(getattr(item, "db", None), "ranger_resource_kind", "") or "").strip().lower()
+        if item_kind == normalized:
+            return True
+        item_key = str(getattr(item, "key", "") or "").strip().lower()
+        return item_key == normalized or item_key == f"{normalized}s"
+
+    def transform_ranger_resource(self, action_key, resource_name):
+        recipe = RANGER_RESOURCE_RECIPES.get(str(action_key or "").strip().lower())
+        if not recipe:
+            self.msg("You can't work that into anything useful.")
+            return False
+
+        requested = str(resource_name or "").strip().lower()
+        if requested.endswith("s") and not requested.endswith("ss"):
+            requested = requested[:-1]
+        if requested and requested != recipe["input"]:
+            self.msg("That recipe won't take that material.")
+            return False
+
+        carried = list(self.get_visible_carried_items())
+        match = next((item for item in carried if self._match_ranger_resource_item(item, recipe["input"])), None)
+        if not match:
+            self.msg("You are not carrying the material you need.")
+            return False
+
+        match.key = recipe["output_key"]
+        match.db.desc = recipe["output_desc"]
+        match.db.item_type = recipe["output_type"]
+        match.db.ranger_resource_kind = recipe["input"]
+        match.db.item_value = recipe["value"]
+        match.db.value = recipe["value"]
+        match.db.weight = recipe["weight"]
+        self.msg(recipe["success_message"])
+        self.use_skill("outdoorsmanship", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=12)
+        return match
+
     def clear_equipped_weapon(self):
         self.ensure_core_defaults()
         self.db.equipped_weapon = None
@@ -8202,9 +9030,9 @@ class Character(ObjectParent, DefaultCharacter):
         try:
             from systems import onboarding
 
-            completed, awarded = onboarding.note_equipment_action(self, item)
-            if completed and awarded:
-                message = f"{message} {onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self))}"
+            completed, override_message = onboarding.note_equipment_action(self, item)
+            if completed and override_message:
+                message = override_message
         except Exception:
             pass
         return True, message
@@ -8435,8 +9263,13 @@ class Character(ObjectParent, DefaultCharacter):
         if looker and hasattr(looker, "can_perceive") and not looker.can_perceive(self):
             return "You see nothing unusual."
 
-        desc = self.db.desc or "An unremarkable person."
-        lines = [self.get_display_name(looker), desc]
+        desc = self.get_rendered_desc(looker)
+        descriptor = self.get_race_descriptor()
+        identity_line = self.get_display_name(looker)
+        if descriptor:
+            identity_line = f"{identity_line} ({descriptor})"
+
+        lines = [identity_line, desc]
         if looker == self:
             lines.append(self.get_self_race_line())
         else:
@@ -8925,6 +9758,23 @@ class Character(ObjectParent, DefaultCharacter):
     def get_profession_rank_label(self):
         return get_profession_rank_label(self.get_profession(), self.get_profession_rank())
 
+    def get_circle(self):
+        self.ensure_core_defaults()
+        profession = self.get_profession()
+        if profession == "warrior":
+            return self.get_warrior_circle()
+        if profession == "ranger":
+            return max(1, int(getattr(self.db, "ranger_circle", getattr(self.db, "circle", 1)) or 1))
+        return max(1, int(getattr(self.db, "circle", 1) or 1))
+
+    def set_ranger_circle(self, value):
+        amount = max(1, int(value or 1))
+        self.db.circle = amount
+        self.db.ranger_circle = amount
+        if hasattr(self, "sync_client_state"):
+            self.sync_client_state()
+        return amount
+
     def get_wilderness_bond(self):
         return max(0, min(100, int(getattr(self.db, "wilderness_bond", 50) or 0)))
 
@@ -9274,8 +10124,8 @@ class Character(ObjectParent, DefaultCharacter):
             messages = {
                 "wildbound": "You feel deeply rooted in the wild.",
                 "attuned": "You feel closer to the wild.",
-                "distant": "The wild feels farther away.",
-                "disconnected": "The city dulls your senses.",
+                "distant": "The city presses in around you.",
+                "disconnected": "The wild does not follow.",
             }
             message = messages.get(current.get("key"))
             if message:
@@ -10360,22 +11210,111 @@ class Character(ObjectParent, DefaultCharacter):
             return vendor.can_trade(self)
         return True, ""
 
+    def room_matches_profession_join_site(self, profession_name, room=None):
+        profession = self.normalize_profession_name(profession_name)
+        room = room or self.location
+        if not profession or not room:
+            return False
+
+        target_guild_tag = PROFESSION_TO_GUILD.get(profession)
+        if not target_guild_tag:
+            return True
+
+        room_tag = getattr(getattr(room, "db", None), "guild_tag", None)
+        if room_tag == target_guild_tag:
+            return True
+
+        tags = getattr(room, "tags", None)
+        if not tags:
+            return False
+
+        return bool(tags.get(target_guild_tag) or tags.get(f"guild_{profession}") or tags.get(f"{profession}_guild"))
+
+    def get_profession_join_guide(self, profession_name, room=None):
+        profession = self.normalize_profession_name(profession_name)
+        room = room or self.location
+        if not profession or not room:
+            return None
+
+        for obj in list(getattr(room, "contents", []) or []):
+            if obj == self:
+                continue
+            role = str(getattr(getattr(obj, "db", None), "guild_role", "") or "").strip().lower()
+            teaches = self.normalize_profession_name(getattr(getattr(obj, "db", None), "trains_profession", None))
+            if role == "guildmaster" and teaches == profession:
+                return obj
+        return None
+
+    def can_join_ranger(self):
+        missing = []
+        for stat_name, minimum, label in RANGER_JOIN_REQUIREMENTS:
+            current = self.get_stat(stat_name)
+            if current < minimum:
+                missing.append(f"{label} {minimum} (you have {current})")
+        return not missing, missing
+
+    def get_ranger_join_requirement_text(self):
+        return ", ".join(f"{label} {minimum}" for _, minimum, label in RANGER_JOIN_REQUIREMENTS)
+
+    def get_ranger_join_success_message(self, guide=None):
+        guide_name = getattr(guide, "key", "Elarion") if guide else "Elarion"
+        return (
+            f"{guide_name} inclines their head. \"Then stand with us. Mind the land, learn its signs, and do not waste what it gives.\"\n"
+            "You are now recognized as a Ranger."
+        )
+
+    def get_ranger_join_failure_message(self, missing_requirements):
+        joined = "; ".join(str(entry) for entry in list(missing_requirements or []) if str(entry).strip())
+        if not joined:
+            joined = self.get_ranger_join_requirement_text()
+        return f"Elarion studies you for a long moment. \"Not yet. A Ranger must show at least {joined}.\""
+
+    def can_advance_ranger(self):
+        if not self.is_profession("ranger"):
+            return False, ["You are not a Ranger."]
+
+        reasons = []
+        forage_uses = int(getattr(self.db, "forage_uses", 0) or 0)
+        awareness_rank = int(self.get_skill("perception") or 0)
+
+        if forage_uses < 1:
+            reasons.append("You have not yet learned to gather from the wild.")
+
+        if awareness_rank < 5:
+            reasons.append("Your awareness of the wild is still too shallow.")
+
+        if reasons:
+            return False, reasons
+
+        return True, None
+
     def join_profession(self, profession_name):
         profession = self.normalize_profession_name(profession_name)
         if profession not in VALID_GUILDS or profession == DEFAULT_PROFESSION:
             options = ", ".join(name.replace("_", " ") for name in VALID_GUILDS if name != DEFAULT_PROFESSION)
             return False, f"You may join one of these professions: {options}"
 
-        target_guild_tag = PROFESSION_TO_GUILD.get(profession)
-        room_tag = getattr(getattr(self.location, "db", None), "guild_tag", None)
-        if target_guild_tag and room_tag != target_guild_tag:
+        if not self.room_matches_profession_join_site(profession):
             return False, "You must stand inside the proper guildhall to join that profession."
 
         if self.get_profession() == profession:
             return False, f"You already belong to the {self.get_profession_display_name()} profession."
 
+        guide = self.get_profession_join_guide(profession)
+        if profession == "ranger":
+            if not guide:
+                return False, "No Ranger guildmaster is here to receive your oath."
+            eligible, missing_requirements = self.can_join_ranger()
+            if not eligible:
+                return False, self.get_ranger_join_failure_message(missing_requirements)
+
         self.set_profession(profession)
         self.set_guild(profession)
+        if profession == "ranger":
+            self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
+            self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
+            self.db.ranger_joined_at = time.time()
+            return True, self.get_ranger_join_success_message(guide=guide)
         return True, f"You are accepted into the {self.get_profession_display_name()} profession."
 
     def advance_profession(self):
@@ -10438,6 +11377,8 @@ class Character(ObjectParent, DefaultCharacter):
         elif normalized == "ranger":
             self.db.wilderness_bond = max(0, min(100, int(getattr(self.db, "wilderness_bond", 50) or 50)))
             self.db.ranger_instinct = max(0, int(getattr(self.db, "ranger_instinct", 0) or 0))
+            self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
+            self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
         elif normalized == "cleric":
             self.set_devotion(max(int(CLERIC_DEVOTION_CONFIG["baseline"]), self.get_devotion()), sync=False)
             skills = dict(self.db.skills or {})
@@ -11825,6 +12766,12 @@ class Character(ObjectParent, DefaultCharacter):
             from systems.onboarding import handle_room_entry
 
             handle_room_entry(self)
+        except Exception:
+            pass
+        try:
+            from systems.first_area import handle_room_entry as handle_first_area_entry
+
+            handle_first_area_entry(self)
         except Exception:
             pass
         if self.is_in_shrine():
