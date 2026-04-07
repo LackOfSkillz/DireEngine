@@ -26,7 +26,6 @@
     submitting: false
   };
 
-  let nameValidationTimer = null;
   let state = loadState();
 
   function getCookie(name) {
@@ -87,7 +86,7 @@
   function validateCurrentStep() {
     const stepKey = getCurrentStepKey();
     if (stepKey === 'name') {
-      return Boolean(state.nameValidation.valid) && !state.nameValidation.pending;
+      return Boolean(String(state.name || '').trim()) && !state.nameValidation.pending;
     }
     if (stepKey === 'race') {
       return Boolean(state.race);
@@ -122,7 +121,7 @@
     const statusClass = state.nameValidation.error ? 'character-name-status is-error' : 'character-name-status';
     const statusText = state.nameValidation.pending
       ? 'Checking name availability...'
-      : (state.nameValidation.error || (state.nameValidation.valid ? 'Name is available.' : 'Enter a valid character name.'));
+      : (state.nameValidation.error || (state.nameValidation.valid ? 'Name is available.' : 'Enter a character name, then click Continue to validate it.'));
     return `
       <div class="character-wizard-copy">
         <h2>Choose a character name.</h2>
@@ -359,10 +358,6 @@
     state.nameValidation = { valid: false, pending: false, error: '' };
     saveState();
     renderButtons();
-    window.clearTimeout(nameValidationTimer);
-    nameValidationTimer = window.setTimeout(function () {
-      validateNameNow(nextName);
-    }, 250);
   });
 
   panel.addEventListener('click', function (event) {
@@ -381,8 +376,11 @@
     }
   });
 
-  nextButton.addEventListener('click', function () {
+  nextButton.addEventListener('click', async function () {
     clearError();
+    if (getCurrentStepKey() === 'name') {
+      await validateNameNow(state.name);
+    }
     if (!validateCurrentStep()) {
       setError('Complete the current step before continuing.');
       return;
@@ -395,7 +393,4 @@
   });
 
   render();
-  if (state.currentStep === 0 && state.name && !state.nameValidation.valid && !state.nameValidation.pending) {
-    validateNameNow(state.name);
-  }
 })();
