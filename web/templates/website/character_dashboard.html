@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block titleblock %} | Characters{% endblock %}
+
+{% block content %}
+<div class="page-shell interior-shell">
+  <main class="interior-page panel obsidian-panel character-page">
+    <div class="panel-title-row">
+      <div class="panel-title">Characters</div>
+      <div class="panel-subtitle">Evennia Character Dashboard</div>
+    </div>
+
+    <section class="interior-hero character-hero">
+      <p class="section-label">Account</p>
+      <h1>Choose which character the webclient should puppet.</h1>
+      <p>Selection writes to the same browser session puppet key Evennia already uses for webclient auto-puppet.</p>
+    </section>
+
+    <section class="character-summary-row">
+      <div class="panel parchment-panel character-summary-card">
+        <div class="subpanel-title">Character Slots</div>
+        <p class="character-slot-label">
+          {% if character_slots.is_unlimited %}
+          Characters: {{ character_slots.used }} / unlimited
+          {% else %}
+          Characters: {{ character_slots.used }} / {{ character_slots.max }}
+          {% endif %}
+        </p>
+        <div class="subpanel-title">Selected</div>
+        <p class="character-selected-label">
+          {% if selected_character_name %}
+          Selected: {{ selected_character_name }}
+          {% else %}
+          Selected: None
+          {% endif %}
+        </p>
+      </div>
+      <div class="panel parchment-panel character-summary-card character-summary-actions">
+        {% if character_slots.is_full %}
+        <span class="action-pill action-pill-dark is-disabled" aria-disabled="true">Create Character</span>
+        {% else %}
+        <a href="/characters/create" class="action-pill action-pill-dark">Create Character</a>
+        {% endif %}
+        <a href="/play" class="action-pill action-pill-brass">Play Selected</a>
+      </div>
+    </section>
+
+    {% if slot_limit_message %}
+    <section class="panel parchment-panel character-summary-card character-slot-notice">
+      <div class="subpanel-title">Slot Limit</div>
+      <p class="character-selected-label">{{ slot_limit_message }}</p>
+    </section>
+    {% endif %}
+
+    <section class="character-list-shell">
+      {% if characters %}
+      {% for character in characters %}
+      <article class="panel parchment-panel character-card{% if character.selected %} is-selected{% endif %}" data-character-id="{{ character.id }}">
+        <div class="character-card-copy">
+          <h2>{{ character.name }}</h2>
+          <p class="character-card-meta">{{ character.race_display }} | {{ character.gender_display }}</p>
+          {% if character.identity_summary %}
+          <p class="character-card-identity">{{ character.identity_summary }}</p>
+          {% endif %}
+        </div>
+        <div class="character-card-actions">
+          {% if character.selected %}
+          <span class="status-tag status-tag-selected">Selected</span>
+          {% endif %}
+          <button type="button" class="action-pill action-pill-brass" data-play-character="{{ character.id }}">Play</button>
+          <button type="button" class="action-pill action-pill-dark" data-select-character="{{ character.id }}">Select</button>
+          <button type="button" class="action-pill action-pill-outline" data-delete-character="{{ character.id }}">Delete</button>
+        </div>
+      </article>
+      {% endfor %}
+      {% else %}
+      <div class="panel parchment-panel character-empty-state">
+        <h2>No characters yet.</h2>
+        <p>Create one here, then the Play Now flow can hand it straight to Evennia’s webclient puppet bridge.</p>
+        {% if character_slots.is_full %}
+        <span class="action-pill action-pill-dark is-disabled" aria-disabled="true">Create Character</span>
+        {% else %}
+        <a href="/characters/create" class="action-pill action-pill-dark">Create Character</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    function getCookie(name) {
+      const cookieValue = document.cookie
+        .split(';')
+        .map((entry) => entry.trim())
+        .find((entry) => entry.startsWith(name + '='));
+      return cookieValue ? decodeURIComponent(cookieValue.split('=').slice(1).join('=')) : '';
+    }
+
+    async function postJson(url, payload) {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Request failed.');
+      }
+      return data;
+    }
+
+    document.addEventListener('click', async function (event) {
+      const playButton = event.target.closest('[data-play-character]');
+      const selectButton = event.target.closest('[data-select-character]');
+      const deleteButton = event.target.closest('[data-delete-character]');
+
+      if (playButton) {
+        event.preventDefault();
+        try {
+          await postJson('/api/characters/select', { character_id: playButton.dataset.playCharacter });
+          window.location.assign('/play');
+        } catch (error) {
+          window.alert(error.message);
+        }
+        return;
+      }
+
+      if (selectButton) {
+        event.preventDefault();
+        try {
+          await postJson('/api/characters/select', { character_id: selectButton.dataset.selectCharacter });
+          window.location.reload();
+        } catch (error) {
+          window.alert(error.message);
+        }
+        return;
+      }
+
+      if (deleteButton) {
+        event.preventDefault();
+        if (!window.confirm('Delete this character?')) {
+          return;
+        }
+        try {
+          await postJson('/api/characters/delete', { character_id: deleteButton.dataset.deleteCharacter });
+          window.location.reload();
+        } catch (error) {
+          window.alert(error.message);
+        }
+      }
+    });
+  })();
+</script>
+{% endblock %}

@@ -153,7 +153,8 @@ def is_identity_renderable(identity):
     appearance = dict((identity or {}).get("appearance") or {})
     hair = dict(appearance.get("hair") or {})
     eyes = dict(appearance.get("eyes") or {})
-    return bool(appearance.get("build") and appearance.get("height") and hair.get("color") and eyes.get("color"))
+    skin = dict(appearance.get("skin") or {})
+    return bool(appearance.get("build") and hair.get("color") and eyes.get("color") and skin.get("tone"))
 
 
 def build_identity_report(character):

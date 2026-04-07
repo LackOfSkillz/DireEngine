@@ -29,6 +29,7 @@ from django.utils.translation import gettext as _
 
 from evennia.accounts.accounts import DefaultAccount, DefaultGuest
 from evennia.objects.models import ObjectDB
+from evennia.utils import logger
 from evennia.utils.utils import mod_import
 
 from systems.chargen.mirror import begin_mirror_chargen, cancel_mirror_chargen, get_active_chargen_character, is_chargen_active
@@ -360,6 +361,10 @@ class Account(DefaultAccount):
         if not session:
             return
 
+        logger.log_info(
+            f"Account login: account={self.key} session={getattr(session, 'sessid', 'unknown')} protocol={getattr(session, 'protocol_key', 'unknown')}"
+        )
+
         protocol_flags = self.attributes.get("_saved_protocol_flags", {})
         if protocol_flags:
             session.update_flags(**protocol_flags)
@@ -387,6 +392,9 @@ class Account(DefaultAccount):
                     self.puppet_object(session, candidate)
                     self.db._last_puppet = candidate
                     self.set_webclient_preferred_character(session, candidate)
+                    logger.log_info(
+                        f"Auto-puppet attached: account={self.key} character={candidate.key} id={candidate.id} session={getattr(session, 'sessid', 'unknown')}"
+                    )
                     return
                 except RuntimeError:
                     continue
@@ -403,6 +411,9 @@ class Account(DefaultAccount):
                     self.route_character_to_onboarding(candidate, create=True)
                     self.puppet_object(session, candidate)
                     self.db._last_puppet = candidate
+                    logger.log_info(
+                        f"Auto-puppet attached: account={self.key} character={candidate.key} id={candidate.id} session={getattr(session, 'sessid', 'unknown')}"
+                    )
                     return
                 except RuntimeError:
                     continue

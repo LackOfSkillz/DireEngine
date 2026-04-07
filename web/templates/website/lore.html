@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="page-shell interior-shell">
-  <main class="interior-page panel obsidian-panel lore-page" data-lore-page data-help-api-url="/api/help/">
+  <main class="interior-page panel obsidian-panel lore-page" data-lore-page data-help-api-url="/api/help/" data-initial-topic="{{ request.GET.topic|default:'' }}">
     <div class="panel-title-row">
       <div class="panel-title">Lore</div>
       <div class="panel-subtitle">Living Help Index</div>
@@ -57,5 +57,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'website/js/lore.js' %}?v=20260407a"></script>
+<script src="{% static 'website/js/lore.js' %}?v=20260407b"></script>
 {% endblock %}

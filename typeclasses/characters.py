@@ -936,10 +936,40 @@ class Character(ObjectParent, DefaultCharacter):
             return False
         return True
 
+    def _apply_web_new_player_spawn(self):
+        if not bool(getattr(self.db, "new_player", False)):
+            return False
+
+        try:
+            from systems import onboarding
+            from systems.character.creation import apply_starting_gear, apply_starting_skills
+
+            guild_room = onboarding._resolve_empath_guild_room()
+            if not guild_room:
+                raise RuntimeError("Empath Guild room could not be resolved.")
+
+            self.home = guild_room
+            self.move_to(guild_room, quiet=True, use_destination=False)
+
+            apply_starting_gear(self)
+            apply_starting_skills(self)
+            self.db.new_player = False
+            self.db.skip_chargen = False
+            self.db.onboarding_step = None
+            self.db.onboarding_complete = True
+            self.msg("You awaken within the Empaths' Guild.")
+            LOGGER.info("Web new-player spawn applied for %s", getattr(self, "key", self))
+            return True
+        except Exception:
+            LOGGER.exception("Failed web new-player spawn for %s", getattr(self, "key", self))
+            return False
+
     def at_post_puppet(self, *args, **kwargs):
         super().at_post_puppet(*args, **kwargs)
         self.ensure_core_defaults()
-        self._restore_onboarding_entry_if_needed()
+        spawned_from_web = self._apply_web_new_player_spawn()
+        if not spawned_from_web:
+            self._restore_onboarding_entry_if_needed()
         try:
             from systems import aftermath
 
@@ -4704,7 +4734,10 @@ class Character(ObjectParent, DefaultCharacter):
                 from systems.chargen import mirror as chargen_mirror
 
                 aftermath.refresh_new_player_state(self)
-                remapped_command, immediate_message = chargen_mirror.gate_chargen_input(self, raw_string)
+                if bool(getattr(self.db, "skip_chargen", False)):
+                    remapped_command, immediate_message = raw_string, None
+                else:
+                    remapped_command, immediate_message = chargen_mirror.gate_chargen_input(self, raw_string)
                 if immediate_message:
                     self.msg(immediate_message)
                     return None

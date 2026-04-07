@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from urllib.parse import quote
 
 from evennia.commands.default.help import CmdHelp as EvenniaCmdHelp
 from evennia.utils.utils import pad
@@ -27,6 +28,12 @@ class CmdHelp(EvenniaCmdHelp):
                 self.msg_help(self.caller.get_warrior_help_text())
                 return
         super().func()
+
+    def msg_help(self, text, **kwargs):
+        query = str(self.args or "").strip().lower()
+        if query and query not in {"all", "list", "index"}:
+            text = f"{text}\n\n|wView online:|n /lore?topic={quote(query)}"
+        return super().msg_help(text, **kwargs)
 
     system_groups = OrderedDict(
         (

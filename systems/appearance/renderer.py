@@ -13,25 +13,28 @@ def _build_external_text(identity):
     skin = dict(appearance.get("skin") or {})
 
     race = str(identity.get("race") or "person").strip().lower()
-    height = str(appearance.get("height") or "average").strip().lower()
+    height = str(appearance.get("height") or "").strip().lower()
     build = str(appearance.get("build") or "average").strip().lower()
 
     details = []
-    if hair.get("color"):
+    if hair.get("color") and hair.get("style"):
+        details.append(f"{hair.get('color')} {hair.get('style')} hair")
+    elif hair.get("color"):
         details.append(f"{hair.get('color')} hair")
     if eyes.get("color"):
         details.append(f"{eyes.get('color')} eyes")
     if skin.get("tone"):
         details.append(f"{skin.get('tone')} skin")
 
-    article = "An" if height[:1] in "aeiou" else "A"
+    subject_text = f"{height} {build} {race}".strip() if height else f"{build} {race}".strip()
+    article = "An" if subject_text[:1] in "aeiou" else "A"
     if not details:
-        return f"{article} {height} {build} {race}."
+        return f"{article} {subject_text}."
     if len(details) == 1:
         detail_text = details[0]
     else:
         detail_text = ", ".join(details[:-1]) + f", and {details[-1]}"
-    return f"{article} {height} {build} {race} with {detail_text}."
+    return f"{article} {subject_text} with {detail_text}."
 
 
 def render_self_view(character, identity=None, fallback_desc=None):
@@ -46,21 +49,26 @@ def render_self_view(character, identity=None, fallback_desc=None):
         eyes = dict(appearance.get("eyes") or {})
         skin = dict(appearance.get("skin") or {})
         race = str(resolved.get("race") or "person").strip().lower()
+        height = str(appearance.get("height") or "").strip().lower()
+        build = str(appearance.get("build") or "average").strip().lower()
 
         details = []
-        if hair.get("color"):
+        if hair.get("color") and hair.get("style"):
+            details.append(f"{hair.get('color')} {hair.get('style')} hair")
+        elif hair.get("color"):
             details.append(f"{hair.get('color')} hair")
         if eyes.get("color"):
             details.append(f"{eyes.get('color')} eyes")
         if skin.get("tone"):
             details.append(f"{skin.get('tone')} skin")
+        subject_text = f"{height} {build} {race}".strip() if height else f"{build} {race}".strip()
         if not details:
-            return f"You are a {appearance.get('height')} {appearance.get('build')} {race}."
+            return f"You are a {subject_text}."
         if len(details) == 1:
             detail_text = details[0]
         else:
             detail_text = ", ".join(details[:-1]) + f", and {details[-1]}"
-        return f"You are a {appearance.get('height')} {appearance.get('build')} {race} with {detail_text}."
+        return f"You are a {subject_text} with {detail_text}."
 
     fallback = str(fallback_desc or "").strip()
     if fallback and getattr(character, "ndb", None) is not None:

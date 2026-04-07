@@ -1,3 +1,11 @@
+html,
+body,
+#clientwrapper {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+}
+
 body {
   background:
     radial-gradient(circle at top left, rgba(155, 108, 52, 0.18), transparent 28%),
@@ -5,16 +13,22 @@ body {
     linear-gradient(180deg, #2e1f17 0%, #1d1410 100%);
   color: #e9dcc4;
   font-family: "Trebuchet MS", Verdana, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
 #dragonsire-shell {
   display: grid;
-  grid-template-columns: 240px minmax(520px, 1fr) 340px;
-  gap: 14px;
-  min-height: 100vh;
-  padding: 14px;
+  grid-template-columns: clamp(180px, 16vw, 240px) minmax(0, 1fr) clamp(250px, 22vw, 340px);
+  gap: clamp(10px, 1vw, 14px);
+  height: 100%;
+  min-height: 100%;
+  max-height: 100dvh;
+  padding: clamp(8px, 1vw, 14px);
   box-sizing: border-box;
   animation: shell-fade-in 260ms ease;
+  overflow: hidden;
 }
 
 .panel {
@@ -42,18 +56,18 @@ body {
   color: #e9dcc4;
   background: linear-gradient(180deg, #f2e1b8 0%, #dfc690 100%);
   color: #33241b;
-  padding: 16px;
+  padding: clamp(10px, 1vw, 16px);
 }
 
 .obsidian-panel {
   background: linear-gradient(180deg, rgba(20, 14, 12, 0.97), rgba(10, 8, 7, 0.98));
-  padding: 14px;
+  padding: clamp(10px, 0.95vw, 14px);
   display: block;
 }
 
 .brass-panel {
   background: linear-gradient(180deg, rgba(92, 63, 37, 0.94), rgba(54, 36, 22, 0.96));
-  padding: 12px 14px;
+  padding: clamp(10px, 0.9vw, 14px);
   overflow: visible;
 }
 
@@ -75,16 +89,26 @@ body {
 #center-stage {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: clamp(10px, 1vw, 14px);
+  min-height: 0;
 }
 
 #center-stage {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   min-width: 0;
+  overflow: hidden;
+}
+
+#left-rail,
+#right-rail {
+  overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .portrait-frame {
-  width: 112px;
-  height: 112px;
+  width: clamp(78px, 7vw, 112px);
+  height: clamp(78px, 7vw, 112px);
   margin-bottom: 12px;
   border: 2px solid rgba(96, 58, 22, 0.55);
   box-shadow: inset 0 0 0 4px rgba(255, 248, 230, 0.25);
@@ -95,7 +119,7 @@ body {
 }
 
 .portrait-placeholder {
-  font-size: 34px;
+  font-size: clamp(24px, 2vw, 34px);
   appearance: none;
   font-weight: 700;
   color: #f4ebd3;
@@ -110,8 +134,12 @@ body {
 }
 
 #titlebar {
-  font-size: 34px;
+  font-size: clamp(1.8rem, 2.2vw, 2.125rem);
   line-height: 1;
+}
+
+#character-card h2 {
+  font-size: clamp(1.15rem, 1.8vw, 1.55rem);
 }
 
 #subtitlebar {
@@ -131,6 +159,7 @@ body {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .chrome-tab {
@@ -138,8 +167,8 @@ body {
   background: linear-gradient(180deg, rgba(149, 116, 74, 0.95), rgba(98, 67, 36, 0.95));
   color: #f2e6cf;
   border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 12px;
+  padding: 7px clamp(10px, 0.95vw, 14px);
+  font-size: clamp(11px, 0.85vw, 12px);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -152,7 +181,7 @@ body {
 #map-room-name,
 .panel-subtitle,
 #connection-indicator {
-  font-size: 12px;
+  font-size: clamp(11px, 0.85vw, 12px);
   opacity: 0.85;
 }
 
@@ -211,7 +240,7 @@ body {
 .ability-item,
 .inventory-item,
 .equipment-item {
-  padding: 8px 10px;
+  padding: clamp(7px, 0.85vw, 10px);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   color: #f3e7cb;
@@ -345,6 +374,7 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 #console-panel {
@@ -352,6 +382,7 @@ body {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 #feed-overlay {
@@ -365,15 +396,15 @@ body {
   overflow-x: hidden;
   padding: 8px 10px 14px;
   font-family: Consolas, "Courier New", monospace;
-  font-size: 14px;
-  line-height: 1.35;
+  font-size: clamp(13px, 0.95vw, 15px);
+  line-height: 1.42;
   color: #f2e6cf;
   pointer-events: auto;
 }
 
 #input-panel {
   flex: 0 0 auto;
-  min-height: 92px;
+  min-height: 0;
 }
 
 #inputform {
@@ -411,7 +442,7 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-height: 320px;
+  min-height: 0;
 }
 
 .feed-view {
@@ -424,18 +455,18 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  min-height: 320px;
+  min-height: 0;
 }
 
 #feed-surface {
   flex: 1 1 auto;
-  min-height: 320px;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 10px 14px;
   font-family: Consolas, "Courier New", monospace;
-  font-size: 14px;
-  line-height: 1.35;
+  font-size: clamp(13px, 0.95vw, 15px);
+  line-height: 1.42;
   color: #f2e6cf;
 }
 
@@ -510,8 +541,8 @@ body {
   overflow-y: auto;
   padding-right: 6px;
   font-family: Consolas, "Courier New", monospace;
-  font-size: 14px;
-  line-height: 1.24;
+  font-size: clamp(13px, 0.95vw, 15px);
+  line-height: 1.34;
 }
 
 #messagewindow .cmd-echo {
@@ -523,9 +554,11 @@ body {
 .feed-line {
   display: block;
   color: #e9dcc4;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid rgba(214, 176, 97, 0.35);
   white-space: pre-wrap;
-  padding: 2px 0;
+  padding: 6px 8px;
+  margin-bottom: 6px;
   min-height: 1.2em;
 }
 
@@ -537,8 +570,8 @@ body {
   display: block;
   flex: 1 1 auto;
   width: 100%;
-  height: 44px !important;
-  min-height: 44px;
+  height: 42px !important;
+  min-height: 42px;
   resize: vertical;
   background: rgba(24, 18, 14, 0.92);
   color: #f0e4cc;
@@ -553,7 +586,7 @@ body {
   align-items: center;
   justify-content: center;
   min-width: 52px;
-  min-height: 44px;
+  min-height: 42px;
   border: 1px solid rgba(214, 176, 97, 0.3);
   background: linear-gradient(180deg, #6a4a2f, #3d2819);
   color: #f0e4cc;
@@ -603,7 +636,8 @@ body {
 
 #map-canvas {
   width: 100%;
-  height: 360px;
+  height: min(34vh, 360px);
+  min-height: 220px;
   display: block;
   border: 1px solid rgba(214, 176, 97, 0.16);
   background: radial-gradient(circle at center, rgba(60, 45, 36, 0.6), rgba(8, 7, 7, 0.95));
@@ -678,8 +712,9 @@ body {
 #resource-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
   align-items: center;
+  min-height: 0;
 }
 
 .resource-block {
@@ -754,6 +789,30 @@ body {
 
 .rail-panel {
   cursor: grab;
+}
+
+#right-rail {
+  display: grid;
+  grid-template-rows: minmax(240px, 1.35fr) minmax(160px, 0.95fr) minmax(120px, 0.75fr) minmax(100px, 0.7fr);
+}
+
+#map-panel,
+#inventory-panel,
+#equipment-panel,
+#debug-panel,
+#left-rail,
+#console-panel {
+  min-height: 0;
+}
+
+#inventory-list,
+#equipment-list,
+#debug-log,
+#status-list,
+#ability-list,
+#recent-characters,
+#exit-strip {
+  overflow: auto;
 }
 
 .rail-panel.is-dragging {
@@ -844,29 +903,227 @@ body {
 
 @media (max-width: 1200px) {
   #dragonsire-shell {
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: clamp(180px, 18vw, 220px) 1fr;
+    grid-template-areas:
+      "left center"
+      "right right";
+  }
+
+  #left-rail {
+    grid-area: left;
+  }
+
+  #center-stage {
+    grid-area: center;
   }
 
   #right-rail {
+    grid-area: right;
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: none;
+    overflow: visible;
+  }
+
+  #map-panel {
+    grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 900px) {
   #dragonsire-shell {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 34vw);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "left left"
+      "center right";
+    height: 100%;
+    min-height: 100%;
+    overflow: hidden;
+  }
+
+  #left-rail {
+    grid-area: left;
+    display: grid;
+    grid-template-columns: auto minmax(180px, 1.2fr) repeat(4, minmax(120px, 1fr));
+    align-items: start;
+    gap: 8px;
+    max-height: min(28dvh, 240px);
+    overflow: auto;
+  }
+
+  #center-stage {
+    grid-area: center;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  }
+
+  #right-rail {
+    grid-area: right;
+    display: grid;
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 1.25fr) minmax(140px, 0.9fr) minmax(100px, 0.6fr);
+    overflow: auto;
+  }
+
+  #left-rail > * {
+    min-width: 0;
+  }
+
+  #right-rail > * {
+    min-width: 0;
+  }
+
+  .portrait-frame {
+    margin-bottom: 0;
+  }
+
+  .subpanel {
+    margin-top: 0;
+  }
+
+  #character-card {
+    align-self: stretch;
+  }
+
+  #console-panel {
+    min-height: 0;
+  }
+
+  #map-panel {
+    min-height: 0;
+  }
+
+  #map-canvas {
+    height: min(24dvh, 240px);
+    min-height: 170px;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow: auto;
+  }
+
+  #dragonsire-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto minmax(420px, 1fr) auto;
+    grid-template-areas:
+      "left"
+      "right"
+      "center"
+      "toast";
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
   }
 
   #left-rail,
   #right-rail {
-    flex-direction: row;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    max-height: none;
+  }
+
+  #left-rail {
+    gap: 8px;
+  }
+
+  #right-rail {
+    grid-template-rows: none;
+    gap: 8px;
   }
 
   #left-rail > *,
   #right-rail > * {
-    min-width: 280px;
+    min-width: 0;
+  }
+
+  #character-card,
+  #map-panel {
+    grid-column: 1 / -1;
+  }
+
+  #center-stage {
+    min-height: 420px;
+  }
+
+  #topbar {
+    gap: 8px;
+  }
+
+  #resource-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 900px) {
+  #dragonsire-shell {
+    grid-template-columns: clamp(170px, 15vw, 210px) minmax(0, 1fr) clamp(225px, 20vw, 285px);
+  }
+
+  #map-canvas {
+    height: min(28vh, 280px);
+    min-height: 180px;
+  }
+
+  #feed-overlay,
+  #feed-surface,
+  #chatwindow {
+    font-size: clamp(13px, 1vw, 15px);
+  }
+}
+
+@media (max-height: 760px) {
+  #dragonsire-shell {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  #center-stage {
+    gap: 8px;
+  }
+
+  .subpanel {
+    margin-top: 8px;
+  }
+
+  #resource-strip {
+    gap: 8px;
+  }
+
+  #topbar {
+    gap: 8px;
+  }
+
+  #inputform {
+    gap: 6px;
+  }
+
+  #inputfield {
+    height: 38px !important;
+    min-height: 38px;
+    padding: 8px 10px;
+  }
+
+  #inputsend {
+    min-height: 38px;
+    min-width: 46px;
+  }
+
+  .resource-label,
+  #footer-status {
+    font-size: 10px;
+  }
+
+  #map-canvas {
+    height: min(24vh, 220px);
+    min-height: 150px;
+  }
+
+  #left-rail {
+    max-height: min(24dvh, 210px);
   }
 }

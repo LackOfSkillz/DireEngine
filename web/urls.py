@@ -22,6 +22,8 @@ from evennia.web.urls import urlpatterns as evennia_default_urlpatterns
 urlpatterns = [
     # website
     path("", include("web.website.urls")),
+    # local api wrappers
+    path("api/", include("web.api.urls")),
     # webclient
     path("webclient/", include("web.webclient.urls")),
     # web admin

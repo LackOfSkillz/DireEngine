@@ -1,4 +1,12 @@
 (function () {
+  function slugifyTopic(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
   function textMatches(entry, query) {
     if (!query) {
       return true;
@@ -36,9 +44,10 @@
     return button;
   }
 
-  function buildEntryCard(entry) {
+  function buildEntryCard(entry, highlightedTopic) {
     const article = document.createElement("article");
-    article.className = "lore-entry-card";
+    article.className = entry.name === highlightedTopic ? "lore-entry-card is-highlighted" : "lore-entry-card";
+    article.id = `topic-${slugifyTopic(entry.name)}`;
 
     const aliasLine = entry.aliases && entry.aliases.length
       ? `<p class="lore-entry-aliases">Aliases: ${entry.aliases.join(", ")}</p>`
@@ -86,6 +95,7 @@
     }
 
     const apiUrl = root.dataset.helpApiUrl;
+    const initialTopic = (root.dataset.initialTopic || "").trim().toLowerCase();
     const searchInput = root.querySelector("[data-lore-search]");
     const tabsHost = root.querySelector("[data-lore-tabs]");
     const categoriesHost = root.querySelector("[data-lore-categories]");
@@ -100,6 +110,7 @@
       sectionKey: "commands",
       categoryKey: "",
       query: "",
+      highlightedTopic: initialTopic,
     };
 
     const embeddedPayload = document.getElementById("lore-help-payload");
@@ -109,6 +120,25 @@
         return null;
       }
       return state.payload.sections.find((section) => section.key === state.sectionKey) || state.payload.sections[0];
+    }
+
+    function findTopicPlacement(topicName) {
+      if (!state.payload || !topicName) {
+        return null;
+      }
+
+      for (const section of state.payload.sections) {
+        for (const category of section.categories) {
+          for (const entry of category.entries) {
+            const names = [entry.name].concat(entry.aliases || []).map((value) => String(value || "").toLowerCase());
+            if (names.includes(topicName)) {
+              return { sectionKey: section.key, categoryKey: category.key, entryName: entry.name.toLowerCase() };
+            }
+          }
+        }
+      }
+
+      return null;
     }
 
     function render() {
@@ -178,8 +208,15 @@
       entriesHost.hidden = false;
       entriesHost.innerHTML = "";
       visibleEntries.forEach((entry) => {
-        entriesHost.appendChild(buildEntryCard(entry));
+        entriesHost.appendChild(buildEntryCard(entry, state.highlightedTopic));
       });
+
+      if (state.highlightedTopic) {
+        const target = entriesHost.querySelector(`#topic-${slugifyTopic(state.highlightedTopic)}`);
+        if (target) {
+          target.scrollIntoView({ block: "start", behavior: "smooth" });
+        }
+      }
     }
 
     searchInput.addEventListener("input", function (event) {
@@ -189,6 +226,16 @@
 
     function mountPayload(payload) {
         state.payload = payload;
+        if (initialTopic) {
+          const placement = findTopicPlacement(initialTopic);
+          if (placement) {
+            state.sectionKey = placement.sectionKey;
+            state.categoryKey = placement.categoryKey;
+            state.query = initialTopic;
+            searchInput.value = initialTopic;
+            state.highlightedTopic = placement.entryName;
+          }
+        }
         feedback.hidden = true;
         render();
     }

@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.views.generic import TemplateView
 
+from evennia.utils import logger
 from evennia.utils.ansi import strip_ansi
 from evennia.help.filehelp import FILE_HELP_ENTRIES
 
@@ -278,34 +279,16 @@ def topic_entry(topic_name, command_catalog, guide_lookup, kind, category_label)
     if kind == "command":
         entry = dict(command_catalog.get(topic_key, {}))
         if not entry:
-            entry = {
-                "name": topic_key,
-                "aliases": [],
-                "category": category_label,
-                "category_key": normalize_category(category_label),
-                "kind": "command",
-                "source": "fallback",
-                "usage": topic_key,
-                "summary": "",
-                "text": "",
-            }
+            logger.log_warn(f"Lore help omitted missing command topic: {topic_key} ({category_label})")
+            return None
         entry["category"] = category_label
         entry["category_key"] = normalize_category(category_label)
         return entry
 
     entry = dict(guide_lookup.get(topic_key, {}))
     if not entry:
-        entry = {
-            "name": topic_key,
-            "aliases": [],
-            "category": category_label,
-            "category_key": normalize_category(category_label),
-            "kind": "guide",
-            "source": "fallback",
-            "usage": f"help {topic_key}",
-            "summary": "",
-            "text": "",
-        }
+        logger.log_warn(f"Lore help omitted missing guide topic: {topic_key} ({category_label})")
+        return None
     entry["category"] = category_label
     entry["category_key"] = normalize_category(category_label)
     return entry
@@ -323,10 +306,18 @@ def build_section(section_key, group_names, include_staff, command_catalog, guid
             if not include_staff and section_key == "guides" and category_label in {"Staff Topics", "Developer Topics"}:
                 continue
 
-            entries = [
-                topic_entry(topic_name, command_catalog, guide_lookup, "command" if section_key == "commands" else "guide", category_label)
-                for topic_name in topics
-            ]
+            entries = []
+            for topic_name in topics:
+                entry = topic_entry(
+                    topic_name,
+                    command_catalog,
+                    guide_lookup,
+                    "command" if section_key == "commands" else "guide",
+                    category_label,
+                )
+                if not entry or entry.get("source") == "fallback":
+                    continue
+                entries.append(entry)
             if not entries:
                 continue
 

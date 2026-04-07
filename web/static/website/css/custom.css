@@ -40,7 +40,7 @@ a {
 .page-shell,
 .site-header-wrap,
 .site-footer-wrap {
-  width: min(1360px, calc(100% - 20px));
+  width: min(1360px, calc(100% - clamp(12px, 2vw, 28px)));
   margin: 0 auto;
 }
 
@@ -92,7 +92,7 @@ a {
 .world-section,
 .race-carousel-section,
 .interior-page {
-  padding: 14px;
+  padding: clamp(12px, 1.4vw, 16px);
 }
 
 .site-header-inner {
@@ -139,7 +139,7 @@ a {
 }
 
 .site-brand-title {
-  font-size: 1.9rem;
+  font-size: clamp(1.45rem, 2.1vw, 1.9rem);
   line-height: 1;
   color: #f7ecd5;
 }
@@ -192,11 +192,11 @@ a {
   align-items: center;
   justify-content: center;
   min-height: 34px;
-  padding: 8px 14px;
+  padding: 8px clamp(10px, 1.1vw, 14px);
   border: 1px solid rgba(233, 201, 142, 0.24);
   border-radius: 999px;
   text-decoration: none;
-  font-size: 12px;
+  font-size: clamp(11px, 0.85vw, 12px);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
@@ -255,6 +255,246 @@ a {
 
 .lore-page {
   padding-bottom: 18px;
+}
+
+.lore-entry-card.is-highlighted {
+  box-shadow: inset 0 0 0 2px rgba(184, 137, 78, 0.45);
+}
+
+.character-page {
+  display: grid;
+  gap: 18px;
+}
+
+.character-summary-row,
+.character-list-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.character-summary-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.character-summary-card {
+  padding: 16px;
+}
+
+.character-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.character-slot-notice {
+  padding: 16px;
+}
+
+.character-selected-label,
+.character-slot-label,
+.character-card-meta,
+.character-card-identity,
+.character-create-copy,
+.character-empty-state p,
+.character-form-error,
+.character-form-errors {
+  margin: 6px 0 0;
+}
+
+.character-card,
+.character-create-panel,
+.character-empty-state {
+  padding: 18px;
+}
+
+.character-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.character-card.is-selected {
+  box-shadow: inset 0 0 0 2px rgba(184, 137, 78, 0.45);
+}
+
+.character-card-copy h2,
+.character-empty-state h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.character-card-actions,
+.character-create-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-tag-selected {
+  background: rgba(108, 71, 38, 0.18);
+  color: var(--ink-900);
+}
+
+.action-pill.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  cursor: default;
+}
+
+.character-create-form {
+  display: grid;
+  gap: 16px;
+}
+
+.character-form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.character-form-field input,
+.character-form-field select {
+  min-height: 44px;
+  border: 1px solid rgba(108, 71, 38, 0.24);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 248, 235, 0.88);
+  color: var(--ink-900);
+}
+
+.character-wizard {
+  display: grid;
+  gap: 18px;
+}
+
+.character-wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.character-wizard-step {
+  padding: 10px 12px;
+  border: 1px solid rgba(108, 71, 38, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 248, 235, 0.62);
+  color: var(--ink-700);
+  font-size: 0.92rem;
+}
+
+.character-wizard-step.is-active {
+  border-color: rgba(184, 137, 78, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(184, 137, 78, 0.35);
+  color: var(--ink-900);
+}
+
+.character-wizard-step.is-complete {
+  background: rgba(226, 210, 177, 0.42);
+}
+
+.character-wizard-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.character-wizard-copy h2,
+.character-review-card h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.character-wizard-copy p,
+.character-review-card p {
+  margin: 8px 0 0;
+}
+
+.character-choice-grid,
+.character-review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.character-choice-grid.is-three-up {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.character-choice-card {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(108, 71, 38, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 248, 235, 0.78);
+  color: var(--ink-900);
+  text-align: left;
+}
+
+.character-choice-card.is-selected {
+  border-color: rgba(184, 137, 78, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(184, 137, 78, 0.38);
+  background: rgba(245, 231, 203, 0.92);
+}
+
+.character-choice-card-label {
+  font-weight: 700;
+}
+
+.character-choice-card-copy {
+  font-size: 0.94rem;
+  color: var(--ink-700);
+}
+
+.character-name-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(108, 71, 38, 0.24);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 248, 235, 0.88);
+  color: var(--ink-900);
+}
+
+.character-name-status {
+  min-height: 24px;
+  color: var(--ink-700);
+}
+
+.character-name-status.is-error {
+  color: #8a2f2f;
+}
+
+.character-review-card {
+  padding: 16px;
+  border: 1px solid rgba(108, 71, 38, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 248, 235, 0.72);
+}
+
+.character-review-label {
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-700);
+}
+
+.character-review-value {
+  margin-top: 4px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+@media (max-width: 900px) {
+  .character-summary-row,
+  .character-card,
+  .character-choice-grid,
+  .character-review-grid,
+  .character-wizard-steps {
+    grid-template-columns: 1fr;
+  }
 }
 
 .lore-hero {
@@ -796,6 +1036,7 @@ a {
 @media (max-width: 1180px) {
   .site-header-inner {
     grid-template-columns: 1fr;
+    justify-items: start;
   }
 
   .site-nav {
@@ -811,6 +1052,32 @@ a {
   .world-section,
   .race-carousel-section {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 980px) {
+  .site-brand {
+    gap: 10px;
+  }
+
+  .site-brand-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .site-nav,
+  .site-account-state,
+  .hero-buttons,
+  .action-stack,
+  .tag-list {
+    gap: 6px;
+  }
+
+  .chrome-tab,
+  .action-pill,
+  .site-account-link {
+    min-height: 32px;
+    padding-inline: 10px;
   }
 }
 
@@ -865,6 +1132,10 @@ a {
     bottom: 12px;
     left: 12px;
     justify-content: space-between;
+  }
+
+  .site-nav {
+    justify-content: flex-start;
   }
 
   .site-header-inner,

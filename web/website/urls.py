@@ -11,9 +11,13 @@ from django.views.generic import TemplateView
 
 from evennia.web.website.urls import urlpatterns as evennia_website_urlpatterns
 from web.website.views.help import LoreHelpApiView, LorePageView
+from web.website.views.portal import CharacterCreatePageView, CharacterDashboardView, PlayNowRedirectView
 
 # add patterns here
 urlpatterns = [
+    path("play", PlayNowRedirectView.as_view(), name="play-now"),
+    path("characters/", CharacterDashboardView.as_view(), name="characters"),
+    path("characters/create/", CharacterCreatePageView.as_view(), name="character-create"),
     path("world", TemplateView.as_view(template_name="website/world.html"), name="world"),
     path("guilds", TemplateView.as_view(template_name="website/guilds.html"), name="guilds"),
     path("lore", LorePageView.as_view(), name="lore"),

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titleblock %} | Create Character{% endblock %}
+
+{% block content %}
+<div class="page-shell interior-shell">
+  <main class="interior-page panel obsidian-panel character-page">
+    <div class="panel-title-row">
+      <div class="panel-title">Create Character</div>
+      <div class="panel-subtitle">Web Entry</div>
+    </div>
+
+    <section class="interior-hero character-hero">
+      <p class="section-label">Identity</p>
+      <h1>Build the whole character shell before first play.</h1>
+      <p>Name, race, gender, and appearance all finalize here. Profession and guild still stay in-world.</p>
+    </section>
+
+    <section class="panel parchment-panel character-create-panel">
+      <div class="subpanel-title">Character Slots</div>
+      <p class="character-slot-label">
+        {% if character_slots.is_unlimited %}
+        Characters: {{ character_slots.used }} / unlimited
+        {% else %}
+        Characters: {{ character_slots.used }} / {{ character_slots.max }}
+        {% endif %}
+      </p>
+      <p class="character-create-copy">Finish the six-step builder, then the character can be selected and played immediately.</p>
+    </section>
+
+    <section class="panel parchment-panel character-create-panel">
+      {% if slot_limit_message %}
+      <div class="character-form-errors">{{ slot_limit_message }}</div>
+      {% endif %}
+      {% if character_slots.is_full %}
+      <div class="character-create-actions">
+        <span class="action-pill action-pill-dark is-disabled" aria-disabled="true">Create Character</span>
+        <a href="/characters/" class="action-pill action-pill-outline">Back</a>
+      </div>
+      {% else %}
+      <div class="character-wizard" id="character-builder" data-create-url="/api/characters/create" data-validate-name-url="/api/characters/validate-name" data-dashboard-url="/characters/">
+        {{ builder_config|json_script:"character-builder-config" }}
+        <div class="character-wizard-steps" id="character-builder-steps"></div>
+        <div class="character-form-errors" id="character-builder-error" hidden></div>
+        <div class="character-wizard-panel" id="character-builder-panel"></div>
+        <div class="character-create-actions">
+          <button type="button" class="action-pill action-pill-outline" id="character-builder-back">Back</button>
+          <button type="button" class="action-pill action-pill-dark" id="character-builder-next">Continue</button>
+        </div>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'website/js/character_builder.js' %}?v=20260407c"></script>
+{% endblock %}
