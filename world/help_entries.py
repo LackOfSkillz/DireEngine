@@ -158,7 +158,7 @@ Examples:
     },
     {
         "key": "fieldcraft",
-        "aliases": ["exploration", "survival", "stealth", "perception"],
+        "aliases": ["exploration", "survival", "gathering", "stealth", "perception"],
         "category": "Survival",
         "text": """
     Fieldcraft covers awareness, stealth, environmental actions, and trap or loot work.
@@ -177,8 +177,155 @@ Examples:
     - `inspect iron lockbox`
     - `pick iron lockbox with crude`
     - `harvest carcass`
+
+    See also:
+
+    - `help fishing`
         """,
         },
+    {
+        "key": "fishing",
+        "aliases": ["angling"],
+        "category": "Survival",
+        "text": """
+Fishing is a survival activity that lets you catch, process, and sell fish with basic equipment.
+It primarily trains Outdoorsmanship and can also train Skinning and Mechanical Lore.
+
+Most characters can fish. Empaths can fish too, but fishing adds empathic strain and makes the
+loop less forgiving as strain rises.
+
+Getting started:
+
+You will usually want:
+
+- `fishing pole`
+- `line`
+- `hook`
+- `bait`
+- `fish string` (optional, but useful for holding catches)
+
+In Town Green, Old Maren can hand you a starter kit:
+
+- `ask maren for gear`
+
+Preparing your gear:
+
+Before you cast, make sure the pole is rigged.
+
+- `rig pole`
+
+If the line tangles:
+
+- `untangle pole`
+
+If something is missing, the system tells you what part needs attention.
+
+Baiting the hook:
+
+Attach bait before you cast.
+
+- `bait <item>`
+
+Example:
+
+- `bait worm`
+
+Fishing:
+
+Cast with:
+
+- `fish`
+
+Watch the feedback. When the line gives you a real cue, respond with:
+
+- `pull`
+
+Timing matters. Pulling at the wrong moment can lose the catch.
+
+Possible outcomes:
+
+Fishing may result in:
+
+- catching a fish
+- pulling up junk
+- losing the catch
+- damaging your line
+- rare unexpected events
+
+Some catches are more difficult than others and require better skill and steadier gear handling.
+
+Managing your catch:
+
+If you have a fish string, landed fish may be stored there automatically.
+
+Use:
+
+- `inventory`
+
+to review what you are carrying.
+
+Processing fish:
+
+You can process a caught fish with:
+
+- `skin <fish>`
+
+Example:
+
+- `skin silver trout`
+
+Processing can produce:
+
+- `fish meat`
+- `fish skin`
+
+Higher Skinning skill improves the result.
+
+Selling your catch:
+
+You can sell individual items or bulk fishing goods to a buyer.
+
+- `sell <item>`
+- `sell fish`
+
+In Town Green, Old Maren buys fish, processed fish goods, and fishing salvage.
+Larger or more valuable catches usually pay better.
+
+Empath warning:
+
+Empath strain reduces fishing effectiveness and increases line-management trouble as it rises.
+Severe strain makes the loop noticeably harder, especially on hooks, struggles, and tangles.
+
+Skill progression:
+
+Fishing primarily trains:
+
+- `Outdoorsmanship` through catching and landing fish
+- `Skinning` through processing fish
+- `Mechanical Lore` through gear handling such as rigging and untangling
+
+Tips:
+
+- Start in easier fishing areas.
+- Keep your gear ready and untangled.
+- Use bait before casting.
+- Pay attention to line feedback before pulling.
+- Process fish if you want additional value from the catch.
+
+Summary:
+
+Fishing is a flexible survival loop that lets you gather resources, earn coin, train multiple
+skills, and explore different waters. Mastery comes from timing, gear care, and reading the
+environment.
+
+See also:
+
+- `help fieldcraft`
+- `help survival`
+- `help skin`
+- `help sell`
+        """,
+    },
         {
         "key": "training gear",
         "aliases": ["practice gear", "builder tools"],

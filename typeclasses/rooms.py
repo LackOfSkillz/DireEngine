@@ -25,6 +25,12 @@ from world.systems.ranger import (
 from .objects import ObjectParent
 
 
+def is_fishable(room):
+    if room is None:
+        return False
+    return bool(getattr(getattr(room, "db", None), "fishable", False))
+
+
 class Room(ObjectParent, DefaultRoom):
     """
     Rooms are like any Object, except their location is None
@@ -65,6 +71,8 @@ class Room(ObjectParent, DefaultRoom):
         self.db.alert_level = 0
         self.db.law_type = LAW_STANDARD
         self.db.region = "default_region"
+        self.db.fishable = False
+        self.db.fish_group = "River 1"
 
     def is_bank_room(self):
         if bool(getattr(self.db, "is_bank", False)):
@@ -396,7 +404,8 @@ class Room(ObjectParent, DefaultRoom):
             if not exit_key or exit_key in seen_labels:
                 continue
             seen_labels.add(exit_key)
-            rendered.append(f"|lc__clickmove__ {str(exit_obj.key)}|lt|y{exit_key}|n|le")
+            display_name = str(exit_obj.get_display_name(looker, **kwargs) or "").strip() or exit_key
+            rendered.append(f"|lc__clickmove__ {str(exit_obj.key)}|lt|y{display_name}|n|le")
 
         exit_names = iter_to_str(rendered, endsep=_(", and"))
         return f"|w{_('Exits')}:|n {exit_names}" if exit_names else ""

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Borrowed gear exit scenario did not report the correct exit direction: ['You return the borrowed fishing gear and head away.']",
+  "mode": "direct",
+  "scenario": "fishing-borrowed-gear-exit",
+  "seed": 557814400
+}

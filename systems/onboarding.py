@@ -41,6 +41,7 @@ TRAINING_HALL = "Training Hall"
 PRACTICE_YARD = "Practice Yard"
 ONBOARDING_ROOM_NAMES = {INTAKE_CHAMBER, TRAINING_HALL, PRACTICE_YARD}
 EMPATH_GUILD_ROOM = "Empath Guild"
+EMPATH_GUILD_INTERIOR_ENTRY_ROOM = "Empath Guild, Entry Hall"
 EMPATH_GUILD_ENTRY_ROOM = "Larkspur Lane, Midway"
 EMPATH_GUILD_ENTRY_DBREF = 4280
 RECOVERY_FALLBACK_ROOM = "Outer Yard"
@@ -332,6 +333,15 @@ def _resolve_recovery_destination():
 
 
 def _resolve_empath_guild_room():
+    try:
+        from world.areas.crossing.empath_guild import ensure_crossing_empath_guildhall
+
+        ensure_crossing_empath_guildhall()
+    except Exception:
+        pass
+    tagged_room = _find_room_by_tag("guild_empath")
+    if tagged_room:
+        return tagged_room
     lane_room = _find_room_by_dbref(EMPATH_GUILD_ENTRY_DBREF)
     if lane_room:
         for exit_obj in list(getattr(lane_room, "exits", []) or []):
@@ -340,11 +350,8 @@ def _resolve_empath_guild_room():
             if key not in {"guild", "north"} and "guild" not in aliases:
                 continue
             destination = getattr(exit_obj, "destination", None)
-            if destination:
+            if destination and str(getattr(getattr(destination, "db", None), "empath_guild_room", "") or "").strip().lower() == "main_hall":
                 return destination
-    tagged_room = _find_room_by_tag("guild_empath")
-    if tagged_room:
-        return tagged_room
     return _find_room_by_key(EMPATH_GUILD_ROOM)
 
 

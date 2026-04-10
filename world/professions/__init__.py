@@ -1,5 +1,6 @@
 from .professions import (
     DEFAULT_PROFESSION,
+    PROF_EMPATH,
     PROFESSION_ALIASES,
     PROFESSION_PROFILES,
     PROFESSION_TO_GUILD,
@@ -14,6 +15,7 @@ from .subsystems import create_subsystem
 
 __all__ = [
     "DEFAULT_PROFESSION",
+    "PROF_EMPATH",
     "PROFESSION_ALIASES",
     "PROFESSION_PROFILES",
     "PROFESSION_SKILL_WEIGHTS",

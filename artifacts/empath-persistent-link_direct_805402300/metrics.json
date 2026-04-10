@@ -1,0 +1,456 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 9,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_DIRECT_PATIENT",
+      "first_response_ms": 100.35010002320632,
+      "kind": "command",
+      "ms": 100.42410000460222,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 76.89440000103787,
+      "kind": "command",
+      "ms": 89.14229995571077,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 76.10200002091005,
+      "kind": "command",
+      "ms": 76.80020004045218,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 74.58280003629625,
+      "kind": "command",
+      "ms": 75.25350002106279,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "release",
+      "first_response_ms": 25.617400009650737,
+      "kind": "command",
+      "ms": 25.679600017610937,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_PERSISTENT_PATIENT",
+      "first_response_ms": 112.54359997110441,
+      "kind": "command",
+      "ms": 112.59960004827008,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 73.34240002091974,
+      "kind": "command",
+      "ms": 73.99659999646246,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 74.47260001208633,
+      "kind": "command",
+      "ms": 75.1328999758698,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 75.59510000282899,
+      "kind": "command",
+      "ms": 76.21639996068552,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    }
+  ],
+  "command_timings_ms": [
+    100.42410000460222,
+    89.14229995571077,
+    76.80020004045218,
+    75.25350002106279,
+    25.679600017610937,
+    112.59960004827008,
+    73.99659999646246,
+    75.1328999758698,
+    76.21639996068552
+  ],
+  "commands": {
+    "count": 9,
+    "max_ms": 112.58350004209206,
+    "timings_ms": [
+      100.42410000460222,
+      89.14229995571077,
+      76.80020004045218,
+      75.25350002106279,
+      25.679600017610937,
+      112.59960004827008,
+      73.99659999646246,
+      75.1328999758698,
+      76.21639996068552
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775607519.126076,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 76.61115556644897,
+  "interest": {
+    "active_object_count": 3,
+    "active_object_peak": 3,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_count_current": 8,
+    "source_count_peak": 8,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 7,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 3,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 3
+    },
+    "transition_total": 3
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 78.36057778008075,
+    "jitter": 23.970786974543717,
+    "max_ms": 112.59960004827008,
+    "min_ms": 25.679600017610937,
+    "p95_ms": 107.72940003080294,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_DIRECT_PATIENT",
+      "ms": 100.42410000460222,
+      "snapshot": "direct_linked"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 89.14229995571077,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 76.80020004045218,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 75.25350002106279,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "release",
+      "ms": 25.679600017610937,
+      "snapshot": "persistent_linked"
+    },
+    {
+      "command": "link persistent TEST_EMPATH_PERSISTENT_PATIENT",
+      "ms": 112.59960004827008,
+      "snapshot": "persistent_linked"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 73.99659999646246,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 75.1328999758698,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 76.21639996068552,
+      "snapshot": "persistent_strain"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 112.58350004209206,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3553, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:18:29-04).",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3553, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:18:29-04).",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3553, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:18:29-04).",
+    "You release your connection.",
+    "You settle into a deeper, longer-held connection.",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3553, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:18:29-04).",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3553, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:18:29-04).",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3553, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:18:29-04)."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 13732,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775607509.4076698,
+        "delay_s": 2.5,
+        "due_at": 1775607511.9076698,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "job_id": "352fa4e028ab454590bbcd59fc6caa02",
+        "key": "combat:roundtime:14370",
+        "owner": "#14370",
+        "owner_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "direct_linked",
+    "direct_strain",
+    "persistent_linked",
+    "persistent_strain",
+    "final"
+  ],
+  "started_at": 1775607504.9431016,
+  "state_transition_count": 5,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath persistent-link coverage validates endurance-vs-throughput tradeoffs and clean separation failure without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 78.34448889803349,
+      "count": 9,
+      "entries": [
+        {
+          "duration_ms": 100.4079999984242,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775607509.0313647
+        },
+        {
+          "duration_ms": 89.127000013832,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775607509.1225352
+        },
+        {
+          "duration_ms": 76.78250002209097,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775607509.1987653
+        },
+        {
+          "duration_ms": 75.23630000650883,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775607509.2746892
+        },
+        {
+          "duration_ms": 25.66280000610277,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "release"
+          },
+          "timestamp": 1775607509.30449
+        },
+        {
+          "duration_ms": 112.58350004209206,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775607509.4246364
+        },
+        {
+          "duration_ms": 73.98370001465082,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775607509.499505
+        },
+        {
+          "duration_ms": 75.11509995674714,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775607509.575268
+        },
+        {
+          "duration_ms": 76.20150002185255,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775607509.6515536
+        }
+      ],
+      "max_ms": 112.58350004209206,
+      "total_ms": 705.1004000823013
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 8
+}

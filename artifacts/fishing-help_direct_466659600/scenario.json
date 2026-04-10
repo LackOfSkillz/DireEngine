@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Help output verification should still emit lag telemetry without turning formatting checks into environment failures."
+  },
+  "mode": "direct",
+  "name": "fishing-help",
+  "seed": 466659600,
+  "started_at": 1775754942.7914398
+}

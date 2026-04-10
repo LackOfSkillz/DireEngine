@@ -1,0 +1,294 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 4,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 633.308699936606,
+      "kind": "command",
+      "ms": 633.7808000389487,
+      "npc_response_delay_ms": 633.6530999979004,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 117.52919992431998,
+      "kind": "command",
+      "ms": 117.59680008981377,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 14.24740010406822,
+      "kind": "command",
+      "ms": 15.687900013290346,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "west",
+      "first_response_ms": 636.4359998842701,
+      "kind": "command",
+      "ms": 1224.9705999856815,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    633.7808000389487,
+    117.59680008981377,
+    15.687900013290346,
+    1224.9705999856815
+  ],
+  "commands": {
+    "count": 4,
+    "max_ms": 1224.9325999291614,
+    "timings_ms": [
+      633.7808000389487,
+      117.59680008981377,
+      15.687900013290346,
+      1224.9705999856815
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775761527.8746972,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 350.3803249623161,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 4,
+  "lag": {
+    "avg_ms": 498.00902503193356,
+    "jitter": 555.0538216763166,
+    "max_ms": 1224.9705999856815,
+    "min_ms": 15.687900013290346,
+    "p95_ms": 1136.2921299936713,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "ask maren for gear",
+      "ms": 633.7808000389487,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 117.59680008981377,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 15.687900013290346,
+      "snapshot": "final"
+    },
+    {
+      "command": "west",
+      "ms": 1224.9705999856815,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 1224.9325999291614,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 633.6530999979004,
+  "output_log": [
+    "Old Maren stoops beside her baskets, sorts out the basics in practiced order, and presses them into your hands one piece at a time.",
+    "Thread your catch onto this if you plan to keep fishing.",
+    "Old Maren says, \"Start with the pole, then mind your bait. I've set you up with fishing pole, fish string, hook, line, worm.\"",
+    "You bait your hook with worm.",
+    "You cast your line into the water.",
+    "You wait for a bite...",
+    "|cTEST_BORROWED_GEAR_WEST|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}",
+    "You disturb the line."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 18145,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 633.7808000389487
+    },
+    {
+      "cmd": "west",
+      "ms": 1224.9705999856815
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775761509.1410148,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Borrowed-gear exit cleanup should report lag telemetry without masking return-logic regressions."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 497.9767499899026,
+      "count": 4,
+      "entries": [
+        {
+          "duration_ms": 633.7532000616193,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "ask"
+          },
+          "timestamp": 1775761513.946042
+        },
+        {
+          "duration_ms": 117.56799998693168,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "bait"
+          },
+          "timestamp": 1775761514.7320955
+        },
+        {
+          "duration_ms": 15.65319998189807,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "fish"
+          },
+          "timestamp": 1775761515.2673304
+        },
+        {
+          "duration_ms": 1224.9325999291614,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "west"
+          },
+          "timestamp": 1775761517.4067538
+        }
+      ],
+      "max_ms": 1224.9325999291614,
+      "total_ms": 1991.9069999596104
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -143,14 +143,13 @@ class CmdStats(Command):
                 links = char.get_empath_links(require_local=False, include_group=False)
                 if links:
                     primary = links[0]
-                    detail = " deep" if primary.get("deepened") else ""
-                    lines.insert(4, f"Active Link: {primary['target'].key} [{str(primary.get('type', 'touch')).title()} {primary.get('strength_label', 'Weak')}{detail}] (+{max(0, len(links) - 1)} more)")
+                    lines.insert(4, f"Active Link: {primary['target'].key} [{str(primary.get('type', 'touch')).title()} {primary.get('condition', 'steady').title()} S{int(primary.get('stability', 0) or 0)}]")
                 else:
                     lines.insert(4, "Active Link: None")
             if hasattr(char, "get_empath_unity_state"):
                 unity = char.get_empath_unity_state()
                 if unity:
-                    lines.insert(5, f"Unity: {', '.join(member.key for member in unity.get('members', []))}")
+                    lines.insert(5, f"Unity: {unity['primary_target'].key} <-> {unity['secondary_target'].key} [{unity.get('condition', 'steady').title()} S{int(unity.get('stability', 0) or 0)}]")
             if hasattr(char, "get_empath_wounds"):
                 wounds = char.get_empath_wounds()
                 lines.insert(6, f"Wounds: V {int(wounds.get('vitality', 0) or 0)}  B {int(wounds.get('bleeding', 0) or 0)}  F {int(wounds.get('fatigue', 0) or 0)}  T {int(wounds.get('trauma', 0) or 0)}  P {int(wounds.get('poison', 0) or 0)}  D {int(wounds.get('disease', 0) or 0)}")

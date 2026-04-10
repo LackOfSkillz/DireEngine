@@ -124,7 +124,11 @@ class EmpathSubsystem(ProfessionSubsystem):
             state["overdraw"] = bool(character.is_empath_overdrawn())
         if hasattr(character, "get_empath_unity_state"):
             unity = character.get_empath_unity_state()
-            state["unity"] = [member.key for member in unity.get("members", [])] if unity else []
+            state["unity"] = {
+                "members": [member.key for member in unity.get("members", [])],
+                "stability": int(unity.get("stability", 0) or 0),
+                "condition": unity.get("condition"),
+            } if unity else []
         if hasattr(character, "get_empath_wounds"):
             state["wounds"] = character.get_empath_wounds()
         return state

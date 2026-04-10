@@ -6,8 +6,8 @@ class CmdUnity(Command):
     Weave a shared empathic bond between allies.
 
     Examples:
-        unity jekar corl
-        unity jekar, corl, aelis
+        unity corl
+        unity status
     """
 
     key = "unity"
@@ -21,20 +21,19 @@ class CmdUnity(Command):
             return
         raw_args = str(self.args or "").strip()
         if not raw_args:
-            caller.msg("Usage: unity <target1> <target2> [target3]")
+            caller.msg("Usage: unity <target> or unity status")
             return
-        if "," in raw_args:
-            names = [entry.strip() for entry in raw_args.split(",") if entry.strip()]
-        else:
-            names = [entry.strip() for entry in raw_args.split() if entry.strip()]
-        if len(names) < 2:
-            caller.msg("You need at least two allies for unity.")
-            return
-        targets = []
-        for name in names[:3]:
-            target = caller.search(name, location=caller.location)
-            if not target:
+        if raw_args.lower() == "status":
+            unity = caller.get_empath_unity_state() if hasattr(caller, "get_empath_unity_state") else None
+            if not unity:
+                caller.msg("You are not holding a shared burden together.")
                 return
-            targets.append(target)
-        ok, message = caller.create_empath_unity(targets) if hasattr(caller, "create_empath_unity") else (False, "You fail to weave the bond.")
+            caller.msg(f"Unity: {unity['primary_target'].key} <-> {unity['secondary_target'].key}")
+            caller.msg(f"Stability: {int(unity.get('stability', 0) or 0)}")
+            caller.msg(f"Condition: {str(unity.get('condition') or 'steady').title()}")
+            return
+        target = caller.search(raw_args, location=caller.location)
+        if not target:
+            return
+        ok, message = caller.create_empath_unity(target) if hasattr(caller, "create_empath_unity") else (False, "You fail to weave the bond.")
         caller.msg(message)

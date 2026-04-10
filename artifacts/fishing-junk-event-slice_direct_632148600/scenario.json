@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Fishing junk and event validation should report lag telemetry without masking weighted outcome or safe-zone regressions."
+  },
+  "mode": "direct",
+  "name": "fishing-junk-event-slice",
+  "seed": 632148600,
+  "started_at": 1775748563.8625915
+}

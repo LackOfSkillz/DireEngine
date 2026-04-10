@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Linking should award transient empathy pool.",
+  "mode": "direct",
+  "scenario": "empath-learning-unification",
+  "seed": 322861000
+}

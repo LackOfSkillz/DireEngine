@@ -1,0 +1,178 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 72.81703752232715,
+  "lag": {
+    "avg_ms": 72.91824999265373,
+    "jitter": 148.7224401895456,
+    "max_ms": 438.17189999390393,
+    "min_ms": 0.04200008697807789,
+    "p95_ms": 302.0540650060864,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "pull",
+      "ms": 48.633099999278784,
+      "snapshot": "final"
+    },
+    {
+      "command": "cast",
+      "ms": 10.972399963065982,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 10.23200002964586,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT start_fishing_cast",
+      "ms": 0.04200008697807789,
+      "snapshot": "final"
+    },
+    {
+      "command": "get gear",
+      "ms": 10.321499896235764,
+      "snapshot": "final"
+    },
+    {
+      "command": "ask maren for gear",
+      "ms": 438.17189999390393,
+      "snapshot": "final"
+    },
+    {
+      "command": "ask maren for gear",
+      "ms": 15.70929994340986,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait hook",
+      "ms": 49.26380002871156,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 226.80560004664585,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 438.17189999390393
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 437.95560009311885,
+      "kind": "command",
+      "ms": 438.17189999390393,
+      "npc_response_delay_ms": 438.0750000709668,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "pull",
+      "first_response_ms": 48.53120003826916,
+      "kind": "command",
+      "ms": 48.633099999278784,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "cast",
+      "first_response_ms": 10.891700047068298,
+      "kind": "command",
+      "ms": 10.972399963065982,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 10.167100001126528,
+      "kind": "command",
+      "ms": 10.23200002964586,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT start_fishing_cast",
+      "first_response_ms": 0.02580008003860712,
+      "kind": "direct",
+      "ms": 0.04200008697807789,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "get gear",
+      "first_response_ms": 10.253499960526824,
+      "kind": "command",
+      "ms": 10.321499896235764,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 437.95560009311885,
+      "kind": "command",
+      "ms": 438.17189999390393,
+      "npc_response_delay_ms": 438.0750000709668,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 15.53620002232492,
+      "kind": "command",
+      "ms": 15.70929994340986,
+      "npc_response_delay_ms": 15.53620002232492,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait hook",
+      "first_response_ms": 49.175199936144054,
+      "kind": "command",
+      "ms": 49.26380002871156,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 16575,
+        "is_dead": false,
+        "key": "TEST_BORROWED_FULL_LOOP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_BORROWED_FULL_LOOP_SOUTH",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 16577,
+          "key": "fishing pole",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.items.fishing_pole.FishingPole"
+        },
+        {
+          "id": 16578,
+          "key": "worm",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        },
+        {
+          "id": 16579,
+          "key": "hook",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16580,
+          "key": "line",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16581,
+          "key": "fish string",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.items.fish_string.FishString"
+        },
+        {
+          "id": 16582,
+          "key": "river salvage",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16583,
+          "key": "cleaned fish skin",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 16572,
+            "key": "TEST_BORROWED_FULL_LOOP_WATER",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16573,
+            "key": "TEST_BORROWED_FULL_LOOP_SOUTH",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16574,
+            "key": "south",
+            "location": "TEST_BORROWED_FULL_LOOP_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16575,
+            "key": "TEST_BORROWED_FULL_LOOP_CHAR",
+            "location": "TEST_BORROWED_FULL_LOOP_SOUTH",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_BORROWED_FULL_LOOP_CHAR"
+        ],
+        "exits": [],
+        "id": 16573,
+        "key": "TEST_BORROWED_FULL_LOOP_SOUTH"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775761267.6614373
+    },
+    "label": "final"
+  }
+]

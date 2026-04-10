@@ -111,6 +111,7 @@ from world.systems.ranger.companion import (
     normalize_ranger_companion,
 )
 from world.systems.ranger.beseech import get_beseech_kinds, get_beseech_profile
+from world.systems.wounds import WOUND_RULES, apply_poison_tick, describe_wound, get_disease_penalty
 from world.systems.interest import (
     clear_direct_interest,
     clear_subject_interest,
@@ -119,6 +120,20 @@ from world.systems.interest import (
     sync_subject_interest,
 )
 from world.systems.skills import MINDSTATE_MAX, SkillHandler, TEMPLATE_EXP_SKILLS, award_exp_skill, is_active
+from world.systems.circles import (
+    get_circle_requirements,
+    get_highest_configured_circle,
+    is_circle_location_enforced,
+    is_valid_empath_circle_location,
+)
+from world.systems.empath_unlocks import (
+    EMPATH_ABILITY_UNLOCKS,
+    EMPATH_UNLOCKS,
+    format_empath_unlock_name,
+    get_empath_unlock,
+    get_empath_unlock_rank,
+    get_next_empath_unlock,
+)
 
 from .objects import ObjectParent
 
@@ -305,11 +320,12 @@ WEIGHT_UNIT = 1.0
 COIN_WEIGHT = 0.002
 MAX_CONTAINER_WEIGHT_DEPTH = 5
 
-VENDOR_TYPES = ("general", "gem_buyer", "pawn")
+VENDOR_TYPES = ("general", "gem_buyer", "pawn", "fish_buyer")
 VENDOR_PAYOUTS = {
     "general": {"default": 0.5, "gems": None},
     "gem_buyer": {"default": None, "gems": 0.9},
     "pawn": {"default": 0.6, "gems": 0.7},
+    "fish_buyer": {"default": None, "gems": None},
 }
 
 STRICT_BOX_LOCK_DIFFICULTY = 35
@@ -323,6 +339,12 @@ SKILLSET_ALIASES = {
     "survival": "survival",
     "weapon": "weapons",
     "weapons": "weapons",
+}
+
+EXP_SKILLSET_TIER_OVERRIDES = {
+    "empathy": "primary",
+    "first_aid": "secondary",
+    "scholarship": "secondary",
 }
 
 MINDSTATE_LEVELS = [
@@ -361,6 +383,7 @@ SKILL_REGISTRY = {
     "light_armor": {"category": "armor", "visibility": "shared", "description": "training in light armor use", "starter_rank": 0},
     "light_edge": {"category": "combat", "visibility": "shared", "description": "fighting with light edged weapons", "starter_rank": 0},
     "locksmithing": {"category": "survival", "visibility": "shared", "description": "picking locks and disarming traps", "starter_rank": 0},
+    "mechanical_lore": {"category": "lore", "visibility": "shared", "description": "understanding tools, rigs, and practical systems", "starter_rank": 0},
     "outdoorsmanship": {"category": "survival", "visibility": "shared", "description": "foraging, wilderness interaction, and natural gathering", "starter_rank": 0},
     "perception": {"category": "survival", "visibility": "shared", "description": "noticing hidden threats, traps, and subtle details", "starter_rank": 1},
     "plate_armor": {"category": "armor", "visibility": "shared", "description": "training in plate armor use", "starter_rank": 0},
@@ -427,16 +450,16 @@ STEALTH_FATIGUE_WINDOW = 90.0
 STEALTH_MOVE_ROUNDTIME = 0.5
 
 DEFAULT_INJURIES = {
-    "head": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 100, "vital": True},
-    "chest": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 120, "vital": True},
-    "abdomen": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 110, "vital": True},
-    "back": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 110, "vital": True},
-    "left_arm": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 80, "vital": False},
-    "right_arm": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 80, "vital": False},
-    "left_hand": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 60, "vital": False},
-    "right_hand": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 60, "vital": False},
-    "left_leg": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 90, "vital": False},
-    "right_leg": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 90, "vital": False},
+    "head": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 100, "vital": True},
+    "chest": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 120, "vital": True},
+    "abdomen": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 110, "vital": True},
+    "back": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 110, "vital": True},
+    "left_arm": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 80, "vital": False},
+    "right_arm": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 80, "vital": False},
+    "left_hand": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 60, "vital": False},
+    "right_hand": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 60, "vital": False},
+    "left_leg": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 90, "vital": False},
+    "right_leg": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 90, "vital": False},
 }
 
 BODY_PART_ORDER = tuple(DEFAULT_INJURIES.keys())
@@ -475,19 +498,17 @@ DEFAULT_EQUIPMENT = {
 }
 
 DEFAULT_EMPATH_WOUNDS = {
+    "fatigue": 0,
     "vitality": 0,
     "bleeding": 0,
-    "fatigue": 0,
-    "trauma": 0,
     "poison": 0,
     "disease": 0,
 }
 
 EMPATH_WOUND_LABELS = {
+    "fatigue": "Fatigue",
     "vitality": "Vitality",
     "bleeding": "Bleeding",
-    "fatigue": "Fatigue",
-    "trauma": "Trauma",
     "poison": "Poison",
     "disease": "Disease",
 }
@@ -496,54 +517,91 @@ EMPATH_WOUND_ALIASES = {
     "health": "vitality",
 }
 
+EMPATH_SELECTIVE_TAKE_BUCKETS = {
+    "arm": ("bleeding", "vitality"),
+    "leg": ("bleeding", "vitality"),
+    "chest": ("vitality", "bleeding"),
+    "head": ("vitality", "bleeding"),
+}
+EMPATH_PARTIAL_TAKE_BUCKET_PRIORITY = ("bleeding", "poison", "disease")
+
 EMPATH_TRANSFER_CONFIG = {
-    "vitality": {"default": 18, "efficiency": 1.0, "self_tax": 0.10, "risk": 0.12},
-    "bleeding": {"default": 26, "efficiency": 1.1, "self_tax": 0.25, "risk": 0.28},
-    "fatigue": {"default": 24, "efficiency": 1.2, "self_tax": 0.05, "risk": 0.06},
-    "trauma": {"default": 12, "efficiency": 0.75, "self_tax": 0.18, "risk": 0.22},
-    "poison": {"default": 14, "efficiency": 0.85, "self_tax": 0.20, "risk": 0.26},
-    "disease": {"default": 10, "efficiency": 0.80, "self_tax": 0.16, "risk": 0.20},
+    "fatigue": {"default": 10},
+    "vitality": {
+        "default": 20,
+        "risk": 0.45,
+        "hp_ratio": 0.5,
+        "fatigue_ratio": 0.35,
+        "shock_ratio": 0.3,
+    },
+    "bleeding": {"default": 20},
+    "poison": {"default": 20},
+    "disease": {"default": 20},
 }
 
 EMPATH_LINK_TOUCH = "touch"
-EMPATH_LINK_STANDARD = "link"
+EMPATH_LINK_DIRECT = "direct"
+EMPATH_LINK_STANDARD = EMPATH_LINK_DIRECT
 EMPATH_LINK_PERSISTENT = "persistent"
 EMPATH_LINK_GROUP = "group"
 EMPATH_LINK_TYPES = {
     EMPATH_LINK_TOUCH,
-    EMPATH_LINK_STANDARD,
+    EMPATH_LINK_DIRECT,
     EMPATH_LINK_PERSISTENT,
     EMPATH_LINK_GROUP,
 }
 EMPATH_LINK_PRIORITY = {
     EMPATH_LINK_GROUP: 0,
     EMPATH_LINK_TOUCH: 1,
-    EMPATH_LINK_STANDARD: 2,
+    EMPATH_LINK_DIRECT: 2,
     EMPATH_LINK_PERSISTENT: 3,
 }
 EMPATH_LINK_DURATIONS = {
     EMPATH_LINK_TOUCH: 30,
-    EMPATH_LINK_STANDARD: 120,
+    EMPATH_LINK_DIRECT: 120,
     EMPATH_LINK_PERSISTENT: 300,
     EMPATH_LINK_GROUP: 90,
 }
 EMPATH_LINK_BASE_STRENGTH = {
-    EMPATH_LINK_TOUCH: 30,
-    EMPATH_LINK_STANDARD: 55,
-    EMPATH_LINK_PERSISTENT: 70,
+    EMPATH_LINK_TOUCH: 60,
+    EMPATH_LINK_DIRECT: 100,
+    EMPATH_LINK_PERSISTENT: 90,
     EMPATH_LINK_GROUP: 45,
 }
+EMPATH_LINK_BASE_STABILITY = {
+    EMPATH_LINK_TOUCH: 80,
+    EMPATH_LINK_DIRECT: 100,
+    EMPATH_LINK_PERSISTENT: 120,
+}
+EMPATH_LINK_STABILITY_RULES = {
+    EMPATH_LINK_TOUCH: {"small_transfer": 10, "large_transfer": 20, "damage": 15},
+    EMPATH_LINK_DIRECT: {"small_transfer": 6, "large_transfer": 15, "damage": 10},
+    EMPATH_LINK_PERSISTENT: {"small_transfer": 4, "large_transfer": 12, "damage": 10},
+}
+EMPATH_UNITY_STABILITY_RULES = {
+    "transfer": 15,
+    "damage": 10,
+    "shock_worsen": 15,
+    "redirect": 20,
+}
+EMPATH_UNITY_SMOOTH_RATIO = 0.15
 EMPATH_UNITY_MAX_TARGETS = 3
 EMPATH_UNITY_DURATION = 90
 EMPATH_UNITY_SHARE_RATIO = 0.4
+EMPATH_SHOCK_THRESHOLDS = {
+    "clear": 0,
+    "strained": 20,
+    "dull": 50,
+    "disconnected": 80,
+}
 EMPATH_SYSTEM_CONFIG = {
     "shock_penalties": {
         "major_threshold": 80,
         "medium_threshold": 50,
         "minor_threshold": 20,
-        "major_modifier": 0.4,
-        "medium_modifier": 0.7,
-        "minor_modifier": 0.9,
+        "major_modifier": 0.35,
+        "medium_modifier": 0.6,
+        "minor_modifier": 0.85,
     },
     "link_strength": {
         "time_bonus_scale": 10.0,
@@ -584,14 +642,45 @@ EMPATH_SYSTEM_CONFIG = {
         "duration": 25.0,
     },
     "center": {
-        "fatigue_reduction": 14,
-        "shock_reduction": 6,
-        "wound_reduction": 8,
+        "fatigue_cost": 10,
+        "shock_reduction": 15,
         "roundtime": 2.5,
         "overdraw_clear_shock_threshold": 18,
         "overdraw_clear_fatigue_threshold": 50,
     },
 }
+EMPATH_GUILD_ZONE_TAGS = {
+    "recovery": "empath_zone_recovery",
+    "training": "empath_zone_training",
+    "triage": "empath_zone_triage",
+}
+EMPATH_SCAR_RULES = {
+    "severity_threshold": 45,
+    "trauma_threshold": 70,
+    "repeat_threshold": 15,
+    "repeat_gate": 25,
+    "max_scars": 10,
+}
+EMPATH_STABILIZE_RULES = {
+    "base_duration": 10.0,
+    "duration_scale": 0.08,
+    "base_strength": 0.35,
+    "strength_scale": 0.005,
+    "max_strength": 1.0,
+}
+EMPATH_CHANNEL_RULES = {
+    "pulse_interval": 4.0,
+    "base_ratio": 0.4,
+    "min_amount": 4,
+    "fatigue_base": 2,
+    "fatigue_escalation": 2,
+    "shock_every": 2,
+}
+EMPATH_TRAINING_UNSET = 0
+EMPATH_TRAINING_PATIENT = 1
+EMPATH_TRAINING_BASIC = 2
+EMPATH_TUTORIAL_LOCKED_ABILITIES = {"link", "unity", "redirect"}
+EMPATH_TUTORIAL_WOUNDS = {"vitality", "bleeding"}
 
 FAVOR_SYSTEM_CONFIG = {
     "base_cost": 1000,
@@ -801,10 +890,12 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.nature_focus = 0
         self.db.ranger_companion = normalize_ranger_companion()
         self.db.empath_shock = 0
+        self.db.empath_link = None
         self.db.active_link = None
         self.db.empath_links = {}
         self.db.empath_unity = None
         self.db.wounds = _copy_default_empath_wounds()
+        self.db.stabilized_until = 0.0
         self.db.warrior_circle = 1
         self.db.unlocked_warrior_abilities = []
         self.db.unlocked_warrior_passives = []
@@ -983,6 +1074,10 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_unpuppet(self, *args, **kwargs):
         super().at_post_unpuppet(*args, **kwargs)
+        if bool(getattr(self.ndb, "is_fishing", False)) or getattr(self.ndb, "fishing_session", None) is not None:
+            from world.systems.fishing import cancel_fishing_session
+
+            cancel_fishing_session(self)
         clear_subject_interest(self)
         self.reset_thief_pressure_states()
 
@@ -1000,8 +1095,26 @@ class Character(ObjectParent, DefaultCharacter):
         if not isinstance(legacy_entry, Mapping):
             legacy_entry = {}
 
-        skill.rank = max(0, int(legacy_entry.get("rank", skill.rank) or 0))
-        skill.skillset = self.get_skillset(skill_name)
+        persisted_entry = self._get_exp_skill_store().get(skill_name, {})
+        if not isinstance(persisted_entry, Mapping):
+            persisted_entry = {}
+
+        if persisted_entry:
+            skill.rank = max(
+                0,
+                int(skill.rank or 0),
+                int(persisted_entry.get("rank", 0) or 0),
+            )
+        else:
+            skill.rank = max(
+                0,
+                int(skill.rank or 0),
+                int(legacy_entry.get("rank", 0) or 0),
+            )
+        skill.rank_progress = max(0.0, float(persisted_entry.get("rank_progress", skill.rank_progress) or 0.0))
+        skill.pool = max(0.0, float(persisted_entry.get("pool", skill.pool) or 0.0))
+        skill.last_trained = max(0.0, float(persisted_entry.get("last_trained", skill.last_trained) or 0.0))
+        skill.skillset = str(persisted_entry.get("skillset") or self.get_exp_skillset_tier(skill_name) or "primary")
         skill.recalc_pool()
         return skill
 
@@ -1012,6 +1125,223 @@ class Character(ObjectParent, DefaultCharacter):
         for skill_name in TEMPLATE_EXP_SKILLS:
             self._sync_exp_skill_state(skill_name, current_skills.get(skill_name, {}))
         return handler
+
+    def _get_exp_skill_store(self):
+        store = getattr(self.db, "exp_skill_state", None)
+        return dict(store) if isinstance(store, Mapping) else {}
+
+    def _persist_exp_skill_state(self, skill):
+        if skill is None:
+            return None
+        store = self._get_exp_skill_store()
+        store[skill.name] = {
+            "rank": int(getattr(skill, "rank", 0) or 0),
+            "rank_progress": float(getattr(skill, "rank_progress", 0.0) or 0.0),
+            "pool": float(getattr(skill, "pool", 0.0) or 0.0),
+            "skillset": str(getattr(skill, "skillset", "primary") or "primary"),
+            "mindstate": int(getattr(skill, "mindstate", 0) or 0),
+            "last_trained": float(getattr(skill, "last_trained", 0.0) or 0.0),
+        }
+        self.db.exp_skill_state = store
+
+        skills = dict(self.db.skills or {})
+        legacy_entry = dict(skills.get(skill.name) or {"rank": 0, "mindstate": 0})
+        legacy_entry["rank"] = max(int(legacy_entry.get("rank", 0) or 0), int(getattr(skill, "rank", 0) or 0))
+        legacy_entry.setdefault("mindstate", int(legacy_entry.get("mindstate", 0) or 0))
+        skills[skill.name] = legacy_entry
+        self.db.skills = skills
+        return skill
+
+    def get_exp_skillset_tier(self, skill_name):
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if normalized in EXP_SKILLSET_TIER_OVERRIDES:
+            return EXP_SKILLSET_TIER_OVERRIDES[normalized]
+        metadata = self.get_skill_metadata(normalized)
+        category = str(metadata.get("category", "") or "").strip().lower()
+        if category in {"primary", "secondary", "tertiary"}:
+            return category
+        return "primary"
+
+    def award_skill_experience(self, skill_name, difficulty, success=True, outcome=None, event_key=None, context_multiplier=1.0):
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if not normalized:
+            return 0.0
+        exp_skill = self._sync_exp_skill_state(normalized)
+        exp_skill.skillset = self.get_exp_skillset_tier(normalized)
+        exp_skill.recalc_pool()
+        gained = award_exp_skill(
+            self,
+            normalized,
+            difficulty,
+            success=success,
+            outcome=outcome,
+            event_key=event_key,
+            context_multiplier=context_multiplier,
+        )
+        self._persist_exp_skill_state(exp_skill)
+        return gained
+
+    def compute_empathy_xp(self, action_key, difficulty, amount=0, target=None, wound_key=None, requested_fraction=None, rate_key=None, unity=False):
+        normalized_action = str(action_key or "take").strip().lower() or "take"
+        multiplier = {
+            "link": 0.35,
+            "unity": 0.6,
+            "redirect": 0.85,
+            "manipulate": 0.75,
+            "perceive_health": 0.2,
+            "perceive_target": 0.3,
+            "take": 1.0,
+            "channel": 0.7,
+            "mend": 0.45,
+            "purge": 0.55,
+            "scar_heal": 0.5,
+            "legacy_transfer": 0.9,
+        }.get(normalized_action, 1.0)
+
+        normalized_wound = self.normalize_empath_wound_key(wound_key) if wound_key else ""
+        if normalized_wound == "vitality":
+            multiplier *= 1.25
+        elif normalized_wound in {"poison", "disease"}:
+            multiplier *= 1.1
+
+        if requested_fraction is not None:
+            multiplier *= max(0.45, min(1.0, float(requested_fraction) + 0.25))
+        if rate_key == "slow":
+            multiplier *= 0.85
+        elif rate_key == "fast":
+            multiplier *= 1.1
+        if unity:
+            multiplier *= 1.1
+        if target is not None and hasattr(target, "is_empath") and target.is_empath():
+            multiplier *= 0.25
+        if int(amount or 0) > 0:
+            multiplier *= max(0.5, min(1.4, 0.65 + (int(amount or 0) / 40.0)))
+
+        return {
+            "difficulty": max(1, int(difficulty or 1)),
+            "event_key": f"empathy_{normalized_action}",
+            "context_multiplier": multiplier,
+        }
+
+    def award_empathy_experience(self, action_key, difficulty, amount=0, target=None, wound_key=None, requested_fraction=None, rate_key=None, unity=False):
+        profile = self.compute_empathy_xp(
+            action_key,
+            difficulty,
+            amount=amount,
+            target=target,
+            wound_key=wound_key,
+            requested_fraction=requested_fraction,
+            rate_key=rate_key,
+            unity=unity,
+        )
+        return self.award_skill_experience(
+            "empathy",
+            profile["difficulty"],
+            success=True,
+            outcome="success",
+            event_key=profile["event_key"],
+            context_multiplier=profile["context_multiplier"],
+        )
+
+    def _get_first_aid_tend_profile(self, body_part):
+        bleed = max(0, int((body_part or {}).get("bleed", 0) or 0))
+        trauma = max(0, int(self.get_part_trauma(body_part) or 0)) if body_part else 0
+        severity = max(1, (bleed * 12) + trauma)
+        if severity >= 60:
+            return {"difficulty": 22, "context_multiplier": 1.35, "severity": severity}
+        if severity >= 30:
+            return {"difficulty": 16, "context_multiplier": 1.05, "severity": severity}
+        if severity >= 12:
+            return {"difficulty": 12, "context_multiplier": 0.85, "severity": severity}
+        return {"difficulty": 10, "context_multiplier": 0.65, "severity": severity}
+
+    def start_first_aid_training_window(self, part, tender=None):
+        body_part = self.get_body_part(part)
+        if not body_part:
+            return False
+        tend_state = dict(body_part.get("tend") or {})
+        now = time.time()
+        training_until = float(tend_state.get("xp_window_until", 0.0) or 0.0)
+        if training_until > now:
+            body_part["tend"] = tend_state
+            return True
+        profile = self._get_first_aid_tend_profile(body_part)
+        tender_id = int(getattr(tender or self, "id", 0) or 0)
+        tend_state.update(
+            {
+                "xp_window_until": now + 300.0,
+                "xp_next_at": now + 15.0,
+                "xp_pulses": 0,
+                "xp_tender_id": tender_id,
+                "xp_severity": int(profile["severity"]),
+            }
+        )
+        body_part["tend"] = tend_state
+        return True
+
+    def process_first_aid_tend_training(self, now=None):
+        current_time = float(now or time.time())
+        injuries = getattr(self.db, "injuries", None) or {}
+        changed = False
+        for _part_name, body_part in injuries.items():
+            if not isinstance(body_part, Mapping):
+                continue
+            tend_state = dict(body_part.get("tend") or {})
+            window_until = float(tend_state.get("xp_window_until", 0.0) or 0.0)
+            next_at = float(tend_state.get("xp_next_at", 0.0) or 0.0)
+            pulses = max(0, int(tend_state.get("xp_pulses", 0) or 0))
+            tender_id = int(tend_state.get("xp_tender_id", 0) or 0)
+            if window_until <= current_time or pulses >= 20 or next_at <= 0.0 or current_time < next_at:
+                continue
+            if int(body_part.get("bleed", 0) or 0) <= 0 and int(self.get_part_trauma(body_part) or 0) <= 0:
+                tend_state["xp_window_until"] = 0.0
+                tend_state["xp_next_at"] = 0.0
+                body_part["tend"] = tend_state
+                changed = True
+                continue
+
+            tender = self if tender_id == int(getattr(self, "id", 0) or 0) else None
+            if tender is None and tender_id > 0:
+                result = search_object(f"#{tender_id}")
+                tender = result[0] if result else None
+            if tender is None or not hasattr(tender, "award_skill_experience"):
+                continue
+
+            profile = self._get_first_aid_tend_profile(body_part)
+            severity_multiplier = max(
+                float(profile["context_multiplier"]),
+                0.5 + (max(1, int(tend_state.get("xp_severity", profile["severity"]) or profile["severity"])) / 80.0),
+            )
+            tender.award_skill_experience(
+                "first_aid",
+                profile["difficulty"],
+                success=True,
+                outcome="success",
+                event_key="first_aid_tend",
+                context_multiplier=severity_multiplier,
+            )
+            tend_state["xp_pulses"] = pulses + 1
+            tend_state["xp_next_at"] = current_time + 15.0
+            body_part["tend"] = tend_state
+            changed = True
+        return changed
+
+    def _is_anatomy_study_item(self, item):
+        if not item:
+            return False
+        if bool(getattr(item.db, "anatomy_study", False) or getattr(item.db, "anatomy_chart", False)):
+            return True
+        raw_tags = list(getattr(item.db, "study_tags", None) or [])
+        normalized_tags = {str(tag or "").strip().lower() for tag in raw_tags}
+        if "anatomy" in normalized_tags:
+            return True
+        searchable = " ".join(
+            [
+                str(getattr(item, "key", "") or ""),
+                str(getattr(item.db, "desc", "") or ""),
+            ]
+        ).lower()
+        return "anatomy" in searchable or "anatomical" in searchable or "body chart" in searchable
 
     def at_after_move(self, source_location, **kwargs):
         super().at_after_move(source_location, **kwargs)
@@ -1156,6 +1486,16 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.ranger_companion = normalize_ranger_companion()
         if self.db.empath_shock is None:
             self.db.empath_shock = 0
+        if getattr(self.db, "empath_rank", None) is None:
+            self.db.empath_rank = 0
+        if getattr(self.db, "empath_xp", None) is None:
+            self.db.empath_xp = 0
+        if getattr(self.db, "empath_training_stage", None) is None:
+            self.db.empath_training_stage = EMPATH_TRAINING_UNSET
+        if getattr(self.db, "empath_tutorial_patient_id", None) is None:
+            self.db.empath_tutorial_patient_id = None
+        if getattr(self.db, "empath_link", None) is None:
+            self.db.empath_link = None
         if self.db.active_link is None:
             self.db.active_link = None
         empath_links_missing = self.db.empath_links is None
@@ -1163,17 +1503,36 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.empath_links = {}
         if self.db.empath_unity is None:
             self.db.empath_unity = None
-        if getattr(self.db, "active_link", None) and empath_links_missing:
+        raw_link = getattr(self.db, "empath_link", None)
+        if isinstance(raw_link, int):
+            legacy_target_id = int(raw_link or 0)
+            self.db.empath_link = {
+                "target_id": legacy_target_id,
+                "type": EMPATH_LINK_TOUCH,
+                "strength": 60,
+                "stability": 80,
+                "created_at": time.time(),
+            } if legacy_target_id > 0 else None
+        elif isinstance(raw_link, Mapping) and int(raw_link.get("target_id", 0) or 0) > 0:
+            link_type = str(raw_link.get("type") or EMPATH_LINK_TOUCH).strip().lower()
+            if link_type in {"standard", "link", "strong", "deep"}:
+                link_type = EMPATH_LINK_DIRECT
+            self.db.empath_link = {
+                "target_id": int(raw_link.get("target_id", 0) or 0),
+                "type": link_type if link_type in EMPATH_LINK_TYPES else EMPATH_LINK_TOUCH,
+                "strength": max(1, min(100, int(raw_link.get("strength", EMPATH_LINK_BASE_STRENGTH.get(link_type, 60)) or EMPATH_LINK_BASE_STRENGTH.get(link_type, 60)))),
+                "stability": max(0, min(150, int(raw_link.get("stability", EMPATH_LINK_BASE_STABILITY.get(link_type, 100)) or EMPATH_LINK_BASE_STABILITY.get(link_type, 100)))),
+                "created_at": float(raw_link.get("created_at", time.time()) or time.time()),
+            }
+        elif getattr(self.db, "active_link", None) and empath_links_missing:
             legacy_target_id = int(getattr(self.db, "active_link", 0) or 0)
             if legacy_target_id > 0:
-                now = time.time()
-                self.db.empath_links = {
-                    str(legacy_target_id): {
-                        "target_id": legacy_target_id,
-                        "type": EMPATH_LINK_TOUCH,
-                        "created_at": now,
-                        "expires_at": now + EMPATH_LINK_DURATIONS[EMPATH_LINK_TOUCH],
-                    }
+                self.db.empath_link = {
+                    "target_id": legacy_target_id,
+                    "type": EMPATH_LINK_TOUCH,
+                    "strength": 60,
+                    "stability": 80,
+                    "created_at": time.time(),
                 }
         if self.db.wounds is None:
             self.db.wounds = _copy_default_empath_wounds()
@@ -1457,6 +1816,10 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.max_devotion = int(CLERIC_DEVOTION_CONFIG["max_devotion"])
         if self.db.bleed_state is None:
             self.db.bleed_state = "none"
+        if self.db.stabilized_until is None:
+            self.db.stabilized_until = 0.0
+        if self.db.stability_strength is None:
+            self.db.stability_strength = 0.0
         if self.db.roundtime_end is None:
             self.db.roundtime_end = 0
         if self.db.coins is None:
@@ -1559,6 +1922,7 @@ class Character(ObjectParent, DefaultCharacter):
                         "internal": existing.get("internal", defaults["internal"]),
                         "bruise": existing.get("bruise", defaults["bruise"]),
                         "bleed": existing.get("bleed", existing.get("bleeding", defaults["bleed"])),
+                        "scar": int(existing.get("scar", defaults["scar"]) or 0),
                         "tended": bool(existing.get("tended", defaults["tended"])),
                         "tend": {
                             "strength": int((existing.get("tend") or {}).get("strength", defaults["tend"]["strength"])),
@@ -1643,6 +2007,8 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.states = states
         if not isinstance(getattr(self.db, "stealth_learning", None), Mapping):
             self.db.stealth_learning = {"pending": [], "attempts": {}, "last_contest": {}, "combat_state": False}
+        if getattr(self.db, "empath_strain", None) is None:
+            self.db.empath_strain = 0
 
         self.ndb._core_defaults_ready = True
 
@@ -3363,10 +3729,14 @@ class Character(ObjectParent, DefaultCharacter):
         old_state = self.get_empath_shock_state(old_value)
         self.db.empath_shock = max(0, min(100, int(value or 0)))
         new_state = self.get_empath_shock_state(self.db.empath_shock)
+        if self.get_empath_shock_state_rank(new_state) > self.get_empath_shock_state_rank(old_state):
+            self.decay_empath_unity_stability(event_key="shock_worsen", emit_message=True)
         if new_state != old_state:
             message = self.get_empath_shock_message(new_state)
             if message:
                 self.msg(message)
+        if new_state == "disconnected":
+            self.break_empath_connections(reason="shock", emit_message=True)
         self.sync_client_state()
         return self.db.empath_shock
 
@@ -3388,27 +3758,325 @@ class Character(ObjectParent, DefaultCharacter):
             modifier *= 0.8
         return modifier
 
+    def get_empath_strain(self):
+        self.ensure_core_defaults()
+        if not self.is_empath():
+            return 0
+        return max(0, min(100, int(getattr(self.db, "empath_strain", 0) or 0)))
+
+    def set_empath_strain(self, value):
+        self.ensure_core_defaults()
+        if not self.is_empath():
+            self.db.empath_strain = 0
+            return 0
+        old_value = self.get_empath_strain()
+        self.db.empath_strain = max(0, min(100, int(value or 0)))
+        new_value = self.get_empath_strain()
+        if new_value >= 70 > old_value:
+            self.msg("The press of nearby life starts to grate at your nerves.")
+        elif new_value >= 40 > old_value:
+            self.msg("A low empathic strain settles in behind your focus.")
+        elif new_value < 20 <= old_value:
+            self.msg("The empathic pressure eases off again.")
+        self.sync_client_state()
+        return new_value
+
+    def adjust_empath_strain(self, amount):
+        return self.set_empath_strain(self.get_empath_strain() + int(amount or 0))
+
+    def get_empath_strain_fishing_modifier(self):
+        strain = self.get_empath_strain()
+        if strain >= 80:
+            return 0.70
+        if strain >= 60:
+            return 0.82
+        if strain >= 40:
+            return 0.92
+        return 1.0
+
+    def get_empath_strain_tangle_modifier(self):
+        strain = self.get_empath_strain()
+        if strain >= 80:
+            return 1.40
+        if strain >= 60:
+            return 1.22
+        if strain >= 40:
+            return 1.10
+        return 1.0
+
+    def apply_fishing_empath_strain(self, event_key, amount=0, fish_profile=None):
+        if not self.is_empath():
+            return 0
+        difficulty = int((fish_profile or {}).get("difficulty", 0) or 0)
+        event = str(event_key or "").strip().lower()
+        delta = max(1, int(amount or 0))
+        if event == "cast":
+            delta = max(1, delta - 1)
+        elif event == "hook":
+            delta += max(1, int(round(difficulty * 0.04)))
+        elif event == "struggle":
+            delta += max(1, int(round(difficulty * 0.03)))
+        elif event == "landed":
+            delta += max(1, int(round(difficulty * 0.05)))
+        return self.adjust_empath_strain(delta)
+
+    def decay_empath_strain(self, amount=2):
+        if not self.is_empath():
+            return 0
+        return self.adjust_empath_strain(-max(1, int(amount or 0)))
+
     def get_empath_shock_state(self, shock=None):
         value = self.get_empath_shock() if shock is None else max(0, min(100, int(shock or 0)))
-        if value >= 80:
-            return "numb"
-        if value >= 50:
+        if value >= int(EMPATH_SHOCK_THRESHOLDS["disconnected"]):
             return "disconnected"
-        if value >= 20:
-            return "dulled"
+        if value >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
+            return "dull"
+        if value >= int(EMPATH_SHOCK_THRESHOLDS["strained"]):
+            return "strained"
         return "clear"
+
+    def get_empath_shock_state_rank(self, shock_state):
+        return {"clear": 0, "strained": 1, "dull": 2, "disconnected": 3}.get(str(shock_state or "clear").strip().lower(), 0)
 
     def get_empath_shock_message(self, shock_state):
         return {
             "clear": "Your empathy steadies again.",
-            "dulled": "Your connection dulls.",
-            "disconnected": "You feel disconnected from others.",
-            "numb": "You struggle to sense clearly.",
+            "strained": "Your focus wavers slightly.",
+            "dull": "Your connection feels distant and unreliable.",
+            "disconnected": "You feel completely disconnected from others.",
         }.get(str(shock_state or "").strip().lower(), "")
+
+    def get_empath_rank(self):
+        return max(0, int(getattr(self.db, "empath_rank", 0) or 0))
+
+    def get_empath_progression_rank(self):
+        return self.get_progression_skill_rank("empathy")
+
+    def get_empath_unlock_status(self, unlock_key):
+        key = str(unlock_key or "").strip().lower()
+        unlock_data = get_empath_unlock(key)
+        required_rank = int(unlock_data.get("rank", 0) or 0)
+        current_rank = self.get_empath_progression_rank()
+        return {
+            "key": key,
+            "label": unlock_data.get("label", format_empath_unlock_name(key)),
+            "required_rank": required_rank,
+            "current_rank": current_rank,
+            "unlocked": current_rank >= required_rank,
+            "failure_message": unlock_data.get("failure_message") or f"You need more Empathy to use {format_empath_unlock_name(key)}.",
+        }
+
+    def has_empath_unlock(self, unlock_key):
+        return bool(self.get_empath_unlock_status(unlock_key).get("unlocked"))
+
+    def require_empath_unlock(self, unlock_key):
+        status = self.get_empath_unlock_status(unlock_key)
+        if status.get("unlocked"):
+            return True, None
+        return False, status.get("failure_message")
+
+    def get_available_empath_unlocks(self):
+        available = []
+        for unlock_key in sorted(EMPATH_UNLOCKS, key=lambda key: (get_empath_unlock_rank(key), key)):
+            status = self.get_empath_unlock_status(unlock_key)
+            if status.get("unlocked"):
+                available.append(status)
+        return available
+
+    def get_locked_empath_unlocks(self):
+        locked = []
+        for unlock_key in sorted(EMPATH_UNLOCKS, key=lambda key: (get_empath_unlock_rank(key), key)):
+            status = self.get_empath_unlock_status(unlock_key)
+            if not status.get("unlocked"):
+                locked.append(status)
+        return locked
+
+    def get_next_empath_unlock_status(self):
+        unlock_key, unlock_data = get_next_empath_unlock(self.get_empath_progression_rank())
+        if not unlock_key or not unlock_data:
+            return None
+        return self.get_empath_unlock_status(unlock_key)
+
+    def get_empath_training_stage(self):
+        return max(0, int(getattr(self.db, "empath_training_stage", EMPATH_TRAINING_UNSET) or EMPATH_TRAINING_UNSET))
+
+    def set_empath_training_stage(self, value):
+        self.db.empath_training_stage = max(0, int(value or 0))
+        self.sync_client_state()
+        return self.get_empath_training_stage()
+
+    def is_empath_tutorial_active(self):
+        return self.get_empath_training_stage() == EMPATH_TRAINING_PATIENT
+
+    def is_empath_apprentice(self):
+        return self.get_empath_training_stage() in {EMPATH_TRAINING_PATIENT, EMPATH_TRAINING_BASIC} and self.get_empath_rank() < 1
+
+    def is_empath_join_room(self, room=None):
+        room = room or self.location
+        return str(getattr(getattr(room, "db", None), "empath_guild_room", "") or "").strip().lower() == "office"
+
+    def can_begin_profession_oath(self):
+        if self.is_dead():
+            return False, "The dead do not swear guild oaths."
+        if not getattr(self, "location", None):
+            return False, "You must be somewhere real before taking an oath."
+        return True, None
+
+    def get_empath_tutorial_patient(self):
+        patient_id = int(getattr(self.db, "empath_tutorial_patient_id", 0) or 0)
+        if patient_id <= 0:
+            return None
+        result = search_object(f"#{patient_id}")
+        patient = result[0] if result else None
+        if not patient:
+            self.db.empath_tutorial_patient_id = None
+        return patient
+
+    def clear_empath_tutorial_patient(self, delete_patient=True):
+        patient = self.get_empath_tutorial_patient()
+        self.db.empath_tutorial_patient_id = None
+        if patient and delete_patient:
+            try:
+                patient.delete()
+            except Exception:
+                pass
+        return patient
+
+    def spawn_empath_tutorial_patient(self, room=None):
+        patient = self.get_empath_tutorial_patient()
+        target_room = room or getattr(self, "location", None)
+        if not target_room:
+            return None
+        if not patient:
+            patient = create_object(
+                "typeclasses.npcs.EmpathTutorialPatient",
+                key="Training Patient",
+                aliases=["patient", "training patient"],
+                location=target_room,
+                home=target_room,
+            )
+            patient.db.empath_tutorial_owner = self.id
+            self.db.empath_tutorial_patient_id = patient.id
+        if getattr(patient, "location", None) != target_room:
+            patient.move_to(target_room, quiet=True, use_destination=False)
+        patient.db.desc = "A pale training patient lies on the cot, breathing shallowly but steadily while waiting for an apprentice to begin."
+        patient.db.is_npc = True
+        patient.db.is_training_dummy = True
+        patient.db.is_tutorial_patient = True
+        patient.db.empath_tutorial_owner = self.id
+        patient.ensure_core_defaults()
+        patient.db.hp = max(1, int(getattr(patient.db, "max_hp", 100) or 100) - 10)
+        patient.set_empath_wound("vitality", 18)
+        patient.set_empath_wound("bleeding", 8)
+        patient.set_empath_wound("poison", 0)
+        patient.set_empath_wound("disease", 0)
+        patient.set_empath_wound("fatigue", 0)
+        patient.set_empath_wound("trauma", 0)
+        return patient
+
+    def complete_empath_tutorial_if_ready(self, target=None):
+        patient = target or self.get_empath_tutorial_patient()
+        if not patient or int(getattr(patient, "id", 0) or 0) <= 0:
+            return False
+        if int(getattr(getattr(patient, "db", None), "empath_tutorial_owner", 0) or 0) != int(getattr(self, "id", 0) or 0):
+            return False
+        remaining = sum(int(value or 0) for value in dict(patient.get_empath_wounds() if hasattr(patient, "get_empath_wounds") else {}).values())
+        if remaining > 0:
+            return False
+        self.break_empath_link(reason="collapse", emit_message=False)
+        self.clear_empath_tutorial_patient(delete_patient=True)
+        self.msg("The patient finally steadies under your hands.")
+        self.msg("The lesson is not finished. Mend yourself before you call the transfer complete.")
+        return True
+
+    def begin_empath_apprenticeship(self, guide=None):
+        from world.areas.crossing.empath_guild import ensure_crossing_empath_guildhall
+
+        rooms = ensure_crossing_empath_guildhall()
+        training_room = rooms.get("training") or getattr(self, "location", None)
+        self.clear_empath_tutorial_patient(delete_patient=True)
+        self.break_empath_connections(reason="collapse", emit_message=False)
+        self.db.empath_rank = 0
+        self.db.empath_xp = 0
+        self.set_empath_training_stage(EMPATH_TRAINING_PATIENT)
+        patient = self.spawn_empath_tutorial_patient(room=training_room)
+        if training_room and getattr(self, "location", None) != training_room:
+            self.move_to(training_room, quiet=True, use_destination=False)
+        guide_name = getattr(guide, "key", "Merla") if guide else "Merla"
+        message = (
+            f"{guide_name} studies you for a long moment. 'If you are going to bear pain, you will start with a single body and no excuses.'\n"
+            "You are now recognized as an Empath.\n"
+            "A training patient waits on the cot before you. Touch the patient."
+        )
+        return patient, message
+
+    def can_use_empath_ability(self, ability):
+        if not self.is_empath():
+            return False, "You lack empathic sensitivity."
+        state = self.get_empath_shock_state()
+        ability_key = str(ability or "").strip().lower()
+        if ability_key in EMPATH_TUTORIAL_LOCKED_ABILITIES and self.is_empath_apprentice():
+            return False, "You lack the discipline to shape that technique yet."
+        unlock_key = EMPATH_ABILITY_UNLOCKS.get(ability_key)
+        if unlock_key:
+            unlocked, unlock_message = self.require_empath_unlock(unlock_key)
+            if not unlocked:
+                return False, unlock_message
+        if state == "disconnected":
+            if ability_key in {"perceive", "perceive_health", "perceive_target"}:
+                return False, "You sense nothing."
+            return False, "You feel completely cut off from others."
+        if state == "dull" and ability_key in {"assess", "perceive", "perceive_health", "perceive_target"}:
+            return False, "Your senses are too dulled."
+        return True, None
+
+    def break_empath_connections(self, reason="shock", emit_message=True):
+        changed = self.break_empath_link(reason=reason, emit_message=False)
+        unity_changed = False
+        if self.get_empath_unity_state():
+            unity_changed = self.clear_empath_unity(sync_members=True, emit_message=False)
+        if emit_message and (changed or unity_changed):
+            if reason == "shock":
+                self.msg("Every connection slips beyond your reach.")
+            elif reason == "distance":
+                self.msg("Distance tears the shared burden apart.")
+            else:
+                self.msg("Your connection slips away.")
+        return changed or unity_changed
 
     def normalize_empath_wound_key(self, wound_type):
         key = str(wound_type or "").strip().lower()
         return EMPATH_WOUND_ALIASES.get(key, key)
+
+    def normalize_empath_take_selector(self, selector):
+        key = str(selector or "").strip().lower()
+        return key if key in EMPATH_SELECTIVE_TAKE_BUCKETS else ""
+
+    def resolve_empath_take_bucket(self, target, selector):
+        selector_key = self.normalize_empath_take_selector(selector)
+        if not selector_key or not target or not hasattr(target, "get_empath_wounds"):
+            return ""
+        target_wounds = target.get_empath_wounds()
+        for bucket in EMPATH_SELECTIVE_TAKE_BUCKETS.get(selector_key, ()):
+            value = target_wounds.get(bucket)
+            if value and int(value) > 0:
+                return bucket
+        return ""
+
+    def resolve_default_empath_take_bucket(self, target):
+        if not target or not hasattr(target, "get_empath_wounds"):
+            return ""
+        target_wounds = target.get_empath_wounds()
+        available = []
+        for bucket in EMPATH_PARTIAL_TAKE_BUCKET_PRIORITY:
+            value = target_wounds.get(bucket)
+            if not value or int(value) <= 0:
+                continue
+            available.append((int(value), bucket))
+        if not available:
+            return ""
+        available.sort(key=lambda entry: (-entry[0], EMPATH_PARTIAL_TAKE_BUCKET_PRIORITY.index(entry[1])))
+        return available[0][1]
 
     def normalize_empath_wounds(self, wounds=None):
         normalized = dict(_copy_default_empath_wounds())
@@ -3424,6 +4092,30 @@ class Character(ObjectParent, DefaultCharacter):
         skill = int(self.get_skill("empathy") if hasattr(self, "get_skill") else 0)
         return min(1.2, 0.85 + (skill / 300.0))
 
+    def get_empath_mitigation(self):
+        if not self.has_empath_unlock("wound_reduction"):
+            return 1.0
+        skill = int(self.get_empath_progression_rank())
+        shock = int(self.get_empath_shock() if hasattr(self, "get_empath_shock") else getattr(self.db, "empath_shock", 0) or 0)
+        base = 0.9 - (skill * 0.002)
+        penalty = shock * 0.001
+        return max(0.5, min(1.0, base + penalty))
+
+    def get_empath_room_zone(self, room=None):
+        current_room = room or getattr(self, "location", None)
+        if not current_room:
+            return ""
+        for zone_name, tag_name in EMPATH_GUILD_ZONE_TAGS.items():
+            try:
+                if current_room.tags.has(tag_name):
+                    return zone_name
+            except Exception:
+                continue
+        return str(getattr(getattr(current_room, "db", None), "empath_zone", "") or "").strip().lower()
+
+    def is_empath_zone(self, zone_name, room=None):
+        return self.get_empath_room_zone(room=room) == str(zone_name or "").strip().lower()
+
     def get_empath_recovery_modifier(self):
         disease = self.get_empath_wound("disease") if hasattr(self, "get_empath_wound") else 0
         if disease <= 0:
@@ -3435,8 +4127,8 @@ class Character(ObjectParent, DefaultCharacter):
 
     def normalize_empath_link_type(self, link_type):
         normalized = str(link_type or EMPATH_LINK_TOUCH).strip().lower()
-        if normalized in {"standard", "deep", "strong"}:
-            normalized = EMPATH_LINK_STANDARD
+        if normalized in {"standard", "link", "deep", "strong"}:
+            normalized = EMPATH_LINK_DIRECT
         if normalized not in EMPATH_LINK_TYPES:
             normalized = EMPATH_LINK_TOUCH
         return normalized
@@ -3444,57 +4136,62 @@ class Character(ObjectParent, DefaultCharacter):
     def get_empath_link_priority(self, link_type):
         return int(EMPATH_LINK_PRIORITY.get(self.normalize_empath_link_type(link_type), 0) or 0)
 
-    def normalize_empath_links(self, links=None):
-        source = dict(links or {})
-        normalized = {}
-        for raw_key, raw_data in source.items():
-            if not isinstance(raw_data, Mapping):
-                continue
-            target_id = int(raw_data.get("target_id", raw_key) or 0)
-            if target_id <= 0:
-                continue
-            link_type = self.normalize_empath_link_type(raw_data.get("type"))
-            created_at = float(raw_data.get("created_at", time.time()) or time.time())
-            expires_at = float(raw_data.get("expires_at", 0) or 0)
-            if expires_at <= 0:
-                expires_at = created_at + float(EMPATH_LINK_DURATIONS.get(link_type, 30) or 30)
-            normalized[str(target_id)] = {
-                "target_id": target_id,
-                "type": link_type,
-                "created_at": created_at,
-                "expires_at": expires_at,
-                "deepened": bool(raw_data.get("deepened", False)),
+    def normalize_empath_link_state(self, link_state=None):
+        raw = getattr(self.db, "empath_link", None) if link_state is None else link_state
+        if raw in (None, False, 0, ""):
+            return None
+        if isinstance(raw, int):
+            raw = {
+                "target_id": int(raw),
+                "type": EMPATH_LINK_TOUCH,
+                "strength": 60,
+                "stability": 80,
+                "created_at": time.time(),
             }
-        return normalized
+        if not isinstance(raw, Mapping):
+            return None
+        target_id = int(raw.get("target_id", 0) or 0)
+        if target_id <= 0:
+            return None
+        link_type = self.normalize_empath_link_type(raw.get("type"))
+        default_strength = int(EMPATH_LINK_BASE_STRENGTH.get(link_type, 60) or 60)
+        default_stability = int(EMPATH_LINK_BASE_STABILITY.get(link_type, 100) or 100)
+        return {
+            "target_id": target_id,
+            "type": link_type,
+            "strength": max(1, min(100, int(raw.get("strength", default_strength) or default_strength))),
+            "stability": max(0, min(150, int(raw.get("stability", default_stability) or default_stability))),
+            "link_bonus_skill": str(raw.get("link_bonus_skill", "") or "").strip().lower() or None,
+            "link_bonus_value": max(0, int(raw.get("link_bonus_value", 0) or 0)),
+            "link_bonus_tick_at": float(raw.get("link_bonus_tick_at", 0.0) or 0.0),
+            "created_at": float(raw.get("created_at", time.time()) or time.time()),
+        }
 
     def get_empath_link_target(self, target_id):
-        lookup_id = int(target_id or 0)
+        lookup_id = 0
+        if isinstance(target_id, Mapping):
+            state = self.normalize_empath_link_state(target_id)
+            if state:
+                lookup_id = int(state.get("target_id", 0) or 0)
+            else:
+                lookup_id = int(target_id.get("target_id", target_id.get("id", 0)) or 0)
+        elif hasattr(target_id, "id"):
+            lookup_id = int(getattr(target_id, "id", 0) or 0)
+        else:
+            try:
+                lookup_id = int(target_id or 0)
+            except (TypeError, ValueError):
+                lookup_id = 0
         if lookup_id <= 0:
             return None
         result = search_object(f"#{lookup_id}")
         return result[0] if result else None
 
-    def get_empath_link_strength(self, link_data, target=None):
-        if not isinstance(link_data, Mapping):
+    def get_empath_link_strength(self, link_data=None, target=None):
+        state = self.normalize_empath_link_state(link_data)
+        if not state:
             return 0
-        config = EMPATH_SYSTEM_CONFIG["link_strength"]
-        link_type = self.normalize_empath_link_type(link_data.get("type"))
-        created_at = float(link_data.get("created_at", 0) or 0)
-        expires_at = float(link_data.get("expires_at", 0) or 0)
-        elapsed = max(0.0, time.time() - created_at)
-        base_strength = int(EMPATH_LINK_BASE_STRENGTH.get(link_type, 30) or 30)
-        time_bonus = min(int(config["max_time_bonus"]), int(elapsed / float(config["time_bonus_scale"])))
-        shock_penalty = int(self.get_empath_shock() * 0.35)
-        fatigue_penalty = int(self.get_empath_wound("fatigue") * 0.20)
-        if target and getattr(target, "location", None) == getattr(self, "location", None):
-            proximity_bonus = int(config["local_bonus"])
-        else:
-            proximity_bonus = 0 if link_type == EMPATH_LINK_PERSISTENT else -int(config["remote_nonpersistent_penalty"])
-        deepen_bonus = int(config["deepen_bonus"] if bool(link_data.get("deepened", False)) else 0)
-        default_duration = max(1.0, float(EMPATH_LINK_DURATIONS.get(link_type, 30) or 30))
-        remaining_ratio = max(0.0, min(1.0, (expires_at - time.time()) / default_duration)) if expires_at else 1.0
-        decay_penalty = int(round((1.0 - remaining_ratio) * float(config["decay_penalty_max"])))
-        return max(1, min(100, base_strength + time_bonus + proximity_bonus + deepen_bonus - decay_penalty - shock_penalty - fatigue_penalty))
+        return int(state.get("strength", 0) or 0)
 
     def get_empath_link_strength_label(self, strength):
         value = max(0, min(100, int(strength or 0)))
@@ -3506,85 +4203,127 @@ class Character(ObjectParent, DefaultCharacter):
             return "Weak"
         return "Fraying"
 
+    def get_empath_link_condition(self, stability):
+        value = max(0, min(100, int(stability or 0)))
+        if value >= 75:
+            return "steady"
+        if value >= 40:
+            return "strained"
+        if value > 0:
+            return "fragile"
+        return "broken"
+
+    def get_empath_unity_condition(self, stability):
+        value = max(0, min(100, int(stability or 0)))
+        if value >= 70:
+            return "steady"
+        if value >= 40:
+            return "strained"
+        if value > 0:
+            return "fragile"
+        return "broken"
+
     def sync_empath_link_pointer(self):
-        primary = self.get_primary_empath_link(require_local=False, include_group=False)
-        self.db.active_link = int(primary.get("target_id", 0) or 0) if primary else None
+        state = self.normalize_empath_link_state()
+        if not state:
+            self.db.active_link = None
+            self.db.empath_link = None
+            self.db.empath_links = {}
+            return
+        self.db.empath_link = dict(state)
+        self.db.active_link = int(state.get("target_id", 0) or 0)
+        self.db.empath_links = {
+            str(self.db.active_link): {
+                "target_id": self.db.active_link,
+                "type": state.get("type"),
+                "strength": int(state.get("strength", 0) or 0),
+                "stability": int(state.get("stability", 0) or 0),
+                "link_bonus_skill": state.get("link_bonus_skill"),
+                "link_bonus_value": int(state.get("link_bonus_value", 0) or 0),
+                "link_bonus_tick_at": float(state.get("link_bonus_tick_at", 0.0) or 0.0),
+                "created_at": float(state.get("created_at", time.time()) or time.time()),
+            }
+        }
 
-    def set_empath_links(self, links, sync=True):
-        self.db.empath_links = self.normalize_empath_links(links)
-        self.sync_empath_link_pointer()
-        if sync:
-            self.sync_client_state()
-        return dict(self.db.empath_links)
-
-    def prune_empath_links(self, sync=False):
-        self.ensure_core_defaults()
-        now = time.time()
-        changed = False
-        shock_break = self.get_empath_shock() >= 85
-        current = self.normalize_empath_links(getattr(self.db, "empath_links", None) or {})
-        kept = {}
-        for link_data in current.values():
-            target = self.get_empath_link_target(link_data.get("target_id"))
-            if not target or target == self:
-                changed = True
-                continue
-            link_type = self.normalize_empath_link_type(link_data.get("type"))
-            expires_at = float(link_data.get("expires_at", 0) or 0)
-            if expires_at and now >= expires_at:
-                changed = True
-                continue
-            if shock_break:
-                changed = True
-                continue
-            if link_type != EMPATH_LINK_PERSISTENT and getattr(target, "location", None) != getattr(self, "location", None):
-                changed = True
-                continue
-            kept[str(target.id)] = dict(link_data)
-        if changed or len(kept) != len(current):
-            self.db.empath_links = kept
+    def set_empath_link_state(self, link_state, sync=True):
+        if link_state in (None, False):
+            self.db.empath_link = None
             self.sync_empath_link_pointer()
             if sync:
                 self.sync_client_state()
-        return dict(self.db.empath_links)
+            return None
+        normalized = self.normalize_empath_link_state(link_state)
+        self.db.empath_link = dict(normalized) if normalized else None
+        self.sync_empath_link_pointer()
+        if sync:
+            self.sync_client_state()
+        return dict(self.db.empath_link) if self.db.empath_link else None
+
+    def set_empath_links(self, links, sync=True):
+        normalized = None
+        if isinstance(links, Mapping):
+            candidates = []
+            for raw_data in links.values():
+                state = self.normalize_empath_link_state(raw_data)
+                if state:
+                    candidates.append(state)
+            if candidates:
+                candidates.sort(key=lambda entry: (self.get_empath_link_priority(entry.get("type")), int(entry.get("strength", 0) or 0)), reverse=True)
+                normalized = candidates[0]
+        else:
+            normalized = self.normalize_empath_link_state(links)
+        return self.set_empath_link_state(normalized, sync=sync)
+
+    def prune_empath_links(self, sync=False):
+        state = self.get_empath_link_state(require_local=False, emit_break_messages=False)
+        if not state:
+            if getattr(self.db, "empath_link", None) or getattr(self.db, "empath_links", None) or getattr(self.db, "active_link", None):
+                self.set_empath_link_state(None, sync=sync)
+            return {}
+        self.sync_empath_link_pointer()
+        if sync:
+            self.sync_client_state()
+        return dict(getattr(self.db, "empath_links", {}) or {})
+
+    def get_empath_link_state(self, require_local=False, target=None, emit_break_messages=False):
+        self.ensure_core_defaults()
+        state = self.normalize_empath_link_state()
+        if not state:
+            self.sync_empath_link_pointer()
+            return None
+        target_obj = self.get_empath_link_target(state.get("target_id"))
+        if not target_obj or target_obj == self:
+            self.break_empath_link(reason="collapse", emit_message=emit_break_messages)
+            return None
+        if target is not None and int(getattr(target, "id", target) or 0) != int(state.get("target_id", 0) or 0):
+            return None
+        if self.get_empath_shock() >= int(EMPATH_SHOCK_THRESHOLDS["disconnected"]):
+            self.break_empath_link(reason="shock", emit_message=emit_break_messages)
+            return None
+        is_local = getattr(target_obj, "location", None) == getattr(self, "location", None)
+        if require_local and not is_local:
+            self.break_empath_link(reason="distance", emit_message=emit_break_messages)
+            return None
+        enriched = {
+            **dict(state),
+            "target": target_obj,
+            "is_local": is_local,
+            "priority": self.get_empath_link_priority(state.get("type")),
+            "strength_label": self.get_empath_link_strength_label(state.get("strength", 0)),
+            "condition": self.get_empath_link_condition(state.get("stability", 0)),
+            "remaining": 0,
+        }
+        self.db.empath_link = dict(state)
+        self.sync_empath_link_pointer()
+        return enriched
 
     def get_empath_links(self, require_local=False, include_group=False):
-        self.ensure_core_defaults()
-        links = self.prune_empath_links(sync=False)
-        enriched = []
-        for link_data in links.values():
-            link_type = self.normalize_empath_link_type(link_data.get("type"))
-            if not include_group and link_type == EMPATH_LINK_GROUP:
-                continue
-            target = self.get_empath_link_target(link_data.get("target_id"))
-            if not target:
-                continue
-            is_local = getattr(target, "location", None) == getattr(self, "location", None)
-            if require_local and not is_local:
-                continue
-            strength = self.get_empath_link_strength(link_data, target=target)
-            enriched.append(
-                {
-                    **dict(link_data),
-                    "target": target,
-                    "is_local": is_local,
-                    "priority": self.get_empath_link_priority(link_type),
-                    "strength": strength,
-                    "strength_label": self.get_empath_link_strength_label(strength),
-                    "remaining": max(0, int(round(float(link_data.get("expires_at", 0) or 0) - time.time()))),
-                }
-            )
-        enriched.sort(
-            key=lambda entry: (
-                1 if entry.get("is_local") else 0,
-                1 if entry.get("deepened") else 0,
-                self.get_empath_link_priority(entry.get("type")),
-                int(entry.get("strength", 0) or 0),
-                float(entry.get("created_at", 0) or 0),
-            ),
-            reverse=True,
-        )
-        return enriched
+        state = self.get_empath_link_state(require_local=require_local, emit_break_messages=False)
+        if not state:
+            return []
+        if not include_group and state.get("type") == EMPATH_LINK_GROUP:
+            return []
+        return [state]
 
     def get_primary_empath_link(self, require_local=False, include_group=False):
         links = self.get_empath_links(require_local=require_local, include_group=include_group)
@@ -3600,90 +4339,102 @@ class Character(ObjectParent, DefaultCharacter):
         return None
 
     def get_empath_link_transfer_modifier(self, target=None):
-        primary = self.get_primary_empath_link(require_local=False, include_group=False)
+        primary = self.get_empath_link_state(require_local=False, target=target, emit_break_messages=False)
         if not primary:
-            return 0.85
-        if target is not None and getattr(primary.get("target"), "id", None) != getattr(target, "id", None):
-            primary = next((entry for entry in self.get_empath_links(require_local=False, include_group=False) if getattr(entry.get("target"), "id", None) == getattr(target, "id", None)), None)
-            if not primary:
-                return 0.85
-        strength = int(primary.get("strength", 0) or 0)
-        config = EMPATH_SYSTEM_CONFIG["transfer"]
-        bonus = strength / max(1.0, float(config["strength_scale"]))
-        if bool(primary.get("deepened", False)):
-            bonus += 0.08
-        return max(float(config["min_efficiency"]), min(float(config["max_efficiency"]), float(config["min_efficiency"]) + bonus))
+            return 0.0
+        return max(0.0, min(1.0, float(int(primary.get("strength", 0) or 0) / 100.0)))
+
+    def get_empath_link_stability_cost(self, link_type, event_key):
+        rules = EMPATH_LINK_STABILITY_RULES.get(self.normalize_empath_link_type(link_type), {})
+        return max(0, int(rules.get(str(event_key or "").strip().lower(), 0) or 0))
 
     def get_empath_link_backlash_modifier(self, target=None):
-        primary = self.get_primary_empath_link(require_local=False, include_group=False)
+        primary = self.get_empath_link_state(require_local=False, target=target, emit_break_messages=False)
         if not primary:
             return 1.1
-        if target is not None and getattr(primary.get("target"), "id", None) != getattr(target, "id", None):
-            primary = next((entry for entry in self.get_empath_links(require_local=False, include_group=False) if getattr(entry.get("target"), "id", None) == getattr(target, "id", None)), None)
-            if not primary:
-                return 1.1
-        strength = int(primary.get("strength", 0) or 0)
-        config = EMPATH_SYSTEM_CONFIG["backlash"]
-        reduction = strength / max(1.0, float(config["strength_scale"]))
-        if bool(primary.get("deepened", False)):
-            reduction += 0.08
-        return max(float(config["min"]), min(float(config["max"]), float(config["max"]) - reduction))
+        return max(0.55, 1.1 - (int(primary.get("strength", 0) or 0) / 200.0))
 
     def refresh_empath_link(self, target, bonus_seconds=0, deepen=False):
-        links = self.normalize_empath_links(getattr(self.db, "empath_links", None) or {})
-        target_id = int(getattr(target, "id", target) or 0)
-        if target_id <= 0 or str(target_id) not in links:
+        state = self.get_empath_link_state(require_local=False, target=target, emit_break_messages=False)
+        if not state:
             return None
-        link_data = dict(links[str(target_id)])
-        link_type = self.normalize_empath_link_type(link_data.get("type"))
-        link_data["expires_at"] = time.time() + float(EMPATH_LINK_DURATIONS.get(link_type, 30) or 30) + float(bonus_seconds or 0)
-        if deepen:
-            link_data["deepened"] = True
-        links[str(target_id)] = link_data
-        self.set_empath_links(links, sync=False)
-        return link_data
+        refreshed = dict(state)
+        if deepen and refreshed.get("type") == EMPATH_LINK_TOUCH:
+            refreshed["type"] = EMPATH_LINK_DIRECT
+            refreshed["strength"] = 100
+        refreshed["stability"] = max(0, min(100, int(refreshed.get("stability", 0) or 0) + int(bonus_seconds or 0)))
+        return self.set_empath_link_state(refreshed, sync=False)
 
     def create_empath_link(self, target, link_type=EMPATH_LINK_TOUCH, deepen=False):
         if not self.is_empath():
             return False, ["You lack the sensitivity to establish an empathic link."]
+        allowed, message = self.can_use_empath_ability("link" if self.normalize_empath_link_type(link_type) != EMPATH_LINK_TOUCH else "touch")
+        if not allowed:
+            return False, [message]
         if not target or target == self or getattr(target, "location", None) != getattr(self, "location", None):
             return False, ["They are not here."]
         link_type = self.normalize_empath_link_type(link_type)
-        now = time.time()
-        links = self.normalize_empath_links(getattr(self.db, "empath_links", None) or {})
-        existing = dict(links.get(str(target.id), {}) or {})
-        existing_type = self.normalize_empath_link_type(existing.get("type")) if existing else None
-        if existing and self.get_empath_link_priority(existing_type) > self.get_empath_link_priority(link_type):
-            link_type = existing_type
-        created_at = float(existing.get("created_at", now) or now)
-        if existing_type != link_type:
-            created_at = now
-        links[str(target.id)] = {
+        if link_type == EMPATH_LINK_GROUP:
+            return False, ["You have not mastered that kind of bond yet."]
+        if link_type == EMPATH_LINK_PERSISTENT and self.get_empath_unity_state():
+            return False, ["You cannot settle into a persistent link while a shared burden is active."]
+        link_state = {
             "target_id": target.id,
             "type": link_type,
-            "created_at": created_at,
-            "expires_at": now + float(EMPATH_LINK_DURATIONS.get(link_type, 30) or 30),
-            "deepened": bool(existing.get("deepened", False) or deepen),
+            "strength": int(EMPATH_LINK_BASE_STRENGTH.get(link_type, 60) or 60),
+            "stability": int(EMPATH_LINK_BASE_STABILITY.get(link_type, 80) or 80),
+            "created_at": time.time(),
         }
-        self.set_empath_links(links, sync=False)
-        self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=max(10, sum(target.sync_empath_wounds_from_resources().values())))
+        if deepen:
+            link_state["type"] = EMPATH_LINK_DIRECT
+            link_state["strength"] = 100
+            link_state["stability"] = 100
+        self.set_empath_link_state(link_state, sync=False)
+        self.award_empathy_experience("link", max(10, sum(target.sync_empath_wounds_from_resources().values())), target=target)
         self.sync_client_state()
-        return True, self.get_primary_empath_link(require_local=False, include_group=False)
+        return True, self.get_empath_link_state(require_local=False, emit_break_messages=False)
 
     def resolve_empath_link_target(self, query, require_local=True):
         lookup = str(query or "").strip().lower()
         if not lookup:
             return None
-        for entry in self.get_empath_links(require_local=require_local, include_group=False):
-            target = entry.get("target")
-            if not target:
-                continue
+        entry = self.get_empath_link_state(require_local=require_local, emit_break_messages=False)
+        target = entry.get("target") if entry else None
+        if target:
             if target.key.lower() == lookup:
                 return target
             aliases = [str(alias).lower() for alias in getattr(getattr(target, "aliases", None), "all", lambda: [])()]
             if lookup in aliases:
                 return target
         return None
+
+    def decay_empath_link_stability(self, amount=None, reason="strain", emit_message=True):
+        state = self.get_empath_link_state(require_local=False, emit_break_messages=False)
+        if not state:
+            return None
+        cost = self.get_empath_link_stability_cost(state.get("type"), reason) if amount is None else max(0, int(amount or 0))
+        updated = dict(state)
+        updated["stability"] = max(0, int(updated.get("stability", 0) or 0) - cost)
+        if updated["stability"] <= 0:
+            self.break_empath_link(reason="collapse", emit_message=emit_message)
+            return None
+        self.set_empath_link_state(updated, sync=True)
+        return self.get_empath_link_state(require_local=False, emit_break_messages=False)
+
+    def break_empath_link(self, reason="collapse", emit_message=True):
+        state = self.normalize_empath_link_state()
+        if not state:
+            self.set_empath_link_state(None, sync=True)
+            return False
+        self.set_empath_link_state(None, sync=True)
+        if emit_message:
+            if reason == "shock":
+                self.msg("You lose all sense of your patient.")
+            elif reason == "distance":
+                self.msg("Distance tears your connection apart.")
+            else:
+                self.msg("Your connection slips away.")
+        return True
 
     def is_empath_overdrawn(self):
         state = self.get_state("empath_overdraw")
@@ -3718,141 +4469,162 @@ class Character(ObjectParent, DefaultCharacter):
         return True
 
     def remove_empath_link(self, target=None, clear_all=False):
-        links = self.normalize_empath_links(getattr(self.db, "empath_links", None) or {})
-        if clear_all:
-            changed = bool(links)
-            links = {}
-        else:
-            if target is None:
-                primary = self.get_primary_empath_link(require_local=False, include_group=False)
-                target_id = int(primary.get("target_id", 0) or 0) if primary else 0
-            else:
-                target_id = int(getattr(target, "id", target) or 0)
-            changed = bool(target_id and str(target_id) in links)
-            if changed:
-                links.pop(str(target_id), None)
-        if changed:
-            self.set_empath_links(links, sync=True)
-        return changed
+        state = self.normalize_empath_link_state()
+        if not state:
+            self.set_empath_link_state(None, sync=True)
+            return False
+        if not clear_all and target is not None:
+            target_id = int(getattr(target, "id", target) or 0)
+            if target_id != int(state.get("target_id", 0) or 0):
+                return False
+        self.set_empath_link_state(None, sync=True)
+        self.clear_empath_unity(sync_members=True, emit_message=False)
+        return True
 
-    def get_empath_unity_state(self):
+    def get_empath_unity_state(self, emit_break_messages=False):
         self.ensure_core_defaults()
         data = getattr(self.db, "empath_unity", None)
         if not isinstance(data, Mapping):
             return None
-        expires_at = float(data.get("expires_at", 0) or 0)
-        if expires_at and time.time() >= expires_at:
+        primary_target_id = int(data.get("primary_target_id", 0) or 0)
+        secondary_target_id = int(data.get("secondary_target_id", 0) or 0)
+        if primary_target_id <= 0 or secondary_target_id <= 0:
             self.clear_empath_unity(sync_members=True, emit_message=False)
             return None
-        member_ids = [int(entry or 0) for entry in (data.get("member_ids") or []) if int(entry or 0) > 0]
-        members = []
-        for member_id in member_ids:
-            target = self.get_empath_link_target(member_id)
-            if not target or getattr(target, "location", None) != getattr(self, "location", None):
-                continue
-            members.append(target)
-        if len(members) < 2:
+        base_link = self.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not base_link or int(base_link.get("target_id", 0) or 0) != primary_target_id:
+            self.clear_empath_unity(sync_members=True, emit_message=False)
+            if emit_break_messages:
+                self.msg("Distance tears the shared burden apart.")
+            return None
+        primary_target = base_link.get("target")
+        secondary_target = self.get_empath_link_target(secondary_target_id)
+        if not secondary_target:
             self.clear_empath_unity(sync_members=True, emit_message=False)
             return None
-        return {**dict(data), "member_ids": member_ids, "members": members}
+        if getattr(primary_target, "location", None) != getattr(self, "location", None) or getattr(secondary_target, "location", None) != getattr(self, "location", None):
+            self.clear_empath_unity(sync_members=True, emit_message=False)
+            if emit_break_messages:
+                self.msg("Distance tears the shared burden apart.")
+            return None
+        stability = max(0, min(100, int(data.get("stability", 80) or 80)))
+        return {
+            "primary_target_id": primary_target_id,
+            "secondary_target_id": secondary_target_id,
+            "primary_target": primary_target,
+            "secondary_target": secondary_target,
+            "stability": stability,
+            "condition": self.get_empath_unity_condition(stability),
+            "members": [primary_target, secondary_target],
+        }
 
     def clear_empath_unity(self, sync_members=True, emit_message=False):
         unity = getattr(self.db, "empath_unity", None)
         if not isinstance(unity, Mapping):
             return False
-        member_ids = [int(entry or 0) for entry in (unity.get("member_ids") or []) if int(entry or 0) > 0]
         self.db.empath_unity = None
-        if sync_members:
-            for member_id in member_ids:
-                target = self.get_empath_link_target(member_id)
-                if target and hasattr(target, "clear_state"):
-                    target.clear_state("empath_unity")
         self.sync_client_state()
         if emit_message:
-            self.msg("The shared bond unravels.")
+            self.msg("The shared bond comes apart.")
         return True
 
     def create_empath_unity(self, targets):
         if not self.is_empath():
-            return False, "You cannot weave that kind of bond."
-        members = []
-        seen = set()
-        for target in list(targets or []):
-            if not target or target == self or getattr(target, "location", None) != getattr(self, "location", None):
-                continue
-            if getattr(target, "id", None) in seen:
-                continue
-            seen.add(target.id)
-            members.append(target)
-        if len(members) < 2:
-            return False, "You need at least two nearby allies to weave unity."
-        if len(members) > EMPATH_UNITY_MAX_TARGETS:
-            return False, f"You can only sustain unity across {EMPATH_UNITY_MAX_TARGETS} allies right now."
-        expires_at = time.time() + EMPATH_UNITY_DURATION
+            return False, "You do not know how to weave unity."
+        allowed, message = self.can_use_empath_ability("unity")
+        if not allowed:
+            return False, message
+        base_link = self.get_empath_link_state(require_local=True, emit_break_messages=True)
+        if not base_link or base_link.get("type") not in {EMPATH_LINK_DIRECT, EMPATH_LINK_PERSISTENT}:
+            return False, "You need an active direct or persistent link first."
+        if self.get_empath_unity_state():
+            return False, "You are already holding a shared burden together."
+        if isinstance(targets, (list, tuple)):
+            target = targets[0] if targets else None
+        else:
+            target = targets
+        if not target or target == self or getattr(target, "location", None) != getattr(self, "location", None):
+            return False, "They are not here."
+        if int(getattr(target, "id", 0) or 0) == int(base_link.get("target_id", 0) or 0):
+            return False, "They are already your linked patient."
         self.db.empath_unity = {
-            "member_ids": [member.id for member in members],
+            "primary_target_id": int(base_link.get("target_id", 0) or 0),
+            "secondary_target_id": int(target.id),
+            "stability": 80,
             "created_at": time.time(),
-            "expires_at": expires_at,
         }
-        for member in members:
-            if hasattr(member, "set_state"):
-                member.set_state(
-                    "empath_unity",
-                    {
-                        "anchor_id": self.id,
-                        "member_ids": [ally.id for ally in members],
-                        "expires_at": expires_at,
-                    },
-                )
-        self.set_fatigue((self.db.fatigue or 0) + max(2, len(members)))
-        self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=20 + (len(members) * 4))
+        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 5)
+        self.award_empathy_experience("unity", 20, amount=10, target=target, unity=True)
         self.sync_client_state()
-        return True, "You weave a shared bond between your allies."
+        return True, "You weave a frail bond between burdens."
 
-    def redirect_empath_wound(self, wound_type, amount_spec, source_target, dest_target):
+    def decay_empath_unity_stability(self, amount=None, event_key="transfer", emit_message=True):
+        unity = self.get_empath_unity_state()
+        if not unity:
+            return None
+        cost = max(0, int(amount if amount is not None else EMPATH_UNITY_STABILITY_RULES.get(str(event_key or "").strip().lower(), 0) or 0))
+        if cost <= 0:
+            return unity
+        old_stability = int(unity.get("stability", 0) or 0)
+        new_stability = max(0, old_stability - cost)
+        self.db.empath_unity = {
+            "primary_target_id": int(unity.get("primary_target_id", 0) or 0),
+            "secondary_target_id": int(unity.get("secondary_target_id", 0) or 0),
+            "stability": new_stability,
+            "created_at": float(dict(getattr(self.db, "empath_unity", {}) or {}).get("created_at", time.time()) or time.time()),
+        }
+        self.sync_client_state()
+        if new_stability <= 0:
+            self.clear_empath_unity(sync_members=True, emit_message=emit_message)
+            return None
+        if emit_message and old_stability >= 40 and new_stability < 40:
+            self.msg("The shared tension begins to fray.")
+        return self.get_empath_unity_state()
+
+    def redirect_empath_wound(self, wound_type, amount_spec, dest_target):
         if not self.is_empath():
-            return False, "You cannot redirect pain that way."
-        if self.is_empath_overdrawn():
-            return False, "You have taken too much already. You cannot channel more pain right now."
-        if not source_target or not dest_target or source_target == dest_target:
-            return False, "You need two different linked patients for that."
-        if getattr(source_target, "location", None) != getattr(self, "location", None) or getattr(dest_target, "location", None) != getattr(self, "location", None):
-            return False, "Both patients must be here."
-        if not self.resolve_empath_link_target(source_target.key, require_local=True) or not self.resolve_empath_link_target(dest_target.key, require_local=True):
-            return False, "You need active links to both patients first."
+            return False, "You do not know how to redirect pain that way."
+        allowed, message = self.can_use_empath_ability("redirect")
+        if not allowed:
+            return False, message
+        link_state = self.get_empath_link_state(require_local=True, emit_break_messages=True)
+        if not link_state:
+            return False, "You need an active link first."
+        unity = self.get_empath_unity_state(emit_break_messages=True)
+        if not unity:
+            return False, "You need an active unity bond first."
+        source_target = link_state.get("target")
+        if not dest_target or getattr(dest_target, "location", None) != getattr(self, "location", None):
+            return False, "They are not here."
+        if int(getattr(dest_target, "id", 0) or 0) != int(unity.get("secondary_target_id", 0) or 0):
+            return False, "You can only redirect into your current unity partner."
         wound_key = self.normalize_empath_wound_key(wound_type)
         if wound_key not in DEFAULT_EMPATH_WOUNDS:
-            return False, "You can only redirect vitality, bleeding, fatigue, trauma, poison, or disease."
+            return False, "You cannot redirect that wound."
         source_amount = source_target.get_empath_wound(wound_key)
         if source_amount <= 0:
             return False, f"{source_target.key} is not suffering from that wound."
         raw_spec = str(amount_spec or "").strip().lower()
         if raw_spec == "all":
-            requested = source_amount
+            amount = source_amount
         else:
             try:
-                requested = max(1, int(raw_spec or 10))
+                amount = max(1, int(raw_spec or 10))
             except ValueError:
                 return False, "Give a number or 'all'."
-        moved = min(requested, source_amount)
-        source_target.set_empath_wound(wound_key, source_amount - moved)
-        dest_target.set_empath_wound(wound_key, dest_target.get_empath_wound(wound_key) + moved)
-        redirect_cfg = EMPATH_SYSTEM_CONFIG["redirect"]
-        strain = max(1, int(round(moved * float(redirect_cfg["strain_ratio"]))))
-        fatigue_spike = max(int(redirect_cfg["fatigue_spike_min"]), int(round(moved * float(redirect_cfg["fatigue_ratio"]))))
-        self.set_fatigue((self.db.fatigue or 0) + fatigue_spike)
-        if wound_key in {"vitality", "bleeding", "trauma"}:
-            self.set_empath_wound(wound_key, self.get_empath_wound(wound_key) + strain)
+        amount = min(amount, source_amount)
+        source_target.set_empath_wound(wound_key, source_amount - amount)
+        dest_target.set_empath_wound(wound_key, dest_target.get_empath_wound(wound_key) + amount)
+        empath_strain = max(1, int(amount * 0.25))
+        if wound_key == "bleeding":
+            self.set_empath_wound("bleeding", self.get_empath_wound("bleeding") + empath_strain + max(1, int(amount * 0.1)))
         else:
-            self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + max(1, strain // 2))
-        risk = float(redirect_cfg["risk_base"]) + (moved / max(1.0, float(redirect_cfg["risk_scale"])))
-        if random.random() < min(0.75, risk):
-            self.set_fatigue((self.db.fatigue or 0) + max(2, fatigue_spike // 2))
-            self.msg("The force of the redirection jars you badly.")
-        self.refresh_empath_link(source_target, bonus_seconds=8)
-        self.refresh_empath_link(dest_target, bonus_seconds=8)
-        self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=16 + moved)
-        self.maybe_trigger_empath_overdraw()
+            self.set_empath_wound("vitality", self.get_empath_wound("vitality") + empath_strain)
+        self.decay_empath_link_stability(amount=20, reason="redirect", emit_message=True)
+        self.decay_empath_unity_stability(amount=20, event_key="redirect", emit_message=True)
+        if amount > 25:
+            self.adjust_empath_shock(5)
+        self.award_empathy_experience("redirect", 18 + amount, amount=amount, target=source_target, wound_key=wound_key, unity=True)
         return True, "You channel the injury through yourself, shifting its burden."
 
     def get_empath_unity_effect(self):
@@ -3895,36 +4667,7 @@ class Character(ObjectParent, DefaultCharacter):
         return changed
 
     def apply_empath_unity_share(self, location, amount, damage_type="impact"):
-        if int(amount or 0) <= 1 or bool(getattr(self.ndb, "unity_share_in_progress", False)):
-            return int(amount or 0)
-        unity = self.get_empath_unity_effect()
-        if not unity:
-            return int(amount or 0)
-        recipients = [member for member in unity.get("members", []) if member != self and getattr(member, "location", None) == getattr(self, "location", None)]
-        if not recipients:
-            return int(amount or 0)
-        share_ratio = EMPATH_UNITY_SHARE_RATIO if len(recipients) > 1 else 0.3
-        shared_total = max(1, min(int(amount or 0) - 1, int(round(int(amount or 0) * share_ratio))))
-        if shared_total <= 0:
-            return int(amount or 0)
-        local_amount = max(1, int(amount or 0) - shared_total)
-        per_target = shared_total // len(recipients)
-        remainder = shared_total % len(recipients)
-        anchor = unity.get("anchor")
-        for index, recipient in enumerate(recipients):
-            share_amount = per_target + (1 if index < remainder else 0)
-            if share_amount <= 0:
-                continue
-            recipient.msg("You share part of the blow through your unity bond.")
-            recipient.ndb.unity_share_in_progress = True
-            try:
-                recipient.apply_incoming_damage(location, share_amount, damage_type)
-            finally:
-                recipient.ndb.unity_share_in_progress = False
-        self.msg("Your unity bond diffuses part of the blow.")
-        if anchor and anchor != self:
-            anchor.msg(f"You feel {self.key}'s pain spread across the shared bond.")
-        return local_amount
+        return int(amount or 0)
 
     def apply_incoming_damage(self, location, amount, damage_type="impact"):
         self.ensure_core_defaults()
@@ -3933,41 +4676,26 @@ class Character(ObjectParent, DefaultCharacter):
             return 0
         self.set_hp((self.db.hp or 0) - final_amount)
         self.apply_damage(location, final_amount, damage_type)
+        if self.is_empath() and self.get_empath_link_state(require_local=False, emit_break_messages=False):
+            self.decay_empath_link_stability(amount=None, reason="damage", emit_message=True)
+        if self.is_empath() and self.get_empath_unity_state():
+            self.decay_empath_unity_stability(event_key="damage", emit_message=True)
         return final_amount
 
     def process_empath_links(self):
         if not self.is_empath():
             return False
-        now = time.time()
-        self.prune_empath_links(sync=False)
-        changed = False
-        if self.get_empath_shock() >= 85:
-            changed = self.remove_empath_link(clear_all=True) or changed
+        before = self.normalize_empath_link_state()
+        self.get_empath_link_state(require_local=True, emit_break_messages=False)
+        after = self.normalize_empath_link_state()
+        if not before:
             if self.get_empath_unity_state():
-                self.clear_empath_unity(sync_members=True, emit_message=True)
-                changed = True
-        unity = self.get_empath_unity_state()
-        if now >= float(getattr(self.ndb, "next_empath_link_drain_at", 0) or 0):
-            drain = len([entry for entry in self.get_empath_links(require_local=False, include_group=False) if entry.get("type") == EMPATH_LINK_PERSISTENT])
-            if unity:
-                drain += len(unity.get("member_ids", []))
-            if drain > 0:
-                self.set_fatigue((self.db.fatigue or 0) + drain)
-            stress_config = EMPATH_SYSTEM_CONFIG["link_strength"]
-            stress_load = self.get_empath_shock() + self.get_empath_wound("fatigue")
-            extra_decay = min(int(stress_config["stress_decay_max"]), int(stress_load / max(1.0, float(stress_config["stress_decay_scale"]))))
-            if extra_decay > 0:
-                links = self.normalize_empath_links(getattr(self.db, "empath_links", None) or {})
-                for link_id, link_data in list(links.items()):
-                    link_type = self.normalize_empath_link_type(link_data.get("type"))
-                    if link_type == EMPATH_LINK_GROUP:
-                        continue
-                    link_data = dict(link_data)
-                    link_data["expires_at"] = max(now + 1.0, float(link_data.get("expires_at", now) or now) - extra_decay)
-                    links[link_id] = link_data
-                self.set_empath_links(links, sync=False)
-            self.ndb.next_empath_link_drain_at = now + 12.0
-        return changed
+                self.clear_empath_unity(sync_members=True, emit_message=False)
+            return False
+        if self.get_empath_shock() >= int(EMPATH_SHOCK_THRESHOLDS["disconnected"]):
+            return self.break_empath_connections(reason="shock", emit_message=False)
+        self.get_empath_unity_state()
+        return before != after
 
     def get_empath_manipulate_profile(self, target):
         trait_values = [
@@ -3989,6 +4717,9 @@ class Character(ObjectParent, DefaultCharacter):
     def manipulate_empath_target(self, target):
         if not self.is_empath():
             return False, "You cannot impose calm that way."
+        allowed, message = self.can_use_empath_ability("manipulate")
+        if not allowed:
+            return False, message
         if not target or getattr(target, "location", None) != getattr(self, "location", None):
             return False, "They are not here."
         if target == self:
@@ -4019,7 +4750,7 @@ class Character(ObjectParent, DefaultCharacter):
             target.set_target(None)
         if getattr(target.db, "in_combat", None) is not None:
             target.db.in_combat = False
-        self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=18 + max(0, int(target_score / 6)))
+        self.award_empathy_experience("manipulate", 18 + max(0, int(target_score / 6)), target=target)
         return True, f"You press calm into {target.key}'s thoughts, easing their aggression."
 
     def get_empath_transfer_profile(self, wound_type):
@@ -4041,43 +4772,13 @@ class Character(ObjectParent, DefaultCharacter):
     def sync_empath_wounds_from_resources(self):
         self.ensure_core_defaults()
         wounds = self.normalize_empath_wounds(getattr(self.db, "wounds", None) or _copy_default_empath_wounds())
-        max_hp = max(1, int(getattr(self.db, "max_hp", 100) or 100))
-        hp = max(0, int(getattr(self.db, "hp", max_hp) or max_hp))
-        max_fatigue = max(1, int(getattr(self.db, "max_fatigue", 100) or 100))
-        fatigue = max(0, int(getattr(self.db, "fatigue", 0) or 0))
-        wounds["vitality"] = max(0, min(100, int(round((1 - (hp / max_hp)) * 100))))
-        wounds["fatigue"] = max(0, min(100, int(round((fatigue / max_fatigue) * 100))))
-        wounds["trauma"] = self.get_empath_trauma_value()
-        raw_bleed = self.get_total_bleed()
-        effective_bleed = self.get_effective_bleed_total() if hasattr(self, "get_effective_bleed_total") else raw_bleed
-        bleeding_from_injuries = max(0, min(100, int(effective_bleed * 5)))
-        cached_bleeding = max(0, min(100, int(wounds.get("bleeding", 0) or 0)))
-        bleed_state = str(getattr(self.db, "bleed_state", "none") or "none").strip().lower()
-        if raw_bleed > 0:
-            wounds["bleeding"] = bleeding_from_injuries
-        elif bleed_state != "none":
-            wounds["bleeding"] = max(bleeding_from_injuries, cached_bleeding)
-        else:
-            wounds["bleeding"] = bleeding_from_injuries
         self.db.wounds = wounds
         return wounds
 
     def sync_resources_from_empath_wounds(self):
         self.ensure_core_defaults()
         wounds = self.normalize_empath_wounds(getattr(self.db, "wounds", None) or _copy_default_empath_wounds())
-        max_hp = max(1, int(getattr(self.db, "max_hp", 100) or 100))
-        max_fatigue = max(1, int(getattr(self.db, "max_fatigue", 100) or 100))
-        self.db.hp = max(0, min(max_hp, int(round(max_hp * (1 - (int(wounds.get("vitality", 0) or 0) / 100))))))
-        self.db.fatigue = max(0, min(max_fatigue, int(round(max_fatigue * (int(wounds.get("fatigue", 0) or 0) / 100)))))
-        bleed_amount = int(wounds.get("bleeding", 0) or 0)
-        if bleed_amount <= 0:
-            self.db.bleed_state = "none"
-        elif bleed_amount < 20:
-            self.db.bleed_state = "light"
-        elif bleed_amount < 50:
-            self.db.bleed_state = "moderate"
-        else:
-            self.db.bleed_state = "severe"
+        self.db.wounds = wounds
         return wounds
 
     def get_empath_wounds(self):
@@ -4104,23 +4805,12 @@ class Character(ObjectParent, DefaultCharacter):
         return self.set_empath_wound(wound_type, self.get_empath_wound(wound_type) + int(amount or 0))
 
     def get_empath_wound_label(self, value):
-        amount = max(0, min(100, int(value or 0)))
-        if amount <= 0:
-            return "None"
-        if amount < 15:
-            return "Minor"
-        if amount < 35:
-            return "Light"
-        if amount < 60:
-            return "Moderate"
-        if amount < 85:
-            return "Heavy"
-        return "Severe"
+        return describe_wound(value)
 
     def format_empath_diagnosis(self, precise=False):
         wounds = self.sync_empath_wounds_from_resources()
         lines = []
-        for key in ["vitality", "bleeding", "fatigue", "trauma", "poison", "disease"]:
+        for key in ["vitality", "bleeding", "poison", "disease"]:
             label = EMPATH_WOUND_LABELS.get(key, key.title())
             value = int(wounds.get(key, 0) or 0)
             lines.append(f"{label}: {value}%" if precise else f"{label}: {self.get_empath_wound_label(value)}")
@@ -4139,11 +4829,11 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_empath_perception_accuracy(self):
         shock = self.get_empath_shock()
-        if shock >= 80:
+        if shock >= int(EMPATH_SHOCK_THRESHOLDS["disconnected"]):
             return "poor"
-        if shock >= 50:
+        if shock >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
             return "blurred"
-        if shock >= 25:
+        if shock >= int(EMPATH_SHOCK_THRESHOLDS["strained"]):
             return "steady"
         return "keen"
 
@@ -4207,51 +4897,57 @@ class Character(ObjectParent, DefaultCharacter):
     def perceive_empath_health(self):
         if not self.is_empath():
             return False, ["You cannot read life forces that way."]
+        allowed, message = self.can_use_empath_ability("perceive_health")
+        if not allowed:
+            return False, [message]
         targets = self.get_empath_perceive_targets(include_adjacent=False)
         if not targets:
             return True, ["You sense no other lifeforms nearby."]
-        accuracy = self.get_empath_perception_accuracy()
-        lines = ["You sense one lifeform nearby." if len(targets) == 1 else "You sense several lifeforms nearby."]
-        buckets = {"near collapse": 0, "weakened": 0, "strained": 0, "steady": 0}
+        lines = []
+        if self.get_empath_shock() >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
+            lines.append("Your senses are unclear.")
         for target in targets:
-            label = self.describe_empath_life_force(target, targeted=False)
-            buckets[label] = buckets.get(label, 0) + 1
-        if accuracy == "poor":
-            lines.append("Your reading blurs at the edges.")
-            troubled = buckets.get("near collapse", 0) + buckets.get("weakened", 0)
-            if troubled:
-                lines.append("At least one life force nearby is troubled.")
-            elif buckets.get("strained", 0):
-                lines.append("A nearby life force feels strained.")
-        else:
-            for key in ["near collapse", "weakened", "strained"]:
-                count = buckets.get(key, 0)
-                if count <= 0:
-                    continue
-                quantifier = "One" if count == 1 else f"{count}"
-                verb = "is" if count == 1 else "are"
-                lines.append(f"{quantifier} {verb} {key}.")
-        if hasattr(self, "use_skill"):
-            self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=10 + (len(targets) * 2))
-            self.use_skill("attunement", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=10)
+            wounds = target.get_empath_wounds() if hasattr(target, "get_empath_wounds") else {}
+            vitality = int(wounds.get("vitality", 0) or 0)
+            if vitality > 60:
+                status = "near collapse"
+            elif vitality > 30:
+                status = "weakened"
+            else:
+                status = "stable"
+            lines.append(f"You sense a presence that is {status}.")
+        self.award_empathy_experience("perceive_health", 10 + (len(targets) * 2), amount=len(targets))
         return True, lines
 
     def perceive_empath_target(self, target):
         if not self.is_empath():
             return False, ["You cannot read life forces that way."]
+        allowed, message = self.can_use_empath_ability("perceive_target")
+        if not allowed:
+            return False, [message]
         if not target or getattr(target, "location", None) != getattr(self, "location", None):
             return False, ["They are not here."]
         if not hasattr(target, "get_empath_wounds"):
             return False, ["You find no living pattern to read there."]
-        line = self.describe_empath_life_force(target, targeted=True)
-        if self.get_empath_perception_accuracy() == "poor":
-            line = f"{line} The pattern slips in and out of focus."
-        if hasattr(self, "use_skill"):
-            self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=12 + int(self.get_empath_life_force_score(target) / 8))
+        link_state = self.get_empath_link_state(require_local=True, target=target, emit_break_messages=True)
+        if link_state:
+            line = "Their life force trembles under strain."
+        else:
+            wounds = target.get_empath_wounds() if hasattr(target, "get_empath_wounds") else {}
+            vitality = int(wounds.get("vitality", 0) or 0)
+            if vitality > 60:
+                line = "You sense their life force is near collapse."
+            elif vitality > 30:
+                line = "You sense their life force is unstable."
+            else:
+                line = "You sense their life force is stable."
+        if self.get_empath_shock() >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
+            return True, ["Your senses are unclear.", line]
+        self.award_empathy_experience("perceive_target", 12, target=target)
         return True, [line]
 
     def get_linked_target(self):
-        primary = self.get_primary_empath_link(require_local=False, include_group=False)
+        primary = self.get_empath_link_state(require_local=False, emit_break_messages=False)
         return primary.get("target") if primary else None
 
     def set_linked_target(self, target):
@@ -4267,54 +4963,145 @@ class Character(ObjectParent, DefaultCharacter):
     def touch_empath_target(self, target):
         if not self.is_empath():
             return False, ["You lack the sensitivity to establish an empathic link."]
+        allowed, message = self.can_use_empath_ability("touch")
+        if not allowed:
+            return False, [message]
         if not target or getattr(target, "location", None) != getattr(self, "location", None):
             return False, ["They are not here."]
         if target == self:
             return False, ["You already feel every ache in your own body."]
+        if int(getattr(getattr(target, "db", None), "empath_tutorial_owner", 0) or 0) not in {0, int(getattr(self, "id", 0) or 0)}:
+            return False, ["That patient is under another empath's care."]
+        existing = self.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if self.is_empath_tutorial_active() and existing:
+            existing_target = existing.get("target")
+            if existing_target == target:
+                return False, ["You are already linked to that patient."]
+            return False, ["Release your current patient before beginning again."]
         self.create_empath_link(target, link_type=EMPATH_LINK_TOUCH)
-        return True, ["You reach out and sense the condition of your patient.", *target.format_empath_diagnosis(precise=True)]
+        return True, ["You reach out and sense the condition of your patient."]
 
     def link_empath_target(self, target, persistent=False, deepen=False):
         if not self.is_empath():
             return False, ["You do not know how to deepen a bond that way."]
+        allowed, message = self.can_use_empath_ability("link")
+        if not allowed:
+            return False, [message]
         if not target or getattr(target, "location", None) != getattr(self, "location", None):
             return False, ["They are not here."]
         if target == self:
             return False, ["You are already bound to your own hurts."]
-        link_type = EMPATH_LINK_PERSISTENT if persistent else EMPATH_LINK_STANDARD
-        self.create_empath_link(target, link_type=link_type, deepen=deepen)
+        if persistent:
+            unlocked, unlock_message = self.require_empath_unlock("persistent_link")
+            if not unlocked:
+                return False, [unlock_message]
+        link_type = EMPATH_LINK_PERSISTENT if persistent else EMPATH_LINK_DIRECT
+        ok, result = self.create_empath_link(target, link_type=link_type, deepen=deepen)
+        if not ok:
+            return False, result if isinstance(result, list) else [str(result)]
         if hasattr(self, "set_roundtime"):
-            self.set_roundtime(2.5 if not persistent else 3.0)
+            self.set_roundtime(2.5)
+        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 5)
         if persistent:
-            self.set_fatigue((self.db.fatigue or 0) + 4)
-        if deepen:
-            self.set_fatigue((self.db.fatigue or 0) + int(EMPATH_SYSTEM_CONFIG["link_strength"]["deepen_fatigue_cost"]))
-        lines = ["You deepen your connection, sensing their condition clearly."]
-        if persistent:
-            lines.append("The bond settles into a lingering thread that will tax you while it endures.")
-        if deepen:
-            lines.append("Your connection deepens, their pain becoming clearer.")
-        lines.extend(target.format_empath_diagnosis(precise=True))
+            lines = ["You settle into a deeper, longer-held connection."]
+        else:
+            lines = ["You deepen your connection, taking in the shape of their suffering."]
         return True, lines
+
+    def set_empath_link_focus(self, skill_name):
+        if not self.is_empath():
+            return False, "You cannot shape a borrowed focus that way."
+        link_state = self.get_empath_link_state(require_local=True, emit_break_messages=True)
+        if not link_state:
+            return False, "You need an active local link first."
+        target = link_state.get("target")
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if not normalized:
+            return False, "Focus on which skill?"
+        target_rank = int(target.get_skill_rank(normalized) if hasattr(target, "get_skill_rank") else 0)
+        if target_rank <= 0:
+            return False, f"{target.key} has nothing to lend you there."
+        bonus = max(1, int(target_rank * 0.2))
+        updated = dict(link_state)
+        updated["link_bonus_skill"] = normalized
+        updated["link_bonus_value"] = bonus
+        updated["link_bonus_tick_at"] = time.time() + 10.0
+        self.set_empath_link_state(updated, sync=True)
+        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 3)
+        return True, f"You tune the link toward {self.format_skill_name(normalized)}."
+
+    def clear_empath_link_focus(self, emit_message=False):
+        link_state = self.get_empath_link_state(require_local=False, emit_break_messages=False)
+        if not link_state or (not link_state.get("link_bonus_skill") and not int(link_state.get("link_bonus_value", 0) or 0)):
+            return False
+        updated = dict(link_state)
+        updated["link_bonus_skill"] = None
+        updated["link_bonus_value"] = 0
+        updated["link_bonus_tick_at"] = 0.0
+        self.set_empath_link_state(updated, sync=True)
+        if emit_message:
+            self.msg("You let the borrowed focus slip away.")
+        return True
+
+    def get_empath_link_focus_bonus(self, skill_name):
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if not normalized:
+            return 0
+        link_state = self.get_empath_link_state(require_local=False, emit_break_messages=False)
+        if not link_state:
+            return 0
+        if str(link_state.get("link_bonus_skill") or "") != normalized:
+            return 0
+        return max(0, int(link_state.get("link_bonus_value", 0) or 0))
 
     def deepen_empath_link(self, target):
         return self.link_empath_target(target, persistent=False, deepen=True)
 
-    def assess_empath_link(self):
+    def assess_empath_link(self, target_query=None):
         if not self.is_empath():
             return False, ["You lack the sensitivity to assess a patient that way."]
-        link = self.get_primary_empath_link(require_local=False, include_group=False)
-        target = link.get("target") if link else None
-        if not target or not link:
-            return False, ["You have no active empathic link."]
-        lines = [f"You focus on {target.key}'s condition."]
-        lines.append(f"Link: {str(link.get('type', EMPATH_LINK_TOUCH)).title()} ({link.get('strength_label', 'Weak')}, priority {int(link.get('priority', 0) or 0)}).")
-        if link.get("deepened"):
-            lines.append("The bond is unusually deep and responsive.")
-        other_links = [entry for entry in self.get_empath_links(require_local=False, include_group=False) if getattr(entry.get("target"), "id", None) != getattr(target, "id", None)]
-        if other_links:
-            lines.append("Other links: " + ", ".join(f"{entry['target'].key} ({entry['strength_label']}, p{int(entry.get('priority', 0) or 0)})" for entry in other_links[:5]))
-        lines.extend(target.format_empath_diagnosis(precise=True))
+        allowed, message = self.can_use_empath_ability("assess")
+        if not allowed:
+            return False, [message]
+        link_state = self.get_empath_link_state(require_local=True, emit_break_messages=True)
+        if not link_state:
+            return False, ["You are not linked to anyone."]
+        target = link_state.get("target")
+        if target_query and not self.resolve_empath_link_target(target_query, require_local=True):
+            return False, ["You must touch them before you can assess them."]
+        wounds = target.get_empath_wounds() if hasattr(target, "get_empath_wounds") else {}
+        if self.is_empath_tutorial_active():
+            def _tutorial_label(value):
+                amount = int(value or 0)
+                if amount <= 0:
+                    return "None"
+                if amount <= 10:
+                    return "Faint"
+                if amount <= 25:
+                    return "Noticeable"
+                return self.get_empath_wound_label(amount).title()
+
+            lines = [
+                f"Vitality: {_tutorial_label(wounds.get('vitality', 0))}",
+                f"Bleeding: {_tutorial_label(wounds.get('bleeding', 0))}",
+                f"Poison: {_tutorial_label(wounds.get('poison', 0))}",
+                f"Disease: {_tutorial_label(wounds.get('disease', 0))}",
+            ]
+        else:
+            lines = [
+                f"Vitality: {int(wounds.get('vitality', 0) or 0)}%",
+                f"Bleeding: {int(wounds.get('bleeding', 0) or 0)}%",
+                f"Poison: {int(wounds.get('poison', 0) or 0)}%",
+                f"Disease: {int(wounds.get('disease', 0) or 0)}%",
+            ]
+        if link_state.get("type") in {EMPATH_LINK_DIRECT, EMPATH_LINK_PERSISTENT}:
+            condition = str(link_state.get("condition") or "steady")
+            if condition == "fragile":
+                lines.append("Your connection feels fragile.")
+            elif condition == "strained":
+                lines.append("Your connection feels strained.")
+            else:
+                lines.append("Your connection feels steady.")
         return True, lines
 
     def siphon_empath_bleeding(self, target, wound_amount):
@@ -4341,64 +5128,206 @@ class Character(ObjectParent, DefaultCharacter):
             target.update_bleed_state()
         return removed
 
-    def take_empath_wound(self, wound_type, amount_spec="", target=None):
+    def take_empath_wound(self, wound_type, amount_spec="", target=None, selector=None, requested_fraction=None, requested_rate=None, learning_action=None):
         if not self.is_empath():
             return False, "You cannot draw another's wounds into yourself."
-        if self.is_empath_overdrawn():
-            return False, "Your senses are overloaded. Center yourself before taking on more pain."
-        if isinstance(target, str):
-            target = self.resolve_empath_link_target(target, require_local=True)
-        if target is not None:
-            link = self.get_empath_link(target, require_local=True)
+        allowed, message = self.can_use_empath_ability("take")
+        if not allowed:
+            return False, message
+        link_state = self.get_empath_link_state(require_local=True, emit_break_messages=True)
+        if not link_state:
+            return False, "You are not linked to a patient."
+        target = link_state.get("target")
+        selector_key = self.normalize_empath_take_selector(selector)
+        if selector and not selector_key:
+            return False, "You can't focus on that."
+        rate_key = str(requested_rate or "").strip().lower()
+        if rate_key and rate_key not in {"slow", "fast"}:
+            return False, "You cannot shape the transfer that way."
+        explicit_wound_key = self.normalize_empath_wound_key(wound_type)
+        if selector_key:
+            wound_key = self.resolve_empath_take_bucket(target, selector_key)
+        elif requested_fraction is not None or rate_key:
+            if explicit_wound_key in DEFAULT_EMPATH_WOUNDS:
+                wound_key = explicit_wound_key
+            else:
+                wound_key = self.resolve_default_empath_take_bucket(target)
         else:
-            link = self.get_primary_empath_link(require_local=True, include_group=False)
-            target = link.get("target") if link else None
-        if not target:
-            return False, "You need an active link before you can take a wound."
-        if not link:
-            return False, "You do not have an active link to that patient."
-        wound_key = self.normalize_empath_wound_key(wound_type)
+            wound_key = explicit_wound_key
         if wound_key not in DEFAULT_EMPATH_WOUNDS:
-            return False, "You can only take vitality, bleeding, fatigue, trauma, poison, or disease."
-        target_amount = target.get_empath_wound(wound_key)
-        if target_amount <= 0:
+            if selector_key:
+                return False, f"{target.key} has no wound there you can draw."
+            if requested_fraction is not None or rate_key:
+                return False, f"{target.key} has no wound you can draw that way."
+            return False, "You cannot take that."
+        if wound_key == "vitality" and requested_fraction is not None:
+            return False, "You cannot carefully draw life force. It must be taken whole."
+        if self.is_empath_tutorial_active() and wound_key not in EMPATH_TUTORIAL_WOUNDS:
+            return False, "You are not ready to take poison or disease yet."
+        if wound_key == "poison":
+            unlocked, unlock_message = self.require_empath_unlock("poison_transfer")
+            if not unlocked:
+                return False, unlock_message
+        if wound_key == "disease":
+            unlocked, unlock_message = self.require_empath_unlock("disease_transfer")
+            if not unlocked:
+                return False, unlock_message
+        target_wounds = target.get_empath_wounds() if hasattr(target, "get_empath_wounds") else {}
+        target_value = target_wounds.get(wound_key)
+        if not target_value or int(target_value) <= 0:
             return False, f"{target.key} is not suffering from that wound."
-        profile = self.get_empath_transfer_profile(wound_key)
+        target_amount = int(target_value)
         raw_spec = str(amount_spec or "").strip().lower()
-        if raw_spec == "all":
-            requested = target_amount
+        if (requested_fraction is not None or rate_key) and raw_spec not in {"", "all"}:
+            return False, "Partial transfer does not use a direct amount."
+        if selector_key and raw_spec and requested_fraction is None and not rate_key:
+            return False, "Selective take draws the whole injury for now."
+        if requested_fraction is not None:
+            amount = max(1, int(target_amount * float(requested_fraction)))
+        elif selector_key:
+            amount = target_amount
+        elif raw_spec == "all":
+            amount = target_amount
         elif raw_spec:
             try:
-                requested = max(1, int(raw_spec))
+                amount = max(1, int(raw_spec))
             except ValueError:
                 return False, "Give a number or 'all'."
         else:
-            requested = min(int(profile.get("default", 20) or 20), target_amount)
-        requested = min(requested, target_amount)
-        relief_modifier = self.get_empath_shock_modifier() * self.get_empath_transfer_skill_modifier() * self.get_empath_link_transfer_modifier(target=target) * float(profile.get("efficiency", 1.0) or 1.0)
-        actual_relief = max(1, min(target_amount, int(round(requested * relief_modifier))))
-        inefficiency = max(0, requested - actual_relief)
-        extra_self_tax = max(0, int(round(requested * float(profile.get("self_tax", 0.0) or 0.0) * self.get_empath_link_backlash_modifier(target=target))))
-        total_self_gain = min(100, self.get_empath_wound(wound_key) + actual_relief + inefficiency + extra_self_tax)
-        if wound_key == "bleeding":
-            siphoned = self.siphon_empath_bleeding(target, actual_relief)
-            target.sync_empath_wounds_from_resources()
-            remaining_relief = max(0, actual_relief - int(siphoned or 0))
-            if remaining_relief > 0:
-                target.set_empath_wound("bleeding", target.get_empath_wound("bleeding") - remaining_relief)
+            amount = min(20, target_amount)
+        amount = min(amount, target_amount)
+        if self.is_empath_tutorial_active():
+            target.set_empath_wound(wound_key, target_amount - amount)
+            self.set_empath_wound(wound_key, self.get_empath_wound(wound_key) + amount)
+            self.award_empathy_experience(
+                learning_action or "take",
+                10 + amount,
+                amount=amount,
+                target=target,
+                wound_key=wound_key,
+                requested_fraction=requested_fraction,
+                rate_key=rate_key,
+            )
+            self.complete_empath_tutorial_if_ready(target=target)
+            if requested_fraction is not None:
+                if selector_key:
+                    return True, f"You carefully draw only part of the hurt from their {selector_key}."
+                return True, "You carefully draw only part of the injury into yourself."
+            if rate_key == "slow":
+                return True, "You carefully draw the injury into yourself."
+            if rate_key == "fast":
+                return True, "You force the injury across the link into yourself."
+            if selector_key:
+                return True, f"You focus on the hurt in their {selector_key} and draw it into yourself."
+            return True, "You draw the wound into yourself."
+        shock = self.get_empath_shock()
+        penalty = 1 + (shock / 75.0)
+        link_strength = max(1, int(link_state.get("strength", 0) or 0))
+        effective_amount = max(0, int((amount * link_strength / 100.0) / penalty))
+        if requested_fraction is not None and amount > 0 and target_amount > 0:
+            effective_amount = max(1, min(target_amount, effective_amount))
+        if effective_amount <= 0:
+            if shock > 50:
+                return False, "Your connection feels dulled."
+            return False, "You fail to draw the injury across the link."
+        profile = self.get_empath_transfer_profile(wound_key)
+        mitigation_factor = self.get_empath_mitigation()
+        unity = None if wound_key == "vitality" else self.get_empath_unity_state()
+        unity_target = None
+        unity_smoothed = 0
+        if unity and int(unity.get("primary_target_id", 0) or 0) == int(getattr(target, "id", 0) or 0):
+            unity_target = unity.get("secondary_target")
+            unity_smoothed = max(0, min(effective_amount - 1, int(effective_amount * EMPATH_UNITY_SMOOTH_RATIO)))
+        target.set_empath_wound(wound_key, target_amount - effective_amount)
+        if unity_target and unity_smoothed > 0:
+            unity_target.set_empath_wound(wound_key, unity_target.get_empath_wound(wound_key) + unity_smoothed)
+        empath_take_raw = max(1, effective_amount - unity_smoothed)
+        empath_take = max(1, int(empath_take_raw * mitigation_factor))
+        overload_message = ""
+        if wound_key == "poison":
+            self.set_empath_wound("poison", self.get_empath_wound("poison") + empath_take)
+            self.set_empath_wound("vitality", self.get_empath_wound("vitality") + int(empath_take * 0.3))
+        elif wound_key == "vitality":
+            fatigue_ratio = float(profile.get("fatigue_ratio", 0.35) or 0.35)
+            shock_ratio = float(profile.get("shock_ratio", 0.3) or 0.3)
+            hp_ratio = float(profile.get("hp_ratio", 0.5) or 0.5)
+            fatigue_gain = max(1, int(effective_amount * fatigue_ratio))
+            shock_gain = max(1, int(effective_amount * shock_ratio))
+            hp_cost = max(1, int(effective_amount * hp_ratio))
+
+            self.set_empath_wound("vitality", self.get_empath_wound("vitality") + empath_take)
+            self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + fatigue_gain)
+            self.adjust_empath_shock(shock_gain)
+            self.set_hp(int(getattr(self.db, "hp", 0) or 0) - hp_cost)
+            self.maybe_trigger_empath_overdraw()
+            overload_message = self.apply_empath_transfer_overload(effective_amount, wound_key)
+        elif wound_key == "disease":
+            self.set_empath_wound("disease", self.get_empath_wound("disease") + empath_take)
         else:
-            target.set_empath_wound(wound_key, target_amount - actual_relief)
-        self.set_empath_wound(wound_key, total_self_gain)
-        overload_warning = self.apply_empath_transfer_overload(requested, wound_key)
-        self.refresh_empath_link(target, bonus_seconds=10)
-        self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=max(10, requested))
-        self.maybe_trigger_empath_overdraw()
-        if actual_relief < requested and overload_warning:
-            return True, f"You draw the injury into yourself, but shock blunts the relief you provide. {overload_warning}"
-        if actual_relief < requested:
-            return True, "You draw the injury into yourself, but shock blunts the relief you provide."
-        if overload_warning:
-            return True, f"You draw the injury into yourself. {overload_warning}"
+            self.set_empath_wound(wound_key, self.get_empath_wound(wound_key) + empath_take)
+        if wound_key == "bleeding" and not selector_key and requested_fraction is None and not rate_key:
+            self.set_empath_wound("bleeding", self.get_empath_wound("bleeding") + int(amount * 0.2))
+        rate_multiplier = 1.0
+        if rate_key == "slow":
+            rate_multiplier = 0.75
+        elif rate_key == "fast":
+            rate_multiplier = 1.25
+        if rate_key:
+            small_cost = max(1, int(round(self.get_empath_link_stability_cost(link_state.get("type"), "small_transfer") * rate_multiplier)))
+            self.decay_empath_link_stability(amount=small_cost, reason="small_transfer", emit_message=True)
+        else:
+            self.decay_empath_link_stability(amount=None, reason="small_transfer", emit_message=True)
+        if wound_key != "vitality" and amount > 25:
+            if rate_key:
+                large_cost = max(1, int(round(self.get_empath_link_stability_cost(link_state.get("type"), "large_transfer") * rate_multiplier)))
+                self.decay_empath_link_stability(amount=large_cost, reason="large_transfer", emit_message=True)
+                self.adjust_empath_shock(max(1, int(round(5 * rate_multiplier))))
+            else:
+                self.decay_empath_link_stability(amount=None, reason="large_transfer", emit_message=True)
+                self.adjust_empath_shock(5)
+        if unity:
+            self.decay_empath_unity_stability(event_key="transfer", emit_message=True)
+        self.ndb.empath_recent_healing_until = time.time() + 20.0
+        self.award_empathy_experience(
+            learning_action or "take",
+            max(10, amount),
+            amount=amount,
+            target=target,
+            wound_key=wound_key,
+            requested_fraction=requested_fraction,
+            rate_key=rate_key,
+            unity=bool(unity),
+        )
+        if overload_message:
+            self.msg(overload_message)
+        if shock >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
+            self.msg("Your connection feels dulled.")
+        if requested_fraction is not None:
+            if selector_key:
+                return True, f"You carefully draw only part of the hurt from their {selector_key}."
+            return True, "You carefully draw only part of the injury into yourself."
+        if rate_key == "slow":
+            if selector_key:
+                return True, f"You carefully draw the hurt from their {selector_key}."
+            if empath_take < empath_take_raw:
+                return True, "You carefully draw the injury into yourself, lessening the burden as you take it."
+            return True, "You carefully draw the injury into yourself."
+        if rate_key == "fast":
+            if selector_key:
+                return True, f"You force the hurt from their {selector_key} into yourself."
+            if empath_take < empath_take_raw:
+                return True, "You force the injury across the link, but lessen the burden as you take it."
+            return True, "You force the injury across the link into yourself."
+        if selector_key:
+            if empath_take < empath_take_raw:
+                return True, f"You focus on the hurt in their {selector_key} and lessen the burden as you take it."
+            return True, f"You focus on the hurt in their {selector_key} and draw it into yourself."
+        if wound_key == "vitality":
+            if empath_take < empath_take_raw:
+                return True, "You draw out living force, lessening the burden even as it tears through you."
+            return True, "You draw out living force, and it tears through you on the way in."
+        if empath_take < empath_take_raw:
+            return True, "You lessen the burden as you take it."
         return True, "You draw the injury into yourself."
 
     def apply_empath_transfer_overload(self, requested, wound_key):
@@ -4410,6 +5339,7 @@ class Character(ObjectParent, DefaultCharacter):
             return ""
         fatigue_spike = max(2, int(round(int(requested or 0) * float(profile.get("risk", 0.0) or 0.0))))
         self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + fatigue_spike)
+        self.set_state("empath_transfer_overload", {"expires_at": time.time() + 5.0, "requested": int(requested or 0), "wound": str(wound_key or "")})
         if hasattr(self, "set_roundtime"):
             self.set_roundtime(max(1.5, min(4.0, float(int(requested or 0)) / 12.0)))
         return "The force of the transfer buckles you for a moment."
@@ -4417,40 +5347,64 @@ class Character(ObjectParent, DefaultCharacter):
     def mend_empath_self(self):
         if not self.is_empath():
             return False, "You do not know how to mend yourself that way."
-        modifier = self.get_empath_healing_modifier()
-        healed = []
-        for wound_key, base_amount in (("vitality", 12), ("bleeding", 10), ("fatigue", 14), ("trauma", 8), ("poison", 4), ("disease", 3)):
-            before = self.get_empath_wound(wound_key)
-            after = self.set_empath_wound(wound_key, before - max(1, int(round(base_amount * modifier))))
-            if after != before:
-                healed.append(f"{wound_key} {before}->{after}")
-        if not healed:
+        wounds = self.get_empath_wounds()
+        before_vitality = int(wounds.get("vitality", 0) or 0)
+        before_bleeding = int(wounds.get("bleeding", 0) or 0)
+        penalty = get_disease_penalty(self)
+        heal_vitality = max(0, int(10 / penalty))
+        heal_bleeding = max(0, int(5 / penalty))
+        after_vitality = self.set_empath_wound("vitality", before_vitality - heal_vitality)
+        after_bleeding = self.set_empath_wound("bleeding", before_bleeding - heal_bleeding)
+        if before_vitality == after_vitality and before_bleeding == after_bleeding:
             return False, "You are already carrying no wounds that require mending."
-        self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=15)
-        return True, "You draw your own pain into stillness."
+        self.award_empathy_experience("mend", 15, amount=before_vitality + before_bleeding, target=self)
+        if self.is_empath_tutorial_active():
+            after_wounds = self.get_empath_wounds()
+            if int(after_wounds.get("vitality", 0) or 0) <= 0 and int(after_wounds.get("bleeding", 0) or 0) <= 0:
+                self.set_empath_training_stage(EMPATH_TRAINING_BASIC)
+                return True, "You focus inward, stabilizing your condition. Merla gives a short nod. 'Good. Now you have actually finished the lesson.'"
+        return True, "You focus inward, stabilizing your condition."
 
     def center_empath_self(self):
         if not self.is_empath():
             return False, "You do not know how to center yourself that way."
-        if getattr(self.db, "in_combat", False):
-            return False, "You cannot center yourself while heavy combat still grips you."
+        overload = self.get_state("empath_transfer_overload")
+        if isinstance(overload, Mapping) and time.time() < float(overload.get("expires_at", 0.0) or 0.0):
+            return False, "You are still reeling from the last transfer."
+        if self.get_state("empath_channel"):
+            return False, "You cannot center yourself while actively channeling another's pain."
         config = EMPATH_SYSTEM_CONFIG["center"]
         shock_reduction = int(config["shock_reduction"])
-        fatigue_reduction = int(config["fatigue_reduction"])
-        wound_reduction = int(config["wound_reduction"])
+        fatigue_cost = int(config["fatigue_cost"])
+        roundtime = float(config["roundtime"])
+        zone = self.get_empath_room_zone()
+        if zone == "recovery":
+            shock_reduction += 8
+            fatigue_cost = max(4, fatigue_cost - 3)
+        elif zone == "triage":
+            shock_reduction += 3
+        if getattr(self.db, "in_combat", False):
+            shock_reduction = max(5, int(round(shock_reduction * 0.5)))
+            fatigue_cost += 5
+            roundtime += 1.0
         before_shock = self.get_empath_shock()
-        before_fatigue = int(self.db.fatigue or 0)
+        before_fatigue = self.get_empath_wound("fatigue")
         self.adjust_empath_shock(-shock_reduction)
-        self.set_fatigue(before_fatigue - fatigue_reduction)
-        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") - wound_reduction)
-        if self.is_empath_overdrawn() and self.get_empath_shock() <= int(config["overdraw_clear_shock_threshold"]) and int(self.db.fatigue or 0) <= int(config["overdraw_clear_fatigue_threshold"]):
+        self.set_empath_wound("fatigue", before_fatigue + fatigue_cost)
+        if self.is_empath_overdrawn() and self.get_empath_shock() <= int(config["overdraw_clear_shock_threshold"]) and self.get_empath_wound("fatigue") <= int(config["overdraw_clear_fatigue_threshold"]):
             self.clear_state("empath_overdraw")
         if hasattr(self, "set_roundtime"):
-            self.set_roundtime(float(config["roundtime"]))
+            self.set_roundtime(roundtime)
         self.use_skill("attunement", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=14)
-        if before_shock == self.get_empath_shock() and before_fatigue == int(self.db.fatigue or 0):
+        if before_shock == self.get_empath_shock() and before_fatigue == self.get_empath_wound("fatigue"):
             return False, "You are already as centered as you can be."
         return True, "You steady yourself, regaining clarity."
+
+    def get_empath_stabilize_strength(self):
+        skill = int(self.get_skill("first_aid") if hasattr(self, "get_skill") else 0)
+        config = EMPATH_STABILIZE_RULES
+        strength = float(config["base_strength"]) + (skill * float(config["strength_scale"]))
+        return max(0.0, min(float(config["max_strength"]), strength))
 
     def purge_empath_condition(self, wound_type):
         if not self.is_empath():
@@ -4461,13 +5415,10 @@ class Character(ObjectParent, DefaultCharacter):
         before = self.get_empath_wound(wound_key)
         if before <= 0:
             return False, f"You are not carrying any {wound_key}."
-        modifier = self.get_empath_healing_modifier()
-        reduction = max(4, int(round((14 if wound_key == 'poison' else 10) * modifier)))
+        reduction = 15 if wound_key == "poison" else 10
         self.set_empath_wound(wound_key, before - reduction)
-        fatigue_spike = 10 + int(before / 12)
-        self.set_fatigue((self.db.fatigue or 0) + fatigue_spike)
-        if hasattr(self, "use_skill"):
-            self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=18 + int(before / 8))
+        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 10)
+        self.award_empathy_experience("purge", 18, amount=before, target=self, wound_key=wound_key)
         return True, "You force the corruption from your body."
 
     def register_empath_offensive_action(self, target=None, context="attack", amount=None):
@@ -4477,52 +5428,193 @@ class Character(ObjectParent, DefaultCharacter):
             return 0
         if not hasattr(target, "get_empath_wounds"):
             return 0
-        shock_gain = int(amount if amount is not None else (10 if context == "attack" else 8))
+        if amount is not None:
+            shock_gain = int(amount)
+        elif context == "kill":
+            shock_gain = 30
+        elif context == "attack":
+            shock_gain = 15
+        else:
+            shock_gain = 8
         return self.adjust_empath_shock(shock_gain)
 
     def process_wound_conditions(self):
         self.ensure_core_defaults()
         wounds = self.get_empath_wounds()
         poison = int(wounds.get("poison", 0) or 0)
-        disease = int(wounds.get("disease", 0) or 0)
         now = time.time()
         if poison > 0 and now >= float(getattr(self.ndb, "next_poison_tick_at", 0) or 0):
-            hp_loss = max(1, int(math.ceil(poison / 25.0)))
-            self.set_hp((self.db.hp or 0) - hp_loss)
-            if poison < 100:
-                self.set_empath_wound("poison", poison + 1)
+            apply_poison_tick(self)
             self.ndb.next_poison_tick_at = now + 6.0
-        if disease > 0 and now >= float(getattr(self.ndb, "next_disease_tick_at", 0) or 0):
-            fatigue_gain = max(1, int(math.ceil(disease / 30.0)))
-            self.set_fatigue((self.db.fatigue or 0) + fatigue_gain)
-            self.ndb.next_disease_tick_at = now + 8.0
         return False
+
+    def get_stabilizable_parts(self):
+        self.ensure_core_defaults()
+        parts = []
+        for part_name in BODY_PART_ORDER:
+            body_part = self.get_body_part(part_name)
+            if not body_part:
+                continue
+            bleed = max(0, int(body_part.get("bleed", 0) or 0))
+            trauma = max(0, int(self.get_part_trauma(body_part) or 0))
+            if bleed <= 0 and trauma <= 0:
+                continue
+            parts.append(
+                {
+                    "part": part_name,
+                    "bleed": bleed,
+                    "trauma": trauma,
+                }
+            )
+        parts.sort(key=lambda entry: (entry["bleed"], entry["trauma"]), reverse=True)
+        return parts
+
+    def is_stabilized(self):
+        return time.time() < float(getattr(self.db, "stabilized_until", 0.0) or 0.0)
+
+    def refresh_stabilize_tend(self, part, tender=None):
+        body_part = self.get_body_part(part)
+        if not body_part:
+            return False
+
+        current_bleed = max(0, int(body_part.get("bleed", 0) or 0))
+        if current_bleed <= 0:
+            return False
+
+        healer = tender or self
+        skill = healer.get_skill("first_aid") if hasattr(healer, "get_skill") else 0
+        base_duration = 12 + (skill // 2)
+        base_strength = max(1, min(max(1, current_bleed // 2), max(1, current_bleed - 1)))
+        tend_state = dict(body_part.get("tend") or {})
+        existing_duration = max(0, int(tend_state.get("duration", 0) or 0))
+        existing_strength = max(0, int(tend_state.get("strength", 0) or 0))
+        existing_min_until = float(tend_state.get("min_until", 0.0) or 0.0)
+        now = time.time()
+        body_part["tend"] = {
+            "strength": max(existing_strength, base_strength),
+            "duration": max(existing_duration, base_duration),
+            "last_applied": now,
+            "min_until": max(existing_min_until, now + 120.0),
+        }
+        body_part["tended"] = True
+        self.start_first_aid_training_window(part, tender=healer)
+        return True
 
     def stabilize_empath_target(self, target):
         if not self.is_empath():
             return False, "You do not know how to stabilize wounds that way."
+        allowed, message = self.can_use_empath_ability("stabilize")
+        if not allowed:
+            return False, message
         if not target or getattr(target, "location", None) != getattr(self, "location", None):
             return False, "They are not here."
-        bleeding_parts = target.get_bleeding_parts() if hasattr(target, "get_bleeding_parts") else []
-        if not bleeding_parts:
-            return False, f"{target.key} is not bleeding."
+        stabilizable_parts = target.get_stabilizable_parts() if hasattr(target, "get_stabilizable_parts") else []
+        if not stabilizable_parts:
+            return False, f"{target.key} has no wounds you can stabilize."
+        now = time.time()
+        duration = float(EMPATH_STABILIZE_RULES["base_duration"]) + (int(self.get_skill("first_aid") if hasattr(self, "get_skill") else 0) * float(EMPATH_STABILIZE_RULES["duration_scale"]))
+        if self.get_empath_room_zone() == "triage":
+            duration += 4.0
+        strength = self.get_empath_stabilize_strength()
+        target.db.stabilized_until = max(float(getattr(target.db, "stabilized_until", 0.0) or 0.0), now) + duration
+        target.db.stability_strength = max(float(getattr(target.db, "stability_strength", 0.0) or 0.0), strength)
         treated = 0
-        for entry in bleeding_parts[:2]:
+        part_limit = 3 if self.get_empath_room_zone() == "triage" else 2
+        for entry in stabilizable_parts[:part_limit]:
             part_name = entry.get("part")
-            if hasattr(target, "apply_tend") and target.apply_tend(part_name, tender=self):
-                body_part = target.get_body_part(part_name) if hasattr(target, "get_body_part") else None
-                if body_part:
-                    current_bleed = max(0, int(body_part.get("bleed", 0) or 0))
-                    tend_state = dict(body_part.get("tend") or {})
-                    if current_bleed > 0:
-                        tend_state["strength"] = max(1, min(max(1, current_bleed // 2), max(1, current_bleed - 1)))
-                        body_part["tend"] = tend_state
+            if hasattr(target, "refresh_stabilize_tend") and target.refresh_stabilize_tend(part_name, tender=self):
                 treated += 1
-        if treated <= 0:
-            return False, "You fail to get their bleeding under control."
         target.sync_empath_wounds_from_resources()
-        self.use_skill("first_aid", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=12 + (treated * 3))
         return True, "You steady their condition, slowing the damage."
+
+    def start_empath_channel(self, wound_type):
+        if not self.is_empath():
+            return False, "You do not know how to channel another's pain."
+        allowed, message = self.can_use_empath_ability("channel")
+        if not allowed:
+            return False, message
+        link_state = self.get_empath_link_state(require_local=True, emit_break_messages=True)
+        if not link_state:
+            return False, "You need an active local link first."
+        if self.get_state("empath_channel"):
+            return False, "You are already sustaining a transfer."
+        target = link_state.get("target")
+        wound_key = self.normalize_empath_wound_key(wound_type)
+        if wound_key not in DEFAULT_EMPATH_WOUNDS:
+            return False, "You cannot channel that wound."
+        if target.get_empath_wound(wound_key) <= 0:
+            return False, f"{target.key} is not suffering from that wound."
+        self.set_state(
+            "empath_channel",
+            {
+                "wound": wound_key,
+                "pulse_count": 0,
+                "next_pulse_at": time.time() + float(EMPATH_CHANNEL_RULES["pulse_interval"]),
+                "started_at": time.time(),
+            },
+        )
+        return True, "You settle into a sustained channel."
+
+    def stop_empath_channel(self, reason="manual", emit_message=True):
+        state = self.get_state("empath_channel")
+        if not isinstance(state, Mapping):
+            return False
+        self.clear_state("empath_channel")
+        if emit_message:
+            if reason == "broken":
+                self.msg("The sustained channel slips away.")
+            elif reason == "overdraw":
+                self.msg("You lose the channel as your senses fail under the strain.")
+            else:
+                self.msg("You let the sustained channel go.")
+        return True
+
+    def process_empath_channel_tick(self, now=None):
+        state = self.get_state("empath_channel")
+        if not isinstance(state, Mapping):
+            return False
+        now = float(now or time.time())
+        if now < float(state.get("next_pulse_at", 0.0) or 0.0):
+            return False
+        if self.is_empath_overdrawn():
+            self.stop_empath_channel(reason="overdraw", emit_message=True)
+            return False
+        link_state = self.get_empath_link_state(require_local=True, emit_break_messages=True)
+        if not link_state:
+            self.stop_empath_channel(reason="broken", emit_message=True)
+            return False
+        wound_key = self.normalize_empath_wound_key(state.get("wound"))
+        target = link_state.get("target")
+        target_amount = int(target.get_empath_wound(wound_key) if hasattr(target, "get_empath_wound") else 0)
+        if target_amount <= 0:
+            self.stop_empath_channel(reason="manual", emit_message=True)
+            return False
+        profile = self.get_empath_transfer_profile(wound_key)
+        pulse_amount = max(int(EMPATH_CHANNEL_RULES["min_amount"]), int(int(profile.get("default", 10) or 10) * float(EMPATH_CHANNEL_RULES["base_ratio"])))
+        pulse_amount = min(target_amount, pulse_amount)
+        ok, _message = self.take_empath_wound(wound_key, str(pulse_amount), learning_action="channel")
+        if not ok:
+            self.stop_empath_channel(reason="broken", emit_message=True)
+            return False
+        pulse_count = int(state.get("pulse_count", 0) or 0) + 1
+        fatigue_gain = int(EMPATH_CHANNEL_RULES["fatigue_base"]) + (pulse_count * int(EMPATH_CHANNEL_RULES["fatigue_escalation"]))
+        if self.get_empath_room_zone() == "training":
+            fatigue_gain = max(1, int(round(fatigue_gain * 0.5)))
+        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + fatigue_gain)
+        if pulse_count % int(EMPATH_CHANNEL_RULES["shock_every"]) == 0:
+            self.adjust_empath_shock(1)
+        self.set_state(
+            "empath_channel",
+            {
+                "wound": wound_key,
+                "pulse_count": pulse_count,
+                "next_pulse_at": now + float(EMPATH_CHANNEL_RULES["pulse_interval"]),
+                "started_at": float(state.get("started_at", now) or now),
+            },
+        )
+        if self.is_empath_overdrawn():
+            self.stop_empath_channel(reason="overdraw", emit_message=True)
+        return True
 
     def stabilize_corpse(self, corpse):
         if not self.is_empath():
@@ -4539,7 +5631,7 @@ class Character(ObjectParent, DefaultCharacter):
         before = float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 100.0) or 0.0)
         corpse.db.stabilized = True
         after = corpse.adjust_condition(condition_gain) if hasattr(corpse, "adjust_condition") else before
-        self.use_skill("first_aid", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=16)
+        self.award_skill_experience("first_aid", 16, success=True, outcome="success", event_key="first_aid_corpse", context_multiplier=1.0)
         if after <= before and before >= 100:
             return False, "The corpse is already in the best condition you can preserve."
         return True, "You carefully tend to the corpse, slowing its decay."
@@ -4556,14 +5648,29 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("Your connection slips away.")
         shock_tick_at = float(getattr(self.ndb, "next_empath_shock_decay_at", 0) or 0)
         if now >= shock_tick_at and self.get_empath_shock() > 0:
-            decay = 1
-            if not getattr(self.db, "in_combat", False):
-                decay += 1
-            if self.get_linked_target() or any(int(value or 0) > 0 for value in self.get_empath_wounds().values()):
-                decay += 1
-            decay = max(1, int(round(decay * self.get_empath_recovery_modifier())))
+            recent_healing_until = float(getattr(self.ndb, "empath_recent_healing_until", 0) or 0)
+            decay = 4 if now < recent_healing_until else 2
+            if self.get_empath_room_zone() == "recovery":
+                decay += 2
             self.adjust_empath_shock(-decay)
             self.ndb.next_empath_shock_decay_at = now + 10.0
+        strain_tick_at = float(getattr(self.ndb, "next_empath_strain_decay_at", 0) or 0)
+        if now >= strain_tick_at and self.get_empath_strain() > 0:
+            strain_decay = 3 if self.get_empath_room_zone() == "recovery" else 2
+            if self.get_state("empath_channel"):
+                strain_decay = 1
+            self.decay_empath_strain(strain_decay)
+            self.ndb.next_empath_strain_decay_at = now + 20.0
+        link_state = self.get_empath_link_state(require_local=False, emit_break_messages=False)
+        if link_state and link_state.get("link_bonus_skill") and now >= float(link_state.get("link_bonus_tick_at", 0.0) or 0.0):
+            upkeep = max(1, 1 + int(int(link_state.get("link_bonus_value", 0) or 0) / 5))
+            if self.get_empath_room_zone() == "training":
+                upkeep = max(1, int(round(upkeep * 0.5)))
+            self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + upkeep)
+            updated_link = dict(link_state)
+            updated_link["link_bonus_tick_at"] = now + 10.0
+            self.set_empath_link_state(updated_link, sync=True)
+        self.process_empath_channel_tick(now=now)
         smoothing_tick_at = float(getattr(self.ndb, "next_empath_smoothing_at", 0) or 0)
         if now >= smoothing_tick_at:
             self.smooth_empath_linked_wounds()
@@ -4572,16 +5679,23 @@ class Character(ObjectParent, DefaultCharacter):
         if now >= feedback_tick_at:
             primary = self.get_primary_empath_link(require_local=True, include_group=False)
             patient = primary.get("target") if primary else None
-            if self.is_empath_overdrawn() or sum(int(value or 0) for value in self.get_empath_wounds().values()) >= 120:
-                self.msg("You are carrying too much pain.")
-            elif self.get_empath_shock() <= 15:
-                self.msg("Your senses are clear.")
-            elif patient:
-                score = self.get_empath_life_force_score(patient)
-                if score >= 80:
-                    self.msg(f"{patient.key}'s pain presses hard against the link.")
-                elif score >= 55:
-                    self.msg(f"You feel the strain in {patient.key}'s pattern.")
+            carried_wounds = sum(int(value or 0) for value in self.get_empath_wounds().values())
+            has_feedback_context = bool(patient) or self.is_empath_overdrawn() or carried_wounds >= 120 or self.get_empath_shock() > 15
+            if has_feedback_context:
+                if self.is_empath_overdrawn() or carried_wounds >= 120:
+                    self.msg("You are carrying too much pain.")
+                elif self.get_empath_strain() >= 70:
+                    self.msg("The living patterns around you rasp against your nerves.")
+                elif self.get_empath_strain() >= 40:
+                    self.msg("You feel a low empathic strain under your thoughts.")
+                elif patient and self.get_empath_shock() <= 15:
+                    self.msg("Your senses are clear.")
+                elif patient:
+                    score = self.get_empath_life_force_score(patient)
+                    if score >= 80:
+                        self.msg(f"{patient.key}'s pain presses hard against the link.")
+                    elif score >= 55:
+                        self.msg(f"You feel the strain in {patient.key}'s pattern.")
             self.ndb.next_empath_feedback_at = now + 18.0
         next_ping = float(getattr(self.ndb, "empath_sensitivity_next_at", 0) or 0)
         if now < next_ping:
@@ -5860,7 +6974,7 @@ class Character(ObjectParent, DefaultCharacter):
         if transferred_any:
             self.msg(f"You draw wounds from {target.key}.")
             target.msg("Your pain lessens as your wounds are drawn away.")
-            self.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=skill + 10)
+            self.award_empathy_experience("legacy_transfer", skill + 10, amount=transfer_budget, target=target)
 
         return transferred_any
 
@@ -7019,12 +8133,17 @@ class Character(ObjectParent, DefaultCharacter):
         return vendor_type if vendor_type in VENDOR_TYPES else "general"
 
     def vendor_accepts_item(self, vendor, item):
+        from world.systems import fishing_economy
+
         vendor_type = self.get_vendor_type(vendor)
         is_gem = bool(getattr(getattr(item, "db", None), "is_gem", False))
+        is_fish = bool(fishing_economy.is_fish_trade_item(item))
         if vendor_type == "general":
-            accepted = not is_gem
+            accepted = not is_gem and not is_fish
         elif vendor_type == "gem_buyer":
             accepted = is_gem
+        elif vendor_type == "fish_buyer":
+            accepted = is_fish
         elif vendor_type == "pawn":
             accepted = True
         else:
@@ -7041,8 +8160,13 @@ class Character(ObjectParent, DefaultCharacter):
         return True
 
     def get_vendor_sale_multiplier(self, vendor, item):
+        from world.systems import fishing_economy
+
         vendor_type = self.get_vendor_type(vendor)
         is_gem = bool(getattr(getattr(item, "db", None), "is_gem", False))
+        is_fish = bool(fishing_economy.is_fish_trade_item(item))
+        if vendor_type == "fish_buyer":
+            return 1.0 if is_fish else None
         payout_profile = VENDOR_PAYOUTS.get(vendor_type, VENDOR_PAYOUTS["general"])
         return payout_profile["gems"] if is_gem else payout_profile["default"]
 
@@ -7147,9 +8271,16 @@ class Character(ObjectParent, DefaultCharacter):
         return True
 
     def sell_item(self, item_name):
+        from world.systems import fishing_economy
+
+        candidates = list(self.get_visible_carried_items())
+        for carried in list(getattr(self, "contents", []) or []):
+            if fishing_economy.is_fish_string(carried):
+                candidates.extend([entry for entry in list(getattr(carried, "contents", []) or []) if fishing_economy.is_fish_trade_item(entry)])
+
         item, matches, base_query, index = self.resolve_numbered_candidate(
             item_name,
-            self.get_visible_carried_items(),
+            candidates,
             default_first=True,
         )
         if not item:
@@ -7169,6 +8300,12 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(trade_message)
             return False
 
+        if self.get_vendor_type(vendor) == "fish_buyer":
+            allowed, rate_limit_message = fishing_economy.can_use_fish_buyer(vendor, self)
+            if not allowed:
+                self.msg(rate_limit_message)
+                return False
+
         multiplier = self.get_vendor_sale_multiplier(vendor, item)
         if multiplier is None:
             self.msg("They are not interested in that.")
@@ -7176,6 +8313,8 @@ class Character(ObjectParent, DefaultCharacter):
 
         base_value = self.get_item_value(item)
         value = max(1, int(base_value * float(multiplier)))
+        if fishing_economy.is_fish_trade_item(item) and self.get_vendor_type(vendor) == "fish_buyer":
+            value = fishing_economy.get_fish_vendor_sale_value(item, vendor=vendor)
         self.add_coins(value)
         sale_message = None
         if hasattr(vendor, "get_vendor_sale_message"):
@@ -7195,7 +8334,76 @@ class Character(ObjectParent, DefaultCharacter):
             pass
         return True
 
+    def sell_all_fish(self):
+        from world.systems import fishing_economy
+
+        vendor = self.get_nearby_vendor()
+        if not vendor:
+            self.msg("There is no vendor here.")
+            return False
+
+        ok, trade_message = self.can_trade_with(vendor)
+        if not ok:
+            self.msg(trade_message)
+            return False
+        if self.get_vendor_type(vendor) != "fish_buyer":
+            self.msg("No one here is buying fish or salvage.")
+            return False
+
+        allowed, rate_limit_message = fishing_economy.can_use_fish_buyer(vendor, self)
+        if not allowed:
+            self.msg(rate_limit_message)
+            return False
+
+        fish_items = [item for item in list(self.get_visible_carried_items()) if fishing_economy.is_fish_trade_item(item)]
+        for item in list(getattr(self, "contents", []) or []):
+            if not fishing_economy.is_fish_string(item):
+                continue
+            fish_items.extend([entry for entry in list(getattr(item, "contents", []) or []) if fishing_economy.is_fish_trade_item(entry)])
+
+        deduped = []
+        seen_ids = set()
+        for item in fish_items:
+            item_id = int(getattr(item, "id", 0) or 0)
+            if item_id and item_id in seen_ids:
+                continue
+            if item_id:
+                seen_ids.add(item_id)
+            deduped.append(item)
+        fish_items = deduped
+
+        if not fish_items:
+            self.msg("You are not carrying any fishing finds to sell.")
+            return False
+
+        total = 0
+        for fish in fish_items:
+            value = fishing_economy.get_fish_vendor_sale_value(fish, vendor=vendor)
+            total += value
+
+        summary = fishing_economy.get_bulk_sale_summary(fish_items, total)
+
+        for fish in fish_items:
+            fish.delete()
+
+        self.add_coins(total)
+        if summary["only_fish"]:
+            self.msg(f"You sell {summary['count']} fish for a total of {self.format_coins(summary['total_value'])}.")
+        elif summary["mixed"]:
+            self.msg(f"You sell {summary['count']} items (fish and salvage) for a total of {self.format_coins(summary['total_value'])}.")
+        elif summary["only_salvage"]:
+            salvage_label = "salvage item" if int(summary["count"] or 0) == 1 else "salvage items"
+            self.msg(f"You sell {summary['count']} {salvage_label} for a total of {self.format_coins(summary['total_value'])}.")
+        else:
+            self.msg(f"You sell {summary['count']} items for a total of {self.format_coins(summary['total_value'])}.")
+        if self.location:
+            self.location.msg_contents(f"{self.key} sells a bundled catch to {vendor.key}.", exclude=[self])
+        self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        return True
+
     def sell_all_items(self):
+        from world.systems import fishing_economy
+
         vendor = self.get_nearby_vendor()
         if not vendor:
             self.msg("There is no vendor here.")
@@ -7206,9 +8414,14 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(trade_message)
             return False
 
+        if self.get_vendor_type(vendor) == "fish_buyer":
+            return self.sell_all_fish()
+
         total = 0
         sold_any = False
         for item in list(self.get_visible_carried_items()):
+            if fishing_economy.is_fish_trade_item(item):
+                continue
             if not self.vendor_accepts_item(vendor, item):
                 continue
             multiplier = self.get_vendor_sale_multiplier(vendor, item)
@@ -7239,6 +8452,30 @@ class Character(ObjectParent, DefaultCharacter):
             pass
         return True
 
+    def weigh_fish(self, item_name):
+        from world.systems import fishing_economy
+
+        station = fishing_economy.get_nearby_weigh_station(self)
+        if not station:
+            self.msg("There is no weigh station here.")
+            return False
+
+        candidates = list(self.get_visible_carried_items())
+        for item in list(getattr(self, "contents", []) or []):
+            if fishing_economy.is_fish_string(item):
+                candidates.extend(list(getattr(item, "contents", []) or []))
+
+        fish, matches, base_query, index = self.resolve_numbered_candidate(item_name, candidates, default_first=True)
+        if not fish or not fishing_economy.is_fish_item(fish):
+            if matches and index is not None:
+                self.msg_numbered_matches(base_query, matches)
+            else:
+                self.msg("You do not have that fish.")
+            return False
+
+        self.msg(fishing_economy.format_fish_inspection(fish))
+        return True
+
     def recall_knowledge(self, topic):
         scholarship = self.get_skill("scholarship")
 
@@ -7252,7 +8489,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You recall detailed and useful knowledge.")
 
-        self.use_skill("scholarship", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        self.award_skill_experience("scholarship", max(10, scholarship), success=True, outcome="success", event_key="scholarship_recall", context_multiplier=0.5)
 
     def study_item(self, item):
         if not getattr(item.db, "is_study_item", False):
@@ -7275,7 +8512,16 @@ class Character(ObjectParent, DefaultCharacter):
 
         item.db.study_uses = study_uses + 1
         self.msg("You gain some insight from your study.")
-        self.use_skill(skill_name, apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=difficulty)
+        normalized_skill = str(skill_name or "scholarship").strip().lower().replace("-", "_").replace(" ", "_")
+        anatomy_study = self._is_anatomy_study_item(item)
+        if anatomy_study:
+            self.award_skill_experience("scholarship", difficulty, success=True, outcome="success", event_key="study_anatomy", context_multiplier=1.0)
+            self.award_skill_experience("first_aid", max(8, difficulty - 2), success=True, outcome="success", event_key="study_anatomy", context_multiplier=0.55)
+            self.award_skill_experience("empathy", max(6, difficulty - 4), success=True, outcome="success", event_key="empathy_study", context_multiplier=0.12)
+        elif normalized_skill in {"scholarship", "first_aid"}:
+            self.award_skill_experience(normalized_skill, difficulty, success=True, outcome="success", event_key="study", context_multiplier=1.0)
+        else:
+            self.use_skill(normalized_skill, apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=difficulty)
         return True
 
     def create_vendor_inventory_item(self, item_name):
@@ -8031,9 +9277,14 @@ class Character(ObjectParent, DefaultCharacter):
         return perception >= (target.get_stealth_total() + target.get_hidden_strength() + stealth_bonus)
 
     def skin_target(self, target):
+        from world.systems import fishing_economy
+
         if not target:
             self.msg("You can't skin that.")
             return False
+
+        if fishing_economy.is_fish_item(target):
+            return self.skin_fish_target(target)
 
         if bool(getattr(target.db, "skinned", False)):
             self.msg("There is nothing left worth taking from that.")
@@ -8093,6 +9344,79 @@ class Character(ObjectParent, DefaultCharacter):
             )
             target.db.skinned = True
 
+        self.use_skill(
+            "skinning",
+            apply_roundtime=False,
+            emit_placeholder=False,
+            require_known=False,
+            difficulty=difficulty,
+        )
+        return True
+
+    def skin_fish_target(self, target):
+        from world.systems import fishing_economy
+
+        if not target or not fishing_economy.is_fish_item(target):
+            self.msg("You can't skin that.")
+            return False
+        if getattr(target, "location", None) not in {self, getattr(self, "location", None)}:
+            self.msg("You need the fish in front of you before you can clean it.")
+            return False
+        if not self.is_wielding("skinning knife"):
+            self.msg("You need a skinning knife to properly clean that fish.")
+            return False
+
+        profile = fishing_economy.get_fish_processing_profile(target)
+        skill_total = self.get_skill("skinning") + self.get_stat("agility") + self.get_stat("discipline")
+        difficulty = int(profile.get("difficulty", 12) or 12)
+        result = run_contest(skill_total, difficulty, attacker=self)
+        outcome = str(result.get("outcome", "failure") or "failure")
+        species = str(profile.get("species", getattr(target, "key", "fish")) or getattr(target, "key", "fish"))
+
+        meat_yield = int(profile.get("meat_yield", 1) or 1)
+        skin_yield = int(profile.get("skin_yield", 1) or 1)
+        if outcome == "fail":
+            meat_yield = max(0, meat_yield - 1)
+            skin_yield = 0
+            self.msg(f"You make a mess of {species} and salvage very little.")
+        elif outcome == "partial":
+            skin_yield = max(0, skin_yield - 1)
+            self.msg(f"You clean {species} well enough to save a few usable cuts.")
+        elif outcome == "success":
+            self.msg(f"You clean {species} with practiced strokes, saving meat and skin.")
+        else:
+            meat_yield += 1
+            skin_yield += 1
+            self.msg(f"You clean {species} flawlessly, wasting almost nothing.")
+
+        created = []
+        if meat_yield > 0:
+            meat = create_object("typeclasses.items.fish_material.FishMaterial", key=f"{species} fillet", location=self, home=self)
+            meat.db.item_type = "fish_meat"
+            meat.db.quantity = meat_yield
+            meat.db.processed_from = species
+            meat.db.value = max(1, int(profile.get("meat_value", 2) or 2))
+            meat.db.item_value = meat.db.value
+            meat.db.desc = f"Clean fillets trimmed from {species}, ready for cooking or sale."
+            created.append(meat)
+        if skin_yield > 0:
+            skin = create_object("typeclasses.items.fish_material.FishMaterial", key=f"{species} skin", location=self, home=self)
+            skin.db.item_type = "fish_skin"
+            skin.db.quantity = skin_yield
+            skin.db.processed_from = species
+            skin.db.value = max(1, int(profile.get("skin_value", 1) or 1))
+            skin.db.item_value = skin.db.value
+            skin.db.desc = f"A cleaned strip of {species} skin, kept intact for tanning or trade."
+            created.append(skin)
+
+        if created:
+            created_names = ", ".join(str(getattr(obj, "key", "material") or "material") for obj in created)
+            self.msg(f"You finish with {created_names}.")
+        else:
+            self.msg("Nothing worth selling survives your work.")
+        if self.location:
+            msg_room(self, f"{self.key} cleans {species} with quick, careful motions.", exclude=[self])
+        target.delete()
         self.use_skill(
             "skinning",
             apply_roundtime=False,
@@ -9721,13 +11045,28 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_skill_rank(self, skill_name):
         self.ensure_core_defaults()
-        skill = self.db.skills.get(skill_name)
-        if not skill:
-            return 0
-        return skill.get("rank", 0)
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        legacy_skill = (self.db.skills or {}).get(normalized, {})
+        legacy_rank = int((legacy_skill or {}).get("rank", 0) or 0) if isinstance(legacy_skill, Mapping) else 0
+        exp_rank = 0
+        handler = getattr(self, "exp_skills", None)
+        if isinstance(handler, SkillHandler):
+            exp_rank = int(getattr(handler.get(normalized), "rank", 0) or 0)
+        return max(legacy_rank, exp_rank)
 
     def get_skill(self, skill_name):
-        return self.get_skill_rank(skill_name)
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        return self.get_skill_rank(normalized) + self.get_empath_link_focus_bonus(normalized)
+
+    def get_progression_skill_rank(self, skill_name):
+        self.ensure_core_defaults()
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if not normalized:
+            return 0
+        persisted_entry = self._get_exp_skill_store().get(normalized, {})
+        if isinstance(persisted_entry, Mapping):
+            return max(0, int(persisted_entry.get("rank", 0) or 0))
+        return 0
 
     def format_skill_name(self, skill_name):
         return str(skill_name).replace("_", " ").title()
@@ -9799,6 +11138,61 @@ class Character(ObjectParent, DefaultCharacter):
         if profession == "ranger":
             return max(1, int(getattr(self.db, "ranger_circle", getattr(self.db, "circle", 1)) or 1))
         return max(1, int(getattr(self.db, "circle", 1) or 1))
+
+    def get_circle_progression_status(self, enforce_location=None):
+        current_circle = self.get_circle()
+        next_circle = current_circle + 1
+        requirements = get_circle_requirements(next_circle)
+        current_ranks = {skill_name: self.get_progression_skill_rank(skill_name) for skill_name in requirements}
+        missing_requirements = {
+            skill_name: required_rank
+            for skill_name, required_rank in requirements.items()
+            if int(current_ranks.get(skill_name, 0) or 0) < int(required_rank or 0)
+        }
+        location_required = is_circle_location_enforced() if enforce_location is None else bool(enforce_location)
+        location_ok = True
+        location_message = None
+        if location_required:
+            location_ok, location_message = is_valid_empath_circle_location(self)
+        return {
+            "current_circle": current_circle,
+            "next_circle": next_circle if requirements else None,
+            "requirements": requirements,
+            "current_ranks": current_ranks,
+            "missing_requirements": missing_requirements,
+            "location_required": location_required,
+            "location_ok": location_ok,
+            "location_message": location_message,
+            "highest_circle": get_highest_configured_circle(),
+        }
+
+    def can_advance_circle(self, enforce_location=None):
+        if not self.is_profession("empath"):
+            return False, ["Only Empaths can circle this way."], None
+        status = self.get_circle_progression_status(enforce_location=enforce_location)
+        if not status.get("requirements"):
+            return False, ["You have reached the highest configured Empath circle."], status
+        reasons = []
+        if status.get("location_required") and not status.get("location_ok"):
+            reasons.append(status.get("location_message") or "You cannot circle here.")
+        for skill_name, required_rank in status.get("missing_requirements", {}).items():
+            current_rank = int(status.get("current_ranks", {}).get(skill_name, 0) or 0)
+            reasons.append(f"{self.format_skill_name(skill_name)} {current_rank}/{int(required_rank or 0)}")
+        return len(reasons) == 0, reasons, status
+
+    def advance_circle(self, enforce_location=None):
+        can_advance, reasons, status = self.can_advance_circle(enforce_location=enforce_location)
+        if not can_advance:
+            if reasons and status and status.get("missing_requirements"):
+                return False, ["You are not yet ready to circle.", *reasons], status
+            return False, reasons, status
+        next_circle = int(status.get("next_circle", self.get_circle() + 1) or (self.get_circle() + 1))
+        self.db.circle = max(1, next_circle)
+        if hasattr(self, "sync_client_state"):
+            self.sync_client_state()
+        lines = [f"You advance to Empath Circle {self.db.circle}."]
+        lines.append("Your formal circle rises, but your techniques remain tied to your Empathy skill.")
+        return True, lines, status
 
     def set_ranger_circle(self, value):
         amount = max(1, int(value or 1))
@@ -11327,13 +12721,25 @@ class Character(ObjectParent, DefaultCharacter):
             options = ", ".join(name.replace("_", " ") for name in VALID_GUILDS if name != DEFAULT_PROFESSION)
             return False, f"You may join one of these professions: {options}"
 
-        if not self.room_matches_profession_join_site(profession):
+        if profession != "empath" and not self.room_matches_profession_join_site(profession):
             return False, "You must stand inside the proper guildhall to join that profession."
 
         if self.get_profession() == profession:
             return False, f"You already belong to the {self.get_profession_display_name()} profession."
 
         guide = self.get_profession_join_guide(profession)
+        if profession == "empath":
+            ready, ready_message = self.can_begin_profession_oath()
+            if not ready:
+                return False, ready_message
+            if not self.room_matches_profession_join_site(profession) or not self.is_empath_join_room():
+                return False, "You must stand in the guildleader's office to join the Empaths."
+            if not guide:
+                return False, "No Empath guildleader is here to judge your oath."
+            self.set_profession(profession)
+            self.set_guild(profession)
+            _patient, message = self.begin_empath_apprenticeship(guide=guide)
+            return True, message
         if profession == "ranger":
             if not guide:
                 return False, "No Ranger guildmaster is here to receive your oath."
@@ -11419,13 +12825,16 @@ class Character(ObjectParent, DefaultCharacter):
             theurgy["rank"] = max(1, int(theurgy.get("rank", 0) or 0))
             skills["theurgy"] = theurgy
             self.db.skills = skills
+        elif normalized == "empath":
+            self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
+            self.db.empath_rank = max(0, int(getattr(self.db, "empath_rank", 0) or 0))
+            self.db.empath_xp = max(0, int(getattr(self.db, "empath_xp", 0) or 0))
+            self.db.empath_training_stage = max(0, int(getattr(self.db, "empath_training_stage", EMPATH_TRAINING_UNSET) or EMPATH_TRAINING_UNSET))
         self.get_subsystem()
         return True
 
     def get_skillset(self, skill_name):
-        metadata = self.get_skill_metadata(skill_name)
-        category = str(metadata.get("category", "general") or "general").strip().lower()
-        return SKILLSET_ALIASES.get(category, category or "general")
+        return self.get_exp_skillset_tier(skill_name)
 
     def get_skill_weight(self, skillset):
         profession = self.get_profession()
@@ -12356,6 +13765,7 @@ class Character(ObjectParent, DefaultCharacter):
             "min_until": time.time() + 120,
         }
         body_part["tended"] = True
+        self.start_first_aid_training_window(part, tender=healer)
         return True
 
     def normalize_body_part_name(self, part):
@@ -12431,8 +13841,38 @@ class Character(ObjectParent, DefaultCharacter):
         if internal > 0:
             severity = self.get_injury_level(internal)
             descriptions.append(f"{severity_phrases[severity]} internally injured")
+        scars = int(body_part.get("scar", 0) or 0)
+        if scars > 0:
+            descriptions.append("marked by old scarring" if scars == 1 else "marked by heavy scarring")
 
         return descriptions
+
+    def get_part_scar_count(self, part):
+        body_part = self.get_body_part(part)
+        if not body_part:
+            return 0
+        return max(0, int(body_part.get("scar", 0) or 0))
+
+    def apply_scar_progress(self, location, before_part=None):
+        body_part = self.get_body_part(location)
+        if not body_part:
+            return 0
+        previous = dict(before_part or {})
+        previous_peak = max(int(previous.get("external", 0) or 0), int(previous.get("internal", 0) or 0))
+        previous_trauma = int(previous.get("external", 0) or 0) + int(previous.get("internal", 0) or 0)
+        current_peak = max(int(body_part.get("external", 0) or 0), int(body_part.get("internal", 0) or 0))
+        current_trauma = int(body_part.get("external", 0) or 0) + int(body_part.get("internal", 0) or 0)
+        scar_gain = 0
+        if previous_peak < int(EMPATH_SCAR_RULES["severity_threshold"]) <= current_peak:
+            scar_gain += 1
+        if previous_trauma < int(EMPATH_SCAR_RULES["trauma_threshold"]) <= current_trauma:
+            scar_gain += 1
+        if previous_trauma >= int(EMPATH_SCAR_RULES["repeat_gate"]) and (current_trauma - previous_trauma) >= int(EMPATH_SCAR_RULES["repeat_threshold"]):
+            scar_gain += 1
+        if scar_gain <= 0:
+            return 0
+        body_part["scar"] = min(int(EMPATH_SCAR_RULES["max_scars"]), int(body_part.get("scar", 0) or 0) + scar_gain)
+        return scar_gain
 
     def describe_body_part_wounds(self, body_part):
         descriptions = self.get_body_part_wound_descriptions(body_part)
@@ -12456,6 +13896,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.set_awareness("alert")
 
         body_part = self.db.injuries[location]
+        before_part = dict(body_part)
         damage_kind = (damage_type or "impact").lower()
 
         if damage_kind == "impact":
@@ -12487,9 +13928,12 @@ class Character(ObjectParent, DefaultCharacter):
 
         body_part["external"] = min(body_part.get("external", 0), 100)
         body_part["internal"] = min(body_part.get("internal", 0), 100)
+        scar_gain = self.apply_scar_progress(location, before_part=before_part)
 
         if self.get_injury_severity(body_part.get("external", 0)) == "severe":
             self.msg(f"Your {self.format_body_part_name(location)} is badly damaged!")
+        if scar_gain > 0:
+            self.msg(f"The hurt leaves lasting damage in your {self.format_body_part_name(location)}.")
 
         if location == "chest" and body_part.get("internal", 0) > 50:
             self.msg("You are in critical condition!")
@@ -12533,6 +13977,48 @@ class Character(ObjectParent, DefaultCharacter):
             bp["tend"] = {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}
 
         self.update_bleed_state()
+
+    def get_most_scarred_part(self):
+        self.ensure_core_defaults()
+        best_part = None
+        best_value = 0
+        for part_name in BODY_PART_ORDER:
+            body_part = self.get_body_part(part_name)
+            if not body_part:
+                continue
+            scars = int(body_part.get("scar", 0) or 0)
+            if scars > best_value:
+                best_part = part_name
+                best_value = scars
+        return best_part
+
+    def heal_empath_scars(self, target=None):
+        subject = target or self
+        if not self.is_empath():
+            return False, "You do not know how to ease scars that way."
+        unlock_key = "internal_scar_transfer" if subject == self else "external_scar_transfer"
+        unlocked, unlock_message = self.require_empath_unlock(unlock_key)
+        if not unlocked:
+            return False, unlock_message
+        if getattr(subject, "location", None) != getattr(self, "location", None) and subject != self:
+            return False, "They are not here."
+        part_name = subject.get_most_scarred_part() if hasattr(subject, "get_most_scarred_part") else None
+        if not part_name:
+            return False, f"{subject.key if subject != self else 'You'} bear no scars you can heal."
+        body_part = subject.get_body_part(part_name) if hasattr(subject, "get_body_part") else None
+        if not body_part or int(body_part.get("scar", 0) or 0) <= 0:
+            return False, f"{subject.key if subject != self else 'You'} bear no scars you can heal."
+        body_part["scar"] = max(0, int(body_part.get("scar", 0) or 0) - 1)
+        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 12)
+        self.adjust_empath_shock(3)
+        if hasattr(self, "set_roundtime"):
+            self.set_roundtime(3.5)
+        self.award_empathy_experience("scar_heal", 18, amount=int(body_part.get("scar", 0) or 0) + 1, target=subject)
+        part_display = subject.format_body_part_name(part_name) if hasattr(subject, "format_body_part_name") else str(part_name).replace("_", " ")
+        if subject != self:
+            subject.msg(f"The old pull in your {part_display} eases a little.")
+            return True, f"You work at the old scarring in {subject.key}'s {part_display}."
+        return True, f"You work at the old scarring in your {part_display}."
 
     def get_bleed_severity(self, total_bleed):
         if total_bleed == 0:
@@ -12609,10 +14095,22 @@ class Character(ObjectParent, DefaultCharacter):
         if not self.db.injuries:
             return
 
+        now = time.time()
+        stabilized_until = float(getattr(self.db, "stabilized_until", 0.0) or 0.0)
+        is_stabilized = now < stabilized_until
+        stability_strength = max(0.0, min(1.0, float(getattr(self.db, "stability_strength", 0.0) or 0.0))) if is_stabilized else 0.0
         total_bleed = 0
         for part_name, part in self.db.injuries.items():
             if part.get("internal", 0) > 20:
-                part["bleed"] += 1
+                worsening_rate = 1.0
+                if is_stabilized:
+                    worsening_rate *= max(0.0, 1.0 - stability_strength)
+                bleed_gain = int(worsening_rate)
+                fractional = max(0.0, worsening_rate - bleed_gain)
+                if fractional > 0.0 and random.random() < fractional:
+                    bleed_gain += 1
+                if bleed_gain > 0:
+                    part["bleed"] += bleed_gain
 
             tend_state = part.get("tend") or {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}
             duration = int(tend_state.get("duration", 0))
@@ -12621,9 +14119,9 @@ class Character(ObjectParent, DefaultCharacter):
             was_tended = bool(part.get("tended", False))
 
             effective_bleed = part.get("bleed", 0)
-            if duration > 0 or time.time() < min_until:
+            if duration > 0 or now < min_until:
                 effective_bleed = max(0, effective_bleed - strength)
-                if time.time() >= min_until and duration > 0:
+                if now >= min_until and duration > 0:
                     duration -= 1
                     if part.get("external", 0) > 45:
                         duration -= 1
@@ -12631,11 +14129,13 @@ class Character(ObjectParent, DefaultCharacter):
                         duration -= 1
                 tend_state["duration"] = max(0, duration)
                 part["tend"] = tend_state
-                part["tended"] = tend_state["duration"] > 0 or time.time() < min_until
+                part["tended"] = tend_state["duration"] > 0 or now < min_until
                 if was_tended and not part["tended"] and part.get("bleed", 0) > 0:
                     self.msg(f"Your {self.format_body_part_name(part_name)} begins bleeding again!")
 
             total_bleed += max(0, effective_bleed)
+
+        self.process_first_aid_tend_training(now=now)
 
         if total_bleed > 0:
             hp_loss = total_bleed + int(total_bleed * 0.3)
@@ -12710,9 +14210,27 @@ class Character(ObjectParent, DefaultCharacter):
         return True
 
     def move_to(self, destination, quiet=False, *args, **kwargs):
+        origin = self.location
+        travel_direction = getattr(self.ndb, "last_traverse_direction", None)
         if destination and destination != self.location:
             self.break_aim_for_movement(emit_message=not quiet)
-        return super().move_to(destination, quiet=quiet, *args, **kwargs)
+        moved = super().move_to(destination, quiet=quiet, *args, **kwargs)
+        if moved and origin and destination and destination != origin and self.is_empath():
+            self.break_empath_connections(reason="distance", emit_message=not quiet)
+        if moved and origin and destination and destination != origin and bool(getattr(self.ndb, "is_fishing", False)):
+            from world.systems.fishing import cancel_fishing_session
+
+            cancel_fishing_session(self)
+            if not quiet:
+                self.msg("You disturb the line.")
+        if moved and origin and destination and destination != origin:
+            try:
+                from world.systems.fishing import return_borrowed_gear
+
+                return_borrowed_gear(self, source_location=origin, direction=travel_direction)
+            except Exception:
+                LOGGER.exception("Failed to return borrowed fishing gear for %s", getattr(self, "key", self))
+        return moved
 
     def at_pre_move(self, destination, **kwargs):
         if self.is_dead():

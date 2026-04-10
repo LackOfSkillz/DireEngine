@@ -1,0 +1,245 @@
+{
+  "coin_delta": 4,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _begin_nibble",
+      "first_response_ms": 0.044199987314641476,
+      "kind": "direct",
+      "ms": 0.06470002699643373,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _resolve_struggle_round",
+      "first_response_ms": 218.15680002328008,
+      "kind": "direct",
+      "ms": 240.81590003333986,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    0.06470002699643373,
+    240.81590003333986
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 0.0,
+    "timings_ms": [
+      0.06470002699643373,
+      240.81590003333986
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775755048.2546787,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 109.10050000529736,
+  "interest": {
+    "active_object_count": 460,
+    "active_object_peak": 460,
+    "active_source_types": [
+      "proximity",
+      "room"
+    ],
+    "exercised_source_types": [
+      "proximity",
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 20,
+      "room": 442,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 461,
+    "source_count_peak": 461,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 20,
+      "room": 441,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 20,
+      "room": 441,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 1,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 460,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 460
+    },
+    "transition_total": 460
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 120.44030003016815,
+    "jitter": 170.2368061032842,
+    "max_ms": 240.81590003333986,
+    "min_ms": 0.06470002699643373,
+    "p95_ms": 228.7783400330227,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT _begin_nibble",
+      "ms": 0.06470002699643373,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _resolve_struggle_round",
+      "ms": 240.81590003333986,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You feel a slight tug on the line...",
+    "RETURN None",
+    "You catch a silver trout weighing 1 stone.",
+    "You secure silver trout to your fish string.",
+    "You feel your outdoorsmanship settling into perusing.",
+    "RETURN None"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "ask",
+      "fish",
+      "bait",
+      "pull",
+      "rig",
+      "untangle",
+      "sell",
+      "skin",
+      "inventory"
+    ],
+    "fish_help_excerpt": "    def func(self):\n        query = str(self.args or \"\").strip().lower()\n        if query == \"fish\":\n            self.args = \"fishing\"\n            query = \"fishing\"\n        if query == \"warrior\":\n            if hasattr(self.caller, \"get_warrior_help_text\"):\n                self.msg_help(self.caller.get_warrior_help_text())\n                return\n        super().func()\n",
+    "fishing_help_excerpt": "\nFishing is a survival activity that lets you catch, process, and sell fish with basic equipment.\nIt primarily trains Outdoorsmanship and can also train Skinning and Mechanical Lore.\n\nMost characters can fish. Empaths can fish too, but fishing adds empathic strain and makes the\nloop less forgiving as strain rises.\n\nGetting started:\n\nYou will usually want:\n\n- `fishing pole`\n- `line`\n- `hook`\n- `bait`\n- `fish string` (optional, but useful for holding catches)\n\nIn Town Green, Old Maren can hand you a starter kit:\n\n- `ask maren for gear`\n\nPreparing your gear:\n\nBefore you cast, make sure the pole is rigged.\n\n- `rig pole`\n\nIf the line tangles:\n\n- `untangle pole`\n\nIf something is missing, the system tells you what part needs attention.\n\nBaiting the hook:\n\nAttach bait before you cast.\n\n- `bait <item>`\n\nExample:\n\n- `bait worm`\n\nFishing:\n\nCast with:\n\n- `fish`\n\nWatch the feedback. When the line gives you a real cue, respond with:\n\n- `pull`\n\nTiming matters. Pulling at the wrong moment can lose the catch.\n\nPossible outcomes:\n\nFishing may result in:\n\n- catching a fish\n- pulling up junk\n- losing the catch\n- damaging your line\n- rare unexpected events\n\nSome catches are more difficult than others a",
+    "output_log": [
+      "You feel a slight tug on the line...",
+      "RETURN None",
+      "You catch a silver trout weighing 1 stone.",
+      "You secure silver trout to your fish string.",
+      "You feel your outdoorsmanship settling into perusing.",
+      "RETURN None"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "survival_help_excerpt": "\n    Fieldcraft covers awareness, stealth, environmental actions, and trap or loot work.\n\n    - `observe` and `search` reveal hidden details.\n    - `hide`, `unhide`, `sneak`, `stalk`, and `ambush` handle stealth.\n    - `forage`, `climb`, and `swim` handle common wilderness actions.\n    - `inspect`, `disarm`, `pick`, and `open` handle boxes, traps, and locks.\n    - `analyze`, `harvest`, and `skin` handle creature resource gathering.\n\n    Examples:\n\n    - `search`\n    - `hide`\n    - `forage`\n    - `inspect iron lockbox`\n    - `pick iron lockbox with crude`\n    - `harvest carcass`\n\n    See also:\n\n    - `help fishing`\n        "
+  },
+  "scenario_duration_ms": 9985,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT _resolve_struggle_round",
+      "ms": 240.81590003333986
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775755037.6502595,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Help output verification should still emit lag telemetry without turning formatting checks into environment failures."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 2
+}

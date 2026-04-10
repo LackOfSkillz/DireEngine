@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Fishing scenario did not pay the expected processed-fish sale value: expected=24, got=0",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 553666000
+}

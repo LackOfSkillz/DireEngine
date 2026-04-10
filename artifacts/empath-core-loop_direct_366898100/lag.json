@@ -1,0 +1,80 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 114.04503332839037,
+  "lag": {
+    "avg_ms": 119.24913333496079,
+    "jitter": 102.4916661790393,
+    "max_ms": 213.05609995033592,
+    "min_ms": 9.857800032477826,
+    "p95_ms": 205.2338399575092,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 134.83350002206862,
+      "snapshot": "touched"
+    },
+    {
+      "command": "assess",
+      "ms": 9.857800032477826,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "take bleeding",
+      "ms": 213.05609995033592,
+      "snapshot": "took_bleeding"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "take bleeding",
+      "ms": 213.05609995033592
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 134.63069999124855,
+      "kind": "command",
+      "ms": 134.83350002206862,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 9.681999974418432,
+      "kind": "command",
+      "ms": 9.857800032477826,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 197.82240001950413,
+      "kind": "command",
+      "ms": 213.05609995033592,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    }
+  ]
+}

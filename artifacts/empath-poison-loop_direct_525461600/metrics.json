@@ -1,0 +1,555 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 9,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 42.7549000014551,
+      "kind": "command",
+      "ms": 42.84099995857105,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceived_room"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_POISON_PATIENT",
+      "first_response_ms": 37.516599986702204,
+      "kind": "command",
+      "ms": 37.59620001073927,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceived_target"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_POISON_PATIENT",
+      "first_response_ms": 65.44810003833845,
+      "kind": "command",
+      "ms": 65.51980000222102,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 4.263599985279143,
+      "kind": "command",
+      "ms": 4.344899964053184,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take poison",
+      "first_response_ms": 93.76880002673715,
+      "kind": "command",
+      "ms": 96.6842999914661,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_poison"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT apply_poison_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 7.516000012401491,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "poison_ticked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 82.18109997687861,
+      "kind": "command",
+      "ms": 82.90380000835285,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "mend self",
+      "first_response_ms": 46.34010000154376,
+      "kind": "command",
+      "ms": 46.395900018978864,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mended"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "purge poison",
+      "first_response_ms": 45.56699999375269,
+      "kind": "command",
+      "ms": 45.6220000050962,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "purged"
+    }
+  ],
+  "command_timings_ms": [
+    42.84099995857105,
+    37.59620001073927,
+    65.51980000222102,
+    4.344899964053184,
+    96.6842999914661,
+    7.516000012401491,
+    82.90380000835285,
+    46.395900018978864,
+    45.6220000050962
+  ],
+  "commands": {
+    "count": 9,
+    "max_ms": 96.66849998757243,
+    "timings_ms": [
+      42.84099995857105,
+      37.59620001073927,
+      65.51980000222102,
+      4.344899964053184,
+      96.6842999914661,
+      7.516000012401491,
+      82.90380000835285,
+      46.395900018978864,
+      45.6220000050962
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775606443.4214482,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 52.23002500133589,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 2,
+    "active_source_types": [
+      "room"
+    ],
+    "exercised_source_types": [
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 4,
+    "source_count_peak": 4,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 2,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 2
+    },
+    "transition_total": 2
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 47.71376666354222,
+    "jitter": 30.786455458543706,
+    "max_ms": 96.6842999914661,
+    "min_ms": 4.344899964053184,
+    "p95_ms": 91.1720999982208,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "perceive health",
+      "ms": 42.84099995857105,
+      "snapshot": "perceived_room"
+    },
+    {
+      "command": "perceive TEST_EMPATH_POISON_PATIENT",
+      "ms": 37.59620001073927,
+      "snapshot": "perceived_target"
+    },
+    {
+      "command": "touch TEST_EMPATH_POISON_PATIENT",
+      "ms": 65.51980000222102,
+      "snapshot": "touched"
+    },
+    {
+      "command": "assess",
+      "ms": 4.344899964053184,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "take poison",
+      "ms": 96.6842999914661,
+      "snapshot": "took_poison"
+    },
+    {
+      "command": "DIRECT apply_poison_tick",
+      "ms": 7.516000012401491,
+      "snapshot": "poison_ticked"
+    },
+    {
+      "command": "take bleeding",
+      "ms": 82.90380000835285,
+      "snapshot": "took_bleeding"
+    },
+    {
+      "command": "mend self",
+      "ms": 46.395900018978864,
+      "snapshot": "mended"
+    },
+    {
+      "command": "purge poison",
+      "ms": 45.6220000050962,
+      "snapshot": "purged"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 96.66849998757243,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You sense a presence that is weakened.",
+    "You sense their life force is unstable.",
+    "You reach out and sense the condition of your patient.",
+    "Vitality: 50%",
+    "Bleeding: 40%",
+    "Poison: 30%",
+    "Disease: 20%",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:00:38-04).",
+    "RETURN 1",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:00:38-04).",
+    "You focus inward, stabilizing your condition.",
+    "You force the corruption from your body."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "assess_output": [
+      "Vitality: 50%",
+      "Bleeding: 40%",
+      "Poison: 30%",
+      "Disease: 20%"
+    ],
+    "commands": [
+      "perceive health",
+      "perceive TEST_EMPATH_POISON_PATIENT",
+      "touch TEST_EMPATH_POISON_PATIENT",
+      "assess",
+      "take poison",
+      "DIRECT apply_poison_tick",
+      "take bleeding",
+      "mend self",
+      "purge poison"
+    ],
+    "empath_after_bleeding": {
+      "bleeding": 16,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 12,
+      "vitality": 14
+    },
+    "empath_after_mend": {
+      "bleeding": 12,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 12,
+      "vitality": 6
+    },
+    "empath_after_poison": {
+      "bleeding": 0,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 12,
+      "vitality": 13
+    },
+    "empath_after_purge": {
+      "bleeding": 12,
+      "disease": 20,
+      "fatigue": 10,
+      "poison": 0,
+      "vitality": 6
+    },
+    "mend_output": [
+      "You focus inward, stabilizing your condition."
+    ],
+    "output_log": [
+      "You sense a presence that is weakened.",
+      "You sense their life force is unstable.",
+      "You reach out and sense the condition of your patient.",
+      "Vitality: 50%",
+      "Bleeding: 40%",
+      "Poison: 30%",
+      "Disease: 20%",
+      "You draw the injury into yourself.",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:00:38-04).",
+      "RETURN 1",
+      "You draw the injury into yourself.",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:00:38-04).",
+      "You focus inward, stabilizing your condition.",
+      "You force the corruption from your body."
+    ],
+    "patient_after_bleeding": {
+      "bleeding": 28,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 18,
+      "vitality": 50
+    },
+    "patient_after_poison": {
+      "bleeding": 40,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 18,
+      "vitality": 50
+    },
+    "perceive_health_output": [
+      "You sense a presence that is weakened."
+    ],
+    "perceive_target_output": [
+      "You sense their life force is unstable."
+    ],
+    "purge_output": [
+      "You force the corruption from your body."
+    ],
+    "snapshot_count": 11,
+    "snapshot_labels": [
+      "initial",
+      "perceived_room",
+      "perceived_target",
+      "touched",
+      "assessed",
+      "took_poison",
+      "poison_ticked",
+      "took_bleeding",
+      "mended",
+      "purged",
+      "final"
+    ],
+    "take_bleeding_output": [
+      "You draw the injury into yourself.",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:00:38-04)."
+    ],
+    "take_poison_output": [
+      "You draw the injury into yourself.",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 20:00:38-04)."
+    ],
+    "tick_damage": 1
+  },
+  "scenario_duration_ms": 8240,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "perceived_room",
+    "perceived_target",
+    "touched",
+    "assessed",
+    "took_poison",
+    "poison_ticked",
+    "took_bleeding",
+    "mended",
+    "purged",
+    "final"
+  ],
+  "started_at": 1775606434.694886,
+  "state_transition_count": 10,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath poison-loop regression coverage validates poison, disease, perceive, and purge behavior without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 52.72187499940628,
+      "count": 8,
+      "entries": [
+        {
+          "duration_ms": 42.8230999968946,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775606438.4256046
+        },
+        {
+          "duration_ms": 37.580000003799796,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775606438.4646788
+        },
+        {
+          "duration_ms": 65.50450000213459,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775606438.5309918
+        },
+        {
+          "duration_ms": 4.330399970058352,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "assess"
+          },
+          "timestamp": 1775606438.5390177
+        },
+        {
+          "duration_ms": 96.66849998757243,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775606438.6363955
+        },
+        {
+          "duration_ms": 82.88689999608323,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775606438.7302134
+        },
+        {
+          "duration_ms": 46.38040001736954,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "mend"
+          },
+          "timestamp": 1775606438.777371
+        },
+        {
+          "duration_ms": 45.60120002133772,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "purge"
+          },
+          "timestamp": 1775606438.8245125
+        }
+      ],
+      "max_ms": 96.66849998757243,
+      "total_ms": 421.77499999525025
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 7
+}

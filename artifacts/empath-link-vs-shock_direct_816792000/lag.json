@@ -1,0 +1,227 @@
+{
+  "combat_responsiveness_ms": 387.5825499999337,
+  "first_response_ms": 102.73623333260831,
+  "lag": {
+    "avg_ms": 165.903266668061,
+    "jitter": 199.76887118616915,
+    "max_ms": 456.862099992577,
+    "min_ms": 1.984700036700815,
+    "p95_ms": 456.686660007108,
+    "slow_count": 3,
+    "spike_count": 3,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 104.31570000946522,
+      "snapshot": "linked"
+    },
+    {
+      "command": "target TEST_EMPATH_LINK_SHOCK_FOE_ONE",
+      "ms": 24.823199957609177,
+      "snapshot": "first_kill"
+    },
+    {
+      "command": "attack",
+      "ms": 456.4235000289045,
+      "snapshot": "first_kill"
+    },
+    {
+      "command": "target TEST_EMPATH_LINK_SHOCK_FOE_TWO",
+      "ms": 20.510700007434934,
+      "snapshot": "second_kill"
+    },
+    {
+      "command": "attack",
+      "ms": 456.862099992577,
+      "snapshot": "second_kill"
+    },
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 2.383299986831844,
+      "snapshot": "link_locked"
+    },
+    {
+      "command": "perceive TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 1.984700036700815,
+      "snapshot": "perceive_locked"
+    },
+    {
+      "command": "center",
+      "ms": 59.06539998250082,
+      "snapshot": "centered"
+    },
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 366.7608000105247,
+      "snapshot": "relinked"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "attack",
+      "ms": 456.4235000289045
+    },
+    {
+      "cmd": "attack",
+      "ms": 456.862099992577
+    },
+    {
+      "cmd": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 366.7608000105247
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": 375.8780999924056,
+      "command": "attack",
+      "first_response_ms": 361.2100000027567,
+      "kind": "command",
+      "ms": 456.4235000289045,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    },
+    {
+      "combat_response_ms": 399.28700000746176,
+      "command": "attack",
+      "first_response_ms": 31.5907999756746,
+      "kind": "command",
+      "ms": 456.862099992577,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "second_kill"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 366.70329998014495,
+      "kind": "command",
+      "ms": 366.7608000105247,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "relinked"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 104.2301999987103,
+      "kind": "command",
+      "ms": 104.31570000946522,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "target TEST_EMPATH_LINK_SHOCK_FOE_ONE",
+      "first_response_ms": 24.719499982893467,
+      "kind": "command",
+      "ms": 24.823199957609177,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    },
+    {
+      "combat_response_ms": 375.8780999924056,
+      "command": "attack",
+      "first_response_ms": 361.2100000027567,
+      "kind": "command",
+      "ms": 456.4235000289045,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "target TEST_EMPATH_LINK_SHOCK_FOE_TWO",
+      "first_response_ms": 20.454000041354448,
+      "kind": "command",
+      "ms": 20.510700007434934,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "second_kill"
+    },
+    {
+      "combat_response_ms": 399.28700000746176,
+      "command": "attack",
+      "first_response_ms": 31.5907999756746,
+      "kind": "command",
+      "ms": 456.862099992577,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "second_kill"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 2.3305999930016696,
+      "kind": "command",
+      "ms": 2.383299986831844,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "link_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 1.9419000018388033,
+      "kind": "command",
+      "ms": 1.984700036700815,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceive_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "center",
+      "first_response_ms": 11.445800017099828,
+      "kind": "command",
+      "ms": 59.06539998250082,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 366.70329998014495,
+      "kind": "command",
+      "ms": 366.7608000105247,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "relinked"
+    }
+  ]
+}

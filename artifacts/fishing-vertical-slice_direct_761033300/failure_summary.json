@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Fishing scenario expected callback=_begin_nibble seconds=None range=(4.0, 10.0), but found [].",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 761033300
+}

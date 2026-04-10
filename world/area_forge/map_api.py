@@ -69,7 +69,6 @@ _FALLBACK_VECTORS = [
 ]
 
 _ZONE_MAP_TEMPLATE_CACHE = {}
-ZONE_MAP_CACHE_SECONDS = 30.0
 
 
 def _empty_map_payload():
@@ -106,9 +105,8 @@ def _room_map_flags(room):
 
 
 def _get_cached_zone_template(area_tag):
-    now = time.time()
     cached = _ZONE_MAP_TEMPLATE_CACHE.get(area_tag)
-    if cached and now < cached["expires_at"]:
+    if cached:
         return cached["template"]
 
     tagged_objects = list(search_tag(area_tag, category="build"))
@@ -149,10 +147,28 @@ def _get_cached_zone_template(area_tag):
         "zone": area_tag,
     }
     _ZONE_MAP_TEMPLATE_CACHE[area_tag] = {
-        "expires_at": now + ZONE_MAP_CACHE_SECONDS,
         "template": template,
     }
     return template
+
+
+def clear_zone_map_cache(area_tag=None):
+    normalized_area_tag = str(area_tag or "").strip()
+    if normalized_area_tag:
+        _ZONE_MAP_TEMPLATE_CACHE.pop(normalized_area_tag, None)
+        return
+    _ZONE_MAP_TEMPLATE_CACHE.clear()
+
+
+def prime_zone_map_cache(area_tags):
+    primed = []
+    for area_tag in list(area_tags or []):
+        normalized_area_tag = str(area_tag or "").strip()
+        if not normalized_area_tag:
+            continue
+        if _get_cached_zone_template(normalized_area_tag):
+            primed.append(normalized_area_tag)
+    return primed
 
 
 def _area_tag_for_room(room):

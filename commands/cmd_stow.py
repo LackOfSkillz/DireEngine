@@ -1,5 +1,7 @@
 from evennia import Command
 
+from world.systems import fishing_economy
+
 
 class CmdStow(Command):
     """
@@ -26,6 +28,12 @@ class CmdStow(Command):
             item_name, container_name = [part.strip() for part in item_name.split(" in ", 1)]
             container = self.caller.get_worn_container_by_name(container_name)
             if not container:
+                fish_strings = [obj for obj in list(getattr(self.caller, "contents", []) or []) if fishing_economy.is_fish_string(obj)]
+                container, matches, base_query, index = self.caller.resolve_numbered_candidate(container_name, fish_strings, default_first=True)
+                if not container and matches and index is not None:
+                    self.caller.msg_numbered_matches(base_query, matches)
+                    return
+            if not container:
                 self.caller.msg(f"You are not wearing {container_name}.")
                 return
 
@@ -43,6 +51,8 @@ class CmdStow(Command):
 
         if not container:
             containers = self.caller.get_worn_containers()
+            if not containers:
+                containers = [obj for obj in list(getattr(self.caller, "contents", []) or []) if fishing_economy.is_fish_string(obj)]
             if not containers:
                 self.caller.msg("You are not wearing anything you can stow that in.")
                 return

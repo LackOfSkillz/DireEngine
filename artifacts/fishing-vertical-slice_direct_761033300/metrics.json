@@ -1,0 +1,403 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 8,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "pull",
+      "first_response_ms": 48.53120003826916,
+      "kind": "command",
+      "ms": 48.633099999278784,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "cast",
+      "first_response_ms": 10.891700047068298,
+      "kind": "command",
+      "ms": 10.972399963065982,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 10.167100001126528,
+      "kind": "command",
+      "ms": 10.23200002964586,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT start_fishing_cast",
+      "first_response_ms": 0.02580008003860712,
+      "kind": "direct",
+      "ms": 0.04200008697807789,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "get gear",
+      "first_response_ms": 10.253499960526824,
+      "kind": "command",
+      "ms": 10.321499896235764,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 437.95560009311885,
+      "kind": "command",
+      "ms": 438.17189999390393,
+      "npc_response_delay_ms": 438.0750000709668,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 15.53620002232492,
+      "kind": "command",
+      "ms": 15.70929994340986,
+      "npc_response_delay_ms": 15.53620002232492,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait hook",
+      "first_response_ms": 49.175199936144054,
+      "kind": "command",
+      "ms": 49.26380002871156,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    48.633099999278784,
+    10.972399963065982,
+    10.23200002964586,
+    0.04200008697807789,
+    10.321499896235764,
+    438.17189999390393,
+    15.70929994340986,
+    49.26380002871156
+  ],
+  "commands": {
+    "count": 8,
+    "max_ms": 438.12679999973625,
+    "timings_ms": [
+      48.633099999278784,
+      10.972399963065982,
+      10.23200002964586,
+      0.04200008697807789,
+      10.321499896235764,
+      438.17189999390393,
+      15.70929994340986,
+      49.26380002871156
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775758193.2583516,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 72.81703752232715,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 5,
+  "lag": {
+    "avg_ms": 72.91824999265373,
+    "jitter": 148.7224401895456,
+    "max_ms": 438.17189999390393,
+    "min_ms": 0.04200008697807789,
+    "p95_ms": 302.0540650060864,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "pull",
+      "ms": 48.633099999278784,
+      "snapshot": "final"
+    },
+    {
+      "command": "cast",
+      "ms": 10.972399963065982,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 10.23200002964586,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT start_fishing_cast",
+      "ms": 0.04200008697807789,
+      "snapshot": "final"
+    },
+    {
+      "command": "get gear",
+      "ms": 10.321499896235764,
+      "snapshot": "final"
+    },
+    {
+      "command": "ask maren for gear",
+      "ms": 438.17189999390393,
+      "snapshot": "final"
+    },
+    {
+      "command": "ask maren for gear",
+      "ms": 15.70929994340986,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait hook",
+      "ms": 49.26380002871156,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 438.12679999973625,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 226.80560004664585,
+  "output_log": [
+    "There's nothing on the line anymore.",
+    "If you meant to fish, try 'fish'.",
+    "You need a fishing pole before you can fish.",
+    "You need a fishing pole before you can fish.",
+    "RETURN False",
+    "Old Maren taps the bundled tackle beside her. 'Ask me for gear and I'll hand it over properly.'",
+    "Old Maren stoops beside her baskets, sorts out the basics in practiced order, and presses them into your hands one piece at a time.",
+    "Thread your catch onto this if you plan to keep fishing.",
+    "Old Maren says, \"Start with the pole, then mind your bait. I've set you up with fishing pole, fish string, hook, line, worm.\"",
+    "Old Maren says, \"You already have the basics. Use what you're carrying before you come asking for more.\"",
+    "You can't use that as bait."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 21146,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 438.17189999390393
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775758171.5164998,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Fishing vertical slice now validates multi-step economy and world hooks; lag telemetry should be reported without masking behavioral regressions."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 83.28135710741792,
+      "count": 7,
+      "entries": [
+        {
+          "duration_ms": 48.576599918305874,
+          "metadata": {
+            "character": "TEST_FISHING_CHAR",
+            "command": "pull"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 10.929199983365834,
+          "metadata": {
+            "character": "TEST_FISHING_CHAR",
+            "command": "cast"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 10.19339996855706,
+          "metadata": {
+            "character": "TEST_FISHING_CHAR",
+            "command": "fish"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 10.279499925673008,
+          "metadata": {
+            "character": "TEST_FISHING_CHAR",
+            "command": "get"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 438.12679999973625,
+          "metadata": {
+            "character": "TEST_FISHING_CHAR",
+            "command": "ask"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 15.661700046621263,
+          "metadata": {
+            "character": "TEST_FISHING_CHAR",
+            "command": "ask"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 49.20229990966618,
+          "metadata": {
+            "character": "TEST_FISHING_CHAR",
+            "command": "bait"
+          },
+          "timestamp": 1000.0
+        }
+      ],
+      "max_ms": 438.12679999973625,
+      "total_ms": 582.9694997519255
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -1,0 +1,407 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 131.62499997997656,
+      "kind": "command",
+      "ms": 131.7090000375174,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 2.3214000393636525,
+      "kind": "command",
+      "ms": 2.383399987593293,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "link_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 2.1792000043205917,
+      "kind": "command",
+      "ms": 2.230999991297722,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceive_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "center",
+      "first_response_ms": 11.136199987959117,
+      "kind": "command",
+      "ms": 62.85580003168434,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 81.73430000897497,
+      "kind": "command",
+      "ms": 81.79239998571575,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "relinked"
+    }
+  ],
+  "command_timings_ms": [
+    131.7090000375174,
+    2.383399987593293,
+    2.230999991297722,
+    62.85580003168434,
+    81.79239998571575
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 131.68980000773445,
+    "timings_ms": [
+      131.7090000375174,
+      2.383399987593293,
+      2.230999991297722,
+      62.85580003168434,
+      81.79239998571575
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775606411.3192885,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 45.79922000411898,
+  "interest": {
+    "active_object_count": 4,
+    "active_object_peak": 4,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 3,
+      "zone": 0
+    },
+    "source_count_current": 12,
+    "source_count_peak": 12,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 4,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 4
+    },
+    "transition_total": 4
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 56.1943200067617,
+    "jitter": 55.248888982674345,
+    "max_ms": 131.7090000375174,
+    "min_ms": 2.230999991297722,
+    "p95_ms": 121.72568002715707,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 131.7090000375174,
+      "snapshot": "linked"
+    },
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 2.383399987593293,
+      "snapshot": "link_locked"
+    },
+    {
+      "command": "perceive TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 2.230999991297722,
+      "snapshot": "perceive_locked"
+    },
+    {
+      "command": "center",
+      "ms": 62.85580003168434,
+      "snapshot": "centered"
+    },
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 81.79239998571575,
+      "snapshot": "relinked"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 131.68980000773445,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You feel completely cut off from others.",
+    "You sense nothing.",
+    "Your connection feels distant and unreliable.",
+    "You steady yourself, regaining clarity.",
+    "You deepen your connection, taking in the shape of their suffering."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "perceive TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "center",
+      "link TEST_EMPATH_LINK_SHOCK_PATIENT"
+    ],
+    "initial_link": {
+      "condition": "steady",
+      "stability": 100,
+      "strength": 100,
+      "target": "TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "target_id": 14339,
+      "type": "direct"
+    },
+    "link_after_output": [
+      "You deepen your connection, taking in the shape of their suffering."
+    ],
+    "link_fail_output": [
+      "You feel completely cut off from others."
+    ],
+    "output_log": [
+      "You deepen your connection, taking in the shape of their suffering.",
+      "You feel completely cut off from others.",
+      "You sense nothing.",
+      "Your connection feels distant and unreliable.",
+      "You steady yourself, regaining clarity.",
+      "You deepen your connection, taking in the shape of their suffering."
+    ],
+    "perceive_fail_output": [
+      "You sense nothing."
+    ],
+    "relink_state": {
+      "condition": "steady",
+      "stability": 100,
+      "strength": 100,
+      "target": "TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "target_id": 14339,
+      "type": "direct"
+    },
+    "shock_after_center": 75,
+    "snapshot_count": 9,
+    "snapshot_labels": [
+      "initial",
+      "linked",
+      "first_kill",
+      "second_kill",
+      "link_locked",
+      "perceive_locked",
+      "centered",
+      "relinked",
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 17721,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775606400.0297039,
+        "delay_s": 2.5,
+        "due_at": 1775606402.5297039,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "job_id": "6017eeea5a0948e4ad2f75d377bf2f50",
+        "key": "combat:roundtime:14338",
+        "owner": "#14338",
+        "owner_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 2,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "first_kill",
+    "second_kill",
+    "link_locked",
+    "perceive_locked",
+    "centered",
+    "relinked",
+    "final"
+  ],
+  "started_at": 1775606393.1384852,
+  "state_transition_count": 8,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath link-vs-shock coverage validates forced link loss and post-center partial recovery without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 56.177279993426055,
+      "count": 5,
+      "entries": [
+        {
+          "duration_ms": 131.68980000773445,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_SHOCK_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775606399.8116353
+        },
+        {
+          "duration_ms": 2.366199973039329,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_SHOCK_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775606399.8872123
+        },
+        {
+          "duration_ms": 2.214499982073903,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_SHOCK_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775606399.890235
+        },
+        {
+          "duration_ms": 62.838800018653274,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_SHOCK_HEALER",
+            "command": "center"
+          },
+          "timestamp": 1775606399.9560962
+        },
+        {
+          "duration_ms": 81.77709998562932,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_SHOCK_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775606400.0398192
+        }
+      ],
+      "max_ms": 131.68980000773445,
+      "total_ms": 280.8863999671303
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 3
+}

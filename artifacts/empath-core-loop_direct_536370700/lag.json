@@ -1,0 +1,109 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 32.05774000380188,
+  "lag": {
+    "avg_ms": 32.23224000539631,
+    "jitter": 16.47763063351111,
+    "max_ms": 51.185899996198714,
+    "min_ms": 7.887099985964596,
+    "p95_ms": 48.76502000261098,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 24.940299976151437,
+      "snapshot": "touched"
+    },
+    {
+      "command": "assess",
+      "ms": 7.887099985964596,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "take bleeding",
+      "ms": 51.185899996198714,
+      "snapshot": "took_bleeding"
+    },
+    {
+      "command": "take vitality 20",
+      "ms": 38.066400040406734,
+      "snapshot": "took_vitality"
+    },
+    {
+      "command": "mend self",
+      "ms": 39.08150002826005,
+      "snapshot": "mended"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 24.864399980288,
+      "kind": "command",
+      "ms": 24.940299976151437,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 7.822500017937273,
+      "kind": "command",
+      "ms": 7.887099985964596,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 50.84320000605658,
+      "kind": "command",
+      "ms": 51.185899996198714,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 20",
+      "first_response_ms": 37.7215999760665,
+      "kind": "command",
+      "ms": 38.066400040406734,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_vitality"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "mend self",
+      "first_response_ms": 39.03700003866106,
+      "kind": "command",
+      "ms": 39.08150002826005,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mended"
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 137.4614666759347,
+  "lag": {
+    "avg_ms": 143.5794333422867,
+    "jitter": 81.35018671822134,
+    "max_ms": 207.804000005126,
+    "min_ms": 52.10169998463243,
+    "p95_ms": 204.10686000832357,
+    "slow_count": 2,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 207.804000005126,
+      "snapshot": "linked"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 170.83260003710166,
+      "snapshot": "mitigated"
+    },
+    {
+      "command": "link focus scholarship",
+      "ms": 52.10169998463243,
+      "snapshot": "focused"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 207.804000005126
+    },
+    {
+      "cmd": "take disease 20",
+      "ms": 170.83260003710166
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 207.63000001898035,
+      "kind": "command",
+      "ms": 207.804000005126,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 152.80400001211092,
+      "kind": "command",
+      "ms": 170.83260003710166,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mitigated"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link focus scholarship",
+      "first_response_ms": 51.950399996712804,
+      "kind": "command",
+      "ms": 52.10169998463243,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "focused"
+    }
+  ]
+}

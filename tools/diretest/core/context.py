@@ -5,6 +5,7 @@ from __future__ import annotations
 import time
 
 from .diff import diff_snapshots as build_snapshot_diff
+from .harness import _initialize_character_cmdsets
 from .invariants import INVARIANTS, run_invariant
 from .metrics import capture_metric_state
 from .snapshot import capture_snapshot
@@ -209,6 +210,7 @@ class DireTestContext:
         if not self.character:
             raise ValueError("ctx.cmd requires an active test character.")
 
+        _initialize_character_cmdsets(self.character)
         self._ensure_metric_baseline()
         self.command_log.append(command)
         original_msg, output_probe = self._capture_character_output(started_perf=time.perf_counter(), command_label=command)

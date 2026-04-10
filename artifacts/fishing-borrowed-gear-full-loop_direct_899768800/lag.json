@@ -1,0 +1,214 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 181.33584285221463,
+  "lag": {
+    "avg_ms": 283.5854875011137,
+    "jitter": 351.25819224517016,
+    "max_ms": 917.1208000043407,
+    "min_ms": 0.07579999510198832,
+    "p95_ms": 851.1082449869717,
+    "slow_count": 4,
+    "spike_count": 3,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "ask maren for gear",
+      "ms": 728.5134999547154,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 66.35999993886799,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 16.985900001600385,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _begin_nibble",
+      "ms": 0.07579999510198832,
+      "snapshot": "final"
+    },
+    {
+      "command": "pull",
+      "ms": 46.59630008973181,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _resolve_struggle_round",
+      "ms": 304.8085999907926,
+      "snapshot": "final"
+    },
+    {
+      "command": "south",
+      "ms": 188.22300003375858,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _finalize_borrowed_return_cleanup",
+      "ms": 917.1208000043407,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 728.410099982284,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 728.5134999547154
+    },
+    {
+      "cmd": "DIRECT _resolve_struggle_round",
+      "ms": 304.8085999907926
+    },
+    {
+      "cmd": "south",
+      "ms": 188.22300003375858
+    },
+    {
+      "cmd": "DIRECT _finalize_borrowed_return_cleanup",
+      "ms": 917.1208000043407
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 728.3076000167057,
+      "kind": "command",
+      "ms": 728.5134999547154,
+      "npc_response_delay_ms": 728.410099982284,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _resolve_struggle_round",
+      "first_response_ms": 281.7498999647796,
+      "kind": "direct",
+      "ms": 304.8085999907926,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _finalize_borrowed_return_cleanup",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 917.1208000043407,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 728.3076000167057,
+      "kind": "command",
+      "ms": 728.5134999547154,
+      "npc_response_delay_ms": 728.410099982284,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 66.27030007075518,
+      "kind": "command",
+      "ms": 66.35999993886799,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 15.704700024798512,
+      "kind": "command",
+      "ms": 16.985900001600385,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _begin_nibble",
+      "first_response_ms": 0.047699897550046444,
+      "kind": "direct",
+      "ms": 0.07579999510198832,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "pull",
+      "first_response_ms": 14.177000033669174,
+      "kind": "command",
+      "ms": 46.59630008973181,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _resolve_struggle_round",
+      "first_response_ms": 281.7498999647796,
+      "kind": "direct",
+      "ms": 304.8085999907926,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "south",
+      "first_response_ms": 163.0936999572441,
+      "kind": "command",
+      "ms": 188.22300003375858,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _finalize_borrowed_return_cleanup",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 917.1208000043407,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

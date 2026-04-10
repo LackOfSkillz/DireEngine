@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 2419, in scenario
+    run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+  File "C:\Users\gary\dragonsire\diretest.py", line 2215, in run_next
+    raise AssertionError(
+AssertionError: Fishing scenario expected callback=_begin_nibble seconds=None range=(4.0, 10.0), but found [{'seconds': 4.5247215627654835, 'callback': <function _begin_nibble at 0x00000281189EDF80>, 'callback_name': '_begin_nibble', 'args': (TEST_FISHING_CHAR, '104a6071-68e6-416e-b0af-630537a80320'), 'kwargs': {}, 'task': <__main__.run_fishing_vertical_slice_scenario.<locals>.scenario.<locals>.FakeDelayedTask object at 0x0000028118F00990>}].

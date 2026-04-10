@@ -1,0 +1,381 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 4,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_PATIENT",
+      "first_response_ms": 90.65929998178035,
+      "kind": "command",
+      "ms": 90.74079996207729,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding 20",
+      "first_response_ms": 81.68649999424815,
+      "kind": "command",
+      "ms": 86.22009999817237,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding_20"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 30",
+      "first_response_ms": 101.30360000766814,
+      "kind": "command",
+      "ms": 102.0221000071615,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_vitality_30"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding 30",
+      "first_response_ms": 102.74350002873689,
+      "kind": "command",
+      "ms": 103.64430001936853,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding_30"
+    }
+  ],
+  "command_timings_ms": [
+    90.74079996207729,
+    86.22009999817237,
+    102.0221000071615,
+    103.64430001936853
+  ],
+  "commands": {
+    "count": 4,
+    "max_ms": 103.62750000786036,
+    "timings_ms": [
+      90.74079996207729,
+      86.22009999817237,
+      102.0221000071615,
+      103.64430001936853
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775606304.1283484,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 94.09822500310838,
+  "interest": {
+    "active_object_count": 2,
+    "active_object_peak": 2,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 5,
+    "source_count_peak": 5,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 2,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 2
+    },
+    "transition_total": 2
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 95.65682499669492,
+    "jitter": 8.515389285198744,
+    "max_ms": 103.64430001936853,
+    "min_ms": 86.22009999817237,
+    "p95_ms": 103.40097001753747,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_LINK_PATIENT",
+      "ms": 90.74079996207729,
+      "snapshot": "linked"
+    },
+    {
+      "command": "take bleeding 20",
+      "ms": 86.22009999817237,
+      "snapshot": "took_bleeding_20"
+    },
+    {
+      "command": "take vitality 30",
+      "ms": 102.0221000071615,
+      "snapshot": "took_vitality_30"
+    },
+    {
+      "command": "take bleeding 30",
+      "ms": 103.64430001936853,
+      "snapshot": "took_bleeding_30"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 103.62750000786036,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 19:58:18-04).",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 19:58:19-04).",
+    "You draw the injury into yourself.",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 19:58:19-04)."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "after_first": {
+      "condition": "steady",
+      "stability": 90,
+      "strength": 100,
+      "target": "TEST_EMPATH_LINK_PATIENT",
+      "target_id": 14320,
+      "type": "direct"
+    },
+    "after_second": {
+      "condition": "strained",
+      "stability": 65,
+      "strength": 100,
+      "target": "TEST_EMPATH_LINK_PATIENT",
+      "target_id": 14320,
+      "type": "direct"
+    },
+    "after_third": {
+      "condition": "strained",
+      "stability": 40,
+      "strength": 100,
+      "target": "TEST_EMPATH_LINK_PATIENT",
+      "target_id": 14320,
+      "type": "direct"
+    },
+    "commands": [
+      "link TEST_EMPATH_LINK_PATIENT",
+      "take bleeding 20",
+      "take vitality 30",
+      "take bleeding 30"
+    ],
+    "initial_link": {
+      "condition": "steady",
+      "stability": 100,
+      "strength": 100,
+      "target": "TEST_EMPATH_LINK_PATIENT",
+      "target_id": 14320,
+      "type": "direct"
+    },
+    "output_log": [
+      "You deepen your connection, taking in the shape of their suffering.",
+      "You draw the injury into yourself.",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 19:58:18-04).",
+      "You draw the injury into yourself.",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 19:58:19-04).",
+      "You draw the injury into yourself.",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_take.py\", line 32, in func\n    patient = caller.get_empath_link_target(getattr(caller.db, \"empath_link\", None)) if hasattr(caller, \"get_empath_link_target\") else None\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 3524, in get_empath_link_target\n    lookup_id = int(target_id or 0)\n                ^^^^^^^^^^^^^^^^^^^\nTypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-07 19:58:19-04)."
+    ],
+    "snapshot_count": 6,
+    "snapshot_labels": [
+      "initial",
+      "linked",
+      "took_bleeding_20",
+      "took_vitality_30",
+      "took_bleeding_30",
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 7676,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775606298.8611794,
+        "delay_s": 2.5,
+        "due_at": 1775606301.3611794,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_HEALER",
+        "job_id": "cf963065a2d648ce8322046dc9785598",
+        "key": "combat:roundtime:14319",
+        "owner": "#14319",
+        "owner_label": "TEST_EMPATH_LINK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "took_bleeding_20",
+    "took_vitality_30",
+    "took_bleeding_30",
+    "final"
+  ],
+  "started_at": 1775606295.993665,
+  "state_transition_count": 5,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath link stability coverage validates direct-link strength, stability decay, and large-transfer strain without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 95.63987501314841,
+      "count": 4,
+      "entries": [
+        {
+          "duration_ms": 90.72279999963939,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775606298.8778107
+        },
+        {
+          "duration_ms": 86.20300004258752,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775606298.967942
+        },
+        {
+          "duration_ms": 102.00620000250638,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775606299.07359
+        },
+        {
+          "duration_ms": 103.62750000786036,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775606299.1815827
+        }
+      ],
+      "max_ms": 103.62750000786036,
+      "total_ms": 382.55950005259365
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 4
+}

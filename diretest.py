@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 from collections.abc import Mapping
 import json
 import os
@@ -29,6 +30,8 @@ def register_scenario(name, metadata=None, aliases=None, **extra_metadata):
 
     def decorator(func):
         func.diretest_metadata = dict(getattr(func, "diretest_metadata", {}) or {}) | scenario_metadata
+        func.diretest_scenario_name = scenario_name
+        func.diretest_aliases = list(scenario_aliases)
         SCENARIO_REGISTRY[scenario_name] = func
         for alias in scenario_aliases:
             SCENARIO_REGISTRY[alias] = func
@@ -2101,6 +2104,1979 @@ def run_movement_scenario(args):
 
 
 @register_scenario(
+    "fishing-vertical-slice",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Fishing vertical slice now validates multi-step economy and world hooks; lag telemetry should be reported without masking behavioral regressions.",
+    },
+)
+def run_fishing_vertical_slice_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import random as pyrandom
+
+        from evennia.utils.create import create_object
+
+        import world.systems.fishing_economy as fishing_economy
+        import world.systems.fishing as fishing_system
+
+        water_room = ctx.harness.create_test_room(key="TEST_FISHING_WATER")
+        dry_room = ctx.harness.create_test_room(key="TEST_FISHING_DRY")
+        ctx.harness.create_test_exit(water_room, dry_room, "north", aliases=["n"])
+        ctx.harness.create_test_exit(dry_room, water_room, "south", aliases=["s"])
+
+        water_room.db.fishable = True
+        water_room.db.fish_group = "River 1"
+
+        character = ctx.harness.create_test_character(room=water_room, key="TEST_FISHING_CHAR")
+        ctx.character = character
+        ctx.room = water_room
+        character.ndb.fishing_debug = True
+        character.ndb.fishing_debug_trace = []
+        character.db.stats = {"reflex": 12, "discipline": 12}
+        character.learn_skill("outdoorsmanship", {"rank": 60, "mindstate": 0})
+        character.learn_skill("mechanical_lore", {"rank": 0, "mindstate": 0})
+        character.learn_skill("scholarship", {"rank": 0, "mindstate": 0})
+
+        supplier = create_object("typeclasses.fishing_supplier.FishingSupplier", key="Old Maren", location=water_room, home=water_room)
+        create_object("typeclasses.weigh_station.WeighStation", key="dock scale", location=water_room, home=water_room)
+
+        visible_npcs = [obj for obj in list(water_room.contents) if bool(getattr(getattr(obj, "db", None), "is_fishing_supplier", False))]
+        if supplier not in visible_npcs:
+            raise AssertionError("Fishing scenario did not place the supplier/buyer NPC in the fishing room.")
+        if not bool(getattr(getattr(supplier, "db", None), "is_vendor", False)):
+            raise AssertionError("Fishing scenario did not mark the supplier as a valid vendor target.")
+        if "patient expression" not in str(getattr(getattr(supplier, "db", None), "desc", "") or "").lower():
+            raise AssertionError("Fishing scenario did not preserve the supplier's dual-role description.")
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        outdoors_skill = character.exp_skills.get("outdoorsmanship")
+        before_pool = float(getattr(outdoors_skill, "pool", 0.0) or 0.0)
+        mechanical_skill = character.exp_skills.get("mechanical_lore")
+        before_mechanical_pool = float(getattr(mechanical_skill, "pool", 0.0) or 0.0)
+        output_index = len(ctx.output_log)
+
+        original_delay = fishing_system.delay
+        original_time = fishing_system.time.time
+        original_random = fishing_system.random.random
+        original_choice = fishing_system.random.choice
+        original_randint = fishing_system.random.randint
+        original_choose_weighted = fishing_system.choose_weighted_fish_profile
+        original_nibble_chance = fishing_system.calculate_nibble_chance
+        original_hookup_chance = fishing_system.calculate_hookup_chance
+        original_timeout_tangle = fishing_system.calculate_timeout_tangle_chance
+        original_resolve_struggle = fishing_system.resolve_struggle_outcome_data
+        original_fishing_economy_time = fishing_economy.time.time
+        current_time = {"value": 1000.0}
+        scheduled = []
+
+        class FakeDelayedTask:
+            def __init__(self):
+                self.cancelled = False
+
+            def cancel(self):
+                self.cancelled = True
+
+        def fake_delay(seconds, callback, *cb_args, **cb_kwargs):
+            task = FakeDelayedTask()
+            scheduled.append(
+                {
+                    "seconds": float(seconds),
+                    "callback": callback,
+                    "callback_name": getattr(callback, "__name__", "callback"),
+                    "args": cb_args,
+                    "kwargs": cb_kwargs,
+                    "task": task,
+                }
+            )
+            return task
+
+        def run_next(expected_seconds=None, callback_name=None, min_seconds=None, max_seconds=None):
+            event_index = None
+            for index, event in enumerate(list(scheduled)):
+                task = event.get("task")
+                if task is not None and bool(getattr(task, "cancelled", False)):
+                    continue
+                seconds = float(event.get("seconds", 0.0) or 0.0)
+                if callback_name and str(event.get("callback_name", "") or "") != str(callback_name):
+                    continue
+                if expected_seconds is not None and abs(seconds - float(expected_seconds)) > 0.01:
+                    continue
+                if min_seconds is not None and seconds < float(min_seconds):
+                    continue
+                if max_seconds is not None and seconds > float(max_seconds):
+                    continue
+                event_index = index
+                break
+            if event_index is None:
+                raise AssertionError(
+                    f"Fishing scenario expected callback={callback_name or 'any'} seconds={expected_seconds} range=({min_seconds}, {max_seconds}), but found {scheduled}."
+                )
+            event = scheduled.pop(event_index)
+            seconds = float(event.get("seconds", 0.0) or 0.0)
+            current_time["value"] += seconds
+            ctx.direct(event["callback"], *(event.get("args") or ()), **(event.get("kwargs") or {}))
+            return seconds
+
+        def assert_no_active_callback(callback_name):
+            for event in list(scheduled):
+                task = event.get("task")
+                if task is not None and bool(getattr(task, "cancelled", False)):
+                    continue
+                if str(event.get("callback_name", "") or "") == str(callback_name):
+                    raise AssertionError(f"Fishing scenario left an active {callback_name} callback behind: {scheduled}")
+            return float(event.get("seconds", 0.0) or 0.0)
+
+        try:
+            fishing_system.delay = fake_delay
+            fishing_system.time.time = lambda: float(current_time["value"])
+            fishing_system.random.random = lambda: 0.0
+            fishing_system.random.choice = lambda seq: list(seq)[0]
+            fishing_system.random.randint = lambda _low, _high: 5
+            fishing_economy.time.time = lambda: float(current_time["value"])
+
+            river_rng = pyrandom.Random(1234)
+            river_samples = [fishing_system.choose_weighted_fish_profile("River 1", rng=river_rng) for _ in range(80)]
+            if any(sample.get("fish_group") != "river 1" for sample in river_samples):
+                raise AssertionError(f"Fishing scenario found a non-river profile in River 1 selection: {river_samples[:5]}")
+            river_trout = sum(1 for sample in river_samples if sample.get("key") == "silver_trout")
+            river_carp = sum(1 for sample in river_samples if sample.get("key") == "mud_carp")
+            if river_trout <= river_carp:
+                raise AssertionError(f"Fishing scenario did not demonstrate weighted River 1 selection: trout={river_trout}, carp={river_carp}")
+
+            ocean_rng = pyrandom.Random(4321)
+            ocean_samples = [fishing_system.choose_weighted_fish_profile("Ocean", rng=ocean_rng) for _ in range(40)]
+            if any(sample.get("fish_group") != "ocean" for sample in ocean_samples):
+                raise AssertionError(f"Fishing scenario found a non-ocean profile in Ocean selection: {ocean_samples[:5]}")
+
+            fallback_group = fishing_system.resolve_fish_group_data("Unknown Whirlpool")
+            if fallback_group.get("key") != "river 1" or not bool(fallback_group.get("is_fallback")):
+                raise AssertionError(f"Fishing scenario did not provide a safe fish-group fallback: {fallback_group}")
+
+            ctx.cmd("pull")
+            invalid_pull_output = list(ctx.output_log[output_index:])
+            if not any("there's nothing on the line anymore" in str(line).lower() for line in invalid_pull_output):
+                raise AssertionError(f"Fishing scenario did not reject pull outside the reaction window: {invalid_pull_output}")
+
+            cast_hint_index = len(ctx.output_log)
+            ctx.cmd("cast")
+            cast_hint_output = list(ctx.output_log[cast_hint_index:])
+            if not any("if you meant to fish, try 'fish'." in str(line).lower() for line in cast_hint_output):
+                raise AssertionError(f"Fishing scenario did not offer the fishing hint on bare cast with no prepared spell: {cast_hint_output}")
+
+            output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            no_bait_output = list(ctx.output_log[output_index:])
+            if not any("fishing pole" in str(line).lower() or "hook and line" in str(line).lower() for line in no_bait_output):
+                raise AssertionError(f"Fishing scenario did not block fishing without minimal gear: {no_bait_output}")
+            if getattr(character.ndb, "fishing_session", None) is not None:
+                raise AssertionError("Fishing without minimal gear should not create a lingering session.")
+
+            bypass_result = ctx.direct(fishing_system.start_fishing_cast, character)
+            bypass_output = list(ctx.output_log[len(ctx.output_log) - 2 :])
+            if bypass_result is not False:
+                raise AssertionError("Fishing scenario expected start_fishing_cast to fail without minimal gear.")
+            if not any("fishing pole" in str(line).lower() or "hook and line" in str(line).lower() for line in bypass_output):
+                raise AssertionError(f"Fishing scenario did not prove gear gating at the system layer: {bypass_output}")
+
+            gear_redirect_index = len(ctx.output_log)
+            ctx.cmd("get gear")
+            gear_redirect_output = list(ctx.output_log[gear_redirect_index:])
+            if not any("ask me for gear" in str(line).lower() for line in gear_redirect_output):
+                raise AssertionError(f"Fishing scenario did not redirect direct gear pickup toward the supplier dialog: {gear_redirect_output}")
+
+            gear_index = len(ctx.output_log)
+            ctx.cmd("ask maren for gear")
+            gear_output = list(ctx.output_log[gear_index:])
+            if not any("old maren says" in str(line).lower() for line in gear_output):
+                raise AssertionError(f"Fishing scenario did not resolve ask-for-gear through the NPC inquiry path: {gear_output}")
+            if not any("presses them into your hands" in str(line).lower() for line in gear_output):
+                raise AssertionError(f"Fishing scenario did not emit the staged handoff text for starter gear: {gear_output}")
+            if not any("thread your catch onto this" in str(line).lower() for line in gear_output):
+                raise AssertionError(f"Fishing scenario did not surface the fish-string handling hint: {gear_output}")
+
+            initial_pole_count = len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_fishing_pole", False))])
+            initial_bait_count = len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_bait", False))])
+            initial_hook_count = len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_hook", False))])
+            initial_line_count = len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_line", False))])
+            initial_string_count = len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_fish_string", False))])
+            if min(initial_pole_count, initial_bait_count, initial_hook_count, initial_line_count, initial_string_count) < 1:
+                raise AssertionError("Fishing scenario did not receive the full starter fishing kit from Old Maren.")
+
+            repeat_gear_index = len(ctx.output_log)
+            ctx.cmd("ask maren for gear")
+            repeat_gear_output = list(ctx.output_log[repeat_gear_index:])
+            repeated_counts = {
+                "pole": len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_fishing_pole", False))]),
+                "bait": len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_bait", False))]),
+                "hook": len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_hook", False))]),
+                "line": len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_line", False))]),
+                "string": len([obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_fish_string", False))]),
+            }
+            if repeated_counts != {
+                "pole": initial_pole_count,
+                "bait": initial_bait_count,
+                "hook": initial_hook_count,
+                "line": initial_line_count,
+                "string": initial_string_count,
+            }:
+                raise AssertionError(f"Fishing scenario let Old Maren duplicate starter gear infinitely: {repeated_counts}")
+            if not any("already have the basics" in str(line).lower() for line in repeat_gear_output):
+                raise AssertionError(f"Fishing scenario did not explain the non-duplication behavior on a repeated gear request: {repeat_gear_output}")
+
+            pole = next(obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_fishing_pole", False)))
+            if float(getattr(getattr(pole, "db", None), "pole_rating", 0) or 0) != 10.0:
+                raise AssertionError("Fishing scenario did not receive the expected starter fishing pole rating.")
+            if bool(getattr(getattr(pole, "db", None), "line_tangled", True)):
+                raise AssertionError("Fishing scenario expected the starter fishing pole to begin untangled.")
+
+            invalid_bait_index = len(ctx.output_log)
+            ctx.cmd("bait hook")
+            invalid_bait_output = list(ctx.output_log[invalid_bait_index:])
+            if not any("you can't use that as bait" in str(line).lower() for line in invalid_bait_output):
+                raise AssertionError(f"Fishing scenario did not reject non-bait items cleanly: {invalid_bait_output}")
+
+            pole.db.line_attached = False
+            unrigged_bait_index = len(ctx.output_log)
+            ctx.cmd("bait worm")
+            unrigged_bait_output = list(ctx.output_log[unrigged_bait_index:])
+            if not any("you need to rig your pole before baiting it" in str(line).lower() for line in unrigged_bait_output):
+                raise AssertionError(f"Fishing scenario did not hard-gate baiting on rig state: {unrigged_bait_output}")
+            if sum(1 for line in unrigged_bait_output if "rig your pole before baiting" in str(line).lower()) != 1:
+                raise AssertionError(f"Fishing scenario emitted duplicate unrigged bait messaging: {unrigged_bait_output}")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is not None and bool(getattr(session, "baited", False)):
+                raise AssertionError("Fishing scenario applied bait even though the pole was unrigged.")
+            ctx.cmd("rig pole")
+
+            worm = next(obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_bait", False)))
+            spinner = create_object("typeclasses.items.bait.Bait", key="spinner", location=character, home=character)
+            spinner.db.bait_type = "artificial_simple"
+            spinner.db.bait_family = "artificial_simple"
+            spinner.db.quality = 10
+            spinner.db.bait_quality = 10
+            spinner.db.bait_match_tags = ["shiny", "starter"]
+            lure = create_object("typeclasses.items.bait.Bait", key="lure", location=character, home=character)
+            lure.db.bait_type = "specialty_lure"
+            lure.db.bait_family = "specialty_lure"
+            lure.db.quality = 16
+            lure.db.bait_quality = 16
+            lure.db.bait_match_tags = ["saltwater", "deepwater", "specialty"]
+
+            silver_trout = fishing_system.get_fish_profile("silver_trout")
+            trial_session = fishing_system.FishingSession(character)
+            better_nibble = fishing_system.calculate_nibble_chance(character, water_room, worm, silver_trout)
+            weaker_nibble = fishing_system.calculate_nibble_chance(character, water_room, spinner, silver_trout)
+            if better_nibble <= weaker_nibble:
+                raise AssertionError(f"Fishing scenario did not show better bait improving nibble odds: worm={better_nibble}, spinner={weaker_nibble}")
+
+            matched_hook = fishing_system.calculate_hookup_chance(character, trial_session, worm, silver_trout)
+            mismatched_hook = fishing_system.calculate_hookup_chance(character, trial_session, lure, silver_trout)
+            if matched_hook <= mismatched_hook:
+                raise AssertionError(f"Fishing scenario did not show matched bait improving hook odds: matched={matched_hook}, mismatched={mismatched_hook}")
+
+            lore_eff = fishing_system.calculate_lore_efficiency(character, fishing_system.resolve_bait_profile(lure))
+            if lore_eff <= 0.0 or lore_eff >= 1.0:
+                raise AssertionError(f"Fishing scenario did not keep advanced-bait lore friction mild and non-blocking: {lore_eff}")
+
+            fishing_system.choose_weighted_fish_profile = lambda _room_or_group, rng=None: fishing_system.get_fish_profile("silver_trout")
+            fishing_system.calculate_nibble_chance = lambda *_args, **_kwargs: 1.0
+
+            output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            unbaited_output = list(ctx.output_log[output_index:])
+            if not any("bait your hook" in str(line).lower() for line in unbaited_output):
+                raise AssertionError(f"Fishing scenario did not enforce the baited state: {unbaited_output}")
+
+            output_index = len(ctx.output_log)
+            ctx.cmd("bait worm")
+            bait_output = list(ctx.output_log[output_index:])
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "baited" or not bool(getattr(session, "baited", False)):
+                raise AssertionError("Fishing scenario did not create a baited session.")
+            if not any("bait your hook" in str(line).lower() for line in bait_output):
+                raise AssertionError(f"Fishing scenario did not confirm baiting: {bait_output}")
+
+            output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "cast":
+                raise AssertionError("Fishing scenario did not enter the cast state before early-pull tangle validation.")
+            ctx.cmd("pull")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "tangled":
+                raise AssertionError("Fishing scenario did not convert an early pull into a tangled line state.")
+            tangled_output = list(ctx.output_log[output_index:])
+            if not any("tangle" in str(line).lower() for line in tangled_output):
+                raise AssertionError(f"Fishing scenario did not emit tangled-line feedback on early pull: {tangled_output}")
+            blocked_cast_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            blocked_cast_output = list(ctx.output_log[blocked_cast_index:])
+            if not any("tangled" in str(line).lower() for line in blocked_cast_output):
+                raise AssertionError(f"Fishing scenario did not block casting while tangled: {blocked_cast_output}")
+            untangle_after_early_pull_index = len(ctx.output_log)
+            ctx.cmd("untangle pole")
+            untangle_after_early_pull_output = list(ctx.output_log[untangle_after_early_pull_index:])
+            if not any("line hangs clean" in str(line).lower() or "knots free" in str(line).lower() for line in untangle_after_early_pull_output):
+                raise AssertionError(f"Fishing scenario did not require a manual untangle after an early-pull snarl: {untangle_after_early_pull_output}")
+            ctx.cmd("bait worm")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "baited":
+                raise AssertionError("Fishing scenario did not allow baiting after clearing a tangled line state.")
+            assert_no_active_callback("_begin_nibble")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "baited":
+                raise AssertionError("Fishing scenario let a stale nibble callback corrupt a re-baited session.")
+
+            output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "cast":
+                raise AssertionError("Fishing scenario did not enter the cast state.")
+
+            bite_delay = run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            if bite_delay < 4.0 or bite_delay > 10.0:
+                raise AssertionError(f"Fishing scenario scheduled a River 1 bite outside the expected timing range: {bite_delay}")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "nibble" or float(getattr(session, "nibble_time", 0.0) or 0.0) <= 0.0:
+                raise AssertionError("Fishing scenario did not enter the nibble phase with a reaction timestamp.")
+
+            fishing_system.calculate_timeout_tangle_chance = lambda *_args, **_kwargs: 1.0
+            timeout_delay = run_next(callback_name="_expire_nibble_window", min_seconds=2.5, max_seconds=4.5)
+            if timeout_delay < 2.5 or timeout_delay > 4.5:
+                raise AssertionError(f"Fishing scenario scheduled nibble expiry outside the expected timing variance: {timeout_delay}")
+            timeout_output = list(ctx.output_log[output_index:])
+            if not any("line goes still" in str(line).lower() for line in timeout_output):
+                raise AssertionError(f"Fishing scenario did not emit missed-bite text: {timeout_output}")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "tangled":
+                raise AssertionError("Fishing scenario did not promote missed-bite tangles into a real session state.")
+
+            timeout_pull_index = len(ctx.output_log)
+            ctx.cmd("pull")
+            timeout_pull_output = list(ctx.output_log[timeout_pull_index:])
+            if not any("tangled" in str(line).lower() for line in timeout_pull_output):
+                raise AssertionError(f"Fishing scenario did not reject pull after timeout with tangled-state feedback: {timeout_pull_output}")
+
+            ctx.cmd("untangle pole")
+            ctx.cmd("bait worm")
+            fishing_system.calculate_timeout_tangle_chance = original_timeout_tangle
+            fishing_system.calculate_hookup_chance = lambda *_args, **_kwargs: 0.0
+            output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            ctx.cmd("pull")
+            failed_hook_output = list(ctx.output_log[output_index:])
+            if not any("slips" in str(line).lower() or "twists free" in str(line).lower() for line in failed_hook_output):
+                raise AssertionError(f"Fishing scenario did not exercise the failed hook branch: {failed_hook_output}")
+            if getattr(character.ndb, "fishing_session", None) is not None:
+                raise AssertionError("Fishing scenario did not clear the session after a failed hook attempt.")
+            assert_no_active_callback("_expire_nibble_window")
+            if getattr(character.ndb, "fishing_session", None) is not None:
+                raise AssertionError("Fishing scenario let a stale nibble-timeout callback restore state after a failed hook.")
+
+            ctx.cmd("bait worm")
+            fishing_system.calculate_hookup_chance = lambda *_args, **_kwargs: 1.0
+            fishing_system.resolve_struggle_outcome_data = lambda *_args, **_kwargs: {
+                "outcome": "line_break",
+                "pressure": 99.0,
+                "break_score": 1.0,
+                "landed_score": 0.0,
+                "lost_score": 0.0,
+            }
+            output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            ctx.cmd("pull")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "hooked":
+                raise AssertionError("Fishing scenario did not transition from nibble to hooked.")
+            if not any("jerks violently" in str(line).lower() for line in list(ctx.output_log[output_index:])):
+                raise AssertionError("Fishing scenario did not emit hooked-state feedback.")
+            assert_no_active_callback("_expire_nibble_window")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "hooked":
+                raise AssertionError("Fishing scenario let a stale nibble-timeout callback interrupt the hooked state.")
+            run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "broken" or bool(getattr(character.ndb, "is_fishing", False)):
+                raise AssertionError("Fishing scenario did not land in the broken-line state cleanly.")
+            broken_output = list(ctx.output_log[output_index:])
+            if not any("line snaps" in str(line).lower() or "tears the line" in str(line).lower() for line in broken_output):
+                raise AssertionError(f"Fishing scenario did not emit broken-line messaging: {broken_output}")
+            broken_cast_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            broken_cast_output = list(ctx.output_log[broken_cast_index:])
+            if not any("broken" in str(line).lower() for line in broken_cast_output):
+                raise AssertionError(f"Fishing scenario did not block fishing while the line was broken: {broken_cast_output}")
+            rig_index = len(ctx.output_log)
+            ctx.cmd("rig pole")
+            rig_output = list(ctx.output_log[rig_index:])
+            if not any("rig the pole" in str(line).lower() or "set the hook and line" in str(line).lower() for line in rig_output):
+                raise AssertionError(f"Fishing scenario did not let players rig a broken line back into working order: {rig_output}")
+            if not bool(getattr(getattr(pole, "db", None), "line_attached", False)):
+                raise AssertionError("Fishing scenario did not restore line attachment after rigging.")
+            ctx.cmd("bait worm")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "baited":
+                raise AssertionError("Fishing scenario did not let baiting reset the broken-line state.")
+
+            pole.db.line_tangled = True
+            untangle_index = len(ctx.output_log)
+            ctx.cmd("untangle pole")
+            untangle_output = list(ctx.output_log[untangle_index:])
+            if not any("line hangs clean" in str(line).lower() or "knots free" in str(line).lower() for line in untangle_output):
+                raise AssertionError(f"Fishing scenario did not let players clear a pole tangle manually: {untangle_output}")
+            if bool(getattr(getattr(pole, "db", None), "line_tangled", False)):
+                raise AssertionError("Fishing scenario did not clear the physical pole tangle state.")
+
+            outcome_queue = [
+                {"outcome": "still_fighting", "pressure": 40.0, "break_score": 0.1, "landed_score": 0.3, "lost_score": 0.2},
+                {"outcome": "landed", "pressure": 34.0, "break_score": 0.1, "landed_score": 0.6, "lost_score": 0.1},
+            ]
+
+            def next_outcome(*_args, **_kwargs):
+                if not outcome_queue:
+                    raise AssertionError("Fishing scenario exhausted deterministic struggle outcomes.")
+                return dict(outcome_queue.pop(0))
+
+            fishing_system.resolve_struggle_outcome_data = next_outcome
+
+            second_cast_output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            ctx.cmd("pull")
+            assert_no_active_callback("_expire_nibble_window")
+
+            already_fishing_output = list(ctx.output_log[second_cast_output_index:])
+            if not any("jerks violently" in str(line).lower() for line in already_fishing_output):
+                raise AssertionError("Fishing scenario did not reach the hooked state for the success path.")
+
+            repeat_gate_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            repeat_gate_output = list(ctx.output_log[repeat_gate_index:])
+            if not any("already fishing" in str(line).lower() for line in repeat_gate_output):
+                raise AssertionError(f"Fishing scenario did not gate repeated fish commands during an active hooked session: {repeat_gate_output}")
+
+            ctx.cmd("pull")
+            run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or session.state != "hooked" or int(getattr(session, "struggle_round", 0) or 0) < 1:
+                raise AssertionError("Fishing scenario did not keep the fish in a multi-round struggle.")
+
+            ctx.cmd("pull")
+            run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+            success_output = list(ctx.output_log[output_index:])
+            if getattr(character.ndb, "fishing_session", None) is not None:
+                raise AssertionError("Fishing scenario did not clear the session after a successful catch.")
+            if not any("you catch a silver trout" in str(line).lower() for line in success_output):
+                raise AssertionError(f"Fishing scenario did not land the hooked fish after the struggle loop: {success_output}")
+            caught_fish = [obj for obj in list(character.contents) if getattr(obj, "db", None) and getattr(obj.db, "fish_profile_key", None)]
+            stringed_fish = []
+            for item in list(character.contents):
+                if fishing_economy.is_fish_string(item):
+                    stringed_fish.extend([entry for entry in list(getattr(item, "contents", []) or []) if getattr(entry, "db", None) and getattr(entry.db, "fish_profile_key", None)])
+            all_caught_fish = list(caught_fish) + list(stringed_fish)
+            if not any(getattr(obj, "key", "") == "silver trout" for obj in all_caught_fish):
+                raise AssertionError("Fishing scenario did not place the landed fish into a valid carried or stringed location.")
+            landed_fish = next(obj for obj in all_caught_fish if getattr(obj, "key", "") == "silver trout")
+            if getattr(landed_fish, "location", None) != character:
+                landed_fish.move_to(character, quiet=True, use_destination=False)
+            if getattr(landed_fish.db, "fish_group", None) != "river 1" or int(getattr(landed_fish.db, "fish_difficulty", 0) or 0) <= 0:
+                raise AssertionError("Fishing scenario did not stamp fish-group metadata onto the landed fish.")
+            if int(getattr(landed_fish.db, "value", 0) or 0) <= 0 or int(getattr(landed_fish.db, "weight", 0) or 0) <= 0:
+                raise AssertionError("Fishing scenario did not stamp weight and value metadata onto the landed fish.")
+            if getattr(character.db, "fishing_leaderboard", None) is None:
+                raise AssertionError("Fishing scenario did not update the heaviest-fish leaderboard stub.")
+
+            look_index = len(ctx.output_log)
+            ctx.cmd("look silver trout")
+            look_output = list(ctx.output_log[look_index:])
+            if not any("weight:" in str(line).lower() and "value:" in str(line).lower() for line in look_output):
+                raise AssertionError(f"Fishing scenario did not expose fish metadata through look: {look_output}")
+
+            weigh_index = len(ctx.output_log)
+            ctx.cmd("weigh silver trout")
+            weigh_output = list(ctx.output_log[weigh_index:])
+            if not any("trophy:" in str(line).lower() and "weight:" in str(line).lower() for line in weigh_output):
+                raise AssertionError(f"Fishing scenario did not expose fish metadata through weigh: {weigh_output}")
+
+            fish_string = next(obj for obj in list(character.contents) if bool(getattr(getattr(obj, "db", None), "is_fish_string", False)))
+            stow_index = len(ctx.output_log)
+            ctx.cmd("stow silver trout in fish string")
+            if getattr(landed_fish, "location", None) != fish_string:
+                raise AssertionError("Fishing scenario did not allow stowing a fish onto a fish string.")
+            stow_output = list(ctx.output_log[stow_index:])
+            if not any("secure" in str(line).lower() or "stow" in str(line).lower() or "store" in str(line).lower() for line in stow_output):
+                raise AssertionError(f"Fishing scenario did not emit fish-string placement feedback: {stow_output}")
+
+            coins_before_sale = int(getattr(character.db, "coins", 0) or 0)
+            expected_single_sale = fishing_economy.get_fish_vendor_sale_value(landed_fish, vendor=supplier)
+            sale_index = len(ctx.output_log)
+            ctx.cmd("sell silver trout")
+            sale_output = list(ctx.output_log[sale_index:])
+            coins_after_sale = int(getattr(character.db, "coins", 0) or 0)
+            if coins_after_sale - coins_before_sale != expected_single_sale:
+                raise AssertionError(
+                    f"Fishing scenario did not pay the expected fish-buyer value for a single sale: expected={expected_single_sale}, got={coins_after_sale - coins_before_sale}"
+                )
+            if any(getattr(obj, "key", "") == "silver trout" for obj in list(fish_string.contents)):
+                raise AssertionError("Fishing scenario did not remove the sold fish from the fish string.")
+            if not any("old maren" in str(line).lower() or "i'll take it" in str(line).lower() or "fair catch" in str(line).lower() or "fine fish" in str(line).lower() for line in sale_output):
+                raise AssertionError(f"Fishing scenario did not emit fish-buyer sale feedback: {sale_output}")
+
+            knife = create_object("typeclasses.weapons.Weapon", key="skinning knife", location=character, home=character)
+            original_is_wielding = character.is_wielding
+            character.is_wielding = lambda name: str(name or "").strip().lower() == "skinning knife"
+            processed_fish = create_object("typeclasses.items.fish.Fish", key="silver trout", location=character, home=character)
+            processed_fish.db.fish_profile_key = "silver_trout"
+            processed_fish.db.fish_type = "silver trout"
+            processed_fish.db.fish_group = "river 1"
+            processed_fish.db.weight = 5
+            processed_fish.db.value = 16
+            fishing_economy.set_fish_economy_metadata(processed_fish, fishing_system.get_fish_profile("silver_trout"), rng=pyrandom.Random(5555))
+            processed_index = len(ctx.output_log)
+            ctx.cmd("skin silver trout")
+            processed_output = list(ctx.output_log[processed_index:])
+            processed_goods = [obj for obj in list(character.contents) if str(getattr(getattr(obj, "db", None), "item_type", "") or "") in {"fish_meat", "fish_skin"}]
+            if not processed_goods:
+                raise AssertionError(f"Fishing scenario did not turn a caught fish into processed goods: {processed_output}")
+            if any(obj == processed_fish for obj in list(character.contents)):
+                raise AssertionError("Fishing scenario did not consume the source fish during cleaning.")
+            if not any("saving meat and skin" in str(line).lower() or "finish with" in str(line).lower() for line in processed_output):
+                raise AssertionError(f"Fishing scenario did not emit fish-processing feedback: {processed_output}")
+
+            current_time["value"] += 5.0
+            processed_sale_before = int(getattr(character.db, "coins", 0) or 0)
+            expected_processed_sale = sum(fishing_economy.get_fish_vendor_sale_value(item, vendor=supplier) for item in processed_goods)
+            processed_sale_index = len(ctx.output_log)
+            ctx.cmd("sell fish")
+            processed_sale_output = list(ctx.output_log[processed_sale_index:])
+            processed_sale_after = int(getattr(character.db, "coins", 0) or 0)
+            if processed_sale_after - processed_sale_before != expected_processed_sale:
+                raise AssertionError(
+                    f"Fishing scenario did not pay the expected processed-fish sale value: expected={expected_processed_sale}, got={processed_sale_after - processed_sale_before}, output={processed_sale_output}"
+                )
+            if not any(
+                "salvage item" in str(line).lower() or "salvage items" in str(line).lower()
+                for line in processed_sale_output
+            ):
+                raise AssertionError(f"Fishing scenario did not include processed goods in bulk fish-buyer sales: {processed_sale_output}")
+            knife.delete()
+            character.is_wielding = original_is_wielding
+
+            character.db.profession = "empath"
+            character.db.empath_strain = 0
+            character.ndb.next_empath_strain_decay_at = 0.0
+            if character.get_empath_strain() != 0:
+                raise AssertionError("Fishing scenario did not start the empath strain check from zero.")
+            character.apply_fishing_empath_strain("hook", amount=4, fish_profile=fishing_system.get_fish_profile("silver_trout"))
+            if character.get_empath_strain() <= 0:
+                raise AssertionError("Fishing scenario did not add empath strain from fishing events.")
+            current_time["value"] += 25.0
+            ctx.direct(character.process_empath_tick)
+            if character.get_empath_strain() >= 4:
+                raise AssertionError("Fishing scenario did not decay empath strain over time.")
+            character.db.profession = "warrior"
+            character.db.empath_strain = 0
+
+            stone_profile = fishing_system.get_fish_profile("stone_perch")
+            trophy_profile = dict(stone_profile)
+            regular_fish = create_object("typeclasses.items.fish.Fish", key="stone perch", location=character, home=character)
+            regular_fish.db.fish_profile_key = "stone_perch"
+            regular_fish.db.fish_type = trophy_profile.get("display_name", "stone perch")
+            regular_fish.db.fish_group = trophy_profile.get("fish_group", "river 1")
+            regular_fish.db.weight = 5
+            regular_fish.db.value = 14
+            fishing_economy.set_fish_economy_metadata(regular_fish, trophy_profile, rng=pyrandom.Random(9999))
+
+            class TrophyRng:
+                def random(self):
+                    return 0.0
+
+                def uniform(self, low, high):
+                    return max(float(low), min(float(high), 2.0))
+
+            trophy_fish = create_object("typeclasses.items.fish.Fish", key="trophy stone perch", location=character, home=character)
+            trophy_fish.db.fish_profile_key = "stone_perch"
+            trophy_fish.db.fish_type = trophy_profile.get("display_name", "stone perch")
+            trophy_fish.db.fish_group = trophy_profile.get("fish_group", "river 1")
+            trophy_fish.db.weight = 5
+            trophy_fish.db.value = 14
+            fishing_economy.set_fish_economy_metadata(trophy_fish, trophy_profile, rng=TrophyRng())
+            if not bool(getattr(trophy_fish.db, "is_trophy", False)):
+                raise AssertionError("Fishing scenario did not flag a forced trophy fish.")
+            if int(getattr(trophy_fish.db, "value", 0) or 0) <= int(getattr(regular_fish.db, "value", 0) or 0):
+                raise AssertionError("Fishing scenario did not apply a trophy value multiplier.")
+
+            trophy_look = trophy_fish.return_appearance(character)
+            if "Trophy: Yes" not in str(trophy_look):
+                raise AssertionError(f"Fishing scenario did not expose trophy status in fish inspection text: {trophy_look}")
+
+            supplier.ndb.fish_buyer_throttle = {str(int(getattr(character, "id", 0) or 0)): current_time["value"] + float(fishing_economy.BUYER_RATE_LIMIT_SECONDS)}
+            blocked_sale_index = len(ctx.output_log)
+            ctx.cmd("sell trophy stone perch")
+            blocked_sale_output = list(ctx.output_log[blocked_sale_index:])
+            if not any("moment" in str(line).lower() or "wait" in str(line).lower() for line in blocked_sale_output):
+                raise AssertionError(f"Fishing scenario did not rate-limit rapid fish-buyer sales: {blocked_sale_output}")
+
+            current_time["value"] += 5.0
+            trophy_sale_before = int(getattr(character.db, "coins", 0) or 0)
+            expected_trophy_sale = fishing_economy.get_fish_vendor_sale_value(trophy_fish, vendor=supplier)
+            trophy_sale_index = len(ctx.output_log)
+            ctx.cmd("sell trophy stone perch")
+            trophy_sale_output = list(ctx.output_log[trophy_sale_index:])
+            trophy_sale_after = int(getattr(character.db, "coins", 0) or 0)
+            if trophy_sale_after - trophy_sale_before != expected_trophy_sale:
+                raise AssertionError(
+                    f"Fishing scenario did not pay the expected trophy sale value: expected={expected_trophy_sale}, got={trophy_sale_after - trophy_sale_before}"
+                )
+            if not any("remarkable catch" in str(line).lower() for line in trophy_sale_output):
+                raise AssertionError(f"Fishing scenario did not emit higher-tier buyer reaction text for a trophy fish: {trophy_sale_output}")
+
+            rock = create_object("typeclasses.objects.Object", key="rock", location=character, home=character)
+            rock.db.weight = 1
+            bulk_string_fish = create_object("typeclasses.items.fish.Fish", key="mud carp", location=character, home=character)
+            bulk_string_fish.db.fish_profile_key = "mud_carp"
+            bulk_string_fish.db.fish_type = "mud carp"
+            bulk_string_fish.db.fish_group = "river 1"
+            bulk_string_fish.db.weight = 4
+            bulk_string_fish.db.value = 9
+            fishing_economy.set_fish_economy_metadata(bulk_string_fish, fishing_system.get_fish_profile("mud_carp"), rng=pyrandom.Random(2222))
+            fish_string.store_item(bulk_string_fish)
+
+            bulk_inventory_fish = create_object("typeclasses.items.fish.Fish", key="silver trout", location=character, home=character)
+            bulk_inventory_fish.db.fish_profile_key = "silver_trout"
+            bulk_inventory_fish.db.fish_type = "silver trout"
+            bulk_inventory_fish.db.fish_group = "river 1"
+            bulk_inventory_fish.db.weight = 5
+            bulk_inventory_fish.db.value = 16
+            fishing_economy.set_fish_economy_metadata(bulk_inventory_fish, fishing_system.get_fish_profile("silver_trout"), rng=pyrandom.Random(3333))
+
+            current_time["value"] += float(fishing_economy.BUYER_RATE_LIMIT_SECONDS)
+            expected_bulk_sale = sum(fishing_economy.get_fish_vendor_sale_value(fish, vendor=supplier) for fish in (bulk_string_fish, bulk_inventory_fish, regular_fish))
+            bulk_sale_before = int(getattr(character.db, "coins", 0) or 0)
+            bulk_sale_index = len(ctx.output_log)
+            ctx.cmd("sell fish")
+            bulk_sale_output = list(ctx.output_log[bulk_sale_index:])
+            bulk_sale_after = int(getattr(character.db, "coins", 0) or 0)
+            if bulk_sale_after - bulk_sale_before != expected_bulk_sale:
+                raise AssertionError(
+                    f"Fishing scenario did not pay the expected bulk fish total: expected={expected_bulk_sale}, got={bulk_sale_after - bulk_sale_before}, output={bulk_sale_output}"
+                )
+            if getattr(rock, "location", None) != character:
+                raise AssertionError("Fishing scenario let sell fish consume non-fish inventory.")
+            if any(fishing_economy.is_fish_item(obj) for obj in list(character.contents)):
+                raise AssertionError("Fishing scenario did not clear carried fish after sell fish.")
+            if any(fishing_economy.is_fish_item(obj) for obj in list(fish_string.contents)):
+                raise AssertionError("Fishing scenario did not clear fish-string contents after sell fish.")
+            if not any("sell 3 fish" in str(line).lower() for line in bulk_sale_output):
+                raise AssertionError(f"Fishing scenario did not report the bulk fish summary: {bulk_sale_output}")
+
+            ctx.cmd("north")
+            no_vendor_sale_index = len(ctx.output_log)
+            ctx.cmd("sell fish")
+            no_vendor_sale_output = list(ctx.output_log[no_vendor_sale_index:])
+            if not any("no vendor here" in str(line).lower() or "no one here is buying fish" in str(line).lower() for line in no_vendor_sale_output):
+                raise AssertionError(f"Fishing scenario did not fail fish sales away from Old Maren: {no_vendor_sale_output}")
+            ctx.cmd("south")
+
+            fishing_system.resolve_struggle_outcome_data = lambda *_args, **_kwargs: {
+                "outcome": "landed",
+                "pressure": 32.0,
+                "break_score": 0.0,
+                "landed_score": 0.9,
+                "lost_score": 0.0,
+            }
+            ctx.cmd("bait worm")
+            auto_string_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            ctx.cmd("pull")
+            run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+            auto_string_output = list(ctx.output_log[auto_string_index:])
+            if not any("fish string" in str(line).lower() for line in auto_string_output):
+                raise AssertionError(f"Fishing scenario did not report auto-stringing on a successful catch: {auto_string_output}")
+            if not any(fishing_economy.is_fish_item(obj) for obj in list(fish_string.contents)):
+                raise AssertionError("Fishing scenario did not place a newly caught fish onto the existing fish string.")
+
+            for obj in list(fish_string.contents):
+                obj.delete()
+            fish_string.delete()
+            original_can_receive = fishing_economy.can_receive_caught_fish
+            fishing_economy.can_receive_caught_fish = lambda *_args, **_kwargs: False
+            try:
+                ctx.cmd("bait worm")
+                overflow_index = len(ctx.output_log)
+                ctx.cmd("fish")
+                run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+                ctx.cmd("pull")
+                run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+            finally:
+                fishing_economy.can_receive_caught_fish = original_can_receive
+            overflow_output = list(ctx.output_log[overflow_index:])
+            if not any("slips away" in str(line).lower() and "nowhere to secure" in str(line).lower() for line in overflow_output):
+                raise AssertionError(f"Fishing scenario did not emit clear overflow-loss messaging: {overflow_output}")
+
+            trace_entries = list(getattr(character.ndb, "fishing_debug_trace", []) or [])
+            trace_events = [str(entry.get("event", "") or "") for entry in trace_entries]
+            if "cast_started" not in trace_events or "hook_check" not in trace_events or "struggle_round" not in trace_events:
+                raise AssertionError(f"Fishing scenario did not record expected debug trace events: {trace_events}")
+
+            ctx.cmd("bait worm")
+            output_index = len(ctx.output_log)
+            ctx.cmd("fish")
+            if not bool(getattr(character.ndb, "is_fishing", False)):
+                raise AssertionError("Fishing scenario did not mark the cast as active before movement interruption.")
+            ctx.cmd("north")
+            interrupt_output = list(ctx.output_log[output_index:])
+            if not any("disturb the line" in str(line).lower() for line in interrupt_output):
+                raise AssertionError(f"Fishing scenario did not report movement interruption: {interrupt_output}")
+            if getattr(character.ndb, "fishing_session", None) is not None:
+                raise AssertionError("Fishing scenario did not clear the session on movement interruption.")
+            if bool(getattr(character.ndb, "is_fishing", False)):
+                raise AssertionError("Fishing scenario did not clear active fishing state on movement interruption.")
+            assert_no_active_callback("_begin_nibble")
+            if getattr(character.ndb, "fishing_session", None) is not None:
+                raise AssertionError("Fishing scenario let a stale movement-interrupted callback recreate fishing state.")
+
+            ctx.cmd("bait worm")
+            ctx.cmd("south")
+            ctx.cmd("fish")
+            session = getattr(character.ndb, "fishing_session", None)
+            if session is None or str(getattr(session, "state", "") or "") != "cast":
+                raise AssertionError("Fishing scenario did not start an active cast before unpuppet cleanup validation.")
+            ctx.direct(character.at_post_unpuppet)
+            if getattr(character.ndb, "fishing_session", None) is not None or bool(getattr(character.ndb, "is_fishing", False)):
+                raise AssertionError("Fishing scenario did not clear fishing state on unpuppet cleanup.")
+            assert_no_active_callback("_begin_nibble")
+            if getattr(character.ndb, "fishing_session", None) is not None:
+                raise AssertionError("Fishing scenario let a stale unpuppet callback recreate fishing state.")
+        finally:
+            fishing_system.delay = original_delay
+            fishing_system.time.time = original_time
+            fishing_system.random.random = original_random
+            fishing_system.random.choice = original_choice
+            fishing_system.random.randint = original_randint
+            fishing_system.choose_weighted_fish_profile = original_choose_weighted
+            fishing_system.calculate_nibble_chance = original_nibble_chance
+            fishing_system.calculate_hookup_chance = original_hookup_chance
+            fishing_system.calculate_timeout_tangle_chance = original_timeout_tangle
+            fishing_system.resolve_struggle_outcome_data = original_resolve_struggle
+            fishing_economy.time.time = original_fishing_economy_time
+
+        ctx.assert_invariant("character_exists")
+        after_pool = float(getattr(character.exp_skills.get("outdoorsmanship"), "pool", 0.0) or 0.0)
+        if after_pool <= before_pool:
+            raise AssertionError(f"Fishing scenario did not grant Outdoorsmanship XP across the mechanics loop: before={before_pool}, after={after_pool}")
+        after_mechanical_pool = float(getattr(character.exp_skills.get("mechanical_lore"), "pool", 0.0) or 0.0)
+        if after_mechanical_pool <= before_mechanical_pool:
+            raise AssertionError(
+                f"Fishing scenario did not grant Mechanical Lore XP on bait usage: before={before_mechanical_pool}, after={after_mechanical_pool}"
+            )
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "outdoorsmanship_pool_before": before_pool,
+            "outdoorsmanship_pool_after": after_pool,
+            "mechanical_lore_pool_before": before_mechanical_pool,
+            "mechanical_lore_pool_after": after_mechanical_pool,
+            "coins": int(getattr(character.db, "coins", 0) or 0),
+            "inventory": [getattr(obj, "key", "") for obj in list(character.contents)],
+            "final_room": getattr(getattr(character, "location", None), "key", None),
+            "debug_trace_events": [str(entry.get("event", "") or "") for entry in list(getattr(character.ndb, "fishing_debug_trace", []) or [])],
+            "scheduled_callbacks_remaining": len(scheduled),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="fishing-vertical-slice",
+        scenario_metadata=getattr(run_fishing_vertical_slice_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "fishing-junk-event-slice",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Fishing junk and event validation should report lag telemetry without masking weighted outcome or safe-zone regressions.",
+    },
+)
+def run_fishing_junk_event_slice_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import random as pyrandom
+
+        from evennia.utils.create import create_object
+
+        import world.systems.fishing as fishing_system
+        import world.systems.fishing_economy as fishing_economy
+
+        water_room = ctx.harness.create_test_room(key="TEST_FISHING_JUNK_ROOM")
+        water_room.db.fishable = True
+        water_room.db.fish_group = "River 1"
+        water_room.db.safe_zone = True
+
+        character = ctx.harness.create_test_character(room=water_room, key="TEST_FISHING_JUNK_CHAR")
+        ctx.character = character
+        ctx.room = water_room
+        character.db.stats = {"reflex": 14, "discipline": 14, "agility": 14}
+        character.learn_skill("outdoorsmanship", {"rank": 70, "mindstate": 0})
+        character.learn_skill("skinning", {"rank": 70, "mindstate": 0})
+
+        supplier = create_object("typeclasses.fishing_supplier.FishingSupplier", key="Old Maren", location=water_room, home=water_room)
+        create_object("typeclasses.weigh_station.WeighStation", key="dock scale", location=water_room, home=water_room)
+
+        current_time = {"value": 1000.0}
+        scheduled = []
+        original_delay = fishing_system.delay
+        original_time = fishing_system.time.time
+        original_fishing_economy_time = fishing_economy.time.time
+        original_roll_outcome = fishing_system.roll_fishing_outcome
+
+        class FakeDelayedTask:
+            def __init__(self):
+                self.cancelled = False
+
+            def cancel(self):
+                self.cancelled = True
+
+        def fake_delay(seconds, callback, *cb_args, **cb_kwargs):
+            task = FakeDelayedTask()
+            scheduled.append(
+                {
+                    "seconds": float(seconds),
+                    "callback": callback,
+                    "callback_name": getattr(callback, "__name__", "callback"),
+                    "args": cb_args,
+                    "kwargs": cb_kwargs,
+                    "task": task,
+                }
+            )
+            return task
+
+        def run_next(expected_seconds=None, callback_name=None, min_seconds=None, max_seconds=None):
+            for index, event in enumerate(list(scheduled)):
+                task = event.get("task")
+                if task is not None and bool(getattr(task, "cancelled", False)):
+                    continue
+                seconds = float(event.get("seconds", 0.0) or 0.0)
+                if callback_name and str(event.get("callback_name", "") or "") != str(callback_name):
+                    continue
+                if expected_seconds is not None and abs(seconds - float(expected_seconds)) > 0.01:
+                    continue
+                if min_seconds is not None and seconds < float(min_seconds):
+                    continue
+                if max_seconds is not None and seconds > float(max_seconds):
+                    continue
+                scheduled.pop(index)
+                current_time["value"] += seconds
+                ctx.direct(event["callback"], *(event.get("args") or ()), **(event.get("kwargs") or {}))
+                return seconds
+            raise AssertionError(
+                f"Fishing junk/event slice expected callback={callback_name or 'any'} seconds={expected_seconds} range=({min_seconds}, {max_seconds}), but found {scheduled}."
+            )
+
+        junk_item = None
+        try:
+            fishing_system.delay = fake_delay
+            fishing_system.time.time = lambda: current_time["value"]
+            fishing_economy.time.time = lambda: current_time["value"]
+
+            river_one_common = {
+                fishing_system.choose_weighted_junk_profile("River 1", "common", rng=pyrandom.Random(seed)).get("group")
+                for seed in range(1, 8)
+            }
+            river_two_common = {
+                fishing_system.choose_weighted_junk_profile("River 2", "common", rng=pyrandom.Random(seed)).get("group")
+                for seed in range(10, 17)
+            }
+            ocean_interesting = {
+                fishing_system.choose_weighted_junk_profile("Ocean", "interesting", rng=pyrandom.Random(seed)).get("group")
+                for seed in range(20, 27)
+            }
+            event_profile = fishing_system.choose_weighted_junk_profile("River 1", "event", rng=pyrandom.Random(99))
+            if river_one_common != {"River 1"} or river_two_common != {"River 2"} or ocean_interesting != {"Ocean"}:
+                raise AssertionError("Fishing junk tables leaked entries across fish-group boundaries.")
+            if str(event_profile.get("key", "") or "") != "violent_tug":
+                raise AssertionError("Fishing event table did not produce the violent tug profile.")
+
+            ctx.cmd("ask maren for gear")
+            fishing_system.roll_fishing_outcome = lambda room_or_group, rng=None: {
+                "category": "junk",
+                "profile": fishing_system.choose_weighted_junk_profile(room_or_group, "interesting", rng=pyrandom.Random(5)),
+            }
+            coins_before_junk = int(getattr(character.db, "coins", 0) or 0)
+            ctx.cmd("bait worm")
+            ctx.cmd("fish")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            session = fishing_system.get_fishing_session(character, create=False)
+            if session is None or session.state != "junk":
+                raise AssertionError("Fishing junk slice did not enter the junk resolution state.")
+            junk_output_index = len(ctx.output_log)
+            ctx.cmd("pull")
+            junk_output = " ".join(str(line) for line in list(ctx.output_log)[junk_output_index:])
+            if "something unexpected" not in junk_output.lower():
+                raise AssertionError("Fishing junk slice did not show the valuable-junk pull message.")
+            junk_item = next((obj for obj in list(character.contents) if fishing_economy.is_junk_item(obj)), None)
+            if junk_item is None:
+                raise AssertionError("Fishing junk slice did not create a junk item on pull.")
+            if int(getattr(junk_item.db, "value", 0) or 0) < 8:
+                raise AssertionError("Fishing junk slice valuable salvage value was lower than expected.")
+            current_time["value"] += 1.0
+            sell_redirect_index = len(ctx.output_log)
+            ctx.cmd(f"sell {junk_item.key} to maren")
+            sell_redirect_output = list(ctx.output_log[sell_redirect_index:])
+            if int(getattr(character.db, "coins", 0) or 0) <= coins_before_junk:
+                raise AssertionError("Fishing junk slice did not let the supplier buy junk.")
+            if not any("lucky pull" in str(line).lower() or "not much" in str(line).lower() for line in sell_redirect_output):
+                raise AssertionError(f"Fishing junk slice did not support sell <item> to <npc> syntax cleanly: {sell_redirect_output}")
+
+            pole = fishing_system.get_fishing_pole(character)
+            fishing_system.roll_fishing_outcome = lambda room_or_group, rng=None: {
+                "category": "event",
+                "profile": fishing_system.choose_weighted_junk_profile(room_or_group, "event", rng=pyrandom.Random(7)),
+            }
+            prompt = fishing_system.get_event_choice_prompt(event_profile)
+            if "pull harder" not in str(prompt.get("prompt", "") or "").lower():
+                raise AssertionError("Fishing junk slice did not expose the future event choice hook prompt.")
+            npcs_before = len([obj for obj in list(water_room.contents) if bool(getattr(getattr(obj, "db", None), "is_npc", False))])
+            ctx.cmd("bait worm")
+            ctx.cmd("fish")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            session = fishing_system.get_fishing_session(character, create=False)
+            if session is None or session.state != "event":
+                raise AssertionError("Fishing junk slice did not enter the violent tug event state.")
+            ctx.cmd("pull")
+            npcs_after = len([obj for obj in list(water_room.contents) if bool(getattr(getattr(obj, "db", None), "is_npc", False))])
+            if npcs_after != npcs_before:
+                raise AssertionError("Fishing junk slice spawned an uncontrolled NPC in a safe-zone event resolution.")
+            if pole is None or bool(getattr(pole.db, "line_attached", True)):
+                raise AssertionError("Fishing junk slice did not break the line on violent tug resolution.")
+            if fishing_system.get_fishing_session(character, create=False) is not None:
+                raise AssertionError("Fishing junk slice left a stale fishing session after resolving the event.")
+            repair_output_index = len(ctx.output_log)
+            ctx.cmd("rig pole")
+            repair_output = " ".join(str(line) for line in list(ctx.output_log)[repair_output_index:])
+            if "rig" not in repair_output.lower():
+                raise AssertionError("Fishing junk slice did not allow the pole to be repaired after a violent tug event.")
+        finally:
+            fishing_system.delay = original_delay
+            fishing_system.time.time = original_time
+            fishing_economy.time.time = original_fishing_economy_time
+            fishing_system.roll_fishing_outcome = original_roll_outcome
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "junk_vendor_accepts": bool(fishing_economy.is_fish_trade_item(junk_item)) if junk_item else False,
+            "event_safe_zone": bool(getattr(getattr(water_room, "db", None), "safe_zone", False)),
+            "scheduled_callbacks_remaining": len(scheduled),
+            "supplier": getattr(supplier, "key", None),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="fishing-junk-event-slice",
+        scenario_metadata=getattr(run_fishing_junk_event_slice_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "fishing-simulation-100",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "The long-form fishing balance simulation should emit lag telemetry and a report even on slower environments.",
+    },
+)
+def run_fishing_simulation_100_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import builtins
+
+        from evennia.utils.create import create_object
+
+        import typeclasses.characters as character_typeclasses
+        import world.systems.fishing as fishing_system
+        import world.systems.fishing_economy as fishing_economy
+
+        report_path = Path(__file__).resolve().parent / "docs" / "systems" / "fishingSimulationReport.md"
+
+        def skill_snapshot(character, skill_name):
+            skill = character.exp_skills.get(skill_name)
+            if skill is None:
+                return {"pool": 0.0, "mindstate": 0}
+            return {
+                "pool": float(getattr(skill, "pool", 0.0) or 0.0),
+                "mindstate": int(getattr(skill, "mindstate", 0) or 0),
+            }
+
+        def fish_string_contents(character):
+            fish_string = fishing_economy.find_fish_string(character)
+            return fish_string, list(getattr(fish_string, "contents", []) or []) if fish_string else []
+
+        def category_percentages(summary):
+            total = max(1, int(summary.get("runs", 0) or 0))
+            return {
+                "fish": (float(summary["category_counts"].get("fish", 0)) / float(total)) * 100.0,
+                "junk": (float(summary["junk_tiers"].get("common", 0)) / float(total)) * 100.0,
+                "valuable_junk": (float(summary["junk_tiers"].get("interesting", 0)) / float(total)) * 100.0,
+                "event": (float(summary["category_counts"].get("event", 0)) / float(total)) * 100.0,
+            }
+
+        def run_pass(pass_name, run_count):
+            room = ctx.harness.create_test_room(key=f"TEST_FISHING_SIM_ROOM_{pass_name}")
+            room.db.fishable = True
+            room.db.fish_group = "River 1"
+            room.db.safe_zone = True
+
+            character = ctx.harness.create_test_character(room=room, key=f"TEST_FISHING_SIM_{pass_name}")
+            ctx.character = character
+            ctx.room = room
+            character.ndb.fishing_debug = True
+            character.ndb.fishing_debug_trace = []
+            character.db.stats = {"reflex": 18, "discipline": 18, "agility": 16}
+            character.set_profession("Ranger")
+            character.learn_skill("outdoorsmanship", {"rank": 85, "mindstate": 0})
+            character.learn_skill("skinning", {"rank": 75, "mindstate": 0})
+            character.learn_skill("trading", {"rank": 45, "mindstate": 0})
+            character.learn_skill("scholarship", {"rank": 30, "mindstate": 0})
+            character.learn_skill("mechanical_lore", {"rank": 15, "mindstate": 0})
+
+            supplier = create_object("typeclasses.fishing_supplier.FishingSupplier", key="Old Maren", location=room, home=room)
+            create_object("typeclasses.weigh_station.WeighStation", key=f"dock scale {pass_name}", location=room, home=room)
+            create_object("typeclasses.weapons.Weapon", key="skinning knife", location=character, home=character)
+            character.is_wielding = lambda weapon_name: str(weapon_name or "").strip().lower() == "skinning knife"
+
+            current_time = {"value": 2000.0}
+            scheduled = []
+            original_delay = fishing_system.delay
+            original_time = fishing_system.time.time
+            original_fishing_economy_time = fishing_economy.time.time
+            original_hookup = fishing_system.calculate_hookup_chance
+            original_timeout_tangle = fishing_system.calculate_timeout_tangle_chance
+            original_resolve_struggle = fishing_system.resolve_struggle_outcome_data
+            original_run_contest = character_typeclasses.run_contest
+            original_print = builtins.print
+
+            class FakeDelayedTask:
+                def __init__(self):
+                    self.cancelled = False
+
+                def cancel(self):
+                    self.cancelled = True
+
+            def fake_delay(seconds, callback, *cb_args, **cb_kwargs):
+                task = FakeDelayedTask()
+                scheduled.append(
+                    {
+                        "seconds": float(seconds),
+                        "callback": callback,
+                        "callback_name": getattr(callback, "__name__", "callback"),
+                        "args": cb_args,
+                        "kwargs": cb_kwargs,
+                        "task": task,
+                    }
+                )
+                return task
+
+            def run_next(expected_seconds=None, callback_name=None, min_seconds=None, max_seconds=None):
+                for index, event in enumerate(list(scheduled)):
+                    task = event.get("task")
+                    if task is not None and bool(getattr(task, "cancelled", False)):
+                        continue
+                    seconds = float(event.get("seconds", 0.0) or 0.0)
+                    if callback_name and str(event.get("callback_name", "") or "") != str(callback_name):
+                        continue
+                    if expected_seconds is not None and abs(seconds - float(expected_seconds)) > 0.01:
+                        continue
+                    if min_seconds is not None and seconds < float(min_seconds):
+                        continue
+                    if max_seconds is not None and seconds > float(max_seconds):
+                        continue
+                    scheduled.pop(index)
+                    current_time["value"] += seconds
+                    ctx.direct(event["callback"], *(event.get("args") or ()), **(event.get("kwargs") or {}))
+                    return seconds
+                raise AssertionError(
+                    f"Fishing simulation expected callback={callback_name or 'any'} seconds={expected_seconds} range=({min_seconds}, {max_seconds}), but found {scheduled}."
+                )
+
+            summary = {
+                "pass_name": pass_name,
+                "runs": int(run_count),
+                "category_counts": Counter(),
+                "junk_tiers": Counter(),
+                "fish_counts": Counter(),
+                "junk_counts": Counter(),
+                "failure_counts": Counter(),
+                "line_breaks": 0,
+                "violent_tugs": 0,
+                "gear_damage_events": 0,
+                "sales_total": 0,
+                "sales_by_category": Counter(),
+                "outdoorsmanship_pool_gain": 0.0,
+                "skinning_pool_gain": 0.0,
+                "mindstate_start": {
+                    "outdoorsmanship": skill_snapshot(character, "outdoorsmanship")["mindstate"],
+                    "skinning": skill_snapshot(character, "skinning")["mindstate"],
+                },
+                "bite_delays": [],
+                "run_records": [],
+            }
+
+            try:
+                fishing_system.delay = fake_delay
+                fishing_system.time.time = lambda: current_time["value"]
+                fishing_economy.time.time = lambda: current_time["value"]
+                fishing_system.calculate_hookup_chance = lambda *a, **kw: 1.0
+                fishing_system.calculate_timeout_tangle_chance = lambda *a, **kw: 0.0
+                fishing_system.resolve_struggle_outcome_data = lambda actor, session, fish_profile, bait_item, rng=None: {
+                    "outcome": "landed",
+                    "pressure": 0.0,
+                    "landed_score": 1.0,
+                    "lost_score": 0.0,
+                    "break_score": 0.0,
+                }
+                character_typeclasses.run_contest = lambda *a, **kw: {"outcome": "success"}
+                builtins.print = lambda *a, **kw: None
+
+                for run_index in range(1, run_count + 1):
+                    outdoors_before = skill_snapshot(character, "outdoorsmanship")
+                    skinning_before = skill_snapshot(character, "skinning")
+                    coins_before = int(getattr(character.db, "coins", 0) or 0)
+                    record = {
+                        "run": run_index,
+                        "outcome": None,
+                        "fish": None,
+                        "junk": None,
+                        "sale_value": 0,
+                        "failure": None,
+                        "line_break": False,
+                        "violent_tug": False,
+                    }
+
+                    fishing_system.reset_fishing_session(character)
+                    ctx.cmd("ask maren for gear")
+                    pole = fishing_system.get_fishing_pole(character)
+                    if pole is not None:
+                        pole.db.line_attached = True
+                        pole.db.hook_attached = True
+                        pole.db.line_tangled = False
+                    ctx.cmd("rig pole")
+                    ctx.cmd("bait worm")
+                    ctx.cmd("fish")
+                    bite_delay = run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+                    summary["bite_delays"].append(float(bite_delay))
+                    record["bite_delay"] = float(bite_delay)
+
+                    session = fishing_system.get_fishing_session(character, create=False)
+                    if session is None:
+                        record["failure"] = "missing_session"
+                        summary["failure_counts"]["missing_session"] += 1
+                        summary["run_records"].append(record)
+                        scheduled.clear()
+                        continue
+
+                    category = str(getattr(session, "outcome_type", session.state) or session.state)
+                    if category == "junk":
+                        record["outcome"] = "junk"
+                        ctx.cmd("pull")
+                        junk_item = next((obj for obj in list(character.contents) if fishing_economy.is_junk_item(obj)), None)
+                        if junk_item is None:
+                            record["failure"] = "missing_junk"
+                            summary["failure_counts"]["missing_junk"] += 1
+                        else:
+                            tier = str(getattr(junk_item.db, "junk_tier", "common") or "common")
+                            record["junk"] = str(getattr(junk_item, "key", "junk") or "junk")
+                            summary["category_counts"]["junk"] += 1
+                            summary["junk_tiers"][tier] += 1
+                            summary["junk_counts"][record["junk"]] += 1
+                            current_time["value"] += 1.0
+                            ctx.cmd(f"sell {junk_item.key}")
+                    elif category == "event":
+                        record["outcome"] = "event"
+                        summary["category_counts"]["event"] += 1
+                        summary["violent_tugs"] += 1
+                        pole = fishing_system.get_fishing_pole(character)
+                        ctx.cmd("pull")
+                        line_attached = bool(getattr(getattr(pole, "db", None), "line_attached", False)) if pole is not None else False
+                        if not line_attached:
+                            record["line_break"] = True
+                            summary["line_breaks"] += 1
+                            summary["gear_damage_events"] += 1
+                        record["violent_tug"] = True
+                    else:
+                        record["outcome"] = "fish"
+                        ctx.cmd("pull")
+                        run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+                        fish_string, string_contents = fish_string_contents(character)
+                        fish_item = next((obj for obj in list(character.contents) if fishing_economy.is_fish_item(obj)), None)
+                        if fish_item is None and string_contents:
+                            fish_item = string_contents[0]
+                            ctx.cmd(f"get {fish_item.key} from fish string")
+                        if fish_item is None:
+                            record["failure"] = "missing_fish"
+                            summary["failure_counts"]["missing_fish"] += 1
+                        else:
+                            species = str(getattr(fish_item, "key", "fish") or "fish")
+                            record["fish"] = species
+                            summary["category_counts"]["fish"] += 1
+                            summary["fish_counts"][species] += 1
+                            ctx.cmd(f"skin {species}")
+                            current_time["value"] += 1.0
+                            ctx.cmd("sell fish")
+
+                    record["sale_value"] = int(getattr(character.db, "coins", 0) or 0) - coins_before
+                    if record["sale_value"] > 0:
+                        summary["sales_total"] += record["sale_value"]
+                        summary["sales_by_category"][record["outcome"] or "unknown"] += record["sale_value"]
+
+                    outdoors_after = skill_snapshot(character, "outdoorsmanship")
+                    skinning_after = skill_snapshot(character, "skinning")
+                    summary["outdoorsmanship_pool_gain"] += outdoors_after["pool"] - outdoors_before["pool"]
+                    summary["skinning_pool_gain"] += skinning_after["pool"] - skinning_before["pool"]
+                    summary["run_records"].append(record)
+                    scheduled.clear()
+                    current_time["value"] += 0.5
+
+                summary["mindstate_end"] = {
+                    "outdoorsmanship": skill_snapshot(character, "outdoorsmanship")["mindstate"],
+                    "skinning": skill_snapshot(character, "skinning")["mindstate"],
+                }
+                summary["coins"] = int(getattr(character.db, "coins", 0) or 0)
+                summary["scheduled_callbacks_remaining"] = len(scheduled)
+                summary["supplier"] = getattr(supplier, "key", None)
+            finally:
+                fishing_system.delay = original_delay
+                fishing_system.time.time = original_time
+                fishing_economy.time.time = original_fishing_economy_time
+                fishing_system.calculate_hookup_chance = original_hookup
+                fishing_system.calculate_timeout_tangle_chance = original_timeout_tangle
+                fishing_system.resolve_struggle_outcome_data = original_resolve_struggle
+                character_typeclasses.run_contest = original_run_contest
+                builtins.print = original_print
+
+            return summary
+
+        pass_one = run_pass("A", 100)
+        pass_two = run_pass("B", 100)
+        expected = {"fish": 64.0, "junk": 28.0, "valuable_junk": 6.0, "event": 2.0}
+        pass_one_pct = category_percentages(pass_one)
+        pass_two_pct = category_percentages(pass_two)
+        average_pct = {
+            key: (pass_one_pct[key] + pass_two_pct[key]) / 2.0
+            for key in ["fish", "junk", "valuable_junk", "event"]
+        }
+        variance = {
+            key: abs(pass_one_pct[key] - pass_two_pct[key])
+            for key in ["fish", "junk", "valuable_junk", "event"]
+        }
+        combined_bite_delays = list(pass_one.get("bite_delays", []) or []) + list(pass_two.get("bite_delays", []) or [])
+        bite_timing = {
+            "avg": (sum(combined_bite_delays) / len(combined_bite_delays)) if combined_bite_delays else 0.0,
+            "min": min(combined_bite_delays) if combined_bite_delays else 0.0,
+            "max": max(combined_bite_delays) if combined_bite_delays else 0.0,
+        }
+
+        junk_issue = "No."
+        if average_pct["junk"] > 35.0:
+            junk_issue = "Yes. Common junk is showing up too often."
+        elif average_pct["junk"] < 22.0:
+            junk_issue = "Yes. Common junk is too rare to feel present."
+
+        valuable_issue = "No."
+        if average_pct["valuable_junk"] > 9.0:
+            valuable_issue = "Yes. Valuable junk is too generous."
+        elif average_pct["valuable_junk"] < 3.0:
+            valuable_issue = "Yes. Valuable junk is too rare to notice."
+
+        event_issue = "Yes."
+        if average_pct["event"] > 4.0:
+            event_issue = "No. Violent tug events are too common."
+        elif average_pct["event"] < 1.0:
+            event_issue = "No. Violent tug events are too rare to register."
+
+        report_lines = [
+            "# Fishing Simulation Report",
+            "",
+            f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}",
+            "Scenario: fishing-simulation-100",
+            "Runs per pass: 100",
+            "Passes: 2",
+            "Fish group: River 1",
+            "Location safety: safe-zone enabled",
+            "",
+            "## Expected Distribution",
+            f"- Fish: {expected['fish']:.1f}%",
+            f"- Common junk: {expected['junk']:.1f}%",
+            f"- Valuable junk: {expected['valuable_junk']:.1f}%",
+            f"- Event: {expected['event']:.1f}%",
+            "",
+            "## Pass A",
+            f"- Fish: {pass_one['category_counts'].get('fish', 0)} ({pass_one_pct['fish']:.1f}%)",
+            f"- Common junk: {pass_one['junk_tiers'].get('common', 0)} ({pass_one_pct['junk']:.1f}%)",
+            f"- Valuable junk: {pass_one['junk_tiers'].get('interesting', 0)} ({pass_one_pct['valuable_junk']:.1f}%)",
+            f"- Event: {pass_one['category_counts'].get('event', 0)} ({pass_one_pct['event']:.1f}%)",
+            f"- Total value sold: {pass_one['sales_total']} coins",
+            f"- Average sale per run: {pass_one['sales_total'] / max(1, pass_one['runs']):.2f} coins",
+            f"- Outdoorsmanship pool gain: {pass_one['outdoorsmanship_pool_gain']:.2f}",
+            f"- Skinning pool gain: {pass_one['skinning_pool_gain']:.2f}",
+            f"- Mindstates: outdoorsmanship {pass_one['mindstate_start']['outdoorsmanship']} -> {pass_one['mindstate_end']['outdoorsmanship']}, skinning {pass_one['mindstate_start']['skinning']} -> {pass_one['mindstate_end']['skinning']}",
+            f"- Violent tug line breaks: {pass_one['line_breaks']}",
+            f"- Failure count: {sum(pass_one['failure_counts'].values())}",
+            "",
+            "## Pass B",
+            f"- Fish: {pass_two['category_counts'].get('fish', 0)} ({pass_two_pct['fish']:.1f}%)",
+            f"- Common junk: {pass_two['junk_tiers'].get('common', 0)} ({pass_two_pct['junk']:.1f}%)",
+            f"- Valuable junk: {pass_two['junk_tiers'].get('interesting', 0)} ({pass_two_pct['valuable_junk']:.1f}%)",
+            f"- Event: {pass_two['category_counts'].get('event', 0)} ({pass_two_pct['event']:.1f}%)",
+            f"- Total value sold: {pass_two['sales_total']} coins",
+            f"- Average sale per run: {pass_two['sales_total'] / max(1, pass_two['runs']):.2f} coins",
+            f"- Outdoorsmanship pool gain: {pass_two['outdoorsmanship_pool_gain']:.2f}",
+            f"- Skinning pool gain: {pass_two['skinning_pool_gain']:.2f}",
+            f"- Mindstates: outdoorsmanship {pass_two['mindstate_start']['outdoorsmanship']} -> {pass_two['mindstate_end']['outdoorsmanship']}, skinning {pass_two['mindstate_start']['skinning']} -> {pass_two['mindstate_end']['skinning']}",
+            f"- Violent tug line breaks: {pass_two['line_breaks']}",
+            f"- Failure count: {sum(pass_two['failure_counts'].values())}",
+            "",
+            "## Catch Breakdown",
+            f"- Pass A fish: {dict(pass_one['fish_counts'])}",
+            f"- Pass A junk: {dict(pass_one['junk_counts'])}",
+            f"- Pass B fish: {dict(pass_two['fish_counts'])}",
+            f"- Pass B junk: {dict(pass_two['junk_counts'])}",
+            "",
+            "## Distribution Comparison",
+            f"- Fish actual vs expected: {average_pct['fish']:.1f}% vs {expected['fish']:.1f}%",
+            f"- Common junk actual vs expected: {average_pct['junk']:.1f}% vs {expected['junk']:.1f}%",
+            f"- Valuable junk actual vs expected: {average_pct['valuable_junk']:.1f}% vs {expected['valuable_junk']:.1f}%",
+            f"- Event actual vs expected: {average_pct['event']:.1f}% vs {expected['event']:.1f}%",
+            f"- Pass variance: {variance}",
+            "",
+            "## Bite Timing",
+            f"- Avg: {bite_timing['avg']:.1f}s",
+            f"- Min: {bite_timing['min']:.1f}s",
+            f"- Max: {bite_timing['max']:.1f}s",
+            "",
+            "## Balance Answers",
+            f"- Is junk too frequent? {junk_issue}",
+            f"- Are valuable junk items too generous? {valuable_issue}",
+            f"- Are violent tug events noticeable but not annoying? {event_issue}",
+            f"- Stable across rerun? {'Yes.' if max(variance.values()) <= 10.0 else 'No. Variance exceeded the acceptable 10% band.'}",
+            "",
+            "## Safety",
+            f"- Total violent tug events: {pass_one['violent_tugs'] + pass_two['violent_tugs']}",
+            f"- Total line breaks: {pass_one['line_breaks'] + pass_two['line_breaks']}",
+            f"- Total gear damage events: {pass_one['gear_damage_events'] + pass_two['gear_damage_events']}",
+            f"- Total failures: {sum(pass_one['failure_counts'].values()) + sum(pass_two['failure_counts'].values())}",
+        ]
+        report_path.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "pass_one": pass_one,
+            "pass_two": pass_two,
+            "expected_distribution": expected,
+            "average_distribution": average_pct,
+            "bite_timing": bite_timing,
+            "variance": variance,
+            "report_path": str(report_path),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="fishing-simulation-100",
+        scenario_metadata=getattr(run_fishing_simulation_100_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "fishing-help",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Help output verification should still emit lag telemetry without turning formatting checks into environment failures.",
+    },
+)
+def run_fishing_help_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        import inspect
+
+        from evennia.utils.create import create_object
+
+        from commands.cmd_ask import CmdAsk
+        from commands.cmd_fishing import CmdBait, CmdFish, CmdPull, CmdRig, CmdUntangle
+        from commands.cmd_help import CmdHelp
+        from commands.cmd_inventory import CmdInventory
+        from commands.cmd_sell import CmdSell
+        from commands.cmd_skin import CmdSkin
+        import world.systems.fishing as fishing_system
+        import world.systems.fishing_economy as fishing_economy
+        from world.help_entries import HELP_ENTRY_DICTS
+
+        room = ctx.harness.create_test_room(key="TEST_FISHING_HELP_ROOM")
+        room.db.fishable = True
+        room.db.fish_group = "River 1"
+        character = ctx.harness.create_test_character(room=room, key="TEST_FISHING_HELP_CHAR")
+        ctx.character = character
+        ctx.room = room
+
+        supplier = create_object("typeclasses.fishing_supplier.FishingSupplier", key="Old Maren", location=room, home=room)
+
+        fishing_entry = next((entry for entry in list(HELP_ENTRY_DICTS or []) if str(entry.get("key", "") or "").strip().lower() == "fishing"), None)
+        if not fishing_entry:
+            raise AssertionError("Fishing help entry was not registered in HELP_ENTRY_DICTS.")
+        fishing_help_output = str(fishing_entry.get("text", "") or "")
+        if "fishing is a survival activity" not in fishing_help_output.lower():
+            raise AssertionError(f"Fishing help entry did not include the expected overview text: {fishing_help_output}")
+        for required_line in [
+            "ask maren for gear",
+            "rig pole",
+            "untangle pole",
+            "bait <item>",
+            "fish",
+            "pull",
+            "inventory",
+            "skin <fish>",
+            "sell <item>",
+            "sell fish",
+        ]:
+            if required_line not in fishing_help_output.lower():
+                raise AssertionError(f"Fishing help omitted expected command syntax '{required_line}': {fishing_help_output}")
+
+        help_func_source = inspect.getsource(CmdHelp.func)
+        if 'query == "fish"' not in help_func_source or 'self.args = "fishing"' not in help_func_source:
+            raise AssertionError("CmdHelp.func does not redirect 'help fish' to the fishing guide.")
+
+        survival_entry = next((entry for entry in list(HELP_ENTRY_DICTS or []) if str(entry.get("key", "") or "").strip().lower() == "fieldcraft"), None)
+        survival_help_output = str((survival_entry or {}).get("text", "") or "")
+        if "help fishing" not in survival_help_output.lower():
+            raise AssertionError(f"Help survival did not cross-reference fishing: {survival_help_output}")
+
+        expected_commands = {
+            "ask": CmdAsk.key,
+            "fish": CmdFish.key,
+            "bait": CmdBait.key,
+            "pull": CmdPull.key,
+            "rig": CmdRig.key,
+            "untangle": CmdUntangle.key,
+            "sell": CmdSell.key,
+            "skin": CmdSkin.key,
+            "inventory": CmdInventory.key,
+        }
+        if any(str(value or "").strip().lower() != name for name, value in expected_commands.items()):
+            raise AssertionError(f"One or more documented fishing commands no longer match their expected keys: {expected_commands}")
+
+        captured = []
+        original_msg = character.msg
+
+        def capture_msg(text=None, **kwargs):
+            if text is not None:
+                captured.append(str(text))
+            return original_msg(text=text, **kwargs)
+
+        def run_handler(command_cls, args=""):
+            start_index = len(captured)
+            command = command_cls()
+            command.caller = character
+            command.args = str(args or "")
+            command.raw_string = f"{getattr(command, 'key', '')} {command.args}".strip()
+            command.func()
+            return list(captured[start_index:])
+
+        current_time = {"value": 1000.0}
+        scheduled = []
+        original_delay = fishing_system.delay
+        original_time = fishing_system.time.time
+        original_fishing_economy_time = fishing_economy.time.time
+        original_roll_outcome = fishing_system.roll_fishing_outcome
+        original_hookup = fishing_system.calculate_hookup_chance
+        original_resolve_struggle = fishing_system.resolve_struggle_outcome_data
+
+        class FakeDelayedTask:
+            def __init__(self):
+                self.cancelled = False
+
+            def cancel(self):
+                self.cancelled = True
+
+        def fake_delay(seconds, callback, *cb_args, **cb_kwargs):
+            task = FakeDelayedTask()
+            scheduled.append({
+                "seconds": float(seconds),
+                "callback": callback,
+                "callback_name": getattr(callback, "__name__", "callback"),
+                "args": cb_args,
+                "kwargs": cb_kwargs,
+                "task": task,
+            })
+            return task
+
+        def run_next(expected_seconds=None, callback_name=None, min_seconds=None, max_seconds=None):
+            for index, event in enumerate(list(scheduled)):
+                task = event.get("task")
+                if task is not None and bool(getattr(task, "cancelled", False)):
+                    continue
+                seconds = float(event.get("seconds", 0.0) or 0.0)
+                if callback_name and str(event.get("callback_name", "") or "") != str(callback_name):
+                    continue
+                if expected_seconds is not None and abs(seconds - float(expected_seconds)) > 0.01:
+                    continue
+                if min_seconds is not None and seconds < float(min_seconds):
+                    continue
+                if max_seconds is not None and seconds > float(max_seconds):
+                    continue
+                scheduled.pop(index)
+                current_time["value"] += seconds
+                ctx.direct(event["callback"], *(event.get("args") or ()), **(event.get("kwargs") or {}))
+                return seconds
+            raise AssertionError(
+                f"Fishing help scenario expected callback={callback_name or 'any'} seconds={expected_seconds} range=({min_seconds}, {max_seconds}), but found {scheduled}."
+            )
+
+        try:
+            character.msg = capture_msg
+            fishing_system.delay = fake_delay
+            fishing_system.time.time = lambda: current_time["value"]
+            fishing_economy.time.time = lambda: current_time["value"]
+            fishing_system.roll_fishing_outcome = lambda room_or_group, rng=None: {
+                "category": "fish",
+                "profile": fishing_system.get_fish_profile("silver_trout"),
+            }
+            fishing_system.calculate_hookup_chance = lambda *a, **kw: 1.0
+            fishing_system.resolve_struggle_outcome_data = lambda actor, session, fish_profile, bait_item, rng=None: {
+                "outcome": "landed",
+                "pressure": 0.0,
+                "landed_score": 1.0,
+                "lost_score": 0.0,
+                "break_score": 0.0,
+            }
+
+            ask_output = run_handler(CmdAsk, "maren for gear")
+            if not any("start with the pole" in line.lower() for line in ask_output):
+                raise AssertionError(f"Ask maren for gear did not return the expected starter response: {ask_output}")
+
+            pole = fishing_system.get_fishing_pole(character)
+            if pole is None:
+                raise AssertionError("Fishing help scenario did not receive a fishing pole from Old Maren.")
+            pole.db.line_attached = False
+            pole.db.hook_attached = False
+            rig_output = run_handler(CmdRig, "pole")
+            if not bool(getattr(pole.db, "line_attached", False)) or not bool(getattr(pole.db, "hook_attached", False)):
+                raise AssertionError(f"Rig pole did not restore missing line and hook state: {rig_output}")
+
+            pole.db.line_tangled = True
+            untangle_output = run_handler(CmdUntangle, "pole")
+            if bool(getattr(pole.db, "line_tangled", False)):
+                raise AssertionError(f"Untangle pole did not clear the tangle state: {untangle_output}")
+
+            bait_output = run_handler(CmdBait, "worm")
+            session = fishing_system.get_fishing_session(character, create=False)
+            if session is None or int(getattr(session, "bait_item_id", 0) or 0) <= 0:
+                raise AssertionError(f"Bait worm did not attach bait to the fishing session: {bait_output}")
+
+            fish_output = run_handler(CmdFish)
+            if not any("cast your line" in line.lower() for line in fish_output):
+                raise AssertionError(f"Fish did not start the cast flow: {fish_output}")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+
+            pull_output = run_handler(CmdPull)
+            if not any("haul back" in line.lower() or "slight tug" in line.lower() for line in list(captured) + pull_output):
+                raise AssertionError(f"Pull did not react to the fishing bite/hook flow: {pull_output}")
+            run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+
+            inventory_output = run_handler(CmdInventory)
+            if not any("you are carrying" in line.lower() for line in inventory_output):
+                raise AssertionError(f"Inventory did not render carrying output: {inventory_output}")
+
+            fish_item = next((obj for obj in list(character.contents) if fishing_economy.is_fish_item(obj)), None)
+            if fish_item is None:
+                fish_string = fishing_economy.find_fish_string(character)
+                fish_item = next((obj for obj in list(getattr(fish_string, "contents", []) or []) if fishing_economy.is_fish_item(obj)), None) if fish_string else None
+                if fish_item is not None:
+                    fish_item.move_to(character, quiet=True)
+            if fish_item is None:
+                raise AssertionError("Fishing help scenario did not produce a fish item to validate skinning.")
+
+            knife = create_object("typeclasses.weapons.Weapon", key="skinning knife", location=character, home=character)
+            original_is_wielding = getattr(character, "is_wielding", None)
+            character.is_wielding = lambda weapon_name: str(weapon_name or "").strip().lower() == "skinning knife"
+            skin_output = run_handler(CmdSkin, getattr(fish_item, "key", "silver trout"))
+            processed_goods = [obj for obj in list(character.contents) if str(getattr(getattr(obj, "db", None), "item_type", "") or "") in {"fish_meat", "fish_skin"}]
+            if not processed_goods:
+                raise AssertionError(f"Skin <fish> did not create processed fish goods: {skin_output}")
+
+            coins_before_sale = int(getattr(character.db, "coins", 0) or 0)
+            sell_output = run_handler(CmdSell, "fish")
+            coins_after_sale = int(getattr(character.db, "coins", 0) or 0)
+            if coins_after_sale <= coins_before_sale:
+                raise AssertionError(f"Sell fish did not pay out for processed fishing goods: {sell_output}")
+
+            if original_is_wielding is not None:
+                character.is_wielding = original_is_wielding
+            else:
+                delattr(character, "is_wielding")
+            knife.delete()
+        finally:
+            character.msg = original_msg
+            fishing_system.delay = original_delay
+            fishing_system.time.time = original_time
+            fishing_economy.time.time = original_fishing_economy_time
+            fishing_system.roll_fishing_outcome = original_roll_outcome
+            fishing_system.calculate_hookup_chance = original_hookup
+            fishing_system.resolve_struggle_outcome_data = original_resolve_struggle
+
+        return {
+            "commands": list(expected_commands.keys()),
+            "output_log": list(ctx.output_log),
+            "fishing_help_excerpt": fishing_help_output[:1200],
+            "fish_help_excerpt": help_func_source[:400],
+            "survival_help_excerpt": survival_help_output[:800],
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="fishing-help",
+        scenario_metadata=getattr(run_fishing_help_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "fishing-borrowed-gear-exit",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Borrowed-gear exit cleanup should report lag telemetry without masking return-logic regressions.",
+    },
+)
+def run_fishing_borrowed_gear_exit_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.utils.create import create_object
+
+        import world.systems.fishing as fishing_system
+
+        water_room = ctx.harness.create_test_room(key="TEST_BORROWED_GEAR_WATER")
+        west_room = ctx.harness.create_test_room(key="TEST_BORROWED_GEAR_WEST")
+        south_room = ctx.harness.create_test_room(key="TEST_BORROWED_GEAR_SOUTH")
+        ctx.harness.create_test_exit(water_room, west_room, "west", aliases=["w"])
+        ctx.harness.create_test_exit(water_room, south_room, "south", aliases=["s"])
+
+        water_room.db.fishable = True
+        water_room.db.fish_group = "River 1"
+        water_room.db.borrowed_gear_return_room = True
+
+        character = ctx.harness.create_test_character(room=water_room, key="TEST_BORROWED_GEAR_CHAR")
+        ctx.character = character
+        ctx.room = water_room
+        create_object("typeclasses.fishing_supplier.FishingSupplier", key="Old Maren", location=water_room, home=water_room)
+
+        scheduled = []
+        original_delay = fishing_system.delay
+
+        class FakeDelayedTask:
+            def __init__(self):
+                self.cancelled = False
+
+            def cancel(self):
+                self.cancelled = True
+
+        def fake_delay(seconds, callback, *cb_args, **cb_kwargs):
+            task = FakeDelayedTask()
+            scheduled.append(
+                {
+                    "seconds": float(seconds),
+                    "callback": callback,
+                    "callback_name": getattr(callback, "__name__", "callback"),
+                    "args": cb_args,
+                    "kwargs": cb_kwargs,
+                    "task": task,
+                }
+            )
+            return task
+
+        def run_next(expected_seconds=None, callback_name=None):
+            for index, event in enumerate(list(scheduled)):
+                task = event.get("task")
+                if task is not None and bool(getattr(task, "cancelled", False)):
+                    continue
+                seconds = float(event.get("seconds", 0.0) or 0.0)
+                if callback_name and str(event.get("callback_name", "") or "") != str(callback_name):
+                    continue
+                if expected_seconds is not None and abs(seconds - float(expected_seconds)) > 0.01:
+                    continue
+                scheduled.pop(index)
+                ctx.direct(event["callback"], *(event.get("args") or ()), **(event.get("kwargs") or {}))
+                return
+            raise AssertionError(f"Borrowed gear exit scenario expected callback={callback_name or 'any'} seconds={expected_seconds}, but found {scheduled}.")
+
+        fishing_system.delay = fake_delay
+
+        try:
+            gear_index = len(ctx.output_log)
+            ctx.cmd("ask maren for gear")
+            gear_output = list(ctx.output_log[gear_index:])
+            if any("return the borrowed fishing gear" in str(line).lower() for line in gear_output):
+                raise AssertionError(f"Borrowed gear return triggered inside the starter room: {gear_output}")
+
+            borrowed_items = fishing_system.get_borrowed_items(character)
+            borrowed_names = sorted(str(getattr(item, "key", "") or "") for item in borrowed_items)
+            if borrowed_names != ["fish string", "fishing pole", "hook", "line", "worm"]:
+                raise AssertionError(f"Starter kit did not mark the expected borrowed items: {borrowed_names}")
+            flavored_line = fishing_system.format_borrowed_return_message("west", paused=True)
+            if "pause long enough" not in flavored_line.lower() or "west" not in flavored_line.lower():
+                raise AssertionError(f"Borrowed return flavor helper did not build the optional pause message correctly: {flavored_line}")
+            for item in borrowed_items:
+                if not fishing_system.is_borrowed(item):
+                    raise AssertionError(f"Borrowed helper failed to identify Maren's starter item: {item}")
+                if str(getattr(getattr(item, "db", None), "borrowed_source", "") or "") != "maren":
+                    raise AssertionError(f"Borrowed item missing the expected source tag: {item} / {getattr(item.db, 'borrowed_source', None)}")
+
+            real_pole = create_object("typeclasses.items.fishing_pole.FishingPole", key="bought fishing pole", location=character, home=character)
+            river_rock = create_object("typeclasses.objects.Object", key="river rock", location=character, home=character)
+            river_rock.db.weight = 1
+            if fishing_system.is_borrowed(real_pole) or fishing_system.is_borrowed(river_rock):
+                raise AssertionError("Borrowed helper incorrectly marked non-borrowed items as starter gear.")
+
+            ctx.cmd("bait worm")
+            ctx.cmd("fish")
+            if not bool(getattr(character.ndb, "is_fishing", False)):
+                raise AssertionError("Borrowed gear exit scenario did not enter an active fishing state before movement.")
+
+            borrowed_pole = next((item for item in list(character.contents) if bool(getattr(getattr(item, "db", None), "is_fishing_pole", False)) and fishing_system.is_borrowed(item)), None)
+            if borrowed_pole is None:
+                raise AssertionError("Borrowed gear exit scenario lost track of the borrowed fishing pole.")
+            borrowed_pole.db.line_attached = False
+
+            exit_index = len(ctx.output_log)
+            ctx.cmd("west")
+            exit_output = list(ctx.output_log[exit_index:])
+            if getattr(character, "location", None) != west_room:
+                raise AssertionError("Borrowed gear exit scenario did not move the character through the requested exit.")
+            if not any("disturb the line" in str(line).lower() for line in exit_output):
+                raise AssertionError(f"Borrowed gear exit scenario did not cancel fishing on move: {exit_output}")
+            return_lines = [line for line in exit_output if "return the borrowed fishing gear" in str(line).lower()]
+            if len(return_lines) != 1:
+                raise AssertionError(f"Borrowed gear exit scenario emitted the return line {len(return_lines)} times instead of once: {exit_output}")
+            if "west" not in str(return_lines[0]).lower():
+                raise AssertionError(f"Borrowed gear exit scenario did not report the correct exit direction: {return_lines}")
+
+            run_next(expected_seconds=0.0, callback_name="_finalize_borrowed_return_cleanup")
+
+            if fishing_system.get_borrowed_items(character):
+                raise AssertionError("Borrowed gear exit scenario did not remove all remaining borrowed kit items.")
+            if getattr(character.ndb, "fishing_session", None) is not None or bool(getattr(character.ndb, "is_fishing", False)):
+                raise AssertionError("Borrowed gear exit scenario left a ghost fishing session behind after movement.")
+            if getattr(real_pole, "location", None) != character or getattr(river_rock, "location", None) != character:
+                raise AssertionError("Borrowed gear exit scenario removed non-borrowed player items.")
+
+            for room in (water_room, west_room, south_room):
+                for item in list(getattr(room, "contents", []) or []):
+                    if fishing_system.is_borrowed(item):
+                        item.delete()
+
+            return {
+                "output_log": list(ctx.output_log),
+                "return_message": str(return_lines[0]),
+                "kept_items": [obj.key for obj in list(character.contents)],
+            }
+        finally:
+            fishing_system.delay = original_delay
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="fishing-borrowed-gear-exit",
+        scenario_metadata=getattr(run_fishing_borrowed_gear_exit_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "fishing-borrowed-gear-full-loop",
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Borrowed-gear full-loop verification should report lag telemetry without turning starter-loop cleanup into an environment failure.",
+    },
+)
+def run_fishing_borrowed_gear_full_loop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.utils.create import create_object
+
+        import world.systems.fishing as fishing_system
+        import world.systems.fishing_economy as fishing_economy
+
+        water_room = ctx.harness.create_test_room(key="TEST_BORROWED_FULL_LOOP_WATER")
+        south_room = ctx.harness.create_test_room(key="TEST_BORROWED_FULL_LOOP_SOUTH")
+        ctx.harness.create_test_exit(water_room, south_room, "south", aliases=["s"])
+
+        water_room.db.fishable = True
+        water_room.db.fish_group = "River 1"
+        water_room.db.borrowed_gear_return_room = True
+
+        character = ctx.harness.create_test_character(room=water_room, key="TEST_BORROWED_FULL_LOOP_CHAR")
+        ctx.character = character
+        ctx.room = water_room
+        create_object("typeclasses.fishing_supplier.FishingSupplier", key="Old Maren", location=water_room, home=water_room)
+
+        current_time = {"value": 1000.0}
+        scheduled = []
+        original_delay = fishing_system.delay
+        original_time = fishing_system.time.time
+        original_roll_outcome = fishing_system.roll_fishing_outcome
+        original_hookup = fishing_system.calculate_hookup_chance
+        original_resolve_struggle = fishing_system.resolve_struggle_outcome_data
+
+        class FakeDelayedTask:
+            def __init__(self):
+                self.cancelled = False
+
+            def cancel(self):
+                self.cancelled = True
+
+        def fake_delay(seconds, callback, *cb_args, **cb_kwargs):
+            task = FakeDelayedTask()
+            scheduled.append(
+                {
+                    "seconds": float(seconds),
+                    "callback": callback,
+                    "callback_name": getattr(callback, "__name__", "callback"),
+                    "args": cb_args,
+                    "kwargs": cb_kwargs,
+                    "task": task,
+                }
+            )
+            return task
+
+        def run_next(expected_seconds=None, callback_name=None, min_seconds=None, max_seconds=None):
+            for index, event in enumerate(list(scheduled)):
+                task = event.get("task")
+                if task is not None and bool(getattr(task, "cancelled", False)):
+                    continue
+                seconds = float(event.get("seconds", 0.0) or 0.0)
+                if callback_name and str(event.get("callback_name", "") or "") != str(callback_name):
+                    continue
+                if expected_seconds is not None and abs(seconds - float(expected_seconds)) > 0.01:
+                    continue
+                if min_seconds is not None and seconds < float(min_seconds):
+                    continue
+                if max_seconds is not None and seconds > float(max_seconds):
+                    continue
+                scheduled.pop(index)
+                current_time["value"] += seconds
+                ctx.direct(event["callback"], *(event.get("args") or ()), **(event.get("kwargs") or {}))
+                return seconds
+            raise AssertionError(
+                f"Borrowed full-loop scenario expected callback={callback_name or 'any'} seconds={expected_seconds} range=({min_seconds}, {max_seconds}), but found {scheduled}."
+            )
+
+        try:
+            fishing_system.delay = fake_delay
+            fishing_system.time.time = lambda: current_time["value"]
+            fishing_system.roll_fishing_outcome = lambda room_or_group, rng=None: {
+                "category": "fish",
+                "profile": fishing_system.get_fish_profile("silver_trout"),
+            }
+            fishing_system.calculate_hookup_chance = lambda *a, **kw: 1.0
+            fishing_system.resolve_struggle_outcome_data = lambda actor, session, fish_profile, bait_item, rng=None: {
+                "outcome": "landed",
+                "pressure": 0.0,
+                "landed_score": 1.0,
+                "lost_score": 0.0,
+                "break_score": 0.0,
+            }
+
+            ctx.cmd("ask maren for gear")
+            if len(fishing_system.get_borrowed_items(character)) < 5:
+                raise AssertionError("Borrowed full-loop scenario did not receive the complete borrowed starter kit.")
+
+            junk_item = create_object("typeclasses.objects.Object", key="river salvage", location=character, home=character)
+            junk_item.db.is_junk = True
+            junk_item.db.item_type = "junk"
+            junk_item.db.value = 7
+            junk_item.db.weight = 1
+            processed_item = create_object("typeclasses.objects.Object", key="cleaned fish skin", location=character, home=character)
+            processed_item.db.item_type = "fish_skin"
+            processed_item.db.value = 5
+            processed_item.db.weight = 1
+
+            ctx.cmd("bait worm")
+            ctx.cmd("fish")
+            run_next(callback_name="_begin_nibble", min_seconds=4.0, max_seconds=10.0)
+            ctx.cmd("pull")
+            run_next(expected_seconds=2.0, callback_name="_resolve_struggle_round")
+
+            fish_string = next((obj for obj in list(character.contents) if fishing_economy.is_fish_string(obj) and fishing_system.is_borrowed(obj)), None)
+            if fish_string is None:
+                raise AssertionError("Borrowed full-loop scenario did not retain the borrowed fish string before exit.")
+            landed_fish = next((obj for obj in list(getattr(fish_string, "contents", []) or []) if fishing_economy.is_fish_item(obj)), None)
+            if landed_fish is None:
+                landed_fish = next((obj for obj in list(character.contents) if fishing_economy.is_fish_item(obj)), None)
+            if landed_fish is None:
+                raise AssertionError("Borrowed full-loop scenario did not land a fish before exit.")
+
+            exit_index = len(ctx.output_log)
+            ctx.cmd("south")
+            exit_output = list(ctx.output_log[exit_index:])
+            return_lines = [line for line in exit_output if "return the borrowed fishing gear" in str(line).lower()]
+            if len(return_lines) != 1:
+                raise AssertionError(f"Borrowed full-loop scenario emitted the return line {len(return_lines)} times instead of once: {exit_output}")
+            if "south" not in str(return_lines[0]).lower():
+                raise AssertionError(f"Borrowed full-loop scenario did not report the correct exit direction: {return_lines}")
+            run_next(expected_seconds=0.0, callback_name="_finalize_borrowed_return_cleanup")
+            if getattr(character, "location", None) != south_room:
+                raise AssertionError("Borrowed full-loop scenario did not move the character through the south exit.")
+            if fishing_system.get_borrowed_items(character):
+                raise AssertionError("Borrowed full-loop scenario left borrowed starter gear in inventory after exit.")
+            if getattr(landed_fish, "location", None) != character:
+                raise AssertionError("Borrowed full-loop scenario did not preserve the caught fish when returning the borrowed fish string.")
+            if getattr(junk_item, "location", None) != character:
+                raise AssertionError("Borrowed full-loop scenario incorrectly removed kept junk on exit.")
+            if getattr(processed_item, "location", None) != character:
+                raise AssertionError("Borrowed full-loop scenario incorrectly removed processed goods on exit.")
+
+            for room in (water_room, south_room):
+                for item in list(getattr(room, "contents", []) or []):
+                    if fishing_system.is_borrowed(item):
+                        item.delete()
+
+            return {
+                "output_log": list(ctx.output_log),
+                "kept_items": [obj.key for obj in list(character.contents)],
+            }
+        finally:
+            fishing_system.delay = original_delay
+            fishing_system.time.time = original_time
+            fishing_system.roll_fishing_outcome = original_roll_outcome
+            fishing_system.calculate_hookup_chance = original_hookup
+            fishing_system.resolve_struggle_outcome_data = original_resolve_struggle
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="fishing-borrowed-gear-full-loop",
+        scenario_metadata=getattr(run_fishing_borrowed_gear_full_loop_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
     "rt-timing",
     metadata={
         "fail_on_critical_lag": False,
@@ -2227,6 +4203,1957 @@ def run_inventory_scenario(args):
         }
 
     return _run_registered_scenario(args, scenario, auto_snapshot=True, name="inventory")
+
+
+@register_scenario(
+    "empath-core-loop",
+    aliases=["empath_core_loop"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath loop regression coverage validates command and wound-transfer behavior; emit lag telemetry without failing on environment-specific latency.",
+        "tags": ["core", "empath", "smoke"],
+    },
+)
+def run_empath_core_loop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_PATIENT")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0}
+        empath.db.empath_shock = 0
+        patient.db.wounds = {"vitality": 60, "bleeding": 30}
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("initial")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("touch TEST_EMPATH_PATIENT")
+        touch_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("touched")
+
+        link_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        linked_target = int(link_state.get("target_id", 0) or 0) if link_state else 0
+        if linked_target != int(getattr(patient, "id", 0) or 0):
+            raise AssertionError(f"Empath touch did not lock the patient link: {linked_target} vs {getattr(patient, 'id', None)}")
+        if int(link_state.get("strength", 0) or 0) != 60 or int(link_state.get("stability", 0) or 0) != 80:
+            raise AssertionError(f"Empath touch should create a weak touch link, got {link_state}")
+        if not any("sense the condition of your patient" in str(line).lower() for line in touch_output):
+            raise AssertionError(f"Empath touch did not emit the expected feedback: {touch_output}")
+
+        away_room = ctx.harness.create_test_room(key="TEST_EMPATH_AWAY_ROOM")
+        output_index = len(ctx.output_log)
+        ctx.direct(lambda: empath.move_to(away_room, quiet=False))
+        move_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("moved_away")
+
+        lingering_link = empath.get_empath_link_state(require_local=False, emit_break_messages=False)
+        if lingering_link:
+            raise AssertionError(f"Empath link should break when the healer moves away: {lingering_link}")
+        if not any("distance tears" in str(line).lower() for line in move_output):
+            raise AssertionError(f"Empath movement did not emit the expected break message: {move_output}")
+
+        output_index = len(ctx.output_log)
+        empath.ndb.next_empath_feedback_at = 0
+        ctx.direct(empath.process_empath_tick)
+        post_move_feedback_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("post_move_tick")
+        if any("your senses are clear." in str(line).lower() for line in post_move_feedback_output):
+            raise AssertionError(f"Empath feedback should stop after moving out of touch range: {post_move_feedback_output}")
+
+        ctx.direct(lambda: empath.move_to(room, quiet=True))
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("assess")
+        assess_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("assessed")
+
+        assess_text = " ".join(str(line) for line in assess_output)
+        if "Vitality: 60%" not in assess_text or "Bleeding: 30%" not in assess_text:
+            raise AssertionError(f"Empath assess did not report the expected precise wound values: {assess_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("take bleeding")
+        take_bleeding_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("took_bleeding")
+
+        patient_after_bleeding = dict(getattr(patient.db, "wounds", {}) or {})
+        empath_after_bleeding = dict(getattr(empath.db, "wounds", {}) or {})
+        dangerous_bleeding_threshold = 12
+        expected_bleeding_take = max(1, int(12 * empath.get_empath_mitigation())) + int(20 * 0.2)
+        if int(patient_after_bleeding.get("bleeding", 0) or 0) != 18:
+            raise AssertionError(f"Empath bleeding transfer did not reduce patient bleeding by the default chunk: {patient_after_bleeding}")
+        if int(empath_after_bleeding.get("bleeding", 0) or 0) != expected_bleeding_take:
+            raise AssertionError(f"Empath bleeding transfer did not apply the expected self-risk spike: {empath_after_bleeding}")
+        if not any("lessen the burden" in str(line).lower() or "draw the injury into yourself" in str(line).lower() for line in take_bleeding_output):
+            raise AssertionError(f"Empath take bleeding did not emit the transfer message: {take_bleeding_output}")
+        if int(empath_after_bleeding.get("bleeding", 0) or 0) < dangerous_bleeding_threshold:
+            raise AssertionError(f"Empath bleeding did not cross the unsafe threshold after transfer: threshold={dangerous_bleeding_threshold}, wounds={empath_after_bleeding}")
+
+        output_index = len(ctx.output_log)
+        hp_before_vitality = int(getattr(empath.db, "hp", 0) or 0)
+        ctx.cmd("take vitality 20")
+        take_vitality_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("took_vitality")
+
+        patient_after_vitality = dict(getattr(patient.db, "wounds", {}) or {})
+        empath_after_vitality = dict(getattr(empath.db, "wounds", {}) or {})
+        hp_after_vitality = int(getattr(empath.db, "hp", 0) or 0)
+        expected_vitality_take = max(1, int(12 * empath.get_empath_mitigation()))
+        if int(patient_after_vitality.get("vitality", 0) or 0) != 48:
+            raise AssertionError(f"Empath vitality transfer did not reduce patient vitality correctly: {patient_after_vitality}")
+        if int(empath_after_vitality.get("vitality", 0) or 0) != expected_vitality_take:
+            raise AssertionError(f"Empath vitality transfer did not accumulate transferred damage on the healer: {empath_after_vitality}")
+        if int(empath_after_vitality.get("bleeding", 0) or 0) != expected_bleeding_take:
+            raise AssertionError(f"Empath vitality transfer unexpectedly reset or altered carried bleeding: {empath_after_vitality}")
+        if hp_after_vitality >= hp_before_vitality:
+            raise AssertionError(f"Empath vitality transfer did not apply any HP cost: before={hp_before_vitality}, after={hp_after_vitality}")
+        if not any("living force" in str(line).lower() for line in take_vitality_output):
+            raise AssertionError(f"Empath take vitality did not emit the transfer message: {take_vitality_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("mend self")
+        mend_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("mended")
+
+        empath_after_mend = dict(getattr(empath.db, "wounds", {}) or {})
+        if int(empath_after_mend.get("vitality", 0) or 0) != max(0, expected_vitality_take - 10):
+            raise AssertionError(f"Empath mend did not reduce vitality by the expected placeholder amount: {empath_after_mend}")
+        if int(empath_after_mend.get("bleeding", 0) or 0) != max(0, expected_bleeding_take - 5):
+            raise AssertionError(f"Empath mend did not reduce bleeding by the expected placeholder amount: {empath_after_mend}")
+        if int(empath_after_mend.get("vitality", 0) or 0) <= 0 and int(empath_after_mend.get("bleeding", 0) or 0) <= 0:
+            raise AssertionError(f"Empath mend reset the loop instead of leaving carried risk in place: {empath_after_mend}")
+        if not any("focus inward, stabilizing your condition" in str(line).lower() for line in mend_output):
+            raise AssertionError(f"Empath mend did not emit the expected feedback: {mend_output}")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = ["initial", "touched", "moved_away", "post_move_tick", "assessed", "took_bleeding", "took_vitality", "mended"]
+        if labels != expected_labels:
+            raise AssertionError(f"Empath core-loop snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "touch_output": touch_output,
+            "move_output": move_output,
+            "post_move_feedback_output": post_move_feedback_output,
+            "assess_output": assess_output,
+            "take_bleeding_output": take_bleeding_output,
+            "take_vitality_output": take_vitality_output,
+            "mend_output": mend_output,
+            "dangerous_bleeding_threshold": dangerous_bleeding_threshold,
+            "patient_after_bleeding": patient_after_bleeding,
+            "empath_after_bleeding": empath_after_bleeding,
+            "patient_after_vitality": patient_after_vitality,
+            "empath_after_vitality": empath_after_vitality,
+            "empath_after_mend": empath_after_mend,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-core-loop",
+        scenario_metadata=getattr(run_empath_core_loop_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-link-state-compat",
+    aliases=["empath_link_state_compat"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath link compatibility coverage validates that persisted link mappings still resolve through the current link helpers and command flow.",
+        "tags": ["core", "empath"],
+    },
+)
+def run_empath_link_state_compat_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_LINK_COMPAT_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_COMPAT_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_COMPAT_PATIENT")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        patient.db.wounds = {"vitality": 0, "bleeding": 20, "fatigue": 0, "poison": 0, "disease": 0}
+        empath.db.empath_link = {
+            "target_id": int(patient.id),
+            "type": "touch",
+            "strength": 60,
+            "stability": 80,
+            "created_at": time.time(),
+        }
+
+        resolved_target = empath.get_empath_link_target(getattr(empath.db, "empath_link", None))
+        if resolved_target != patient:
+            raise AssertionError(f"Persisted empath link mapping did not resolve back to the patient: {resolved_target}")
+
+        ctx.snapshot("initial")
+        output_index = len(ctx.output_log)
+        ctx.cmd("take bleeding")
+        take_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("took_bleeding")
+
+        patient_bleeding = int(patient.get_empath_wound("bleeding") or 0)
+        empath_bleeding = int(empath.get_empath_wound("bleeding") or 0)
+        if patient_bleeding >= 20:
+            raise AssertionError(f"Take bleeding did not resolve through the stored link state: {patient_bleeding}")
+        if empath_bleeding <= 0:
+            raise AssertionError(f"Take bleeding did not place any burden on the empath: {empath_bleeding}")
+        if not any("draw the injury into yourself" in str(line).lower() or "lessen the burden" in str(line).lower() for line in take_output):
+            raise AssertionError(f"Take bleeding through persisted link state did not emit transfer messaging: {take_output}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "resolved_target_id": int(getattr(resolved_target, "id", 0) or 0),
+            "patient_bleeding": patient_bleeding,
+            "empath_bleeding": empath_bleeding,
+            "take_output": take_output,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-link-state-compat",
+        scenario_metadata=getattr(run_empath_link_state_compat_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-vitality-transfer",
+    aliases=["empath_vitality_transfer"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath vitality-transfer regression coverage validates HP cost, overdraw, unity lockout, and partial lockout without depending on wall-clock timing.",
+        "tags": ["core", "empath"],
+    },
+)
+def run_empath_vitality_transfer_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_VITALITY_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_VITALITY_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_VITALITY_PATIENT")
+        partner = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_VITALITY_PARTNER")
+        fatalist = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_VITALITY_FATALIST")
+        fatal_patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_VITALITY_FATAL_PATIENT")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        fatalist.set_profession("empath")
+        empath.db.max_hp = 100
+        empath.db.hp = 100
+        fatalist.db.max_hp = 100
+        fatalist.db.hp = 10
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        patient.db.wounds = {"vitality": 80, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        partner.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        fatalist.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        fatal_patient.db.wounds = {"vitality": 40, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+
+        profile = empath.get_empath_transfer_profile("vitality")
+        mitigation = empath.get_empath_mitigation()
+        expected_hp_cost = max(1, int(20 * float(profile.get("hp_ratio", 0.5) or 0.5)))
+        expected_fatigue = max(1, int(20 * float(profile.get("fatigue_ratio", 0.35) or 0.35)))
+        expected_shock = max(1, int(20 * float(profile.get("shock_ratio", 0.3) or 0.3)))
+        expected_vitality_take = max(1, int(20 * mitigation))
+
+        ctx.snapshot("initial")
+        ctx.cmd("link TEST_EMPATH_VITALITY_PATIENT")
+        ctx.cmd("unity TEST_EMPATH_VITALITY_PARTNER")
+        ctx.snapshot("unified")
+
+        partial_output_index = len(ctx.output_log)
+        ctx.cmd("take 25%")
+        partial_output = list(ctx.output_log[partial_output_index:])
+        ctx.snapshot("partial_blocked")
+
+        if patient.get_empath_wound("vitality") != 80 or empath.get_empath_wound("vitality") != 0 or partner.get_empath_wound("vitality") != 0:
+            raise AssertionError("Generic partial transfer should not resolve onto vitality.")
+        if not any("no wound you can draw that way" in str(line).lower() for line in partial_output):
+            raise AssertionError(f"Vitality partial lockout did not emit the expected failure: {partial_output}")
+
+        hp_before = int(getattr(empath.db, "hp", 0) or 0)
+        shock_before = int(empath.get_empath_shock() or 0)
+        fatigue_before = int(empath.get_empath_wound("fatigue") or 0)
+        total_before = patient.get_empath_wound("vitality") + empath.get_empath_wound("vitality") + partner.get_empath_wound("vitality")
+
+        take_output_index = len(ctx.output_log)
+        ctx.cmd("take vitality 20")
+        take_output = list(ctx.output_log[take_output_index:])
+        ctx.snapshot("vitality_taken")
+
+        hp_after = int(getattr(empath.db, "hp", 0) or 0)
+        shock_after = int(empath.get_empath_shock() or 0)
+        fatigue_after = int(empath.get_empath_wound("fatigue") or 0)
+        patient_vitality = patient.get_empath_wound("vitality")
+        empath_vitality = empath.get_empath_wound("vitality")
+        partner_vitality = partner.get_empath_wound("vitality")
+        total_after = patient_vitality + empath_vitality + partner_vitality
+
+        if patient_vitality != 60:
+            raise AssertionError(f"Vitality transfer did not reduce the patient by the full amount: {patient_vitality}")
+        if empath_vitality != expected_vitality_take:
+            raise AssertionError(f"Vitality transfer did not add the full burden to the empath: {empath_vitality}")
+        if partner_vitality != 0:
+            raise AssertionError(f"Vitality transfer should bypass unity smoothing entirely: {partner_vitality}")
+        if hp_after != hp_before - expected_hp_cost:
+            raise AssertionError(f"Vitality HP cost should scale with effective amount: before={hp_before}, after={hp_after}, expected={expected_hp_cost}")
+        if fatigue_after != fatigue_before + expected_fatigue:
+            raise AssertionError(f"Vitality fatigue spike was incorrect: before={fatigue_before}, after={fatigue_after}, expected={expected_fatigue}")
+        if shock_after != shock_before + expected_shock:
+            raise AssertionError(f"Vitality shock spike was incorrect: before={shock_before}, after={shock_after}, expected={expected_shock}")
+        if total_before - total_after != 20 - expected_vitality_take:
+            raise AssertionError(f"Vitality burden conservation drifted: before={total_before}, after={total_after}")
+        if not any("living force" in str(line).lower() for line in take_output):
+            raise AssertionError(f"Vitality transfer did not emit the danger message: {take_output}")
+
+        patient.set_empath_wound("vitality", 100)
+        overdraw_output_index = len(ctx.output_log)
+        ctx.cmd("take vitality all")
+        overdraw_output = list(ctx.output_log[overdraw_output_index:])
+        ctx.snapshot("overdrawn")
+
+        if not empath.is_empath_overdrawn():
+            raise AssertionError("Vitality transfer should be able to trigger existing overdraw state.")
+        if partner.get_empath_wound("vitality") != 0:
+            raise AssertionError("Unity partner should still receive no vitality burden after an overdraw transfer.")
+        if not any("taken too much" in str(line).lower() for line in overdraw_output):
+            raise AssertionError(f"Overdraw warning did not fire after a large vitality transfer: {overdraw_output}")
+
+        direct_ok, direct_message = empath.take_empath_wound("vitality", requested_fraction=0.25)
+        if direct_ok or "life force" not in str(direct_message).lower():
+            raise AssertionError(f"Direct partial vitality lockout failed: ok={direct_ok}, message={direct_message}")
+
+        link_ok, _link_state = fatalist.create_empath_link(fatal_patient, link_type="direct")
+        if not link_ok:
+            raise AssertionError("Failed to create a direct vitality link for lethal-transfer coverage.")
+        death_ok, death_message = fatalist.take_empath_wound("vitality", "all")
+        if not death_ok:
+            raise AssertionError(f"Lethal vitality transfer unexpectedly failed: {death_message}")
+        if int(getattr(fatalist.db, "hp", 0) or 0) != 0 or not bool(getattr(fatalist.db, "is_dead", False)):
+            raise AssertionError(f"Vitality HP damage did not flow through the death pipeline: hp={getattr(fatalist.db, 'hp', None)}, dead={getattr(fatalist.db, 'is_dead', None)}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "partial_output": partial_output,
+            "take_output": take_output,
+            "overdraw_output": overdraw_output,
+            "patient_vitality": patient_vitality,
+            "empath_vitality": empath_vitality,
+            "partner_vitality": partner_vitality,
+            "hp_before": hp_before,
+            "hp_after": hp_after,
+            "shock_before": shock_before,
+            "shock_after": shock_after,
+            "fatigue_before": fatigue_before,
+            "fatigue_after": fatigue_after,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-vitality-transfer",
+        scenario_metadata=getattr(run_empath_vitality_transfer_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-completion-pass",
+    aliases=["empath_completion_pass"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath completion coverage validates mitigation, scars, center scaling, link borrowing, channel pulse, stabilize scaling, and guild-zone effects without depending on real-time waits.",
+        "tags": ["core", "empath"],
+    },
+)
+def run_empath_completion_pass_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        triage_room = ctx.harness.create_test_room(key="TEST_EMPATH_TRIAGE_ROOM")
+        recovery_room = ctx.harness.create_test_room(key="TEST_EMPATH_RECOVERY_ROOM")
+        training_room = ctx.harness.create_test_room(key="TEST_EMPATH_TRAINING_ROOM")
+        triage_room.tags.add("empath_zone_triage")
+        triage_room.db.empath_zone = "triage"
+        recovery_room.tags.add("empath_zone_recovery")
+        recovery_room.db.empath_zone = "recovery"
+        training_room.tags.add("empath_zone_training")
+        training_room.db.empath_zone = "training"
+
+        empath = ctx.harness.create_test_character(room=triage_room, key="TEST_EMPATH_COMPLETION_HEALER")
+        patient = ctx.harness.create_test_character(room=triage_room, key="TEST_EMPATH_COMPLETION_PATIENT")
+
+        ctx.character = empath
+        ctx.room = triage_room
+
+        empath.set_profession("empath")
+        empath.update_skill("empathy", rank=100, mindstate=0)
+        empath.update_skill("first_aid", rank=80, mindstate=0)
+        empath.update_skill("attunement", rank=60, mindstate=0)
+        patient.update_skill("scholarship", rank=60, mindstate=0)
+        empath.db.max_hp = 100
+        empath.db.hp = 100
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        patient.db.wounds = {"vitality": 20, "bleeding": 20, "fatigue": 0, "poison": 0, "disease": 40}
+
+        ctx.snapshot("initial")
+        ctx.cmd("link TEST_EMPATH_COMPLETION_PATIENT")
+        ctx.snapshot("linked")
+
+        mitigation_output_index = len(ctx.output_log)
+        ctx.cmd("take disease 20")
+        mitigation_output = list(ctx.output_log[mitigation_output_index:])
+        ctx.snapshot("mitigated")
+
+        if patient.get_empath_wound("disease") != 20:
+            raise AssertionError(f"Mitigation pass did not remove the full effective amount from the patient: {patient.db.wounds}")
+        if empath.get_empath_wound("disease") != 14:
+            raise AssertionError(f"Mitigation pass did not reduce empath intake according to skill: {empath.db.wounds}")
+        if not any("lessen the burden" in str(line).lower() for line in mitigation_output):
+            raise AssertionError(f"Mitigation message did not surface: {mitigation_output}")
+
+        focus_output_index = len(ctx.output_log)
+        ctx.cmd("link focus scholarship")
+        focus_output = list(ctx.output_log[focus_output_index:])
+        ctx.snapshot("focused")
+
+        if empath.get_skill("scholarship") != 12:
+            raise AssertionError(f"Borrowed link focus did not apply the expected bonus: {empath.get_skill('scholarship')}")
+        if not any("scholarship" in str(line).lower() for line in focus_output):
+            raise AssertionError(f"Link focus did not emit expected feedback: {focus_output}")
+
+        empath.move_to(training_room, quiet=True, use_destination=False)
+        patient.move_to(training_room, quiet=True, use_destination=False)
+        ctx.room = training_room
+        link_ok, _link_lines = empath.link_empath_target(patient)
+        if not link_ok:
+            raise AssertionError("Empath link should be restorable after moving together into the training room.")
+        focus_ok, focus_message = empath.set_empath_link_focus("scholarship")
+        if not focus_ok:
+            raise AssertionError(f"Empath link focus should be restorable in the training room: {focus_message}")
+        link_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        updated_link = dict(link_state)
+        updated_link["link_bonus_tick_at"] = time.time() - 1.0
+        empath.set_empath_link_state(updated_link, sync=True)
+        fatigue_before_focus_upkeep = empath.get_empath_wound("fatigue")
+        empath.process_empath_tick()
+        fatigue_after_focus_upkeep = empath.get_empath_wound("fatigue")
+        ctx.snapshot("focus_upkeep")
+
+        if fatigue_after_focus_upkeep - fatigue_before_focus_upkeep != 2:
+            raise AssertionError(f"Training-room link upkeep should be reduced to 2 fatigue, got {fatigue_after_focus_upkeep - fatigue_before_focus_upkeep}")
+
+        channel_output_index = len(ctx.output_log)
+        ctx.cmd("channel bleeding")
+        channel_output = list(ctx.output_log[channel_output_index:])
+        channel_state = dict(empath.get_state("empath_channel") or {})
+        channel_state["next_pulse_at"] = time.time() - 1.0
+        empath.set_state("empath_channel", channel_state)
+        updated_link = dict(empath.get_empath_link_state(require_local=True, emit_break_messages=False))
+        updated_link["link_bonus_tick_at"] = time.time() + 30.0
+        empath.set_empath_link_state(updated_link, sync=True)
+        patient_bleeding_before = patient.get_empath_wound("bleeding")
+        fatigue_before_channel = empath.get_empath_wound("fatigue")
+        empath.process_empath_tick()
+        fatigue_after_channel = empath.get_empath_wound("fatigue")
+        patient_bleeding_after = patient.get_empath_wound("bleeding")
+        channel_state_after = empath.get_state("empath_channel") or {}
+        ctx.snapshot("channeled")
+
+        if not any("sustained channel" in str(line).lower() for line in channel_output):
+            raise AssertionError(f"Channel did not emit its start message: {channel_output}")
+        if patient_bleeding_after >= patient_bleeding_before:
+            raise AssertionError(f"Channel pulse did not transfer any bleeding: before={patient_bleeding_before}, after={patient_bleeding_after}")
+        if fatigue_after_channel - fatigue_before_channel != 2:
+            raise AssertionError(f"Training-room channel strain should be reduced to 2 fatigue on the first pulse, got {fatigue_after_channel - fatigue_before_channel}")
+        if int(channel_state_after.get("pulse_count", 0) or 0) != 1:
+            raise AssertionError(f"Channel pulse count did not advance: {channel_state_after}")
+
+        stop_output_index = len(ctx.output_log)
+        ctx.cmd("channel stop")
+        stop_output = list(ctx.output_log[stop_output_index:])
+        if empath.get_state("empath_channel"):
+            raise AssertionError("Channel stop should clear the active channel state.")
+        if not any("let the sustained channel go" in str(line).lower() for line in stop_output):
+            raise AssertionError(f"Channel stop did not emit the expected feedback: {stop_output}")
+
+        empath.move_to(recovery_room, quiet=True, use_destination=False)
+        patient.move_to(recovery_room, quiet=True, use_destination=False)
+        ctx.room = recovery_room
+        empath.db.empath_shock = 40
+        fatigue_before_center = empath.get_empath_wound("fatigue")
+        center_output_index = len(ctx.output_log)
+        ctx.cmd("center")
+        center_output = list(ctx.output_log[center_output_index:])
+        ctx.snapshot("centered")
+
+        if empath.get_empath_shock() != 17:
+            raise AssertionError(f"Recovery-room center should reduce shock by 23, got {empath.get_empath_shock()}")
+        if empath.get_empath_wound("fatigue") - fatigue_before_center != 7:
+            raise AssertionError(f"Recovery-room center should cost 7 fatigue, got {empath.get_empath_wound('fatigue') - fatigue_before_center}")
+        if not any("regaining clarity" in str(line).lower() for line in center_output):
+            raise AssertionError(f"Center did not emit the expected recovery message: {center_output}")
+
+        patient.apply_damage("head", 30, "slice")
+        patient.apply_damage("head", 20, "slice")
+        head_scars_before = patient.get_part_scar_count("head")
+        patient.heal_body_part("head", 100)
+        if patient.get_part_scar_count("head") != head_scars_before or head_scars_before <= 0:
+            raise AssertionError(f"Scars should persist after normal healing: before={head_scars_before}, after={patient.get_part_scar_count('head')}")
+
+        empath.move_to(triage_room, quiet=True, use_destination=False)
+        patient.move_to(triage_room, quiet=True, use_destination=False)
+        triage_room.tags.add("empath_zone_triage")
+        triage_room.db.empath_zone = "triage"
+        patient.get_body_part("head")["internal"] = 30
+        patient.get_body_part("chest")["internal"] = 35
+        patient.get_body_part("left_arm")["internal"] = 28
+        patient.get_body_part("head")["bleed"] = 1
+        patient.get_body_part("chest")["bleed"] = 1
+        patient.get_body_part("left_arm")["bleed"] = 1
+        stabilize_output_index = len(ctx.output_log)
+        ctx.cmd("stabilize TEST_EMPATH_COMPLETION_PATIENT")
+        stabilize_output = list(ctx.output_log[stabilize_output_index:])
+        ctx.snapshot("stabilized")
+
+        tended_parts = [part for part in ("head", "chest", "left_arm") if patient.is_tended(part)]
+        if len(tended_parts) != 3:
+            raise AssertionError(f"Triage-room stabilize should tend three parts, got {tended_parts}")
+        if float(getattr(patient.db, "stability_strength", 0.0) or 0.0) <= 0.0:
+            raise AssertionError("Stabilize should store a positive stability strength.")
+        if not any("steady their condition" in str(line).lower() for line in stabilize_output):
+            raise AssertionError(f"Stabilize did not emit the expected message: {stabilize_output}")
+
+        scar_heal_output_index = len(ctx.output_log)
+        ctx.cmd("heal scars TEST_EMPATH_COMPLETION_PATIENT")
+        scar_heal_output = list(ctx.output_log[scar_heal_output_index:])
+        ctx.snapshot("scar_healed")
+
+        if patient.get_part_scar_count("head") != max(0, head_scars_before - 1):
+            raise AssertionError(f"Heal scars should reduce the highest scar count by one: before={head_scars_before}, after={patient.get_part_scar_count('head')}")
+        if not any("old scarring" in str(line).lower() for line in scar_heal_output):
+            raise AssertionError(f"Heal scars did not emit the expected feedback: {scar_heal_output}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "mitigation_output": mitigation_output,
+            "focus_output": focus_output,
+            "channel_output": channel_output,
+            "center_output": center_output,
+            "stabilize_output": stabilize_output,
+            "scar_heal_output": scar_heal_output,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-completion-pass",
+        scenario_metadata=getattr(run_empath_completion_pass_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-learning-unification",
+    aliases=["empath_learning_unification"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath learning unification coverage validates transient pools and legacy mindstate isolation without depending on wall-clock waits.",
+        "tags": ["core", "empath", "exp"],
+    },
+)
+def run_empath_learning_unification_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from evennia.utils.create import create_object
+        from typeclasses.study_item import StudyItem
+
+        training_room = ctx.harness.create_test_room(key="TEST_EMPATH_LEARNING_ROOM")
+        healer = ctx.harness.create_test_character(room=training_room, key="TEST_EMPATH_LEARNING_HEALER")
+        patient = ctx.harness.create_test_character(room=training_room, key="TEST_EMPATH_LEARNING_PATIENT")
+        empath_patient = ctx.harness.create_test_character(room=training_room, key="TEST_EMPATH_LEARNING_EMPATH_PATIENT")
+        animal = ctx.harness.create_test_character(room=training_room, key="TEST_EMPATH_LEARNING_ANIMAL")
+
+        ctx.character = healer
+        ctx.room = training_room
+
+        healer.set_profession("empath")
+        empath_patient.set_profession("empath")
+        healer.db.empath_rank = 1
+        healer.db.empath_training_stage = 0
+        healer.db.empath_shock = 0
+        healer.update_skill("empathy", rank=120, mindstate=0)
+        healer.update_skill("first_aid", rank=90, mindstate=0)
+        healer.update_skill("scholarship", rank=80, mindstate=0)
+        patient.update_skill("scholarship", rank=10, mindstate=0)
+
+        animal.db.desc = "A simple animal with little resistance to empathic influence."
+        animal.db.creature_type = "animal"
+        animal.db.stats = dict(animal.db.stats or {})
+        animal.db.stats["discipline"] = 4
+        animal.db.stats["intelligence"] = 4
+
+        for wound_key, wound_value in {"vitality": 30, "bleeding": 25, "fatigue": 0, "poison": 20, "disease": 20, "trauma": 0}.items():
+            patient.set_empath_wound(wound_key, wound_value)
+            empath_patient.set_empath_wound(wound_key, wound_value)
+        for skill_name in ("empathy", "first_aid", "scholarship"):
+            healer.update_skill(skill_name, rank=healer.get_skill_rank(skill_name), mindstate=0)
+
+        empathy_skill = healer.exp_skills.get("empathy")
+        first_aid_skill = healer.exp_skills.get("first_aid")
+        scholarship_skill = healer.exp_skills.get("scholarship")
+        if empathy_skill.skillset != "primary":
+            raise AssertionError(f"Empathy should use primary transient tier, got {empathy_skill.skillset}")
+        if first_aid_skill.skillset != "secondary":
+            raise AssertionError(f"First Aid should use secondary transient tier, got {first_aid_skill.skillset}")
+        if scholarship_skill.skillset != "secondary":
+            raise AssertionError(f"Scholarship should use secondary transient tier, got {scholarship_skill.skillset}")
+
+        ok, _link_state = healer.link_empath_target(patient)
+        if not ok:
+            raise AssertionError("Link creation should succeed for the baseline patient.")
+        link_pool = healer.exp_skills.get("empathy").pool
+        if link_pool <= 0:
+            raise AssertionError("Linking should award transient empathy pool.")
+        if healer.db.skills.get("empathy", {}).get("mindstate", 0) != 0:
+            raise AssertionError("Linking should not write legacy empathy mindstate.")
+
+        before_perceive = healer.exp_skills.get("empathy").pool
+        ok, _lines = healer.perceive_empath_target(patient)
+        if not ok or healer.exp_skills.get("empathy").pool <= before_perceive:
+            raise AssertionError("Perceive target should award a small empathy gain through transient EXP.")
+
+        before_manipulate = healer.exp_skills.get("empathy").pool
+        ok, message = healer.manipulate_empath_target(animal)
+        if not ok:
+            raise AssertionError(f"Manipulate should succeed against the test animal: {message}")
+        if healer.exp_skills.get("empathy").pool <= before_manipulate:
+            raise AssertionError("Manipulate should award empathy through transient EXP.")
+
+        ok, _link_state = healer.link_empath_target(patient)
+        if not ok:
+            raise AssertionError("Link creation should succeed before vitality transfer.")
+        before_vitality = healer.exp_skills.get("empathy").pool
+        ok, message = healer.take_empath_wound("vitality", "10")
+        if not ok:
+            raise AssertionError(f"Vitality transfer should succeed: {message}")
+        vitality_gain = healer.exp_skills.get("empathy").pool - before_vitality
+        if vitality_gain <= 0:
+            raise AssertionError("Vitality transfer should award empathy pool.")
+
+        patient.set_empath_wound("poison", 20)
+        ok, _link_state = healer.link_empath_target(patient)
+        if not ok:
+            raise AssertionError("Link creation should succeed before poison transfer.")
+        before_poison = healer.exp_skills.get("empathy").pool
+        ok, message = healer.take_empath_wound("poison", "10")
+        if not ok:
+            raise AssertionError(f"Poison transfer should succeed: {message}")
+        poison_gain = healer.exp_skills.get("empathy").pool - before_poison
+        if poison_gain <= 0:
+            raise AssertionError("Poison transfer should award empathy pool.")
+
+        empath_patient.set_empath_wound("poison", 20)
+        ok, _link_state = healer.link_empath_target(empath_patient)
+        if not ok:
+            raise AssertionError("Link creation should succeed before empath-target transfer.")
+        before_empath_target = healer.exp_skills.get("empathy").pool
+        ok, message = healer.take_empath_wound("poison", "10")
+        if not ok:
+            raise AssertionError(f"Transfer from another empath should still function: {message}")
+        empath_target_gain = healer.exp_skills.get("empathy").pool - before_empath_target
+        if empath_target_gain >= poison_gain:
+            raise AssertionError(
+                f"Healing another empath should be substantially reduced as a trainer: normal={poison_gain}, empath_target={empath_target_gain}"
+            )
+        if healer.db.skills.get("empathy", {}).get("mindstate", 0) != 0:
+            raise AssertionError("Empathy actions should no longer update legacy empathy mindstate.")
+
+        patient.get_body_part("head")["bleed"] = 3
+        patient.get_body_part("head")["internal"] = 28
+        ok, message = healer.stabilize_empath_target(patient)
+        if not ok:
+            raise AssertionError(f"Stabilize should succeed on a bleeding patient: {message}")
+        tend_state = dict((patient.get_body_part("head") or {}).get("tend") or {})
+        if float(tend_state.get("xp_window_until", 0.0) or 0.0) <= time.time():
+            raise AssertionError("Valid tending should start a First Aid training window.")
+        tend_state["xp_next_at"] = time.time() - 1.0
+        patient.get_body_part("head")["tend"] = tend_state
+        before_first_aid = healer.exp_skills.get("first_aid").pool
+        patient.process_bleed()
+        first_aid_gain = healer.exp_skills.get("first_aid").pool - before_first_aid
+        if first_aid_gain <= 0:
+            raise AssertionError("Timed tend pulse should award First Aid transient EXP.")
+        if healer.db.skills.get("first_aid", {}).get("mindstate", 0) != 0:
+            raise AssertionError("Timed tend pulses should not update legacy First Aid mindstate.")
+
+        anatomy_book = create_object(StudyItem, key="anatomy chart", location=healer, home=healer)
+        anatomy_book.db.anatomy_study = True
+        anatomy_book.db.study_tags = ["anatomy"]
+        anatomy_book.db.difficulty = 12
+        before_scholarship = healer.exp_skills.get("scholarship").pool
+        before_first_aid_study = healer.exp_skills.get("first_aid").pool
+        before_empathy_study = healer.exp_skills.get("empathy").pool
+        if not healer.study_item(anatomy_book):
+            raise AssertionError("Anatomy study should succeed for the test healer.")
+        scholarship_gain = healer.exp_skills.get("scholarship").pool - before_scholarship
+        first_aid_study_gain = healer.exp_skills.get("first_aid").pool - before_first_aid_study
+        empathy_study_gain = healer.exp_skills.get("empathy").pool - before_empathy_study
+        if scholarship_gain <= 0 or first_aid_study_gain <= 0:
+            raise AssertionError(
+                f"Anatomy study should train scholarship and first aid: scholarship={scholarship_gain}, first_aid={first_aid_study_gain}"
+            )
+        if not (0 < empathy_study_gain < scholarship_gain and empathy_study_gain < first_aid_study_gain):
+            raise AssertionError(
+                f"Anatomy study should only give a tiny empathy gain: empathy={empathy_study_gain}, scholarship={scholarship_gain}, first_aid={first_aid_study_gain}"
+            )
+        if healer.db.skills.get("scholarship", {}).get("mindstate", 0) != 0:
+            raise AssertionError("Scholarship transient study should not update legacy mindstate.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "output_log": list(ctx.output_log),
+            "link_pool": link_pool,
+            "vitality_gain": vitality_gain,
+            "poison_gain": poison_gain,
+            "empath_target_gain": empath_target_gain,
+            "first_aid_gain": first_aid_gain,
+            "scholarship_gain": scholarship_gain,
+            "first_aid_study_gain": first_aid_study_gain,
+            "empathy_study_gain": empathy_study_gain,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-learning-unification",
+        scenario_metadata=getattr(run_empath_learning_unification_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-poison-loop",
+    aliases=["empath_poison_loop"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath poison-loop regression coverage validates poison, disease, perceive, and purge behavior without failing on environment-specific latency.",
+        "tags": ["core", "empath"],
+    },
+)
+def run_empath_poison_loop_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        from world.systems.wounds import apply_poison_tick
+
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_POISON_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_POISON_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_POISON_PATIENT")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 10, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 20}
+        empath.db.empath_shock = 0
+        patient.db.wounds = {"vitality": 50, "bleeding": 40, "fatigue": 0, "poison": 30, "disease": 20}
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("initial")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("perceive health")
+        perceive_health_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("perceived_room")
+        perceive_health_text = " ".join(str(line) for line in perceive_health_output)
+        if "weakened" not in perceive_health_text.lower():
+            raise AssertionError(f"Perceive health did not produce the expected vague triage signal: {perceive_health_output}")
+        if "TEST_EMPATH_POISON_PATIENT" in perceive_health_text or "%" in perceive_health_text:
+            raise AssertionError(f"Perceive health exposed exact data or names instead of vague sensing: {perceive_health_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("perceive TEST_EMPATH_POISON_PATIENT")
+        perceive_target_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("perceived_target")
+        perceive_target_text = " ".join(str(line) for line in perceive_target_output)
+        if "life force is unstable" not in perceive_target_text.lower():
+            raise AssertionError(f"Perceive target did not produce the expected imprecise target reading: {perceive_target_output}")
+        if "%" in perceive_target_text:
+            raise AssertionError(f"Perceive target exposed exact values instead of a vague reading: {perceive_target_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("touch TEST_EMPATH_POISON_PATIENT")
+        touch_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("touched")
+        link_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if int(link_state.get("strength", 0) or 0) != 60 or int(link_state.get("stability", 0) or 0) != 80:
+            raise AssertionError(f"Empath touch should create the expected weak link in poison loop: {link_state}")
+        if not any("sense the condition of your patient" in str(line).lower() for line in touch_output):
+            raise AssertionError(f"Empath touch did not emit the expected feedback: {touch_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("assess")
+        assess_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("assessed")
+        assess_text = " ".join(str(line) for line in assess_output)
+        for expected in ["Vitality: 50%", "Bleeding: 40%", "Poison: 30%", "Disease: 20%"]:
+            if expected not in assess_text:
+                raise AssertionError(f"Empath assess did not include expected exact wound values: {assess_output}")
+
+        vitality_before_poison_take = int((empath.db.wounds or {}).get("vitality", 0) or 0)
+        output_index = len(ctx.output_log)
+        ctx.cmd("take poison")
+        take_poison_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("took_poison")
+
+        patient_after_poison = dict(getattr(patient.db, "wounds", {}) or {})
+        empath_after_poison = dict(getattr(empath.db, "wounds", {}) or {})
+        if int(patient_after_poison.get("poison", 0) or 0) != 18:
+            raise AssertionError(f"Poison transfer did not reduce patient poison correctly: {patient_after_poison}")
+        if int(empath_after_poison.get("poison", 0) or 0) != 12:
+            raise AssertionError(f"Poison transfer did not load poison onto the Empath correctly: {empath_after_poison}")
+        expected_vitality_after_poison = vitality_before_poison_take + int(12 * 0.3)
+        if int(empath_after_poison.get("vitality", 0) or 0) != expected_vitality_after_poison:
+            raise AssertionError(f"Poison transfer did not apply the immediate vitality spike: {empath_after_poison}")
+        if not any("draw the injury into yourself" in str(line).lower() for line in take_poison_output):
+            raise AssertionError(f"Take poison did not emit the transfer message: {take_poison_output}")
+
+        vitality_before_tick = int((empath.db.wounds or {}).get("vitality", 0) or 0)
+        tick_damage = ctx.direct(apply_poison_tick, empath)
+        ctx.snapshot("poison_ticked")
+        vitality_after_tick = int((empath.db.wounds or {}).get("vitality", 0) or 0)
+        if int(tick_damage or 0) <= 0 or vitality_after_tick <= vitality_before_tick:
+            raise AssertionError(f"Poison tick did not increase vitality damage as required: damage={tick_damage}, before={vitality_before_tick}, after={vitality_after_tick}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("take bleeding")
+        take_bleeding_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("took_bleeding")
+
+        patient_after_bleeding = dict(getattr(patient.db, "wounds", {}) or {})
+        empath_after_bleeding = dict(getattr(empath.db, "wounds", {}) or {})
+        if int(patient_after_bleeding.get("bleeding", 0) or 0) != 28:
+            raise AssertionError(f"Bleeding transfer did not reduce patient bleeding correctly: {patient_after_bleeding}")
+        if int(empath_after_bleeding.get("bleeding", 0) or 0) != 16:
+            raise AssertionError(f"Bleeding transfer did not preserve the dangerous self-spike behavior: {empath_after_bleeding}")
+        if not any("draw the injury into yourself" in str(line).lower() for line in take_bleeding_output):
+            raise AssertionError(f"Take bleeding did not emit the transfer message: {take_bleeding_output}")
+
+        vitality_before_mend = int((empath.db.wounds or {}).get("vitality", 0) or 0)
+        bleeding_before_mend = int((empath.db.wounds or {}).get("bleeding", 0) or 0)
+        output_index = len(ctx.output_log)
+        ctx.cmd("mend self")
+        mend_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("mended")
+
+        empath_after_mend = dict(getattr(empath.db, "wounds", {}) or {})
+        if int(empath_after_mend.get("vitality", 0) or 0) != max(0, vitality_before_mend - 8):
+            raise AssertionError(f"Disease penalty did not reduce vitality healing to the expected amount: before={vitality_before_mend}, after={empath_after_mend}")
+        if int(empath_after_mend.get("bleeding", 0) or 0) != max(0, bleeding_before_mend - 4):
+            raise AssertionError(f"Disease penalty did not reduce bleeding healing to the expected amount: before={bleeding_before_mend}, after={empath_after_mend}")
+        if not any("focus inward, stabilizing your condition" in str(line).lower() for line in mend_output):
+            raise AssertionError(f"Mend self did not emit the expected feedback: {mend_output}")
+
+        fatigue_before_purge = int((empath.db.wounds or {}).get("fatigue", 0) or 0)
+        poison_before_purge = int((empath.db.wounds or {}).get("poison", 0) or 0)
+        output_index = len(ctx.output_log)
+        ctx.cmd("purge poison")
+        purge_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("purged")
+
+        empath_after_purge = dict(getattr(empath.db, "wounds", {}) or {})
+        if int(empath_after_purge.get("poison", 0) or 0) != max(0, poison_before_purge - 15):
+            raise AssertionError(f"Purge poison did not reduce poison by the locked amount: before={poison_before_purge}, after={empath_after_purge}")
+        if int(empath_after_purge.get("fatigue", 0) or 0) != fatigue_before_purge + 10:
+            raise AssertionError(f"Purge poison did not apply the fatigue cost: before={fatigue_before_purge}, after={empath_after_purge}")
+        if not any("force the corruption from your body" in str(line).lower() for line in purge_output):
+            raise AssertionError(f"Purge poison did not emit the expected feedback: {purge_output}")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = ["initial", "perceived_room", "perceived_target", "touched", "assessed", "took_poison", "poison_ticked", "took_bleeding", "mended", "purged"]
+        if labels != expected_labels:
+            raise AssertionError(f"Empath poison-loop snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "perceive_health_output": perceive_health_output,
+            "perceive_target_output": perceive_target_output,
+            "assess_output": assess_output,
+            "take_poison_output": take_poison_output,
+            "take_bleeding_output": take_bleeding_output,
+            "mend_output": mend_output,
+            "purge_output": purge_output,
+            "tick_damage": tick_damage,
+            "patient_after_poison": patient_after_poison,
+            "empath_after_poison": empath_after_poison,
+            "patient_after_bleeding": patient_after_bleeding,
+            "empath_after_bleeding": empath_after_bleeding,
+            "empath_after_mend": empath_after_mend,
+            "empath_after_purge": empath_after_purge,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-poison-loop",
+        scenario_metadata=getattr(run_empath_poison_loop_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-shock-lockout",
+    aliases=["empath_shock_lockout"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath shock lockout coverage validates offensive shock gain, automatic link breakage, and center-based recovery without failing on environment-specific latency.",
+        "tags": ["core", "empath", "shock", "smoke"],
+    },
+)
+def run_empath_shock_lockout_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_SHOCK_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_SHOCK_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_SHOCK_PATIENT")
+        foe_one = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_SHOCK_FOE_ONE")
+        foe_two = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_SHOCK_FOE_TWO")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        empath.db.empath_shock = 0
+        patient.db.wounds = {"vitality": 40, "bleeding": 15, "fatigue": 0, "poison": 0, "disease": 0}
+
+        empath.set_stat("agility", 40)
+        empath.set_stat("reflex", 40)
+        foe_one.set_stat("agility", 1)
+        foe_one.set_stat("reflex", 1)
+        foe_two.set_stat("agility", 1)
+        foe_two.set_stat("reflex", 1)
+        foe_one.set_hp(1)
+        foe_two.set_hp(1)
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("initial")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("touch TEST_EMPATH_SHOCK_PATIENT")
+        touch_before_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("linked")
+        link_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if int(link_state.get("target_id", 0) or 0) != int(getattr(patient, "id", 0) or 0):
+            raise AssertionError(f"Empath did not establish the initial patient link: {link_state}")
+
+        empath.register_empath_offensive_action(target=foe_one, context="attack", amount=15)
+        empath.register_empath_offensive_action(target=foe_one, context="kill", amount=30)
+        ctx.snapshot("first_kill")
+        shock_after_first = empath.get_empath_shock()
+        if shock_after_first != 45:
+            raise AssertionError(f"First empath kill should apply 45 shock total, got {shock_after_first}")
+
+        empath.register_empath_offensive_action(target=foe_two, context="attack", amount=15)
+        empath.register_empath_offensive_action(target=foe_two, context="kill", amount=30)
+        ctx.snapshot("second_kill")
+        shock_after_second = empath.get_empath_shock()
+        if shock_after_second < 80:
+            raise AssertionError(f"Second empath kill should push shock into lockout, got {shock_after_second}")
+        if empath.get_empath_link_state(require_local=False, emit_break_messages=False):
+            raise AssertionError("Empath link should break automatically once shock reaches disconnection.")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("touch TEST_EMPATH_SHOCK_PATIENT")
+        touch_fail_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("touch_locked")
+        if not any("cut off from others" in str(line).lower() for line in touch_fail_output):
+            raise AssertionError(f"Touch should fail from shock lockout: {touch_fail_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("perceive health")
+        perceive_fail_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("perceive_locked")
+        if not any("you sense nothing" in str(line).lower() for line in perceive_fail_output):
+            raise AssertionError(f"Perceive should return nothing while disconnected: {perceive_fail_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("take vitality 10")
+        take_fail_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("take_locked")
+        if not any("cut off from others" in str(line).lower() for line in take_fail_output):
+            raise AssertionError(f"Take should fail from shock lockout before link validation: {take_fail_output}")
+
+        empath.db.in_combat = False
+        empath.db.target = None
+        output_index = len(ctx.output_log)
+        ctx.cmd("center")
+        center_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("centered")
+        if empath.get_empath_shock() >= 80:
+            raise AssertionError(f"Center should reduce shock below lockout threshold, got {empath.get_empath_shock()}")
+        if int((empath.db.wounds or {}).get("fatigue", 0) or 0) != 10:
+            raise AssertionError(f"Center should apply the locked fatigue cost, got {empath.db.wounds}")
+        if not any("regaining clarity" in str(line).lower() for line in center_output):
+            raise AssertionError(f"Center did not emit the expected recovery message: {center_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("touch TEST_EMPATH_SHOCK_PATIENT")
+        touch_after_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("relinked")
+        relink_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if int(relink_state.get("target_id", 0) or 0) != int(getattr(patient, "id", 0) or 0):
+            raise AssertionError("Empath should be able to relink after centering below the disconnection threshold.")
+        if not any("sense the condition of your patient" in str(line).lower() for line in touch_after_output):
+            raise AssertionError(f"Touch should work again after recovery: {touch_after_output}")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = [
+            "initial",
+            "linked",
+            "first_kill",
+            "second_kill",
+            "touch_locked",
+            "perceive_locked",
+            "take_locked",
+            "centered",
+            "relinked",
+        ]
+        if labels != expected_labels:
+            raise AssertionError(f"Empath shock-lockout snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "shock_after_first": shock_after_first,
+            "shock_after_second": shock_after_second,
+            "shock_after_center": empath.get_empath_shock(),
+            "touch_before_output": touch_before_output,
+            "touch_fail_output": touch_fail_output,
+            "perceive_fail_output": perceive_fail_output,
+            "take_fail_output": take_fail_output,
+            "center_output": center_output,
+            "touch_after_output": touch_after_output,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-shock-lockout",
+        scenario_metadata=getattr(run_empath_shock_lockout_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-link-stability",
+    aliases=["empath_link_stability"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath link stability coverage validates direct-link strength, stability decay, and large-transfer strain without failing on environment-specific latency.",
+        "tags": ["core", "empath", "link"],
+    },
+)
+def run_empath_link_stability_scenario(args):
+    _setup_django()
+
+    def _serialize_link_state(state):
+        if not state:
+            return None
+        return {
+            "target": getattr(state.get("target"), "key", None),
+            "target_id": int(state.get("target_id", 0) or 0),
+            "type": state.get("type"),
+            "strength": int(state.get("strength", 0) or 0),
+            "stability": int(state.get("stability", 0) or 0),
+            "condition": state.get("condition"),
+        }
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_LINK_STABILITY_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_PATIENT")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        empath.db.empath_shock = 0
+        patient.db.wounds = {"vitality": 70, "bleeding": 70, "fatigue": 0, "poison": 0, "disease": 0}
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("initial")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("link TEST_EMPATH_LINK_PATIENT")
+        link_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("linked")
+
+        initial_link = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not initial_link or initial_link.get("type") != "direct" or int(initial_link.get("strength", 0) or 0) != 100 or int(initial_link.get("stability", 0) or 0) != 100:
+            raise AssertionError(f"Direct link was not created as expected: {initial_link}")
+        if not any("shape of their suffering" in str(line).lower() for line in link_output):
+            raise AssertionError(f"Link command did not emit the expected direct-link messaging: {link_output}")
+
+        ctx.cmd("take bleeding 20")
+        ctx.snapshot("took_bleeding_20")
+        after_first = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not after_first or int(after_first.get("stability", 0) or 0) != 94:
+            raise AssertionError(f"Direct small-transfer strain should reduce stability by 6: {after_first}")
+
+        ctx.cmd("take vitality 30")
+        ctx.snapshot("took_vitality_30")
+        after_second = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not after_second or int(after_second.get("stability", 0) or 0) != 73:
+            raise AssertionError(f"Direct large transfer should consume the new typed stability costs: {after_second}")
+
+        ctx.cmd("take bleeding 30")
+        ctx.snapshot("took_bleeding_30")
+        after_third = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not after_third:
+            raise AssertionError("Direct link should still exist but be badly worn after the locked sequence.")
+        if int(after_third.get("stability", 0) or 0) != 52:
+            raise AssertionError(f"Repeated large transfers should push stability toward collapse: {after_third}")
+        if str(after_third.get("condition") or "") == "steady":
+            raise AssertionError(f"Link condition should weaken under repeated strain: {after_third}")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = ["initial", "linked", "took_bleeding_20", "took_vitality_30", "took_bleeding_30"]
+        if labels != expected_labels:
+            raise AssertionError(f"Empath link-stability snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "initial_link": _serialize_link_state(initial_link),
+            "after_first": _serialize_link_state(after_first),
+            "after_second": _serialize_link_state(after_second),
+            "after_third": _serialize_link_state(after_third),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-link-stability",
+        scenario_metadata=getattr(run_empath_link_stability_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-link-separation",
+    aliases=["empath_link_separation"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath link separation coverage validates automatic link breakage when a patient leaves the room without failing on environment-specific latency.",
+        "tags": ["core", "empath", "link"],
+    },
+)
+def run_empath_link_separation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_LINK_SEPARATION_ROOM")
+        far_room = ctx.harness.create_test_room(key="TEST_EMPATH_LINK_FAR_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_SEPARATION_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_SEPARATION_PATIENT")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        patient.db.wounds = {"vitality": 45, "bleeding": 20, "fatigue": 0, "poison": 0, "disease": 0}
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("initial")
+        ctx.cmd("link TEST_EMPATH_SEPARATION_PATIENT")
+        ctx.snapshot("linked")
+
+        patient.move_to(far_room, quiet=True, use_destination=False)
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("assess")
+        assess_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("assess_after_move")
+        if not any("distance tears your connection apart" in str(line).lower() for line in assess_output):
+            raise AssertionError(f"Assess should break the link cleanly on separation: {assess_output}")
+        if empath.get_empath_link_state(require_local=False, emit_break_messages=False):
+            raise AssertionError("Link should be cleared after the target leaves the room.")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("take vitality 10")
+        take_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("take_after_move")
+        if not any("not linked to a patient" in str(line).lower() for line in take_output):
+            raise AssertionError(f"Take should fail cleanly after separation breaks the link: {take_output}")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = ["initial", "linked", "assess_after_move", "take_after_move"]
+        if labels != expected_labels:
+            raise AssertionError(f"Empath link-separation snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "assess_output": assess_output,
+            "take_output": take_output,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-link-separation",
+        scenario_metadata=getattr(run_empath_link_separation_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-link-vs-shock",
+    aliases=["empath_link_vs_shock"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath link-vs-shock coverage validates forced link loss and post-center partial recovery without failing on environment-specific latency.",
+        "tags": ["core", "empath", "link", "shock"],
+    },
+)
+def run_empath_link_vs_shock_scenario(args):
+    _setup_django()
+
+    def _serialize_link_state(state):
+        if not state:
+            return None
+        return {
+            "target": getattr(state.get("target"), "key", None),
+            "target_id": int(state.get("target_id", 0) or 0),
+            "type": state.get("type"),
+            "strength": int(state.get("strength", 0) or 0),
+            "stability": int(state.get("stability", 0) or 0),
+            "condition": state.get("condition"),
+        }
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_LINK_SHOCK_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_SHOCK_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_SHOCK_PATIENT")
+        foe_one = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_SHOCK_FOE_ONE")
+        foe_two = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_LINK_SHOCK_FOE_TWO")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        empath.db.empath_shock = 0
+        patient.db.wounds = {"vitality": 35, "bleeding": 20, "fatigue": 0, "poison": 0, "disease": 0}
+
+        empath.set_stat("agility", 40)
+        empath.set_stat("reflex", 40)
+        foe_one.set_stat("agility", 1)
+        foe_one.set_stat("reflex", 1)
+        foe_two.set_stat("agility", 1)
+        foe_two.set_stat("reflex", 1)
+        foe_one.set_hp(1)
+        foe_two.set_hp(1)
+
+        ctx.assert_invariant("character_exists")
+        ctx.assert_invariant("valid_room_state")
+
+        ctx.snapshot("initial")
+        ctx.cmd("link TEST_EMPATH_LINK_SHOCK_PATIENT")
+        ctx.snapshot("linked")
+
+        initial_link = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not initial_link or initial_link.get("type") != "direct":
+            raise AssertionError(f"Expected an active direct link before shock buildup: {initial_link}")
+
+        empath.register_empath_offensive_action(target=foe_one, context="attack", amount=15)
+        empath.register_empath_offensive_action(target=foe_one, context="kill", amount=30)
+        ctx.snapshot("first_kill")
+
+        empath.register_empath_offensive_action(target=foe_two, context="attack", amount=15)
+        empath.register_empath_offensive_action(target=foe_two, context="kill", amount=30)
+        ctx.snapshot("second_kill")
+
+        if empath.get_empath_shock() < 80:
+            raise AssertionError(f"Shock should reach disconnected after the locked offensive sequence, got {empath.get_empath_shock()}")
+        if empath.get_empath_link_state(require_local=False, emit_break_messages=False):
+            raise AssertionError("Direct link should be forcibly cleared by disconnected shock.")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("link TEST_EMPATH_LINK_SHOCK_PATIENT")
+        link_fail_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("link_locked")
+        if not any("cut off from others" in str(line).lower() for line in link_fail_output):
+            raise AssertionError(f"Link should remain blocked while disconnected: {link_fail_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("perceive TEST_EMPATH_LINK_SHOCK_PATIENT")
+        perceive_fail_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("perceive_locked")
+        if not any("you sense nothing" in str(line).lower() for line in perceive_fail_output):
+            raise AssertionError(f"Perceive target should remain blocked while disconnected: {perceive_fail_output}")
+
+        empath.db.in_combat = False
+        empath.db.target = None
+        ctx.cmd("center")
+        ctx.snapshot("centered")
+        if empath.get_empath_shock() <= 0 or empath.get_empath_shock() >= 80:
+            raise AssertionError(f"Center should restore access without acting as a full reset, got {empath.get_empath_shock()}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("link TEST_EMPATH_LINK_SHOCK_PATIENT")
+        link_after_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("relinked")
+        relink_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not relink_state or relink_state.get("type") != "direct":
+            raise AssertionError(f"Direct link should be available again after center restores partial access: {relink_state}")
+        if not any("shape of their suffering" in str(line).lower() for line in link_after_output):
+            raise AssertionError(f"Direct link should work again after recovery: {link_after_output}")
+
+        labels = ctx.get_snapshot_labels()
+        expected_labels = ["initial", "linked", "first_kill", "second_kill", "link_locked", "perceive_locked", "centered", "relinked"]
+        if labels != expected_labels:
+            raise AssertionError(f"Empath link-vs-shock snapshot labels drifted: expected {expected_labels}, got {labels}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_count": len(ctx.snapshots),
+            "snapshot_labels": labels,
+            "initial_link": _serialize_link_state(initial_link),
+            "relink_state": _serialize_link_state(relink_state),
+            "link_fail_output": link_fail_output,
+            "perceive_fail_output": perceive_fail_output,
+            "link_after_output": link_after_output,
+            "shock_after_center": empath.get_empath_shock(),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-link-vs-shock",
+        scenario_metadata=getattr(run_empath_link_vs_shock_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-persistent-link",
+    aliases=["empath_persistent_link"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath persistent-link coverage validates endurance-vs-throughput tradeoffs and clean separation failure without failing on environment-specific latency.",
+        "tags": ["core", "empath", "link"],
+    },
+)
+def run_empath_persistent_link_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_PERSISTENT_ROOM")
+        far_room = ctx.harness.create_test_room(key="TEST_EMPATH_PERSISTENT_FAR_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_PERSISTENT_HEALER")
+        direct_patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_DIRECT_PATIENT")
+        persistent_patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_PERSISTENT_PATIENT")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        direct_patient.db.wounds = {"vitality": 40, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        persistent_patient.db.wounds = {"vitality": 40, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+
+        ctx.snapshot("initial")
+        ctx.cmd("link TEST_EMPATH_DIRECT_PATIENT")
+        ctx.snapshot("direct_linked")
+        ctx.cmd("take vitality 10")
+        ctx.cmd("take vitality 10")
+        ctx.cmd("take vitality 10")
+        ctx.snapshot("direct_strain")
+        direct_link = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        direct_empath_vitality = empath.get_empath_wound("vitality")
+        direct_remaining = direct_patient.get_empath_wound("vitality")
+
+        ctx.cmd("release")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        ctx.cmd("link persistent TEST_EMPATH_PERSISTENT_PATIENT")
+        ctx.snapshot("persistent_linked")
+        ctx.cmd("take vitality 10")
+        ctx.cmd("take vitality 10")
+        ctx.cmd("take vitality 10")
+        ctx.snapshot("persistent_strain")
+        persistent_link = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        persistent_empath_vitality = empath.get_empath_wound("vitality")
+        persistent_remaining = persistent_patient.get_empath_wound("vitality")
+
+        if int(direct_link.get("stability", 0) or 0) != 82:
+            raise AssertionError(f"Direct link should end at 82 stability after three small transfers: {direct_link}")
+        if int(persistent_link.get("stability", 0) or 0) != 108:
+            raise AssertionError(f"Persistent link should last longer under small repeated strain: {persistent_link}")
+        if persistent_empath_vitality >= direct_empath_vitality:
+            raise AssertionError(
+                f"Persistent link should carry slightly less throughput than direct: direct={direct_empath_vitality}, persistent={persistent_empath_vitality}"
+            )
+        if persistent_remaining <= direct_remaining:
+            raise AssertionError(
+                f"Persistent link should leave more wound on the patient than direct throughput: direct={direct_remaining}, persistent={persistent_remaining}"
+            )
+
+        persistent_patient.move_to(far_room, quiet=True, use_destination=False)
+        output_index = len(ctx.output_log)
+        ctx.cmd("assess")
+        assess_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("persistent_separated")
+        if not any("distance tears your connection apart" in str(line).lower() for line in assess_output):
+            raise AssertionError(f"Persistent link should still fail on separation: {assess_output}")
+        if empath.get_empath_link_state(require_local=False, emit_break_messages=False):
+            raise AssertionError("Persistent link should clear after separation.")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "direct_link": {"stability": int(direct_link.get("stability", 0) or 0), "strength": int(direct_link.get("strength", 0) or 0)},
+            "persistent_link": {"stability": int(persistent_link.get("stability", 0) or 0), "strength": int(persistent_link.get("strength", 0) or 0)},
+            "direct_empath_vitality": direct_empath_vitality,
+            "persistent_empath_vitality": persistent_empath_vitality,
+            "direct_remaining": direct_remaining,
+            "persistent_remaining": persistent_remaining,
+            "assess_output": assess_output,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-persistent-link",
+        scenario_metadata=getattr(run_empath_persistent_link_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-unity-burden",
+    aliases=["empath_unity_burden"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath unity-burden coverage validates partial smoothing without creating free group healing.",
+        "tags": ["core", "empath", "unity"],
+    },
+)
+def run_empath_unity_burden_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_UNITY_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_PATIENT")
+        partner = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_PARTNER")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        patient.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 40}
+        partner.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+
+        ctx.snapshot("initial")
+        ctx.cmd("link TEST_EMPATH_UNITY_PATIENT")
+        ctx.cmd("unity TEST_EMPATH_UNITY_PARTNER")
+        ctx.snapshot("unified")
+        unity_before = empath.get_empath_unity_state()
+        ctx.cmd("take disease 20")
+        ctx.snapshot("took_with_unity")
+
+        unity_after = empath.get_empath_unity_state()
+        empath_disease = empath.get_empath_wound("disease")
+        patient_disease = patient.get_empath_wound("disease")
+        partner_disease = partner.get_empath_wound("disease")
+
+        if patient_disease != 20:
+            raise AssertionError(f"Primary patient should lose the full requested burden: {patient_disease}")
+        if partner_disease != 3:
+            raise AssertionError(f"Unity should smooth only a small share onto the secondary target: {partner_disease}")
+        if empath_disease != 17:
+            raise AssertionError(f"Empath should still take the majority of the burden: {empath_disease}")
+        if not unity_before or not unity_after or int(unity_before.get("stability", 0) or 0) != 80 or int(unity_after.get("stability", 0) or 0) != 65:
+            raise AssertionError(f"Unity stability should decay by 15 on assisted transfer: before={unity_before}, after={unity_after}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "unity_before": {"stability": int(unity_before.get("stability", 0) or 0), "condition": unity_before.get("condition")},
+            "unity_after": {"stability": int(unity_after.get("stability", 0) or 0), "condition": unity_after.get("condition")},
+            "empath_disease": empath_disease,
+            "patient_disease": patient_disease,
+            "partner_disease": partner_disease,
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-unity-burden",
+        scenario_metadata=getattr(run_empath_unity_burden_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-redirect-strain",
+    aliases=["empath_redirect_strain"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath redirect-strain coverage validates conduit strain, stability loss, and large-redirect shock without failing on environment-specific latency.",
+        "tags": ["core", "empath", "unity", "redirect"],
+    },
+)
+def run_empath_redirect_strain_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_REDIRECT_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_REDIRECT_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_REDIRECT_PATIENT")
+        partner = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_REDIRECT_PARTNER")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        empath.db.empath_shock = 0
+        patient.db.wounds = {"vitality": 40, "bleeding": 40, "fatigue": 0, "poison": 0, "disease": 0}
+        partner.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+
+        ctx.cmd("link TEST_EMPATH_REDIRECT_PATIENT")
+        ctx.cmd("unity TEST_EMPATH_REDIRECT_PARTNER")
+        ctx.snapshot("unified")
+        ctx.cmd("redirect vitality 20 TEST_EMPATH_REDIRECT_PARTNER")
+        ctx.snapshot("redirected_vitality")
+        ctx.cmd("redirect bleeding 30 TEST_EMPATH_REDIRECT_PARTNER")
+        ctx.snapshot("redirected_bleeding")
+
+        link_after = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        unity_after = empath.get_empath_unity_state()
+        if patient.get_empath_wound("vitality") != 20 or partner.get_empath_wound("vitality") != 20:
+            raise AssertionError("Vitality redirect should move the wound between the pair.")
+        if patient.get_empath_wound("bleeding") != 10 or partner.get_empath_wound("bleeding") != 30:
+            raise AssertionError("Bleeding redirect should move the wound between the pair.")
+        if empath.get_empath_wound("vitality") != 5:
+            raise AssertionError(f"Vitality redirect should inflict conduit strain on the empath: {empath.get_empath_wound('vitality')}")
+        if empath.get_empath_wound("bleeding") != 10:
+            raise AssertionError(f"Bleeding redirect should inflict conduit bleeding strain on the empath: {empath.get_empath_wound('bleeding')}")
+        if int(link_after.get("stability", 0) or 0) != 60:
+            raise AssertionError(f"Two redirects should strip 40 link stability total: {link_after}")
+        if int(unity_after.get("stability", 0) or 0) != 40:
+            raise AssertionError(f"Two redirects should strip 40 unity stability total: {unity_after}")
+        if empath.get_empath_shock() != 5:
+            raise AssertionError(f"Large redirect should add 5 shock: {empath.get_empath_shock()}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "link_after": {"stability": int(link_after.get("stability", 0) or 0), "condition": link_after.get("condition")},
+            "unity_after": {"stability": int(unity_after.get("stability", 0) or 0), "condition": unity_after.get("condition")},
+            "empath_vitality": empath.get_empath_wound("vitality"),
+            "empath_bleeding": empath.get_empath_wound("bleeding"),
+            "shock": empath.get_empath_shock(),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-redirect-strain",
+        scenario_metadata=getattr(run_empath_redirect_strain_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-unity-breaks-on-shock",
+    aliases=["empath_unity_breaks_on_shock"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath unity-breaks-on-shock coverage validates central cleanup and post-center partial recovery without failing on environment-specific latency.",
+        "tags": ["core", "empath", "unity", "shock"],
+    },
+)
+def run_empath_unity_breaks_on_shock_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_UNITY_SHOCK_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_SHOCK_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_SHOCK_PATIENT")
+        partner = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_SHOCK_PARTNER")
+        foe_one = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_SHOCK_FOE_ONE")
+        foe_two = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNITY_SHOCK_FOE_TWO")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        empath.db.empath_shock = 0
+
+        ctx.cmd("link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT")
+        ctx.cmd("unity TEST_EMPATH_UNITY_SHOCK_PARTNER")
+        ctx.snapshot("unified")
+
+        empath.register_empath_offensive_action(target=foe_one, context="attack", amount=15)
+        empath.register_empath_offensive_action(target=foe_one, context="kill", amount=30)
+        empath.register_empath_offensive_action(target=foe_two, context="attack", amount=15)
+        empath.register_empath_offensive_action(target=foe_two, context="kill", amount=30)
+        ctx.snapshot("disconnected")
+
+        if empath.get_empath_shock() < 80:
+            raise AssertionError(f"Shock should reach disconnected: {empath.get_empath_shock()}")
+        if empath.get_empath_link_state(require_local=False, emit_break_messages=False):
+            raise AssertionError("Base link should clear on disconnected shock.")
+        if empath.get_empath_unity_state():
+            raise AssertionError("Unity should clear on disconnected shock.")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("touch TEST_EMPATH_UNITY_SHOCK_PATIENT")
+        touch_fail_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("touch_locked")
+        if not any("cut off from others" in str(line).lower() for line in touch_fail_output):
+            raise AssertionError(f"Touch should be blocked while disconnected: {touch_fail_output}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("redirect vitality 10 TEST_EMPATH_UNITY_SHOCK_PARTNER")
+        redirect_fail_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("redirect_locked")
+        if not any("cut off from others" in str(line).lower() for line in redirect_fail_output):
+            raise AssertionError(f"Redirect should be blocked while disconnected: {redirect_fail_output}")
+
+        empath.db.in_combat = False
+        empath.db.target = None
+        ctx.cmd("center")
+        ctx.snapshot("centered")
+        if empath.get_empath_shock() <= 0 or empath.get_empath_shock() >= 80:
+            raise AssertionError(f"Center should restore partial access without fully resetting shock: {empath.get_empath_shock()}")
+
+        output_index = len(ctx.output_log)
+        ctx.cmd("link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT")
+        relink_output = list(ctx.output_log[output_index:])
+        ctx.snapshot("relinked")
+        relink_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if not relink_state or relink_state.get("type") != "persistent":
+            raise AssertionError(f"Persistent link should be available again after centering below disconnected: {relink_state}")
+        if not any("deeper, longer-held connection" in str(line).lower() for line in relink_output):
+            raise AssertionError(f"Persistent relink messaging drifted: {relink_output}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "touch_fail_output": touch_fail_output,
+            "redirect_fail_output": redirect_fail_output,
+            "relink_output": relink_output,
+            "shock_after_center": empath.get_empath_shock(),
+            "output_log": list(ctx.output_log),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-unity-breaks-on-shock",
+        scenario_metadata=getattr(run_empath_unity_breaks_on_shock_scenario, "diretest_metadata", {}),
+    )
+
+
+def _diretest_set_progression_rank(character, skill_name, rank):
+    if not hasattr(character, "_sync_exp_skill_state") or not hasattr(character, "_persist_exp_skill_state"):
+        raise AssertionError("Character is missing EXP skill helpers needed by DireTest progression scenarios.")
+    skill = character._sync_exp_skill_state(skill_name, legacy_entry={})
+    skill.rank = max(0, int(rank or 0))
+    skill.rank_progress = 0.0
+    skill.pool = 0.0
+    skill.last_trained = 0.0
+    character._persist_exp_skill_state(skill)
+    store = dict(getattr(character.db, "exp_skill_state", {}) or {})
+    store[str(skill_name)] = {
+        "rank": int(skill.rank or 0),
+        "rank_progress": float(skill.rank_progress or 0.0),
+        "pool": float(skill.pool or 0.0),
+        "skillset": str(getattr(skill, "skillset", "primary") or "primary"),
+        "mindstate": int(getattr(skill, "mindstate", 0) or 0),
+        "last_trained": float(skill.last_trained or 0.0),
+    }
+    character.db.exp_skill_state = store
+    return skill
+
+
+def _diretest_get_progression_snapshot(character, skill_name="empathy"):
+    store = dict(getattr(character.db, "exp_skill_state", {}) or {})
+    entry = dict(store.get(skill_name, {}) or {})
+    return {
+        "rank": int(entry.get("rank", 0) or 0),
+        "rank_progress": float(entry.get("rank_progress", 0.0) or 0.0),
+        "pool": float(entry.get("pool", 0.0) or 0.0),
+        "last_trained": float(entry.get("last_trained", 0.0) or 0.0),
+    }
+
+
+@register_scenario(
+    "empath-circle-progression",
+    aliases=["empath_circle_progression"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath circle progression coverage validates manual-only circling, transient-rank checks, and advance-command delegation without depending on wall-clock timing.",
+        "tags": ["core", "empath", "circles"],
+    },
+)
+def run_empath_circle_progression_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_CIRCLE_ROOM")
+        room.db.empath_circle_room = True
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_CIRCLE_HEALER")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.circle = 1
+        empath.db.skills = {"empathy": {"rank": 500, "mindstate": 0}}
+        _diretest_set_progression_rank(empath, "empathy", 0)
+
+        blocked_output_index = len(ctx.output_log)
+        ctx.cmd("circle advance")
+        blocked_output = list(ctx.output_log[blocked_output_index:])
+        ctx.snapshot("blocked")
+
+        if empath.get_circle() != 1:
+            raise AssertionError(f"Circle should remain unchanged when transient empathy rank is below requirement: {empath.get_circle()}")
+        if not any("not yet ready to circle" in str(line).lower() for line in blocked_output):
+            raise AssertionError(f"Blocked circle attempt did not emit the expected failure line: {blocked_output}")
+        if not any("empathy 0/10" in str(line).lower() for line in blocked_output):
+            raise AssertionError(f"Blocked circle attempt did not report transient empathy requirements: {blocked_output}")
+
+        _diretest_set_progression_rank(empath, "empathy", 40)
+        if empath.get_circle() != 1:
+            raise AssertionError("Empathy rank should not auto-advance circle state.")
+
+        advanced_output_index = len(ctx.output_log)
+        ctx.cmd("advance")
+        advanced_output = list(ctx.output_log[advanced_output_index:])
+        ctx.snapshot("advanced")
+
+        if empath.get_circle() != 2:
+            raise AssertionError(f"Advance should move the empath to the next circle only: {empath.get_circle()}")
+        if not any("advance to empath circle 2" in str(line).lower() for line in advanced_output):
+            raise AssertionError(f"Advance delegation did not emit the expected circling success line: {advanced_output}")
+
+        status_output_index = len(ctx.output_log)
+        ctx.cmd("circle")
+        status_output = list(ctx.output_log[status_output_index:])
+        ctx.snapshot("status")
+
+        if not any("empath circle: 2" in str(line).lower() for line in status_output):
+            raise AssertionError(f"Circle status did not report the updated circle: {status_output}")
+        if not any("empathy rank: 40" in str(line).lower() for line in status_output):
+            raise AssertionError(f"Circle status did not report the transient empathy rank: {status_output}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "blocked_output": blocked_output,
+            "advanced_output": advanced_output,
+            "status_output": status_output,
+            "circle": empath.get_circle(),
+            "progression_rank": empath.get_progression_skill_rank("empathy"),
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-circle-progression",
+        scenario_metadata=getattr(run_empath_circle_progression_scenario, "diretest_metadata", {}),
+    )
+
+
+@register_scenario(
+    "empath-unlock-separation",
+    aliases=["empath_unlock_separation"],
+    metadata={
+        "fail_on_critical_lag": False,
+        "lag_policy_reason": "Empath unlock separation coverage validates that circle state does not bypass transient empathy unlocks and that locked actions do not train empathy.",
+        "tags": ["core", "empath", "circles", "unlocks"],
+    },
+)
+def run_empath_unlock_separation_scenario(args):
+    _setup_django()
+
+    def scenario(ctx):
+        room = ctx.harness.create_test_room(key="TEST_EMPATH_UNLOCK_ROOM")
+        empath = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNLOCK_HEALER")
+        patient = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNLOCK_PATIENT")
+        partner = ctx.harness.create_test_character(room=room, key="TEST_EMPATH_UNLOCK_PARTNER")
+
+        ctx.character = empath
+        ctx.room = room
+
+        empath.set_profession("empath")
+        empath.db.circle = 30
+        empath.db.skills = {"empathy": {"rank": 500, "mindstate": 0}}
+        _diretest_set_progression_rank(empath, "empathy", 0)
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+        patient.db.wounds = {"vitality": 40, "bleeding": 20, "fatigue": 0, "poison": 30, "disease": 20}
+        partner.db.wounds = {"vitality": 0, "bleeding": 0, "fatigue": 0, "poison": 0, "disease": 0}
+
+        ctx.cmd("touch TEST_EMPATH_UNLOCK_PATIENT")
+        ctx.snapshot("touched")
+
+        blocked_state_before = _diretest_get_progression_snapshot(empath)
+        blocked_output_index = len(ctx.output_log)
+        ctx.cmd("take poison")
+        blocked_take_output = list(ctx.output_log[blocked_output_index:])
+        ctx.snapshot("blocked_take")
+        blocked_state_after = _diretest_get_progression_snapshot(empath)
+
+        if patient.get_empath_wound("poison") != 30:
+            raise AssertionError("Locked poison transfer should not alter the patient's poison burden.")
+        if blocked_state_before != blocked_state_after:
+            raise AssertionError(f"Locked poison transfer should not train empathy: before={blocked_state_before}, after={blocked_state_after}")
+        if not any("not yet ready to take poison" in str(line).lower() for line in blocked_take_output):
+            raise AssertionError(f"Locked poison transfer did not emit the expected unlock message: {blocked_take_output}")
+
+        blocked_link_output_index = len(ctx.output_log)
+        ctx.cmd("link persistent TEST_EMPATH_UNLOCK_PATIENT")
+        blocked_link_output = list(ctx.output_log[blocked_link_output_index:])
+        if not any("not yet ready to hold a persistent empathic link" in str(line).lower() for line in blocked_link_output):
+            raise AssertionError(f"High circle should not bypass the persistent-link unlock: {blocked_link_output}")
+
+        blocked_perceive_output_index = len(ctx.output_log)
+        ctx.cmd("perceive health")
+        blocked_perceive_output = list(ctx.output_log[blocked_perceive_output_index:])
+        if not any("not yet ready to read nearby life forces clearly" in str(line).lower() for line in blocked_perceive_output):
+            raise AssertionError(f"Perceive health should stay locked below its empathy threshold: {blocked_perceive_output}")
+
+        _diretest_set_progression_rank(empath, "empathy", 39)
+        mitigation_before = empath.get_empath_mitigation()
+        if mitigation_before != 1.0:
+            raise AssertionError(f"Wound reduction should stay disabled below empathy 40: {mitigation_before}")
+
+        _diretest_set_progression_rank(empath, "empathy", 40)
+        mitigation_after = empath.get_empath_mitigation()
+        if mitigation_after >= 1.0:
+            raise AssertionError(f"Wound reduction should activate at empathy 40: {mitigation_after}")
+
+        unlocked_state_before = _diretest_get_progression_snapshot(empath)
+        unlocked_take_output_index = len(ctx.output_log)
+        ctx.cmd("take poison")
+        unlocked_take_output = list(ctx.output_log[unlocked_take_output_index:])
+        ctx.snapshot("unlocked_take")
+        unlocked_state_after = _diretest_get_progression_snapshot(empath)
+
+        if patient.get_empath_wound("poison") >= 30:
+            raise AssertionError("Unlocked poison transfer should reduce the patient's poison burden.")
+        if unlocked_state_after["last_trained"] <= unlocked_state_before["last_trained"]:
+            raise AssertionError(f"Unlocked poison transfer should train empathy: before={unlocked_state_before}, after={unlocked_state_after}")
+        if not any("draw the injury into yourself" in str(line).lower() or "lessen the burden" in str(line).lower() for line in unlocked_take_output):
+            raise AssertionError(f"Unlocked poison transfer did not emit the expected transfer messaging: {unlocked_take_output}")
+
+        persistent_output_index = len(ctx.output_log)
+        ctx.cmd("link persistent TEST_EMPATH_UNLOCK_PATIENT")
+        persistent_output = list(ctx.output_log[persistent_output_index:])
+        persistent_state = empath.get_empath_link_state(require_local=True, emit_break_messages=False)
+        if str(persistent_state.get("type") or "") != "persistent":
+            raise AssertionError(f"Persistent link should unlock once empathy threshold is met: {persistent_state}")
+
+        ctx.cmd("link TEST_EMPATH_UNLOCK_PATIENT")
+        unity_output_index = len(ctx.output_log)
+        ctx.cmd("unity TEST_EMPATH_UNLOCK_PARTNER")
+        unity_output = list(ctx.output_log[unity_output_index:])
+        if not empath.get_empath_unity_state():
+            raise AssertionError(f"Unity should unlock once empathy threshold is met: {unity_output}")
+
+        channel_output_index = len(ctx.output_log)
+        ctx.cmd("channel poison")
+        channel_output = list(ctx.output_log[channel_output_index:])
+        if not empath.get_state("empath_channel"):
+            raise AssertionError(f"Channel should unlock once empathy threshold is met: {channel_output}")
+
+        return {
+            "commands": list(ctx.command_log),
+            "snapshot_labels": ctx.get_snapshot_labels(),
+            "blocked_take_output": blocked_take_output,
+            "blocked_link_output": blocked_link_output,
+            "blocked_perceive_output": blocked_perceive_output,
+            "unlocked_take_output": unlocked_take_output,
+            "persistent_output": persistent_output,
+            "unity_output": unity_output,
+            "channel_output": channel_output,
+            "mitigation_before": mitigation_before,
+            "mitigation_after": mitigation_after,
+            "blocked_state_before": blocked_state_before,
+            "blocked_state_after": blocked_state_after,
+            "unlocked_state_before": unlocked_state_before,
+            "unlocked_state_after": unlocked_state_after,
+        }
+
+    return _run_registered_scenario(
+        args,
+        scenario,
+        auto_snapshot=False,
+        name="empath-unlock-separation",
+        scenario_metadata=getattr(run_empath_unlock_separation_scenario, "diretest_metadata", {}),
+    )
 
 
 @register_scenario(
@@ -5521,6 +9448,9 @@ def _run_first_area_case(args, case_name):
         expected_recovery_room = _expected_recovery_room_key(onboarding)
         lane_room = character.location
         if getattr(lane_room, "key", None) == onboarding.EMPATH_GUILD_ROOM:
+            character.execute_cmd("south")
+            lane_room = character.location
+        if getattr(lane_room, "key", None) == getattr(onboarding, "EMPATH_GUILD_INTERIOR_ENTRY_ROOM", None):
             character.execute_cmd("out")
             lane_room = character.location
         if getattr(lane_room, "key", None) != onboarding.EMPATH_GUILD_ENTRY_ROOM:
@@ -5538,7 +9468,7 @@ def _run_first_area_case(args, case_name):
             character.execute_cmd("guild")
             messages = "\n".join(captured.get(character) or [])
             ok = (
-                getattr(character.location, "key", None) == onboarding.EMPATH_GUILD_ROOM
+                getattr(character.location, "key", None) == getattr(onboarding, "EMPATH_GUILD_INTERIOR_ENTRY_ROOM", onboarding.EMPATH_GUILD_ROOM)
                 and "It is a place for those who have not yet died." in messages
             )
             detail = messages or str(getattr(getattr(character, "location", None), "key", ""))
@@ -5656,6 +9586,15 @@ def _run_empath_guild_case(args, case_name):
         )
         if not guild_room:
             raise RuntimeError("Empath Guild room is missing.")
+        guild_entry_room = next(
+            (
+                room for room in ObjectDB.objects.filter(db_key__iexact=getattr(onboarding, "EMPATH_GUILD_INTERIOR_ENTRY_ROOM", "Empath Guild, Entry Hall"))
+                if getattr(room, "db_typeclass_path", "") == "typeclasses.rooms.Room"
+            ),
+            None,
+        )
+        if not guild_entry_room:
+            raise RuntimeError("Empath Guild entry room is missing.")
 
         character = create_object(
             "typeclasses.characters.Character",
@@ -5672,7 +9611,7 @@ def _run_empath_guild_case(args, case_name):
 
         if case_name == "entry":
             character.execute_cmd("guild")
-            ok = getattr(getattr(character, "location", None), "key", None) == onboarding.EMPATH_GUILD_ROOM
+            ok = getattr(getattr(character, "location", None), "key", None) == getattr(onboarding, "EMPATH_GUILD_INTERIOR_ENTRY_ROOM", onboarding.EMPATH_GUILD_ROOM)
             detail = f"room={getattr(getattr(character, 'location', None), 'key', None)}"
         elif case_name == "aliases":
             results = []
@@ -5680,23 +9619,29 @@ def _run_empath_guild_case(args, case_name):
                 character.move_to(lane_room, quiet=True, use_destination=False)
                 character.execute_cmd(command)
                 results.append((command, getattr(getattr(character, "location", None), "key", None)))
-            ok = all(room_key == onboarding.EMPATH_GUILD_ROOM for _, room_key in results)
+            expected_entry_key = getattr(onboarding, "EMPATH_GUILD_INTERIOR_ENTRY_ROOM", onboarding.EMPATH_GUILD_ROOM)
+            ok = all(room_key == expected_entry_key for _, room_key in results)
             detail = ", ".join(f"{command}->{room_key}" for command, room_key in results)
         elif case_name == "return":
-            character.move_to(guild_room, quiet=True, use_destination=False)
+            character.move_to(guild_entry_room, quiet=True, use_destination=False)
+            entry_appearance = guild_entry_room.return_appearance(character)
             character.execute_cmd("out")
             out_room = getattr(getattr(character, "location", None), "key", None)
-            character.move_to(guild_room, quiet=True, use_destination=False)
+            character.move_to(guild_entry_room, quiet=True, use_destination=False)
             character.execute_cmd("street")
             street_room = getattr(getattr(character, "location", None), "key", None)
-            ok = out_room == onboarding.EMPATH_GUILD_ENTRY_ROOM and street_room == onboarding.EMPATH_GUILD_ENTRY_ROOM
-            detail = f"out={out_room}, street={street_room}"
+            ok = (
+                out_room == onboarding.EMPATH_GUILD_ENTRY_ROOM
+                and street_room == onboarding.EMPATH_GUILD_ENTRY_ROOM
+                and "|lc__clickmove__ out|lt|yOut|n|le" in entry_appearance
+            )
+            detail = f"out={out_room}, street={street_room}, appearance={entry_appearance}"
         elif case_name == "clickable":
             appearance = lane_room.return_appearance(character)
             character.execute_cmd("__clickmove__ north")
             ok = (
-                "|lc__clickmove__ north|lt|ynorth|n|le" in appearance
-                and getattr(getattr(character, "location", None), "key", None) == onboarding.EMPATH_GUILD_ROOM
+                "|lc__clickmove__ north|lt|yEmpath Guild|n|le" in appearance
+                and getattr(getattr(character, "location", None), "key", None) == getattr(onboarding, "EMPATH_GUILD_INTERIOR_ENTRY_ROOM", onboarding.EMPATH_GUILD_ROOM)
             )
             detail = appearance
         elif case_name == "post-teleport-location":
@@ -5757,6 +9702,257 @@ def run_post_teleport_location_scenario(args):
 @register_scenario("guild-clickable")
 def run_guild_clickable_scenario(args):
     return _run_empath_guild_case(args, "clickable")
+
+
+@register_scenario("empath-guild-map")
+def run_empath_guild_map_scenario(args):
+    _setup_django()
+
+    from evennia.utils.create import create_object
+    from world.area_forge.map_api import get_zone_map
+    from world.areas.crossing.empath_guild.build import MAP_BUILD_TAG, ROOM_SPECS, ensure_crossing_empath_guildhall
+
+    created_character = None
+    try:
+        rooms = ensure_crossing_empath_guildhall()
+        guild_room = rooms["main_hall"]
+        created_character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Empath Guild Map {int(time.time() * 1000)}",
+            location=guild_room,
+            home=guild_room,
+        )
+        created_character.ensure_core_defaults()
+
+        payload = get_zone_map(created_character)
+        room_names = {entry.get("name") for entry in payload.get("rooms", [])}
+        room_positions = {(entry.get("x"), entry.get("y")) for entry in payload.get("rooms", [])}
+        current_room = next((entry for entry in payload.get("rooms", []) if entry.get("current")), None)
+        ok = (
+            payload.get("zone") == MAP_BUILD_TAG
+            and len(payload.get("rooms", [])) == len(ROOM_SPECS)
+            and len(room_positions) == len(ROOM_SPECS)
+            and room_names == {spec["key"] for spec in ROOM_SPECS.values()}
+            and current_room is not None
+            and current_room.get("name") == guild_room.key
+        )
+        detail = (
+            f"zone={payload.get('zone')}, rooms={len(payload.get('rooms', []))}, "
+            f"edges={len(payload.get('edges', []))}, unique_positions={len(room_positions)}"
+        )
+        payload_out = {"scenario": "empath-guild-map", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload_out, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: empath-guild-map")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        if created_character:
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("empath-join")
+def run_empath_join_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from evennia.utils.create import create_object
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        _ensure_new_player_tutorial()
+
+        lane_room = ObjectDB.objects.get_id(4280)
+        guild_room = ObjectDB.objects.filter(db_key__iexact="Empath Guild", db_typeclass_path="typeclasses.rooms.Room").first()
+        guild_entry = ObjectDB.objects.filter(db_key__iexact="Empath Guild, Entry Hall", db_typeclass_path="typeclasses.rooms.Room").first()
+        office = ObjectDB.objects.filter(db_key__iexact="Empath Guildleader's Office", db_typeclass_path="typeclasses.rooms.Room").first()
+        merla = ObjectDB.objects.filter(db_key__iexact="Guildleader Merla", db_location=office).first() if office else None
+        if not lane_room or getattr(lane_room, "key", None) != "Larkspur Lane, Midway":
+            raise RuntimeError("Larkspur Lane, Midway (#4280) is missing.")
+        if not guild_room:
+            raise RuntimeError("Empath Guild room is missing.")
+        if not guild_entry:
+            raise RuntimeError("Empath Guild entry room is missing.")
+        if not office:
+            raise RuntimeError("Empath Guildleader's Office is missing.")
+        if not merla:
+            raise RuntimeError("Guildleader Merla is missing from the Empath Guildleader's Office.")
+
+        character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Empath Join {int(time.time() * 1000)}",
+            location=lane_room,
+            home=lane_room,
+        )
+        character.ensure_core_defaults()
+        created_character = character
+        captured, originals = _capture_object_messages(character)
+
+        results = []
+
+        captured[character].clear()
+        character.execute_cmd("join empath")
+        fail_messages = "\n".join(captured.get(character) or [])
+        fail_ok = character.get_profession() == "commoner" and "guildleader's office" in fail_messages.lower()
+        results.append(("location", fail_ok, fail_messages or "missing location failure message"))
+
+        captured[character].clear()
+        character.execute_cmd("go empath")
+        go_messages = "\n".join(captured.get(character) or [])
+        go_ok = getattr(getattr(character, "location", None), "key", None) == "Empath Guild, Entry Hall"
+        results.append(("go-empath", go_ok, go_messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"))
+
+        captured[character].clear()
+        character.execute_cmd("northeast")
+        office_messages = "\n".join(captured.get(character) or [])
+        office_ok = getattr(getattr(character, "location", None), "key", None) == "Empath Guildleader's Office"
+        results.append(("office", office_ok, office_messages or f"room={getattr(getattr(character, 'location', None), 'key', None)}"))
+
+        captured[character].clear()
+        character.execute_cmd("ask merla about join")
+        inquiry_messages = "\n".join(captured.get(character) or [])
+        inquiry_ok = "accepting another person's hurt" in inquiry_messages.lower() or "join by" in inquiry_messages.lower()
+        results.append(("inquiry", inquiry_ok, inquiry_messages or "missing inquiry response"))
+
+        captured[character].clear()
+        character.execute_cmd("join empath")
+        join_messages = "\n".join(captured.get(character) or [])
+        patient = character.get_empath_tutorial_patient() if hasattr(character, "get_empath_tutorial_patient") else None
+        join_ok = (
+            character.get_profession() == "empath"
+            and character.get_guild() == "empath"
+            and getattr(getattr(character, "location", None), "key", None) == "Empath Guild, Lecture Hall"
+            and int(getattr(character.db, "empath_training_stage", 0) or 0) == 1
+            and patient is not None
+            and getattr(getattr(patient, "location", None), "key", None) == "Empath Guild, Lecture Hall"
+        )
+        results.append(("join", join_ok, join_messages or "missing join success message"))
+
+        ok = all(passed for _name, passed, _detail in results)
+        detail = " | ".join(f"{name}={'PASS' if passed else 'FAIL'}:{detail}" for name, passed, detail in results)
+        payload = {"scenario": "empath-join", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: empath-join")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.clear_empath_tutorial_patient(delete_patient=True)
+            except Exception:
+                pass
+            try:
+                created_character.delete()
+            except Exception:
+                pass
+
+
+@register_scenario("empath-tutorial")
+def run_empath_tutorial_scenario(args):
+    _setup_django()
+
+    from evennia.objects.models import ObjectDB
+    from evennia.utils.create import create_object
+    from server.conf.at_server_startstop import _ensure_new_player_tutorial
+
+    created_character = None
+    captured = {}
+    originals = {}
+    try:
+        _ensure_new_player_tutorial()
+
+        office = ObjectDB.objects.filter(db_key__iexact="Empath Guildleader's Office", db_typeclass_path="typeclasses.rooms.Room").first()
+        if not office:
+            raise RuntimeError("Empath Guildleader's Office is missing.")
+
+        character = create_object(
+            "typeclasses.characters.Character",
+            key=f"DireTest Empath Tutorial {int(time.time() * 1000)}",
+            location=office,
+            home=office,
+        )
+        character.ensure_core_defaults()
+        created_character = character
+        captured, originals = _capture_object_messages(character)
+
+        results = []
+
+        captured[character].clear()
+        character.execute_cmd("join empath")
+        join_messages = "\n".join(captured.get(character) or [])
+        patient = character.get_empath_tutorial_patient() if hasattr(character, "get_empath_tutorial_patient") else None
+        joined_ok = character.get_profession() == "empath" and patient is not None
+        results.append(("join", joined_ok, join_messages or "missing join output"))
+
+        captured[character].clear()
+        character.execute_cmd("touch patient")
+        touch_messages = "\n".join(captured.get(character) or [])
+        touch_ok = "sense the condition of your patient" in touch_messages.lower()
+        results.append(("touch", touch_ok, touch_messages or "missing touch output"))
+
+        captured[character].clear()
+        character.execute_cmd("assess patient")
+        assess_messages = "\n".join(captured.get(character) or [])
+        assess_ok = "vitality:" in assess_messages.lower() and "bleeding:" in assess_messages.lower()
+        results.append(("assess", assess_ok, assess_messages or "missing assess output"))
+
+        captured[character].clear()
+        character.execute_cmd("take bleeding all")
+        character.execute_cmd("take vitality all")
+        take_messages = "\n".join(captured.get(character) or [])
+        patient_after_take = character.get_empath_tutorial_patient() if hasattr(character, "get_empath_tutorial_patient") else None
+        take_ok = "draw the wound into yourself" in take_messages.lower() and patient_after_take is None
+        results.append(("take", take_ok, take_messages or "missing take output"))
+
+        captured[character].clear()
+        character.execute_cmd("mend self")
+        character.execute_cmd("mend self")
+        mend_messages = "\n".join(captured.get(character) or [])
+        mend_ok = (
+            int(getattr(character.db, "empath_training_stage", 0) or 0) == 2
+            and int(character.get_empath_wound("vitality") or 0) <= 0
+            and int(character.get_empath_wound("bleeding") or 0) <= 0
+            and "finished the lesson" in mend_messages.lower()
+        )
+        results.append(("mend", mend_ok, mend_messages or "missing mend output"))
+
+        gate_ok, gate_message = character.can_use_empath_ability("link") if hasattr(character, "can_use_empath_ability") else (False, "missing ability gate")
+        link_ok = (not gate_ok) and "lack the discipline" in str(gate_message or "").lower()
+        results.append(("gate", link_ok, str(gate_message or "missing apprentice gate output")))
+
+        ok = all(passed for _name, passed, _detail in results)
+        detail = " | ".join(f"{name}={'PASS' if passed else 'FAIL'}:{detail}" for name, passed, detail in results)
+        payload = {"scenario": "empath-tutorial", "ok": bool(ok), "detail": detail}
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            print("DireTest Scenario: empath-tutorial")
+            print(f"Status: {'PASS' if ok else 'FAIL'}")
+            print(detail)
+        return 0 if ok else 1
+    finally:
+        _restore_object_messages(originals)
+        if created_character:
+            try:
+                created_character.clear_empath_tutorial_patient(delete_patient=True)
+            except Exception:
+                pass
+            try:
+                created_character.delete()
+            except Exception:
+                pass
 
 
 @register_scenario("ranger-join")
@@ -9821,6 +14017,65 @@ def _handle_list_command(args):
     return 0
 
 
+def _get_canonical_scenarios():
+    scenarios = []
+    seen = set()
+    for name, handler in sorted(SCENARIO_REGISTRY.items()):
+        canonical_name = str(getattr(handler, "diretest_scenario_name", name) or name)
+        if canonical_name != name:
+            continue
+        if canonical_name in seen:
+            continue
+        seen.add(canonical_name)
+        scenarios.append((canonical_name, handler))
+    return scenarios
+
+
+def _scenario_has_tag(handler, tag):
+    desired = str(tag or "").strip().lower()
+    if not desired:
+        return False
+    metadata = dict(getattr(handler, "diretest_metadata", {}) or {})
+    tags = [str(entry or "").strip().lower() for entry in list(metadata.get("tags", []) or []) if str(entry or "").strip()]
+    return desired in tags
+
+
+def _handle_smoke_command(args):
+    tagged_scenarios = [(name, handler) for name, handler in _get_canonical_scenarios() if _scenario_has_tag(handler, "smoke")]
+    if not tagged_scenarios:
+        if bool(getattr(args, "json", False)):
+            print(json.dumps({"exit_code": 1, "failure_type": "smoke_lookup_failure", "message": "No smoke-tagged scenarios are registered."}, indent=2, sort_keys=True))
+            return 1
+        print("FAIL: smoke")
+        print("No smoke-tagged scenarios are registered.")
+        return 1
+
+    parser = build_parser()
+    results = []
+    exit_code = 0
+    for scenario_name, _handler in tagged_scenarios:
+        scenario_argv = ["scenario", scenario_name]
+        if getattr(args, "seed", None) is not None:
+            scenario_argv.extend(["--seed", str(int(args.seed))])
+        if bool(getattr(args, "check_lag", False)):
+            scenario_argv.append("--check-lag")
+        scenario_args = parser.parse_args(scenario_argv)
+        scenario_args.json = False
+        scenario_exit = int(_execute_cli_scenario(scenario_args))
+        results.append({"scenario": scenario_name, "exit_code": scenario_exit, "seed": int(getattr(scenario_args, "seed", 0) or 0)})
+        if scenario_exit != 0:
+            exit_code = 1
+
+    if bool(getattr(args, "json", False)):
+        print(json.dumps({"command": "smoke", "exit_code": exit_code, "results": results}, indent=2, sort_keys=True))
+        return exit_code
+
+    passed = sum(1 for entry in results if int(entry.get("exit_code", 0) or 0) == 0)
+    total = len(results)
+    print(f"Smoke Summary: {passed}/{total} passed")
+    return exit_code
+
+
 def _handle_repro_command(args):
     metadata = _load_artifact_metadata(args.artifact_path)
     scenario_name = metadata["scenario"]
@@ -9916,6 +14171,12 @@ def build_parser():
     list_parser = subparsers.add_parser("list")
     list_parser.add_argument("--json", action="store_true")
     list_parser.set_defaults(cli_handler=_handle_list_command)
+
+    smoke_parser = subparsers.add_parser("smoke")
+    smoke_parser.add_argument("--seed", type=int)
+    smoke_parser.add_argument("--json", action="store_true")
+    smoke_parser.add_argument("--check-lag", action="store_true")
+    smoke_parser.set_defaults(cli_handler=_handle_smoke_command)
 
     repro_parser = subparsers.add_parser("repro")
     repro_parser.add_argument("artifact_path")
@@ -10027,11 +14288,82 @@ def build_parser():
     movement_parser = _add_common_scenario_args(scenario_subparsers.add_parser("movement"))
     movement_parser.set_defaults(handler=run_movement_scenario)
 
+    fishing_vertical_slice_parser = _add_common_scenario_args(scenario_subparsers.add_parser("fishing-vertical-slice"))
+    fishing_vertical_slice_parser.set_defaults(handler=run_fishing_vertical_slice_scenario)
+
+    fishing_junk_event_slice_parser = _add_common_scenario_args(scenario_subparsers.add_parser("fishing-junk-event-slice"))
+    fishing_junk_event_slice_parser.set_defaults(handler=run_fishing_junk_event_slice_scenario)
+
+    fishing_simulation_100_parser = _add_common_scenario_args(scenario_subparsers.add_parser("fishing-simulation-100"))
+    fishing_simulation_100_parser.set_defaults(handler=run_fishing_simulation_100_scenario)
+
+    fishing_help_parser = _add_common_scenario_args(scenario_subparsers.add_parser("fishing-help"))
+    fishing_help_parser.set_defaults(handler=run_fishing_help_scenario)
+
+    fishing_borrowed_gear_exit_parser = _add_common_scenario_args(scenario_subparsers.add_parser("fishing-borrowed-gear-exit"))
+    fishing_borrowed_gear_exit_parser.set_defaults(handler=run_fishing_borrowed_gear_exit_scenario)
+
+    fishing_borrowed_gear_full_loop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("fishing-borrowed-gear-full-loop"))
+    fishing_borrowed_gear_full_loop_parser.set_defaults(handler=run_fishing_borrowed_gear_full_loop_scenario)
+
     rt_timing_parser = _add_common_scenario_args(scenario_subparsers.add_parser("rt-timing"))
     rt_timing_parser.set_defaults(handler=run_rt_timing_scenario)
 
     inventory_parser = _add_common_scenario_args(scenario_subparsers.add_parser("inventory"))
     inventory_parser.set_defaults(handler=run_inventory_scenario)
+
+    empath_core_loop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-core-loop"))
+    empath_core_loop_parser.set_defaults(handler=run_empath_core_loop_scenario)
+
+    empath_link_state_compat_parser = _add_common_scenario_args(
+        scenario_subparsers.add_parser(
+            "empath-link-state-compat",
+            aliases=["empath_link_state_compat"],
+        )
+    )
+    empath_link_state_compat_parser.set_defaults(handler=run_empath_link_state_compat_scenario)
+
+    empath_completion_pass_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-completion-pass"))
+    empath_completion_pass_parser.set_defaults(handler=run_empath_completion_pass_scenario)
+
+    empath_learning_unification_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-learning-unification"))
+    empath_learning_unification_parser.set_defaults(handler=run_empath_learning_unification_scenario)
+
+    empath_vitality_transfer_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-vitality-transfer"))
+    empath_vitality_transfer_parser.set_defaults(handler=run_empath_vitality_transfer_scenario)
+
+    empath_poison_loop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-poison-loop"))
+    empath_poison_loop_parser.set_defaults(handler=run_empath_poison_loop_scenario)
+
+    empath_shock_lockout_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-shock-lockout"))
+    empath_shock_lockout_parser.set_defaults(handler=run_empath_shock_lockout_scenario)
+
+    empath_link_stability_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-link-stability"))
+    empath_link_stability_parser.set_defaults(handler=run_empath_link_stability_scenario)
+
+    empath_link_separation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-link-separation"))
+    empath_link_separation_parser.set_defaults(handler=run_empath_link_separation_scenario)
+
+    empath_link_vs_shock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-link-vs-shock"))
+    empath_link_vs_shock_parser.set_defaults(handler=run_empath_link_vs_shock_scenario)
+
+    empath_persistent_link_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-persistent-link"))
+    empath_persistent_link_parser.set_defaults(handler=run_empath_persistent_link_scenario)
+
+    empath_unity_burden_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-unity-burden"))
+    empath_unity_burden_parser.set_defaults(handler=run_empath_unity_burden_scenario)
+
+    empath_redirect_strain_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-redirect-strain"))
+    empath_redirect_strain_parser.set_defaults(handler=run_empath_redirect_strain_scenario)
+
+    empath_unity_breaks_on_shock_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-unity-breaks-on-shock"))
+    empath_unity_breaks_on_shock_parser.set_defaults(handler=run_empath_unity_breaks_on_shock_scenario)
+
+    empath_circle_progression_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-circle-progression"))
+    empath_circle_progression_parser.set_defaults(handler=run_empath_circle_progression_scenario)
+
+    empath_unlock_separation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-unlock-separation"))
+    empath_unlock_separation_parser.set_defaults(handler=run_empath_unlock_separation_scenario)
 
     combat_basic_parser = _add_common_scenario_args(scenario_subparsers.add_parser("combat-basic"))
     combat_basic_parser.set_defaults(handler=run_combat_basic_scenario)
@@ -10228,11 +14560,20 @@ def build_parser():
     empath_guild_return_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-guild-return"))
     empath_guild_return_parser.set_defaults(handler=run_empath_guild_return_scenario)
 
+    empath_guild_map_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-guild-map"))
+    empath_guild_map_parser.set_defaults(handler=run_empath_guild_map_scenario)
+
     post_teleport_location_parser = _add_common_scenario_args(scenario_subparsers.add_parser("post-teleport-location"))
     post_teleport_location_parser.set_defaults(handler=run_post_teleport_location_scenario)
 
     guild_clickable_parser = _add_common_scenario_args(scenario_subparsers.add_parser("guild-clickable"))
     guild_clickable_parser.set_defaults(handler=run_guild_clickable_scenario)
+
+    empath_join_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-join"))
+    empath_join_parser.set_defaults(handler=run_empath_join_scenario)
+
+    empath_tutorial_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-tutorial"))
+    empath_tutorial_parser.set_defaults(handler=run_empath_tutorial_scenario)
 
     ranger_join_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-join"))
     ranger_join_parser.set_defaults(handler=run_ranger_join_scenario)

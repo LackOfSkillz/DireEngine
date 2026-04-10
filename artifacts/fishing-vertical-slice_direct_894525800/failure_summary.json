@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Fishing scenario did not reject pull outside the reaction window: ['Command \\'pull\\' is not available. Maybe you meant \"l\"?']",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 894525800
+}

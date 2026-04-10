@@ -1,0 +1,347 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 65.25141176055459,
+  "lag": {
+    "avg_ms": 68.59236472176717,
+    "jitter": 117.5625287257518,
+    "max_ms": 376.226200023666,
+    "min_ms": 0.07599999662488699,
+    "p95_ms": 369.1285999957472,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "pull",
+      "ms": 34.72009999677539,
+      "snapshot": "final"
+    },
+    {
+      "command": "cast",
+      "ms": 10.509400046430528,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 14.659099979326129,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT start_fishing_cast",
+      "ms": 0.07599999662488699,
+      "snapshot": "final"
+    },
+    {
+      "command": "get gear",
+      "ms": 16.46059995982796,
+      "snapshot": "final"
+    },
+    {
+      "command": "ask maren for gear",
+      "ms": 376.226200023666,
+      "snapshot": "final"
+    },
+    {
+      "command": "ask maren for gear",
+      "ms": 10.460800025612116,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait hook",
+      "ms": 23.416400072164834,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 9.226400055922568,
+      "snapshot": "final"
+    },
+    {
+      "command": "rig pole",
+      "ms": 367.3541999887675,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 11.161900009028614,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 114.90639997646213,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 11.08550000935793,
+      "snapshot": "final"
+    },
+    {
+      "command": "pull",
+      "ms": 56.026100064627826,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 8.807900012470782,
+      "snapshot": "final"
+    },
+    {
+      "command": "untangle pole",
+      "ms": 63.00670001655817,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 37.96650003641844,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 193.2669500238262,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 376.226200023666
+    },
+    {
+      "cmd": "rig pole",
+      "ms": 367.3541999887675
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 376.03879999369383,
+      "kind": "command",
+      "ms": 376.226200023666,
+      "npc_response_delay_ms": 376.1441999813542,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "rig pole",
+      "first_response_ms": 367.24080005660653,
+      "kind": "command",
+      "ms": 367.3541999887675,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "pull",
+      "first_response_ms": 34.621399943716824,
+      "kind": "command",
+      "ms": 34.72009999677539,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "cast",
+      "first_response_ms": 10.427200002595782,
+      "kind": "command",
+      "ms": 10.509400046430528,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 14.531599939800799,
+      "kind": "command",
+      "ms": 14.659099979326129,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT start_fishing_cast",
+      "first_response_ms": 0.04880002234131098,
+      "kind": "direct",
+      "ms": 0.07599999662488699,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "get gear",
+      "first_response_ms": 16.395799932070076,
+      "kind": "command",
+      "ms": 16.46059995982796,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 376.03879999369383,
+      "kind": "command",
+      "ms": 376.226200023666,
+      "npc_response_delay_ms": 376.1441999813542,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 10.389700066298246,
+      "kind": "command",
+      "ms": 10.460800025612116,
+      "npc_response_delay_ms": 10.389700066298246,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait hook",
+      "first_response_ms": 23.344699991866946,
+      "kind": "command",
+      "ms": 23.416400072164834,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 9.164399933069944,
+      "kind": "command",
+      "ms": 9.226400055922568,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "rig pole",
+      "first_response_ms": 367.24080005660653,
+      "kind": "command",
+      "ms": 367.3541999887675,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 11.099299998022616,
+      "kind": "command",
+      "ms": 11.161900009028614,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 114.84100006055087,
+      "kind": "command",
+      "ms": 114.90639997646213,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 10.832400061190128,
+      "kind": "command",
+      "ms": 11.08550000935793,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "pull",
+      "first_response_ms": 9.681799914687872,
+      "kind": "command",
+      "ms": 56.026100064627826,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 8.757999981753528,
+      "kind": "command",
+      "ms": 8.807900012470782,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "untangle pole",
+      "first_response_ms": 53.95440000575036,
+      "kind": "command",
+      "ms": 63.00670001655817,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 37.90390002541244,
+      "kind": "command",
+      "ms": 37.96650003641844,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

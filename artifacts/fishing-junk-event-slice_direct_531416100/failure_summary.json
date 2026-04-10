@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": "critical",
+  "message": "",
+  "mode": "direct",
+  "scenario": "fishing-junk-event-slice",
+  "seed": 531416100
+}

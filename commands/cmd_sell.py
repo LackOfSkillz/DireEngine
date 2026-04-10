@@ -1,4 +1,4 @@
-﻿from evennia import Command
+﻿from commands.command import Command
 
 
 class CmdSell(Command):
@@ -20,7 +20,19 @@ class CmdSell(Command):
             return
 
         args = self.args.strip()
-        if args.lower() == "all":
+        lowered = args.lower()
+        if " to " in lowered:
+            item_name, _separator, _vendor_name = args.rpartition(" to ")
+            if str(item_name or "").strip():
+                args = str(item_name).strip()
+                lowered = args.lower()
+            else:
+                self.caller.msg("Try 'sell <item>'.")
+                return
+        if lowered == "all":
             self.caller.sell_all_items()
+            return
+        if lowered == "fish":
+            self.caller.sell_all_fish()
             return
         self.caller.sell_item(args)

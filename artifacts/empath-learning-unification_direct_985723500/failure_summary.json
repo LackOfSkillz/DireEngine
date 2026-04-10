@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Perceive target should award a small empathy gain through transient EXP.",
+  "mode": "direct",
+  "scenario": "empath-learning-unification",
+  "seed": 985723500
+}

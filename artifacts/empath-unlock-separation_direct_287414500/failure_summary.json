@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Locked poison transfer should not alter the patient's poison burden.",
+  "mode": "direct",
+  "scenario": "empath-unlock-separation",
+  "seed": 287414500
+}

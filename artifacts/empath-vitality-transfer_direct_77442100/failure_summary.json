@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Direct partial vitality lockout failed: ok=False, message=TEST_EMPATH_VITALITY_PATIENT has no wound you can draw that way.",
+  "mode": "direct",
+  "scenario": "empath-vitality-transfer",
+  "seed": 77442100
+}

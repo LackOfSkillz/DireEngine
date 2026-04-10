@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "TypeError: '<' not supported between instances of 'NoneType' and 'float'",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 155589400
+}

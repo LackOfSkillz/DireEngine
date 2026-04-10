@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Fishing scenario did not allow baiting to clear a tangled line state.",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 876228100
+}

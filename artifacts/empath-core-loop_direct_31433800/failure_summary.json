@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Empath mend reset the loop instead of leaving carried risk in place: {'fatigue': 4, 'vitality': 0, 'bleeding': 9, 'poison': 0, 'disease': 0}",
+  "mode": "direct",
+  "scenario": "empath-core-loop",
+  "seed": 31433800
+}

@@ -1,0 +1,95 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 16678,
+        "is_dead": false,
+        "key": "TEST_BORROWED_GEAR_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_BORROWED_GEAR_WEST",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 16685,
+          "key": "bought fishing pole",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.items.fishing_pole.FishingPole"
+        },
+        {
+          "id": 16686,
+          "key": "river rock",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 16673,
+            "key": "TEST_BORROWED_GEAR_WATER",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16674,
+            "key": "TEST_BORROWED_GEAR_WEST",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16675,
+            "key": "TEST_BORROWED_GEAR_SOUTH",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16676,
+            "key": "west",
+            "location": "TEST_BORROWED_GEAR_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16677,
+            "key": "south",
+            "location": "TEST_BORROWED_GEAR_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16678,
+            "key": "TEST_BORROWED_GEAR_CHAR",
+            "location": "TEST_BORROWED_GEAR_WEST",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_BORROWED_GEAR_CHAR"
+        ],
+        "exits": [],
+        "id": 16674,
+        "key": "TEST_BORROWED_GEAR_WEST"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775761781.0405796
+    },
+    "label": "final"
+  }
+]

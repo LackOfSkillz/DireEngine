@@ -1,0 +1,84 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 162.56206665032855,
+  "lag": {
+    "avg_ms": 165.00903330355263,
+    "jitter": 54.016133976227025,
+    "max_ms": 217.14849997079,
+    "min_ms": 109.2938999645412,
+    "p95_ms": 212.29211997124366,
+    "slow_count": 2,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "ms": 168.58469997532666,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "ms": 109.2938999645412,
+      "snapshot": "unified"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 217.14849997079,
+      "snapshot": "took_with_unity"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "link TEST_EMPATH_UNITY_PATIENT",
+      "ms": 168.58469997532666
+    },
+    {
+      "cmd": "take disease 20",
+      "ms": 217.14849997079
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "first_response_ms": 168.43869996955618,
+      "kind": "command",
+      "ms": 168.58469997532666,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "first_response_ms": 109.12179999286309,
+      "kind": "command",
+      "ms": 109.2938999645412,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 210.12569998856634,
+      "kind": "command",
+      "ms": 217.14849997079,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_with_unity"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Fishing scenario expected callback=_begin_nibble seconds=None range=(4.0, 10.0), but found [{'seconds': 4.5247215627654835, 'callback': <function _begin_nibble at 0x00000281189EDF80>, 'callback_name': '_begin_nibble', 'args': (TEST_FISHING_CHAR, '104a6071-68e6-416e-b0af-630537a80320'), 'kwargs': {}, 'task': <__main__.run_fishing_vertical_slice_scenario.<locals>.scenario.<locals>.FakeDelayedTask object at 0x0000028118F00990>}].",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 474611300
+}

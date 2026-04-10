@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 11071, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 6842, in run_empath_guild_entry_scenario
+    return _run_empath_guild_case(args, "entry")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 6737, in _run_empath_guild_case
+    _ensure_new_player_tutorial()
+  File "C:\Users\gary\dragonsire\server\conf\at_server_startstop.py", line 616, in _ensure_new_player_tutorial
+    empath_guild = empath_rooms["courtyard"]
+                   ~~~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'courtyard'

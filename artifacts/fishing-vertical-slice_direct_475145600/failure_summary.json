@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "django.db.utils.OperationalError: database is locked",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 475145600
+}

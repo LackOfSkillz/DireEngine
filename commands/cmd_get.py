@@ -20,6 +20,19 @@ class CmdGet(Command):
             caller.msg("Get what?")
             return
 
+        normalized_query = str(self.args or "").strip().lower()
+        if normalized_query in {"gear", "fishing gear", "starter gear", "starter kit", "kit"}:
+            room = getattr(caller, "location", None)
+            supplier = None
+            if room:
+                for obj in list(getattr(room, "contents", []) or []):
+                    if bool(getattr(getattr(obj, "db", None), "is_fishing_supplier", False)):
+                        supplier = obj
+                        break
+            if supplier is not None:
+                caller.msg(f"{supplier.key} taps the bundled tackle beside her. 'Ask me for gear and I'll hand it over properly.'")
+                return
+
         room = caller.location
         if not room:
             caller.msg("There is nothing here to pick up.")

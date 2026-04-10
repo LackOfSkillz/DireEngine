@@ -1,0 +1,90 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 12,
+        "hp": 100,
+        "id": 16063,
+        "is_dead": false,
+        "key": "TEST_FISHING_HELP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_FISHING_HELP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 16065,
+          "key": "fishing pole",
+          "location": "TEST_FISHING_HELP_CHAR",
+          "typeclass": "typeclasses.items.fishing_pole.FishingPole"
+        },
+        {
+          "id": 16066,
+          "key": "worm",
+          "location": "TEST_FISHING_HELP_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        },
+        {
+          "id": 16067,
+          "key": "hook",
+          "location": "TEST_FISHING_HELP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16068,
+          "key": "line",
+          "location": "TEST_FISHING_HELP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16069,
+          "key": "fish string",
+          "location": "TEST_FISHING_HELP_CHAR",
+          "typeclass": "typeclasses.items.fish_string.FishString"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 16062,
+            "key": "TEST_FISHING_HELP_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16063,
+            "key": "TEST_FISHING_HELP_CHAR",
+            "location": "TEST_FISHING_HELP_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_FISHING_HELP_CHAR",
+          "Old Maren"
+        ],
+        "exits": [],
+        "id": 16062,
+        "key": "TEST_FISHING_HELP_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775758229.0601525
+    },
+    "label": "final"
+  }
+]

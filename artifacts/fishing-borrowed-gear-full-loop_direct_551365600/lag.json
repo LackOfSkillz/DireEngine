@@ -1,0 +1,185 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 204.06089997517742,
+  "lag": {
+    "avg_ms": 275.53145712175007,
+    "jitter": 277.23287039075547,
+    "max_ms": 762.6280999975279,
+    "min_ms": 0.06310001481324434,
+    "p95_ms": 688.2720200112087,
+    "slow_count": 4,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "ask maren for gear",
+      "ms": 514.7745000431314,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 219.90019991062582,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 14.185399981215596,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _begin_nibble",
+      "ms": 0.06310001481324434,
+      "snapshot": "final"
+    },
+    {
+      "command": "pull",
+      "ms": 136.45679992623627,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _resolve_struggle_round",
+      "ms": 280.7120999787003,
+      "snapshot": "final"
+    },
+    {
+      "command": "south",
+      "ms": 762.6280999975279,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 514.6671999245882,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 514.7745000431314
+    },
+    {
+      "cmd": "bait worm",
+      "ms": 219.90019991062582
+    },
+    {
+      "cmd": "DIRECT _resolve_struggle_round",
+      "ms": 280.7120999787003
+    },
+    {
+      "cmd": "south",
+      "ms": 762.6280999975279
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 514.5616999361664,
+      "kind": "command",
+      "ms": 514.7745000431314,
+      "npc_response_delay_ms": 514.6671999245882,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "south",
+      "first_response_ms": 413.2883999263868,
+      "kind": "command",
+      "ms": 762.6280999975279,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 514.5616999361664,
+      "kind": "command",
+      "ms": 514.7745000431314,
+      "npc_response_delay_ms": 514.6671999245882,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 219.8289999505505,
+      "kind": "command",
+      "ms": 219.90019991062582,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 13.102700002491474,
+      "kind": "command",
+      "ms": 14.185399981215596,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _begin_nibble",
+      "first_response_ms": 0.04009995609521866,
+      "kind": "direct",
+      "ms": 0.06310001481324434,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "pull",
+      "first_response_ms": 8.662000065669417,
+      "kind": "command",
+      "ms": 136.45679992623627,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _resolve_struggle_round",
+      "first_response_ms": 258.94239998888224,
+      "kind": "direct",
+      "ms": 280.7120999787003,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "south",
+      "first_response_ms": 413.2883999263868,
+      "kind": "command",
+      "ms": 762.6280999975279,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 81,
+        "hp": 100,
+        "id": 16131,
+        "is_dead": false,
+        "key": "TEST_FISHING_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_FISHING_WATER",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 16134,
+          "key": "fishing pole",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.fishing_pole.FishingPole"
+        },
+        {
+          "id": 16135,
+          "key": "worm",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        },
+        {
+          "id": 16136,
+          "key": "hook",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16137,
+          "key": "line",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16138,
+          "key": "fish string",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.fish_string.FishString"
+        },
+        {
+          "id": 16139,
+          "key": "spinner",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        },
+        {
+          "id": 16140,
+          "key": "lure",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        },
+        {
+          "id": 16142,
+          "key": "skinning knife",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.weapons.Weapon"
+        },
+        {
+          "id": 16145,
+          "key": "silver trout skin",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.fish_material.FishMaterial"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 16127,
+            "key": "TEST_FISHING_WATER",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16128,
+            "key": "TEST_FISHING_DRY",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16129,
+            "key": "north",
+            "location": "TEST_FISHING_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16130,
+            "key": "south",
+            "location": "TEST_FISHING_DRY",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16131,
+            "key": "TEST_FISHING_CHAR",
+            "location": "TEST_FISHING_WATER",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "north",
+          "TEST_FISHING_CHAR",
+          "Old Maren",
+          "dock scale"
+        ],
+        "exits": [
+          "north"
+        ],
+        "id": 16127,
+        "key": "TEST_FISHING_WATER"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775758571.101407
+    },
+    "label": "final"
+  }
+]

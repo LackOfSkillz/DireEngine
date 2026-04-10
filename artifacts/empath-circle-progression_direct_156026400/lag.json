@@ -1,0 +1,75 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 4.9685333312178654,
+  "lag": {
+    "avg_ms": 5.040233333905538,
+    "jitter": 3.801490141899168,
+    "max_ms": 9.423899988178164,
+    "min_ms": 2.6510999887250364,
+    "p95_ms": 8.786079991841689,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "circle advance",
+      "ms": 3.0457000248134136,
+      "snapshot": "blocked"
+    },
+    {
+      "command": "advance",
+      "ms": 9.423899988178164,
+      "snapshot": "advanced"
+    },
+    {
+      "command": "circle",
+      "ms": 2.6510999887250364,
+      "snapshot": "status"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "circle advance",
+      "first_response_ms": 2.9781999764963984,
+      "kind": "command",
+      "ms": 3.0457000248134136,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "blocked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "advance",
+      "first_response_ms": 9.347599989268929,
+      "kind": "command",
+      "ms": 9.423899988178164,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "advanced"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "circle",
+      "first_response_ms": 2.5798000278882682,
+      "kind": "command",
+      "ms": 2.6510999887250364,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "status"
+    }
+  ]
+}

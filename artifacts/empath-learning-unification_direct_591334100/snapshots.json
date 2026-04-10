@@ -1,0 +1,86 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 95,
+        "id": 14682,
+        "is_dead": false,
+        "key": "TEST_EMPATH_LEARNING_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LEARNING_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.95,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 14686,
+          "key": "anatomy chart",
+          "location": "TEST_EMPATH_LEARNING_HEALER",
+          "typeclass": "typeclasses.study_item.StudyItem"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14681,
+            "key": "TEST_EMPATH_LEARNING_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14682,
+            "key": "TEST_EMPATH_LEARNING_HEALER",
+            "location": "TEST_EMPATH_LEARNING_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 14683,
+            "key": "TEST_EMPATH_LEARNING_PATIENT",
+            "location": "TEST_EMPATH_LEARNING_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 14684,
+            "key": "TEST_EMPATH_LEARNING_EMPATH_PATIENT",
+            "location": "TEST_EMPATH_LEARNING_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 14685,
+            "key": "TEST_EMPATH_LEARNING_ANIMAL",
+            "location": "TEST_EMPATH_LEARNING_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_LEARNING_HEALER",
+          "TEST_EMPATH_LEARNING_PATIENT",
+          "TEST_EMPATH_LEARNING_EMPATH_PATIENT",
+          "TEST_EMPATH_LEARNING_ANIMAL"
+        ],
+        "exits": [],
+        "id": 14681,
+        "key": "TEST_EMPATH_LEARNING_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775681825.4682152
+    },
+    "label": "final"
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: First empath kill should apply 45 shock total, got 40",
+  "mode": "direct",
+  "scenario": "empath-shock-lockout",
+  "seed": 46664400
+}

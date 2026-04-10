@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Fishing scenario did not rate-limit rapid fish-buyer sales: ['Old Maren counts out 4 silvers, 5 coppers. Maren raises her brows. \"That\\'s a remarkable catch.\"']",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 974308500
+}

@@ -193,7 +193,7 @@ class CmdAttack(Command):
             self.caller.msg("You are too far away to attack in melee.")
             return
         if hasattr(self.caller, "register_empath_offensive_action"):
-            self.caller.register_empath_offensive_action(target=target, context="attack", amount=10)
+            self.caller.register_empath_offensive_action(target=target, context="attack", amount=15)
         if hasattr(target, "check_room_traps_for_enemy"):
             target.check_room_traps_for_enemy(self.caller)
         try:
@@ -644,11 +644,14 @@ class CmdAttack(Command):
                         difficulty=difficulty,
                         return_learning=True,
                     )
+        target_was_dead = bool(getattr(target.db, "is_dead", False))
         if hasattr(target, "apply_incoming_damage"):
             target.apply_incoming_damage(hit_location, damage, attack_context["damage_type"])
         else:
             target.set_hp(target.db.hp - damage)
             target.apply_damage(hit_location, damage, attack_context["damage_type"])
+        if not target_was_dead and bool(getattr(target.db, "is_dead", False)) and hasattr(self.caller, "register_empath_offensive_action"):
+            self.caller.register_empath_offensive_action(target=target, context="kill", amount=30)
         if isinstance(sweep_state, dict):
             balance_resist = 0
             if hasattr(target, "has_warrior_passive") and target.has_warrior_passive("balance_resist_1"):

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Fishing scenario did not hard-gate baiting on rig state: ['You bait your hook with worm.']",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 104660200
+}

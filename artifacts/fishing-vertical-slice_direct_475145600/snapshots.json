@@ -1,0 +1,124 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 122,
+        "hp": 100,
+        "id": 15780,
+        "is_dead": false,
+        "key": "TEST_FISHING_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_FISHING_WATER",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 15783,
+          "key": "fishing pole",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.fishing_pole.FishingPole"
+        },
+        {
+          "id": 15784,
+          "key": "worm",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        },
+        {
+          "id": 15785,
+          "key": "hook",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 15786,
+          "key": "line",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 15787,
+          "key": "fish string",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.fish_string.FishString"
+        },
+        {
+          "id": 15788,
+          "key": "spinner",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        },
+        {
+          "id": 15789,
+          "key": "lure",
+          "location": "TEST_FISHING_CHAR",
+          "typeclass": "typeclasses.items.bait.Bait"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 15776,
+            "key": "TEST_FISHING_WATER",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 15777,
+            "key": "TEST_FISHING_DRY",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 15778,
+            "key": "north",
+            "location": "TEST_FISHING_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 15779,
+            "key": "south",
+            "location": "TEST_FISHING_DRY",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 15780,
+            "key": "TEST_FISHING_CHAR",
+            "location": "TEST_FISHING_WATER",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "north",
+          "TEST_FISHING_CHAR",
+          "Old Maren",
+          "dock scale"
+        ],
+        "exits": [
+          "north"
+        ],
+        "id": 15776,
+        "key": "TEST_FISHING_WATER"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775749456.538447
+    },
+    "label": "final"
+  }
+]

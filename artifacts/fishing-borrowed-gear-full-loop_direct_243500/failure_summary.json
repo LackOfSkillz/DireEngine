@@ -1,0 +1,8 @@
+{
+  "failure_type": "leak_failure",
+  "lag_status": "critical",
+  "message": "1 test objects were not cleaned up.",
+  "mode": "direct",
+  "scenario": "fishing-borrowed-gear-full-loop",
+  "seed": 243500
+}

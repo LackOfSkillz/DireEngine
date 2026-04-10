@@ -41,11 +41,12 @@ SKILL_GROUPS = {
     "stealth": 120,
     "perception": 120,
     "locksmithing": 120,
+    "first_aid": 120,
     "appraisal": 140,
     "light_edge": 140,
     "targeted_magic": 160,
     "debilitation": 160,
-    "first_aid": 160,
+    "empathy": 180,
     "scholarship": 180,
 }
 
@@ -65,9 +66,16 @@ SECOND_WAVE_EXP_SKILLS = (
     "debilitation",
 )
 
+THIRD_WAVE_EXP_SKILLS = (
+    "empathy",
+    "first_aid",
+    "scholarship",
+)
+
 TEMPLATE_EXP_SKILLS = (
     *FIRST_WAVE_EXP_SKILLS,
     *SECOND_WAVE_EXP_SKILLS,
+    *THIRD_WAVE_EXP_SKILLS,
 )
 
 DRAIN_RATES = {
@@ -151,6 +159,22 @@ def base_pool(rank, skillset):
     return (BASE_POOL_NUMERATOR * normalized_rank / (normalized_rank + BASE_POOL_OFFSET)) + BASE_POOL_FLOOR
 
 
+def pool_stat_modifier(owner):
+    if owner is None:
+        return 1.0
+
+    stats = getattr(getattr(owner, "db", None), "stats", None)
+    if isinstance(stats, dict):
+        intelligence = float(stats.get("intelligence", 10.0) or 10.0)
+        discipline = float(stats.get("discipline", 10.0) or 10.0)
+    else:
+        intelligence = 10.0
+        discipline = 10.0
+
+    modifier = 1.0 + (((intelligence - 10.0) + (discipline - 10.0)) * 0.005)
+    return max(0.75, min(1.5, modifier))
+
+
 def rank_cost(rank):
     return 200 + max(0, int(rank or 0))
 
@@ -165,6 +189,7 @@ def award_xp(skill, amount):
     skill.pool += gained_amount
     skill.pool = min(skill.pool, skill.max_pool)
     skill.update_mindstate()
+    persist_skill_state(skill)
     return skill.pool - before
 
 
@@ -330,6 +355,7 @@ def drain_skill(skill, wisdom=30):
     skill.rank_progress += drain
     skill.rank_progress = max(0.0, skill.rank_progress)
     skill.update_mindstate()
+    persist_skill_state(skill)
     return drain
 
 
@@ -344,10 +370,28 @@ def process_rank(skill):
         cost = rank_cost(skill.rank)
 
     skill.rank_progress = max(0.0, skill.rank_progress)
+    persist_skill_state(skill)
     return skill.rank
 
 
-def pulse(skill, wisdom=30):
+def resolve_wisdom(skill, wisdom=None):
+    if wisdom is not None:
+        return wisdom
+    owner = getattr(skill, "owner", None)
+    if owner is not None and hasattr(owner, "get_stat"):
+        return owner.get_stat("wisdom")
+    return 30
+
+
+def persist_skill_state(skill):
+    owner = getattr(skill, "owner", None)
+    if owner is not None and hasattr(owner, "_persist_exp_skill_state"):
+        owner._persist_exp_skill_state(skill)
+    return skill
+
+
+def pulse(skill, wisdom=None):
+    wisdom = resolve_wisdom(skill, wisdom=wisdom)
     drained = drain_skill(skill, wisdom=wisdom)
     process_rank(skill)
     return drained
@@ -383,9 +427,10 @@ class SkillState:
         self.skillset = normalize_skillset(self.skillset)
         self.rank = max(0, int(self.rank or 0))
         self.rank_progress = max(0.0, float(getattr(self, "rank_progress", 0.0) or 0.0))
-        self.max_pool = base_pool(self.rank, self.skillset)
+        self.max_pool = base_pool(self.rank, self.skillset) * pool_stat_modifier(self.owner)
         self.pool = max(0.0, min(float(self.pool or 0.0), float(self.max_pool or 0.0)))
         self.update_mindstate()
+        persist_skill_state(self)
 
 
 class SkillHandler:

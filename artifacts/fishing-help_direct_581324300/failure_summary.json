@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Fishing help did not show the fishing guide entry:",
+  "mode": "direct",
+  "scenario": "fishing-help",
+  "seed": 581324300
+}

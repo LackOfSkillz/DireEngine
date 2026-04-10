@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Borrowed full-loop scenario emitted the return line 0 times instead of once: ['|cTEST_BORROWED_FULL_LOOP_SOUTH|n\\nThis is a room.', \"OPTIONS {'type': 'look'}\"]",
+  "mode": "direct",
+  "scenario": "fishing-borrowed-gear-full-loop",
+  "seed": 275182500
+}

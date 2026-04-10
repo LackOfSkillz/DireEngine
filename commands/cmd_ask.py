@@ -16,15 +16,20 @@ class CmdAsk(Command):
 
     def func(self):
         raw = str(self.args or "").strip()
-        if not raw or " about " not in raw.lower():
+        lowered = raw.lower()
+        marker = " about "
+        if not raw or (" about " not in lowered and " for " not in lowered):
             self.caller.msg("Ask whom about what?")
             return
 
-        target_name, _, topic = raw.partition(" about ")
+        if " for " in lowered and (" about " not in lowered or lowered.find(" for ") < lowered.find(" about ")):
+            marker = " for "
+
+        target_name, _, topic = raw.partition(marker)
         if not topic:
-            marker = raw.lower().find(" about ")
-            target_name = raw[:marker].strip()
-            topic = raw[marker + len(" about "):].strip()
+            marker_index = lowered.find(marker)
+            target_name = raw[:marker_index].strip()
+            topic = raw[marker_index + len(marker):].strip()
 
         target = self.caller.search(target_name.strip())
         if not target:

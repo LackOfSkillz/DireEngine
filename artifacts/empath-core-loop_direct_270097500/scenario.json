@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath loop regression coverage validates command and wound-transfer behavior; emit lag telemetry without failing on environment-specific latency."
+  },
+  "mode": "direct",
+  "name": "empath-core-loop",
+  "seed": 270097500,
+  "started_at": 1775600003.94801
+}

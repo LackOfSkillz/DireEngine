@@ -43,13 +43,17 @@ def _get_lane_room(ObjectDB):
 
 
 def _resolve_authoritative_guild(ObjectDB, room_typeclass):
+    tagged_room = _find_tagged_room(ObjectDB, room_typeclass, "guild_empath")
+    if tagged_room:
+        lane_room = _get_lane_room(ObjectDB)
+        guild_exit = ObjectDB.objects.filter(db_key__iexact="guild", db_location=lane_room).first() if lane_room else None
+        return tagged_room, lane_room, guild_exit
     lane_room = _get_lane_room(ObjectDB)
     if lane_room:
         guild_exit = ObjectDB.objects.filter(db_key__iexact="guild", db_location=lane_room).first()
         destination = getattr(guild_exit, "destination", None)
         if destination:
             return destination, lane_room, guild_exit
-    tagged_room = _find_tagged_room(ObjectDB, room_typeclass, "guild_empath")
     return tagged_room, lane_room, None
 
 

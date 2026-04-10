@@ -34,6 +34,7 @@ from world.systems.metrics import increment_counter, record_event
 from world.systems.timing_audit import register_ticker_metadata, unregister_ticker_metadata
 from world.systems.exp_pulse import EXP_TICKER_IDSTRING, PULSE_TICK, exp_pulse_tick, start_exp_ticker
 from world.the_landing import build_the_landing
+from world.area_forge.map_api import prime_zone_map_cache
 
 
 _NPC_TICK_CACHE = {"expires_at": 0.0, "objects": []}
@@ -231,7 +232,7 @@ def _find_empath_guild_duplicates():
     if larkspur_lane_room and str(getattr(larkspur_lane_room, "key", "") or "") == "Larkspur Lane, Midway":
         lane_guild_exit = _find_exit(larkspur_lane_room, "guild", "north")
 
-    canonical_room = getattr(lane_guild_exit, "destination", None) or tagged_room
+    canonical_room = tagged_room or getattr(lane_guild_exit, "destination", None)
     duplicates = [room for room in rooms if canonical_room and room.id != canonical_room.id]
     non_room_matches = list(
         ObjectDB.objects.filter(db_key__iexact="Empath Guild").exclude(db_typeclass_path=ROOM_TYPECLASS)
@@ -479,6 +480,54 @@ def _ensure_named_npc(key, location, desc, aliases=None, typeclass="typeclasses.
     return npc
 
 
+def _ensure_fishing_supplier_room():
+    room = ObjectDB.objects.get_id(4305)
+    if not room:
+        logger.log_warn("Fishing room normalization skipped because room #4305 was not found.")
+        return None
+
+    room.key = "Town Green NE"
+    room.db.desc = (
+        "A wedge of town green opens between worn stone walks and low iron edging, giving the district a rare pocket of quiet. "
+        "Trim grass and a few shade trees soften the square, while a broad pond occupies the northeastern side beneath a simple wooden rail. "
+        "The water is calm enough for fishing, broken by reeds near the bank, drifting insects over the shallows, and the occasional ring spreading across the surface where something feeds below."
+    )
+    room.db.fishable = True
+    room.db.fish_group = "River 1"
+    room.db.area = getattr(room.db, "area", None) or "The Landing"
+    room.db.region_name = getattr(room.db, "region_name", None) or "The Landing"
+    for alias in ["town green ne", "town green", "green", "pond", "park"]:
+        room.aliases.add(alias)
+    room.save()
+    return room
+
+
+def _ensure_fishing_supplier_npc():
+    room = _ensure_fishing_supplier_room()
+    if not room:
+        logger.log_warn("Fishing supplier spawn skipped because room #4305 was not found.")
+        return None
+
+    supplier = _ensure_named_npc(
+        "Old Maren",
+        room,
+        (
+            "An older woman with weathered hands and a patient expression. "
+            "A small collection of fishing gear sits neatly beside her, along with a scale and a few empty baskets."
+        ),
+        aliases=["maren", "old maren", "supplier", "fish buyer"],
+        typeclass="typeclasses.fishing_supplier.FishingSupplier",
+    )
+    supplier.db.is_fishing_supplier = True
+    supplier.db.is_fish_buyer = True
+    supplier.db.is_vendor = True
+    supplier.db.vendor_type = "fish_buyer"
+    supplier.db.accepted_item_types = ["fish", "fish_meat", "fish_skin", "junk"]
+    supplier.db.trade_difficulty = 20
+    supplier.db.trophy_sale_bonus_multiplier = 1.25
+    return supplier
+
+
 def _resolve_landing_arrival_room():
     preferred_regions = {"Central Crossing", "Upper Crossing", "North Crossing", "Lower Crossing"}
     landing_rooms = []
@@ -554,6 +603,7 @@ def _cleanup_tutorial_helper_characters(rooms):
 def _ensure_new_player_tutorial():
     from typeclasses.objects import ChargenMirror, Object
     from systems import aftermath
+    from world.areas.crossing.empath_guild import ensure_crossing_empath_guildhall
 
     room_specs = {
         "Intake Chamber": {
@@ -611,41 +661,10 @@ def _ensure_new_player_tutorial():
     if larkspur_lane_room and str(getattr(larkspur_lane_room, "key", "") or "") == "Larkspur Lane, Midway":
         lane_guild_exit = _find_exit(larkspur_lane_room, "guild", "north")
 
-    empath_guild = getattr(lane_guild_exit, "destination", None) or _find_tagged_room("guild_empath")
-    if not empath_guild:
-        empath_guild = _ensure_room(
-            "Empath Guild",
-            "The air is clean in a way that feels deliberate.\n\nStone floors, worn smooth, are marked by careful movement rather than traffic. Tables are spaced with intention, not comfort. Instruments rest where they are needed\u2014never where they are convenient.\n\nVoices are low. Focused. No one lingers without purpose.\n\nThis is not a place for recovery.\n\nIt is a place for those who have not yet died.",
-        )
-
-    empath_guild.key = "Empath Guild"
-    empath_guild.db.desc = aftermath.append_guild_triage_detail(
-        "The air is clean in a way that feels deliberate.\n\nStone floors, worn smooth, are marked by careful movement rather than traffic. Tables are spaced with intention, not comfort. Instruments rest where they are needed\u2014never where they are convenient.\n\nVoices are low. Focused. No one lingers without purpose.\n\nThis is not a place for recovery.\n\nIt is a place for those who have not yet died."
-    )
-    empath_guild.db.area = "Empath Guild"
-    empath_guild.db.region_name = "The Landing"
-    empath_guild.tags.add("guild_empath")
+    empath_rooms = ensure_crossing_empath_guildhall()
+    empath_guild = empath_rooms["main_hall"]
+    empath_guild.db.desc = aftermath.append_guild_triage_detail(str(getattr(empath_guild.db, "desc", "") or ""))
     aftermath.ensure_empath_orderly(empath_guild)
-
-    if larkspur_lane_room and str(getattr(larkspur_lane_room, "key", "") or "") == "Larkspur Lane, Midway":
-        larkspur_lane_room.tags.add("guild_access_empath")
-        lane_to_guild = _ensure_custom_exit(
-            larkspur_lane_room,
-            "north",
-            empath_guild,
-            aliases=["empath", "empath guild", "door", "guild"],
-            desc="A narrow doorway set into the north side of the lane, marked only by a worn lintel.",
-            existing_keys=["guild"],
-        )
-        lane_to_guild.db.exit_display_name = "Empaths Guild"
-        guild_to_lane = _ensure_custom_exit(
-            empath_guild,
-            "south",
-            larkspur_lane_room,
-            aliases=["street", "lane", "back", "out"],
-            existing_keys=["out"],
-        )
-        guild_to_lane.db.exit_display_name = "Larkspur Lane"
 
     ranger_guild = _find_tagged_room("guild_ranger")
     if not ranger_guild:
@@ -1414,6 +1433,12 @@ def at_server_start():
 
     _ensure_limbo_training_dummy()
     build_the_landing()
+    try:
+        primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map"])
+        if primed_zones:
+            logger.log_info(f"Primed AreaForge zone map cache: {', '.join(primed_zones)}")
+    except Exception:
+        logger.log_warn("AreaForge zone map cache priming failed during server start.")
     logger.log_info("Ensuring new player tutorial bootstrap.")
     tutorial_entry = _ensure_new_player_tutorial()
     if tutorial_entry:
@@ -1426,6 +1451,7 @@ def at_server_start():
         logger.log_warn("[Aftermath] Failed to ensure POI tags during server start.")
     _warn_empath_guild_duplicates()
     _configure_brookhollow_justice()
+    _ensure_fishing_supplier_npc()
 
 
 def at_server_stop():
@@ -1440,14 +1466,14 @@ def at_server_reload_start():
     """
     This is called only when server starts back up after a reload.
     """
-    pass
+    _ensure_fishing_supplier_npc()
 
 
 def at_server_reload_stop():
     """
     This is called only time the server stops before a reload.
     """
-    pass
+    _ensure_fishing_supplier_npc()
 
 
 def at_server_cold_start():

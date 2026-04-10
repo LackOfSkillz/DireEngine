@@ -23,6 +23,9 @@ class CmdHelp(EvenniaCmdHelp):
 
     def func(self):
         query = str(self.args or "").strip().lower()
+        if query == "fish":
+            self.args = "fishing"
+            query = "fishing"
         if query == "warrior":
             if hasattr(self.caller, "get_warrior_help_text"):
                 self.msg_help(self.caller.get_warrior_help_text())
@@ -64,14 +67,17 @@ class CmdHelp(EvenniaCmdHelp):
                     "passage travel",
                 ),
             ),
-            ("Survival", ("analyze", "beseech", "companion", "cover tracks", "focus", "follow trail", "forage", "harvest", "hunt", "inspect", "open", "read land", "scout", "track", "climb", "swim", "skin", "pick", "disarm", "settrap", "rework")),
+            (
+                "Survival",
+                ("analyze", "bait", "beseech", "companion", "cover tracks", "fish", "focus", "follow trail", "forage", "harvest", "hunt", "inspect", "open", "pull", "read land", "rig", "scout", "track", "climb", "swim", "skin", "pick", "disarm", "settrap", "rework", "untangle"),
+            ),
         )
     )
 
     topic_groups = OrderedDict(
         (
             ("Start Here", ("getting started", "getting_started")),
-            ("Game Systems", ("character", "equipment", "combat", "fieldcraft")),
+            ("Game Systems", ("character", "equipment", "combat", "fieldcraft", "fishing")),
             ("Staff Topics", ("training gear",)),
             ("Developer Topics", ("evennia",)),
         )

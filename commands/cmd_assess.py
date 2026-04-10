@@ -7,6 +7,7 @@ class CmdAssess(Command):
 
     Examples:
         assess
+        assess patient
     """
 
     key = "assess"
@@ -15,6 +16,7 @@ class CmdAssess(Command):
 
     def func(self):
         caller = self.caller
-        ok, lines = caller.assess_empath_link() if hasattr(caller, "assess_empath_link") else (False, ["You have no patient to assess."])
+        target_query = str(self.args or "").strip()
+        ok, lines = caller.assess_empath_link(target_query=target_query) if hasattr(caller, "assess_empath_link") else (False, ["You have no patient to assess."])
         for line in lines:
             caller.msg(line)

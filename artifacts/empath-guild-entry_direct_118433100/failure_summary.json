@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "KeyError: 'courtyard'",
+  "mode": "direct",
+  "scenario": "empath-guild-entry",
+  "seed": 118433100
+}

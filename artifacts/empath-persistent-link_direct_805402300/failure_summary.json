@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Persistent link should last longer under small repeated strain: {'target_id': 14372, 'type': 'persistent', 'strength': 90, 'stability': 88, 'created_at': 1775607509.313466, 'target': TEST_EMPATH_PERSISTENT_PATIENT, 'is_local': True, 'priority': 3, 'strength_label': 'Strong', 'condition': 'steady', 'remaining': 0}",
+  "mode": "direct",
+  "scenario": "empath-persistent-link",
+  "seed": 805402300
+}

@@ -1,0 +1,432 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_VITALITY_PATIENT",
+      "first_response_ms": 212.97699998831376,
+      "kind": "command",
+      "ms": 213.0965999676846,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_VITALITY_PARTNER",
+      "first_response_ms": 123.04969999240711,
+      "kind": "command",
+      "ms": 123.12689999816939,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take 25%",
+      "first_response_ms": 18.665799987502396,
+      "kind": "command",
+      "ms": 18.771500035654753,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "partial_blocked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 20",
+      "first_response_ms": 226.58650000812486,
+      "kind": "command",
+      "ms": 248.7348000286147,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "vitality_taken"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality all",
+      "first_response_ms": 86.471899994649,
+      "kind": "command",
+      "ms": 227.5058999657631,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "overdrawn"
+    }
+  ],
+  "command_timings_ms": [
+    213.0965999676846,
+    123.12689999816939,
+    18.771500035654753,
+    248.7348000286147,
+    227.5058999657631
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 248.69380000745878,
+    "timings_ms": [
+      213.0965999676846,
+      123.12689999816939,
+      18.771500035654753,
+      248.7348000286147,
+      227.5058999657631
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775667829.7669456,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 133.55017999419942,
+  "interest": {
+    "active_object_count": 6,
+    "active_object_peak": 6,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 16,
+      "scheduled": 4,
+      "zone": 0
+    },
+    "source_count_current": 19,
+    "source_count_peak": 19,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 16,
+      "scheduled": 3,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 16,
+      "scheduled": 3,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 7,
+      "deactivate": 1
+    },
+    "transition_event_counts": {
+      "activate": 7,
+      "deactivate": 1
+    },
+    "transition_total": 8
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 166.2471399991773,
+    "jitter": 95.34167649762568,
+    "max_ms": 248.7348000286147,
+    "min_ms": 18.771500035654753,
+    "p95_ms": 244.48902001604438,
+    "slow_count": 3,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_VITALITY_PATIENT",
+      "ms": 213.0965999676846,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_VITALITY_PARTNER",
+      "ms": 123.12689999816939,
+      "snapshot": "unified"
+    },
+    {
+      "command": "take 25%",
+      "ms": 18.771500035654753,
+      "snapshot": "partial_blocked"
+    },
+    {
+      "command": "take vitality 20",
+      "ms": 248.7348000286147,
+      "snapshot": "vitality_taken"
+    },
+    {
+      "command": "take vitality all",
+      "ms": 227.5058999657631,
+      "snapshot": "overdrawn"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 248.69380000745878,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You weave a frail bond between burdens.",
+    "TEST_EMPATH_VITALITY_PATIENT has no wound you can draw that way.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "Your focus wavers slightly.",
+    "You have taken too much. Your senses falter.",
+    "You draw out living force, lessening the burden even as it tears through you."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "link TEST_EMPATH_VITALITY_PATIENT",
+      "unity TEST_EMPATH_VITALITY_PARTNER",
+      "take 25%",
+      "take vitality 20",
+      "take vitality all"
+    ],
+    "empath_vitality": 18,
+    "fatigue_after": 17,
+    "fatigue_before": 10,
+    "hp_after": 90,
+    "hp_before": 100,
+    "output_log": [
+      "You deepen your connection, taking in the shape of their suffering.",
+      "You weave a frail bond between burdens.",
+      "TEST_EMPATH_VITALITY_PATIENT has no wound you can draw that way.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "Your focus wavers slightly.",
+      "You have taken too much. Your senses falter.",
+      "You draw out living force, lessening the burden even as it tears through you."
+    ],
+    "overdraw_output": [
+      "Your focus wavers slightly.",
+      "You have taken too much. Your senses falter.",
+      "You draw out living force, lessening the burden even as it tears through you."
+    ],
+    "partial_output": [
+      "TEST_EMPATH_VITALITY_PATIENT has no wound you can draw that way."
+    ],
+    "partner_vitality": 0,
+    "patient_vitality": 60,
+    "shock_after": 6,
+    "shock_before": 0,
+    "snapshot_count": 6,
+    "snapshot_labels": [
+      "initial",
+      "unified",
+      "partial_blocked",
+      "vitality_taken",
+      "overdrawn",
+      "final"
+    ],
+    "take_output": [
+      "You draw out living force, lessening the burden even as it tears through you."
+    ]
+  },
+  "scenario_duration_ms": 37870,
+  "scheduler": {
+    "active_job_count": 3,
+    "active_jobs": [
+      {
+        "created_at": 1775667806.7055128,
+        "delay_s": 2.5,
+        "due_at": 1775667809.2055128,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_VITALITY_HEALER",
+        "job_id": "058f8ab9256348b5a0e20e9b8fd3561d",
+        "key": "combat:roundtime:14617",
+        "owner": "#14617",
+        "owner_label": "TEST_EMPATH_VITALITY_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775667807.9839678,
+        "delay_s": 599.8726694583893,
+        "due_at": 1775668407.8566372,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": "#14622",
+        "interest_object_label": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "job_id": "d9d4291469464568995b1ef9e1dcf694",
+        "key": "corpse:decay:14622",
+        "owner": "#14622",
+        "owner_label": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "source": "world.corpse_decay",
+        "system": "world.corpse_decay",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775667808.0319014,
+        "delay_s": 3.3333333333333335,
+        "due_at": 1775667811.3652346,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_VITALITY_FATALIST",
+        "job_id": "9c390c90d0434d37afc091837959bf71",
+        "key": "combat:roundtime:14620",
+        "owner": "#14620",
+        "owner_label": "TEST_EMPATH_VITALITY_FATALIST",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 3.0,
+    "queue_peak": 3.0,
+    "reschedule_total": 0,
+    "scheduled_total": 4,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "link TEST_EMPATH_VITALITY_PATIENT",
+      "ms": 213.0965999676846
+    },
+    {
+      "cmd": "take vitality 20",
+      "ms": 248.7348000286147
+    },
+    {
+      "cmd": "take vitality all",
+      "ms": 227.5058999657631
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "unified",
+    "partial_blocked",
+    "vitality_taken",
+    "overdrawn",
+    "final"
+  ],
+  "started_at": 1775667790.6855175,
+  "state_transition_count": 5,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath vitality-transfer regression coverage validates HP cost, overdraw, unity lockout, and partial lockout without depending on wall-clock timing."
+    },
+    "scheduler_job_count": 3,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 166.20427999878302,
+      "count": 5,
+      "entries": [
+        {
+          "duration_ms": 213.042100018356,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775667806.743434
+        },
+        {
+          "duration_ms": 123.10490000527352,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "unity"
+          },
+          "timestamp": 1775667806.862119
+        },
+        {
+          "duration_ms": 18.715300015173852,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775667806.8927352
+        },
+        {
+          "duration_ms": 248.69380000745878,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775667807.1593995
+        },
+        {
+          "duration_ms": 227.46529994765297,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775667807.4283373
+        }
+      ],
+      "max_ms": 248.69380000745878,
+      "total_ms": 831.0213999939151
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 4
+}

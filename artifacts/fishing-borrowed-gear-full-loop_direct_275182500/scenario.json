@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Borrowed-gear full-loop verification should report lag telemetry without turning starter-loop cleanup into an environment failure."
+  },
+  "mode": "direct",
+  "name": "fishing-borrowed-gear-full-loop",
+  "seed": 275182500,
+  "started_at": 1775761259.467686
+}

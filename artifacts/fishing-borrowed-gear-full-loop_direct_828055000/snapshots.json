@@ -1,0 +1,89 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 16782,
+        "is_dead": false,
+        "key": "TEST_BORROWED_FULL_LOOP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_BORROWED_FULL_LOOP_SOUTH",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 16789,
+          "key": "river salvage",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16790,
+          "key": "cleaned fish skin",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16791,
+          "key": "silver trout",
+          "location": "TEST_BORROWED_FULL_LOOP_CHAR",
+          "typeclass": "typeclasses.items.fish.Fish"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 16779,
+            "key": "TEST_BORROWED_FULL_LOOP_WATER",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16780,
+            "key": "TEST_BORROWED_FULL_LOOP_SOUTH",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16781,
+            "key": "south",
+            "location": "TEST_BORROWED_FULL_LOOP_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16782,
+            "key": "TEST_BORROWED_FULL_LOOP_CHAR",
+            "location": "TEST_BORROWED_FULL_LOOP_SOUTH",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_BORROWED_FULL_LOOP_CHAR"
+        ],
+        "exits": [],
+        "id": 16780,
+        "key": "TEST_BORROWED_FULL_LOOP_SOUTH"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775762141.6501033
+    },
+    "label": "final"
+  }
+]

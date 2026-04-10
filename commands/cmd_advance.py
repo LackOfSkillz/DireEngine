@@ -1,5 +1,7 @@
 from evennia import Command
 
+from commands.cmd_circle import run_empath_circle_command
+
 
 class CmdAdvance(Command):
     """
@@ -15,6 +17,14 @@ class CmdAdvance(Command):
     help_category = "Combat"
 
     def func(self):
+        if (
+            hasattr(self.caller, "is_profession")
+            and self.caller.is_profession("empath")
+            and not getattr(self.caller.db, "in_combat", False)
+            and not getattr(self.caller.db, "target", None)
+        ):
+            run_empath_circle_command(self.caller, force_advance=True)
+            return
         if self.caller.is_stunned():
             self.caller.msg("You are too stunned to press the attack.")
             self.caller.consume_stun()

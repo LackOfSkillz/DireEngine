@@ -100,28 +100,118 @@ body {
   overflow: hidden;
 }
 
-#left-rail,
+#left-rail {
+  overflow: hidden;
+}
+
 #right-rail {
   overflow: auto;
   scrollbar-gutter: stable;
 }
 
-.portrait-frame {
-  width: clamp(78px, 7vw, 112px);
-  height: clamp(78px, 7vw, 112px);
+.left-rail-brand {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 6px;
+  background: linear-gradient(180deg, #f2e1b8 0%, rgba(242, 225, 184, 0.96) 78%, rgba(242, 225, 184, 0) 100%);
+}
+
+#left-rail-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.engine-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 168px;
+  max-width: 100%;
+  min-height: 44px;
   margin-bottom: 12px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 2px solid rgba(96, 58, 22, 0.55);
+  box-shadow: inset 0 0 0 4px rgba(255, 248, 230, 0.25);
+  background: linear-gradient(135deg, #c68642, #7a4d25);
+  color: #f4ebd3;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.portrait-frame {
+  width: 100%;
+  max-width: 176px;
+  min-height: 40px;
+  margin-bottom: 12px;
+  display: block;
+  overflow: visible;
+}
+
+.portrait-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  border: 2px solid rgba(96, 58, 22, 0.55);
+  box-shadow: inset 0 0 0 4px rgba(255, 248, 230, 0.25);
+  background: linear-gradient(135deg, #c68642, #7a4d25);
+  font-size: 18px;
+  appearance: none;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  white-space: nowrap;
+  color: #f4ebd3;
+}
+
+.brand-mark-frame {
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
+  height: clamp(28px, 2.8vw, 34px);
+  margin-bottom: 12px;
+  box-sizing: border-box;
   border: 2px solid rgba(96, 58, 22, 0.55);
   box-shadow: inset 0 0 0 4px rgba(255, 248, 230, 0.25);
   background: linear-gradient(135deg, #c68642, #7a4d25);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-.portrait-placeholder {
-  font-size: clamp(24px, 2vw, 34px);
-  appearance: none;
+.brand-mark-text {
+  display: block;
+  max-width: 100%;
+  padding: 0 12px;
+  box-sizing: border-box;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(7px, 0.62vw, 9px);
   font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  text-align: center;
   color: #f4ebd3;
 }
 
@@ -945,11 +1035,17 @@ body {
 
   #left-rail {
     grid-area: left;
+    display: flex;
+    flex-direction: column;
+    max-height: min(28dvh, 240px);
+    overflow: hidden;
+  }
+
+  #left-rail-body {
     display: grid;
-    grid-template-columns: auto minmax(180px, 1.2fr) repeat(4, minmax(120px, 1fr));
+    grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(120px, 1fr));
     align-items: start;
     gap: 8px;
-    max-height: min(28dvh, 240px);
     overflow: auto;
   }
 
@@ -966,7 +1062,7 @@ body {
     overflow: auto;
   }
 
-  #left-rail > * {
+  #left-rail-body > * {
     min-width: 0;
   }
 
@@ -1019,24 +1115,28 @@ body {
     overflow: visible;
   }
 
-  #left-rail,
+  #left-rail {
+    overflow: hidden;
+    max-height: none;
+  }
+
   #right-rail {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    gap: 8px;
     overflow: visible;
     max-height: none;
   }
 
-  #left-rail {
+  #left-rail-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+    overflow: visible;
   }
 
-  #right-rail {
-    grid-template-rows: none;
-    gap: 8px;
-  }
-
-  #left-rail > *,
+  #left-rail-body > *,
   #right-rail > * {
     min-width: 0;
   }

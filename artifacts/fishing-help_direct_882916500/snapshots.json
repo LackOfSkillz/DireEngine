@@ -1,0 +1,59 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 15822,
+        "is_dead": false,
+        "key": "TEST_FISHING_HELP_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_FISHING_HELP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 15821,
+            "key": "TEST_FISHING_HELP_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 15822,
+            "key": "TEST_FISHING_HELP_CHAR",
+            "location": "TEST_FISHING_HELP_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_FISHING_HELP_CHAR",
+          "Old Maren"
+        ],
+        "exits": [],
+        "id": 15821,
+        "key": "TEST_FISHING_HELP_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775754640.3382285
+    },
+    "label": "final"
+  }
+]

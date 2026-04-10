@@ -1,0 +1,505 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 14270,
+            "key": "TEST_EMPATH_POISON_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 14271,
+            "key": "TEST_EMPATH_POISON_HEALER",
+            "location": "TEST_EMPATH_POISON_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 14272,
+            "key": "TEST_EMPATH_POISON_PATIENT",
+            "location": "TEST_EMPATH_POISON_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1775606084.6885085
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "perceived_room",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "perceived_room",
+      "timestamp": 1775606084.743728
+    },
+    "label": "perceived_room"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "perceived_target",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "perceived_target",
+      "timestamp": 1775606084.7742343
+    },
+    "label": "perceived_target"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "touched",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "touched",
+      "timestamp": 1775606084.8326716
+    },
+    "label": "touched"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "assessed",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "assessed",
+      "timestamp": 1775606084.8386831
+    },
+    "label": "assessed"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "took_poison",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "took_poison",
+      "timestamp": 1775606084.9226625
+    },
+    "label": "took_poison"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "poison_ticked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "poison_ticked",
+      "timestamp": 1775606084.9303198
+    },
+    "label": "poison_ticked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "took_bleeding",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "took_bleeding",
+      "timestamp": 1775606085.000569
+    },
+    "label": "took_bleeding"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "mended",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "mended",
+      "timestamp": 1775606085.0457382
+    },
+    "label": "mended"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "purged",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "purged",
+      "timestamp": 1775606085.0868647
+    },
+    "label": "purged"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 14271,
+        "is_dead": false,
+        "key": "TEST_EMPATH_POISON_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_POISON_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_POISON_HEALER",
+          "TEST_EMPATH_POISON_PATIENT"
+        ],
+        "exits": [],
+        "id": 14270,
+        "key": "TEST_EMPATH_POISON_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775606085.087864
+    },
+    "label": "final"
+  }
+]

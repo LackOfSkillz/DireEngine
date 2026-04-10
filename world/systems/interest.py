@@ -386,6 +386,8 @@ def _call_hook(obj, hook_name):
 
 
 def add_interest(obj, source, interest_type):
+    if not is_enabled("interest_activation"):
+        return []
     normalized_type = _normalize_interest_type(interest_type)
     normalized_source_key = _source_key(source)
     normalized_source_label = _source_label(source)
@@ -413,6 +415,8 @@ def add_interest(obj, source, interest_type):
 
 
 def remove_interest(obj, source):
+    if not is_enabled("interest_activation"):
+        return []
     normalized_source_key = _source_key(source)
 
     removed_type = None
@@ -439,6 +443,8 @@ def remove_interest(obj, source):
 
 
 def get_activation_sources(obj):
+    if not is_enabled("interest_activation"):
+        return []
     with _LOCK:
         record = _get_record(obj, create=False)
         if not record:
@@ -461,6 +467,8 @@ def get_zone_rooms(room):
 
 
 def get_active_objects():
+    if not is_enabled("interest_activation"):
+        return []
     with _LOCK:
         active_objects = []
         stale_keys = []
@@ -478,6 +486,8 @@ def get_active_objects():
 
 
 def clear_room_interest(subject, room=None):
+    if not is_enabled("interest_activation"):
+        return
     target_room = room if room is not None else getattr(subject, "location", None)
     source = _room_source(subject)
     for target in _iter_room_targets(target_room):
@@ -485,6 +495,8 @@ def clear_room_interest(subject, room=None):
 
 
 def clear_proximity_interest(subject, room=None, radius=1):
+    if not is_enabled("interest_activation"):
+        return
     target_room = room if room is not None else getattr(subject, "location", None)
     source = _proximity_source(subject, radius=radius)
     for target in _iter_proximity_targets(target_room, radius=radius):
@@ -492,6 +504,8 @@ def clear_proximity_interest(subject, room=None, radius=1):
 
 
 def clear_zone_interest(subject, room=None):
+    if not is_enabled("interest_activation"):
+        return
     target_room = room if room is not None else getattr(subject, "location", None)
     zone_key = _get_zone_key(target_room)
     if not zone_key:
@@ -502,18 +516,26 @@ def clear_zone_interest(subject, room=None):
 
 
 def clear_direct_interest(subject, channel="direct"):
+    if not is_enabled("interest_activation"):
+        return
     _remove_source_everywhere(_direct_source(subject, channel=channel))
 
 
 def add_scheduled_interest(obj, schedule_key=None, system="", job_id=None):
+    if not is_enabled("interest_activation"):
+        return []
     return add_interest(obj, _scheduled_source(schedule_key=schedule_key, system=system, job_id=job_id), SCHEDULED)
 
 
 def remove_scheduled_interest(obj, schedule_key=None, system="", job_id=None):
+    if not is_enabled("interest_activation"):
+        return []
     return remove_interest(obj, _scheduled_source(schedule_key=schedule_key, system=system, job_id=job_id))
 
 
 def sync_room_interest(subject, previous_room=None):
+    if not is_enabled("interest_activation"):
+        return
     source = _room_source(subject)
     for target in _iter_room_targets(previous_room):
         remove_interest(target, source)
@@ -523,6 +545,8 @@ def sync_room_interest(subject, previous_room=None):
 
 
 def sync_proximity_interest(subject, previous_room=None, radius=1):
+    if not is_enabled("interest_activation"):
+        return
     source = _proximity_source(subject, radius=radius)
     for target in _iter_proximity_targets(previous_room, radius=radius):
         remove_interest(target, source)
@@ -532,6 +556,8 @@ def sync_proximity_interest(subject, previous_room=None, radius=1):
 
 
 def sync_zone_interest(subject, previous_room=None):
+    if not is_enabled("interest_activation"):
+        return
     previous_zone_key = _get_zone_key(previous_room)
     current_room = getattr(subject, "location", None)
     current_zone_key = _get_zone_key(current_room)
@@ -552,6 +578,8 @@ def sync_zone_interest(subject, previous_room=None):
 
 
 def sync_direct_interest(subject, targets, channel="direct"):
+    if not is_enabled("interest_activation"):
+        return
     source = _direct_source(subject, channel=channel)
     _remove_source_everywhere(source)
     for target in list(targets or []):
@@ -570,6 +598,8 @@ def direct_interest(subject, targets, channel="direct"):
 
 
 def clear_subject_interest(subject):
+    if not is_enabled("interest_activation"):
+        return
     _remove_source_everywhere(_room_source(subject))
     _remove_source_everywhere(_proximity_source(subject, radius=1))
     current_room = getattr(subject, "location", None)
@@ -579,6 +609,8 @@ def clear_subject_interest(subject):
 
 
 def sync_subject_interest(subject, previous_room=None):
+    if not is_enabled("interest_activation"):
+        return
     sync_room_interest(subject, previous_room=previous_room)
     sync_proximity_interest(subject, previous_room=previous_room, radius=1)
     sync_zone_interest(subject, previous_room=previous_room)

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Fishing scenario did not include processed goods in bulk fish-buyer sales: ['You sell 2 items for a total of 2 silvers, 4 coppers.']",
+  "mode": "direct",
+  "scenario": "fishing-vertical-slice",
+  "seed": 203865900
+}

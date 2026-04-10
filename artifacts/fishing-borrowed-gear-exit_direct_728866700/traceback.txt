@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 3832, in scenario
+    raise AssertionError(f"Borrowed gear exit scenario emitted the return line {len(return_lines)} times instead of once: {exit_output}")
+AssertionError: Borrowed gear exit scenario emitted the return line 0 times instead of once: ['|cTEST_BORROWED_GEAR_WEST|n\nThis is a room.', "OPTIONS {'type': 'look'}", 'You disturb the line.']

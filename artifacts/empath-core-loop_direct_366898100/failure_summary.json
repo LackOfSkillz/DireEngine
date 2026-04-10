@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Empath bleeding transfer did not apply the expected self-risk spike: {'fatigue': 0, 'vitality': 0, 'bleeding': 14, 'poison': 0, 'disease': 0}",
+  "mode": "direct",
+  "scenario": "empath-core-loop",
+  "seed": 366898100
+}

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Vitality transfer did not add the full burden to the empath: 18",
+  "mode": "direct",
+  "scenario": "empath-vitality-transfer",
+  "seed": 244214900
+}

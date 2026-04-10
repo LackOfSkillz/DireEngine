@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "ValueError: too many values to unpack (expected 2)",
+  "mode": "direct",
+  "scenario": "fishing-help",
+  "seed": 940998100
+}

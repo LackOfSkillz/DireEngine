@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Link creation should succeed for the baseline patient.",
+  "mode": "direct",
+  "scenario": "empath-learning-unification",
+  "seed": 336765000
+}

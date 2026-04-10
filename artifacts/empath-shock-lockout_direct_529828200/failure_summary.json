@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Second empath kill should push shock into lockout, got 60",
+  "mode": "direct",
+  "scenario": "empath-shock-lockout",
+  "seed": 529828200
+}

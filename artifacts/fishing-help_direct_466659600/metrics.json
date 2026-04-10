@@ -1,0 +1,184 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 0,
+  "command_timing_entries": [],
+  "command_timings_ms": [],
+  "commands": {
+    "count": 0,
+    "max_ms": 0.0,
+    "timings_ms": []
+  },
+  "deletion_failures": [],
+  "ended_at": 1775754951.7464566,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 454,
+    "active_object_peak": 454,
+    "active_source_types": [
+      "proximity",
+      "room"
+    ],
+    "exercised_source_types": [
+      "proximity",
+      "room"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 20,
+      "room": 436,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 455,
+    "source_count_peak": 455,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 20,
+      "room": 435,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 20,
+      "room": 435,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 1,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 454,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 454
+    },
+    "transition_total": 454
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.0,
+    "jitter": 0.0,
+    "max_ms": 0.0,
+    "min_ms": 0.0,
+    "p95_ms": 0.0,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "ask",
+      "fish",
+      "bait",
+      "pull",
+      "rig",
+      "untangle",
+      "sell",
+      "skin",
+      "inventory"
+    ],
+    "fish_help_excerpt": "    def func(self):\n        query = str(self.args or \"\").strip().lower()\n        if query == \"fish\":\n            self.args = \"fishing\"\n            query = \"fishing\"\n        if query == \"warrior\":\n            if hasattr(self.caller, \"get_warrior_help_text\"):\n                self.msg_help(self.caller.get_warrior_help_text())\n                return\n        super().func()\n",
+    "fishing_help_excerpt": "\nFishing is a survival activity that lets you catch, process, and sell fish with basic equipment.\nIt primarily trains Outdoorsmanship and can also train Skinning and Mechanical Lore.\n\nMost characters can fish. Empaths can fish too, but fishing adds empathic strain and makes the\nloop less forgiving as strain rises.\n\nGetting started:\n\nYou will usually want:\n\n- `fishing pole`\n- `line`\n- `hook`\n- `bait`\n- `fish string` (optional, but useful for holding catches)\n\nIn Town Green, Old Maren can hand you a starter kit:\n\n- `ask maren for gear`\n\nPreparing your gear:\n\nBefore you cast, make sure the pole is rigged.\n\n- `rig pole`\n\nIf the line tangles:\n\n- `untangle pole`\n\nIf something is missing, the system tells you what part needs attention.\n\nBaiting the hook:\n\nAttach bait before you cast.\n\n- `bait <item>`\n\nExample:\n\n- `bait worm`\n\nFishing:\n\nCast with:\n\n- `fish`\n\nWatch the feedback. When the line gives you a real cue, respond with:\n\n- `pull`\n\nTiming matters. Pulling at the wrong moment can lose the catch.\n\nPossible outcomes:\n\nFishing may result in:\n\n- catching a fish\n- pulling up junk\n- losing the catch\n- damaging your line\n- rare unexpected events\n\nSome catches are more difficult than others a",
+    "output_log": [],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "survival_help_excerpt": "\n    Fieldcraft covers awareness, stealth, environmental actions, and trap or loot work.\n\n    - `observe` and `search` reveal hidden details.\n    - `hide`, `unhide`, `sneak`, `stalk`, and `ambush` handle stealth.\n    - `forage`, `climb`, and `swim` handle common wilderness actions.\n    - `inspect`, `disarm`, `pick`, and `open` handle boxes, traps, and locks.\n    - `analyze`, `harvest`, and `skin` handle creature resource gathering.\n\n    Examples:\n\n    - `search`\n    - `hide`\n    - `forage`\n    - `inspect iron lockbox`\n    - `pick iron lockbox with crude`\n    - `harvest carcass`\n\n    See also:\n\n    - `help fishing`\n        "
+  },
+  "scenario_duration_ms": 8329,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775754942.7914398,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Help output verification should still emit lag telemetry without turning formatting checks into environment failures."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -259,6 +259,30 @@ class NPC(Character):
 
         return getattr(self.db, "default_inquiry_response", None)
 
+
+class EmpathGuildleader(NPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.guild_role = "guildmaster"
+        self.db.trains_profession = "empath"
+        self.db.default_inquiry_response = "Merla says, 'If you mean to join us, prove you can stand where the work is done first.'"
+
+    def handle_inquiry(self, actor, topic):
+        normalized = str(topic or "").strip().lower()
+        if normalized in {"join", "guild", "empath", "healing"}:
+            return "Merla says, 'Empaths do not join by wanting to be kind. You join by accepting another person's hurt and mastering your own.'"
+        if normalized in {"patient", "training", "lesson"}:
+            return "Merla says, 'The patient is in the training room. Touch the patient, read the wound, take it cleanly, then bear what you chose.'"
+        return super().handle_inquiry(actor, topic)
+
+
+class EmpathTutorialPatient(NPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.is_training_dummy = True
+        self.db.is_tutorial_patient = True
+        self.db.default_inquiry_response = None
+
     def get_vendor_interaction_lines(self, actor, action="shop"):
         attr_name = f"{str(action or 'shop').strip().lower()}_intro_lines"
         lines = getattr(self.db, attr_name, None)

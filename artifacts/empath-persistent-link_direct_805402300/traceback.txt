@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 3046, in scenario
+    raise AssertionError(f"Persistent link should last longer under small repeated strain: {persistent_link}")
+AssertionError: Persistent link should last longer under small repeated strain: {'target_id': 14372, 'type': 'persistent', 'strength': 90, 'stability': 88, 'created_at': 1775607509.313466, 'target': TEST_EMPATH_PERSISTENT_PATIENT, 'is_local': True, 'priority': 3, 'strength_label': 'Strong', 'condition': 'steady', 'remaining': 0}

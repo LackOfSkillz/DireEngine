@@ -1,0 +1,323 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 687.0987999718636,
+      "kind": "command",
+      "ms": 687.4648999655619,
+      "npc_response_delay_ms": 687.2801999561489,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 227.51619992777705,
+      "kind": "command",
+      "ms": 227.58260008413345,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 15.917599899694324,
+      "kind": "command",
+      "ms": 17.17500004451722,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "west",
+      "first_response_ms": 710.1589000085369,
+      "kind": "command",
+      "ms": 827.479200088419,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _finalize_borrowed_return_cleanup",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 487.0957999955863,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    687.4648999655619,
+    227.58260008413345,
+    17.17500004451722,
+    827.479200088419,
+    487.0957999955863
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 827.436999999918,
+    "timings_ms": [
+      687.4648999655619,
+      227.58260008413345,
+      17.17500004451722,
+      827.479200088419,
+      487.0957999955863
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775761704.0590632,
+  "exit_code": 1,
+  "failure_type": "direct_execution_failure",
+  "first_response_ms": 410.17287495196797,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 5,
+  "lag": {
+    "avg_ms": 449.3595000356436,
+    "jitter": 330.55300360272633,
+    "max_ms": 827.479200088419,
+    "min_ms": 17.17500004451722,
+    "p95_ms": 799.4763400638476,
+    "slow_count": 4,
+    "spike_count": 3,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "ask maren for gear",
+      "ms": 687.4648999655619,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 227.58260008413345,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 17.17500004451722,
+      "snapshot": "final"
+    },
+    {
+      "command": "west",
+      "ms": 827.479200088419,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _finalize_borrowed_return_cleanup",
+      "ms": 487.0957999955863,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 827.436999999918,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 687.2801999561489,
+  "output_log": [
+    "Old Maren stoops beside her baskets, sorts out the basics in practiced order, and presses them into your hands one piece at a time.",
+    "Thread your catch onto this if you plan to keep fishing.",
+    "Old Maren says, \"Start with the pole, then mind your bait. I've set you up with fishing pole, fish string, hook, line, worm.\"",
+    "You bait your hook with worm.",
+    "You cast your line into the water.",
+    "You wait for a bite...",
+    "|cTEST_BORROWED_GEAR_WEST|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}",
+    "You disturb the line.",
+    "You return the borrowed fishing gear and head west.",
+    "ERROR database is locked"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 20910,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 687.4648999655619
+    },
+    {
+      "cmd": "bait worm",
+      "ms": 227.58260008413345
+    },
+    {
+      "cmd": "west",
+      "ms": 827.479200088419
+    },
+    {
+      "cmd": "DIRECT _finalize_borrowed_return_cleanup",
+      "ms": 487.0957999955863
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775761681.9151926,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Borrowed-gear exit cleanup should report lag telemetry without masking return-logic regressions."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 439.89049998344854,
+      "count": 4,
+      "entries": [
+        {
+          "duration_ms": 687.4314999440685,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "ask"
+          },
+          "timestamp": 1775761686.6760824
+        },
+        {
+          "duration_ms": 227.55069995764643,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "bait"
+          },
+          "timestamp": 1775761687.896585
+        },
+        {
+          "duration_ms": 17.142800032161176,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "fish"
+          },
+          "timestamp": 1775761688.583253
+        },
+        {
+          "duration_ms": 827.436999999918,
+          "metadata": {
+            "character": "TEST_BORROWED_GEAR_CHAR",
+            "command": "west"
+          },
+          "timestamp": 1775761689.9828572
+        }
+      ],
+      "max_ms": 827.436999999918,
+      "total_ms": 1759.5619999337941
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

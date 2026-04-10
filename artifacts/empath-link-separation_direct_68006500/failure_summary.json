@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Link should be cleared after the target leaves the room.",
+  "mode": "direct",
+  "scenario": "empath-link-separation",
+  "seed": 68006500
+}

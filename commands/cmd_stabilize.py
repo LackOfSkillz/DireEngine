@@ -33,4 +33,6 @@ class CmdStabilize(Command):
         ok, message = caller.stabilize_empath_target(target) if hasattr(caller, "stabilize_empath_target") else (False, "You fail to steady their condition.")
         caller.msg(message)
         if ok:
-            target.msg("Your bleeding eases as your condition steadies.")
+            if getattr(caller, "location", None):
+                caller.location.msg_contents(f"{caller.key} steadies {target.key}'s condition with practiced calm.", exclude=[caller, target])
+            target.msg("Your condition steadies under careful hands.")

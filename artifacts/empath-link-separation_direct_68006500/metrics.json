@@ -1,0 +1,264 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "first_response_ms": 78.93869996769354,
+      "kind": "command",
+      "ms": 79.00959998369217,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 2.895599987823516,
+      "kind": "command",
+      "ms": 2.9525000136345625,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assess_after_move"
+    }
+  ],
+  "command_timings_ms": [
+    79.00959998369217,
+    2.9525000136345625
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 78.9931999752298,
+    "timings_ms": [
+      79.00959998369217,
+      2.9525000136345625
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775606133.0532436,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 40.91714997775853,
+  "interest": {
+    "active_object_count": 4,
+    "active_object_peak": 4,
+    "active_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 6,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_count_current": 5,
+    "source_count_peak": 5,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 4,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 2,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 4,
+      "deactivate": 0
+    },
+    "transition_event_counts": {
+      "activate": 4
+    },
+    "transition_total": 4
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 40.981049998663366,
+    "jitter": 53.78049114621089,
+    "max_ms": 79.00959998369217,
+    "min_ms": 2.9525000136345625,
+    "p95_ms": 75.20674498518929,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "ms": 79.00959998369217,
+      "snapshot": "linked"
+    },
+    {
+      "command": "assess",
+      "ms": 2.9525000136345625,
+      "snapshot": "assess_after_move"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 78.9931999752298,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "Distance tears your connection apart.",
+    "You are not linked to anyone."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 8707,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775606127.4324732,
+        "delay_s": 2.5,
+        "due_at": 1775606129.9324732,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "job_id": "6716c8f0165d47c7a5e5a2dd29dd58ec",
+        "key": "combat:roundtime:14285",
+        "owner": "#14285",
+        "owner_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "assess_after_move",
+    "final"
+  ],
+  "started_at": 1775606123.940014,
+  "state_transition_count": 3,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath link separation coverage validates automatic link breakage when a patient leaves the room without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 40.965699998196214,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 78.9931999752298,
+          "metadata": {
+            "character": "TEST_EMPATH_SEPARATION_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775606127.4410503
+        },
+        {
+          "duration_ms": 2.938200021162629,
+          "metadata": {
+            "character": "TEST_EMPATH_SEPARATION_HEALER",
+            "command": "assess"
+          },
+          "timestamp": 1775606127.4719615
+        }
+      ],
+      "max_ms": 78.9931999752298,
+      "total_ms": 81.93139999639243
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 1
+}

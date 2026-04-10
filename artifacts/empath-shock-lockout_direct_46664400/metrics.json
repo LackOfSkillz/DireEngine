@@ -1,0 +1,318 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 353.4665000042878,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "first_response_ms": 26.92700002808124,
+      "kind": "command",
+      "ms": 27.00080000795424,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "target TEST_EMPATH_SHOCK_FOE_ONE",
+      "first_response_ms": 20.64900001278147,
+      "kind": "command",
+      "ms": 20.72039997437969,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    },
+    {
+      "combat_response_ms": 353.4665000042878,
+      "command": "attack",
+      "first_response_ms": 340.15840000938624,
+      "kind": "command",
+      "ms": 423.35639998782426,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    }
+  ],
+  "command_timings_ms": [
+    27.00080000795424,
+    20.72039997437969,
+    423.35639998782426
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 423.34620002657175,
+    "timings_ms": [
+      27.00080000795424,
+      20.72039997437969,
+      423.35639998782426
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775603350.7770758,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 129.24480001674965,
+  "interest": {
+    "active_object_count": 5,
+    "active_object_peak": 5,
+    "active_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "exercised_source_types": [
+      "direct",
+      "room",
+      "scheduled"
+    ],
+    "source_add_totals": {
+      "direct": 3,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 3,
+      "zone": 0
+    },
+    "source_count_current": 15,
+    "source_count_peak": 15,
+    "source_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 2,
+      "proximity": 0,
+      "room": 11,
+      "scheduled": 2,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 1,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 6,
+      "deactivate": 1
+    },
+    "transition_event_counts": {
+      "activate": 6,
+      "deactivate": 1
+    },
+    "transition_total": 7
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 157.0258666567194,
+    "jitter": 230.6703830023883,
+    "max_ms": 423.35639998782426,
+    "min_ms": 20.72039997437969,
+    "p95_ms": 383.7208399898372,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "ms": 27.00080000795424,
+      "snapshot": "linked"
+    },
+    {
+      "command": "target TEST_EMPATH_SHOCK_FOE_ONE",
+      "ms": 20.72039997437969,
+      "snapshot": "first_kill"
+    },
+    {
+      "command": "attack",
+      "ms": 423.35639998782426,
+      "snapshot": "first_kill"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 423.34620002657175,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You reach out and sense the condition of your patient.",
+    "You feel unprepared for what may come.",
+    "You focus on TEST_EMPATH_SHOCK_FOE_ONE.",
+    "Your focus wavers slightly.",
+    "You crush TEST_EMPATH_SHOCK_FOE_ONE's chest with a devastating hit.",
+    "You bring down TEST_EMPATH_SHOCK_FOE_ONE."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 16481,
+  "scheduler": {
+    "active_job_count": 2,
+    "active_jobs": [
+      {
+        "created_at": 1775603339.1787553,
+        "delay_s": 599.9063458442688,
+        "due_at": 1775603939.0851011,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": "#14246",
+        "interest_object_label": "corpse of TEST_EMPATH_SHOCK_FOE_ONE",
+        "job_id": "09a2b0eec6b84d20901beac85bf1661e",
+        "key": "corpse:decay:14246",
+        "owner": "#14246",
+        "owner_label": "corpse of TEST_EMPATH_SHOCK_FOE_ONE",
+        "source": "world.corpse_decay",
+        "system": "world.corpse_decay",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775603339.289266,
+        "delay_s": 2.0,
+        "due_at": 1775603341.289266,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SHOCK_HEALER",
+        "job_id": "ad00739028254e958c2f53807fa26682",
+        "key": "combat:roundtime:14242",
+        "owner": "#14242",
+        "owner_label": "TEST_EMPATH_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 2.0,
+    "queue_peak": 2.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "attack",
+      "ms": 423.35639998782426
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "first_kill",
+    "final"
+  ],
+  "started_at": 1775603333.9791658,
+  "state_transition_count": 3,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath shock lockout coverage validates offensive shock gain, automatic link breakage, and center-based recovery without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 2,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 157.0138666817608,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 26.986300013959408,
+          "metadata": {
+            "character": "TEST_EMPATH_SHOCK_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775603338.857668
+        },
+        {
+          "duration_ms": 20.709100004751235,
+          "metadata": {
+            "character": "TEST_EMPATH_SHOCK_HEALER",
+            "command": "target"
+          },
+          "timestamp": 1775603338.879759
+        },
+        {
+          "duration_ms": 423.34620002657175,
+          "metadata": {
+            "character": "TEST_EMPATH_SHOCK_HEALER",
+            "command": "attack"
+          },
+          "timestamp": 1775603339.3031597
+        }
+      ],
+      "max_ms": 423.34620002657175,
+      "total_ms": 471.0416000452824
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -44,9 +44,55 @@
     return document.getElementById(id);
   }
 
-  function normalizeMessage(cmdname, args, kwargs) {
-    return { cmd: cmdname, args: args || [], kwargs: kwargs || {} };
+  function ensureRailBrandPresent() {
+    const rail = byId("left-rail-body");
+    if (!rail) return;
+
+    let brand = rail.querySelector(":scope > .left-rail-brand");
+    if (!brand) {
+      brand = document.createElement("div");
+      brand.className = "left-rail-brand";
+
+      const badge = document.createElement("div");
+      badge.className = "engine-badge";
+      badge.textContent = "DireEngine";
+
+      const crest = document.createElement("div");
+      crest.className = "crest-banner";
+      crest.textContent = "Wayfarer Interface";
+
+      brand.appendChild(badge);
+      brand.appendChild(crest);
+    }
+
+    const staleBadge = rail.querySelector(":scope > .brand-mark-frame, :scope > .portrait-frame");
+    if (staleBadge && staleBadge.parentNode === rail) {
+      staleBadge.remove();
+    }
+
+    const staleCrest = Array.from(rail.querySelectorAll(":scope > .crest-banner")).find((node) => node.parentNode === rail && !node.closest(".left-rail-brand"));
+    if (staleCrest) {
+      staleCrest.remove();
+    }
+
+    if (brand.parentNode !== rail || rail.firstElementChild !== brand) {
+      rail.insertBefore(brand, rail.firstChild);
+    }
   }
+
+  function resetLeftRailScroll() {
+    const body = byId("left-rail-body");
+    const rail = byId("left-rail");
+    if (body) {
+      body.scrollTop = 0;
+      body.scrollLeft = 0;
+    }
+    if (rail) {
+      rail.scrollTop = 0;
+      rail.scrollLeft = 0;
+    }
+  }
+
 
   function stripHtmlToText(html) {
     const parser = new DOMParser();
@@ -776,6 +822,68 @@
     };
   }
 
+  function mapRoomRadius(room, compactMap) {
+    if (room.is_player) {
+      return compactMap ? 9 : 6;
+    }
+    if (room.id === state.hoveredRoomId) {
+      return compactMap ? 6 : 4;
+    }
+    return compactMap ? 5 : 3;
+  }
+
+  function renderedMapBounds(canvas, scale) {
+    const rooms = state.map.rooms || [];
+    if (!canvas || !rooms.length) {
+      return { minX: 0, maxX: 1, minY: 0, maxY: 1, width: 1, height: 1 };
+    }
+
+    const compactMap = isCompactMap();
+    const ctx = canvas.getContext("2d");
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    for (const room of rooms) {
+      const roomX = (Number(room.x) || 0) * scale;
+      const roomY = (Number(room.y) || 0) * scale;
+      const radius = mapRoomRadius(room, compactMap);
+      const outline = room.is_player ? 4 : 0;
+
+      minX = Math.min(minX, roomX - radius - outline);
+      maxX = Math.max(maxX, roomX + radius + outline);
+      minY = Math.min(minY, roomY - radius - outline);
+      maxY = Math.max(maxY, roomY + radius + outline);
+
+      if (!compactMap) {
+        continue;
+      }
+
+      const fontSize = room.is_player ? 12 : 11;
+      ctx.save();
+      ctx.font = room.is_player ? "600 12px Georgia" : "11px Georgia";
+      const textWidth = ctx.measureText(room.name || "").width;
+      ctx.restore();
+
+      const textBottom = roomY - (radius + 8);
+      const textTop = textBottom - fontSize;
+      minX = Math.min(minX, roomX - textWidth / 2);
+      maxX = Math.max(maxX, roomX + textWidth / 2);
+      minY = Math.min(minY, textTop);
+      maxY = Math.max(maxY, textBottom);
+    }
+
+    return {
+      minX,
+      maxX,
+      minY,
+      maxY,
+      width: Math.max(1, maxX - minX),
+      height: Math.max(1, maxY - minY),
+    };
+  }
+
   function resizeMapCanvas() {
     const canvas = byId("map-canvas");
     if (!canvas) return false;
@@ -810,14 +918,30 @@
   function fitMapToCanvas() {
     const canvas = byId("map-canvas");
     if (!canvas || !state.map || !(state.map.rooms || []).length) return;
-    const bounds = mapBounds();
     const padding = 24;
     const usableWidth = Math.max(40, canvas.width - padding * 2);
     const usableHeight = Math.max(40, canvas.height - padding * 2);
-    const fitScale = Math.min(usableWidth / bounds.width, usableHeight / bounds.height);
-    state.mapScale = Math.max(0.12, fitScale);
-    state.mapOffset.x = padding + (usableWidth - bounds.width * state.mapScale) / 2 - bounds.minX * state.mapScale;
-    state.mapOffset.y = padding + (usableHeight - bounds.height * state.mapScale) / 2 - bounds.minY * state.mapScale;
+    const rawBounds = mapBounds();
+    let nextScale = Math.max(0.12, Math.min(usableWidth / rawBounds.width, usableHeight / rawBounds.height));
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const bounds = renderedMapBounds(canvas, nextScale);
+      const scaleFactor = Math.min(usableWidth / bounds.width, usableHeight / bounds.height);
+      if (!Number.isFinite(scaleFactor) || scaleFactor <= 0) {
+        break;
+      }
+      const adjustedScale = Math.max(0.12, nextScale * scaleFactor);
+      if (Math.abs(adjustedScale - nextScale) < 0.01) {
+        nextScale = adjustedScale;
+        break;
+      }
+      nextScale = adjustedScale;
+    }
+
+    state.mapScale = nextScale;
+    const bounds = renderedMapBounds(canvas, state.mapScale);
+    state.mapOffset.x = padding + (usableWidth - bounds.width) / 2 - bounds.minX;
+    state.mapOffset.y = padding + (usableHeight - bounds.height) / 2 - bounds.minY;
   }
 
   function getCurrentRoomId() {
@@ -874,7 +998,7 @@
 
     state.map.rooms.forEach((room) => {
       const pos = state.roomPositions.get(room.id);
-      const radius = room.is_player ? (compactMap ? 9 : 6) : room.id === state.hoveredRoomId ? (compactMap ? 6 : 4) : (compactMap ? 5 : 3);
+      const radius = mapRoomRadius(room, compactMap);
       if (room.id === state.hoveredRoomId) {
         ctx.fillStyle = "rgba(255,255,255,0.25)";
         ctx.beginPath();
@@ -1392,8 +1516,10 @@
   function init() {
     loadHotbar();
     loadUiPrefs();
+    resetLeftRailScroll();
     bootstrapEvennia();
     applyRailOrder();
+    resetLeftRailScroll();
     renderHotbar();
     renderRecentCharacters();
     updateAudioToggleLabel();
@@ -1450,6 +1576,8 @@
       scheduleMapRefit(false);
     });
     switchView(state.activeView);
+    ensureRailBrandPresent();
+    resetLeftRailScroll();
 
     appendRichLine(primaryFeedId(), "<strong>Client feed online.</strong>", "sys");
 

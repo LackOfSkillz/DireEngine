@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Borrowed gear exit scenario emitted the return line 0 times instead of once: ['|cTEST_BORROWED_GEAR_WEST|n\\nThis is a room.', \"OPTIONS {'type': 'look'}\", 'You disturb the line.']",
+  "mode": "direct",
+  "scenario": "fishing-borrowed-gear-exit",
+  "seed": 677605200
+}

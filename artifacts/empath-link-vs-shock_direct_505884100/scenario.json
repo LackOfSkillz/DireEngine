@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath link-vs-shock coverage validates forced link loss and post-center partial recovery without failing on environment-specific latency.",
+    "tags": [
+      "core",
+      "empath",
+      "link",
+      "shock"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-link-vs-shock",
+  "seed": 505884100,
+  "started_at": 1775607719.388513
+}

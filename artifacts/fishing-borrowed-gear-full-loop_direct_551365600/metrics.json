@@ -1,0 +1,373 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 7,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "ask maren for gear",
+      "first_response_ms": 514.5616999361664,
+      "kind": "command",
+      "ms": 514.7745000431314,
+      "npc_response_delay_ms": 514.6671999245882,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "bait worm",
+      "first_response_ms": 219.8289999505505,
+      "kind": "command",
+      "ms": 219.90019991062582,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "fish",
+      "first_response_ms": 13.102700002491474,
+      "kind": "command",
+      "ms": 14.185399981215596,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _begin_nibble",
+      "first_response_ms": 0.04009995609521866,
+      "kind": "direct",
+      "ms": 0.06310001481324434,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "pull",
+      "first_response_ms": 8.662000065669417,
+      "kind": "command",
+      "ms": 136.45679992623627,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT _resolve_struggle_round",
+      "first_response_ms": 258.94239998888224,
+      "kind": "direct",
+      "ms": 280.7120999787003,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "south",
+      "first_response_ms": 413.2883999263868,
+      "kind": "command",
+      "ms": 762.6280999975279,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    514.7745000431314,
+    219.90019991062582,
+    14.185399981215596,
+    0.06310001481324434,
+    136.45679992623627,
+    280.7120999787003,
+    762.6280999975279
+  ],
+  "commands": {
+    "count": 7,
+    "max_ms": 762.5699000200257,
+    "timings_ms": [
+      514.7745000431314,
+      219.90019991062582,
+      14.185399981215596,
+      0.06310001481324434,
+      136.45679992623627,
+      280.7120999787003,
+      762.6280999975279
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775761474.848741,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 204.06089997517742,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 6,
+  "lag": {
+    "avg_ms": 275.53145712175007,
+    "jitter": 277.23287039075547,
+    "max_ms": 762.6280999975279,
+    "min_ms": 0.06310001481324434,
+    "p95_ms": 688.2720200112087,
+    "slow_count": 4,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "ask maren for gear",
+      "ms": 514.7745000431314,
+      "snapshot": "final"
+    },
+    {
+      "command": "bait worm",
+      "ms": 219.90019991062582,
+      "snapshot": "final"
+    },
+    {
+      "command": "fish",
+      "ms": 14.185399981215596,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _begin_nibble",
+      "ms": 0.06310001481324434,
+      "snapshot": "final"
+    },
+    {
+      "command": "pull",
+      "ms": 136.45679992623627,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT _resolve_struggle_round",
+      "ms": 280.7120999787003,
+      "snapshot": "final"
+    },
+    {
+      "command": "south",
+      "ms": 762.6280999975279,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 762.5699000200257,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 514.6671999245882,
+  "output_log": [
+    "Old Maren stoops beside her baskets, sorts out the basics in practiced order, and presses them into your hands one piece at a time.",
+    "Thread your catch onto this if you plan to keep fishing.",
+    "Old Maren says, \"Start with the pole, then mind your bait. I've set you up with fishing pole, fish string, hook, line, worm.\"",
+    "You bait your hook with worm.",
+    "You cast your line into the water.",
+    "You wait for a bite...",
+    "You feel a slight tug on the line...",
+    "RETURN None",
+    "The line jerks violently!",
+    "You catch a silver trout weighing 2 stones.",
+    "You secure silver trout to your fish string.",
+    "You feel your outdoorsmanship settling into perusing.",
+    "RETURN None",
+    "|cTEST_BORROWED_FULL_LOOP_SOUTH|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 20284,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "ask maren for gear",
+      "ms": 514.7745000431314
+    },
+    {
+      "cmd": "bait worm",
+      "ms": 219.90019991062582
+    },
+    {
+      "cmd": "DIRECT _resolve_struggle_round",
+      "ms": 280.7120999787003
+    },
+    {
+      "cmd": "south",
+      "ms": 762.6280999975279
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775761453.9435976,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Borrowed-gear full-loop verification should report lag telemetry without turning starter-loop cleanup into an environment failure."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 329.55243999604136,
+      "count": 5,
+      "entries": [
+        {
+          "duration_ms": 514.7484999615699,
+          "metadata": {
+            "character": "TEST_BORROWED_FULL_LOOP_CHAR",
+            "command": "ask"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 219.86489999108016,
+          "metadata": {
+            "character": "TEST_BORROWED_FULL_LOOP_CHAR",
+            "command": "bait"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 14.154999982565641,
+          "metadata": {
+            "character": "TEST_BORROWED_FULL_LOOP_CHAR",
+            "command": "fish"
+          },
+          "timestamp": 1000.0
+        },
+        {
+          "duration_ms": 136.4239000249654,
+          "metadata": {
+            "character": "TEST_BORROWED_FULL_LOOP_CHAR",
+            "command": "pull"
+          },
+          "timestamp": 1007.5755811765733
+        },
+        {
+          "duration_ms": 762.5699000200257,
+          "metadata": {
+            "character": "TEST_BORROWED_FULL_LOOP_CHAR",
+            "command": "south"
+          },
+          "timestamp": 1009.5755811765733
+        }
+      ],
+      "max_ms": 762.5699000200257,
+      "total_ms": 1647.7621999802068
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

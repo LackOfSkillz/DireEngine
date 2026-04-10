@@ -1,0 +1,125 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 16650,
+        "is_dead": false,
+        "key": "TEST_BORROWED_GEAR_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_BORROWED_GEAR_WATER",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 16652,
+          "key": "fishing pole",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.items.fishing_pole.FishingPole"
+        },
+        {
+          "id": 16654,
+          "key": "hook",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16655,
+          "key": "line",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        },
+        {
+          "id": 16656,
+          "key": "fish string",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.items.fish_string.FishString"
+        },
+        {
+          "id": 16657,
+          "key": "bought fishing pole",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.items.fishing_pole.FishingPole"
+        },
+        {
+          "id": 16658,
+          "key": "river rock",
+          "location": "TEST_BORROWED_GEAR_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 16645,
+            "key": "TEST_BORROWED_GEAR_WATER",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16646,
+            "key": "TEST_BORROWED_GEAR_WEST",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16647,
+            "key": "TEST_BORROWED_GEAR_SOUTH",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16648,
+            "key": "west",
+            "location": "TEST_BORROWED_GEAR_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16649,
+            "key": "south",
+            "location": "TEST_BORROWED_GEAR_WATER",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 16650,
+            "key": "TEST_BORROWED_GEAR_CHAR",
+            "location": "TEST_BORROWED_GEAR_WATER",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "south",
+          "TEST_BORROWED_GEAR_CHAR",
+          "Old Maren"
+        ],
+        "exits": [
+          "west",
+          "south"
+        ],
+        "id": 16645,
+        "key": "TEST_BORROWED_GEAR_WATER"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775761627.9409275
+    },
+    "label": "final"
+  }
+]

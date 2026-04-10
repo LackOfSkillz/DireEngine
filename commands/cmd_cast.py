@@ -15,5 +15,9 @@ class CmdCast(Command):
     help_category = "Magic"
 
     def func(self):
+        prepared_spell = self.caller.get_state("prepared_spell") if hasattr(self.caller, "get_state") else None
+        if not prepared_spell and not str(self.args or "").strip():
+            self.caller.msg("If you meant to fish, try 'fish'.")
+            return
         target_name = (self.args or "").strip() or None
         self.caller.cast_spell(target_name=target_name)

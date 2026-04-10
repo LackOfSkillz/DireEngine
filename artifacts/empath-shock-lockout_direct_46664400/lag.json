@@ -1,0 +1,93 @@
+{
+  "combat_responsiveness_ms": 353.4665000042878,
+  "first_response_ms": 129.24480001674965,
+  "lag": {
+    "avg_ms": 157.0258666567194,
+    "jitter": 230.6703830023883,
+    "max_ms": 423.35639998782426,
+    "min_ms": 20.72039997437969,
+    "p95_ms": 383.7208399898372,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "ms": 27.00080000795424,
+      "snapshot": "linked"
+    },
+    {
+      "command": "target TEST_EMPATH_SHOCK_FOE_ONE",
+      "ms": 20.72039997437969,
+      "snapshot": "first_kill"
+    },
+    {
+      "command": "attack",
+      "ms": 423.35639998782426,
+      "snapshot": "first_kill"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "attack",
+      "ms": 423.35639998782426
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": 353.4665000042878,
+      "command": "attack",
+      "first_response_ms": 340.15840000938624,
+      "kind": "command",
+      "ms": 423.35639998782426,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "first_response_ms": 26.92700002808124,
+      "kind": "command",
+      "ms": 27.00080000795424,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "target TEST_EMPATH_SHOCK_FOE_ONE",
+      "first_response_ms": 20.64900001278147,
+      "kind": "command",
+      "ms": 20.72039997437969,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    },
+    {
+      "combat_response_ms": 353.4665000042878,
+      "command": "attack",
+      "first_response_ms": 340.15840000938624,
+      "kind": "command",
+      "ms": 423.35639998782426,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "first_kill"
+    }
+  ]
+}

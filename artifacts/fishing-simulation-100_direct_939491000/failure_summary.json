@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Fishing simulation expected a scheduled 5s callback, but found [].",
+  "mode": "direct",
+  "scenario": "fishing-simulation-100",
+  "seed": 939491000
+}

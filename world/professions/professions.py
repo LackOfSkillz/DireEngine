@@ -1,4 +1,5 @@
 DEFAULT_PROFESSION = "commoner"
+PROF_EMPATH = "empath"
 
 COMMON_RANK_LABELS = {
     1: "Novice",
@@ -50,7 +51,7 @@ PROFESSION_PROFILES = {
         "guild_tag": "cleric_guildhall",
         "social": "Trusted",
     },
-    "empath": {
+    PROF_EMPATH: {
         "display": "Empath",
         "description": "Healers who carry the pain of others and move through the world with restorative calm.",
         "primary": "lore",

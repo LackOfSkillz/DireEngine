@@ -32,6 +32,7 @@ from commands.cmd_abilities import CmdAbilities
 from commands.cmd_ability import CmdAbility
 from commands.cmd_ability_nomatch import CmdAbilityNoMatch
 from commands.cmd_cast import CmdCast
+from commands.cmd_channel import CmdChannel
 from commands.cmd_clickmove import CmdClickMove
 from commands.cmd_chargen import (
     CmdCharCreate,
@@ -74,6 +75,7 @@ from commands.cmd_enterpassage import CmdEnterPassage
 from commands.cmd_experience import CmdExperience
 from commands.cmd_findpassage import CmdFindPassage
 from commands.cmd_fire import CmdFire
+from commands.cmd_fishing import CmdBait, CmdFish, CmdPull, CmdRig, CmdUntangle
 from commands.cmd_favor import CmdFavor
 from commands.cmd_focus import CmdFocus
 from commands.cmd_followtrail import CmdFollowTrail
@@ -93,6 +95,7 @@ from commands.cmd_death import CmdDeath
 from commands.cmd_die import CmdDie
 from commands.cmd_drop import CmdDrop
 from commands.cmd_heal import CmdHeal
+from commands.cmd_heal_scars import CmdHealScars
 from commands.cmd_help import CmdHelp
 from commands.cmd_injuries import CmdInjuries
 from commands.cmd_inspect import CmdInspect
@@ -204,6 +207,7 @@ from commands.cmd_use import CmdUseSkill
 from commands.cmd_uncurse import CmdUncurse
 from commands.cmd_unlock import CmdUnlock
 from commands.cmd_wear import CmdWear
+from commands.cmd_weigh import CmdWeigh
 from commands.cmd_wield import CmdWield
 from commands.cmd_xp import CmdXP
 from commands.cmd_ambush import CmdAmbush
@@ -260,6 +264,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCast())
         self.add(CmdCapture())
         self.add(CmdCenter())
+        self.add(CmdChannel())
         self.add(CmdCharge())
         self.add(CmdCircle())
         self.add(CmdCommune())
@@ -294,6 +299,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdDrop())
         self.add(CmdFavor())
         self.add(CmdFire())
+        self.add(CmdBait())
+        self.add(CmdFish())
+        self.add(CmdRig())
         self.add(CmdFocus())
         self.add(CmdForage())
         self.add(CmdGather())
@@ -307,6 +315,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdHarvest())
         self.add(CmdHaggle())
         self.add(CmdHeal())
+        self.add(CmdHealScars())
         self.add(CmdHelp())
         self.add(CmdHide())
         self.add(CmdHunt())
@@ -345,6 +354,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdPurge())
         self.add(CmdPrepare())
         self.add(CmdProfession())
+        self.add(CmdPull())
         self.add(CmdReposition())
         self.add(CmdReadLand())
         self.add(CmdRace())
@@ -402,6 +412,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSnipe())
         self.add(CmdTrack())
         self.add(CmdTouch())
+        self.add(CmdUntangle())
         self.add(CmdUnity())
         self.add(CmdUnlock())
         self.add(CmdStalk())
@@ -421,6 +432,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdWithdraw())
         self.add(CmdXP())
         self.add(CmdWear())
+        self.add(CmdWeigh())
         self.add(CmdWield())
         self.add(CmdThug())
         #

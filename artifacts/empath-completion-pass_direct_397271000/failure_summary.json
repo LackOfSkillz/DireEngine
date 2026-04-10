@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Training-room link upkeep should be reduced to 2 fatigue, got 0",
+  "mode": "direct",
+  "scenario": "empath-completion-pass",
+  "seed": 397271000
+}

@@ -1,0 +1,58 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 77.22154998918995,
+  "lag": {
+    "avg_ms": 78.2928999979049,
+    "jitter": 7.752294492604025,
+    "max_ms": 83.77460000338033,
+    "min_ms": 72.81119999242947,
+    "p95_ms": 83.22643000283279,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_UNLOCK_PATIENT",
+      "ms": 72.81119999242947,
+      "snapshot": "touched"
+    },
+    {
+      "command": "take poison",
+      "ms": 83.77460000338033,
+      "snapshot": "blocked_take"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_UNLOCK_PATIENT",
+      "first_response_ms": 72.74239999242127,
+      "kind": "command",
+      "ms": 72.81119999242947,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take poison",
+      "first_response_ms": 81.70069998595864,
+      "kind": "command",
+      "ms": 83.77460000338033,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "blocked_take"
+    }
+  ]
+}
