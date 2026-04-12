@@ -1,14 +1,14 @@
 {
   "coin_delta": 0,
-  "combat_responsiveness_ms": 126.37396665134777,
+  "combat_responsiveness_ms": 96.36676668499906,
   "command_count": 3,
   "command_timing_entries": [
     {
-      "combat_response_ms": 83.39310006704181,
+      "combat_response_ms": 96.60459996666759,
       "command": "target TEST_COMBAT_DEFENDER",
-      "first_response_ms": 83.36950000375509,
+      "first_response_ms": 96.55569994356483,
       "kind": "command",
-      "ms": 83.468500059098,
+      "ms": 96.66919999290258,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -16,11 +16,11 @@
       "snapshot": "engaged"
     },
     {
-      "combat_response_ms": 231.30869993474334,
+      "combat_response_ms": 139.92520002648234,
       "command": "attack",
-      "first_response_ms": 231.30869993474334,
+      "first_response_ms": 139.92520002648234,
       "kind": "command",
-      "ms": 231.496800086461,
+      "ms": 140.01390000339597,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -28,11 +28,11 @@
       "snapshot": "damaged"
     },
     {
-      "combat_response_ms": 64.42009995225817,
+      "combat_response_ms": 52.57050006184727,
       "command": "disengage",
-      "first_response_ms": 56.45089992322028,
+      "first_response_ms": 52.57050006184727,
       "kind": "command",
-      "ms": 64.50730003416538,
+      "ms": 52.65009996946901,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -41,24 +41,24 @@
     }
   ],
   "command_timings_ms": [
-    83.468500059098,
-    231.496800086461,
-    64.50730003416538
+    96.66919999290258,
+    140.01390000339597,
+    52.65009996946901
   ],
   "commands": {
     "count": 3,
-    "max_ms": 231.45710001699626,
+    "max_ms": 139.9867000291124,
     "timings_ms": [
-      83.468500059098,
-      231.496800086461,
-      64.50730003416538
+      96.66919999290258,
+      140.01390000339597,
+      52.65009996946901
     ]
   },
   "deletion_failures": [],
-  "ended_at": 1776005604.2490115,
+  "ended_at": 1776023241.442793,
   "exit_code": 0,
   "failure_type": null,
-  "first_response_ms": 123.70969995390624,
+  "first_response_ms": 96.35046667729814,
   "interest": {
     "active_object_count": 0,
     "active_object_peak": 0,
@@ -115,43 +115,42 @@
   ],
   "item_delta_count": 0,
   "lag": {
-    "avg_ms": 126.4908667265748,
-    "jitter": 91.43066393274208,
-    "max_ms": 231.496800086461,
-    "min_ms": 64.50730003416538,
-    "p95_ms": 216.6939700837247,
-    "slow_count": 1,
+    "avg_ms": 96.44439998858918,
+    "jitter": 43.68233384760307,
+    "max_ms": 140.01390000339597,
+    "min_ms": 52.65009996946901,
+    "p95_ms": 135.67943000234663,
+    "slow_count": 0,
     "spike_count": 0,
-    "status": "warning"
+    "status": "ok"
   },
   "lag_events": [
     {
       "command": "target TEST_COMBAT_DEFENDER",
-      "ms": 83.468500059098,
+      "ms": 96.66919999290258,
       "snapshot": "engaged"
     },
     {
       "command": "attack",
-      "ms": 231.496800086461,
+      "ms": 140.01390000339597,
       "snapshot": "damaged"
     },
     {
       "command": "disengage",
-      "ms": 64.50730003416538,
+      "ms": 52.65009996946901,
       "snapshot": "disengaged"
     }
   ],
-  "lag_status": "warning",
+  "lag_status": "ok",
   "leaks": [],
-  "max_command_time_ms": 231.45710001699626,
+  "max_command_time_ms": 139.9867000291124,
   "mindstate_delta": {},
   "npc_response_delay_ms": 0.0,
   "output_log": [
     "You feel unprepared for what may come.",
     "You focus on TEST_COMBAT_DEFENDER.",
-    "You slam TEST_COMBAT_DEFENDER's chest with a devastating hit.",
-    "You lose your rhythm.",
-    "You step back and disengage."
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_attack.py\", line 21, in func\n    result = CombatService.attack(self.caller, target)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\engine\\services\\combat_service.py\", line 43, in attack\n    StateService.apply_roundtime(attacker, resolution.roundtime, ambush=bool(details.get(\"ambush\")))\n  File \"C:\\Users\\gary\\dragonsire\\engine\\services\\state_service.py\", line 39, in apply_roundtime\n    character.set_roundtime(duration)\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 13200, in set_roundtime\n    schedule_event(\n  File \"C:\\Users\\gary\\dragonsire\\world\\systems\\scheduler.py\", line 131, in schedule_event\n    return schedule(\n           ^^^^^^^^^\nTypeError: schedule() got multiple values for argument 'key'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-12 15:47:13-04).",
+    "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_disengage.py\", line 43, in func\n    self.caller.set_roundtime(3)\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 13200, in set_roundtime\n    schedule_event(\n  File \"C:\\Users\\gary\\dragonsire\\world\\systems\\scheduler.py\", line 131, in schedule_event\n    return schedule(\n           ^^^^^^^^^\nTypeError: schedule() got multiple values for argument 'key'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-12 15:47:14-04)."
   ],
   "payload_timing_ms": 0.0,
   "preexisting_cleanup_failures": [],
@@ -193,15 +192,15 @@
         "in_combat_after": true,
         "in_combat_before": true,
         "range_changed": false,
-        "roundtime_after": 1.97,
+        "roundtime_after": 1.99,
         "roundtime_before": 0.0,
         "target_after": "TEST_COMBAT_DEFENDER",
         "target_assigned": false,
         "target_before": "TEST_COMBAT_DEFENDER",
         "target_cleared": false,
-        "target_hp_after": 48,
+        "target_hp_after": 49,
         "target_hp_before": 50,
-        "target_hp_delta": -2,
+        "target_hp_delta": -1,
         "target_range_after": "melee",
         "target_range_before": "melee"
       },
@@ -257,13 +256,13 @@
         "in_combat_before": true,
         "range_changed": true,
         "roundtime_after": 2.99,
-        "roundtime_before": 1.97,
+        "roundtime_before": 1.99,
         "target_after": null,
         "target_assigned": false,
         "target_before": "TEST_COMBAT_DEFENDER",
         "target_cleared": true,
         "target_hp_after": null,
-        "target_hp_before": 48,
+        "target_hp_before": 49,
         "target_hp_delta": null,
         "target_range_after": null,
         "target_range_before": "melee"
@@ -354,9 +353,8 @@
     "output_log": [
       "You feel unprepared for what may come.",
       "You focus on TEST_COMBAT_DEFENDER.",
-      "You slam TEST_COMBAT_DEFENDER's chest with a devastating hit.",
-      "You lose your rhythm.",
-      "You step back and disengage."
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_attack.py\", line 21, in func\n    result = CombatService.attack(self.caller, target)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\engine\\services\\combat_service.py\", line 43, in attack\n    StateService.apply_roundtime(attacker, resolution.roundtime, ambush=bool(details.get(\"ambush\")))\n  File \"C:\\Users\\gary\\dragonsire\\engine\\services\\state_service.py\", line 39, in apply_roundtime\n    character.set_roundtime(duration)\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 13200, in set_roundtime\n    schedule_event(\n  File \"C:\\Users\\gary\\dragonsire\\world\\systems\\scheduler.py\", line 131, in schedule_event\n    return schedule(\n           ^^^^^^^^^\nTypeError: schedule() got multiple values for argument 'key'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-12 15:47:13-04).",
+      "Traceback (most recent call last):\n  File \"C:\\Users\\gary\\dragonsire\\.venv\\Lib\\site-packages\\evennia\\commands\\cmdhandler.py\", line 630, in _run_command\n    ret = cmd.func()\n          ^^^^^^^^^^\n  File \"C:\\Users\\gary\\dragonsire\\commands\\cmd_disengage.py\", line 43, in func\n    self.caller.set_roundtime(3)\n  File \"C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py\", line 13200, in set_roundtime\n    schedule_event(\n  File \"C:\\Users\\gary\\dragonsire\\world\\systems\\scheduler.py\", line 131, in schedule_event\n    return schedule(\n           ^^^^^^^^^\nTypeError: schedule() got multiple values for argument 'key'\n\nAn untrapped error occurred.\n(Traceback was logged 26-04-12 15:47:14-04)."
     ],
     "snapshot_count": 5,
     "snapshot_labels": [
@@ -366,39 +364,22 @@
       "disengaged",
       "final"
     ],
-    "target_hp": 48
+    "target_hp": 49
   },
-  "scenario_duration_ms": 11890,
+  "scenario_duration_ms": 10823,
   "scheduler": {
-    "active_job_count": 1,
-    "active_jobs": [
-      {
-        "created_at": 1776005596.3518417,
-        "delay_s": 3.0,
-        "due_at": 1776005599.3518417,
-        "inactive_defer_count": 0,
-        "inactive_policy": "defer",
-        "interest_object_key": null,
-        "interest_object_label": "TEST_COMBAT_ATTACKER",
-        "job_id": "0892ea0687c845e8a7489405e8d359ed",
-        "key": "combat:roundtime:24427",
-        "owner": "#24427",
-        "owner_label": "TEST_COMBAT_ATTACKER",
-        "source": "combat.roundtime",
-        "system": "combat.roundtime",
-        "timing_mode": "scheduled_expiry"
-      }
-    ],
-    "cancel_total": 1,
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
     "defer_total": 0,
     "events": 0,
     "flush_executed_total": 0,
     "flush_total": 0,
     "job_key_breakdown": {},
-    "queue_current": 1.0,
-    "queue_peak": 1.0,
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
     "reschedule_total": 0,
-    "scheduled_total": 2,
+    "scheduled_total": 0,
     "skip_total": 0,
     "system_counts": {},
     "systems_exercised": [],
@@ -412,12 +393,7 @@
     "sources": [],
     "total_ms": 0
   },
-  "slow_commands": [
-    {
-      "cmd": "attack",
-      "ms": 231.496800086461
-    }
-  ],
+  "slow_commands": [],
   "snapshot_labels": [
     "initial",
     "engaged",
@@ -425,7 +401,7 @@
     "disengaged",
     "final"
   ],
-  "started_at": 1776005591.7008815,
+  "started_at": 1776023229.8539765,
   "state_transition_count": 4,
   "ticker": {
     "avg_ms": 0.0,
@@ -445,7 +421,7 @@
       "fail_on_critical_lag": false,
       "reason": "Structural combat sanity validation should report lag without failing on environment-specific latency."
     },
-    "scheduler_job_count": 1,
+    "scheduler_job_count": 0,
     "scheduler_job_key_breakdown": {},
     "script_activity": {
       "count": 0,
@@ -465,36 +441,36 @@
   },
   "timings": {
     "command_execute": {
-      "avg_ms": 126.46016664803028,
+      "avg_ms": 96.41670001049836,
       "count": 3,
       "entries": [
         {
-          "duration_ms": 83.44039996154606,
+          "duration_ms": 96.64130001328886,
           "metadata": {
             "character": "TEST_COMBAT_ATTACKER",
             "command": "target"
           },
-          "timestamp": 1776005595.1209419
+          "timestamp": 1776023233.3693724
         },
         {
-          "duration_ms": 231.45710001699626,
+          "duration_ms": 139.9867000291124,
           "metadata": {
             "character": "TEST_COMBAT_ATTACKER",
             "command": "attack"
           },
-          "timestamp": 1776005595.813351
+          "timestamp": 1776023233.8738563
         },
         {
-          "duration_ms": 64.48299996554852,
+          "duration_ms": 52.62209998909384,
           "metadata": {
             "character": "TEST_COMBAT_ATTACKER",
             "command": "disengage"
           },
-          "timestamp": 1776005596.3528438
+          "timestamp": 1776023234.3371544
         }
       ],
-      "max_ms": 231.45710001699626,
-      "total_ms": 379.38049994409084
+      "max_ms": 139.9867000291124,
+      "total_ms": 289.2501000314951
     },
     "scheduler_execute": {}
   },

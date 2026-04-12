@@ -1,18 +1,28 @@
 """
-Start plugin services
+Start plugin services.
 
-This plugin module can define user-created services for the Portal to
-start.
-
-This module must handle all imports and setups required to start
-twisted services (see examples in evennia.server.portal.portal). It
-must also contain a function start_plugin_services(application).
-Evennia will call this function with the main Portal application (so
-your services can be added to it). The function should not return
-anything. Plugin services are started last in the Portal startup
-process.
-
+This module also applies small portal-side compatibility patches that
+must load with the Portal process itself.
 """
+
+from evennia.server.portal import portalsessionhandler
+
+
+def _patch_portal_server_disconnect():
+    original = portalsessionhandler.PortalSessionHandler.server_disconnect
+    if getattr(original, "_dragonsire_accepts_sessid", False):
+        return
+
+    def patched(self, session, reason=""):
+        if session and not hasattr(session, "disconnect"):
+            try:
+                session = self.get(int(session))
+            except (TypeError, ValueError):
+                session = None
+        return original(self, session, reason=reason)
+
+    patched._dragonsire_accepts_sessid = True
+    portalsessionhandler.PortalSessionHandler.server_disconnect = patched
 
 
 def start_plugin_services(portal):
@@ -21,4 +31,4 @@ def start_plugin_services(portal):
 
     portal - a reference to the main portal application.
     """
-    pass
+    _patch_portal_server_disconnect()

@@ -6,6 +6,7 @@ import time
 from domain.wounds import rules as wound_rules
 from domain.wounds.constants import BLEED_TICK_SECONDS, BODY_PART_ORDER, RECOVERY_TICK_SECONDS
 from domain.wounds.models import copy_default_injuries, normalize_injuries
+from engine.presenters.injury_presenter import InjuryPresenter
 from engine.services.result import ActionResult
 
 
@@ -33,6 +34,15 @@ def _ensure_scheduler_callbacks_registered() -> bool:
 
 
 class InjuryService:
+
+	@staticmethod
+	def _merge_injury_events(*event_groups) -> list[dict]:
+		events: list[dict] = []
+		for group in event_groups:
+			for event in list(group or []):
+				if isinstance(event, Mapping):
+					events.append(dict(event))
+		return events
 
 	@staticmethod
 	def _ensure_wound_state(target) -> dict:
@@ -188,32 +198,21 @@ class InjuryService:
 		new_state = wound_rules.get_bleed_severity(total_bleed)
 		old_state = str(getattr(target.db, "bleed_state", "none") or "none")
 		target.db.bleed_state = new_state
+		events = []
 		if emit_messages and new_state != old_state:
-			if hasattr(target, "on_bleed_state_change"):
-				target.on_bleed_state_change(old_state, new_state)
-			else:
-				if new_state == "none":
-					target.msg("Your bleeding has stopped.")
-				elif new_state == "light":
-					target.msg("You are bleeding.")
-				elif new_state == "moderate":
-					target.msg("Your wounds are bleeding steadily.")
-				elif new_state == "severe":
-					target.msg("Your wounds are bleeding heavily.")
-				else:
-					target.msg("Blood is pouring from your wounds!")
+			events.append({"event": "bleed_state", "old_state": old_state, "new_state": new_state})
 		InjuryService.sync_scheduled_effects(target)
-		return ActionResult.ok(data={"bleed_state": new_state, "total_bleed": total_bleed})
+		return ActionResult.ok(data={"bleed_state": new_state, "total_bleed": total_bleed, "injury_events": events})
 
 	@staticmethod
 	def apply_hit_wound(target, location, damage, damage_type="impact", critical: bool = False):
 		injuries = InjuryService._ensure_wound_state(target)
 		if not location or location not in injuries:
-			return ActionResult.ok(data={"amount": int(damage or 0), "location": location, "severity": "none", "bleed": 0, "applied": False})
+			return ActionResult.ok(data={"amount": int(damage or 0), "location": location, "severity": "none", "bleed": 0, "applied": False, "injury_events": []})
 
 		amount = max(0, int(damage or 0))
 		if amount <= 0:
-			return ActionResult.ok(data={"amount": 0, "location": location, "severity": "none", "bleed": 0, "applied": False})
+			return ActionResult.ok(data={"amount": 0, "location": location, "severity": "none", "bleed": 0, "applied": False, "injury_events": []})
 
 		if hasattr(target, "maybe_break_ranger_aim_on_hit"):
 			target.maybe_break_ranger_aim_on_hit(amount)
@@ -228,28 +227,33 @@ class InjuryService:
 		injuries = InjuryService._set_injuries(target, apply_result["injuries"])
 		body_part = apply_result.get("body_part") or {}
 		severity = str(apply_result.get("severity") or "none")
+		part_display = InjuryService._format_part(target, location)
+		events = []
 		if apply_result.get("applied"):
 			if severity in {"severe", "critical"}:
-				target.msg(f"Your {InjuryService._format_part(target, location)} is badly damaged!")
+				events.append({"event": "apply_wound", "kind": "badly_damaged", "location": location, "part_display": part_display, "severity": severity})
 			if int(apply_result.get("scar_gain", 0) or 0) > 0:
-				target.msg(f"The hurt leaves lasting damage in your {InjuryService._format_part(target, location)}.")
+				events.append({"event": "apply_wound", "kind": "scar_gain", "location": location, "part_display": part_display, "scar_gain": int(apply_result.get("scar_gain", 0) or 0)})
 			if location == "chest" and int(body_part.get("internal", 0) or 0) > 50:
-				target.msg("You are in critical condition!")
+				events.append({"event": "worsen", "kind": "critical_condition", "location": location, "part_display": part_display})
 
 		if apply_result.get("vital_destroyed"):
 			target.db.is_dead = True
 
 		penalties = wound_rules.derive_penalties(injuries)
 		bleed_result = InjuryService.update_bleed_state(target)
+		events = InjuryService._merge_injury_events(events, bleed_result.data.get("injury_events", []))
 		return ActionResult.ok(
 			data={
 				"amount": amount,
 				"location": location,
+				"part_display": part_display,
 				"severity": severity,
 				"bleed": int(body_part.get("bleed", 0) or 0),
 				"applied": bool(apply_result.get("applied")),
 				"total_bleed": int(bleed_result.data.get("total_bleed", 0) or 0),
 				"penalties": penalties,
+				"injury_events": events,
 			},
 		)
 
@@ -260,8 +264,8 @@ class InjuryService:
 			return ActionResult.fail(errors=[f"Unknown wound location: {location}"])
 		injuries[location] = wound_rules.heal_part(injuries.get(location), amount)
 		InjuryService._set_injuries(target, injuries)
-		InjuryService.update_bleed_state(target, emit_messages=False)
-		return ActionResult.ok(data={"location": location, "amount": int(amount or 0)})
+		bleed_result = InjuryService.update_bleed_state(target, emit_messages=False)
+		return ActionResult.ok(data={"location": location, "part_display": InjuryService._format_part(target, location), "amount": int(amount or 0), "injury_events": InjuryService._merge_injury_events([{"event": "heal", "location": location, "part_display": InjuryService._format_part(target, location), "amount": int(amount or 0)}], bleed_result.data.get("injury_events", []))})
 
 	@staticmethod
 	def stop_bleeding(target, location):
@@ -270,8 +274,8 @@ class InjuryService:
 			return ActionResult.fail(errors=[f"Unknown wound location: {location}"])
 		injuries[location] = wound_rules.stop_bleeding(injuries.get(location))
 		InjuryService._set_injuries(target, injuries)
-		InjuryService.update_bleed_state(target)
-		return ActionResult.ok(data={"location": location})
+		bleed_result = InjuryService.update_bleed_state(target)
+		return ActionResult.ok(data={"location": location, "part_display": InjuryService._format_part(target, location), "injury_events": InjuryService._merge_injury_events(bleed_result.data.get("injury_events", []))})
 
 	@staticmethod
 	def stabilize_wound(target, location, skill_result=None, tender=None, heal_amount: int = 0, strong: bool = False):
@@ -291,10 +295,12 @@ class InjuryService:
 		InjuryService._set_injuries(target, injuries)
 		if hasattr(target, "start_first_aid_training_window"):
 			target.start_first_aid_training_window(location, tender=healer)
+		events = [{"event": "stabilize", "location": location, "part_display": InjuryService._format_part(target, location), "strength": int(body_part["tend"].get("strength", 0) or 0), "duration": int(body_part["tend"].get("duration", 0) or 0)}]
 		if heal_amount > 0:
-			InjuryService.heal_wound(target, location, heal_amount)
-		InjuryService.update_bleed_state(target, emit_messages=False)
-		return ActionResult.ok(data={"location": location, "strength": int(body_part["tend"].get("strength", 0) or 0), "duration": int(body_part["tend"].get("duration", 0) or 0)})
+			heal_result = InjuryService.heal_wound(target, location, heal_amount)
+			events = InjuryService._merge_injury_events(events, heal_result.data.get("injury_events", []))
+		bleed_result = InjuryService.update_bleed_state(target, emit_messages=False)
+		return ActionResult.ok(data={"location": location, "part_display": InjuryService._format_part(target, location), "strength": int(body_part["tend"].get("strength", 0) or 0), "duration": int(body_part["tend"].get("duration", 0) or 0), "injury_events": InjuryService._merge_injury_events(events, bleed_result.data.get("injury_events", []))})
 
 	@staticmethod
 	def process_bleed_tick(target, payload=None):
@@ -304,7 +310,7 @@ class InjuryService:
 		if wound_rules.get_total_bleed(injuries) <= 0:
 			InjuryService._cancel_bleed_tick(target)
 			InjuryService.sync_scheduled_effects(target)
-			return ActionResult.ok(data={"hp_loss": 0, "total_bleed": 0})
+			return ActionResult.ok(data={"hp_loss": 0, "total_bleed": 0, "injury_events": []})
 
 		bleed_result = wound_rules.apply_bleed_tick(
 			injuries,
@@ -315,22 +321,21 @@ class InjuryService:
 			resurrection_bleed_multiplier=float(target.get_resurrection_bleed_multiplier() if hasattr(target, "get_resurrection_bleed_multiplier") else 1.0),
 		)
 		injuries = InjuryService._set_injuries(target, bleed_result["injuries"])
+		events = []
 		for part_name in bleed_result.get("resumed_parts", []):
-			target.msg(f"Your {InjuryService._format_part(target, part_name)} begins bleeding again!")
+			events.append({"event": "worsen", "kind": "bleed_resumed", "location": part_name, "part_display": InjuryService._format_part(target, part_name)})
 		hp_loss = int(bleed_result.get("hp_loss", 0) or 0)
 		if hp_loss > 0:
 			target.set_hp((target.db.hp or 0) - hp_loss)
-			target.msg("You bleed from your wounds.")
-			if int(bleed_result.get("total_bleed", 0) or 0) > 5:
-				target.msg("You are bleeding heavily!")
+			events.append({"event": "bleed_tick", "kind": "tick", "hp_loss": hp_loss, "total_bleed": int(bleed_result.get("total_bleed", 0) or 0), "heavy": bool(int(bleed_result.get("total_bleed", 0) or 0) > 5)})
 			if (target.db.hp or 0) <= 0:
 				if hasattr(target, "consume_resurrection_death_guard") and target.consume_resurrection_death_guard():
 					target.db.hp = 1
-					target.msg("Your returning life falters, but the rite holds for one heartbeat.")
+					events.append({"event": "bleed_tick", "kind": "death_guard"})
 				else:
 					target.db.is_dead = True
-		InjuryService.update_bleed_state(target)
-		return ActionResult.ok(data={"hp_loss": hp_loss, "total_bleed": wound_rules.get_total_bleed(injuries)})
+		bleed_state_result = InjuryService.update_bleed_state(target)
+		return ActionResult.ok(data={"hp_loss": hp_loss, "total_bleed": wound_rules.get_total_bleed(injuries), "injury_events": InjuryService._merge_injury_events(events, bleed_state_result.data.get("injury_events", []))})
 
 	@staticmethod
 	def process_recovery_tick(target, payload=None):
@@ -343,13 +348,20 @@ class InjuryService:
 			in_combat=bool(getattr(target.db, "in_combat", False)),
 		)
 		InjuryService._set_injuries(target, recovery_result["injuries"])
-		InjuryService.update_bleed_state(target, emit_messages=False)
-		return ActionResult.ok(data={"changed": bool(recovery_result.get("changed")), "remaining": bool(recovery_result.get("remaining"))})
+		bleed_result = InjuryService.update_bleed_state(target, emit_messages=False)
+		events = []
+		if recovery_result.get("changed"):
+			events.append({"event": "heal", "kind": "natural_recovery"})
+		return ActionResult.ok(data={"changed": bool(recovery_result.get("changed")), "remaining": bool(recovery_result.get("remaining")), "injury_events": InjuryService._merge_injury_events(events, bleed_result.data.get("injury_events", []))})
 
 
 def _callback_process_bleed(owner, payload=None):
-	return InjuryService.process_bleed_tick(owner, payload)
+	result = InjuryService.process_bleed_tick(owner, payload)
+	InjuryPresenter.present_result(owner, result)
+	return result
 
 
 def _callback_process_recovery(owner, payload=None):
-	return InjuryService.process_recovery_tick(owner, payload)
+	result = InjuryService.process_recovery_tick(owner, payload)
+	InjuryPresenter.present_result(owner, result)
+	return result

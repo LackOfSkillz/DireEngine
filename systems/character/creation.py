@@ -219,7 +219,7 @@ def resolve_creation_start_room(start_room=None):
 
 
 def is_onboarding_start_room(room):
-    return bool(room and (getattr(getattr(room, "db", None), "is_onboarding", False) or getattr(getattr(room, "db", None), "is_tutorial", False)))
+    return bool(room and (room.db.is_onboarding or room.db.is_tutorial))
 
 
 def apply_character_stats(character, stats):

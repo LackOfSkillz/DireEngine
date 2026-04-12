@@ -3,257 +3,158 @@
 
 # DireEngine
 
-DireEngine is the game and engine workspace behind Dragons Ire, a modern browser-first MUD project built to recreate the feel of DragonRealms while making it faster to access, easier to extend, and free to play.
+DireEngine is the game and engine workspace behind Dragons Ire: a browser-first, DragonRealms-inspired MUD built on Evennia with a custom client, custom world bootstrap, and a growing service-oriented gameplay core.
 
-The goal is not to clone old friction. The goal is to keep the tension, pace, depth, and skill-driven identity that made classic text worlds compelling, then rebuild that experience with a cleaner architecture, a modern web client, stronger tooling, and an open development workflow.
+The project goal is not a museum clone. The goal is to keep the dangerous pacing, verb-driven depth, profession identity, injuries, and skill pressure that made classic text worlds compelling, then rebuild that experience with modern client support, stronger automation, and an architecture that can keep evolving.
 
-## Vision
+## Overview
 
-DireEngine is aiming for:
+DireEngine is already far beyond a stock Evennia scaffold. The current codebase includes:
 
-- the dangerous, skill-based, verb-driven feel of classic DragonRealms-style play
-- modern browser accessibility instead of requiring a dedicated legacy client
-- a free and openly developed codebase that can keep growing without proprietary lock-in
-- an engine foundation that supports handcrafted content and map-assisted world building
-
-In practical terms, that means a game where combat pacing matters, injuries matter, movement and positioning matter, skill training matters, and the interface does not fight the player.
+- a custom web client with structured character, subsystem, combat, and map updates
+- a Godot client workspace with websocket support for an alternate native-style front end
+- custom combat pacing with targeting, range, roundtime, weapon profiles, fatigue, balance, retaliation, and wound-aware damage handling
+- a body-part injury system with severity, bleed pressure, tending, stabilization, scheduled bleed/recovery, and condition reporting
+- death, corpse, grave, favor, depart, resurrection, and recovery loops instead of a trivial respawn model
+- race, profession, subsystem, language, and progression foundations for a broader DragonRealms-style character model
+- stealth, theft, justice, and reputation-facing systems including mark, shop heat, burglary/justice scenarios, contacts, and guard enforcement hooks
+- inventory, equipment, containers, sheaths, improvised wielding, appraisal, vendors, buying, selling, haggle, banking, and carrying/encumbrance rules
+- fieldcraft and survival verbs such as hide, stalk, sneak, search, forage, harvest, fish, track, skin, locksmithing, and trap interaction
+- profession-facing systems for warrior, ranger, empath, thief, cleric, and shared profession/subsystem scaffolding for the wider guild roster
+- AreaForge world tooling for graph/map-driven area generation, map payloads, and client navigation support
+- DireTest scenario automation, baseline comparison, lag diagnostics, artifact capture, and replay tooling
 
 ## Current State
 
-DireEngine is already well past a stock Evennia scaffold.
+The project is in an active playable-alpha state.
 
-The project currently includes:
+What is implemented now:
 
-- a custom browser-native web client for moment-to-moment play
-- DragonRealms-inspired combat pacing with roundtime, targeting, weapon profiles, and NPC retaliation
-- race, profession, and subsystem state for warrior, ranger, empath, and cleric gameplay identity
-- a body-part injury model with bleeding, tending, recovery pressure, and condition reporting
-- death, depart, grave, favor, and resurrection-recovery foundations instead of a trivial respawn loop
-- survival, lore, combat, armor, and early magic/guild scaffolding
-- inventory, equipment, wearable containers, sheaths, and weapon handling flows
-- stealth and survival verbs such as hide, sneak, stalk, forage, harvest, skin, and search
-- law, theft, and shoplifting-oriented systems with regional justice hooks and stocks support
-- trading and appraisal-oriented systems including vendors, buying, selling, haggle support, and item evaluation flows
-- spell preparation and casting scaffolding with targeted, warding, augmentation, debilitation, utility, and cyclic-ready support
-- a browser map system with fullscreen mode, drag/pan, fit/center controls, pathfinding, click-to-walk, and generic fallback layouts for non-forged rooms
-- AreaForge, a map-driven world-building pipeline that can turn processed source maps into playable area graphs and Evennia content
-- DireTest automation with scenario artifacts, replay support, baseline persistence, and lag diagnostics
+- core movement, look, inventory, equipment, combat, death/recovery, and progression loops
+- a custom onboarding/tutorial flow in The Landing
+- law and enforcement behavior in lawful zones, including jail and pillory outcomes
+- browser map interaction with fit/center controls, pathfinding, click-to-walk, and AreaForge zone payloads
+- service/domain consolidation for combat, skills, state mutation, and wounds
+- focused automated coverage for combat math, wounds, service contracts, onboarding, economy, movement, death loops, justice, and more through DireTest
 
-## What Makes It Different
+What is still partial or under expansion:
 
-### DragonRealms feel, modernized
+- many professions have registry/profile support before they have full ability parity
+- some guild mechanics are scaffolding-first and still need deeper content and balance passes
+- the Godot client exists and is wired for websocket use, but the browser client remains the primary player-facing surface
+- world content is growing faster than the long-form docs, which is why this README and the as-built snapshot are maintained separately
 
-The design target is the feel of an older premium text game without the old access barriers. DireEngine keeps the deliberate tempo, the layered character state, and the verb-heavy world interaction, but presents it in a modern browser shell with visible map context, cleaner UI state, and a codebase that is easier to iterate on.
+For the more detailed implementation snapshot, see [AS_BUILT.md](AS_BUILT.md).
 
-### Browser-first play
+## Feature Areas
 
-The current client is a custom Evennia webclient override, not just a recolored default terminal pane. It includes:
+### Core gameplay
 
-- a live feed panel for world output
-- character, status, inventory, and equipment rails
-- hotbar and quick action support
-- structured client updates for map, character, combat, and chat state
-- an interactive local and zone map renderer
+- stateful combat with target selection, range management, attack resolution, resource pressure, and retaliation
+- wound consequences layered on top of HP loss, including body-part trauma and bleed processing
+- persistent death consequences with corpse handling, graves, favor, depart modes, and recovery workflows
+- learning and mindstate-driven advancement instead of instant rank gains
 
-### AreaForge world pipeline
+### Profession and system identity
 
-AreaForge is a custom content pipeline for turning map sources into playable spaces. It supports:
+- warrior tempo, berserks, roars, and exhaustion recovery
+- ranger bond, terrain support, trail and tracking systems, companion hooks, and fieldcraft support
+- empath wound/healing systems, links, shock/strain support, and recovery-facing mechanics
+- thief-facing systems including khri hooks, mark/theft support, burglary/justice scenarios, contacts, and stealth support
+- cleric devotion and commune support plus death/favor/revival-facing mechanics
+- shared registry support for the broader profession roster, including commoner, barbarian, bard, moon mage, necromancer, paladin, trader, warrior mage, and others
 
-- manifest-driven area intake
-- OCR-assisted extraction and review
-- graph-based area serialization
-- rebuilding and validating large map spaces
-- full-zone map payloads for the browser client
+### Clients and maps
 
-This lets the project mix traditional hand-authored game logic with faster world bootstrapping from map assets.
+- custom browser UI under `web/` with structured payload updates
+- zone and local map rendering, pathfinding, and click movement
+- Godot client workspace under `godot/` with websocket integration on the portal side
+- AreaForge-backed zone maps and fallback local-map behavior for non-authored spaces
 
-## Implemented Systems
+### World and tooling
 
-### Core character and combat systems
+- auto-bootstrap of The Landing and supporting spaces on startup
+- Brookhollow justice setup and guard, jail, and pillory support
+- AreaForge content pipeline for turning processed map data into playable area graphs
+- DireTest scenario runner with artifact bundles, replay support, lag reporting, and baseline save/compare workflows
 
-- persistent character state with combat, target, balance, fatigue, attunement, stance, and injury tracking
-- roundtime as a global action pacing system
-- weapon profiles that drive damage, fatigue cost, balance pressure, and timing
-- NPC combat participation with retaliation and combat loop support
-- disengage, retreat, targeting, and combat-state cleanup
+## Quickstart
 
-### Injury, bleeding, and first-aid loop
+This repository currently assumes a Python 3.11 environment with Evennia available. In this workspace that environment is `.venv`; there is no pinned dependency manifest checked in yet, so a fresh machine will need an Evennia-capable environment prepared first.
 
-- body-part injuries for head, chest, abdomen, back, arms, hands, and legs
-- separate external, internal, bruise, and bleed values
-- bleed-state escalation and player-facing injury reporting
-- first-aid tending with temporary bleed suppression rather than trivial instant reset
-- reopen behavior for wounds after tending expires
-- empath-style injury transfer foundations
-
-### Skills, abilities, and progression foundations
-
-- shared skill registry with starter baselines
-- skill categories across combat, armor, survival, lore, and magic
-- guild-locked visibility hooks for future profession identity
-- ability visibility, cooldown, and execution scaffolding
-- mindstate and learning-oriented support paths
-
-### Race, profession, and subsystem identity
-
-- race selection and validation with race-specific stat caps, carry modifiers, learning modifiers, and display state
-- profession-aware subsystem payloads and browser-visible state for warrior, ranger, empath, and cleric progression
-- warrior tempo, pressure, exhaustion, berserk, and roar support paths
-- ranger bond, focus, terrain, companion, aim, and ammo state support
-- empath shock, wounds, links, unity, and overdraw tracking
-- cleric devotion and favor-facing state hooks
-
-### Death, favor, and recovery systems
-
-- persistent life-state handling for alive, dead, and departed characters
-- corpse creation, corpse decay, grave ownership, grave expiry, and grave recovery support
-- depart-mode handling, soul-state recovery hooks, resurrection fragility, and instability tracking
-- favor snapshots and death-sting severity state carried through death and recovery flows
-
-### World interaction and item systems
-
-- inventory inspection and action routing
-- wearing, removing, wielding, unwielding, stowing, and drawing
-- wearable containers and sheaths
-- traps, lockpicks, locksmithing-oriented interactions, and survival tools
-- vendors, spawning helpers, and test-world utility commands
-
-### Magic and guild-facing foundations
-
-- spell preparation and release flow
-- category-driven spell handling
-- targeted, augmentation, debilitation, warding, and utility support layers
-- cyclic spell scaffolding
-- guild-aware access hooks for future spellbook identity
-
-### Justice, theft, and economy-facing systems
-
-- regional justice configuration with room law types, bounty board support, and stocks-linked recovery flows
-- theft and shoplifting support paths with criminal-state hooks for broader stealth gameplay
-- vendor trading, banking, and economy diagnostics covered by DireTest scenarios
-
-### Onboarding and scripted tutorial content
-
-- guided onboarding progression through race choice, mirror, weapon, combat, vendor, and breach beats
-- mentor and gremlin roleplay scripts that react to idle players and tutorial delays
-- invasion scripting that escalates tutorial pressure with staged breach events and repeatable NPC spawns
-
-### Browser map and navigation systems
-
-- structured server-side map payloads
-- zone maps for AreaForge-tagged areas
-- deterministic local-map fallback for rooms without authored coordinates
-- fullscreen map mode
-- pan, fit, and center controls
-- click-to-route and auto-walk from exit graph pathfinding
-- stable fallback layout anchoring so compact areas do not shift while moving
-
-## Tech Stack
-
-- Python 3.11
-- Evennia
-- Django via Evennia's web stack
-- custom JavaScript/CSS browser client under [web/static/webclient](web/static/webclient)
-- game logic in [typeclasses](typeclasses), [commands](commands), and [world](world)
-
-## Project Layout
-
-- [typeclasses](typeclasses): characters, rooms, objects, NPCs, weapons, armor, spells, and gameplay rules
-- [commands](commands): player verbs, admin/debug commands, and system actions
-- [world/area_forge](world/area_forge): AreaForge extraction, review, serialization, and map APIs
-- [web/templates/webclient](web/templates/webclient): custom browser client template
-- [web/static/webclient](web/static/webclient): browser client JS and CSS
-- [server/conf](server/conf): Evennia configuration and startup hooks
-- [maps](maps): source map assets used for AreaForge intake
-
-## Running Locally
-
-From the project root:
+From the repo root on Windows PowerShell:
 
 ```powershell
+& .\.venv\Scripts\Activate.ps1
 evennia migrate
 evennia start
 ```
 
-Then open the browser client:
+Open the browser client at:
 
 ```text
-http://localhost:4005/webclient/
+http://localhost:4001/webclient/
 ```
 
-If your local ports differ, check [server/conf/settings.py](server/conf/settings.py).
+Useful notes:
 
-## Useful Test Commands
+- the default Evennia web port is in use here because `server/conf/settings.py` does not override it
+- the Godot websocket bridge is enabled and listens on `127.0.0.1:4008`
+- the server start hooks bootstrap world state through `server/conf/at_server_startstop.py`
 
-Some helpful flows already present in the repo:
+To stop the server:
 
-- `attack training dummy` for combat loop testing
-- `stats`, `injuries`, and `mindstate` for state inspection
-- `renew`, `renew room`, and `renew all` for test resets
-- `spawnweapon`, `spawnwearable`, `spawnsheath`, `spawnvendor`, and related debug spawners
-- `maptest local` and `maptest zone` for structured map payload checks
+```powershell
+evennia stop
+```
 
-DireTest currently has these live scenario entrypoints:
+## Testing And Diagnostics
+
+DireTest is the main regression and scenario harness.
+
+Common entry points:
 
 ```powershell
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py list
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py balance-baseline --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline save v1 --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline compare v1 --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario race-balance
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario movement --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario movement --seed 1234 --check-lag
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario inventory --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario combat-basic --seed 1234
 c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario death-loop --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario grave-recovery --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario economy --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario bank --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario onboarding_lag --seed 1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario e2e-full-lifecycle-all-races
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario e2e-failure-cases
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe tools/empath_guild_maintenance.py --json
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe tools/empath_guild_maintenance.py --deprecate
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe tools/empath_guild_maintenance.py --delete
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py repro artifacts/bank_direct_1234
-c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py diff artifacts/bank_direct_1234/snapshots.json::initial artifacts/bank_direct_1234/snapshots.json::deposited
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py scenario justice-guardhouse-flow --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline save v1 --seed 1234
+c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py baseline compare v1 --seed 1234
 ```
 
-Optional flags:
+The repo also includes focused tooling such as:
 
-- `--profession commoner`
-- `--sample-weight 80`
-- `--base-xp 100`
-- `--check-lag`
-- `--json`
+- `tools/architecture_audit.py`
+- `tools/full_death_to_res_suite.py`
+- `tools/empath_guild_maintenance.py`
 
-The direct gameplay scenarios now cover movement, inventory, basic combat, death and depart loops, grave recovery, vendor trading, banking, and onboarding lag diagnostics. Artifact bundles under `artifacts/` now include `diffs.json`, `failure_summary.json`, `lag.json`, timing and delta metrics, and replayable scenario metadata.
+## Project Layout
 
-`diretest.py balance-baseline --seed <n>` is the first descriptive balance pass. It rolls up combat outcomes, economy flow, and onboarding progression pacing into a single artifact-backed report without adding hard balance gates yet.
+- `commands/`: player verbs, admin tools, and command-entry behavior
+- `typeclasses/`: persistent object behavior and legacy integration surface
+- `engine/`: service-layer orchestration and typed engine contracts
+- `domain/`: pure combat and wound rules
+- `world/`: professions, systems, race/language support, AreaForge, and world bootstrap code
+- `web/`: custom browser client templates and static assets
+- `godot/`: Godot client workspace and related experiments/integration
+- `tests/`: focused domain/service tests and other validation coverage
+- `artifacts/`: saved DireTest outputs and baseline/scenario artifacts
+- `docs/architecture/`: current architecture and timing rules
 
-`diretest.py baseline save <name> --seed <n>` persists that aggregated report under `artifacts/baselines/<name>.json`. `diretest.py baseline compare <name> --seed <n>` reruns the same aggregated baseline and prints simple factual deltas against the saved baseline with no analysis layer yet.
+## Architecture Direction
 
-`diretest.py scenario <name> --check-lag` promotes lag status into a scenario failure when the run reaches `bad` or `critical`, while `critical` lag fails even without the extra flag. `diretest.py repro <artifact_path>` now recomputes lag metrics and prints a replay lag comparison against the original artifact.
+The current direction is a clearer separation of responsibilities:
 
-DireTest is also now wired into live payload-generation and ticker/script timing paths, so lag artifacts can distinguish command latency from client-payload cost and scheduled-system delay.
-
-## Development Notes
-
-- The repository includes implementation reports and task-range reports documenting major system work.
-- The browser client is the active player-facing target.
-- AreaForge build artifacts are intentionally kept out of git by the current ignore rules.
-- The codebase is under active development and still contains placeholder and future-facing hooks where deeper guild, spell, economy, and content systems will expand.
+- commands delegate to services instead of owning core mutation rules
+- `engine/services/` owns orchestration and game-state authority
+- `domain/` owns pure rule calculations such as combat math and wound logic
+- `typeclasses/characters.py` remains the compatibility surface, persistence bridge, and live Evennia object API
+- scheduler and ticker responsibilities are being tightened so periodic work stays scoped and measurable
 
 ## License
 
 DireEngine is licensed under the BSD 3-Clause License in [LICENSE.txt](LICENSE.txt).
 
 This repository also includes Evennia-derived and Evennia-dependent work. Evennia's license is included separately in [LICENSE.evennia.txt](LICENSE.evennia.txt).
-
-## Direction
-
-DireEngine is building toward a full modern text-world platform that preserves the identity of classic skill-based fantasy MUDs while removing the cost and friction that kept those experiences niche.
-
-If the old goal was "make a deep text world players can disappear into," the new goal is:
-
-Build that world again, make it sharper, make it easier to enter, and keep it open.

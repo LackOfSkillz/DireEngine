@@ -28,6 +28,7 @@ class StateService:
 
         data = {"amount": final_damage, "location": location, "damage_type": damage_type, "critical": bool(critical)}
         data.update(dict(wound_result.data or {}))
+        data.setdefault("injury_events", list((wound_result.data or {}).get("injury_events", []) or []))
         return ActionResult.ok(data=data)
 
     @staticmethod

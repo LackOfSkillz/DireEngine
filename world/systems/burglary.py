@@ -30,29 +30,29 @@ def _get_skill_rank(character, skill_name):
 def _ensure_target_state(target):
     if target is None:
         return
-    if getattr(getattr(target, "db", None), "burglary_enabled", None) is None:
+    if target.db.burglary_enabled is None:
         target.db.burglary_enabled = False
-    if getattr(getattr(target, "db", None), "lock_difficulty", None) is None:
+    if target.db.lock_difficulty is None:
         target.db.lock_difficulty = 0
-    if getattr(getattr(target, "db", None), "trap_difficulty", None) is None:
+    if target.db.trap_difficulty is None:
         target.db.trap_difficulty = 0
-    if getattr(getattr(target, "db", None), "entry_open", None) is None:
+    if target.db.entry_open is None:
         target.db.entry_open = False
-    if getattr(getattr(target, "db", None), "last_burgled_at", None) is None:
+    if target.db.last_burgled_at is None:
         target.db.last_burgled_at = 0
-    if getattr(getattr(target, "db", None), "burgle_heat", None) is None:
+    if target.db.burgle_heat is None:
         target.db.burgle_heat = 0
-    if getattr(getattr(target, "db", None), "burgle_heat_updated_at", None) is None:
+    if target.db.burgle_heat_updated_at is None:
         target.db.burgle_heat_updated_at = 0
 
 
 def _get_target_kind(target):
     if target is None:
         return "entry"
-    explicit = str(getattr(getattr(target, "db", None), "burglary_kind", "") or "").strip().lower()
+    explicit = str(target.db.burglary_kind or "").strip().lower()
     if explicit in {"entry", "container"}:
         return explicit
-    if bool(getattr(getattr(target, "db", None), "is_container", False)):
+    if bool(target.db.is_container):
         return "container"
     return "entry"
 
@@ -61,14 +61,14 @@ def get_burgle_heat(target):
     if target is None:
         return 0
     _ensure_target_state(target)
-    return int(getattr(target.db, "burgle_heat", 0) or 0)
+    return int(target.db.burgle_heat or 0)
 
 
 def add_burgle_heat(target, amount=1):
     if target is None:
         return 0
     _ensure_target_state(target)
-    target.db.burgle_heat = max(0, int(getattr(target.db, "burgle_heat", 0) or 0) + int(amount or 0))
+    target.db.burgle_heat = max(0, int(target.db.burgle_heat or 0) + int(amount or 0))
     target.db.burgle_heat_updated_at = time.time()
     return int(target.db.burgle_heat or 0)
 
@@ -77,9 +77,9 @@ def decay_burgle_heat(target):
     if target is None:
         return 0
     _ensure_target_state(target)
-    if not float(getattr(target.db, "burgle_heat_updated_at", 0) or 0):
+    if not float(target.db.burgle_heat_updated_at or 0):
         target.db.burgle_heat_updated_at = time.time()
-    return int(getattr(target.db, "burgle_heat", 0) or 0)
+    return int(target.db.burgle_heat or 0)
 
 
 def get_burgle_heat_penalty(target):
@@ -88,28 +88,27 @@ def get_burgle_heat_penalty(target):
 
 def can_burgle(actor, target):
     _ensure_target_state(target)
-    requires_lockpick = int(getattr(getattr(target, "db", None), "lock_difficulty", 0) or 0) > 0
-    requires_disarm = int(getattr(getattr(target, "db", None), "trap_difficulty", 0) or 0) > 0
-
     result = {
         "allowed": False,
         "reason": None,
-        "requires_lockpick": requires_lockpick,
-        "requires_disarm": requires_disarm,
+        "requires_lockpick": False,
+        "requires_disarm": False,
     }
     if actor is None or target is None:
         result["reason"] = "There is nothing here to burgle."
         return result
-    if not bool(getattr(getattr(target, "db", None), "burglary_enabled", False)):
+    result["requires_lockpick"] = int(target.db.lock_difficulty or 0) > 0
+    result["requires_disarm"] = int(target.db.trap_difficulty or 0) > 0
+    if not bool(target.db.burglary_enabled):
         result["reason"] = "That is not a viable burglary target."
         return result
     if getattr(actor, "location", None) != getattr(target, "location", None):
         result["reason"] = "You need to be at the target to work it."
         return result
-    if bool(getattr(getattr(target, "db", None), "entry_open", False)):
+    if bool(target.db.entry_open):
         result["reason"] = "That entry has already been compromised."
         return result
-    if requires_lockpick and hasattr(actor, "has_lockpick") and not actor.has_lockpick():
+    if result["requires_lockpick"] and hasattr(actor, "has_lockpick") and not actor.has_lockpick():
         result["reason"] = "You need a lockpick before you can try that."
         return result
     if bool(getattr(getattr(actor, "db", None), "guard_attention", False)):
@@ -135,7 +134,7 @@ def _run_locksmith_contest(actor, difficulty, stat="intelligence"):
 def _apply_trap_consequence(actor, target, room):
     if actor is None:
         return
-    trap_type = str(getattr(getattr(target, "db", None), "trap_type", "alarm") or "alarm")
+    trap_type = str(target.db.trap_type or "alarm")
     if hasattr(actor, "break_stealth"):
         actor.break_stealth()
     elif hasattr(actor, "reveal"):
@@ -143,7 +142,7 @@ def _apply_trap_consequence(actor, target, room):
     if hasattr(actor, "apply_box_trap_effect"):
         actor.apply_box_trap_effect(trap_type)
     elif hasattr(actor, "set_hp"):
-        current_hp = int(getattr(getattr(actor, "db", None), "hp", 0) or 0)
+        current_hp = int(actor.db.hp or 0)
         StateService.apply_damage(actor, min(5, max(0, current_hp)), damage_type="impact")
     if room is not None:
         increase_room_suspicion(room, amount=2)
@@ -159,7 +158,7 @@ def _finalize_success(actor, target, room, result, difficulty_total):
         target.db.opened = True
         result["entry_result"] = "container_open"
     else:
-        destination = getattr(getattr(target, "db", None), "burglary_destination", None)
+        destination = target.db.burglary_destination
         if destination is not None and hasattr(actor, "move_to"):
             actor.move_to(destination, quiet=True, move_type="burgle")
         result["entry_result"] = "entry_opened"

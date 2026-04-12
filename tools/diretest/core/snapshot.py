@@ -42,13 +42,13 @@ def _serialize_character(character):
         "id": int(getattr(character, "id", 0) or 0),
         "key": str(getattr(character, "key", "") or ""),
         "location": str(getattr(location, "key", "") or "") if location else None,
-        "hp": int(getattr(getattr(character, "db", None), "hp", 0) or 0),
-        "max_hp": int(getattr(getattr(character, "db", None), "max_hp", 0) or 0),
-        "coins": int(getattr(getattr(character, "db", None), "coins", 0) or 0),
-        "bank_coins": int(getattr(getattr(character, "db", None), "bank_coins", 0) or 0),
-        "life_state": str(getattr(getattr(character, "db", None), "life_state", "") or ""),
-        "is_dead": bool(getattr(getattr(character, "db", None), "is_dead", False)),
-        "states": _serialize_value(getattr(getattr(character, "db", None), "states", {}) or {}),
+        "hp": int(character.db.hp or 0),
+        "max_hp": int(character.db.max_hp or 0),
+        "coins": int(character.db.coins or 0),
+        "bank_coins": int(character.db.bank_coins or 0),
+        "life_state": str(character.db.life_state or ""),
+        "is_dead": bool(character.db.is_dead),
+        "states": _serialize_value(character.db.states or {}),
     }
 
 
@@ -87,13 +87,13 @@ def _serialize_combat(character):
         target_summary = {
             "id": int(getattr(target, "id", 0) or 0),
             "key": str(getattr(target, "key", "") or ""),
-            "hp": int(getattr(getattr(target, "db", None), "hp", 0) or 0),
-            "max_hp": int(getattr(getattr(target, "db", None), "max_hp", 0) or 0),
-            "in_combat": bool(getattr(getattr(target, "db", None), "in_combat", False)),
+            "hp": int(target.db.hp or 0),
+            "max_hp": int(target.db.max_hp or 0),
+            "in_combat": bool(target.db.in_combat),
             "range": str(character.get_range(target) if hasattr(character, "get_range") else "melee"),
         }
     return {
-        "in_combat": bool(getattr(getattr(character, "db", None), "in_combat", False)),
+        "in_combat": bool(character.db.in_combat),
         "target": str(getattr(target, "key", "") or "") if target else None,
         "target_summary": target_summary,
         "roundtime": float(character.get_remaining_roundtime() if hasattr(character, "get_remaining_roundtime") else 0.0),
@@ -133,7 +133,7 @@ def _capture_object_deltas(ctx):
 def capture_snapshot(ctx) -> dict:
     character = ctx.get_character()
     room = ctx.get_room()
-    attributes = _serialize_value(getattr(getattr(character, "db", None), "attributes", {}) or {}) if character else {}
+    attributes = _serialize_value(character.db.attributes or {}) if character else {}
 
     return {
         "character": _serialize_character(character),

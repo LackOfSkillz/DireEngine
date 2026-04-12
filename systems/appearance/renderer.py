@@ -39,9 +39,9 @@ def _build_external_text(identity):
 
 def render_self_view(character, identity=None, fallback_desc=None):
     resolved = normalize_identity_data(
-        identity or getattr(getattr(character, "db", None), "identity", None),
-        fallback_race=getattr(getattr(character, "db", None), "race", None),
-        fallback_gender=getattr(getattr(character, "db", None), "gender", None),
+        identity or character.db.identity,
+        fallback_race=character.db.race,
+        fallback_gender=character.db.gender,
     )
     if is_identity_renderable(resolved):
         appearance = dict(resolved.get("appearance") or {})
@@ -81,9 +81,9 @@ def render_self_view(character, identity=None, fallback_desc=None):
 
 def render_external_view(character, viewer=None, identity=None, fallback_desc=None):
     resolved = normalize_identity_data(
-        identity or getattr(getattr(character, "db", None), "identity", None),
-        fallback_race=getattr(getattr(character, "db", None), "race", None),
-        fallback_gender=getattr(getattr(character, "db", None), "gender", None),
+        identity or character.db.identity,
+        fallback_race=character.db.race,
+        fallback_gender=character.db.gender,
     )
     if is_identity_renderable(resolved):
         return _build_external_text(resolved)
@@ -97,7 +97,7 @@ def render_external_view(character, viewer=None, identity=None, fallback_desc=No
 
 
 def render_appearance(character, viewer=None):
-    fallback_desc = getattr(getattr(character, "db", None), "desc", None)
+    fallback_desc = character.db.desc
     if viewer == character:
         return render_self_view(character, fallback_desc=fallback_desc)
     return render_external_view(character, viewer=viewer, fallback_desc=fallback_desc)

@@ -27,6 +27,7 @@ from evennia.utils.search import search_object, search_tag
 from domain.wounds.constants import BODY_PART_ORDER as WOUND_BODY_PART_ORDER, DEFAULT_INJURIES as DEFAULT_WOUND_INJURIES
 from domain.wounds.models import copy_default_injuries as copy_default_wound_map
 from domain.wounds import rules as wound_rules
+from engine.presenters.injury_presenter import InjuryPresenter
 from engine.services.injury_service import InjuryService
 from typeclasses.abilities import get_ability
 from typeclasses.box import Box
@@ -1137,7 +1138,7 @@ class Character(ObjectParent, DefaultCharacter):
         if not step or step == "complete":
             return False
         room = getattr(self, "location", None)
-        room_is_tutorial = bool(getattr(getattr(room, "db", None), "is_onboarding", False) or getattr(getattr(room, "db", None), "is_tutorial", False))
+        room_is_tutorial = bool(room and (room.db.is_onboarding or room.db.is_tutorial))
         try:
             from server.conf.at_server_startstop import _ensure_new_player_tutorial
             from systems import onboarding
@@ -6717,6 +6718,7 @@ class Character(ObjectParent, DefaultCharacter):
         from engine.services.state_service import StateService
 
         result = StateService.apply_damage(self, amount, location=location, damage_type=damage_type)
+        InjuryPresenter.present_result(self, result)
         return int(result.amount or 0)
 
     def process_empath_links(self):
@@ -15719,7 +15721,8 @@ class Character(ObjectParent, DefaultCharacter):
 
         from engine.services.state_service import StateService
 
-        StateService.apply_damage(target, damage, location="chest", damage_type="impact")
+        damage_result = StateService.apply_damage(target, damage, location="chest", damage_type="impact")
+        InjuryPresenter.present_result(target, damage_result)
         self.msg(f"Your {name} {hit_quality}s {target.key} for {damage} damage.")
         target.msg(f"{self.key}'s {name} {hit_quality}s you for {damage} damage.")
         if self.location:
@@ -15774,7 +15777,8 @@ class Character(ObjectParent, DefaultCharacter):
             hit_any = True
             from engine.services.state_service import StateService
 
-            StateService.apply_damage(target, damage, location="chest", damage_type="impact")
+            damage_result = StateService.apply_damage(target, damage, location="chest", damage_type="impact")
+            InjuryPresenter.present_result(target, damage_result)
             if getattr(target, "account", None):
                 target.msg(f"{self.key}'s {name} washes over you!")
 
@@ -16172,6 +16176,7 @@ class Character(ObjectParent, DefaultCharacter):
 
     def apply_tend(self, part, tender=None):
         result = InjuryService.stabilize_wound(self, self.normalize_body_part_name(part), tender=tender)
+        InjuryPresenter.present_result(self, result)
         return bool(result.success)
 
     def normalize_body_part_name(self, part):
@@ -16242,7 +16247,8 @@ class Character(ObjectParent, DefaultCharacter):
     # DEPRECATED: logic should live in services
     # LOGIC (must move later)
     def apply_damage(self, location, amount, damage_type="impact"):
-        InjuryService.apply_hit_wound(self, location, amount, damage_type=damage_type)
+        result = InjuryService.apply_hit_wound(self, location, amount, damage_type=damage_type)
+        InjuryPresenter.present_result(self, result)
 
     def is_vital_destroyed(self):
         self.ensure_core_defaults()
@@ -16252,10 +16258,12 @@ class Character(ObjectParent, DefaultCharacter):
         return False
 
     def stop_bleeding(self, part):
-        InjuryService.stop_bleeding(self, self.normalize_body_part_name(part))
+        result = InjuryService.stop_bleeding(self, self.normalize_body_part_name(part))
+        InjuryPresenter.present_result(self, result)
 
     def heal_body_part(self, part, amount):
-        InjuryService.heal_wound(self, self.normalize_body_part_name(part), amount)
+        result = InjuryService.heal_wound(self, self.normalize_body_part_name(part), amount)
+        InjuryPresenter.present_result(self, result)
 
     def get_most_scarred_part(self):
         self.ensure_core_defaults()
@@ -16312,7 +16320,8 @@ class Character(ObjectParent, DefaultCharacter):
 
     def update_bleed_state(self):
         self.ensure_core_defaults()
-        InjuryService.update_bleed_state(self)
+        result = InjuryService.update_bleed_state(self)
+        InjuryPresenter.present_result(self, result)
 
     def on_bleed_state_change(self, old, new):
         if new == "none":
@@ -16335,7 +16344,8 @@ class Character(ObjectParent, DefaultCharacter):
 
     def process_bleed(self):
         self.ensure_core_defaults()
-        InjuryService.process_bleed_tick(self)
+        result = InjuryService.process_bleed_tick(self)
+        InjuryPresenter.present_result(self, result)
 
     def sync_combat_state(self):
         self.ensure_core_defaults()

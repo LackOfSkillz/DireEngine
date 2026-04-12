@@ -36,7 +36,7 @@ def _object_weight(obj):
         except TypeError:
             pass
     try:
-        return float(getattr(getattr(obj, "db", None), "weight", 0.0) or 0.0)
+        return float(obj.db.weight or 0.0)
     except (TypeError, ValueError):
         return 0.0
 
@@ -75,7 +75,7 @@ def _no_negative_currency(ctx):
     character = ctx.get_character()
     if not character:
         return True, "No active character."
-    coins = int(getattr(getattr(character, "db", None), "coins", 0) or 0)
+    coins = int(character.db.coins or 0)
     if coins < 0:
         return False, f"Character has negative coins: {coins}."
     return True, "Currency is non-negative."

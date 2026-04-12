@@ -1,41 +1,14 @@
 {
   "scheduler": {
-    "active_job_count": 1,
-    "active_jobs": [
-      {
-        "created_at": 1776005596.3518417,
-        "delay_s": 3.0,
-        "due_at": 1776005599.3518417,
-        "inactive_defer_count": 0,
-        "inactive_policy": "defer",
-        "interest_object_key": null,
-        "interest_object_label": "TEST_COMBAT_ATTACKER",
-        "job_id": "0892ea0687c845e8a7489405e8d359ed",
-        "key": "combat:roundtime:24427",
-        "owner": "#24427",
-        "owner_label": "TEST_COMBAT_ATTACKER",
-        "source": "combat.roundtime",
-        "system": "combat.roundtime",
-        "timing_mode": "scheduled_expiry"
-      }
-    ],
+    "active_job_count": 0,
+    "active_jobs": [],
     "breakdown": {
-      "by_key": {
-        "combat:roundtime:24427": 1
-      },
-      "by_system": {
-        "combat.roundtime": 1
-      },
-      "by_timing_mode": {
-        "scheduled_expiry": 1
-      }
+      "by_key": {},
+      "by_system": {},
+      "by_timing_mode": {}
     },
-    "by_owner": {
-      "#24427": 1
-    },
-    "by_system": {
-      "combat.roundtime": 1
-    },
+    "by_owner": {},
+    "by_system": {},
     "delayed_job_count": 0,
     "delayed_jobs": [],
     "quota_policy": {
@@ -52,7 +25,7 @@
         "limit": 100
       }
     },
-    "total_jobs": 1
+    "total_jobs": 0
   },
   "scripts": {
     "active_script_count": 813,
@@ -9069,57 +9042,117 @@
     },
     {
       "kind": "tick_function",
-      "line": 230,
+      "line": 292,
+      "message": "suspicious tick-like function: apply_bleed_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\domain\\wounds\\rules.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 14,
+      "message": "suspicious tick-like function: render_bleed_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\engine\\presenters\\injury_presenter.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 81,
+      "message": "suspicious tick-like function: _schedule_bleed_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\engine\\services\\injury_service.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 96,
+      "message": "suspicious tick-like function: _cancel_bleed_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\engine\\services\\injury_service.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 106,
+      "message": "suspicious tick-like function: _schedule_recovery_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\engine\\services\\injury_service.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 121,
+      "message": "suspicious tick-like function: _cancel_recovery_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\engine\\services\\injury_service.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 306,
+      "message": "suspicious tick-like function: process_bleed_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\engine\\services\\injury_service.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 341,
+      "message": "suspicious tick-like function: process_recovery_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\engine\\services\\injury_service.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 231,
       "message": "suspicious tick-like function: _get_cached_tick_npcs",
       "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
     },
     {
       "kind": "tick_function",
-      "line": 246,
+      "line": 247,
       "message": "suspicious tick-like function: _npc_needs_status_tick",
       "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
     },
     {
       "kind": "tick_function",
-      "line": 292,
+      "line": 293,
       "message": "suspicious tick-like function: _iter_tick_characters",
       "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
     },
     {
       "kind": "tick_function",
-      "line": 1256,
+      "line": 1257,
       "message": "suspicious tick-like function: _log_slow_tick",
       "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
     },
     {
       "kind": "tick_function",
-      "line": 1292,
+      "line": 1293,
       "message": "suspicious tick-like function: process_status_tick",
       "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
     },
     {
       "kind": "tick_function",
-      "line": 1468,
+      "line": 1464,
       "message": "suspicious tick-like function: process_learning_tick",
       "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
     },
     {
       "kind": "time_loop",
-      "line": 588,
+      "line": 596,
       "message": "time-based loop pattern detected",
       "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
     },
     {
       "kind": "time_loop",
-      "line": 637,
+      "line": 652,
       "message": "time-based loop pattern detected",
       "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
     },
     {
       "kind": "while_true",
-      "line": 1042,
+      "line": 1064,
       "message": "while True loop found in gameplay code",
       "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 35,
+      "message": "suspicious tick-like function: test_bleed_tick_respects_tending_strength",
+      "path": "C:\\Users\\gary\\dragonsire\\tests\\domain\\test_wound_rules.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 69,
+      "message": "suspicious tick-like function: test_process_bleed_tick_returns_events_without_service_messages",
+      "path": "C:\\Users\\gary\\dragonsire\\tests\\services\\test_injury_service.py"
     },
     {
       "kind": "tick_function",
@@ -9138,66 +9171,6 @@
       "line": 159,
       "message": "suspicious tick-like function: _build_ticker_performance",
       "path": "C:\\Users\\gary\\dragonsire\\tools\\diretest\\core\\metrics.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 3706,
-      "message": "suspicious tick-like function: process_cleric_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 3872,
-      "message": "suspicious tick-like function: process_soul_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 4036,
-      "message": "suspicious tick-like function: process_resurrection_stabilization_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 4111,
-      "message": "suspicious tick-like function: process_resurrection_recovery_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 8008,
-      "message": "suspicious tick-like function: process_empath_channel_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 8075,
-      "message": "suspicious tick-like function: process_empath_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 9118,
-      "message": "suspicious tick-like function: process_justice_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 9136,
-      "message": "suspicious tick-like function: process_thief_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 9194,
-      "message": "suspicious tick-like function: process_warrior_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
-    },
-    {
-      "kind": "tick_function",
-      "line": 9287,
-      "message": "suspicious tick-like function: process_ranger_tick",
-      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
     }
   ],
   "tickers": {

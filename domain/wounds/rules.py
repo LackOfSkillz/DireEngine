@@ -108,8 +108,8 @@ def should_apply_wound(target, body_part: dict | None, damage: int, damage_type:
 		return True
 	if get_part_trauma(body_part) > 0:
 		return True
-	max_hp = max(1, int(getattr(getattr(target, "db", None), "max_hp", 1) or 1))
-	hp = max(0, int(getattr(getattr(target, "db", None), "hp", max_hp) or 0))
+	max_hp = max(1, int(target.db.max_hp or 1))
+	hp = max(0, int(target.db.hp or 0))
 	return (hp / max_hp) <= LOW_HP_WOUND_RATIO and damage >= max(3, threshold - 2)
 
 

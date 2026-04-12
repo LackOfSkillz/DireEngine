@@ -32,12 +32,6 @@ class CmdHelp(EvenniaCmdHelp):
                 return
         super().func()
 
-    def msg_help(self, text, **kwargs):
-        query = str(self.args or "").strip().lower()
-        if query and query not in {"all", "list", "index"}:
-            text = f"{text}\n\n|wView online:|n /lore?topic={quote(query)}"
-        return super().msg_help(text, **kwargs)
-
     system_groups = OrderedDict(
         (
             ("System", ("home", "setdesc", "access")),
@@ -370,6 +364,9 @@ class CmdHelp(EvenniaCmdHelp):
         return self._format_root_index(cmd_help_dict, db_help_dict, click_topics)
 
     def msg_help(self, text, **kwargs):
+        query = str(self.args or "").strip().lower()
+        if isinstance(text, str) and query and query not in {"all", "list", "index"}:
+            text = f"{text}\n\n|wView online:|n /lore?topic={quote(query)}"
         if isinstance(text, str):
             text = self._paginate_help_text(text)
         super().msg_help(text, **kwargs)

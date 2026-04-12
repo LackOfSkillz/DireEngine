@@ -799,15 +799,15 @@ def _completed_steps_for(step):
 
 
 def get_onboarding_step(character):
-    if bool(getattr(getattr(character, "db", None), "chargen_active", False)):
+    if bool(character.db.chargen_active):
         return None
-    step = str(getattr(getattr(character, "db", None), "onboarding_step", "") or "").strip().lower()
+    step = str(character.db.onboarding_step or "").strip().lower()
     if step in ONBOARDING_STEPS:
         return step
-    if bool(getattr(getattr(character, "db", None), "onboarding_complete", False)):
+    if bool(character.db.onboarding_complete):
         return STEP_COMPLETE
     room = getattr(character, "location", None)
-    if bool(getattr(getattr(room, "db", None), "is_onboarding", False)):
+    if bool(room and room.db.is_onboarding):
         return STEP_START
     return None
 
@@ -1182,7 +1182,7 @@ def handle_room_entry(character):
     if bool(getattr(getattr(character, "db", None), "chargen_active", False)):
         return
     room = getattr(character, "location", None)
-    if not room or not bool(getattr(getattr(room, "db", None), "is_onboarding", False)):
+    if not room or not bool(room.db.is_onboarding):
         return
     if not get_onboarding_step(character):
         activate_onboarding(character)

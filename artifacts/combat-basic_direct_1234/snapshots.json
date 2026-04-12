@@ -6,7 +6,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 24427,
+        "id": 24461,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -28,19 +28,19 @@
       "object_deltas": {
         "created": [
           {
-            "id": 24426,
+            "id": 24460,
             "key": "TEST_COMBAT_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 24427,
+            "id": 24461,
             "key": "TEST_COMBAT_ATTACKER",
             "location": "TEST_COMBAT_ROOM",
             "typeclass": "typeclasses.characters.Character"
           },
           {
-            "id": 24428,
+            "id": 24462,
             "key": "TEST_COMBAT_DEFENDER",
             "location": "TEST_COMBAT_ROOM",
             "typeclass": "typeclasses.characters.Character"
@@ -54,11 +54,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 24426,
+        "id": 24460,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "initial",
-      "timestamp": 1776005594.6027277
+      "timestamp": 1776023232.8862684
     },
     "label": "initial"
   },
@@ -69,7 +69,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 24427,
+        "id": 24461,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -85,7 +85,7 @@
         "target": "TEST_COMBAT_DEFENDER",
         "target_summary": {
           "hp": 50,
-          "id": 24428,
+          "id": 24462,
           "in_combat": false,
           "key": "TEST_COMBAT_DEFENDER",
           "max_hp": 100,
@@ -105,11 +105,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 24426,
+        "id": 24460,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "engaged",
-      "timestamp": 1776005595.1209419
+      "timestamp": 1776023233.3693724
     },
     "label": "engaged"
   },
@@ -120,7 +120,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 24427,
+        "id": 24461,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -132,11 +132,11 @@
       },
       "combat": {
         "in_combat": true,
-        "roundtime": 1.97,
+        "roundtime": 1.99,
         "target": "TEST_COMBAT_DEFENDER",
         "target_summary": {
-          "hp": 48,
-          "id": 24428,
+          "hp": 49,
+          "id": 24462,
           "in_combat": true,
           "key": "TEST_COMBAT_DEFENDER",
           "max_hp": 100,
@@ -156,11 +156,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 24426,
+        "id": 24460,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "damaged",
-      "timestamp": 1776005595.8153505
+      "timestamp": 1776023233.8748922
     },
     "label": "damaged"
   },
@@ -171,7 +171,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 24427,
+        "id": 24461,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -200,11 +200,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 24426,
+        "id": 24460,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "disengaged",
-      "timestamp": 1776005596.3528438
+      "timestamp": 1776023234.3378327
     },
     "label": "disengaged"
   },
@@ -215,7 +215,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 24427,
+        "id": 24461,
         "is_dead": false,
         "key": "TEST_COMBAT_ATTACKER",
         "life_state": "ALIVE",
@@ -244,11 +244,11 @@
           "TEST_COMBAT_DEFENDER"
         ],
         "exits": [],
-        "id": 24426,
+        "id": 24460,
         "key": "TEST_COMBAT_ROOM"
       },
       "snapshot_label": "final",
-      "timestamp": 1776005596.353843
+      "timestamp": 1776023234.3378327
     },
     "label": "final"
   }

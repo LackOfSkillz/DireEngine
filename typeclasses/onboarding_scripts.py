@@ -78,7 +78,7 @@ class OnboardingGuidePromptScript(Script):
 
     def is_valid(self):
         obj = self.obj
-        return bool(obj and getattr(getattr(obj, "db", None), "is_onboarding_guide", False))
+        return bool(obj and obj.db.is_onboarding_guide)
 
     def at_repeat(self):
         def _run():
@@ -114,11 +114,11 @@ class OnboardingInvasionScript(Script):
 
     def is_valid(self):
         obj = self.obj
-        return bool(obj and getattr(getattr(obj, "db", None), "is_tutorial", False))
+        return bool(obj and obj.db.is_tutorial)
 
     def _find_room(self, key):
         for room in ObjectDB.objects.filter(db_key__iexact=key):
-            if getattr(getattr(room, "db", None), "is_tutorial", False):
+            if room.db.is_tutorial:
                 return room
         return None
 

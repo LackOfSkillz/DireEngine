@@ -55,6 +55,8 @@ class InjuryServiceTests(unittest.TestCase):
 		self.assertTrue(result.success)
 		self.assertTrue(result.data["applied"])
 		self.assertGreater(target.db.injuries["left_arm"]["external"], 0)
+		self.assertEqual(target.messages, [])
+		self.assertEqual(target.messages, [])
 
 	def test_stabilize_wound_sets_tend_state(self):
 		target = DummyTarget()
@@ -63,6 +65,28 @@ class InjuryServiceTests(unittest.TestCase):
 		self.assertTrue(result.success)
 		self.assertTrue(target.db.injuries["head"]["tended"])
 		self.assertGreater(target.db.injuries["head"]["tend"]["strength"], 0)
+		self.assertEqual(target.messages, [])
+
+	def test_process_bleed_tick_returns_events_without_service_messages(self):
+		target = DummyTarget()
+		target.pk = 1
+		target.db.injuries["head"]["bleed"] = 4
+		result = InjuryService.process_bleed_tick(target)
+		self.assertTrue(result.success)
+		self.assertGreaterEqual(result.data["hp_loss"], 0)
+		self.assertIsInstance(result.data.get("injury_events", []), list)
+		self.assertEqual(target.messages, [])
+		self.assertEqual(target.messages, [])
+
+	def test_process_bleed_tick_returns_events_without_service_messages(self):
+		target = DummyTarget()
+		target.pk = 1
+		target.db.injuries["head"]["bleed"] = 4
+		result = InjuryService.process_bleed_tick(target)
+		self.assertTrue(result.success)
+		self.assertGreaterEqual(result.data["hp_loss"], 0)
+		self.assertIsInstance(result.data.get("injury_events", []), list)
+		self.assertEqual(target.messages, [])
 
 	def test_state_service_damage_applies_hp_and_wound(self):
 		target = DummyTarget()
