@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "IndentationError: unexpected indent",
+  "mode": "command",
+  "scenario": "guard-ai-basic",
+  "seed": 117505700
+}

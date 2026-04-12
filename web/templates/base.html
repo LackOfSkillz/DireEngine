@@ -9,7 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="{% static 'website/images/evennia_logo.png' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'website/images/favicon.ico' %}?v=20260411b">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'website/images/favicon.ico' %}?v=20260411b">
+    <link rel="alternate icon" type="image/png" href="{% static 'website/images/dragons_ire_favicon.png' %}?v=20260411b">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'website/css/custom.css' %}?v=20260407d">
     <title>Dragons Ire{% block titleblock %}{% endblock %}</title>
@@ -19,7 +21,7 @@
       <div class="site-header-wrap">
       <div class="site-header-inner panel brass-panel">
         <a class="site-brand" href="/">
-          <img class="site-brand-logo" src="{% static 'website/images/evennia_logo.png' %}" alt="Dragons Ire logo">
+          <img class="site-brand-logo" src="{% static 'website/images/dragons_ire_logo.png' %}" alt="Dragons Ire logo">
           <span class="site-brand-copy">
             <span class="site-brand-title">Dragons Ire</span>
             <span class="site-brand-tag">Browser Adventurer Client</span>

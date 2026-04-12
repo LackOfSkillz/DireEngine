@@ -1,0 +1,252 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "east",
+      "first_response_ms": 1.7310000257566571,
+      "kind": "command",
+      "ms": 1.7473000334575772,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal nobody",
+      "first_response_ms": 1.8927999772131443,
+      "kind": "command",
+      "ms": 1.9070999696850777,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 48.84599999058992,
+      "kind": "command",
+      "ms": 48.94300003070384,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    1.7473000334575772,
+    1.9070999696850777,
+    48.94300003070384
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 48.90519997570664,
+    "timings_ms": [
+      1.7473000334575772,
+      1.9070999696850777,
+      48.94300003070384
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775961130.2250595,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 17.489933331186574,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 17.532466677948833,
+    "jitter": 27.202437172674543,
+    "max_ms": 48.94300003070384,
+    "min_ms": 1.7473000334575772,
+    "p95_ms": 44.23941002460196,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "east",
+      "ms": 1.7473000334575772,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal nobody",
+      "ms": 1.9070999696850777,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 48.94300003070384,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 48.90519997570664,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You are locked into the pillory. You cannot move.",
+    "You are detained in jail and cannot do that.",
+    "You must go to the guardhouse to reclaim your belongings."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 22646,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775961106.958648,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 17.505566667144496,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 1.7300000181421638,
+          "metadata": {
+            "character": "TEST_JUSTICE_MINOR",
+            "command": "east"
+          },
+          "timestamp": 1775961112.9839258
+        },
+        {
+          "duration_ms": 1.881500007584691,
+          "metadata": {
+            "character": "TEST_JUSTICE_MODERATE",
+            "command": "steal"
+          },
+          "timestamp": 1775961114.0197625
+        },
+        {
+          "duration_ms": 48.90519997570664,
+          "metadata": {
+            "character": "TEST_JUSTICE_SEVERE",
+            "command": "retrieve"
+          },
+          "timestamp": 1775961116.9118736
+        }
+      ],
+      "max_ms": 48.90519997570664,
+      "total_ms": 52.51670000143349
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

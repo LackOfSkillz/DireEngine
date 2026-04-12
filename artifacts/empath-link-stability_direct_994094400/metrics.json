@@ -1,0 +1,340 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_PATIENT",
+      "first_response_ms": 107.32469998765737,
+      "kind": "command",
+      "ms": 107.40530001930892,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding 20",
+      "first_response_ms": 80.07019991055131,
+      "kind": "command",
+      "ms": 98.34640007466078,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding_20"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 30",
+      "first_response_ms": 86.67290001176298,
+      "kind": "command",
+      "ms": 200.5302000325173,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_vitality_30"
+    }
+  ],
+  "command_timings_ms": [
+    107.40530001930892,
+    98.34640007466078,
+    200.5302000325173
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 200.49440010916442,
+    "timings_ms": [
+      107.40530001930892,
+      98.34640007466078,
+      200.5302000325173
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775829009.9589748,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 91.35593330332388,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 135.42730004216233,
+    "jitter": 56.56241338041905,
+    "max_ms": 200.5302000325173,
+    "min_ms": 98.34640007466078,
+    "p95_ms": 191.21771003119648,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_LINK_PATIENT",
+      "ms": 107.40530001930892,
+      "snapshot": "linked"
+    },
+    {
+      "command": "take bleeding 20",
+      "ms": 98.34640007466078,
+      "snapshot": "took_bleeding_20"
+    },
+    {
+      "command": "take vitality 30",
+      "ms": 200.5302000325173,
+      "snapshot": "took_vitality_30"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 200.49440010916442,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You feel your empathy settling into perusing.",
+    "You draw the injury into yourself.",
+    "You have taken too much. Your senses falter.",
+    "The force of the transfer buckles you for a moment.",
+    "You draw out living force, and it tears through you on the way in."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 13390,
+  "scheduler": {
+    "active_job_count": 4,
+    "active_jobs": [
+      {
+        "created_at": 1775828935.0643468,
+        "delay_s": 3.5,
+        "due_at": 1775828938.5663166,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "8c60838c95b7479081127970f6aa1251",
+        "key": "combat:roundtime:17224",
+        "owner": "#17224",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775828968.019473,
+        "delay_s": 2.5,
+        "due_at": 1775828970.519473,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LEARNING_HEALER",
+        "job_id": "46f2a287ec664bda90ce9da311b6b266",
+        "key": "combat:roundtime:17231",
+        "owner": "#17231",
+        "owner_label": "TEST_EMPATH_LEARNING_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775828988.7491786,
+        "delay_s": 2.5,
+        "due_at": 1775828991.2491786,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "job_id": "74e85a3d86974eb8b480805687fb751c",
+        "key": "combat:roundtime:17238",
+        "owner": "#17238",
+        "owner_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829003.1534195,
+        "delay_s": 2.5,
+        "due_at": 1775829005.6534195,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_HEALER",
+        "job_id": "6de35dcf88a8417497c13e513f628234",
+        "key": "combat:roundtime:17241",
+        "owner": "#17241",
+        "owner_label": "TEST_EMPATH_LINK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 2,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 4.0,
+    "queue_peak": 4.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "take vitality 30",
+      "ms": 200.5302000325173
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "took_bleeding_20",
+    "took_vitality_30",
+    "final"
+  ],
+  "started_at": 1775828995.995175,
+  "state_transition_count": 4,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath link stability coverage validates direct-link strength, stability decay, and large-transfer strain without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 4,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 135.39246671522656,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 107.37250000238419,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775829001.5362546
+        },
+        {
+          "duration_ms": 98.31050003413111,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775829002.342954
+        },
+        {
+          "duration_ms": 200.49440010916442,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775829003.2178588
+        }
+      ],
+      "max_ms": 200.49440010916442,
+      "total_ms": 406.1774001456797
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

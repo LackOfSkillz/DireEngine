@@ -1,4 +1,6 @@
-from evennia import Command, syscmdkeys
+from evennia import syscmdkeys
+
+from commands.command import Command
 
 from typeclasses.abilities import get_ability
 

@@ -1,0 +1,114 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 63.73673998750746,
+  "lag": {
+    "avg_ms": 93.73971996828914,
+    "jitter": 82.73894514700393,
+    "max_ms": 186.4445999963209,
+    "min_ms": 3.3798000076785684,
+    "p95_ms": 178.14513999037445,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_VITALITY_PATIENT",
+      "ms": 124.26819989923388,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_VITALITY_PARTNER",
+      "ms": 3.3798000076785684,
+      "snapshot": "unified"
+    },
+    {
+      "command": "take 25%",
+      "ms": 9.658699971623719,
+      "snapshot": "partial_blocked"
+    },
+    {
+      "command": "take vitality 20",
+      "ms": 144.94729996658862,
+      "snapshot": "vitality_taken"
+    },
+    {
+      "command": "take vitality all",
+      "ms": 186.4445999963209,
+      "snapshot": "overdrawn"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "take vitality all",
+      "ms": 186.4445999963209
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_VITALITY_PATIENT",
+      "first_response_ms": 124.17169997934252,
+      "kind": "command",
+      "ms": 124.26819989923388,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_VITALITY_PARTNER",
+      "first_response_ms": 3.3016999950632453,
+      "kind": "command",
+      "ms": 3.3798000076785684,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take 25%",
+      "first_response_ms": 9.56219993531704,
+      "kind": "command",
+      "ms": 9.658699971623719,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "partial_blocked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 20",
+      "first_response_ms": 125.98320003598928,
+      "kind": "command",
+      "ms": 144.94729996658862,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "vitality_taken"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality all",
+      "first_response_ms": 55.66489999182522,
+      "kind": "command",
+      "ms": 186.4445999963209,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "overdrawn"
+    }
+  ]
+}

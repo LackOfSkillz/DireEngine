@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Prepared corpse path still redied during the post-res bleed window.",
+  "mode": "direct",
+  "scenario": "corpse-wound-pipeline",
+  "seed": 881732600
+}

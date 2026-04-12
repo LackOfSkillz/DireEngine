@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": null,
+  "message": "",
+  "mode": "direct",
+  "scenario": "death-revive-interrupted-then-depart",
+  "seed": 790448800
+}

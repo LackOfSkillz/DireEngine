@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 18729, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8675, in run_resurrection_good_prep_survives_scenario
+    raise AssertionError(f"Good prep case should become stable before revive: {result}")
+AssertionError: Good prep case should become stable before revive: {'band_before': 'critical', 'starting_hp': 68, 'tick_results': [{'tick': 1, 'dead': False, 'hp': 62}, {'tick': 2, 'dead': False, 'hp': 56}, {'tick': 3, 'dead': False, 'hp': 50}, {'tick': 4, 'dead': False, 'hp': 44}, {'tick': 5, 'dead': False, 'hp': 38}, {'tick': 6, 'dead': False, 'hp': 32}, {'tick': 7, 'dead': False, 'hp': 26}, {'tick': 8, 'dead': False, 'hp': 20}], 'patient_dead': False}

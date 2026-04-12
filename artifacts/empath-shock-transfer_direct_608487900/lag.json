@@ -1,0 +1,92 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 35.764650005148724,
+  "lag": {
+    "avg_ms": 56.57379995682277,
+    "jitter": 36.03275292542296,
+    "max_ms": 82.9212999669835,
+    "min_ms": 4.926899913698435,
+    "p95_ms": 82.41626496310346,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "ms": 82.9212999669835,
+      "snapshot": "final"
+    },
+    {
+      "command": "take shock TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "ms": 58.89260000549257,
+      "snapshot": "final"
+    },
+    {
+      "command": "take shock TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "ms": 79.55439994111657,
+      "snapshot": "final"
+    },
+    {
+      "command": "take shock TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "ms": 4.926899913698435,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "first_response_ms": 82.82240002881736,
+      "kind": "command",
+      "ms": 82.9212999669835,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take shock TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "first_response_ms": 27.810700004920363,
+      "kind": "command",
+      "ms": 58.89260000549257,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take shock TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "first_response_ms": 27.56389998830855,
+      "kind": "command",
+      "ms": 79.55439994111657,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take shock TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+      "first_response_ms": 4.861599998548627,
+      "kind": "command",
+      "ms": 4.926899913698435,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

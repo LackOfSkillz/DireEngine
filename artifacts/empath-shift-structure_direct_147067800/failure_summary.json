@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "TypeError: Object of type _SaverDict is not JSON serializable",
+  "mode": "direct",
+  "scenario": "empath-shift-structure",
+  "seed": 147067800
+}

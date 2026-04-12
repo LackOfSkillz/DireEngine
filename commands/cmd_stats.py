@@ -1,4 +1,4 @@
-from evennia import Command
+from commands.command import Command
 
 
 def _bond_flavor(profile_label):
@@ -93,7 +93,7 @@ class CmdStats(Command):
             f"HP: {char.db.hp}/{char.db.max_hp}",
             f"Balance: {bal}/{max_bal}",
             f"Fatigue: {fat}/{max_fat}",
-            f"Favor: {char.get_favor() if hasattr(char, 'get_favor') else 0} ({char.get_favor_state().title() if hasattr(char, 'get_favor_state') else 'Unprepared'})",
+            f"Favor: {(char.get_favor() if hasattr(char, 'get_favor') else 0)} / {(char.get_favor_max() if hasattr(char, 'get_favor_max') else (char.get_favor() if hasattr(char, 'get_favor') else 0))}",
             f"Unabsorbed XP: {char.get_unabsorbed_xp() if hasattr(char, 'get_unabsorbed_xp') else 0}",
             f"Experience Debt: {char.get_exp_debt() if hasattr(char, 'get_exp_debt') else 0}",
             f"Bleeding: {char.get_bleeding_summary()}",
@@ -102,6 +102,10 @@ class CmdStats(Command):
             "",
             "Skill Weights:",
         ]
+
+        if hasattr(char, "is_profession") and char.is_profession("cleric"):
+            lines.insert(9, f"Devotion: {char.get_devotion() if hasattr(char, 'get_devotion') else 0} / {char.get_devotion_max() if hasattr(char, 'get_devotion_max') else 0}")
+            lines.insert(10, f"Specialization: {char.get_cleric_specialization_label() if hasattr(char, 'get_cleric_specialization_label') else 'None'}")
 
         if hasattr(char, "get_death_status_lines"):
             death_lines = char.get_death_status_lines()

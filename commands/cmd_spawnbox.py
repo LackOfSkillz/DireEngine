@@ -1,6 +1,6 @@
-﻿import random
+import random
 
-from evennia import Command
+from commands.command import Command
 from evennia.utils.create import create_object
 
 from typeclasses.box import Box

@@ -1,0 +1,320 @@
+{
+  "coin_delta": -29,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 4,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 49.50020008254796,
+      "kind": "direct",
+      "ms": 274.9245000304654,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT schedule_decay_transition",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.520800007507205,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 529.8234999645501,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "recover",
+      "first_response_ms": 3.1952999997884035,
+      "kind": "command",
+      "ms": 3.2163000432774425,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    }
+  ],
+  "command_timings_ms": [
+    274.9245000304654,
+    0.520800007507205,
+    529.8234999645501,
+    3.2163000432774425
+  ],
+  "commands": {
+    "count": 4,
+    "max_ms": 3.1999999191612005,
+    "timings_ms": [
+      274.9245000304654,
+      0.520800007507205,
+      529.8234999645501,
+      3.2163000432774425
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775871212.571412,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 26.347750041168183,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": -1,
+  "lag": {
+    "avg_ms": 202.12127501145005,
+    "jitter": 253.57115924416323,
+    "max_ms": 529.8234999645501,
+    "min_ms": 0.520800007507205,
+    "p95_ms": 491.5886499744373,
+    "slow_count": 2,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 274.9245000304654,
+      "snapshot": "dead"
+    },
+    {
+      "command": "DIRECT schedule_decay_transition",
+      "ms": 0.520800007507205,
+      "snapshot": "graved"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 529.8234999645501,
+      "snapshot": "graved"
+    },
+    {
+      "command": "recover",
+      "ms": 3.2163000432774425,
+      "snapshot": "recovered"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 3.1999999191612005,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You have no anchor to return. You must depart.",
+    "You have died.",
+    "You feel yourself slipping free from your body.",
+    "You feel your wealth slip from your grasp as you fall.",
+    "RETURN corpse of TEST_GRAVE_CHAR",
+    "RETURN <world.systems.scheduler._DeferredTask object at 0x000002021520B150>",
+    "RETURN 1",
+    "Command 'recover' is not available. Type \"help\" for help."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 6930,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 3,
+    "defer_total": 0,
+    "events": 1,
+    "flush_executed_total": 1,
+    "flush_total": 1,
+    "job_key_breakdown": {
+      "corpse:decay:18402": 1
+    },
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3,
+    "skip_total": 0,
+    "system_counts": {
+      "world.corpse_decay": 1
+    },
+    "systems_exercised": [
+      "world.corpse_decay"
+    ],
+    "timing_mode_counts": {
+      "scheduled_expiry": 1
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "scheduler_events": 1,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 274.9245000304654
+    },
+    {
+      "cmd": "DIRECT flush_due",
+      "ms": 529.8234999645501
+    }
+  ],
+  "snapshot_labels": [
+    "alive",
+    "dead",
+    "graved",
+    "departed",
+    "recovered",
+    "final"
+  ],
+  "started_at": 1775871205.197417,
+  "state_transition_count": 5,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 1,
+      "flush_total": 1
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Structural corpse decay scheduling validation should report lag without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {
+      "corpse:decay:18402": 1
+    },
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": [
+      "scheduled_expiry"
+    ]
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 3.1999999191612005,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 3.1999999191612005,
+          "metadata": {
+            "character": "TEST_GRAVE_CHAR",
+            "command": "recover"
+          },
+          "timestamp": 1775871207.6851912
+        }
+      ],
+      "max_ms": 3.1999999191612005,
+      "total_ms": 3.1999999191612005
+    },
+    "scheduler_execute": {
+      "avg_ms": 529.3686999939382,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 529.3686999939382,
+          "metadata": {
+            "created_at": 1775871206.8715508,
+            "delay_s": 0.09447312355041504,
+            "key": "corpse:decay:18402",
+            "owner": "#18402",
+            "owner_label": "#18402",
+            "source": "world.corpse_decay",
+            "system": "world.corpse_decay",
+            "timing_mode": "scheduled_expiry"
+          },
+          "timestamp": 1775871207.5524907
+        }
+      ],
+      "max_ms": 529.3686999939382,
+      "total_ms": 529.3686999939382
+    }
+  },
+  "xp_delta": 0
+}

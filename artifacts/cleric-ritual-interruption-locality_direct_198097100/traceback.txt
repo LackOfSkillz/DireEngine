@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 16678, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8301, in run_cleric_ritual_interruption_locality_scenario
+    raise AssertionError(f"Interruption-locality scenario missed the interrupted actor feedback: {actor_text}")
+AssertionError: Interruption-locality scenario missed the interrupted actor feedback: TEST_CLERIC_INTERRUPT_A begins a stabilization vigil.
+Pain breaks your concentration. The rite holds, but your part in it is lost.
+The fading pattern steadies.
+The rite is ready for restoration.

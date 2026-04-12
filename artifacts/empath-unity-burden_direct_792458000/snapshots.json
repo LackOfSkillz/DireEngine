@@ -1,0 +1,207 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17380,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17379,
+            "key": "TEST_EMPATH_UNITY_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17380,
+            "key": "TEST_EMPATH_UNITY_HEALER",
+            "location": "TEST_EMPATH_UNITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17381,
+            "key": "TEST_EMPATH_UNITY_PATIENT",
+            "location": "TEST_EMPATH_UNITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17382,
+            "key": "TEST_EMPATH_UNITY_PARTNER",
+            "location": "TEST_EMPATH_UNITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_HEALER",
+          "TEST_EMPATH_UNITY_PATIENT",
+          "TEST_EMPATH_UNITY_PARTNER"
+        ],
+        "exits": [],
+        "id": 17379,
+        "key": "TEST_EMPATH_UNITY_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1775829933.9926846
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17380,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.51,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "unified",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_HEALER",
+          "TEST_EMPATH_UNITY_PATIENT",
+          "TEST_EMPATH_UNITY_PARTNER"
+        ],
+        "exits": [],
+        "id": 17379,
+        "key": "TEST_EMPATH_UNITY_ROOM"
+      },
+      "snapshot_label": "unified",
+      "timestamp": 1775829935.8850157
+    },
+    "label": "unified"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17380,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.47,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "took_with_unity",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_HEALER",
+          "TEST_EMPATH_UNITY_PATIENT",
+          "TEST_EMPATH_UNITY_PARTNER"
+        ],
+        "exits": [],
+        "id": 17379,
+        "key": "TEST_EMPATH_UNITY_ROOM"
+      },
+      "snapshot_label": "took_with_unity",
+      "timestamp": 1775829936.9341195
+    },
+    "label": "took_with_unity"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17380,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.45,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_HEALER",
+          "TEST_EMPATH_UNITY_PATIENT",
+          "TEST_EMPATH_UNITY_PARTNER"
+        ],
+        "exits": [],
+        "id": 17379,
+        "key": "TEST_EMPATH_UNITY_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775829936.9481902
+    },
+    "label": "final"
+  }
+]

@@ -1,4 +1,4 @@
-from evennia import Command
+from commands.command import Command
 from evennia.objects.models import ObjectDB
 import time
 

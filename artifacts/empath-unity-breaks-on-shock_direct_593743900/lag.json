@@ -1,0 +1,126 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 40.91923330755284,
+  "lag": {
+    "avg_ms": 49.10965001909062,
+    "jitter": 38.24612428180826,
+    "max_ms": 91.81000001262873,
+    "min_ms": 1.9889000104740262,
+    "p95_ms": 87.54320003208704,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "ms": 91.81000001262873,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "ms": 56.11130001489073,
+      "snapshot": "unified"
+    },
+    {
+      "command": "touch TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "ms": 1.9889000104740262,
+      "snapshot": "touch_locked"
+    },
+    {
+      "command": "redirect vitality 10 TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "ms": 2.093199989758432,
+      "snapshot": "redirect_locked"
+    },
+    {
+      "command": "center",
+      "ms": 67.91169999632984,
+      "snapshot": "centered"
+    },
+    {
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "ms": 74.74280009046197,
+      "snapshot": "relinked"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "first_response_ms": 91.75020002294332,
+      "kind": "command",
+      "ms": 91.81000001262873,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "first_response_ms": 56.031999993138015,
+      "kind": "command",
+      "ms": 56.11130001489073,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "first_response_ms": 1.9410999957472086,
+      "kind": "command",
+      "ms": 1.9889000104740262,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touch_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "redirect vitality 10 TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "first_response_ms": 2.044399967417121,
+      "kind": "command",
+      "ms": 2.093199989758432,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "redirect_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "center",
+      "first_response_ms": 19.058899953961372,
+      "kind": "command",
+      "ms": 67.91169999632984,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "first_response_ms": 74.68879991210997,
+      "kind": "command",
+      "ms": 74.74280009046197,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "relinked"
+    }
+  ]
+}

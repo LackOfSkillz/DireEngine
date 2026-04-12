@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Perceive cooldown coverage validates command throttling and normalized room/target output without depending on real waits.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-perceive-cooldown",
+  "seed": 569371300,
+  "started_at": 1775829700.570625
+}

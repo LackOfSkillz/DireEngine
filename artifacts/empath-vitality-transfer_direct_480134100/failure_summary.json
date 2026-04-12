@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Direct partial vitality lockout failed: ok=False, message=You have taken too much. Your senses still reel.",
+  "mode": "direct",
+  "scenario": "empath-vitality-transfer",
+  "seed": 480134100
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 15060, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7270, in run_cleric_revive_loop_scenario
+    raise AssertionError(message)
+AssertionError: You do not have permission to work with that corpse.

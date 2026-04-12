@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 16887, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8055, in run_cleric_specialization_unlock_behavior_scenario
+    raise AssertionError(f"Unlock behavior scenario missed the unlock message: {stabilize_messages[1]}")
+AssertionError: Unlock behavior scenario missed the unlock message: You begin stabilizing the body's fading pattern.

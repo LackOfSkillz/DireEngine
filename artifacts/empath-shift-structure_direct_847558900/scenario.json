@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Shift structure coverage validates wound relocation while preserving total severity.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-shift-structure",
+  "seed": 847558900,
+  "started_at": 1775829162.8485594
+}

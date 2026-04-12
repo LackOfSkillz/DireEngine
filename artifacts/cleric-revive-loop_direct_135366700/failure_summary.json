@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Revive loop scenario did not consume the expected devotion across the full rite.",
+  "mode": "direct",
+  "scenario": "cleric-revive-loop",
+  "seed": 135366700
+}

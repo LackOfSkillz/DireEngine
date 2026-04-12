@@ -1,0 +1,104 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 23024,
+        "is_dead": false,
+        "key": "TEST_JUSTICE_FUGITIVE",
+        "life_state": "ALIVE",
+        "location": "TEST_JUSTICE_CHASE",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 23016,
+            "key": "TEST_JUSTICE_LAWFUL",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23017,
+            "key": "TEST_JUSTICE_LAWLESS",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23018,
+            "key": "TEST_JUSTICE_CHASE",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23019,
+            "key": "east",
+            "location": "TEST_JUSTICE_LAWFUL",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23020,
+            "key": "west",
+            "location": "TEST_JUSTICE_CHASE",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23021,
+            "key": "TEST_JUSTICE_GUARD",
+            "location": "TEST_JUSTICE_LAWFUL",
+            "typeclass": "typeclasses._guard_npc_impl.GuardNPC"
+          },
+          {
+            "id": 23022,
+            "key": "TEST_JUSTICE_GUARD_2",
+            "location": "TEST_JUSTICE_LAWFUL",
+            "typeclass": "typeclasses._guard_npc_impl.GuardNPC"
+          },
+          {
+            "id": 23023,
+            "key": "TEST_JUSTICE_ACCUSED",
+            "location": "Town Square",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23024,
+            "key": "TEST_JUSTICE_FUGITIVE",
+            "location": "TEST_JUSTICE_CHASE",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "east",
+          "TEST_JUSTICE_GUARD",
+          "TEST_JUSTICE_GUARD_2"
+        ],
+        "exits": [
+          "east"
+        ],
+        "id": 23016,
+        "key": "TEST_JUSTICE_LAWFUL"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775957197.7363338
+    },
+    "label": "final"
+  }
+]

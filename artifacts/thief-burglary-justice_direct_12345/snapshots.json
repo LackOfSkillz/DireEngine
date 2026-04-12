@@ -1,0 +1,98 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 22384,
+        "is_dead": false,
+        "key": "TEST_BURGLE_THIEF",
+        "life_state": "ALIVE",
+        "location": "TEST_BURGLE_STREET",
+        "max_hp": 100,
+        "states": {
+          "awareness": "alert"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 4.97,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 22388,
+          "key": "replacement lockpick",
+          "location": "TEST_BURGLE_THIEF",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 22382,
+            "key": "TEST_BURGLE_STREET",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22383,
+            "key": "TEST_BURGLE_INTERIOR",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22384,
+            "key": "TEST_BURGLE_THIEF",
+            "location": "TEST_BURGLE_STREET",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22386,
+            "key": "TEST_BURGLE_WINDOW",
+            "location": "TEST_BURGLE_STREET",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 22387,
+            "key": "TEST_LOCKED_GATE",
+            "location": "TEST_BURGLE_STREET",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 22388,
+            "key": "replacement lockpick",
+            "location": "TEST_BURGLE_THIEF",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 22389,
+            "key": "TEST_TRAPPED_ENTRY",
+            "location": "TEST_BURGLE_STREET",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_BURGLE_WINDOW",
+          "TEST_BURGLE_THIEF",
+          "TEST_LOCKED_GATE",
+          "TEST_TRAPPED_ENTRY"
+        ],
+        "exits": [],
+        "id": 22382,
+        "key": "TEST_BURGLE_STREET"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775950130.6434884
+    },
+    "label": "final"
+  }
+]

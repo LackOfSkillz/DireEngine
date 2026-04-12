@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Circle state should be consistent across all members: member=TEST_EMPATH_CIRCLE_LEADER, ids=[], expected=[17580, 17581, 17582]",
+  "mode": "direct",
+  "scenario": "empath-circle-formation",
+  "seed": 481728900
+}

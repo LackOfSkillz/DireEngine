@@ -1,6 +1,6 @@
-﻿import time
+import time
 
-from evennia import Command
+from commands.command import Command
 
 
 class CmdSlip(Command):

@@ -1,0 +1,349 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "first_response_ms": 345.8402999676764,
+      "kind": "command",
+      "ms": 345.89650004636496,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 28.64379994571209,
+      "kind": "command",
+      "ms": 28.709499980323017,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assess_after_move"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 2.2794000105932355,
+      "kind": "command",
+      "ms": 2.3158000549301505,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "take_after_move"
+    }
+  ],
+  "command_timings_ms": [
+    345.89650004636496,
+    28.709499980323017,
+    2.3158000549301505
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 345.8735999884084,
+    "timings_ms": [
+      345.89650004636496,
+      28.709499980323017,
+      2.3158000549301505
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775822411.8451319,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 125.5878333079939,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 125.64060002720605,
+    "jitter": 191.20317196342538,
+    "max_ms": 345.89650004636496,
+    "min_ms": 2.3158000549301505,
+    "p95_ms": 314.17780003976077,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "ms": 345.89650004636496,
+      "snapshot": "linked"
+    },
+    {
+      "command": "assess",
+      "ms": 28.709499980323017,
+      "snapshot": "assess_after_move"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 2.3158000549301505,
+      "snapshot": "take_after_move"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 345.8735999884084,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "Distance tears your connection apart.",
+    "You are not linked to anyone.",
+    "You are not linked to a patient."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "assess_output": [
+      "Distance tears your connection apart.",
+      "You are not linked to anyone."
+    ],
+    "commands": [
+      "link TEST_EMPATH_SEPARATION_PATIENT",
+      "assess",
+      "take vitality 10"
+    ],
+    "output_log": [
+      "You deepen your connection, taking in the shape of their suffering.",
+      "Distance tears your connection apart.",
+      "You are not linked to anyone.",
+      "You are not linked to a patient."
+    ],
+    "snapshot_count": 5,
+    "snapshot_labels": [
+      "initial",
+      "linked",
+      "assess_after_move",
+      "take_after_move",
+      "final"
+    ],
+    "take_output": [
+      "You are not linked to a patient."
+    ]
+  },
+  "scenario_duration_ms": 8762,
+  "scheduler": {
+    "active_job_count": 3,
+    "active_jobs": [
+      {
+        "created_at": 1775822370.9582117,
+        "delay_s": 3.5,
+        "due_at": 1775822374.4582117,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "63f06397508542cdb464d0b14181a803",
+        "key": "combat:roundtime:17002",
+        "owner": "#17002",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822393.9832563,
+        "delay_s": 2.5,
+        "due_at": 1775822396.4832563,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LEARNING_HEALER",
+        "job_id": "963d5d9851d547ce91788b6d687775e4",
+        "key": "combat:roundtime:17009",
+        "owner": "#17009",
+        "owner_label": "TEST_EMPATH_LEARNING_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822406.0760007,
+        "delay_s": 2.5,
+        "due_at": 1775822408.5770004,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "job_id": "1e330994f8b445deac00e6bb3ae5b623",
+        "key": "combat:roundtime:17015",
+        "owner": "#17015",
+        "owner_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 3.0,
+    "queue_peak": 3.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "ms": 345.89650004636496
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "assess_after_move",
+    "take_after_move",
+    "final"
+  ],
+  "started_at": 1775822402.6773243,
+  "state_transition_count": 4,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath link separation coverage validates automatic link breakage when a patient leaves the room without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 3,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 125.61646666533004,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 345.8735999884084,
+          "metadata": {
+            "character": "TEST_EMPATH_SEPARATION_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775822406.0860958
+        },
+        {
+          "duration_ms": 28.68240000680089,
+          "metadata": {
+            "character": "TEST_EMPATH_SEPARATION_HEALER",
+            "command": "assess"
+          },
+          "timestamp": 1775822406.5947542
+        },
+        {
+          "duration_ms": 2.293400000780821,
+          "metadata": {
+            "character": "TEST_EMPATH_SEPARATION_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775822407.0323434
+        }
+      ],
+      "max_ms": 345.8735999884084,
+      "total_ms": 376.8493999959901
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

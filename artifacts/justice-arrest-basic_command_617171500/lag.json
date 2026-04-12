@@ -1,0 +1,93 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 269.83136668180424,
+  "lag": {
+    "avg_ms": 290.5306000029668,
+    "jitter": 478.18860131508126,
+    "max_ms": 842.6698000403121,
+    "min_ms": 9.871199959889054,
+    "p95_ms": 760.3079000371507,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "justice",
+      "ms": 19.050800008699298,
+      "snapshot": "final"
+    },
+    {
+      "command": "laylow",
+      "ms": 9.871199959889054,
+      "snapshot": "final"
+    },
+    {
+      "command": "surrender",
+      "ms": 842.6698000403121,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "surrender",
+      "ms": 842.6698000403121
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "surrender",
+      "first_response_ms": 780.7552000740543,
+      "kind": "command",
+      "ms": 842.6698000403121,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "justice",
+      "first_response_ms": 18.92740000039339,
+      "kind": "command",
+      "ms": 19.050800008699298,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "laylow",
+      "first_response_ms": 9.811499970965087,
+      "kind": "command",
+      "ms": 9.871199959889054,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "surrender",
+      "first_response_ms": 780.7552000740543,
+      "kind": "command",
+      "ms": 842.6698000403121,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

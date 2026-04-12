@@ -1,6 +1,6 @@
 import random
 
-from evennia import Command
+from commands.command import Command
 
 
 class CmdTend(Command):
@@ -129,18 +129,12 @@ class CmdTend(Command):
         ) // 3
         success_chance = max(15, min(95, 35 + (skill_rank * 5) + aptitude - severity_penalty - wound_penalty))
         difficulty = max(10, (bleed * 10) + wound_penalty)
-        self.caller.use_skill(
-            skill_name,
-            apply_roundtime=False,
-            emit_placeholder=False,
-            require_known=False,
-            difficulty=difficulty,
-            learning_multiplier=4,
-        )
         self.caller.set_roundtime(3)
         if random.randint(1, 100) <= success_chance:
             patient.apply_tend(part_key, tender=self.caller)
             patient.heal_body_part(part_key, 5 + max(0, skill_rank // 5))
+            if hasattr(self.caller, "award_field_xp"):
+                self.caller.award_field_xp("tend", difficulty=difficulty, success=True, outcome="success", context_multiplier=min(2.0, 0.75 + (bleed / 6.0)))
             if patient == self.caller:
                 message = f"You tend your {part_display}."
             else:

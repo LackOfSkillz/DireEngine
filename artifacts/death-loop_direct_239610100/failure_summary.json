@@ -1,0 +1,8 @@
+{
+  "failure_type": "lag_failure",
+  "lag_status": "critical",
+  "message": "Lag status critical exceeded DireTest thresholds.",
+  "mode": "direct",
+  "scenario": "death-loop",
+  "seed": 239610100
+}

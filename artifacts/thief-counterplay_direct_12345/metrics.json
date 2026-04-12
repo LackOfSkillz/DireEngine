@@ -1,0 +1,425 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 7,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "search",
+      "first_response_ms": 60.40299998130649,
+      "kind": "command",
+      "ms": 84.03379993978888,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "search",
+      "first_response_ms": 0.7668000180274248,
+      "kind": "command",
+      "ms": 0.8062999695539474,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "observe TEST_OBSERVE_TARGET",
+      "first_response_ms": 27.715599979273975,
+      "kind": "command",
+      "ms": 36.34220000822097,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "observe TEST_OBSERVE_TARGET",
+      "first_response_ms": 0.7969000143930316,
+      "kind": "command",
+      "ms": 0.8345999522134662,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "observe TEST_OBSERVE_TARGET",
+      "first_response_ms": 23.798399954102933,
+      "kind": "command",
+      "ms": 40.45800003223121,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal moonstone from shadow chest",
+      "first_response_ms": 154.69460003077984,
+      "kind": "command",
+      "ms": 163.88310003094375,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "passage",
+      "first_response_ms": 162.6479000551626,
+      "kind": "command",
+      "ms": 227.8256999561563,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    84.03379993978888,
+    0.8062999695539474,
+    36.34220000822097,
+    0.8345999522134662,
+    40.45800003223121,
+    163.88310003094375,
+    227.8256999561563
+  ],
+  "commands": {
+    "count": 7,
+    "max_ms": 227.8002001112327,
+    "timings_ms": [
+      84.03379993978888,
+      0.8062999695539474,
+      36.34220000822097,
+      0.8345999522134662,
+      40.45800003223121,
+      163.88310003094375,
+      227.8256999561563
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775947498.4413586,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 61.54617143329233,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 1,
+  "lag": {
+    "avg_ms": 79.16909998415836,
+    "jitter": 86.51457176611001,
+    "max_ms": 227.8256999561563,
+    "min_ms": 0.8062999695539474,
+    "p95_ms": 208.6429199785925,
+    "slow_count": 2,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "search",
+      "ms": 84.03379993978888,
+      "snapshot": "final"
+    },
+    {
+      "command": "search",
+      "ms": 0.8062999695539474,
+      "snapshot": "final"
+    },
+    {
+      "command": "observe TEST_OBSERVE_TARGET",
+      "ms": 36.34220000822097,
+      "snapshot": "final"
+    },
+    {
+      "command": "observe TEST_OBSERVE_TARGET",
+      "ms": 0.8345999522134662,
+      "snapshot": "final"
+    },
+    {
+      "command": "observe TEST_OBSERVE_TARGET",
+      "ms": 40.45800003223121,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal moonstone from shadow chest",
+      "ms": 163.88310003094375,
+      "snapshot": "final"
+    },
+    {
+      "command": "passage",
+      "ms": 227.8256999561563,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 227.8002001112327,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You pinpoint TEST_HIDDEN_TARGET and drag them out of hiding.\nYou uncover the seam of a hidden passage.",
+    "You must wait 1.08 seconds before acting.",
+    "You study TEST_OBSERVE_TARGET's habits and posture for any telltale weakness.",
+    "You must wait 0.69 seconds before acting.",
+    "You study TEST_OBSERVE_TARGET's habits and posture for any telltale weakness.",
+    "You cleanly steal moonstone from shadow chest.",
+    "|cTEST_THIEF_PASSAGE_DEST|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}",
+    "You emerge from a hidden passage."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "contact_role": "fence",
+    "container_theft_success": true,
+    "observe_awareness_gain": 8,
+    "observe_roundtime_blocked": true,
+    "passage_revealed": true,
+    "passage_travel_success": true,
+    "room_suspicion_margin_gain": 25,
+    "search_revealed_hidden": true,
+    "search_roundtime_blocked": true,
+    "shop_block_message": "They are watching you too closely right now.",
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "thief_reputation": -2,
+    "wanted_level": 1
+  },
+  "scenario_duration_ms": 56425,
+  "scheduler": {
+    "active_job_count": 2,
+    "active_jobs": [
+      {
+        "created_at": 1775947402.6804795,
+        "delay_s": 2.0,
+        "due_at": 1775947404.6804795,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_THIEF_HIDER",
+        "job_id": "5ab5d8df4e994b82986e35d4140210b2",
+        "key": "combat:roundtime:22309",
+        "owner": "#22309",
+        "owner_label": "TEST_THIEF_HIDER",
+        "source": "thief.roundtime",
+        "system": "thief.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775947457.670006,
+        "delay_s": 2.0,
+        "due_at": 1775947459.670006,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_THIEF_COUNTERPLAY",
+        "job_id": "e662cbdd13c3443986e5d2a2aa1635f2",
+        "key": "combat:roundtime:22319",
+        "owner": "#22319",
+        "owner_label": "TEST_THIEF_COUNTERPLAY",
+        "source": "thief.roundtime",
+        "system": "thief.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 4,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 2.0,
+    "queue_peak": 2.0,
+    "reschedule_total": 0,
+    "scheduled_total": 5,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "steal moonstone from shadow chest",
+      "ms": 163.88310003094375
+    },
+    {
+      "cmd": "passage",
+      "ms": 227.8256999561563
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775947441.061503,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 2,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 79.1414142918906,
+      "count": 7,
+      "entries": [
+        {
+          "duration_ms": 84.0143000241369,
+          "metadata": {
+            "character": "TEST_THIEF_COUNTERPLAY",
+            "command": "search"
+          },
+          "timestamp": 1775947447.4361815
+        },
+        {
+          "duration_ms": 0.7770999800413847,
+          "metadata": {
+            "character": "TEST_THIEF_COUNTERPLAY",
+            "command": "search"
+          },
+          "timestamp": 1775947448.3502443
+        },
+        {
+          "duration_ms": 36.311800009571016,
+          "metadata": {
+            "character": "TEST_THIEF_COUNTERPLAY",
+            "command": "observe"
+          },
+          "timestamp": 1775947451.3928058
+        },
+        {
+          "duration_ms": 0.8062999695539474,
+          "metadata": {
+            "character": "TEST_THIEF_COUNTERPLAY",
+            "command": "observe"
+          },
+          "timestamp": 1775947452.1948936
+        },
+        {
+          "duration_ms": 40.42420000769198,
+          "metadata": {
+            "character": "TEST_THIEF_COUNTERPLAY",
+            "command": "observe"
+          },
+          "timestamp": 1775947453.036309
+        },
+        {
+          "duration_ms": 163.8559999410063,
+          "metadata": {
+            "character": "TEST_THIEF_COUNTERPLAY",
+            "command": "steal"
+          },
+          "timestamp": 1775947456.586442
+        },
+        {
+          "duration_ms": 227.8002001112327,
+          "metadata": {
+            "character": "TEST_THIEF_COUNTERPLAY",
+            "command": "passage"
+          },
+          "timestamp": 1775947457.670006
+        }
+      ],
+      "max_ms": 227.8002001112327,
+      "total_ms": 553.9899000432342
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

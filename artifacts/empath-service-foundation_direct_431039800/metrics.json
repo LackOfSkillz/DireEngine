@@ -1,0 +1,443 @@
+{
+  "coin_delta": -50,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 4,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "request healing",
+      "first_response_ms": 4.637099918909371,
+      "kind": "command",
+      "ms": 34.9990000249818,
+      "npc_response_delay_ms": 4.637099918909371,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "request healing confirm",
+      "first_response_ms": 277.80310006346554,
+      "kind": "command",
+      "ms": 286.9139000540599,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "tip 25",
+      "first_response_ms": 303.88020002283156,
+      "kind": "command",
+      "ms": 303.9708000142127,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "study anatomy anatomy chart",
+      "first_response_ms": 5.9717000694945455,
+      "kind": "command",
+      "ms": 112.31260001659393,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    34.9990000249818,
+    286.9139000540599,
+    303.9708000142127,
+    112.31260001659393
+  ],
+  "commands": {
+    "count": 4,
+    "max_ms": 303.93589998129755,
+    "timings_ms": [
+      34.9990000249818,
+      286.9139000540599,
+      303.9708000142127,
+      112.31260001659393
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775829800.4629087,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 148.07302501867525,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 184.5490750274621,
+    "jitter": 132.06493233353098,
+    "max_ms": 303.9708000142127,
+    "min_ms": 34.9990000249818,
+    "p95_ms": 301.4122650201898,
+    "slow_count": 2,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "request healing",
+      "ms": 34.9990000249818,
+      "snapshot": "final"
+    },
+    {
+      "command": "request healing confirm",
+      "ms": 286.9139000540599,
+      "snapshot": "final"
+    },
+    {
+      "command": "tip 25",
+      "ms": 303.9708000142127,
+      "snapshot": "final"
+    },
+    {
+      "command": "study anatomy anatomy chart",
+      "ms": 112.31260001659393,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 303.93589998129755,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 4.637099918909371,
+  "output_log": [
+    "TEST_EMPATH_HOUSE_HEALER studies your condition and says, 'Treatment will cost 25 coins. Type REQUEST HEALING CONFIRM if you wish to proceed.'",
+    "TEST_EMPATH_HOUSE_HEALER treats your wounds with practiced detachment.",
+    "TEST_EMPATH_HOUSE_HEALER finishes the work without ceremony.",
+    "You offer 25 coins to TEST_EMPATH_HOUSE_HEALER.",
+    "TEST_EMPATH_HOUSE_HEALER inclines their head with visible approval. 'A thoughtful gesture.'",
+    "You begin studying anatomy chart.",
+    "You gain some insight from your study.",
+    "You feel your scholarship settling into dabbling."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "request healing",
+      "request healing confirm",
+      "tip 25",
+      "study anatomy anatomy chart"
+    ],
+    "confirm_output": [
+      "TEST_EMPATH_HOUSE_HEALER treats your wounds with practiced detachment.",
+      "TEST_EMPATH_HOUSE_HEALER finishes the work without ceremony."
+    ],
+    "output_log": [
+      "TEST_EMPATH_HOUSE_HEALER studies your condition and says, 'Treatment will cost 25 coins. Type REQUEST HEALING CONFIRM if you wish to proceed.'",
+      "TEST_EMPATH_HOUSE_HEALER treats your wounds with practiced detachment.",
+      "TEST_EMPATH_HOUSE_HEALER finishes the work without ceremony.",
+      "You offer 25 coins to TEST_EMPATH_HOUSE_HEALER.",
+      "TEST_EMPATH_HOUSE_HEALER inclines their head with visible approval. 'A thoughtful gesture.'",
+      "You begin studying anatomy chart.",
+      "You gain some insight from your study.",
+      "You feel your scholarship settling into dabbling."
+    ],
+    "request_output": [
+      "TEST_EMPATH_HOUSE_HEALER studies your condition and says, 'Treatment will cost 25 coins. Type REQUEST HEALING CONFIRM if you wish to proceed.'"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "study_output": [
+      "You begin studying anatomy chart.",
+      "You gain some insight from your study.",
+      "You feel your scholarship settling into dabbling."
+    ],
+    "tip_output": [
+      "You offer 25 coins to TEST_EMPATH_HOUSE_HEALER.",
+      "TEST_EMPATH_HOUSE_HEALER inclines their head with visible approval. 'A thoughtful gesture.'"
+    ]
+  },
+  "scenario_duration_ms": 15382,
+  "scheduler": {
+    "active_job_count": 7,
+    "active_jobs": [
+      {
+        "created_at": 1775829578.3187933,
+        "delay_s": 3.5,
+        "due_at": 1775829581.819781,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "cfff4c463cd343e9b4a106ad26bfa25a",
+        "key": "combat:roundtime:17311",
+        "owner": "#17311",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829614.7627425,
+        "delay_s": 2.5,
+        "due_at": 1775829617.2627425,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LEARNING_HEALER",
+        "job_id": "442362acec0a480c9d7a66f9094cbac8",
+        "key": "combat:roundtime:17318",
+        "owner": "#17318",
+        "owner_label": "TEST_EMPATH_LEARNING_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829635.1420643,
+        "delay_s": 2.5,
+        "due_at": 1775829637.6420643,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "job_id": "ca8fe7ba1cbb4af996b644244520b61a",
+        "key": "combat:roundtime:17325",
+        "owner": "#17325",
+        "owner_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829652.7379832,
+        "delay_s": 2.5,
+        "due_at": 1775829655.2389255,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_HEALER",
+        "job_id": "88849595ab2b47a296c6da38f8809811",
+        "key": "combat:roundtime:17328",
+        "owner": "#17328",
+        "owner_label": "TEST_EMPATH_LINK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829686.5934093,
+        "delay_s": 2.5,
+        "due_at": 1775829689.0934093,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "job_id": "1d26ec3bcd174dbd8c9a20ba85ce0e3e",
+        "key": "combat:roundtime:17334",
+        "owner": "#17334",
+        "owner_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829728.876984,
+        "delay_s": 2.5,
+        "due_at": 1775829731.3779297,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "job_id": "c81835e13a42449f9d3f500fccd312fd",
+        "key": "combat:roundtime:17343",
+        "owner": "#17343",
+        "owner_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829771.890781,
+        "delay_s": 2.5,
+        "due_at": 1775829774.390781,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_REDIRECT_HEALER",
+        "job_id": "6e5a7c8fd50840a487abca49a7ef6e0b",
+        "key": "combat:roundtime:17350",
+        "owner": "#17350",
+        "owner_label": "TEST_EMPATH_REDIRECT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "request healing confirm",
+      "ms": 286.9139000540599
+    },
+    {
+      "cmd": "tip 25",
+      "ms": 303.9708000142127
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775829784.4320254,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Service foundation coverage validates request healing, tipping, and study anatomy command hooks."
+    },
+    "scheduler_job_count": 7,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 184.44454998825677,
+      "count": 4,
+      "entries": [
+        {
+          "duration_ms": 34.967300016433,
+          "metadata": {
+            "character": "TEST_EMPATH_SERVICE_PATIENT",
+            "command": "request"
+          },
+          "timestamp": 1775829789.7226088
+        },
+        {
+          "duration_ms": 286.885799956508,
+          "metadata": {
+            "character": "TEST_EMPATH_SERVICE_PATIENT",
+            "command": "request"
+          },
+          "timestamp": 1775829790.6562712
+        },
+        {
+          "duration_ms": 303.93589998129755,
+          "metadata": {
+            "character": "TEST_EMPATH_SERVICE_PATIENT",
+            "command": "tip"
+          },
+          "timestamp": 1775829791.6088169
+        },
+        {
+          "duration_ms": 111.98919999878854,
+          "metadata": {
+            "character": "TEST_EMPATH_SERVICE_PATIENT",
+            "command": "study"
+          },
+          "timestamp": 1775829792.4274154
+        }
+      ],
+      "max_ms": 303.93589998129755,
+      "total_ms": 737.7781999530271
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

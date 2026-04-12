@@ -1,0 +1,160 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 67.06371250038501,
+  "lag": {
+    "avg_ms": 77.98665000882465,
+    "jitter": 47.67996294890542,
+    "max_ms": 131.4221000066027,
+    "min_ms": 12.170300004072487,
+    "p95_ms": 129.46511001791805,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 131.4221000066027,
+      "snapshot": "linked"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 125.62740000430495,
+      "snapshot": "mitigated"
+    },
+    {
+      "command": "link focus scholarship",
+      "ms": 43.594200047664344,
+      "snapshot": "focused"
+    },
+    {
+      "command": "channel bleeding",
+      "ms": 26.01859997957945,
+      "snapshot": "channeled"
+    },
+    {
+      "command": "channel stop",
+      "ms": 12.170300004072487,
+      "snapshot": "centered"
+    },
+    {
+      "command": "center",
+      "ms": 67.80399999115616,
+      "snapshot": "centered"
+    },
+    {
+      "command": "stabilize TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 125.83070003893226,
+      "snapshot": "stabilized"
+    },
+    {
+      "command": "heal scars TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 91.42589999828488,
+      "snapshot": "scar_healed"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 131.32280006539077,
+      "kind": "command",
+      "ms": 131.4221000066027,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 121.0021999431774,
+      "kind": "command",
+      "ms": 125.62740000430495,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mitigated"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link focus scholarship",
+      "first_response_ms": 43.52369997650385,
+      "kind": "command",
+      "ms": 43.594200047664344,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "focused"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "channel bleeding",
+      "first_response_ms": 25.952800060622394,
+      "kind": "command",
+      "ms": 26.01859997957945,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "channeled"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "channel stop",
+      "first_response_ms": 12.055700062774122,
+      "kind": "command",
+      "ms": 12.170300004072487,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "center",
+      "first_response_ms": 27.714299969375134,
+      "kind": "command",
+      "ms": 67.80399999115616,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "stabilize TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 125.72829995770007,
+      "kind": "command",
+      "ms": 125.83070003893226,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "stabilized"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "heal scars TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 49.20989996753633,
+      "kind": "command",
+      "ms": 91.42589999828488,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "scar_healed"
+    }
+  ]
+}

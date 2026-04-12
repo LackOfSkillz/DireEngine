@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: You can only revive someone in a shrine or consecrated place.",
+  "mode": "direct",
+  "scenario": "death-revive-interrupted-then-depart",
+  "seed": 4437900
+}

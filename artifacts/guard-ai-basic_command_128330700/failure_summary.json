@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Guard should issue a warning before starting arrest.",
+  "mode": "command",
+  "scenario": "guard-ai-basic",
+  "seed": 128330700
+}

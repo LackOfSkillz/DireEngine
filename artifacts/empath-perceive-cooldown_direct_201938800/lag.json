@@ -1,0 +1,80 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 62.82543332781643,
+  "lag": {
+    "avg_ms": 67.1422000353535,
+    "jitter": 82.64075624869733,
+    "max_ms": 159.7156000789255,
+    "min_ms": 0.8026000577956438,
+    "p95_ms": 147.83488006796688,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "perceive",
+      "ms": 40.90839996933937,
+      "snapshot": "final"
+    },
+    {
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "ms": 0.8026000577956438,
+      "snapshot": "final"
+    },
+    {
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "ms": 159.7156000789255,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "ms": 159.7156000789255
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "perceive",
+      "first_response_ms": 33.28400000464171,
+      "kind": "command",
+      "ms": 40.90839996933937,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "first_response_ms": 0.7630999898537993,
+      "kind": "command",
+      "ms": 0.8026000577956438,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "first_response_ms": 154.42919998895377,
+      "kind": "command",
+      "ms": 159.7156000789255,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

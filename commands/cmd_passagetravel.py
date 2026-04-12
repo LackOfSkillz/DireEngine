@@ -1,6 +1,5 @@
-﻿import random
-
-from commands.command import Command
+﻿from commands.command import Command
+from world.systems.theft import move_through_passage
 
 
 class CmdPassageTravel(Command):
@@ -8,33 +7,28 @@ class CmdPassageTravel(Command):
     Travel through a discovered passage network.
 
     Examples:
-        passage travel cellar
+        passage
     """
 
-    key = "passage travel"
-    aliases = ["passagetravel"]
+    key = "passage"
+    aliases = ["passage travel", "passagetravel"]
     locks = "cmd:all()"
     help_category = "Stealth"
 
     def func(self):
         caller = self.caller
-        if not getattr(caller.db, "in_passage", False):
-            caller.msg("You are not inside a hidden passage.")
+        if caller.is_in_roundtime():
+            caller.msg_roundtime_block()
             return
 
         room = getattr(caller, "location", None)
-        if not room or not hasattr(room, "get_passage_destinations"):
-            caller.db.in_passage = False
-            caller.msg("The passage has no clear exit.")
+        if not room:
+            caller.msg("You find no hidden route here.")
             return
 
-        destinations = room.get_passage_destinations()
-        if not destinations:
-            caller.db.in_passage = False
-            caller.msg("The passage has no clear exit.")
+        success, outcome = move_through_passage(caller, room)
+        if not success:
+            caller.msg(str(outcome))
             return
-
-        target_room = random.choice(destinations)
-        caller.move_to(target_room, quiet=True, move_type="passage")
-        caller.db.in_passage = False
         caller.msg("You emerge from a hidden passage.")
+        caller.apply_thief_roundtime(2)

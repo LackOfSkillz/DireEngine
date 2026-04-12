@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath unlock separation coverage validates that circle state does not bypass transient empathy unlocks and that locked actions do not train empathy.",
+    "tags": [
+      "core",
+      "empath",
+      "circles",
+      "unlocks"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-unlock-separation",
+  "seed": 330113600,
+  "started_at": 1775823229.3311229
+}

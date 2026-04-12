@@ -1,0 +1,493 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17915,
+            "key": "TEST_EMPATH_SHOCK_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17916,
+            "key": "TEST_EMPATH_SHOCK_HEALER",
+            "location": "TEST_EMPATH_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17917,
+            "key": "TEST_EMPATH_SHOCK_PATIENT",
+            "location": "TEST_EMPATH_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17918,
+            "key": "TEST_EMPATH_SHOCK_FOE_ONE",
+            "location": "TEST_EMPATH_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17919,
+            "key": "TEST_EMPATH_SHOCK_FOE_TWO",
+            "location": "TEST_EMPATH_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1775835301.5614996
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "linked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "linked",
+      "timestamp": 1775835302.2974179
+    },
+    "label": "linked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "first_kill",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "first_kill",
+      "timestamp": 1775835302.3178387
+    },
+    "label": "first_kill"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "second_kill",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "second_kill",
+      "timestamp": 1775835302.3726587
+    },
+    "label": "second_kill"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "touch_locked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "touch_locked",
+      "timestamp": 1775835302.9023924
+    },
+    "label": "touch_locked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "perceive_locked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "perceive_locked",
+      "timestamp": 1775835303.4463289
+    },
+    "label": "perceive_locked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "take_locked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "take_locked",
+      "timestamp": 1775835304.0559387
+    },
+    "label": "take_locked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.46,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "centered",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "centered",
+      "timestamp": 1775835304.7248023
+    },
+    "label": "centered"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.75,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "relinked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "relinked",
+      "timestamp": 1775835305.4255457
+    },
+    "label": "relinked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17916,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.75,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_HEALER",
+          "TEST_EMPATH_SHOCK_PATIENT",
+          "TEST_EMPATH_SHOCK_FOE_ONE",
+          "TEST_EMPATH_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17915,
+        "key": "TEST_EMPATH_SHOCK_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775835305.4297855
+    },
+    "label": "final"
+  }
+]

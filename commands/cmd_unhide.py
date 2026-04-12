@@ -1,4 +1,4 @@
-from evennia import Command
+from commands.command import Command
 
 
 class CmdUnhide(Command):
@@ -21,5 +21,7 @@ class CmdUnhide(Command):
             caller.msg("You are not hiding.")
             return
 
+      # IMPORTANT: Do not clear roundtime here.
+      # Roundtime represents action recovery, not stealth state.
         caller.break_stealth()
         caller.msg("You step out of hiding.")

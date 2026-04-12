@@ -1,0 +1,291 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "circle advance",
+      "first_response_ms": 3.453899989835918,
+      "kind": "command",
+      "ms": 3.5372000420466065,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "blocked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "advance",
+      "first_response_ms": 18.30510003492236,
+      "kind": "command",
+      "ms": 18.401999957859516,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "advanced"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "circle",
+      "first_response_ms": 5.666899960488081,
+      "kind": "command",
+      "ms": 5.834299954585731,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "status"
+    }
+  ],
+  "command_timings_ms": [
+    3.5372000420466065,
+    18.401999957859516,
+    5.834299954585731
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 18.36450002156198,
+    "timings_ms": [
+      3.5372000420466065,
+      18.401999957859516,
+      5.834299954585731
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775828922.6499717,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 9.141966661748787,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 9.257833318163952,
+    "jitter": 8.001937556175864,
+    "max_ms": 18.401999957859516,
+    "min_ms": 3.5372000420466065,
+    "p95_ms": 17.145229957532138,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "circle advance",
+      "ms": 3.5372000420466065,
+      "snapshot": "blocked"
+    },
+    {
+      "command": "advance",
+      "ms": 18.401999957859516,
+      "snapshot": "advanced"
+    },
+    {
+      "command": "circle",
+      "ms": 5.834299954585731,
+      "snapshot": "status"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 18.36450002156198,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You are not yet ready to circle.",
+    "Empathy 0/10",
+    "You advance to Empath Circle 2.",
+    "Your formal circle rises, but your techniques remain tied to your Empathy skill.",
+    "Empath Circle: 2",
+    "Empathy Rank: 40",
+    "Next Circle: 3",
+    "  Empathy: 40/20",
+    "Unlocked: Unity Link, Hand of Hodierna, Wound Reduction"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "advanced_output": [
+      "You advance to Empath Circle 2.",
+      "Your formal circle rises, but your techniques remain tied to your Empathy skill."
+    ],
+    "blocked_output": [
+      "You are not yet ready to circle.",
+      "Empathy 0/10"
+    ],
+    "circle": 2,
+    "commands": [
+      "circle advance",
+      "advance",
+      "circle"
+    ],
+    "progression_rank": 40,
+    "snapshot_count": 4,
+    "snapshot_labels": [
+      "blocked",
+      "advanced",
+      "status",
+      "final"
+    ],
+    "status_output": [
+      "Empath Circle: 2",
+      "Empathy Rank: 40",
+      "Next Circle: 3",
+      "  Empathy: 40/20",
+      "Unlocked: Unity Link, Hand of Hodierna, Wound Reduction"
+    ]
+  },
+  "scenario_duration_ms": 7776,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "blocked",
+    "advanced",
+    "status",
+    "final"
+  ],
+  "started_at": 1775828913.899598,
+  "state_transition_count": 3,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath circle progression coverage validates manual-only circling, transient-rank checks, and advance-command delegation without depending on wall-clock timing."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 9.21650001934419,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 3.51310009136796,
+          "metadata": {
+            "character": "TEST_EMPATH_CIRCLE_HEALER",
+            "command": "circle"
+          },
+          "timestamp": 1775828916.9013584
+        },
+        {
+          "duration_ms": 18.36450002156198,
+          "metadata": {
+            "character": "TEST_EMPATH_CIRCLE_HEALER",
+            "command": "advance"
+          },
+          "timestamp": 1775828917.6260026
+        },
+        {
+          "duration_ms": 5.771899945102632,
+          "metadata": {
+            "character": "TEST_EMPATH_CIRCLE_HEALER",
+            "command": "circle"
+          },
+          "timestamp": 1775828918.438717
+        }
+      ],
+      "max_ms": 18.36450002156198,
+      "total_ms": 27.649500058032572
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

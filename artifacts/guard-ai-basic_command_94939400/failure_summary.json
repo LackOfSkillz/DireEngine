@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Guard should escalate from warning to arrest on repeated arrest-eligible detection.",
+  "mode": "command",
+  "scenario": "guard-ai-basic",
+  "seed": 94939400
+}

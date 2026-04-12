@@ -1,0 +1,75 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 33.4596666895474,
+  "lag": {
+    "avg_ms": 33.52739999536425,
+    "jitter": 54.1492778229251,
+    "max_ms": 96.05359996203333,
+    "min_ms": 2.259099972434342,
+    "p95_ms": 86.67518997099249,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 96.05359996203333,
+      "snapshot": "linked"
+    },
+    {
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 2.259099972434342,
+      "snapshot": "link_locked"
+    },
+    {
+      "command": "perceive TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "ms": 2.269500051625073,
+      "snapshot": "perceive_locked"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 95.96499998588115,
+      "kind": "command",
+      "ms": 96.05359996203333,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 2.1934000542387366,
+      "kind": "command",
+      "ms": 2.259099972434342,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "link_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_LINK_SHOCK_PATIENT",
+      "first_response_ms": 2.2206000285223126,
+      "kind": "command",
+      "ms": 2.269500051625073,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceive_locked"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 14893, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4727, in run_empath_cooperative_efficiency_scenario
+    return _run_registered_scenario(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 1476, in _run_registered_scenario
+    return run_scenario(
+           ^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 205, in run_scenario
+    artifact_dir = write_artifacts(
+                   ^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\tools\diretest\core\artifacts.py", line 63, in write_artifacts
+    _write_json(artifact_dir / "metrics.json", metrics)
+  File "C:\Users\gary\dragonsire\tools\diretest\core\artifacts.py", line 24, in _write_json
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 326, in _iterencode_list
+    yield from chunks
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\json\encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type Character is not JSON serializable

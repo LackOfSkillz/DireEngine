@@ -1,0 +1,75 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 119.59033331368119,
+  "lag": {
+    "avg_ms": 119.72530003792296,
+    "jitter": 7.524896131267107,
+    "max_ms": 125.13200007379055,
+    "min_ms": 111.1312999855727,
+    "p95_ms": 124.91006007185206,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_SOLO_PATIENT_1",
+      "ms": 122.91260005440563,
+      "snapshot": "final"
+    },
+    {
+      "command": "link TEST_EMPATH_TEAM_PATIENT_1",
+      "ms": 111.1312999855727,
+      "snapshot": "final"
+    },
+    {
+      "command": "link TEST_EMPATH_TEAM_PATIENT_2",
+      "ms": 125.13200007379055,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_SOLO_PATIENT_1",
+      "first_response_ms": 122.76800000108778,
+      "kind": "command",
+      "ms": 122.91260005440563,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_TEAM_PATIENT_1",
+      "first_response_ms": 111.02179996669292,
+      "kind": "command",
+      "ms": 111.1312999855727,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_TEAM_PATIENT_2",
+      "first_response_ms": 124.98119997326285,
+      "kind": "command",
+      "ms": 125.13200007379055,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

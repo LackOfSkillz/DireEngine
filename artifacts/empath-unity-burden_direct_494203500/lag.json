@@ -1,0 +1,80 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 138.85003332203874,
+  "lag": {
+    "avg_ms": 139.71613332008323,
+    "jitter": 77.3532673624595,
+    "max_ms": 228.6613000323996,
+    "min_ms": 88.16569996997714,
+    "p95_ms": 216.02731002494693,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "ms": 88.16569996997714,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "ms": 228.6613000323996,
+      "snapshot": "unified"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 102.32139995787293,
+      "snapshot": "took_with_unity"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "unity TEST_EMPATH_UNITY_PARTNER",
+      "ms": 228.6613000323996
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "first_response_ms": 88.08829996269196,
+      "kind": "command",
+      "ms": 88.16569996997714,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "first_response_ms": 228.60249993391335,
+      "kind": "command",
+      "ms": 228.6613000323996,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 99.85930006951094,
+      "kind": "command",
+      "ms": 102.32139995787293,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_with_unity"
+    }
+  ]
+}

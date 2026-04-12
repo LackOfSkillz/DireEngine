@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Mitigation pass did not reduce empath intake according to skill: {'fatigue': 5, 'vitality': 0, 'bleeding': 0, 'poison': 0, 'disease': 16}",
+  "mode": "direct",
+  "scenario": "empath-completion-pass",
+  "seed": 261191800
+}

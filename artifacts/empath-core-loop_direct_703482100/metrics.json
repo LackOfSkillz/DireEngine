@@ -1,0 +1,322 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 73.85430007707328,
+      "kind": "command",
+      "ms": 73.92329990398139,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 13.841700041666627,
+      "kind": "direct",
+      "ms": 63.10929998289794,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "moved_away"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT process_empath_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 16.271599917672575,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_move_tick"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 11.344400001689792,
+      "kind": "direct",
+      "ms": 27.58599992375821,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 2.7717999182641506,
+      "kind": "command",
+      "ms": 2.821300062350929,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    }
+  ],
+  "command_timings_ms": [
+    73.92329990398139,
+    63.10929998289794,
+    16.271599917672575,
+    27.58599992375821,
+    2.821300062350929
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 73.88049992732704,
+    "timings_ms": [
+      73.92329990398139,
+      63.10929998289794,
+      16.271599917672575,
+      27.58599992375821,
+      2.821300062350929
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775821915.9716341,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 25.45305000967346,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 36.74229995813221,
+    "jitter": 30.541639902249756,
+    "max_ms": 73.92329990398139,
+    "min_ms": 2.821300062350929,
+    "p95_ms": 71.7604999197647,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 73.92329990398139,
+      "snapshot": "touched"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 63.10929998289794,
+      "snapshot": "moved_away"
+    },
+    {
+      "command": "DIRECT process_empath_tick",
+      "ms": 16.271599917672575,
+      "snapshot": "post_move_tick"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 27.58599992375821,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "assess",
+      "ms": 2.821300062350929,
+      "snapshot": "assessed"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 73.88049992732704,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You reach out and sense the condition of your patient.",
+    "|cTEST_EMPATH_AWAY_ROOM|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}",
+    "Distance tears the shared burden apart.",
+    "RETURN True",
+    "RETURN False",
+    "|cTEST_EMPATH_ROOM|n\nThis is a room.\nCharacters: TEST_EMPATH_PATIENT",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "You are not linked to anyone."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 9855,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775821898.9520075,
+        "delay_s": 2.5,
+        "due_at": 1775821901.4520075,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "5dba9181fa4c4ba69ef3f36f8ba8179c",
+        "key": "combat:roundtime:16897",
+        "owner": "#16897",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "touched",
+    "moved_away",
+    "post_move_tick",
+    "assessed",
+    "final"
+  ],
+  "started_at": 1775821905.7045035,
+  "state_transition_count": 5,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath loop regression coverage validates command and wound-transfer behavior; emit lag telemetry without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 38.335799938067794,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 73.88049992732704,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775821910.074282
+        },
+        {
+          "duration_ms": 2.791099948808551,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "assess"
+          },
+          "timestamp": 1775821910.7741263
+        }
+      ],
+      "max_ms": 73.88049992732704,
+      "total_ms": 76.67159987613559
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

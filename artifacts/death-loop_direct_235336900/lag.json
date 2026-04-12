@@ -1,0 +1,80 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 11.45736671363314,
+  "lag": {
+    "avg_ms": 77.49103335663676,
+    "jitter": 128.42205882280325,
+    "max_ms": 225.77670007012784,
+    "min_ms": 2.48449994251132,
+    "p95_ms": 203.62022006884214,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 225.77670007012784,
+      "snapshot": "dead"
+    },
+    {
+      "command": "depart full",
+      "ms": 4.211900057271123,
+      "snapshot": "departed"
+    },
+    {
+      "command": "depart confirm",
+      "ms": 2.48449994251132,
+      "snapshot": "departed"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 225.77670007012784
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 34.27310008555651,
+      "kind": "direct",
+      "ms": 225.77670007012784,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart full",
+      "first_response_ms": 0.0475000124424696,
+      "kind": "command",
+      "ms": 4.211900057271123,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart confirm",
+      "first_response_ms": 0.05150004290044308,
+      "kind": "command",
+      "ms": 2.48449994251132,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    }
+  ]
+}

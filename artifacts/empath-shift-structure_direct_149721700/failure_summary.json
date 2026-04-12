@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Shift did not emit the expected success message: ['TEST_EMPATH_SHIFT_PATIENT has no wounds you can shift.']",
+  "mode": "direct",
+  "scenario": "empath-shift-structure",
+  "seed": 149721700
+}

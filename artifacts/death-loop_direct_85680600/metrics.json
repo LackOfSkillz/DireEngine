@@ -1,0 +1,269 @@
+{
+  "coin_delta": -37,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 62.88250000216067,
+      "kind": "direct",
+      "ms": 363.17350005265325,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart full",
+      "first_response_ms": 0.040899962186813354,
+      "kind": "command",
+      "ms": 3.4905000356957316,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart confirm",
+      "first_response_ms": 0.03250001464039087,
+      "kind": "command",
+      "ms": 2.6709999656304717,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    }
+  ],
+  "command_timings_ms": [
+    363.17350005265325,
+    3.4905000356957316,
+    2.6709999656304717
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 3.4718000097200274,
+    "timings_ms": [
+      363.17350005265325,
+      3.4905000356957316,
+      2.6709999656304717
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775870757.3639877,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 20.98529999299596,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": -1,
+  "lag": {
+    "avg_ms": 123.11166668465982,
+    "jitter": 207.90004996414237,
+    "max_ms": 363.17350005265325,
+    "min_ms": 2.6709999656304717,
+    "p95_ms": 327.20520005095744,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 363.17350005265325,
+      "snapshot": "dead"
+    },
+    {
+      "command": "depart full",
+      "ms": 3.4905000356957316,
+      "snapshot": "departed"
+    },
+    {
+      "command": "depart confirm",
+      "ms": 2.6709999656304717,
+      "snapshot": "departed"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 3.4718000097200274,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "A thread of divine favor is consumed.",
+    "You have died.",
+    "You feel yourself slipping free from your body.",
+    "You feel your wealth slip from your grasp as you fall.",
+    "RETURN corpse of TEST_DEATH_CHAR",
+    "[You are dead. Type DEPART to return.]",
+    "Command 'depart full' is not available. Type \"help\" for help.",
+    "[You are dead. Type DEPART to return.]",
+    "Command 'depart confirm' is not available. Type \"help\" for help."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 4221,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 2,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 363.17350005265325
+    }
+  ],
+  "snapshot_labels": [
+    "alive",
+    "dead",
+    "departed",
+    "final"
+  ],
+  "started_at": 1775870752.7559452,
+  "state_transition_count": 3,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 3.0630999826826155,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 3.4718000097200274,
+          "metadata": {
+            "character": "TEST_DEATH_CHAR",
+            "command": "depart"
+          },
+          "timestamp": 1775870753.767215
+        },
+        {
+          "duration_ms": 2.6543999556452036,
+          "metadata": {
+            "character": "TEST_DEATH_CHAR",
+            "command": "depart"
+          },
+          "timestamp": 1775870753.7762675
+        }
+      ],
+      "max_ms": 3.4718000097200274,
+      "total_ms": 6.126199965365231
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

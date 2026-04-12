@@ -1,0 +1,109 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 70.31570002436638,
+  "lag": {
+    "avg_ms": 294.09920001247275,
+    "jitter": 273.056638380896,
+    "max_ms": 540.5815000412986,
+    "min_ms": 0.5794999888166785,
+    "p95_ms": 520.637010037899,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 341.13660000730306,
+      "snapshot": "dead"
+    },
+    {
+      "command": "DIRECT schedule_decay_transition",
+      "ms": 0.5794999888166785,
+      "snapshot": "final"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 540.5815000412986,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 341.13660000730306
+    },
+    {
+      "cmd": "DIRECT flush_due",
+      "ms": 540.5815000412986
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 70.31570002436638,
+      "kind": "direct",
+      "ms": 341.13660000730306,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 540.5815000412986,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 70.31570002436638,
+      "kind": "direct",
+      "ms": 341.13660000730306,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT schedule_decay_transition",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.5794999888166785,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 540.5815000412986,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

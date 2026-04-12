@@ -1,0 +1,246 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "hide",
+      "first_response_ms": 54.10250008571893,
+      "kind": "command",
+      "ms": 54.17800007853657,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unhide",
+      "first_response_ms": 26.398600079119205,
+      "kind": "command",
+      "ms": 26.459199958480895,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    54.17800007853657,
+    26.459199958480895
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 54.162099957466125,
+    "timings_ms": [
+      54.17800007853657,
+      26.459199958480895
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775940413.351907,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 40.25055008241907,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 40.31860001850873,
+    "jitter": 19.600151531245857,
+    "max_ms": 54.17800007853657,
+    "min_ms": 26.459199958480895,
+    "p95_ms": 52.792060072533786,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "hide",
+      "ms": 54.17800007853657,
+      "snapshot": "final"
+    },
+    {
+      "command": "unhide",
+      "ms": 26.459199958480895,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 54.162099957466125,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You blend into the surroundings.",
+    "You step out of hiding."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "alone_hidden": true,
+    "detect_results": [
+      {
+        "detected": false,
+        "observer": "TEST_THIEF_WEAK"
+      },
+      {
+        "detected": true,
+        "observer": "TEST_THIEF_STRONG"
+      }
+    ],
+    "observer_entry_visibility": "Characters: TEST_THIEF_OBSERVER",
+    "single_observer_results": [
+      false,
+      true
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "stealth_score": 134
+  },
+  "scenario_duration_ms": 21208,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775940391.4640958,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 40.297299972735345,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 54.162099957466125,
+          "metadata": {
+            "character": "TEST_THIEF_HIDER",
+            "command": "hide"
+          },
+          "timestamp": 1775940393.5616798
+        },
+        {
+          "duration_ms": 26.432499988004565,
+          "metadata": {
+            "character": "TEST_THIEF_HIDER",
+            "command": "unhide"
+          },
+          "timestamp": 1775940393.9909968
+        }
+      ],
+      "max_ms": 54.162099957466125,
+      "total_ms": 80.59459994547069
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -1,0 +1,266 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "justice",
+      "first_response_ms": 18.92740000039339,
+      "kind": "command",
+      "ms": 19.050800008699298,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "laylow",
+      "first_response_ms": 9.811499970965087,
+      "kind": "command",
+      "ms": 9.871199959889054,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "surrender",
+      "first_response_ms": 780.7552000740543,
+      "kind": "command",
+      "ms": 842.6698000403121,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    19.050800008699298,
+    9.871199959889054,
+    842.6698000403121
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 842.636700021103,
+    "timings_ms": [
+      19.050800008699298,
+      9.871199959889054,
+      842.6698000403121
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775957100.2191327,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 269.83136668180424,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 290.5306000029668,
+    "jitter": 478.18860131508126,
+    "max_ms": 842.6698000403121,
+    "min_ms": 9.871199959889054,
+    "p95_ms": 760.3079000371507,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "justice",
+      "ms": 19.050800008699298,
+      "snapshot": "final"
+    },
+    {
+      "command": "laylow",
+      "ms": 9.871199959889054,
+      "snapshot": "final"
+    },
+    {
+      "command": "surrender",
+      "ms": 842.6698000403121,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 842.636700021103,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Justice in this area: standard",
+    "Wanted tier: arrest_eligible (6)",
+    "Warning level: 1",
+    "Active guard: TEST_JUSTICE_GUARD",
+    "Pending arrest: yes",
+    "The authorities are actively trying to detain you.",
+    "default_region: severity 6",
+    "You cannot lay low while a guard is actively confronting you.",
+    "|cTown Square|n\nThe cobbled heart of Brookhollow opens around a worn stone well ringed by benches, handbills, and flower carts. Roads radiate outward in all directions, and almost every errand in town seems to begin or end here.\n|wExits:|n |lc__clickmove__ east|lt|yeast|n|le, |lc__clickmove__ north|lt|ynorth|n|le, |lc__clickmove__ northeast|lt|ynortheast|n|le, |lc__clickmove__ northwest|lt|ynorthwest|n|le, |lc__clickmove__ south|lt|ysouth|n|le, |lc__clickmove__ southeast|lt|ysoutheast|n|le, |lc__clickmove__ up|lt|yup|n|le, and |lc__clickmove__ west|lt|ywest|n|le\n|wYou see:|n a bounty board, a notice board, and a public well",
+    "OPTIONS {'type': 'look'}",
+    "You submit to the authorities and accept the sentence without resistance.",
+    "TEST_JUSTICE_GUARD accepts your surrender. Fine assessed: 60 coins. Detention: 144 seconds."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 10048,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "surrender",
+      "ms": 842.6698000403121
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775957089.4137318,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 290.50113338356215,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 19.02860007248819,
+          "metadata": {
+            "character": "TEST_JUSTICE_ACCUSED",
+            "command": "justice"
+          },
+          "timestamp": 1775957093.0238059
+        },
+        {
+          "duration_ms": 9.83810005709529,
+          "metadata": {
+            "character": "TEST_JUSTICE_ACCUSED",
+            "command": "laylow"
+          },
+          "timestamp": 1775957093.5280232
+        },
+        {
+          "duration_ms": 842.636700021103,
+          "metadata": {
+            "character": "TEST_JUSTICE_ACCUSED",
+            "command": "surrender"
+          },
+          "timestamp": 1775957094.852608
+        }
+      ],
+      "max_ms": 842.636700021103,
+      "total_ms": 871.5034001506865
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

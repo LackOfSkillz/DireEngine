@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Death diff did not record a dead life-state transition: {'character_changes': {'before_label': 'alive', 'after_label': 'dead', 'location_before': 'TEST_DEATH_ROOM', 'location_after': 'TEST_DEATH_ROOM', 'hp_before': 100, 'hp_after': 100, 'hp_delta': 0, 'coins_before': 37, 'coins_after': 0, 'coins_delta': -37, 'bank_coins_before': 0, 'bank_coins_after': 0, 'bank_coins_delta': 0, 'life_state_before': 'ALIVE', 'life_state_after': 'dead', 'is_dead_before': False, 'is_dead_after': True, 'died': False, 'revived': False}, 'room_changes': {'room_before': 'TEST_DEATH_ROOM', 'room_after': 'TEST_DEATH_ROOM', 'changed': False, 'contents_added': ['corpse of TEST_DEATH_CHAR'], 'contents_removed': []}, 'inventory_changes': {'added': [], 'removed': ['TEST_DEATH_TOKEN']}, 'equipment_changes': {'added': [], 'removed': []}, 'combat_changes': {'target_before': None, 'target_after': None, 'target_assigned': False, 'target_cleared': False, 'in_combat_before': False, 'in_combat_after': False, 'entered_combat': False, 'exited_combat': False, 'roundtime_before': 0.0, 'roundtime_after': 0.0, 'target_hp_before': None, 'target_hp_after': None, 'target_hp_delta': None, 'target_range_before': None, 'target_range_after': None, 'range_changed': False}, 'attribute_changes': {'changed': {}}, 'object_delta_changes': {'created': ['corpse of TEST_DEATH_CHAR'], 'deleted': []}}",
+  "mode": "direct",
+  "scenario": "death-loop",
+  "seed": 120579800
+}

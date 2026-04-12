@@ -1,6 +1,8 @@
 import random
 import time
 from collections.abc import Mapping
+import importlib.util
+from pathlib import Path
 
 from typeclasses.characters import Character
 
@@ -276,6 +278,47 @@ class EmpathGuildleader(NPC):
         return super().handle_inquiry(actor, topic)
 
 
+class HealerNPC(NPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.is_house_healer = True
+        self.db.healing_fee = 25
+        self.db.default_inquiry_response = "The healer says, 'If you need treatment, ask for healing plainly.'"
+
+    def get_treatable_wound_total(self, actor):
+        if not actor or not hasattr(actor, "get_empath_wounds"):
+            return 0
+        wounds = actor.get_empath_wounds()
+        return sum(int(wounds.get(key, 0) or 0) for key in ("vitality", "bleeding", "poison", "disease"))
+
+    def quote_healing_cost(self, actor):
+        treatable = self.get_treatable_wound_total(actor)
+        if treatable <= 0:
+            return False, 0, "You have no treatable wounds."
+        cost = max(1, int(getattr(self.db, "healing_fee", 25) or 25))
+        return True, cost, f"{self.key} studies your condition and says, 'Treatment will cost {cost} coins. Type REQUEST HEALING CONFIRM if you wish to proceed.'"
+
+    def perform_healing(self, actor):
+        if not actor or not hasattr(actor, "set_empath_wound"):
+            return False, "The healer cannot help you."
+        changed = False
+        for key in ("vitality", "bleeding", "poison", "disease"):
+            current = int(actor.get_empath_wound(key) if hasattr(actor, "get_empath_wound") else 0)
+            if current > 0:
+                actor.set_empath_wound(key, 0)
+                changed = True
+        if changed:
+            actor.msg(f"{self.key} treats your wounds with practiced detachment.")
+            return True, f"{self.key} finishes the work without ceremony."
+        return False, "You have no treatable wounds."
+
+    def get_tip_response(self, amount):
+        value = max(0, int(amount or 0))
+        if value >= 25:
+            return f"{self.key} inclines their head with visible approval. 'A thoughtful gesture.'"
+        return f"{self.key} accepts the tip with clinical reserve. 'Noted.'"
+
+
 class EmpathTutorialPatient(NPC):
     def at_object_creation(self):
         super().at_object_creation()
@@ -364,6 +407,43 @@ class RangerGuildmaster(NPC):
                 "Elarion studies you for a long moment.\n"
                 "\"You have taken your first true step into the wilds.\"\n"
                 "You feel your understanding deepen."
+            )
+
+        return super().handle_inquiry(actor, topic)
+
+
+class ClericGuildmaster(NPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.key = "Guildleader Esuin"
+        for alias in ["guildleader", "cleric guildleader", "esuin", "leader"]:
+            self.aliases.add(alias)
+        self.db.is_trainer = True
+        self.db.trains_profession = "cleric"
+        self.db.guild_role = "guildmaster"
+        self.db.desc = (
+            "A grave, composed cleric stands with the settled authority of someone long accustomed to prayer, duty, and the burdens that follow both. "
+            "Esuin's attention feels exacting, but never theatrical."
+        )
+        self.db.default_inquiry_response = "Esuin says, 'Ask plainly. Faith dislikes evasions nearly as much as the dead do.'"
+
+    def handle_inquiry(self, actor, topic):
+        normalized = str(topic or "").strip().lower()
+        if not normalized:
+            return super().handle_inquiry(actor, topic)
+
+        if normalized in {"join", "joining", "guild", "cleric", "oath"}:
+            if hasattr(actor, "is_profession") and actor.is_profession("cleric"):
+                return "Esuin says, 'You already stand in service. See that your conduct keeps pace with your vows.'"
+            return (
+                "Esuin says, 'A cleric's path is not ornament. It is duty, devotion, and the willingness to stand where death and fear test weaker vows. "
+                "If you would take that burden, speak the joining plainly.'"
+            )
+
+        if normalized in {"magic", "mana", "study", "training"}:
+            return (
+                "Esuin says, 'You will begin with discipline before grandeur. Learn prayer, theurgy, and the ordered use of holy power. "
+                "Miracles without devotion are only badly aimed appetite.'"
             )
 
         return super().handle_inquiry(actor, topic)
@@ -464,3 +544,16 @@ class OrrenMossbinder(RangerMentor):
 
     def training_response(self, speaker):
         return "There is power in the old ways, but power without understanding just leaves wreckage. Learn the names of things first. Control comes after."
+
+
+def _load_guard_npc_class():
+    guard_module_path = Path(__file__).with_name("npcs") / "guard.py"
+    spec = importlib.util.spec_from_file_location("typeclasses._guard_npc_impl", guard_module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load guard NPC typeclass from {guard_module_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.GuardNPC
+
+
+GuardNPC = _load_guard_npc_class()

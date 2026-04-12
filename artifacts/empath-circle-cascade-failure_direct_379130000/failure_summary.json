@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Cascade failure should emit visible collapse messaging: []",
+  "mode": "direct",
+  "scenario": "empath-circle-cascade-failure",
+  "seed": 379130000
+}

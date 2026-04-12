@@ -1,0 +1,165 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 129.20995711881136,
+  "lag": {
+    "avg_ms": 129.27055714784987,
+    "jitter": 192.19375165005488,
+    "max_ms": 531.6723000723869,
+    "min_ms": 2.315100049600005,
+    "p95_ms": 439.08702003536723,
+    "slow_count": 2,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "east",
+      "ms": 2.315100049600005,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal nobody",
+      "ms": 31.147999921813607,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 42.69679996650666,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 501",
+      "ms": 19.103200058452785,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 50",
+      "ms": 531.6723000723869,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 450",
+      "ms": 54.90380001720041,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 223.05469994898885,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "payfine 50",
+      "ms": 531.6723000723869
+    },
+    {
+      "cmd": "retrieve items",
+      "ms": 223.05469994898885
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "payfine 50",
+      "first_response_ms": 531.5846999874339,
+      "kind": "command",
+      "ms": 531.6723000723869,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "east",
+      "first_response_ms": 2.295200014486909,
+      "kind": "command",
+      "ms": 2.315100049600005,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal nobody",
+      "first_response_ms": 31.13180003128946,
+      "kind": "command",
+      "ms": 31.147999921813607,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 42.5734999589622,
+      "kind": "command",
+      "ms": 42.69679996650666,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 501",
+      "first_response_ms": 19.031299976632,
+      "kind": "command",
+      "ms": 19.103200058452785,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 50",
+      "first_response_ms": 531.5846999874339,
+      "kind": "command",
+      "ms": 531.6723000723869,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 450",
+      "first_response_ms": 54.84549992252141,
+      "kind": "command",
+      "ms": 54.90380001720041,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 223.00769994035363,
+      "kind": "command",
+      "ms": 223.05469994898885,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

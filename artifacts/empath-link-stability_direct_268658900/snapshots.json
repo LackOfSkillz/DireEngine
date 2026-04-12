@@ -1,0 +1,300 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17763,
+        "is_dead": false,
+        "key": "TEST_EMPATH_LINK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17762,
+            "key": "TEST_EMPATH_LINK_STABILITY_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17763,
+            "key": "TEST_EMPATH_LINK_HEALER",
+            "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17764,
+            "key": "TEST_EMPATH_LINK_PATIENT",
+            "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_LINK_HEALER",
+          "TEST_EMPATH_LINK_PATIENT"
+        ],
+        "exits": [],
+        "id": 17762,
+        "key": "TEST_EMPATH_LINK_STABILITY_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1775834346.7484891
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17763,
+        "is_dead": false,
+        "key": "TEST_EMPATH_LINK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.46,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "linked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_LINK_HEALER",
+          "TEST_EMPATH_LINK_PATIENT"
+        ],
+        "exits": [],
+        "id": 17762,
+        "key": "TEST_EMPATH_LINK_STABILITY_ROOM"
+      },
+      "snapshot_label": "linked",
+      "timestamp": 1775834348.063343
+    },
+    "label": "linked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17763,
+        "is_dead": false,
+        "key": "TEST_EMPATH_LINK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.19,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "took_bleeding_20",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_LINK_HEALER",
+          "TEST_EMPATH_LINK_PATIENT"
+        ],
+        "exits": [],
+        "id": 17762,
+        "key": "TEST_EMPATH_LINK_STABILITY_ROOM"
+      },
+      "snapshot_label": "took_bleeding_20",
+      "timestamp": 1775834349.3413424
+    },
+    "label": "took_bleeding_20"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 85,
+        "id": 17763,
+        "is_dead": false,
+        "key": "TEST_EMPATH_LINK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "empath_transfer_overload": {
+            "expires_at": 1775834355.46667,
+            "requested": 30,
+            "wound": "vitality"
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.33,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "took_vitality_30",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_LINK_HEALER",
+          "TEST_EMPATH_LINK_PATIENT"
+        ],
+        "exits": [],
+        "id": 17762,
+        "key": "TEST_EMPATH_LINK_STABILITY_ROOM"
+      },
+      "snapshot_label": "took_vitality_30",
+      "timestamp": 1775834350.7422466
+    },
+    "label": "took_vitality_30"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 85,
+        "id": 17763,
+        "is_dead": false,
+        "key": "TEST_EMPATH_LINK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "empath_transfer_overload": {
+            "expires_at": 1775834355.46667,
+            "requested": 30,
+            "wound": "vitality"
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.16,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "took_bleeding_30",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_LINK_HEALER",
+          "TEST_EMPATH_LINK_PATIENT"
+        ],
+        "exits": [],
+        "id": 17762,
+        "key": "TEST_EMPATH_LINK_STABILITY_ROOM"
+      },
+      "snapshot_label": "took_bleeding_30",
+      "timestamp": 1775834351.9076185
+    },
+    "label": "took_bleeding_30"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 85,
+        "id": 17763,
+        "is_dead": false,
+        "key": "TEST_EMPATH_LINK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_STABILITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "empath_transfer_overload": {
+            "expires_at": 1775834355.46667,
+            "requested": 30,
+            "wound": "vitality"
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.15,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_LINK_HEALER",
+          "TEST_EMPATH_LINK_PATIENT"
+        ],
+        "exits": [],
+        "id": 17762,
+        "key": "TEST_EMPATH_LINK_STABILITY_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775834351.914581
+    },
+    "label": "final"
+  }
+]

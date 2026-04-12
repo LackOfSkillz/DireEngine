@@ -1,6 +1,6 @@
 import time
 
-from evennia import Command
+from commands.command import Command
 
 
 class CmdAim(Command):

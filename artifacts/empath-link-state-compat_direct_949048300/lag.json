@@ -1,0 +1,41 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 110.2379000512883,
+  "lag": {
+    "avg_ms": 125.85499999113381,
+    "jitter": 0.0,
+    "max_ms": 125.85499999113381,
+    "min_ms": 125.85499999113381,
+    "p95_ms": 125.85499999113381,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "take bleeding",
+      "ms": 125.85499999113381,
+      "snapshot": "took_bleeding"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 110.2379000512883,
+      "kind": "command",
+      "ms": 125.85499999113381,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    }
+  ]
+}

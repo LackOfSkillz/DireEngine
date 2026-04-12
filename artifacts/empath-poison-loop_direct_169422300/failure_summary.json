@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Perceive target did not produce the expected structured output: ['You must wait before perceiving again.']",
+  "mode": "direct",
+  "scenario": "empath-poison-loop",
+  "seed": 169422300
+}

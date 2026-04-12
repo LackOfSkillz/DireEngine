@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\tests\scenarios\canon_seed_validation.py", line 5, in scenario
+    result = canon_seed.import_controlled_dataset(limit_per_category=20, reset=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\canon_seed.py", line 179, in import_controlled_dataset
+    raw_rows = fetch_direlore_entities(category, limit_per_category)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\canon_seed.py", line 156, in fetch_direlore_entities
+    return fetcher(conn, int(limit or 20), dict(filters or {}))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\canon_seed.py", line 755, in _fetch_clothing
+    return _fetch_rows(
+           ^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\canon_seed.py", line 333, in _fetch_rows
+    cursor.execute(query, params or {})
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\psycopg\cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.ProgrammingError: only '%s', '%b', '%t' are allowed as placeholders, got '%''

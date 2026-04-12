@@ -1,0 +1,145 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 24059,
+        "is_dead": false,
+        "key": "TEST_THIEF_COUNTERPLAY",
+        "life_state": "ALIVE",
+        "location": "TEST_COUNTERPLAY_SHOP",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "hidden": {
+            "source": "test",
+            "strength": 120
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 24064,
+          "key": "moonstone",
+          "location": "TEST_THIEF_COUNTERPLAY",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 24057,
+            "key": "TEST_THIEF_COUNTERPLAY_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 24058,
+            "key": "TEST_THIEF_PASSAGE_DEST",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 24059,
+            "key": "TEST_THIEF_COUNTERPLAY",
+            "location": "TEST_COUNTERPLAY_SHOP",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 24060,
+            "key": "TEST_HIDDEN_TARGET",
+            "location": "TEST_THIEF_COUNTERPLAY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 24061,
+            "key": "TEST_OBSERVE_TARGET",
+            "location": "TEST_THIEF_COUNTERPLAY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 24062,
+            "key": "TEST_CHEST_OWNER",
+            "location": "TEST_THIEF_COUNTERPLAY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 24063,
+            "key": "shadow chest",
+            "location": "TEST_CHEST_OWNER",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 24064,
+            "key": "moonstone",
+            "location": "TEST_THIEF_COUNTERPLAY",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 24065,
+            "key": "TEST_COUNTERPLAY_SHOP",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 24066,
+            "key": "TEST_COUNTERPLAY_SHOPKEEPER",
+            "location": "TEST_COUNTERPLAY_SHOP",
+            "typeclass": "typeclasses.vendor.Vendor"
+          },
+          {
+            "id": 24067,
+            "key": "silver clasp",
+            "location": "TEST_COUNTERPLAY_SHOPKEEPER",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 24068,
+            "key": "TEST_COUNTERPLAY_CAUGHT",
+            "location": "TEST_COUNTERPLAY_SHOP",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 24069,
+            "key": "TEST_SUSPICION_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 24070,
+            "key": "TEST_SUSPICIOUS_OBSERVER",
+            "location": "TEST_SUSPICION_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 24071,
+            "key": "TEST_SNEAKING_TARGET",
+            "location": "TEST_SUSPICION_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [],
+        "exits": [],
+        "id": 24058,
+        "key": "TEST_THIEF_PASSAGE_DEST"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775962155.7557182
+    },
+    "label": "final"
+  }
+]

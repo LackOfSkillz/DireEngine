@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 15928, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7374, in run_cleric_revive_interrupt_scenario
+    raise AssertionError("Revive interrupt scenario did not record the interruption failure.")
+AssertionError: Revive interrupt scenario did not record the interruption failure.

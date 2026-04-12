@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 17445, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7591, in run_death_revive_interrupted_then_depart_scenario
+    raise AssertionError(message)
+AssertionError: You can only revive someone in a shrine or consecrated place.

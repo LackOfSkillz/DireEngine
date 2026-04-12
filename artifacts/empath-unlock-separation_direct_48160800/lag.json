@@ -1,0 +1,177 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 45.20737778188454,
+  "lag": {
+    "avg_ms": 45.638455530732045,
+    "jitter": 41.01931859210539,
+    "max_ms": 103.14229992218316,
+    "min_ms": 1.1081999400630593,
+    "p95_ms": 100.82641993649304,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_UNLOCK_PATIENT",
+      "ms": 97.35259995795786,
+      "snapshot": "touched"
+    },
+    {
+      "command": "take poison",
+      "ms": 4.812899976968765,
+      "snapshot": "blocked_take"
+    },
+    {
+      "command": "link persistent TEST_EMPATH_UNLOCK_PATIENT",
+      "ms": 2.81929993070662,
+      "snapshot": "unlocked_take"
+    },
+    {
+      "command": "perceive health",
+      "ms": 1.1081999400630593,
+      "snapshot": "unlocked_take"
+    },
+    {
+      "command": "take poison",
+      "ms": 103.14229992218316,
+      "snapshot": "unlocked_take"
+    },
+    {
+      "command": "link persistent TEST_EMPATH_UNLOCK_PATIENT",
+      "ms": 68.57890007086098,
+      "snapshot": "final"
+    },
+    {
+      "command": "link TEST_EMPATH_UNLOCK_PATIENT",
+      "ms": 66.68659998103976,
+      "snapshot": "final"
+    },
+    {
+      "command": "unity TEST_EMPATH_UNLOCK_PARTNER",
+      "ms": 52.01580002903938,
+      "snapshot": "final"
+    },
+    {
+      "command": "channel poison",
+      "ms": 14.229499967768788,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_UNLOCK_PATIENT",
+      "first_response_ms": 97.21170004922897,
+      "kind": "command",
+      "ms": 97.35259995795786,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take poison",
+      "first_response_ms": 4.7529999865219,
+      "kind": "command",
+      "ms": 4.812899976968765,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "blocked_take"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_UNLOCK_PATIENT",
+      "first_response_ms": 2.754200017079711,
+      "kind": "command",
+      "ms": 2.81929993070662,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unlocked_take"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 1.06669997330755,
+      "kind": "command",
+      "ms": 1.1081999400630593,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unlocked_take"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take poison",
+      "first_response_ms": 99.80209998320788,
+      "kind": "command",
+      "ms": 103.14229992218316,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unlocked_take"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_UNLOCK_PATIENT",
+      "first_response_ms": 68.52259999141097,
+      "kind": "command",
+      "ms": 68.57890007086098,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_UNLOCK_PATIENT",
+      "first_response_ms": 66.63010001648217,
+      "kind": "command",
+      "ms": 66.68659998103976,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_UNLOCK_PARTNER",
+      "first_response_ms": 51.95929994806647,
+      "kind": "command",
+      "ms": 52.01580002903938,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "channel poison",
+      "first_response_ms": 14.166700071655214,
+      "kind": "command",
+      "ms": 14.229499967768788,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

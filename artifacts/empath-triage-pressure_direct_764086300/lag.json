@@ -1,0 +1,131 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 51.575283345300704,
+  "lag": {
+    "avg_ms": 83.33181667452057,
+    "jitter": 71.31533766564364,
+    "max_ms": 204.05389997176826,
+    "min_ms": 2.7901000576093793,
+    "p95_ms": 181.32119998335838,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 54.28439995739609,
+      "snapshot": "final"
+    },
+    {
+      "command": "perceive health",
+      "ms": 92.86910004448146,
+      "snapshot": "final"
+    },
+    {
+      "command": "queue",
+      "ms": 32.870299997739494,
+      "snapshot": "final"
+    },
+    {
+      "command": "touch TEST_EMPATH_CRITICAL",
+      "ms": 113.12310001812875,
+      "snapshot": "final"
+    },
+    {
+      "command": "take bleeding 20",
+      "ms": 204.05389997176826,
+      "snapshot": "final"
+    },
+    {
+      "command": "shift TEST_EMPATH_INJURED arm",
+      "ms": 2.7901000576093793,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "take bleeding 20",
+      "ms": 204.05389997176826
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 43.16439991816878,
+      "kind": "direct",
+      "ms": 54.28439995739609,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 85.55910002905875,
+      "kind": "command",
+      "ms": 92.86910004448146,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "queue",
+      "first_response_ms": 32.767800032161176,
+      "kind": "command",
+      "ms": 32.870299997739494,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_CRITICAL",
+      "first_response_ms": 113.04280010517687,
+      "kind": "command",
+      "ms": 113.12310001812875,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding 20",
+      "first_response_ms": 32.19469997566193,
+      "kind": "command",
+      "ms": 204.05389997176826,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "shift TEST_EMPATH_INJURED arm",
+      "first_response_ms": 2.722900011576712,
+      "kind": "command",
+      "ms": 2.7901000576093793,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

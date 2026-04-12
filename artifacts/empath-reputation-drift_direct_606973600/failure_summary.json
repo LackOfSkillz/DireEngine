@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Ignoring a visible critical patient should reduce reputation: before=0, after=0",
+  "mode": "direct",
+  "scenario": "empath-reputation-drift",
+  "seed": 606973600
+}

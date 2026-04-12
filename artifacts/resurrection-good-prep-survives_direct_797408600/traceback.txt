@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 18729, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8662, in run_resurrection_good_prep_survives_scenario
+    result = _run_resurrection_contract_case(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8583, in _run_resurrection_contract_case
+    raise AssertionError(action_message)
+AssertionError: You have taken too much. Your senses still reel.

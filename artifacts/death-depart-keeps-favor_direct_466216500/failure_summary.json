@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Death-depart-keeps-favor scenario left the character dead after depart.",
+  "mode": "direct",
+  "scenario": "death-depart-keeps-favor",
+  "seed": 466216500
+}

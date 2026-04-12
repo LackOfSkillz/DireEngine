@@ -1,0 +1,123 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 2000,
+        "hp": 100,
+        "id": 23823,
+        "is_dead": false,
+        "key": "TEST_JUSTICE_SEVERE",
+        "life_state": "ALIVE",
+        "location": "TEST_TOWN_GREEN",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 23814,
+            "key": "TEST_TOWN_GREEN",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23815,
+            "key": "TEST_PILLORY_SQUARE",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23816,
+            "key": "TEST_TOWN_JAIL",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23817,
+            "key": "east",
+            "location": "TEST_PILLORY_SQUARE",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23818,
+            "key": "west",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23819,
+            "key": "out",
+            "location": "TEST_TOWN_JAIL",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23820,
+            "key": "wooden pillory",
+            "location": "TEST_PILLORY_SQUARE",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 23821,
+            "key": "TEST_JUSTICE_MINOR",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23822,
+            "key": "TEST_JUSTICE_MODERATE",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23823,
+            "key": "TEST_JUSTICE_SEVERE",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23824,
+            "key": "confiscated satchel",
+            "location": null,
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 23825,
+            "key": "confiscated knife",
+            "location": null,
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "west",
+          "TEST_JUSTICE_MINOR",
+          "TEST_JUSTICE_MODERATE",
+          "TEST_JUSTICE_SEVERE"
+        ],
+        "exits": [
+          "west"
+        ],
+        "id": 23814,
+        "key": "TEST_TOWN_GREEN"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775961116.9181132
+    },
+    "label": "final"
+  }
+]

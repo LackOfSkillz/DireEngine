@@ -1,0 +1,555 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 9,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 81.94539998658001,
+      "kind": "command",
+      "ms": 90.59120004530996,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceived_room"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_POISON_PATIENT",
+      "first_response_ms": 66.27559999469668,
+      "kind": "command",
+      "ms": 75.56119991932064,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceived_target"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_POISON_PATIENT",
+      "first_response_ms": 69.87430003937334,
+      "kind": "command",
+      "ms": 69.94459999259561,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 8.24530003592372,
+      "kind": "command",
+      "ms": 8.36639991030097,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take poison",
+      "first_response_ms": 107.6811000239104,
+      "kind": "command",
+      "ms": 135.46570006292313,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_poison"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT apply_poison_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 7.788800052367151,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "poison_ticked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 118.93840006086975,
+      "kind": "command",
+      "ms": 122.92310001794249,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "mend self",
+      "first_response_ms": 80.06379997823387,
+      "kind": "command",
+      "ms": 80.1376000745222,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mended"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "purge poison",
+      "first_response_ms": 56.71400006394833,
+      "kind": "command",
+      "ms": 56.77749996539205,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "purged"
+    }
+  ],
+  "command_timings_ms": [
+    90.59120004530996,
+    75.56119991932064,
+    69.94459999259561,
+    8.36639991030097,
+    135.46570006292313,
+    7.788800052367151,
+    122.92310001794249,
+    80.1376000745222,
+    56.77749996539205
+  ],
+  "commands": {
+    "count": 9,
+    "max_ms": 135.4249999858439,
+    "timings_ms": [
+      90.59120004530996,
+      75.56119991932064,
+      69.94459999259561,
+      8.36639991030097,
+      135.46570006292313,
+      7.788800052367151,
+      122.92310001794249,
+      80.1376000745222,
+      56.77749996539205
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775835198.6380503,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 73.71723752294201,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 71.95067778229713,
+    "jitter": 43.95144073339851,
+    "max_ms": 135.46570006292313,
+    "min_ms": 7.788800052367151,
+    "p95_ms": 130.44866004493088,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "perceive health",
+      "ms": 90.59120004530996,
+      "snapshot": "perceived_room"
+    },
+    {
+      "command": "perceive TEST_EMPATH_POISON_PATIENT",
+      "ms": 75.56119991932064,
+      "snapshot": "perceived_target"
+    },
+    {
+      "command": "touch TEST_EMPATH_POISON_PATIENT",
+      "ms": 69.94459999259561,
+      "snapshot": "touched"
+    },
+    {
+      "command": "assess",
+      "ms": 8.36639991030097,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "take poison",
+      "ms": 135.46570006292313,
+      "snapshot": "took_poison"
+    },
+    {
+      "command": "DIRECT apply_poison_tick",
+      "ms": 7.788800052367151,
+      "snapshot": "poison_ticked"
+    },
+    {
+      "command": "take bleeding",
+      "ms": 122.92310001794249,
+      "snapshot": "took_bleeding"
+    },
+    {
+      "command": "mend self",
+      "ms": 80.1376000745222,
+      "snapshot": "mended"
+    },
+    {
+      "command": "purge poison",
+      "ms": 56.77749996539205,
+      "snapshot": "purged"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 135.4249999858439,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "TEST_EMPATH_POISON_PATIENT: critical",
+    "Target: TEST_EMPATH_POISON_PATIENT",
+    "Vitality: unstable",
+    "Condition: critical",
+    "Wounds: bleeding 40%, poison 30%, disease 20%",
+    "You reach out and sense the condition of your patient.",
+    "Vitality: 50%",
+    "Bleeding: 40%",
+    "Poison: 30%",
+    "Disease: 20%",
+    "You feel your empathy settling into dabbling.",
+    "You draw the injury into yourself.",
+    "RETURN 1",
+    "You draw the injury into yourself.",
+    "You focus inward, stabilizing your condition.",
+    "You force the corruption from your body."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "assess_output": [
+      "Vitality: 50%",
+      "Bleeding: 40%",
+      "Poison: 30%",
+      "Disease: 20%"
+    ],
+    "commands": [
+      "perceive health",
+      "perceive TEST_EMPATH_POISON_PATIENT",
+      "touch TEST_EMPATH_POISON_PATIENT",
+      "assess",
+      "take poison",
+      "DIRECT apply_poison_tick",
+      "take bleeding",
+      "mend self",
+      "purge poison"
+    ],
+    "empath_after_bleeding": {
+      "bleeding": 16,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 12,
+      "vitality": 14
+    },
+    "empath_after_mend": {
+      "bleeding": 12,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 12,
+      "vitality": 6
+    },
+    "empath_after_poison": {
+      "bleeding": 0,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 12,
+      "vitality": 13
+    },
+    "empath_after_purge": {
+      "bleeding": 12,
+      "disease": 20,
+      "fatigue": 10,
+      "poison": 0,
+      "vitality": 6
+    },
+    "mend_output": [
+      "You focus inward, stabilizing your condition."
+    ],
+    "output_log": [
+      "TEST_EMPATH_POISON_PATIENT: critical",
+      "Target: TEST_EMPATH_POISON_PATIENT",
+      "Vitality: unstable",
+      "Condition: critical",
+      "Wounds: bleeding 40%, poison 30%, disease 20%",
+      "You reach out and sense the condition of your patient.",
+      "Vitality: 50%",
+      "Bleeding: 40%",
+      "Poison: 30%",
+      "Disease: 20%",
+      "You feel your empathy settling into dabbling.",
+      "You draw the injury into yourself.",
+      "RETURN 1",
+      "You draw the injury into yourself.",
+      "You focus inward, stabilizing your condition.",
+      "You force the corruption from your body."
+    ],
+    "patient_after_bleeding": {
+      "bleeding": 28,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 18,
+      "vitality": 50
+    },
+    "patient_after_poison": {
+      "bleeding": 40,
+      "disease": 20,
+      "fatigue": 0,
+      "poison": 18,
+      "vitality": 50
+    },
+    "perceive_health_output": [
+      "TEST_EMPATH_POISON_PATIENT: critical"
+    ],
+    "perceive_target_output": [
+      "Target: TEST_EMPATH_POISON_PATIENT",
+      "Vitality: unstable",
+      "Condition: critical",
+      "Wounds: bleeding 40%, poison 30%, disease 20%"
+    ],
+    "purge_output": [
+      "You force the corruption from your body."
+    ],
+    "snapshot_count": 11,
+    "snapshot_labels": [
+      "initial",
+      "perceived_room",
+      "perceived_target",
+      "touched",
+      "assessed",
+      "took_poison",
+      "poison_ticked",
+      "took_bleeding",
+      "mended",
+      "purged",
+      "final"
+    ],
+    "take_bleeding_output": [
+      "You draw the injury into yourself."
+    ],
+    "take_poison_output": [
+      "You feel your empathy settling into dabbling.",
+      "You draw the injury into yourself."
+    ],
+    "tick_damage": 1
+  },
+  "scenario_duration_ms": 15944,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "perceived_room",
+    "perceived_target",
+    "touched",
+    "assessed",
+    "took_poison",
+    "poison_ticked",
+    "took_bleeding",
+    "mended",
+    "purged",
+    "final"
+  ],
+  "started_at": 1775835182.0952215,
+  "state_transition_count": 10,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath poison-loop regression coverage validates poison, disease, perceive, and purge behavior without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 79.92954998917412,
+      "count": 8,
+      "entries": [
+        {
+          "duration_ms": 90.55289998650551,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775835186.593309
+        },
+        {
+          "duration_ms": 75.51849994342774,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775835187.4650621
+        },
+        {
+          "duration_ms": 69.91169997490942,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775835188.187866
+        },
+        {
+          "duration_ms": 8.326199953444302,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "assess"
+          },
+          "timestamp": 1775835188.9414394
+        },
+        {
+          "duration_ms": 135.4249999858439,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835189.7632833
+        },
+        {
+          "duration_ms": 122.88760009687394,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835190.5825155
+        },
+        {
+          "duration_ms": 80.07799996994436,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "mend"
+          },
+          "timestamp": 1775835191.5287316
+        },
+        {
+          "duration_ms": 56.73650000244379,
+          "metadata": {
+            "character": "TEST_EMPATH_POISON_HEALER",
+            "command": "purge"
+          },
+          "timestamp": 1775835192.3425922
+        }
+      ],
+      "max_ms": 135.4249999858439,
+      "total_ms": 639.436399913393
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

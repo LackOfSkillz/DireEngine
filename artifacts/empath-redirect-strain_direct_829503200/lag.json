@@ -1,0 +1,92 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 109.3425749859307,
+  "lag": {
+    "avg_ms": 112.48692497611046,
+    "jitter": 31.734399490187982,
+    "max_ms": 143.54149997234344,
+    "min_ms": 68.71209992095828,
+    "p95_ms": 140.65680497442372,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_REDIRECT_PATIENT",
+      "ms": 113.38390002492815,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_REDIRECT_PARTNER",
+      "ms": 68.71209992095828,
+      "snapshot": "unified"
+    },
+    {
+      "command": "redirect vitality 20 TEST_EMPATH_REDIRECT_PARTNER",
+      "ms": 143.54149997234344,
+      "snapshot": "redirected_vitality"
+    },
+    {
+      "command": "redirect bleeding 30 TEST_EMPATH_REDIRECT_PARTNER",
+      "ms": 124.31019998621196,
+      "snapshot": "redirected_bleeding"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_REDIRECT_PATIENT",
+      "first_response_ms": 113.28920000232756,
+      "kind": "command",
+      "ms": 113.38390002492815,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_REDIRECT_PARTNER",
+      "first_response_ms": 68.64189996849746,
+      "kind": "command",
+      "ms": 68.71209992095828,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "redirect vitality 20 TEST_EMPATH_REDIRECT_PARTNER",
+      "first_response_ms": 143.46549997571856,
+      "kind": "command",
+      "ms": 143.54149997234344,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "redirected_vitality"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "redirect bleeding 30 TEST_EMPATH_REDIRECT_PARTNER",
+      "first_response_ms": 111.97369999717921,
+      "kind": "command",
+      "ms": 124.31019998621196,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "redirected_bleeding"
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 87.14972501911689,
+  "lag": {
+    "avg_ms": 82.57565556818412,
+    "jitter": 97.73657120452991,
+    "max_ms": 327.53660005982965,
+    "min_ms": 6.821200018748641,
+    "p95_ms": 240.02484006341538,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "perceive health",
+      "ms": 327.53660005982965,
+      "snapshot": "perceived_room"
+    },
+    {
+      "command": "perceive TEST_EMPATH_POISON_PATIENT",
+      "ms": 39.229199988767505,
+      "snapshot": "perceived_target"
+    },
+    {
+      "command": "touch TEST_EMPATH_POISON_PATIENT",
+      "ms": 51.14400002639741,
+      "snapshot": "touched"
+    },
+    {
+      "command": "assess",
+      "ms": 6.821200018748641,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "take poison",
+      "ms": 108.75720006879419,
+      "snapshot": "took_poison"
+    },
+    {
+      "command": "DIRECT apply_poison_tick",
+      "ms": 11.187299969606102,
+      "snapshot": "poison_ticked"
+    },
+    {
+      "command": "take bleeding",
+      "ms": 93.25819998048246,
+      "snapshot": "took_bleeding"
+    },
+    {
+      "command": "mend self",
+      "ms": 44.94589997921139,
+      "snapshot": "mended"
+    },
+    {
+      "command": "purge poison",
+      "ms": 60.30130002181977,
+      "snapshot": "purged"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "perceive health",
+      "ms": 327.53660005982965
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 320.5587000120431,
+      "kind": "command",
+      "ms": 327.53660005982965,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceived_room"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 320.5587000120431,
+      "kind": "command",
+      "ms": 327.53660005982965,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceived_room"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_POISON_PATIENT",
+      "first_response_ms": 33.6323999799788,
+      "kind": "command",
+      "ms": 39.229199988767505,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceived_target"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_POISON_PATIENT",
+      "first_response_ms": 51.09950003679842,
+      "kind": "command",
+      "ms": 51.14400002639741,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 6.732400041073561,
+      "kind": "command",
+      "ms": 6.821200018748641,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take poison",
+      "first_response_ms": 90.61970002949238,
+      "kind": "command",
+      "ms": 108.75720006879419,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_poison"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT apply_poison_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 11.187299969606102,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "poison_ticked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 89.44379992317408,
+      "kind": "command",
+      "ms": 93.25819998048246,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "mend self",
+      "first_response_ms": 44.89280004054308,
+      "kind": "command",
+      "ms": 44.94589997921139,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mended"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "purge poison",
+      "first_response_ms": 60.21850008983165,
+      "kind": "command",
+      "ms": 60.30130002181977,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "purged"
+    }
+  ]
+}

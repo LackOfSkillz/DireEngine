@@ -1,0 +1,172 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 29,
+        "hp": 100,
+        "id": 18643,
+        "is_dead": false,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 18644,
+          "key": "TEST_GRAVE_TOKEN",
+          "location": "TEST_GRAVE_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "alive",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 18642,
+            "key": "TEST_GRAVE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 18643,
+            "key": "TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 18644,
+            "key": "TEST_GRAVE_TOKEN",
+            "location": "TEST_GRAVE_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18642,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "alive",
+      "timestamp": 1775908978.2111518
+    },
+    "label": "alive"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 18643,
+        "is_dead": true,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "DEAD",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "dead",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 18645,
+            "key": "corpse of TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR",
+          "corpse of TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18642,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "dead",
+      "timestamp": 1775908978.5535781
+    },
+    "label": "dead"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 18643,
+        "is_dead": true,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "DEAD",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": [
+          {
+            "id": 18645,
+            "key": "corpse of TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ]
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18642,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775908979.2572732
+    },
+    "label": "final"
+  }
+]

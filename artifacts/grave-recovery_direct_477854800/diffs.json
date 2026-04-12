@@ -1,0 +1,284 @@
+[
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "dead",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "alive",
+        "coins_after": 0,
+        "coins_before": 29,
+        "coins_delta": -29,
+        "died": true,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": true,
+        "is_dead_before": false,
+        "life_state_after": "DEAD",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_GRAVE_ROOM",
+        "location_before": "TEST_GRAVE_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": [
+          "TEST_GRAVE_TOKEN"
+        ]
+      },
+      "object_delta_changes": {
+        "created": [
+          "corpse of TEST_GRAVE_CHAR"
+        ],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [
+          "corpse of TEST_GRAVE_CHAR"
+        ],
+        "contents_removed": [],
+        "room_after": "TEST_GRAVE_ROOM",
+        "room_before": "TEST_GRAVE_ROOM"
+      }
+    },
+    "from": "alive",
+    "to": "dead"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "departed",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "dead",
+        "coins_after": 0,
+        "coins_before": 0,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 50,
+        "hp_before": 100,
+        "hp_delta": -50,
+        "is_dead_after": false,
+        "is_dead_before": true,
+        "life_state_after": "ALIVE",
+        "life_state_before": "DEAD",
+        "location_after": "TEST_GRAVE_ROOM",
+        "location_before": "TEST_GRAVE_ROOM",
+        "revived": true
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [
+          "grave of TEST_GRAVE_CHAR"
+        ],
+        "deleted": [
+          "corpse of TEST_GRAVE_CHAR"
+        ]
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [
+          "grave of TEST_GRAVE_CHAR"
+        ],
+        "contents_removed": [
+          "corpse of TEST_GRAVE_CHAR"
+        ],
+        "room_after": "TEST_GRAVE_ROOM",
+        "room_before": "TEST_GRAVE_ROOM"
+      }
+    },
+    "from": "dead",
+    "to": "departed"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "recovered",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "departed",
+        "coins_after": 0,
+        "coins_before": 0,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 50,
+        "hp_before": 50,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_GRAVE_ROOM",
+        "location_before": "TEST_GRAVE_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [],
+        "room_after": "TEST_GRAVE_ROOM",
+        "room_before": "TEST_GRAVE_ROOM"
+      }
+    },
+    "from": "departed",
+    "to": "recovered"
+  },
+  {
+    "data": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "final",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "recovered",
+        "coins_after": 0,
+        "coins_before": 0,
+        "coins_delta": 0,
+        "died": false,
+        "hp_after": 50,
+        "hp_before": 50,
+        "hp_delta": 0,
+        "is_dead_after": false,
+        "is_dead_before": false,
+        "life_state_after": "ALIVE",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_GRAVE_ROOM",
+        "location_before": "TEST_GRAVE_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [],
+        "room_after": "TEST_GRAVE_ROOM",
+        "room_before": "TEST_GRAVE_ROOM"
+      }
+    },
+    "from": "recovered",
+    "to": "final"
+  }
+]

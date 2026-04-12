@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4599, in scenario
+    raise AssertionError(f"Shock circle should spread some burden onto both empaths: leader={after_leader}, partner={after_partner}")
+AssertionError: Shock circle should spread some burden onto both empaths: leader=6, partner=0

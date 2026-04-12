@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Service foundation coverage validates request healing, tipping, and study anatomy command hooks.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-service-foundation",
+  "seed": 98774500,
+  "started_at": 1775835264.3245656
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 5541, in scenario
+    raise AssertionError(f"Perceive should return nothing while disconnected: {perceive_fail_output}")
+AssertionError: Perceive should return nothing while disconnected: ['You are not yet ready to read nearby life forces clearly.']

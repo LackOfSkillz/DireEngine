@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Guard scan should escalate to justice attention after the warning pass.",
+  "mode": "command",
+  "scenario": "guard-ai-basic",
+  "seed": 990334600
+}

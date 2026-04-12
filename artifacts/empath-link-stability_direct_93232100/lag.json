@@ -1,0 +1,92 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 114.48539997218177,
+  "lag": {
+    "avg_ms": 119.46602497482672,
+    "jitter": 20.082880266892825,
+    "max_ms": 144.50729999225587,
+    "min_ms": 100.54819996003062,
+    "p95_ms": 141.81517499382608,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_LINK_PATIENT",
+      "ms": 106.24879994429648,
+      "snapshot": "linked"
+    },
+    {
+      "command": "take bleeding 20",
+      "ms": 100.54819996003062,
+      "snapshot": "took_bleeding_20"
+    },
+    {
+      "command": "take vitality 30",
+      "ms": 144.50729999225587,
+      "snapshot": "took_vitality_30"
+    },
+    {
+      "command": "take bleeding 30",
+      "ms": 126.55980000272393,
+      "snapshot": "took_bleeding_30"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_LINK_PATIENT",
+      "first_response_ms": 106.15819995291531,
+      "kind": "command",
+      "ms": 106.24879994429648,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding 20",
+      "first_response_ms": 86.26979996915907,
+      "kind": "command",
+      "ms": 100.54819996003062,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding_20"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 30",
+      "first_response_ms": 141.63219998590648,
+      "kind": "command",
+      "ms": 144.50729999225587,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_vitality_30"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding 30",
+      "first_response_ms": 123.88139998074621,
+      "kind": "command",
+      "ms": 126.55980000272393,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding_30"
+    }
+  ]
+}

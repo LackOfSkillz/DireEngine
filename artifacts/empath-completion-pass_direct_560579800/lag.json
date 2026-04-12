@@ -1,0 +1,58 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 49.606400018092245,
+  "lag": {
+    "avg_ms": 49.66229997808114,
+    "jitter": 65.00644772747219,
+    "max_ms": 95.62879998702556,
+    "min_ms": 3.695799969136715,
+    "p95_ms": 91.03214998613112,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 95.62879998702556,
+      "snapshot": "linked"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 3.695799969136715,
+      "snapshot": "mitigated"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 95.56500008329749,
+      "kind": "command",
+      "ms": 95.62879998702556,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 3.6477999528869987,
+      "kind": "command",
+      "ms": 3.695799969136715,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mitigated"
+    }
+  ]
+}

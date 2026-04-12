@@ -1,0 +1,187 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17697,
+        "is_dead": false,
+        "key": "TEST_EMPATH_CIRCLE_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_CIRCLE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "blocked",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17696,
+            "key": "TEST_EMPATH_CIRCLE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17697,
+            "key": "TEST_EMPATH_CIRCLE_HEALER",
+            "location": "TEST_EMPATH_CIRCLE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_CIRCLE_HEALER"
+        ],
+        "exits": [],
+        "id": 17696,
+        "key": "TEST_EMPATH_CIRCLE_ROOM"
+      },
+      "snapshot_label": "blocked",
+      "timestamp": 1775833969.694276
+    },
+    "label": "blocked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17697,
+        "is_dead": false,
+        "key": "TEST_EMPATH_CIRCLE_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_CIRCLE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "advanced",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_CIRCLE_HEALER"
+        ],
+        "exits": [],
+        "id": 17696,
+        "key": "TEST_EMPATH_CIRCLE_ROOM"
+      },
+      "snapshot_label": "advanced",
+      "timestamp": 1775833970.9229877
+    },
+    "label": "advanced"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17697,
+        "is_dead": false,
+        "key": "TEST_EMPATH_CIRCLE_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_CIRCLE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "status",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_CIRCLE_HEALER"
+        ],
+        "exits": [],
+        "id": 17696,
+        "key": "TEST_EMPATH_CIRCLE_ROOM"
+      },
+      "snapshot_label": "status",
+      "timestamp": 1775833972.149194
+    },
+    "label": "status"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17697,
+        "is_dead": false,
+        "key": "TEST_EMPATH_CIRCLE_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_CIRCLE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_CIRCLE_HEALER"
+        ],
+        "exits": [],
+        "id": 17696,
+        "key": "TEST_EMPATH_CIRCLE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775833972.1522954
+    },
+    "label": "final"
+  }
+]

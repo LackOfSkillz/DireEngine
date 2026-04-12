@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Revive interrupt scenario did not regress the corpse to restored state.",
+  "mode": "direct",
+  "scenario": "cleric-revive-interrupt",
+  "seed": 917033600
+}

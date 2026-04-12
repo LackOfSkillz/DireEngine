@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 17664, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 9690, in run_favor_pray_loop_scenario
+    raise AssertionError(f"Favor-pray-loop scenario missed the combat blocker: {combat_output}")
+AssertionError: Favor-pray-loop scenario missed the combat blocker: Your favor is already full.

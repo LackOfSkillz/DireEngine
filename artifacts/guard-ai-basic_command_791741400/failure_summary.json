@@ -1,0 +1,8 @@
+{
+  "failure_type": "leak_failure",
+  "lag_status": "ok",
+  "message": "1 test objects were not cleaned up.",
+  "mode": "command",
+  "scenario": "guard-ai-basic",
+  "seed": 791741400
+}

@@ -1,0 +1,376 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "justice",
+      "first_response_ms": 22.970000049099326,
+      "kind": "command",
+      "ms": 23.099399986676872,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "laylow",
+      "first_response_ms": 13.797899940982461,
+      "kind": "command",
+      "ms": 13.858100050128996,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "surrender",
+      "first_response_ms": 324.9759000027552,
+      "kind": "command",
+      "ms": 470.7510999869555,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal nobody",
+      "first_response_ms": 1.0414000134915113,
+      "kind": "command",
+      "ms": 1.0587000288069248,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "passage",
+      "first_response_ms": 30.67240002565086,
+      "kind": "command",
+      "ms": 37.586300051771104,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    23.099399986676872,
+    13.858100050128996,
+    470.7510999869555,
+    1.0587000288069248,
+    37.586300051771104
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 470.7219999982044,
+    "timings_ms": [
+      23.099399986676872,
+      13.858100050128996,
+      470.7510999869555,
+      1.0587000288069248,
+      37.586300051771104
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775962110.9099336,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 78.69152000639588,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 109.27072002086788,
+    "jitter": 202.51273224393248,
+    "max_ms": 470.7510999869555,
+    "min_ms": 1.0587000288069248,
+    "p95_ms": 384.1181399999186,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "justice",
+      "ms": 23.099399986676872,
+      "snapshot": "final"
+    },
+    {
+      "command": "laylow",
+      "ms": 13.858100050128996,
+      "snapshot": "final"
+    },
+    {
+      "command": "surrender",
+      "ms": 470.7510999869555,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal nobody",
+      "ms": 1.0587000288069248,
+      "snapshot": "final"
+    },
+    {
+      "command": "passage",
+      "ms": 37.586300051771104,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 470.7219999982044,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Justice in this area: standard",
+    "Wanted tier: arrest_eligible (6)",
+    "Warning level: 3",
+    "Active guard: TEST_JUSTICE_GUARD",
+    "Pending arrest: yes",
+    "The authorities are actively trying to detain you.",
+    "Debt: 0 silver",
+    "Confiscated items: No",
+    "Crime Count: 2",
+    "Law Reputation: -7",
+    "default_region: severity 6",
+    "You cannot lay low while a guard is actively confronting you.",
+    "The guard confiscates your belongings and sends them to the guardhouse evidence locker.",
+    "The authorities lock you in a jail cell.",
+    "You submit to the authorities and accept the sentence without resistance.",
+    "TEST_JUSTICE_GUARD accepts your surrender. Fine assessed: 750 coins. Detention: 583 seconds.",
+    "You are detained in jail and cannot do that.",
+    "Your refusal to submit will worsen the sentence when they catch you.",
+    "You find no hidden route here."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "detained": true,
+    "fine": 750,
+    "flee_flag": true,
+    "forced_penalty": {
+      "confiscate": true,
+      "detain_seconds": 838,
+      "fine": 1050,
+      "outcome": "jail",
+      "reputation_loss": 4,
+      "severity": "severe",
+      "wanted_reduction": 4
+    },
+    "fugitive_penalty": {
+      "confiscate": true,
+      "detain_seconds": 684,
+      "fine": 800,
+      "outcome": "jail",
+      "reputation_loss": 4,
+      "severity": "severe",
+      "wanted_reduction": 4
+    },
+    "fugitive_penalty_before_flee": {
+      "confiscate": true,
+      "detain_seconds": 624,
+      "fine": 750,
+      "outcome": "jail",
+      "reputation_loss": 4,
+      "severity": "severe",
+      "wanted_reduction": 4
+    },
+    "guard_attention": true,
+    "reputation_after": 2,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "surrender_penalty": {
+      "confiscate": true,
+      "detain_seconds": 628,
+      "fine": 787,
+      "outcome": "jail",
+      "reputation_loss": 3,
+      "severity": "severe",
+      "wanted_reduction": 5
+    },
+    "surrendered": true,
+    "wanted_after": 1,
+    "wanted_tier": "arrest_eligible"
+  },
+  "scenario_duration_ms": 17272,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "surrender",
+      "ms": 470.7510999869555
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775962092.935402,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 109.24052000045776,
+      "count": 5,
+      "entries": [
+        {
+          "duration_ms": 23.073400021530688,
+          "metadata": {
+            "character": "TEST_JUSTICE_ACCUSED",
+            "command": "justice"
+          },
+          "timestamp": 1775962096.8990357
+        },
+        {
+          "duration_ms": 13.82190000731498,
+          "metadata": {
+            "character": "TEST_JUSTICE_ACCUSED",
+            "command": "laylow"
+          },
+          "timestamp": 1775962097.3928406
+        },
+        {
+          "duration_ms": 470.7219999982044,
+          "metadata": {
+            "character": "TEST_JUSTICE_ACCUSED",
+            "command": "surrender"
+          },
+          "timestamp": 1775962098.425607
+        },
+        {
+          "duration_ms": 1.0287000332027674,
+          "metadata": {
+            "character": "TEST_JUSTICE_ACCUSED",
+            "command": "steal"
+          },
+          "timestamp": 1775962098.9372787
+        },
+        {
+          "duration_ms": 37.55659994203597,
+          "metadata": {
+            "character": "TEST_JUSTICE_FUGITIVE",
+            "command": "passage"
+          },
+          "timestamp": 1775962102.0534968
+        }
+      ],
+      "max_ms": 470.7219999982044,
+      "total_ms": 546.2026000022888
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

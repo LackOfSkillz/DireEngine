@@ -1,0 +1,1410 @@
+{
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "breakdown": {
+      "by_key": {},
+      "by_system": {},
+      "by_timing_mode": {}
+    },
+    "by_owner": {},
+    "by_system": {},
+    "delayed_job_count": 0,
+    "delayed_jobs": [],
+    "quota_policy": {
+      "global": {
+        "behavior": "reject",
+        "limit": 1000
+      },
+      "owner": {
+        "behavior": "reject",
+        "limit": 5
+      },
+      "system": {
+        "behavior": "reject",
+        "limit": 100
+      }
+    },
+    "total_jobs": 0
+  },
+  "scripts": {
+    "active_script_count": 102,
+    "active_scripts": [
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 6826,
+        "object_key": "corpse of evenniaadmin_owner_550232",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "controller",
+        "classification": "controller",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_invasion",
+        "object_id": 7204,
+        "object_key": "Breach Corridor",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingInvasionScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 5,
+        "is_active": true,
+        "key": "onboarding_roleplay",
+        "object_id": 9595,
+        "object_key": "Marshal Vey",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingRoleplayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 5,
+        "is_active": true,
+        "key": "onboarding_roleplay",
+        "object_id": 9596,
+        "object_key": "Pip the Gremlin",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingRoleplayScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9684,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9685,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9686,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "first_area_vendor_prompt",
+        "object_id": 9707,
+        "object_key": "Street Vendor",
+        "persistent": true,
+        "typeclass_path": "typeclasses.first_area_scripts.FirstAreaVendorPromptScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14246,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14252,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14253,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_TWO",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14265,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14266,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_TWO",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14278,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14279,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_TWO",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14304,
+        "object_key": "corpse of TEST_EMPATH_LINK_SHOCK_FOE_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14305,
+        "object_key": "corpse of TEST_EMPATH_LINK_SHOCK_FOE_TWO",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14317,
+        "object_key": "corpse of TEST_EMPATH_SHOCK_FOE_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14330,
+        "object_key": "corpse of TEST_EMPATH_LINK_SHOCK_FOE_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14331,
+        "object_key": "corpse of TEST_EMPATH_LINK_SHOCK_FOE_TWO",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14570,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14606,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14622,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 14635,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 16974,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17078,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17199,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17490,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17578,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17948,
+        "object_key": "corpse of TEST_EMPATH_VITALITY_FATALIST",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17960,
+        "object_key": "corpse of TEST_CLERIC_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17973,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17977,
+        "object_key": "corpse of TEST_CLERIC_ZERO_FAVOR_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17981,
+        "object_key": "corpse of TEST_CLERIC_EXPIRED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17985,
+        "object_key": "corpse of TEST_CLERIC_EXPIRED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17989,
+        "object_key": "corpse of TEST_CLERIC_WRONG_ROOM_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17993,
+        "object_key": "corpse of TEST_CLERIC_DELAY_EXPIRY_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 17997,
+        "object_key": "corpse of TEST_CLERIC_UNPREPARED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18001,
+        "object_key": "corpse of TEST_CLERIC_PREPARE_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18005,
+        "object_key": "corpse of TEST_CLERIC_RESTORE_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18009,
+        "object_key": "corpse of TEST_CLERIC_MISSING_STEP_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18018,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18022,
+        "object_key": "corpse of TEST_CLERIC_ZERO_FAVOR_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18026,
+        "object_key": "corpse of TEST_CLERIC_DELAY_EXPIRY_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18030,
+        "object_key": "corpse of TEST_CLERIC_EXPIRED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18034,
+        "object_key": "corpse of TEST_CLERIC_WRONG_ROOM_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18038,
+        "object_key": "corpse of TEST_CLERIC_DEVOTION_GATE_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18042,
+        "object_key": "corpse of TEST_CLERIC_DEVOTION_SPEND_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18046,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_CONSEQUENCE_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18050,
+        "object_key": "corpse of TEST_CLERIC_MULTI_FAIL_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18054,
+        "object_key": "corpse of TEST_CLERIC_QUALITY_LOSS_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18070,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18074,
+        "object_key": "corpse of TEST_CLERIC_MISSING_STEP_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18078,
+        "object_key": "corpse of TEST_CLERIC_ZERO_FAVOR_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18082,
+        "object_key": "corpse of TEST_CLERIC_DELAY_EXPIRY_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18091,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18096,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18100,
+        "object_key": "corpse of TEST_CLERIC_UNPREPARED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18104,
+        "object_key": "corpse of TEST_CLERIC_PREPARE_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18108,
+        "object_key": "corpse of TEST_CLERIC_RESTORE_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18112,
+        "object_key": "corpse of TEST_CLERIC_EXPIRED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18116,
+        "object_key": "corpse of TEST_CLERIC_WRONG_ROOM_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18121,
+        "object_key": "corpse of TEST_CLERIC_GROUP_SPEED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18126,
+        "object_key": "corpse of TEST_CLERIC_GROUP_SPEED_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18131,
+        "object_key": "corpse of TEST_CLERIC_GROUP_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18136,
+        "object_key": "corpse of TEST_CLERIC_SPECIALIZATION_TARGET_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18137,
+        "object_key": "corpse of TEST_CLERIC_SPECIALIZATION_TARGET_TWO",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18141,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_1",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18143,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_2",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18145,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_3",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18147,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_4",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18151,
+        "object_key": "corpse of TEST_CLERIC_BLOCKER_FAVOR",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18153,
+        "object_key": "corpse of TEST_CLERIC_BLOCKER_MEMORY",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18155,
+        "object_key": "corpse of TEST_CLERIC_BLOCKER_PLACE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18157,
+        "object_key": "corpse of TEST_CLERIC_BLOCKER_BIND",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18163,
+        "object_key": "corpse of TEST_CLERIC_MSG_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18169,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18174,
+        "object_key": "corpse of TEST_CLERIC_PROGRESS_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18180,
+        "object_key": "corpse of TEST_CLERIC_SPAM_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18184,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_1",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18186,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_2",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18188,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_3",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18190,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_4",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18196,
+        "object_key": "corpse of TEST_CLERIC_INTERRUPT_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18202,
+        "object_key": "corpse of TEST_CLERIC_UNLOCK_TARGET_1",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18204,
+        "object_key": "corpse of TEST_CLERIC_UNLOCK_TARGET_2",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18206,
+        "object_key": "corpse of TEST_CLERIC_UNLOCK_TARGET_3",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18211,
+        "object_key": "corpse of TEST_CLERIC_MATCH_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18212,
+        "object_key": "corpse of TEST_CLERIC_NONMATCH_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18218,
+        "object_key": "corpse of TEST_CLERIC_UNLOCK_TARGET_1",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18220,
+        "object_key": "corpse of TEST_CLERIC_UNLOCK_TARGET_2",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18222,
+        "object_key": "corpse of TEST_CLERIC_UNLOCK_TARGET_3",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18227,
+        "object_key": "corpse of TEST_CLERIC_MATCH_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18228,
+        "object_key": "corpse of TEST_CLERIC_NONMATCH_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18233,
+        "object_key": "corpse of TEST_CLERIC_SPECIALIZATION_TARGET_ONE",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18234,
+        "object_key": "corpse of TEST_CLERIC_SPECIALIZATION_TARGET_TWO",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18238,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_1",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18244,
+        "object_key": "corpse of TEST_CLERIC_MSG_TARGET",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18248,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_1",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18250,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_2",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18252,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_3",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      },
+      {
+        "behavior_classification": "mixed",
+        "classification": "controller",
+        "interval": 30,
+        "is_active": true,
+        "key": "corpse_decay",
+        "object_id": 18254,
+        "object_key": "corpse of TEST_CLERIC_ASSESS_TARGET_4",
+        "persistent": true,
+        "typeclass_path": "typeclasses.scripts.CorpseDecayScript"
+      }
+    ],
+    "unclassified_scripts": [
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9684,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9685,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "onboarding_guide_prompt",
+        "object_id": 9686,
+        "object_key": "Intake Guide",
+        "persistent": true,
+        "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+      },
+      {
+        "behavior_classification": "unclassified",
+        "classification": "unclassified",
+        "interval": 6,
+        "is_active": true,
+        "key": "first_area_vendor_prompt",
+        "object_id": 9707,
+        "object_key": "Street Vendor",
+        "persistent": true,
+        "typeclass_path": "typeclasses.first_area_scripts.FirstAreaVendorPromptScript"
+      }
+    ]
+  },
+  "tick_audit_warnings": [
+    {
+      "kind": "tick_function",
+      "line": 9567,
+      "message": "suspicious tick-like function: run_ticker_execution_scenario",
+      "path": "C:\\Users\\gary\\dragonsire\\diretest.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 14543,
+      "message": "suspicious tick-like function: run_exp_single_tick_scenario",
+      "path": "C:\\Users\\gary\\dragonsire\\diretest.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 14627,
+      "message": "suspicious tick-like function: run_exp_multi_skill_tick_scenario",
+      "path": "C:\\Users\\gary\\dragonsire\\diretest.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 90,
+      "message": "suspicious tick-like function: _get_cached_tick_npcs",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 106,
+      "message": "suspicious tick-like function: _npc_needs_status_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 152,
+      "message": "suspicious tick-like function: _iter_tick_characters",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 1113,
+      "message": "suspicious tick-like function: _log_slow_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 1149,
+      "message": "suspicious tick-like function: process_status_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 1322,
+      "message": "suspicious tick-like function: process_learning_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\server\\conf\\at_server_startstop.py"
+    },
+    {
+      "kind": "time_loop",
+      "line": 588,
+      "message": "time-based loop pattern detected",
+      "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
+    },
+    {
+      "kind": "time_loop",
+      "line": 637,
+      "message": "time-based loop pattern detected",
+      "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
+    },
+    {
+      "kind": "while_true",
+      "line": 1042,
+      "message": "while True loop found in gameplay code",
+      "path": "C:\\Users\\gary\\dragonsire\\systems\\onboarding.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 159,
+      "message": "suspicious tick-like function: _build_ticker_performance",
+      "path": "C:\\Users\\gary\\dragonsire\\tools\\diretest\\core\\metrics.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 3401,
+      "message": "suspicious tick-like function: process_cleric_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 3567,
+      "message": "suspicious tick-like function: process_soul_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 3707,
+      "message": "suspicious tick-like function: process_resurrection_recovery_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 7471,
+      "message": "suspicious tick-like function: process_empath_channel_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 7538,
+      "message": "suspicious tick-like function: process_empath_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 8574,
+      "message": "suspicious tick-like function: process_justice_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 8602,
+      "message": "suspicious tick-like function: process_thief_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 8660,
+      "message": "suspicious tick-like function: process_warrior_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 8753,
+      "message": "suspicious tick-like function: process_ranger_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 12502,
+      "message": "suspicious tick-like function: process_combat_range_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\characters.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 84,
+      "message": "suspicious tick-like function: ai_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\npcs.py"
+    },
+    {
+      "kind": "tick_function",
+      "line": 213,
+      "message": "suspicious tick-like function: npc_combat_tick",
+      "path": "C:\\Users\\gary\\dragonsire\\typeclasses\\npcs.py"
+    }
+  ],
+  "tickers": {
+    "performance": {},
+    "registered_ticker_count": 0,
+    "registered_tickers": []
+  },
+  "unclassified_registrations": [
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "onboarding_guide_prompt",
+      "kind": "script",
+      "object_id": 9684,
+      "object_key": "Intake Guide",
+      "persistent": true,
+      "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+    },
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "onboarding_guide_prompt",
+      "kind": "script",
+      "object_id": 9685,
+      "object_key": "Intake Guide",
+      "persistent": true,
+      "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+    },
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "onboarding_guide_prompt",
+      "kind": "script",
+      "object_id": 9686,
+      "object_key": "Intake Guide",
+      "persistent": true,
+      "typeclass_path": "typeclasses.onboarding_scripts.OnboardingGuidePromptScript"
+    },
+    {
+      "behavior_classification": "unclassified",
+      "classification": "unclassified",
+      "interval": 6,
+      "is_active": true,
+      "key": "first_area_vendor_prompt",
+      "kind": "script",
+      "object_id": 9707,
+      "object_key": "Street Vendor",
+      "persistent": true,
+      "typeclass_path": "typeclasses.first_area_scripts.FirstAreaVendorPromptScript"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17460,
+        "is_dead": false,
+        "key": "TEST_EMPATH_TRIAGE_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_TRIAGE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.72,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17459,
+            "key": "TEST_EMPATH_TRIAGE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17460,
+            "key": "TEST_EMPATH_TRIAGE_HEALER",
+            "location": "TEST_EMPATH_TRIAGE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17461,
+            "key": "TEST_EMPATH_CRITICAL",
+            "location": "TEST_EMPATH_TRIAGE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17462,
+            "key": "TEST_EMPATH_INJURED",
+            "location": "TEST_EMPATH_TRIAGE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17463,
+            "key": "TEST_HOUSE_HEALER",
+            "location": "TEST_EMPATH_TRIAGE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_TRIAGE_HEALER",
+          "TEST_EMPATH_CRITICAL",
+          "TEST_EMPATH_INJURED",
+          "TEST_HOUSE_HEALER"
+        ],
+        "exits": [],
+        "id": 17459,
+        "key": "TEST_EMPATH_TRIAGE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775830424.0393374
+    },
+    "label": "final"
+  }
+]

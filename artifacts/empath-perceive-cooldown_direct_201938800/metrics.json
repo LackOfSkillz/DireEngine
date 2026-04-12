@@ -1,0 +1,368 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "perceive",
+      "first_response_ms": 33.28400000464171,
+      "kind": "command",
+      "ms": 40.90839996933937,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "first_response_ms": 0.7630999898537993,
+      "kind": "command",
+      "ms": 0.8026000577956438,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "first_response_ms": 154.42919998895377,
+      "kind": "command",
+      "ms": 159.7156000789255,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    40.90839996933937,
+    0.8026000577956438,
+    159.7156000789255
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 159.68499996233732,
+    "timings_ms": [
+      40.90839996933937,
+      0.8026000577956438,
+      159.7156000789255
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775821995.976385,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 62.82543332781643,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 67.1422000353535,
+    "jitter": 82.64075624869733,
+    "max_ms": 159.7156000789255,
+    "min_ms": 0.8026000577956438,
+    "p95_ms": 147.83488006796688,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "perceive",
+      "ms": 40.90839996933937,
+      "snapshot": "final"
+    },
+    {
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "ms": 0.8026000577956438,
+      "snapshot": "final"
+    },
+    {
+      "command": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "ms": 159.7156000789255,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 159.68499996233732,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "TEST_EMPATH_PERCEIVE_PATIENT: injured",
+    "You must wait before perceiving again.",
+    "Target: TEST_EMPATH_PERCEIVE_PATIENT",
+    "Vitality: unstable",
+    "Wounds: bleeding 18%"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "blocked_output": [
+      "You must wait before perceiving again."
+    ],
+    "commands": [
+      "perceive",
+      "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "perceive TEST_EMPATH_PERCEIVE_PATIENT"
+    ],
+    "first_room_output": [
+      "TEST_EMPATH_PERCEIVE_PATIENT: injured"
+    ],
+    "output_log": [
+      "TEST_EMPATH_PERCEIVE_PATIENT: injured",
+      "You must wait before perceiving again.",
+      "Target: TEST_EMPATH_PERCEIVE_PATIENT",
+      "Vitality: unstable",
+      "Wounds: bleeding 18%"
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "target_output": [
+      "Target: TEST_EMPATH_PERCEIVE_PATIENT",
+      "Vitality: unstable",
+      "Wounds: bleeding 18%"
+    ]
+  },
+  "scenario_duration_ms": 10306,
+  "scheduler": {
+    "active_job_count": 5,
+    "active_jobs": [
+      {
+        "created_at": 1775821898.9520075,
+        "delay_s": 2.5,
+        "due_at": 1775821901.4520075,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "5dba9181fa4c4ba69ef3f36f8ba8179c",
+        "key": "combat:roundtime:16897",
+        "owner": "#16897",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775821923.7193294,
+        "delay_s": 2.5,
+        "due_at": 1775821926.2203498,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LEARNING_HEALER",
+        "job_id": "cf7bf922b0724a9e84cd335bc18db51b",
+        "key": "combat:roundtime:16904",
+        "owner": "#16904",
+        "owner_label": "TEST_EMPATH_LEARNING_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775821939.678049,
+        "delay_s": 2.5,
+        "due_at": 1775821942.178049,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "job_id": "ce3976de07284a459a0dfc15a2952a15",
+        "key": "combat:roundtime:16911",
+        "owner": "#16911",
+        "owner_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775821953.018879,
+        "delay_s": 2.5,
+        "due_at": 1775821955.5198786,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_HEALER",
+        "job_id": "26bfa9a9b5a446e8b263fbe2e4155887",
+        "key": "combat:roundtime:16914",
+        "owner": "#16914",
+        "owner_label": "TEST_EMPATH_LINK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775821975.3149078,
+        "delay_s": 2.5,
+        "due_at": 1775821977.8149078,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "job_id": "3cf6af49b3d34d2bb118ba65f94ca60e",
+        "key": "combat:roundtime:16920",
+        "owner": "#16920",
+        "owner_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "perceive TEST_EMPATH_PERCEIVE_PATIENT",
+      "ms": 159.7156000789255
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775821985.2019386,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Perceive cooldown coverage validates command throttling and normalized room/target output without depending on real waits."
+    },
+    "scheduler_job_count": 5,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 67.11643328890204,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 40.88909993879497,
+          "metadata": {
+            "character": "TEST_EMPATH_PERCEIVE_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775821990.053301
+        },
+        {
+          "duration_ms": 0.7751999655738473,
+          "metadata": {
+            "character": "TEST_EMPATH_PERCEIVE_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775821990.636933
+        },
+        {
+          "duration_ms": 159.68499996233732,
+          "metadata": {
+            "character": "TEST_EMPATH_PERCEIVE_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775821991.4249766
+        }
+      ],
+      "max_ms": 159.68499996233732,
+      "total_ms": 201.34929986670613
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

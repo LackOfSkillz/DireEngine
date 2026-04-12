@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Empath assess did not report the expected precise wound values: ['You are not linked to anyone.']",
+  "mode": "direct",
+  "scenario": "empath-core-loop",
+  "seed": 703482100
+}

@@ -1,0 +1,111 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 22066,
+        "is_dead": false,
+        "key": "TEST_THIEF_HIDER",
+        "life_state": "ALIVE",
+        "location": "TEST_THIEF_HIDE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "hidden": {
+            "source": "test",
+            "strength": 101
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 22065,
+            "key": "TEST_THIEF_HIDE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22066,
+            "key": "TEST_THIEF_HIDER",
+            "location": "TEST_THIEF_HIDE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22067,
+            "key": "TEST_THIEF_OBSERVER",
+            "location": "TEST_THIEF_HIDE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22068,
+            "key": "TEST_THIEF_ENTRY_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22069,
+            "key": "east",
+            "location": "TEST_THIEF_HIDE_ROOM",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 22070,
+            "key": "west",
+            "location": "TEST_THIEF_ENTRY_ROOM",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 22071,
+            "key": "TEST_THIEF_LATE",
+            "location": "TEST_THIEF_HIDE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22072,
+            "key": "TEST_THIEF_WEAK",
+            "location": "TEST_THIEF_HIDE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22073,
+            "key": "TEST_THIEF_STRONG",
+            "location": "TEST_THIEF_HIDE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_THIEF_HIDER",
+          "TEST_THIEF_OBSERVER",
+          "east",
+          "TEST_THIEF_LATE",
+          "TEST_THIEF_WEAK",
+          "TEST_THIEF_STRONG"
+        ],
+        "exits": [
+          "east"
+        ],
+        "id": 22065,
+        "key": "TEST_THIEF_HIDE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775940399.456566
+    },
+    "label": "final"
+  }
+]

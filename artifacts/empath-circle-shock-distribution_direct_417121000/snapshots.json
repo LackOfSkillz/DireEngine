@@ -1,0 +1,72 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 90,
+        "id": 17825,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_LEADER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_CIRCLE_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.32,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17824,
+            "key": "TEST_EMPATH_CIRCLE_SHOCK_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17825,
+            "key": "TEST_EMPATH_SHOCK_LEADER",
+            "location": "TEST_EMPATH_CIRCLE_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17826,
+            "key": "TEST_EMPATH_SHOCK_PARTNER",
+            "location": "TEST_EMPATH_CIRCLE_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17827,
+            "key": "TEST_EMPATH_SHOCK_PATIENT",
+            "location": "TEST_EMPATH_CIRCLE_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_LEADER",
+          "TEST_EMPATH_SHOCK_PARTNER",
+          "TEST_EMPATH_SHOCK_PATIENT"
+        ],
+        "exits": [],
+        "id": 17824,
+        "key": "TEST_EMPATH_CIRCLE_SHOCK_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775834804.9094663
+    },
+    "label": "final"
+  }
+]

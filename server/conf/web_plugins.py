@@ -2,6 +2,8 @@
 Web plugin hooks.
 """
 
+from twisted.web import static
+
 
 def at_webserver_root_creation(web_root):
     """
@@ -25,6 +27,7 @@ def at_webserver_root_creation(web_root):
         web_root.putChild("mypage", my_page)
 
     """
+    web_root.putChild(b"favicon.ico", static.File("web/static/website/images/favicon.ico"))
     return web_root
 
 
@@ -38,4 +41,5 @@ def at_webproxy_root_creation(web_root):
             primarily for new protocol development, but suitable
             for other shenanigans.
     """
+    web_root.putChild(b"favicon.ico", static.File("web/static/website/images/favicon.ico"))
     return web_root

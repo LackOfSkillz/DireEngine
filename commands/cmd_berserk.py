@@ -1,4 +1,4 @@
-from evennia import Command
+from commands.command import Command
 
 from world.systems.warrior import BERSERK_DATA, format_berserk_name
 

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "The rite is ready for restoration.",
+  "mode": "direct",
+  "scenario": "cleric-ritual-interruption-locality",
+  "seed": 198097100
+}

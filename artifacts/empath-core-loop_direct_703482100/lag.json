@@ -1,0 +1,109 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 25.45305000967346,
+  "lag": {
+    "avg_ms": 36.74229995813221,
+    "jitter": 30.541639902249756,
+    "max_ms": 73.92329990398139,
+    "min_ms": 2.821300062350929,
+    "p95_ms": 71.7604999197647,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 73.92329990398139,
+      "snapshot": "touched"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 63.10929998289794,
+      "snapshot": "moved_away"
+    },
+    {
+      "command": "DIRECT process_empath_tick",
+      "ms": 16.271599917672575,
+      "snapshot": "post_move_tick"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 27.58599992375821,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "assess",
+      "ms": 2.821300062350929,
+      "snapshot": "assessed"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 73.85430007707328,
+      "kind": "command",
+      "ms": 73.92329990398139,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 13.841700041666627,
+      "kind": "direct",
+      "ms": 63.10929998289794,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "moved_away"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT process_empath_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 16.271599917672575,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_move_tick"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 11.344400001689792,
+      "kind": "direct",
+      "ms": 27.58599992375821,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 2.7717999182641506,
+      "kind": "command",
+      "ms": 2.821300062350929,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    }
+  ]
+}

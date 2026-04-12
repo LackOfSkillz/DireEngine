@@ -25,6 +25,7 @@ DEAD_STATE_ALLOWED_COMMANDS = {
     "l",
     "pose",
     "raise",
+    "revive",
     "resurrect",
     "say",
     "score",

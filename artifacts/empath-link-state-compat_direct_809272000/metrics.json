@@ -1,0 +1,221 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 163.65759994369,
+      "kind": "command",
+      "ms": 183.42589994426817,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    }
+  ],
+  "command_timings_ms": [
+    183.42589994426817
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 183.3649999462068,
+    "timings_ms": [
+      183.42589994426817
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775835110.452414,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 163.65759994369,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 183.42589994426817,
+    "jitter": 0.0,
+    "max_ms": 183.42589994426817,
+    "min_ms": 183.42589994426817,
+    "p95_ms": 183.42589994426817,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "take bleeding",
+      "ms": 183.42589994426817,
+      "snapshot": "took_bleeding"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 183.3649999462068,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You feel your empathy settling into perusing.",
+    "You draw the injury into yourself."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "take bleeding"
+    ],
+    "empath_bleeding": 16,
+    "patient_bleeding": 8,
+    "resolved_target_id": 17881,
+    "snapshot_count": 3,
+    "snapshot_labels": [
+      "initial",
+      "took_bleeding",
+      "final"
+    ],
+    "take_output": [
+      "You feel your empathy settling into perusing.",
+      "You draw the injury into yourself."
+    ]
+  },
+  "scenario_duration_ms": 11644,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "take bleeding",
+      "ms": 183.42589994426817
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "took_bleeding",
+    "final"
+  ],
+  "started_at": 1775835098.23574,
+  "state_transition_count": 2,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath link compatibility coverage validates that persisted link mappings still resolve through the current link helpers and command flow."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 183.3649999462068,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 183.3649999462068,
+          "metadata": {
+            "character": "TEST_EMPATH_LINK_COMPAT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835103.536593
+        }
+      ],
+      "max_ms": 183.3649999462068,
+      "total_ms": 183.3649999462068
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

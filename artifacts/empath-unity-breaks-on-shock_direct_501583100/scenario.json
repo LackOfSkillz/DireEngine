@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath unity-breaks-on-shock coverage validates central cleanup and post-center partial recovery without failing on environment-specific latency.",
+    "tags": [
+      "core",
+      "empath",
+      "unity",
+      "shock"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-unity-breaks-on-shock",
+  "seed": 501583100,
+  "started_at": 1775830437.5025833
+}

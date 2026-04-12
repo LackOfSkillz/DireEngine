@@ -1,0 +1,65 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17177,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SHOCK_TRANSFER_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SHOCK_TRANSFER_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17176,
+            "key": "TEST_EMPATH_SHOCK_TRANSFER_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17177,
+            "key": "TEST_EMPATH_SHOCK_TRANSFER_HEALER",
+            "location": "TEST_EMPATH_SHOCK_TRANSFER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17178,
+            "key": "TEST_EMPATH_SHOCK_TRANSFER_PATIENT",
+            "location": "TEST_EMPATH_SHOCK_TRANSFER_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SHOCK_TRANSFER_HEALER",
+          "TEST_EMPATH_SHOCK_TRANSFER_PATIENT"
+        ],
+        "exits": [],
+        "id": 17176,
+        "key": "TEST_EMPATH_SHOCK_TRANSFER_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775823189.546907
+    },
+    "label": "final"
+  }
+]

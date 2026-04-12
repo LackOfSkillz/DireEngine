@@ -89,13 +89,13 @@ def _room_has_any_tag(room, tag_keys):
 
 
 def _room_map_flags(room):
-    poi_tags = ("poi_bank", "poi_town_green", "poi_guild_empath", "poi_guild_ranger", "poi_market")
+    poi_tags = ("poi_bank", "poi_town_green", "poi_guild_empath", "poi_guild_ranger", "poi_guild_cleric", "poi_market")
     has_poi = bool(
         _room_has_any_tag(room, poi_tags)
         or getattr(getattr(room, "db", None), "poi_anchor", None)
         or getattr(getattr(room, "db", None), "poi_exit_name", None)
     )
-    has_guild_entrance = _room_has_any_tag(room, ("guild_access_empath", "guild_access_ranger"))
+    has_guild_entrance = _room_has_any_tag(room, ("guild_access_empath", "guild_access_ranger", "guild_access_cleric"))
     return {
         "has_poi": has_poi,
         "has_guild_entrance": has_guild_entrance,

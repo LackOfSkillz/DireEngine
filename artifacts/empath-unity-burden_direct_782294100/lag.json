@@ -1,0 +1,75 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 97.65343337009351,
+  "lag": {
+    "avg_ms": 98.77969999797642,
+    "jitter": 40.395144783666744,
+    "max_ms": 138.4834999917075,
+    "min_ms": 57.726999977603555,
+    "p95_ms": 134.64800999499857,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "ms": 100.12860002461821,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "ms": 57.726999977603555,
+      "snapshot": "unified"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 138.4834999917075,
+      "snapshot": "took_with_unity"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "first_response_ms": 100.04539997316897,
+      "kind": "command",
+      "ms": 100.12860002461821,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "first_response_ms": 57.651500101201236,
+      "kind": "command",
+      "ms": 57.726999977603555,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 135.2634000359103,
+      "kind": "command",
+      "ms": 138.4834999917075,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_with_unity"
+    }
+  ]
+}

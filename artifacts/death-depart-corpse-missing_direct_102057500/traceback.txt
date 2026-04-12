@@ -1,0 +1,56 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: database is locked
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 17446, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7643, in run_death_depart_corpse_missing_scenario
+    corpse.delete()
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\objects\objects.py", line 1571, in delete
+    script.delete()
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\scripts\scripts.py", line 488, in delete
+    super().delete()
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\typeclasses\models.py", line 777, in delete
+    super().delete()
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\utils\idmapper\models.py", line 422, in delete
+    super().delete(*args, **kwargs)
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\models\base.py", line 1281, in delete
+    return collector.delete()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\models\deletion.py", line 501, in delete
+    count = query.delete_batch(pk_list, self.using)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\models\sql\subqueries.py", line 42, in delete_batch
+    num_deleted += self.do_query(
+                   ^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\models\sql\subqueries.py", line 24, in do_query
+    return self.get_compiler(using).execute_sql(ROW_COUNT)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\django\db\backends\sqlite3\base.py", line 360, in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: database is locked

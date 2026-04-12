@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath link separation coverage validates automatic link breakage when a patient leaves the room without failing on environment-specific latency.",
+    "tags": [
+      "core",
+      "empath",
+      "link"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-link-separation",
+  "seed": 310614300,
+  "started_at": 1775835050.9973261
+}

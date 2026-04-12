@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Favor-pray-loop scenario missed the combat blocker: Your favor is already full.",
+  "mode": "direct",
+  "scenario": "favor-pray-loop",
+  "seed": 631511500
+}

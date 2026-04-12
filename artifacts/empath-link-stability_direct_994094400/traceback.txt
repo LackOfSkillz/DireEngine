@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 5804, in scenario
+    raise AssertionError(f"Vitality transfers should only consume the configured small-transfer stability cost: {after_second}")
+AssertionError: Vitality transfers should only consume the configured small-transfer stability cost: {'target_id': 17242, 'type': 'direct', 'strength': 100, 'stability': 76, 'link_bonus_skill': None, 'link_bonus_value': 0, 'link_bonus_tick_at': 0.0, 'created_at': 1775829001.4354856, 'target': TEST_EMPATH_LINK_PATIENT, 'is_local': True, 'priority': 2, 'strength_label': 'Strong', 'condition': 'steady', 'remaining': 0}

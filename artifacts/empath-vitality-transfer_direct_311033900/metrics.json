@@ -1,0 +1,532 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 5,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_VITALITY_PATIENT",
+      "first_response_ms": 124.17169997934252,
+      "kind": "command",
+      "ms": 124.26819989923388,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_VITALITY_PARTNER",
+      "first_response_ms": 3.3016999950632453,
+      "kind": "command",
+      "ms": 3.3798000076785684,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take 25%",
+      "first_response_ms": 9.56219993531704,
+      "kind": "command",
+      "ms": 9.658699971623719,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "partial_blocked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 20",
+      "first_response_ms": 125.98320003598928,
+      "kind": "command",
+      "ms": 144.94729996658862,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "vitality_taken"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality all",
+      "first_response_ms": 55.66489999182522,
+      "kind": "command",
+      "ms": 186.4445999963209,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "overdrawn"
+    }
+  ],
+  "command_timings_ms": [
+    124.26819989923388,
+    3.3798000076785684,
+    9.658699971623719,
+    144.94729996658862,
+    186.4445999963209
+  ],
+  "commands": {
+    "count": 5,
+    "max_ms": 186.40859995502979,
+    "timings_ms": [
+      124.26819989923388,
+      3.3798000076785684,
+      9.658699971623719,
+      144.94729996658862,
+      186.4445999963209
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775830019.2628453,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 63.73673998750746,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 93.73971996828914,
+    "jitter": 82.73894514700393,
+    "max_ms": 186.4445999963209,
+    "min_ms": 3.3798000076785684,
+    "p95_ms": 178.14513999037445,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_VITALITY_PATIENT",
+      "ms": 124.26819989923388,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_VITALITY_PARTNER",
+      "ms": 3.3798000076785684,
+      "snapshot": "unified"
+    },
+    {
+      "command": "take 25%",
+      "ms": 9.658699971623719,
+      "snapshot": "partial_blocked"
+    },
+    {
+      "command": "take vitality 20",
+      "ms": 144.94729996658862,
+      "snapshot": "vitality_taken"
+    },
+    {
+      "command": "take vitality all",
+      "ms": 186.4445999963209,
+      "snapshot": "overdrawn"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 186.40859995502979,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You are not yet ready to weave unity between burdens.",
+    "TEST_EMPATH_VITALITY_PATIENT has no wound you can draw that way.",
+    "You feel your empathy settling into perusing.",
+    "You draw out living force, and it tears through you on the way in.",
+    "Your focus wavers slightly.",
+    "You have taken too much. Your senses falter.",
+    "You have taken too much. Your senses falter.",
+    "The weight of the transfer leaves you reeling.",
+    "You draw out living force, and it tears through you on the way in."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 40177,
+  "scheduler": {
+    "active_job_count": 13,
+    "active_jobs": [
+      {
+        "created_at": 1775829578.3187933,
+        "delay_s": 3.5,
+        "due_at": 1775829581.819781,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "cfff4c463cd343e9b4a106ad26bfa25a",
+        "key": "combat:roundtime:17311",
+        "owner": "#17311",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829614.7627425,
+        "delay_s": 2.5,
+        "due_at": 1775829617.2627425,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LEARNING_HEALER",
+        "job_id": "442362acec0a480c9d7a66f9094cbac8",
+        "key": "combat:roundtime:17318",
+        "owner": "#17318",
+        "owner_label": "TEST_EMPATH_LEARNING_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829635.1420643,
+        "delay_s": 2.5,
+        "due_at": 1775829637.6420643,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "job_id": "ca8fe7ba1cbb4af996b644244520b61a",
+        "key": "combat:roundtime:17325",
+        "owner": "#17325",
+        "owner_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829652.7379832,
+        "delay_s": 2.5,
+        "due_at": 1775829655.2389255,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_HEALER",
+        "job_id": "88849595ab2b47a296c6da38f8809811",
+        "key": "combat:roundtime:17328",
+        "owner": "#17328",
+        "owner_label": "TEST_EMPATH_LINK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829686.5934093,
+        "delay_s": 2.5,
+        "due_at": 1775829689.0934093,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "job_id": "1d26ec3bcd174dbd8c9a20ba85ce0e3e",
+        "key": "combat:roundtime:17334",
+        "owner": "#17334",
+        "owner_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829728.876984,
+        "delay_s": 2.5,
+        "due_at": 1775829731.3779297,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "job_id": "c81835e13a42449f9d3f500fccd312fd",
+        "key": "combat:roundtime:17343",
+        "owner": "#17343",
+        "owner_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829771.890781,
+        "delay_s": 2.5,
+        "due_at": 1775829774.390781,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_REDIRECT_HEALER",
+        "job_id": "6e5a7c8fd50840a487abca49a7ef6e0b",
+        "key": "combat:roundtime:17350",
+        "owner": "#17350",
+        "owner_label": "TEST_EMPATH_REDIRECT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829826.4853883,
+        "delay_s": 2.5,
+        "due_at": 1775829828.9853883,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SHOCK_HEALER",
+        "job_id": "af746b491da7454a8068b16ddb90f7c5",
+        "key": "combat:roundtime:17361",
+        "owner": "#17361",
+        "owner_label": "TEST_EMPATH_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829869.0742574,
+        "delay_s": 3.0,
+        "due_at": 1775829872.0742574,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_TRIAGE_HEALER",
+        "job_id": "069ccbaf1fd84fb896c0c3045d1af93d",
+        "key": "combat:roundtime:17369",
+        "owner": "#17369",
+        "owner_label": "TEST_EMPATH_TRIAGE_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829905.0380895,
+        "delay_s": 2.5,
+        "due_at": 1775829907.5390868,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "job_id": "997c33440a0244d8855e7f601a94a108",
+        "key": "combat:roundtime:17374",
+        "owner": "#17374",
+        "owner_label": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829934.910274,
+        "delay_s": 2.5,
+        "due_at": 1775829937.410274,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_UNITY_HEALER",
+        "job_id": "444f6a8b91aa4a0ab6d24afb17dc43f0",
+        "key": "combat:roundtime:17380",
+        "owner": "#17380",
+        "owner_label": "TEST_EMPATH_UNITY_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829964.092538,
+        "delay_s": 2.5,
+        "due_at": 1775829966.5935886,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_UNLOCK_HEALER",
+        "job_id": "fc8483a260a14289a5a20ba72926f7de",
+        "key": "combat:roundtime:17384",
+        "owner": "#17384",
+        "owner_label": "TEST_EMPATH_UNLOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775829998.5291915,
+        "delay_s": 3.0,
+        "due_at": 1775830001.5305958,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_VITALITY_HEALER",
+        "job_id": "1c9917f6c65e455fa14ae2f2cb582ad5",
+        "key": "combat:roundtime:17388",
+        "owner": "#17388",
+        "owner_label": "TEST_EMPATH_VITALITY_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 13.0,
+    "queue_peak": 13.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "take vitality all",
+      "ms": 186.4445999963209
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "unified",
+    "partial_blocked",
+    "vitality_taken",
+    "overdrawn",
+    "final"
+  ],
+  "started_at": 1775829978.3120348,
+  "state_transition_count": 5,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath vitality-transfer regression coverage validates HP cost, overdraw, unity lockout, and partial lockout without depending on wall-clock timing."
+    },
+    "scheduler_job_count": 13,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 93.69997996836901,
+      "count": 5,
+      "entries": [
+        {
+          "duration_ms": 124.23389998730272,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775829994.2089322
+        },
+        {
+          "duration_ms": 3.3402000553905964,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "unity"
+          },
+          "timestamp": 1775829995.0822248
+        },
+        {
+          "duration_ms": 9.605499915778637,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775829996.0976133
+        },
+        {
+          "duration_ms": 144.9116999283433,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775829997.3480365
+        },
+        {
+          "duration_ms": 186.40859995502979,
+          "metadata": {
+            "character": "TEST_EMPATH_VITALITY_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775829998.5346265
+        }
+      ],
+      "max_ms": 186.40859995502979,
+      "total_ms": 468.49989984184504
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

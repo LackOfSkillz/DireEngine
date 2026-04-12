@@ -2,9 +2,10 @@ import random
 import time
 from collections.abc import Mapping
 
-from evennia import Command
+from commands.command import Command
 from world.systems.ranger import RANGER_SNIPE_CONFIG
 from world.systems.skills import award_exp_skill
+from world.systems.stealth import break_stealth
 
 from utils.contests import run_contest
 from utils.survival_messaging import msg_room, react_or_message_target
@@ -772,6 +773,9 @@ class CmdAttack(Command):
             self.caller.apply_thief_roundtime(action_roundtime)
         else:
             self.caller.set_roundtime(action_roundtime)
+
+        if self.caller.is_hidden() or bool(getattr(self.caller.db, "stealthed", False)):
+            break_stealth(self.caller)
 
         if target.db.hp == 0:
             self.caller.msg(f"You bring down {target.key}.")

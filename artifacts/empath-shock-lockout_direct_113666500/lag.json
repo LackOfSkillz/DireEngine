@@ -1,0 +1,126 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 35.05648334976286,
+  "lag": {
+    "avg_ms": 45.31311664807921,
+    "jitter": 47.791146151613525,
+    "max_ms": 97.19869995024055,
+    "min_ms": 1.121699926443398,
+    "p95_ms": 95.13367497129366,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "ms": 88.93860003445297,
+      "snapshot": "linked"
+    },
+    {
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "ms": 2.7453999500721693,
+      "snapshot": "touch_locked"
+    },
+    {
+      "command": "perceive health",
+      "ms": 2.0689000375568867,
+      "snapshot": "perceive_locked"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 1.121699926443398,
+      "snapshot": "take_locked"
+    },
+    {
+      "command": "center",
+      "ms": 97.19869995024055,
+      "snapshot": "centered"
+    },
+    {
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "ms": 79.80539998970926,
+      "snapshot": "relinked"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "first_response_ms": 88.84039998520166,
+      "kind": "command",
+      "ms": 88.93860003445297,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "first_response_ms": 2.681800047867,
+      "kind": "command",
+      "ms": 2.7453999500721693,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touch_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 1.9910000264644623,
+      "kind": "command",
+      "ms": 2.0689000375568867,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceive_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 1.0727000189945102,
+      "kind": "command",
+      "ms": 1.121699926443398,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "take_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "center",
+      "first_response_ms": 36.027500056661665,
+      "kind": "command",
+      "ms": 97.19869995024055,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "first_response_ms": 79.72549996338785,
+      "kind": "command",
+      "ms": 79.80539998970926,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "relinked"
+    }
+  ]
+}

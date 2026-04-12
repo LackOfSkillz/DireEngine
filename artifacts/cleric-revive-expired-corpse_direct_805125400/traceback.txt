@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 15217, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7461, in run_cleric_revive_expired_corpse_scenario
+    raise AssertionError("Expired-corpse scenario unexpectedly allowed revive startup.")
+AssertionError: Expired-corpse scenario unexpectedly allowed revive startup.

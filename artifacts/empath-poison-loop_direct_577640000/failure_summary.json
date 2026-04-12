@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Perceive health did not produce the expected room scan signal: ['TEST_EMPATH_POISON_PATIENT: critical']",
+  "mode": "direct",
+  "scenario": "empath-poison-loop",
+  "seed": 577640000
+}

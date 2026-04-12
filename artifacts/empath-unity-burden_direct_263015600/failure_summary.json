@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Unity should smooth only a small share onto the secondary target: 3",
+  "mode": "direct",
+  "scenario": "empath-unity-burden",
+  "seed": 263015600
+}

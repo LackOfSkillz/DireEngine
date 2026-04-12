@@ -1,0 +1,333 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 0,
+  "command_timing_entries": [],
+  "command_timings_ms": [],
+  "commands": {
+    "count": 0,
+    "max_ms": 0.0,
+    "timings_ms": []
+  },
+  "deletion_failures": [],
+  "ended_at": 1775951475.4762182,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 0.0,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 0.0,
+    "jitter": 0.0,
+    "max_ms": 0.0,
+    "min_ms": 0.0,
+    "p95_ms": 0.0,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 0.0,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "audit_count": 169,
+    "guard_query_count": 20,
+    "hostile_query_count": 20,
+    "imported": {
+      "armor": 20,
+      "civilian": 19,
+      "clothing": 20,
+      "container": 20,
+      "docile_creature": 10,
+      "guard": 20,
+      "hostile_creature": 20,
+      "shopkeeper": 20,
+      "weapon": 20
+    },
+    "report_lines": [
+      "canon_items: 80",
+      "canon_actors: 89",
+      "canon_shops: 20",
+      "canon_import_audit: 169",
+      "container: 4 missing slot",
+      "docile_creature: 10 missing flee_behavior",
+      "guard: 20 missing aggression_type",
+      "weapon: 3 missing value_text"
+    ],
+    "sample_failures": {
+      "container": [
+        {
+          "canonical_key": "container:canon_containers:17",
+          "missing_fields": [
+            "slot"
+          ],
+          "name": "Brown paper-wrapped package",
+          "source_id": 17,
+          "warnings": []
+        },
+        {
+          "canonical_key": "container:canon_containers:20",
+          "missing_fields": [
+            "slot"
+          ],
+          "name": "Pale purple candy box tied with an ivory ribbon",
+          "source_id": 20,
+          "warnings": [
+            "capacity_json"
+          ]
+        },
+        {
+          "canonical_key": "container:canon_containers:47",
+          "missing_fields": [
+            "slot"
+          ],
+          "name": "Pouch of lead pellets",
+          "source_id": 47,
+          "warnings": []
+        }
+      ],
+      "docile_creature": [
+        {
+          "canonical_key": "docile_creature:canon_npcs:63",
+          "missing_fields": [
+            "flee_behavior"
+          ],
+          "name": "Antelope",
+          "source_id": 63,
+          "warnings": []
+        },
+        {
+          "canonical_key": "docile_creature:canon_npcs:98",
+          "missing_fields": [
+            "flee_behavior"
+          ],
+          "name": "Bison",
+          "source_id": 98,
+          "warnings": []
+        },
+        {
+          "canonical_key": "docile_creature:canon_npcs:136",
+          "missing_fields": [
+            "flee_behavior"
+          ],
+          "name": "Bone amalgam",
+          "source_id": 136,
+          "warnings": []
+        }
+      ],
+      "guard": [
+        {
+          "canonical_key": "guard:entities:55",
+          "missing_fields": [
+            "aggression_type"
+          ],
+          "name": "Andesite guardian",
+          "source_id": 55,
+          "warnings": [
+            "base_health"
+          ]
+        },
+        {
+          "canonical_key": "guard:entities:69",
+          "missing_fields": [
+            "aggression_type"
+          ],
+          "name": "Arisen ghoulish guard",
+          "source_id": 69,
+          "warnings": [
+            "base_health"
+          ]
+        },
+        {
+          "canonical_key": "guard:entities:144",
+          "missing_fields": [
+            "aggression_type"
+          ],
+          "name": "Breccia guardian",
+          "source_id": 144,
+          "warnings": [
+            "base_health"
+          ]
+        }
+      ],
+      "weapon": [
+        {
+          "canonical_key": "weapon:canon_weapons:78",
+          "missing_fields": [
+            "value_text"
+          ],
+          "name": "Weapon:Ash short bow",
+          "source_id": 78,
+          "warnings": []
+        },
+        {
+          "canonical_key": "weapon:canon_weapons:85",
+          "missing_fields": [
+            "value_text"
+          ],
+          "name": "Weapon:Copper-tipped ironwood crossbow",
+          "source_id": 85,
+          "warnings": []
+        },
+        {
+          "canonical_key": "weapon:canon_weapons:93",
+          "missing_fields": [
+            "value_text"
+          ],
+          "name": "Weapon:Dark steel lata'oloh with an curved oak hilt",
+          "source_id": 93,
+          "warnings": []
+        }
+      ]
+    },
+    "snapshot_count": 0,
+    "snapshot_labels": [],
+    "summary": {
+      "failed": {
+        "container": 4,
+        "docile_creature": 10,
+        "guard": 20,
+        "weapon": 3
+      },
+      "imported": {
+        "armor": 20,
+        "civilian": 19,
+        "clothing": 20,
+        "container": 20,
+        "docile_creature": 10,
+        "guard": 20,
+        "hostile_creature": 20,
+        "shopkeeper": 20,
+        "weapon": 20
+      },
+      "missing_fields": {
+        "container.slot": 4,
+        "docile_creature.flee_behavior": 10,
+        "guard.aggression_type": 20,
+        "weapon.value_text": 3
+      }
+    },
+    "weapon_query_count": 20
+  },
+  "scenario_duration_ms": 2850,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [],
+  "started_at": 1775951471.9925022,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {},
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

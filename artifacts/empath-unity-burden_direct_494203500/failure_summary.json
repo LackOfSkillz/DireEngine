@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Empath should still take the majority of the burden: 13",
+  "mode": "direct",
+  "scenario": "empath-unity-burden",
+  "seed": 494203500
+}

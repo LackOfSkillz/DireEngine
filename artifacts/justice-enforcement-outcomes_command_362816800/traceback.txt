@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\tests\scenarios\justice_enforcement_outcomes.py", line 200, in scenario
+    raise AssertionError(f"Retrieval should succeed after debt is cleared, saw: {retrieve_success_messages}")
+AssertionError: Retrieval should succeed after debt is cleared, saw: ['You open the evidence locker and retrieve your belongings.']

@@ -8,6 +8,7 @@ creation commands.
 
 """
 
+import copy
 from collections.abc import Mapping
 import logging
 import math
@@ -22,6 +23,7 @@ from evennia.utils.search import search_object, search_tag
 
 from typeclasses.abilities import get_ability
 from typeclasses.box import Box
+from typeclasses.corpse import get_corpse_wounds as get_corpse_wounds_payload, is_near_stable as is_near_stable_corpse_wounds, is_stable as is_stable_corpse_wounds, normalize_corpse_wounds
 from typeclasses.items.gem import QUALITY_NAMES, SIZE_NAMES, build_gem_data, create_gem, downgrade_gem_data
 from typeclasses.lockpick import Lockpick
 from typeclasses.spells import SPELLS, SPELLCASTING_GUILDS
@@ -153,6 +155,19 @@ DEFAULT_STATS = {
     "magic_resistance": 10,
 }
 
+XP_TAKE = 5
+XP_TEND = 3
+XP_PERCEIVE = 2
+XP_SHIFT = 6
+
+EMPATH_FIELD_XP = {
+    "take": ("empathy", XP_TAKE, "empath_take"),
+    "tend": ("first_aid", XP_TEND, "empath_tend"),
+    "perceive": ("empathy", XP_PERCEIVE, "empath_perceive"),
+    "shift": ("empathy", XP_SHIFT, "empath_shift"),
+    "study_anatomy": ("scholarship", 4, "study_anatomy"),
+}
+
 VALID_GUILDS = tuple(PROFESSION_PROFILES.keys())
 
 RANGER_JOIN_REQUIREMENTS = (
@@ -196,21 +211,25 @@ DEAD_STATE_ALLOWED_COMMANDS = {
 
 CLIMB_OUTCOME_MESSAGES = {
     "low": {
+        "cost": 5,
         "success": (
             "You catch the rhythm of the climb and pull yourself into the low blind.",
             "The lower route yields to you and you climb up cleanly.",
             "You find the easy holds and move into the blind above.",
         ),
+        "cost": 10,
         "partial": (
             "You get partway up, then settle back onto the rope walk without losing ground.",
             "The lower climb wobbles under you and you stop to steady yourself.",
             "You test the route, but do not gain the blind this time.",
         ),
+        "cost": 15,
         "failure": (
             "Your footing slips and you drop back onto the rope walk.",
             "The lower climb turns under you and you fall back to the start.",
             "You lose the easy hold and land back on the rope walk.",
         ),
+        "cost": 15,
     },
     "mid": {
         "success": (
@@ -704,6 +723,79 @@ FAVOR_SYSTEM_CONFIG = {
     "depart_restore_hp_ratio": 0.5,
     "resurrection_restore_hp_ratio": 0.75,
     "resurrection_base_attunement_cost": 30,
+    "shrine_regen_interval": 300.0,
+    "pray_cooldown_seconds": 60.0,
+    "favor_decay_seconds": 1800.0,
+    "revive_cost": 1,
+    "revive_delay_seconds": 5.0,
+}
+
+GRAVE_SYSTEM_CONFIG = {
+    "expiry_seconds": 30 * 60,
+    "base_coin_loss_ratio": 0.10,
+    "high_favor_threshold": 3,
+    "high_favor_loss_scale": 0.5,
+    "moderate_sting_bonus_ratio": 0.02,
+    "severe_sting_bonus_ratio": 0.05,
+}
+
+DEPART_CONFIRM_WINDOW_SECONDS = 8.0
+DEATH_STING_MAX_STACKS = 5
+DEATH_STING_DECAY_SECONDS = 600.0
+DEATH_STING_HP_CAPS = {
+    "light": 0.9,
+    "moderate": 0.8,
+    "severe": 0.7,
+}
+
+CLERIC_CORPSE_RITUAL_ACTIONS = {
+    "prepare": {
+        "cost": 5,
+        "delay": 4.0,
+        "start_message": "You begin preparing the body for the rites.",
+        "room_message": "{actor} begins preparing {corpse} with measured, ritual care.",
+    },
+    "stabilize": {
+        "cost": 10,
+        "delay": 6.0,
+        "start_message": "You begin stabilizing the body's fading pattern.",
+        "room_message": "{actor} settles into a vigil over {corpse}, steadying the corpse's fading pattern.",
+    },
+    "restore": {
+        "cost": 15,
+        "delay": 8.0,
+        "start_message": "You begin restoring the body's fragile memories.",
+        "room_message": "{actor} traces a restorative rite over {corpse}, coaxing memory back into place.",
+    },
+    "bind": {
+        "cost": 15,
+        "delay": 8.0,
+        "start_message": "You begin binding the soul securely to the body.",
+        "room_message": "{actor} raises a binding rite over {corpse}, drawing the soul into a tighter orbit.",
+    },
+}
+
+CLERIC_REVIVE_RITUAL_COST = 20
+
+CLERIC_RITUAL_QUALITY_STEPS = {
+    "prepare": 1,
+    "stabilize": 2,
+    "restore": 3,
+    "bind": 3,
+}
+
+CLERIC_RITUAL_OUTCOME_BANDS = (
+    {"minimum": 10, "label": "best", "hp_ratio": 0.6, "recovery_state": "revived_best", "aftereffect": "perfect", "message": "The soul returns cleanly, guided by steady hands."},
+    {"minimum": 6, "label": "light", "hp_ratio": 0.4, "recovery_state": "revived_light", "aftereffect": "stable", "message": "The rite settles well enough, and life answers with only a slight shudder."},
+    {"minimum": 3, "label": "moderate", "hp_ratio": 0.25, "recovery_state": "revived_moderate", "aftereffect": "fragile", "message": "Life returns unevenly, leaving the body strained and fragile."},
+    {"minimum": 0, "label": "severe", "hp_ratio": 0.12, "recovery_state": "revived_severe", "aftereffect": "flawed", "message": "The body lurches back, barely whole."},
+)
+CLERIC_STAGE_SPECIALIZATIONS = {
+    "prepare": "stabilizer",
+    "stabilize": "stabilizer",
+    "restore": "restorer",
+    "bind": "binder",
+    "revive": "binder",
 }
 
 DEATH_PROTECTION_CONFIG = {
@@ -721,23 +813,24 @@ RESURRECTION_QUALITY_PROFILES = (
 )
 
 CLERIC_DEVOTION_CONFIG = {
-    "baseline": 40,
+    "baseline": 100,
     "max_devotion": 100,
-    "drift_interval": 30.0,
+    "shrine_regen_amount": 5,
+    "shrine_regen_interval": 60.0,
     "rituals": {
         "prayer": {
-            "gain": 8,
-            "cooldown": 20.0,
+            "gain": 5,
+            "cooldown": 60.0,
             "message": "You offer a quiet prayer, strengthening your connection.",
         },
         "focus": {
-            "gain": 14,
-            "cooldown": 45.0,
+            "gain": 5,
+            "cooldown": 60.0,
             "message": "You focus on the Immortals with measured intent, drawing their attention closer.",
         },
         "devotion": {
-            "gain": 22,
-            "cooldown": 90.0,
+            "gain": 5,
+            "cooldown": 60.0,
             "message": "You commit yourself to a fuller rite, and the divine answer with unmistakable warmth.",
         },
     },
@@ -894,6 +987,9 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.active_link = None
         self.db.empath_links = {}
         self.db.empath_unity = None
+        self.db.empath_circle_members = []
+        self.db.empath_circle_leader = None
+        self.db.empath_circle_invites = []
         self.db.wounds = _copy_default_empath_wounds()
         self.db.stabilized_until = 0.0
         self.db.warrior_circle = 1
@@ -914,15 +1010,43 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.crime_flag = False
         self.db.crime_severity = 0
         self.db.awareness_bonus = 0
+        self.db.awareness_state = {}
+        self.db.stealthed = False
+        self.db.stealth_value = 0
+        self.db.last_hide_time = 0
+        self.db.last_search_time = 0
+        self.db.perception_cache = None
+        self.db.repeat_theft_targets = {}
+        self.db.pvp_open_until = 0
+        self.db.last_mark_target = None
+        self.db.last_mark_time = 0
+        self.db.contacts = {}
+        self.db.thief_reputation = 0
+        self.db.wanted_level = 0
+        self.db.last_wanted_update = 0
+        self.db.shop_heat = 0
+        self.db.shop_heat_updated_at = 0
+        self.db.theft_attempt_log = {}
         self.db.is_captured = False
         self.db.confiscated_items = []
+        self.db.confiscation_location = None
         self.db.fine_amount = 0
         self.db.fine_due = 0
+        self.db.justice_debt = 0
         self.db.collateral_locked = False
         self.db.fine_due_timestamp = None
         self.db.sentence_type = None
         self.db.jail_timer = 0
         self.db.in_stocks = False
+        self.db.in_pillory = False
+        self.db.pillory_end_time = 0
+        self.db.in_jail = False
+        self.db.jail_end_time = 0
+        self.db.crime_count = 0
+        self.db.last_crime_time = 0
+        self.db.last_crime_decay_time = 0
+        self.db.law_reputation = 0
+        self.db.last_law_reputation_decay_time = 0
         self.db.awaiting_plea = False
         self.db.plea = None
         self.db.surrendered = False
@@ -974,6 +1098,17 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.bleed_state = "none"
         self.db.roundtime_end = 0
         self.db.coins = 0
+        self.db.total_tips = 0
+        self.db.last_tip_amount = 0
+        self.db.last_tip_time = 0.0
+        self.db.tip_history = {}
+        self.db.empath_reputation_score = 0
+        self.db.last_perceive_time = 0.0
+        self.db.last_medical_decay_at = 0.0
+        self.db.last_critical_warning_at = 0.0
+        self.db.empath_overload_until = 0.0
+        self.db.empath_triage_context = {}
+        self.db.last_triage_scan_at = 0.0
         self.db.exp_debt = 0
         self.db.recovery_consent = []
         self.db.last_recovery_type = None
@@ -1058,6 +1193,7 @@ class Character(ObjectParent, DefaultCharacter):
     def at_post_puppet(self, *args, **kwargs):
         super().at_post_puppet(*args, **kwargs)
         self.ensure_core_defaults()
+        self.refresh_death_sting(emit_message=False)
         spawned_from_web = self._apply_web_new_player_spawn()
         if not spawned_from_web:
             self._restore_onboarding_entry_if_needed()
@@ -1071,6 +1207,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.get_subsystem()
         sync_subject_interest(self)
         self.sync_client_state(include_map=True)
+        if self.is_dead():
+            self.msg("You are dead. You must wait for resurrection or type DEPART to let go.")
 
     def at_post_unpuppet(self, *args, **kwargs):
         super().at_post_unpuppet(*args, **kwargs)
@@ -1180,6 +1318,22 @@ class Character(ObjectParent, DefaultCharacter):
         )
         self._persist_exp_skill_state(exp_skill)
         return gained
+
+    def award_field_xp(self, action_key, difficulty=None, success=True, outcome=None, context_multiplier=1.0):
+        normalized_action = str(action_key or "").strip().lower()
+        config = EMPATH_FIELD_XP.get(normalized_action)
+        if not config:
+            return 0.0
+        skill_name, default_difficulty, event_key = config
+        resolved_difficulty = int(default_difficulty if difficulty is None else difficulty)
+        return self.award_skill_experience(
+            skill_name,
+            max(1, resolved_difficulty),
+            success=success,
+            outcome=outcome,
+            event_key=event_key,
+            context_multiplier=context_multiplier,
+        )
 
     def compute_empathy_xp(self, action_key, difficulty, amount=0, target=None, wound_key=None, requested_fraction=None, rate_key=None, unity=False):
         normalized_action = str(action_key or "take").strip().lower() or "take"
@@ -1503,6 +1657,12 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.empath_links = {}
         if self.db.empath_unity is None:
             self.db.empath_unity = None
+        if getattr(self.db, "empath_circle_members", None) is None:
+            self.db.empath_circle_members = []
+        if getattr(self.db, "empath_circle_leader", None) is None:
+            self.db.empath_circle_leader = None
+        if getattr(self.db, "empath_circle_invites", None) is None:
+            self.db.empath_circle_invites = []
         raw_link = getattr(self.db, "empath_link", None)
         if isinstance(raw_link, int):
             legacy_target_id = int(raw_link or 0)
@@ -1581,13 +1741,23 @@ class Character(ObjectParent, DefaultCharacter):
         if self.db.last_corpse_id is None:
             self.db.last_corpse_id = None
         if self.db.death_sting is None:
-            self.db.death_sting = False
+            self.db.death_sting = 0
         if self.db.death_sting_active is None:
             self.db.death_sting_active = False
         if self.db.death_sting_end is None:
             self.db.death_sting_end = 0.0
         if self.db.death_sting_severity is None:
             self.db.death_sting_severity = 0.0
+        if self.db.death_sting_hp_cap_ratio is None:
+            self.db.death_sting_hp_cap_ratio = 1.0
+        if self.db.death_sting_recovery_label is None:
+            self.db.death_sting_recovery_label = "none"
+        if self.db.death_penalty_applied is None:
+            self.db.death_penalty_applied = False
+        if self.db.depart_confirm_mode is None:
+            self.db.depart_confirm_mode = None
+        if self.db.depart_confirm_expires_at is None:
+            self.db.depart_confirm_expires_at = 0.0
         if self.db.deaths_since_last_shrine is None:
             self.db.deaths_since_last_shrine = 0
         if self.db.last_low_favor_warning_at is None:
@@ -1602,10 +1772,14 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.is_captured = False
         if self.db.confiscated_items is None:
             self.db.confiscated_items = []
+        if self.db.confiscation_location is None:
+            self.db.confiscation_location = None
         if self.db.fine_amount is None:
             self.db.fine_amount = 0
         if self.db.fine_due is None:
             self.db.fine_due = 0
+        if self.db.justice_debt is None:
+            self.db.justice_debt = 0
         if self.db.collateral_locked is None:
             self.db.collateral_locked = False
         if self.db.fine_due_timestamp is None:
@@ -1616,6 +1790,24 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.jail_timer = 0
         if self.db.in_stocks is None:
             self.db.in_stocks = False
+        if self.db.in_pillory is None:
+            self.db.in_pillory = False
+        if self.db.pillory_end_time is None:
+            self.db.pillory_end_time = 0
+        if self.db.in_jail is None:
+            self.db.in_jail = False
+        if self.db.jail_end_time is None:
+            self.db.jail_end_time = 0
+        if self.db.crime_count is None:
+            self.db.crime_count = 0
+        if self.db.last_crime_time is None:
+            self.db.last_crime_time = 0
+        if self.db.last_crime_decay_time is None:
+            self.db.last_crime_decay_time = 0
+        if self.db.law_reputation is None:
+            self.db.law_reputation = 0
+        if self.db.last_law_reputation_decay_time is None:
+            self.db.last_law_reputation_decay_time = 0
         if self.db.awaiting_plea is None:
             self.db.awaiting_plea = False
         if self.db.plea is None:
@@ -1702,6 +1894,29 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.is_npc = False
         if self.db.is_dead is None:
             self.db.is_dead = False
+        if self.db.death_type is None:
+            self.db.death_type = None
+        if self.db.death_timestamp is None:
+            self.db.death_timestamp = 0.0
+        if self.db.death_location is None:
+            self.db.death_location = None
+        if self.db.recovery_state is None:
+            self.db.recovery_state = "none"
+        if self.db.corpse_id is None:
+            self.db.corpse_id = None
+        if self.db.favor_current is None:
+            legacy_favor = getattr(self.db, "favor", None)
+            self.db.favor_current = int(legacy_favor or 0) if legacy_favor is not None else 1
+        if self.db.favor_max is None:
+            self.db.favor_max = 5
+        self.db.favor_current = max(0, min(int(self.db.favor_current or 0), int(self.db.favor_max or 0)))
+        self.db.favor = self.db.favor_current
+        if self.db.last_pray_time is None:
+            self.db.last_pray_time = 0.0
+        if self.db.last_favor_decay_at is None:
+            self.db.last_favor_decay_at = 0.0
+        if self.db.last_shrine_favor_regen_at is None:
+            self.db.last_shrine_favor_regen_at = 0.0
         if self.db.recovery_consent is None:
             self.db.recovery_consent = []
         if self.db.last_recovery_type is None:
@@ -1810,10 +2025,14 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.transfer_pool = 10
         if self.db.max_transfer_pool is None:
             self.db.max_transfer_pool = 10
+        if self.db.devotion_current is None:
+            self.db.devotion_current = 0
         if self.db.devotion is None:
-            self.db.devotion = 0
+            self.db.devotion = int(getattr(self.db, "devotion_current", 0) or 0)
+        if self.db.devotion_max is None:
+            self.db.devotion_max = int(CLERIC_DEVOTION_CONFIG["max_devotion"] if self.is_profession("cleric") else 0)
         if self.db.max_devotion is None:
-            self.db.max_devotion = int(CLERIC_DEVOTION_CONFIG["max_devotion"])
+            self.db.max_devotion = int(getattr(self.db, "devotion_max", 0) or 0)
         if self.db.bleed_state is None:
             self.db.bleed_state = "none"
         if self.db.stabilized_until is None:
@@ -1997,6 +2216,60 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_starter_skills()
         self.ensure_skill_defaults()
         self._seed_template_exp_skills()
+        if getattr(self.db, "stealthed", None) is None:
+            self.db.stealthed = False
+        if getattr(self.db, "stealth_value", None) is None:
+            self.db.stealth_value = 0
+        if getattr(self.db, "last_hide_time", None) is None:
+            self.db.last_hide_time = 0
+        if getattr(self.db, "last_search_time", None) is None:
+            self.db.last_search_time = 0
+        if getattr(self.db, "perception_cache", None) is None:
+            self.db.perception_cache = None
+        if not isinstance(getattr(self.db, "awareness_state", None), Mapping):
+            self.db.awareness_state = {}
+        if not isinstance(getattr(self.db, "repeat_theft_targets", None), Mapping):
+            self.db.repeat_theft_targets = {}
+        if getattr(self.db, "pvp_open_until", None) is None:
+            self.db.pvp_open_until = 0
+        if getattr(self.db, "last_mark_target", None) is None:
+            self.db.last_mark_target = None
+        if getattr(self.db, "last_mark_time", None) is None:
+            self.db.last_mark_time = 0
+        if not isinstance(getattr(self.db, "contacts", None), Mapping):
+            self.db.contacts = {}
+        if getattr(self.db, "thief_reputation", None) is None:
+            self.db.thief_reputation = 0
+        if getattr(self.db, "wanted_level", None) is None:
+            self.db.wanted_level = 0
+        if getattr(self.db, "last_wanted_update", None) is None:
+            self.db.last_wanted_update = 0
+        if getattr(self.db, "guard_attention", None) is None:
+            self.db.guard_attention = False
+        if getattr(self.db, "detained", None) is None:
+            self.db.detained = False
+        if getattr(self.db, "detained_until", None) is None:
+            self.db.detained_until = 0
+        if getattr(self.db, "last_arrest_time", None) is None:
+            self.db.last_arrest_time = 0
+        if getattr(self.db, "last_surrender_time", None) is None:
+            self.db.last_surrender_time = 0
+        if getattr(self.db, "justice_hold_reason", None) is None:
+            self.db.justice_hold_reason = None
+        if getattr(self.db, "justice_flee_flag", None) is None:
+            self.db.justice_flee_flag = False
+        if getattr(self.db, "outstanding_fine", None) is None:
+            self.db.outstanding_fine = 0
+        if getattr(self.db, "fine_due", None) is None:
+            self.db.fine_due = 0
+        if getattr(self.db, "justice_incidents", None) is None:
+            self.db.justice_incidents = []
+        if getattr(self.db, "shop_heat", None) is None:
+            self.db.shop_heat = 0
+        if getattr(self.db, "shop_heat_updated_at", None) is None:
+            self.db.shop_heat_updated_at = 0
+        if not isinstance(getattr(self.db, "theft_attempt_log", None), Mapping):
+            self.db.theft_attempt_log = {}
         if getattr(self.db, "exp_feedback", None) is None:
             self.db.exp_feedback = True
         if getattr(self.db, "circle", None) is None:
@@ -2009,6 +2282,28 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.stealth_learning = {"pending": [], "attempts": {}, "last_contest": {}, "combat_state": False}
         if getattr(self.db, "empath_strain", None) is None:
             self.db.empath_strain = 0
+        if getattr(self.db, "total_tips", None) is None:
+            self.db.total_tips = 0
+        if getattr(self.db, "last_tip_amount", None) is None:
+            self.db.last_tip_amount = 0
+        if getattr(self.db, "last_tip_time", None) is None:
+            self.db.last_tip_time = 0.0
+        if not isinstance(getattr(self.db, "tip_history", None), Mapping):
+            self.db.tip_history = {}
+        if getattr(self.db, "empath_reputation_score", None) is None:
+            self.db.empath_reputation_score = 0
+        if getattr(self.db, "last_perceive_time", None) is None:
+            self.db.last_perceive_time = 0.0
+        if getattr(self.db, "last_medical_decay_at", None) is None:
+            self.db.last_medical_decay_at = 0.0
+        if getattr(self.db, "last_critical_warning_at", None) is None:
+            self.db.last_critical_warning_at = 0.0
+        if getattr(self.db, "empath_overload_until", None) is None:
+            self.db.empath_overload_until = 0.0
+        if not isinstance(getattr(self.db, "empath_triage_context", None), Mapping):
+            self.db.empath_triage_context = {}
+        if getattr(self.db, "last_triage_scan_at", None) is None:
+            self.db.last_triage_scan_at = 0.0
 
         self.ndb._core_defaults_ready = True
 
@@ -2031,10 +2326,14 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_core_defaults()
         old_hp = int(self.db.hp or 0)
         self.db.hp = max(0, min(value, self.db.max_hp))
-        if (self.db.hp or 0) <= 0:
-            self.db.is_dead = True
+        if self.db.hp < old_hp:
+            self.cancel_pending_cleric_ritual("Pain breaks your concentration.")
         if old_hp > 0 and (self.db.hp or 0) <= 0:
-            self.at_death()
+            if self.consume_resurrection_death_guard():
+                self.db.hp = 1
+                self.msg("Your returning life falters, but the rite holds for one heartbeat.")
+            else:
+                self.at_death(death_type="vitality")
         self.sync_empath_wounds_from_resources()
         self.sync_client_state()
 
@@ -2133,27 +2432,125 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_favor(self):
         self.ensure_core_defaults()
-        return max(0, int(getattr(self.db, "favor", 0) or 0))
+        self.refresh_favor_state(emit_message=False)
+        current = getattr(self.db, "favor_current", None)
+        if current is None:
+            current = getattr(self.db, "favor", 0)
+        maximum = self.get_favor_max()
+        current = max(0, min(int(current or 0), maximum))
+        self.db.favor_current = current
+        self.db.favor = current
+        return current
+
+    def get_favor_max(self):
+        self.ensure_core_defaults()
+        maximum = max(1, int(getattr(self.db, "favor_max", 5) or 5))
+        self.db.favor_max = maximum
+        return maximum
+
+    def msg_favor_change(self, delta, reason=None):
+        delta_value = int(delta or 0)
+        reason_key = str(reason or "").strip().lower()
+        if delta_value > 0:
+            if reason_key == "pray":
+                self.msg("A faint sense of favor returns.")
+            else:
+                self.msg("You feel a small measure of favor return to you.")
+            return
+        if delta_value < 0:
+            self.msg("A portion of your favor is spent.")
+
+    def refresh_favor_state(self, emit_message=False, now=None):
+        self.ensure_core_defaults()
+        now = float(now or time.time())
+        current = max(0, min(int(getattr(self.db, "favor_current", 0) or 0), self.get_favor_max()))
+        if self.is_dead():
+            self.db.favor_current = current
+            self.db.favor = current
+            return False
+        last_decay = float(getattr(self.db, "last_favor_decay_at", 0.0) or 0.0)
+        if last_decay <= 0.0:
+            self.db.last_favor_decay_at = now
+            self.db.favor_current = current
+            self.db.favor = current
+            return False
+        interval = float(FAVOR_SYSTEM_CONFIG.get("favor_decay_seconds", 1800.0) or 1800.0)
+        if current <= 1 or now < last_decay + interval:
+            self.db.favor_current = current
+            self.db.favor = current
+            return False
+        decay_steps = int((now - last_decay) // interval)
+        if decay_steps <= 0:
+            return False
+        updated = max(1, current - decay_steps)
+        self.db.last_favor_decay_at = last_decay + (decay_steps * interval)
+        self.db.favor_current = updated
+        self.db.favor = updated
+        if emit_message and updated < current:
+            self.msg("You feel your stored favor begin to fade.")
+        self.sync_client_state()
+        return updated != current
+
+    def get_pray_cooldown_remaining(self, now=None):
+        self.ensure_core_defaults()
+        now = float(now or time.time())
+        cooldown = float(FAVOR_SYSTEM_CONFIG.get("pray_cooldown_seconds", 60.0) or 60.0)
+        last_pray = float(getattr(self.db, "last_pray_time", 0.0) or 0.0)
+        if last_pray <= 0.0:
+            return 0
+        return max(0, int(math.ceil((last_pray + cooldown) - now)))
+
+    def pray_for_favor(self):
+        self.ensure_core_defaults()
+        if self.is_dead():
+            return False, "You are beyond such concerns."
+        if self.is_in_combat():
+            return False, "You cannot gather yourself for prayer in the middle of combat."
+        remaining = self.get_pray_cooldown_remaining()
+        if remaining > 0:
+            return False, f"Your last prayer still lingers. Wait {remaining}s."
+        current = self.get_favor()
+        maximum = self.get_favor_max()
+        if current >= maximum:
+            return False, "Your favor is already full."
+        gain = 2 if self.is_in_shrine() else 1
+        updated = self.adjust_favor(gain, emit_message=True, reason="pray")
+        self.db.last_pray_time = time.time()
+        self.db.last_favor_decay_at = time.time()
+        self.sync_client_state()
+        if updated > current:
+            if gain > 1 and updated - current > 1:
+                return True, f"You kneel and pray. Favor rises to {updated}/{maximum}. The shrine answers more strongly here."
+            return True, f"You kneel and pray. Favor rises to {updated}/{maximum}."
+        return False, "Your prayer passes without effect."
 
     def set_favor(self, value, emit_message=False):
         self.ensure_core_defaults()
         before = self.get_favor()
-        self.db.favor = max(0, int(value or 0))
-        if emit_message and self.db.favor < before:
-            self.msg("A thread of divine favor is consumed.")
+        updated = max(0, min(self.get_favor_max(), int(value or 0)))
+        self.db.favor_current = updated
+        self.db.favor = updated
+        if updated > before:
+            self.db.last_favor_decay_at = time.time()
+        if emit_message and updated != before:
+            self.msg_favor_change(updated - before)
         self.sync_client_state()
-        return self.db.favor
+        return updated
 
-    def adjust_favor(self, amount, emit_message=False):
-        return self.set_favor(self.get_favor() + int(amount or 0), emit_message=emit_message)
+    def adjust_favor(self, amount, emit_message=False, reason=None):
+        before = self.get_favor()
+        updated = self.set_favor(before + int(amount or 0), emit_message=False)
+        if emit_message and updated != before:
+            self.msg_favor_change(updated - before, reason=reason)
+        return updated
 
     def get_favor_state(self, favor=None):
         value = self.get_favor() if favor is None else max(0, int(favor or 0))
         if value <= 0:
             return "unprepared"
-        if value <= 5:
+        if value <= 1:
             return "vulnerable"
-        if value <= 15:
+        if value <= 2:
             return "prepared"
         return "anchored"
 
@@ -2167,26 +2564,64 @@ class Character(ObjectParent, DefaultCharacter):
         }.get(state, "")
 
     def calculate_death_sting_severity(self, favor=None):
-        value = self.get_favor() if favor is None else max(0, int(favor or 0))
-        base = 0.20
-        reduction = min(value, 20) * 0.005
-        return max(0.10, base - reduction)
+        stacks = max(0, min(DEATH_STING_MAX_STACKS, int(getattr(self.db, "death_sting", 0) or 0)))
+        favor_value = self.get_favor() if favor is None else max(0, int(favor or 0))
+        if stacks <= 1:
+            severity = 0.10
+        elif stacks <= 3:
+            severity = 0.20
+        else:
+            severity = 0.30
+        if favor_value <= 0:
+            severity += 0.05
+        elif favor_value >= 1:
+            severity -= 0.03
+        protection = self.get_death_protection_state()
+        if protection["active"]:
+            severity *= float(protection["sting_severity_scale"])
+        return max(0.03, min(0.35, severity))
+
+    def get_death_sting_count(self):
+        self.ensure_core_defaults()
+        return max(0, min(DEATH_STING_MAX_STACKS, int(getattr(self.db, "death_sting", 0) or 0)))
+
+    def get_death_sting_recovery_label(self):
+        count = self.get_death_sting_count()
+        if count >= 4:
+            return "severe"
+        if count >= 2:
+            return "moderate"
+        if count >= 1:
+            return "light"
+        return "none"
 
     def refresh_death_sting(self, emit_message=False):
         self.ensure_core_defaults()
-        active = bool(getattr(self.db, "death_sting_active", False) or getattr(self.db, "death_sting", False))
+        active = bool(getattr(self.db, "death_sting_active", False) or self.get_death_sting_count() > 0)
         if not active:
             return False
         expires_at = float(getattr(self.db, "death_sting_end", 0.0) or 0.0)
         if expires_at > 0 and expires_at <= time.time():
-            self.db.death_sting = False
-            self.db.death_sting_active = False
-            self.db.death_sting_end = 0.0
-            self.db.death_sting_severity = 0.0
+            next_count = max(0, self.get_death_sting_count() - 1)
+            self.db.death_sting = next_count
+            if next_count <= 0:
+                self.db.death_sting_active = False
+                self.db.death_sting_end = 0.0
+                self.db.death_sting_severity = 0.0
+                self.db.death_sting_hp_cap_ratio = 1.0
+                self.db.death_sting_recovery_label = "none"
+                self.sync_client_state()
+                if emit_message:
+                    self.msg("You feel the last of death's grip release you.")
+                return False
+            self.db.death_sting_active = True
+            self.db.death_sting_end = time.time() + DEATH_STING_DECAY_SECONDS
+            self.db.death_sting_severity = self.calculate_death_sting_severity()
+            self.db.death_sting_recovery_label = self.get_death_sting_recovery_label()
+            self.db.death_sting_hp_cap_ratio = float(DEATH_STING_HP_CAPS.get(self.db.death_sting_recovery_label, 1.0))
             self.sync_client_state()
             if emit_message:
-                self.msg("You feel the last of death's grip release you.")
-            return False
+                self.msg("Death's grip loosens slightly.")
         return not self.is_dead() and active
 
     def is_death_sting_active(self):
@@ -2211,14 +2646,43 @@ class Character(ObjectParent, DefaultCharacter):
         return max(0, int(round(expires_at - time.time())))
 
     def get_death_sting_label(self):
-        severity = self.get_death_sting_severity()
-        if severity >= 0.18:
+        label = self.get_death_sting_recovery_label()
+        if label == "severe":
             return "Severe"
-        if severity >= 0.14:
+        if label == "moderate":
             return "Moderate"
-        if severity > 0:
-            return "Mild"
+        if label == "light":
+            return "Light"
         return "None"
+
+    def apply_death_sting_recovery_effects(self, favor=None, via="depart"):
+        self.ensure_core_defaults()
+        if self.get_death_sting_count() <= 0:
+            return "none"
+        label = self.get_death_sting_recovery_label()
+        severity = self.calculate_death_sting_severity(favor=favor)
+        hp_cap_ratio = float(DEATH_STING_HP_CAPS.get(label, 1.0))
+        if favor is not None and int(favor or 0) <= 0:
+            hp_cap_ratio = max(0.6, hp_cap_ratio - 0.05)
+        elif favor is not None and int(favor or 0) >= 1:
+            hp_cap_ratio = min(0.95, hp_cap_ratio + 0.05)
+        self.db.death_sting_active = True
+        self.db.death_sting_severity = severity
+        self.db.death_sting_end = time.time() + DEATH_STING_DECAY_SECONDS
+        self.db.death_sting_hp_cap_ratio = hp_cap_ratio
+        self.db.death_sting_recovery_label = label
+        hp_cap = max(1, int(round((self.db.max_hp or 1) * hp_cap_ratio)))
+        self.db.hp = min(int(self.db.hp or 0), hp_cap)
+        if via == "depart":
+            self.db.recovery_state = "weakened"
+        if favor is not None and int(favor or 0) >= 1:
+            self.msg("Your remaining favor softens the blow of death.")
+        if label == "severe":
+            self.msg("Death has left a deep mark on you.")
+        else:
+            self.msg("You feel the weight of death cling to you.")
+        self.sync_client_state()
+        return label
 
     def apply_death_sting_to_contest_value(self, base_value):
         value = float(base_value or 0.0)
@@ -2308,7 +2772,7 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_depart_preview_lines(self, corpse=None):
         corpse = corpse or self.get_death_corpse()
-        snapshot = corpse.get_favor_snapshot() if corpse and hasattr(corpse, "get_favor_snapshot") else self.get_favor_death_snapshot() or {}
+        snapshot = self.get_corpse_favor_detail_snapshot(corpse) if corpse else self.get_favor_death_snapshot() or {}
         available_favor = int(snapshot.get("favor_before", 0) or 0)
         lines = [f"You have {available_favor} favor{'s' if available_favor != 1 else ''}.", "Available options:"]
         for mode, cost in (("grave", 0), ("coins", 2), ("items", 2), ("full", 3)):
@@ -2379,26 +2843,364 @@ class Character(ObjectParent, DefaultCharacter):
     def pray_at_shrine(self):
         if not self.is_in_shrine():
             return False, "You feel no divine presence here."
+        now = time.time()
         self.db.deaths_since_last_shrine = 0
-        self.db.last_prayed_shrine_at = time.time()
-        return True, "You kneel and prepare an offering."
+        self.db.last_prayed_shrine_at = now
+        favor_changed = False
+        devotion_changed = False
+        favor_interval = float(FAVOR_SYSTEM_CONFIG.get("shrine_regen_interval", 300.0) or 300.0)
+        last_regen = float(getattr(self.db, "last_shrine_favor_regen_at", 0.0) or 0.0)
+        if self.get_favor() < self.get_favor_max() and (last_regen <= 0.0 or now - last_regen >= favor_interval):
+            self.set_favor(self.get_favor() + 1)
+            self.db.last_shrine_favor_regen_at = now
+            favor_changed = True
+        if self.has_devotion_access():
+            devotion_interval = float(CLERIC_DEVOTION_CONFIG.get("shrine_regen_interval", 60.0) or 60.0)
+            last_devotion = float(getattr(self.db, "last_shrine_devotion_regen_at", 0.0) or 0.0)
+            if self.get_devotion() < self.get_devotion_max() and (last_devotion <= 0.0 or now - last_devotion >= devotion_interval):
+                self.adjust_devotion(int(CLERIC_DEVOTION_CONFIG.get("shrine_regen_amount", 5) or 5), sync=False)
+                self.db.last_shrine_devotion_regen_at = now
+                devotion_changed = True
+        self.sync_client_state()
+        if favor_changed and devotion_changed:
+            return True, f"You kneel and prepare an offering. Favor and devotion return. Devotion: {self.get_devotion()}/{self.get_devotion_max()}."
+        if devotion_changed:
+            return True, f"You kneel and pray until your connection steadies. Devotion: {self.get_devotion()}/{self.get_devotion_max()}."
+        if favor_changed:
+            return True, "You kneel and prepare an offering. A measure of favor returns."
+        if self.get_favor() >= self.get_favor_max() and (not self.has_devotion_access() or self.get_devotion() >= self.get_devotion_max()):
+            return True, "You kneel and prepare an offering. Your favor and devotion are already full."
+        remaining = []
+        if self.get_favor() < self.get_favor_max():
+            remaining.append(max(1, int(math.ceil(favor_interval - (now - last_regen)))))
+        if self.has_devotion_access() and self.get_devotion() < self.get_devotion_max():
+            devotion_interval = float(CLERIC_DEVOTION_CONFIG.get("shrine_regen_interval", 60.0) or 60.0)
+            last_devotion = float(getattr(self.db, "last_shrine_devotion_regen_at", 0.0) or 0.0)
+            remaining.append(max(1, int(math.ceil(devotion_interval - (now - last_devotion)))))
+        wait_time = min(remaining) if remaining else 1
+        return True, f"You kneel and prepare an offering. The shrine remains quiet for another {wait_time}s."
+
+    def has_devotion_access(self):
+        return bool(hasattr(self, "is_profession") and self.is_profession("cleric"))
+
+    def get_devotion_max(self):
+        self.ensure_core_defaults()
+        maximum = int(CLERIC_DEVOTION_CONFIG["max_devotion"] if self.has_devotion_access() else 0)
+        self.db.devotion_max = maximum
+        self.db.max_devotion = maximum
+        return maximum
 
     def get_devotion(self):
         self.ensure_core_defaults()
-        maximum = max(0, int(getattr(self.db, "max_devotion", CLERIC_DEVOTION_CONFIG["max_devotion"]) or CLERIC_DEVOTION_CONFIG["max_devotion"]))
-        current = max(0, int(getattr(self.db, "devotion", 0) or 0))
-        return min(maximum, current)
+        if not self.has_devotion_access():
+            self.db.devotion_current = 0
+            self.db.devotion = 0
+            self.db.devotion_max = 0
+            self.db.max_devotion = 0
+            return 0
+        maximum = self.get_devotion_max()
+        current = getattr(self.db, "devotion_current", None)
+        if current is None:
+            current = getattr(self.db, "devotion", CLERIC_DEVOTION_CONFIG["baseline"])
+        current = max(0, min(maximum, int(current or 0)))
+        self.db.devotion_current = current
+        self.db.devotion = current
+        return current
 
     def set_devotion(self, value, sync=True):
         self.ensure_core_defaults()
-        maximum = max(0, int(getattr(self.db, "max_devotion", CLERIC_DEVOTION_CONFIG["max_devotion"]) or CLERIC_DEVOTION_CONFIG["max_devotion"]))
-        self.db.devotion = max(0, min(maximum, int(value or 0)))
+        maximum = self.get_devotion_max()
+        updated = max(0, min(maximum, int(value or 0)))
+        self.db.devotion_current = updated
+        self.db.devotion = updated
+        self.db.devotion_max = maximum
+        self.db.max_devotion = maximum
         if sync:
             self.sync_client_state()
-        return self.db.devotion
+        return updated
 
     def adjust_devotion(self, amount, sync=True):
         return self.set_devotion(self.get_devotion() + int(amount or 0), sync=sync)
+
+    def spend_devotion(self, amount, failure_message=None):
+        cost = max(0, int(amount or 0))
+        if cost <= 0:
+            return True, self.get_devotion()
+        if self.get_devotion() < cost:
+            return False, str(failure_message or "You do not have the devotion required to continue the rite.")
+        return True, self.adjust_devotion(-cost, sync=False)
+
+    def get_cleric_specialization(self):
+        if not self.is_profession("cleric"):
+            return None
+        specialization = str(getattr(self.db, "specialization", "") or "").strip().lower()
+        if specialization not in {"stabilizer", "restorer", "binder"}:
+            return None
+        return specialization
+
+    def get_cleric_specialization_label(self, specialization=None):
+        specialization = str(specialization or self.get_cleric_specialization() or "").strip().lower()
+        return {
+            "stabilizer": "Stabilizer",
+            "restorer": "Restorer",
+            "binder": "Binder",
+        }.get(specialization, "None")
+
+    def get_cleric_stage_specialization(self, stage):
+        return CLERIC_STAGE_SPECIALIZATIONS.get(str(stage or "").strip().lower())
+
+    def get_cleric_specialization_unlock_message(self, specialization):
+        return {
+            "stabilizer": "Your practice settles into the patterns of stabilization.",
+            "restorer": "Your instincts begin to favor restorative rites.",
+            "binder": "Your focus sharpens around binding the soul.",
+        }.get(str(specialization or "").strip().lower(), "")
+
+    def get_cleric_specialization_match_feedback(self, stage):
+        specialization = self.get_cleric_specialization()
+        if not specialization or specialization != self.get_cleric_stage_specialization(stage):
+            return ""
+        return {
+            "stabilizer": "Your practiced hands steady the work.",
+            "restorer": "The rite comes more naturally to you.",
+            "binder": "Your focus aligns cleanly with the ritual.",
+        }.get(specialization, "")
+
+    def announce_cleric_specialization_unlock(self, specialization):
+        specialization = str(specialization or "").strip().lower()
+        if not specialization or bool(getattr(self.db, "specialization_announced", False)):
+            return ""
+        self.db.specialization_announced = True
+        return self.get_cleric_specialization_unlock_message(specialization)
+
+    def maybe_define_cleric_specialization(self, stage):
+        if not self.is_profession("cleric") or self.get_cleric_specialization():
+            return self.get_cleric_specialization(), False
+        stage_key = str(stage or "").strip().lower()
+        repeats = dict(getattr(self.db, "cleric_stage_repeats", {}) or {})
+        repeats[stage_key] = int(repeats.get(stage_key, 0) or 0) + 1
+        self.db.cleric_stage_repeats = repeats
+        specialization = self.get_cleric_stage_specialization(stage_key)
+        if specialization and int(repeats.get(stage_key, 0) or 0) >= 2:
+            self.db.specialization = specialization
+            return specialization, True
+        return self.get_cleric_specialization(), False
+
+    def get_cleric_quality_band_label(self, quality):
+        value = max(0, int(quality or 0))
+        if value >= 10:
+            return "best"
+        if value >= 6:
+            return "light"
+        if value >= 3:
+            return "moderate"
+        return "severe"
+
+    def get_other_pending_cleric_stage_participants(self, corpse, action):
+        if not corpse:
+            return []
+        action_key = str(action or "").strip().lower()
+        room = getattr(corpse, "location", None)
+        participants = set()
+        for obj in list(getattr(room, "contents", []) or []):
+            if obj == self:
+                continue
+            pending = getattr(getattr(obj, "ndb", None), "pending_cleric_ritual_action", None)
+            if not isinstance(pending, dict) or not bool(pending.get("active", False)):
+                continue
+            if str(pending.get("action", "") or "").strip().lower() != action_key:
+                continue
+            if int(pending.get("corpse_id", 0) or 0) != int(getattr(corpse, "id", 0) or 0):
+                continue
+            obj_id = int(getattr(obj, "id", 0) or 0)
+            if obj_id > 0:
+                participants.add(obj_id)
+        return sorted(participants)
+
+    def get_cleric_stage_delay(self, corpse, action):
+        action_key = str(action or "").strip().lower()
+        base_delay = float(CLERIC_CORPSE_RITUAL_ACTIONS.get(action_key, {}).get("delay", FAVOR_SYSTEM_CONFIG.get("revive_delay_seconds", 5.0)) or 5.0)
+        if action_key == "revive":
+            base_delay = float(FAVOR_SYSTEM_CONFIG.get("revive_delay_seconds", 5.0) or 5.0)
+        if not corpse or not hasattr(corpse, "get_group_stage_bonus_count"):
+            return base_delay
+        pending_ids = self.get_other_pending_cleric_stage_participants(corpse, action_key)
+        participant_count = corpse.get_group_stage_bonus_count(action_key if action_key != "revive" else "bind", pending_character_ids=pending_ids)
+        bonus_factor = min(0.5, participant_count * 0.25)
+        return max(base_delay * 0.5, base_delay / (1.0 + bonus_factor))
+
+    def get_cleric_group_support_count(self, corpse):
+        if not corpse:
+            return 0
+        participants = set(list(getattr(corpse.db, "ritual_participants", []) or []))
+        room = getattr(corpse, "location", None)
+        for obj in list(getattr(room, "contents", []) or []):
+            pending = getattr(getattr(obj, "ndb", None), "pending_cleric_ritual_action", None)
+            if not isinstance(pending, dict) or not bool(pending.get("active", False)):
+                continue
+            if int(pending.get("corpse_id", 0) or 0) != int(getattr(corpse, "id", 0) or 0):
+                continue
+            obj_id = int(getattr(obj, "id", 0) or 0)
+            if obj_id > 0:
+                participants.add(obj_id)
+        return len(participants)
+
+    def apply_cleric_group_contribution(self, corpse, action):
+        if not corpse:
+            return {"joined": False, "duplicate": False, "quality_bonus": 0, "specialization_bonus": 0}
+        joined = False
+        if hasattr(corpse, "add_ritual_participant"):
+            _, joined = corpse.add_ritual_participant(self)
+        duplicate = False
+        added_stage = True
+        if hasattr(corpse, "add_stage_contributor"):
+            _, added_stage = corpse.add_stage_contributor(action, self)
+            duplicate = not added_stage
+        quality_bonus = 0
+        if added_stage and hasattr(corpse, "add_quality_bonus_contributor"):
+            _, added_quality = corpse.add_quality_bonus_contributor(self)
+            if added_quality and hasattr(corpse, "adjust_ritual_quality"):
+                corpse.adjust_ritual_quality(1)
+                quality_bonus = 1
+        specialization_bonus = 0
+        specialization = self.get_cleric_specialization()
+        desired = self.get_cleric_stage_specialization(action)
+        if added_stage and specialization and specialization == desired and hasattr(corpse, "mark_specialization_bonus_stage"):
+            _, added_specialization = corpse.mark_specialization_bonus_stage(action)
+            if added_specialization and hasattr(corpse, "adjust_ritual_quality"):
+                corpse.adjust_ritual_quality(1)
+                specialization_bonus = 1
+        return {
+            "joined": joined,
+            "duplicate": duplicate,
+            "quality_bonus": quality_bonus,
+            "specialization_bonus": specialization_bonus,
+        }
+
+    def get_pending_cleric_stage_actor_ids(self, corpse, action, include_self=False):
+        if not corpse:
+            return []
+        action_key = str(action or "").strip().lower()
+        room = getattr(corpse, "location", None)
+        actor_ids = set()
+        for obj in list(getattr(room, "contents", []) or []):
+            if not include_self and obj == self:
+                continue
+            pending = getattr(getattr(obj, "ndb", None), "pending_cleric_ritual_action", None)
+            if not isinstance(pending, dict) or not bool(pending.get("active", False)):
+                continue
+            if str(pending.get("action", "") or "").strip().lower() != action_key:
+                continue
+            if int(pending.get("corpse_id", 0) or 0) != int(getattr(corpse, "id", 0) or 0):
+                continue
+            obj_id = int(getattr(obj, "id", 0) or 0)
+            if obj_id > 0:
+                actor_ids.add(obj_id)
+        return sorted(actor_ids)
+
+    def emit_ritual_message(self, corpse, key, message, cooldown=2.0, exclude=None):
+        if not corpse or not message:
+            return False
+        now = time.time()
+        cache = dict(getattr(getattr(corpse, "ndb", None), "ritual_last_msg_time", {}) or {})
+        if now - float(cache.get(key, 0.0) or 0.0) <= float(cooldown or 0.0):
+            return False
+        room = getattr(corpse, "location", None)
+        if room:
+            room.msg_contents(message, exclude=list(exclude or []))
+        cache[key] = now
+        corpse.ndb.ritual_last_msg_time = cache
+        return True
+
+    def should_emit_ritual_join_message(self, corpse, stage, actor=None, cooldown=6.0):
+        if not corpse:
+            return False
+        actor = actor or self
+        actor_id = int(getattr(actor, "id", 0) or 0)
+        if actor_id <= 0:
+            return False
+        now = time.time()
+        cache = dict(getattr(getattr(corpse, "ndb", None), "ritual_last_join_msg", {}) or {})
+        stage_key = str(stage or "").strip().lower()
+        stage_cache = dict(cache.get(stage_key, {}) or {})
+        last_time = float(stage_cache.get(str(actor_id), 0.0) or 0.0)
+        if now - last_time <= float(cooldown or 0.0):
+            return False
+        stage_cache[str(actor_id)] = now
+        cache[stage_key] = stage_cache
+        corpse.ndb.ritual_last_join_msg = cache
+        return True
+
+    def should_emit_ritual_specialization_join_message(self, corpse, stage, specialization):
+        if not corpse:
+            return False
+        stage_key = str(stage or "").strip().lower()
+        specialization_key = str(specialization or "").strip().lower()
+        if not specialization_key:
+            return False
+        cache = dict(getattr(getattr(corpse, "ndb", None), "ritual_specialization_join_msg", {}) or {})
+        announced = set(list(cache.get(stage_key, []) or []))
+        if specialization_key in announced:
+            return False
+        announced.add(specialization_key)
+        cache[stage_key] = sorted(announced)
+        corpse.ndb.ritual_specialization_join_msg = cache
+        return True
+
+    def get_cleric_stage_start_room_message(self, action):
+        return {
+            "prepare": f"{self.key} begins preparing the body.",
+            "stabilize": f"{self.key} begins a stabilization vigil.",
+            "restore": f"{self.key} begins restoring the corpse's fading pattern.",
+            "bind": f"{self.key} begins binding the wandering soul.",
+        }.get(str(action or "").strip().lower(), "")
+
+    def get_cleric_stage_join_room_message(self, action):
+        action_key = str(action or "").strip().lower()
+        specialization = self.get_cleric_specialization()
+        expected = self.get_cleric_stage_specialization(action_key)
+        if specialization and specialization == expected:
+            return {
+                "prepare": "A trained stabilizer joins the rite.",
+                "stabilize": "A trained stabilizer joins the rite.",
+                "restore": "A practiced restorer reinforces the work.",
+                "bind": "A skilled binder lends focus to the ritual.",
+            }.get(action_key, "")
+        return {
+            "prepare": f"{self.key} joins the preparation rite.",
+            "stabilize": f"{self.key} joins the stabilization rite.",
+            "restore": f"{self.key} joins the restorative rite.",
+            "bind": f"{self.key} joins the binding rite.",
+        }.get(action_key, "")
+
+    def get_cleric_stage_completion_room_message(self, action):
+        return {
+            "prepare": "The body settles into ritual readiness.",
+            "stabilize": "The fading pattern steadies.",
+            "restore": "The corpse's memory coheres once more.",
+            "bind": "The soul's tether tightens and holds.",
+        }.get(str(action or "").strip().lower(), "")
+
+    def get_cleric_dead_owner_transition_message(self, action):
+        return {
+            "prepare": "You feel distant hands preparing your body.",
+            "stabilize": "You feel your fading self steady slightly.",
+            "restore": "Something of you is being restored.",
+            "bind": "A firm pull anchors you back toward your body.",
+        }.get(str(action or "").strip().lower(), "")
+
+    def notify_dead_owner_of_ritual_transition(self, corpse, action):
+        owner = corpse.get_owner() if corpse and hasattr(corpse, "get_owner") else None
+        if owner and owner.is_dead():
+            owner.msg(self.get_cleric_dead_owner_transition_message(action))
+
+    def get_cleric_revive_outcome_feedback(self, quality_label):
+        return {
+            "severe": "The body lurches back to life, strained and unstable.",
+            "moderate": "The soul returns, but the bond is imperfect.",
+            "light": "Life returns with steady breath and form.",
+            "best": "The soul returns cleanly, guided by a flawless rite.",
+        }.get(str(quality_label or "severe").strip().lower(), "The body lurches back to life, strained and unstable.")
 
     def get_devotion_state(self):
         devotion = self.get_devotion()
@@ -2449,12 +3251,116 @@ class Character(ObjectParent, DefaultCharacter):
             return False, "That corpse is not here."
         if not getattr(getattr(corpse, "db", None), "is_corpse", False):
             return False, "You can only use that rite on a corpse."
+        if self.is_profession("cleric"):
+            return True, ""
         if hasattr(corpse, "is_recovery_allowed") and not corpse.is_recovery_allowed(self):
             return False, "You do not have permission to work with that corpse."
         owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
         if owner and hasattr(owner, "notify_recovery_consent_use"):
             owner.notify_recovery_consent_use(self)
         return True, ""
+
+    def get_cleric_assess_quality_label(self, quality):
+        value = max(0, int(quality or 0))
+        if value >= 10:
+            return "Excellent"
+        if value >= 6:
+            return "Strong"
+        if value >= 3:
+            return "Unsteady"
+        return "Poor"
+
+    def get_cleric_ritual_state_label(self, corpse):
+        state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        return str(state or "unprepared").replace("_", " ").title()
+
+    def get_cleric_assess_readiness_line(self, corpse):
+        state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        readiness_map = {
+            "unprepared": "The body must be prepared before the rite can progress.",
+            "prepared": "The rite is ready for stabilization.",
+            "stabilized": "The rite is ready for restoration.",
+            "restored": "The rite is ready for binding.",
+            "bound": "The final rite may now be attempted.",
+        }
+        readiness = readiness_map.get(str(state or "unprepared"), "The body must be prepared before the rite can progress.")
+        warning = self.get_corpse_survivability_warning(corpse)
+        if warning:
+            return f"{readiness} {warning}"
+        return readiness
+
+    def get_cleric_assess_blockers(self, corpse):
+        blockers = []
+        if not bool(getattr(corpse.db, "is_valid_for_revive", True)) or str(getattr(corpse.db, "death_type", "vitality") or "vitality") == "spirit":
+            blockers.append("This death cannot be reversed by the rite.")
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            blockers.append("The body is too far gone to sustain another rite.")
+        favor_snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else 0
+        if int(favor_snapshot or 0) < 1:
+            blockers.append("No favor remains to guide the soul.")
+        if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
+            blockers.append("The corpse's memory has faded.")
+        if not self.can_revive_in_room(room=getattr(corpse, "location", None)):
+            blockers.append("This place is not suitable for the final rite.")
+        ritual_state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        if ritual_state != "bound" or not bool(getattr(corpse.db, "soul_bound", False)):
+            blockers.append("The soul has not yet been bound.")
+        return blockers
+
+    def get_cleric_assess_stage_counts(self, corpse):
+        if hasattr(corpse, "get_stage_contributors"):
+            contributors = corpse.get_stage_contributors()
+        else:
+            contributors = dict(getattr(corpse.db, "stage_contributors", {}) or {})
+        return {
+            "prepare": len(list(contributors.get("prepare", []) or [])),
+            "stabilize": len(list(contributors.get("stabilize", []) or [])),
+            "restore": len(list(contributors.get("restore", []) or [])),
+            "bind": len(list(contributors.get("bind", []) or [])),
+        }
+
+    def can_view_named_cleric_contributors(self, corpse):
+        if not corpse:
+            return False
+        if hasattr(corpse, "get_ritual_participants") and int(getattr(self, "id", 0) or 0) in set(corpse.get_ritual_participants()):
+            return True
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if owner and owner == self:
+            return True
+        return bool(hasattr(corpse, "_has_admin_access") and corpse._has_admin_access(self))
+
+    def get_cleric_assess_stage_names(self, corpse):
+        contributors = corpse.get_stage_contributors() if hasattr(corpse, "get_stage_contributors") else dict(getattr(corpse.db, "stage_contributors", {}) or {})
+        names_by_stage = {}
+        for stage in ("prepare", "stabilize", "restore", "bind"):
+            stage_names = []
+            for char_id in list(contributors.get(stage, []) or []):
+                if int(char_id or 0) <= 0:
+                    continue
+                result = search_object(f"#{int(char_id)}")
+                if result:
+                    stage_names.append(str(getattr(result[0], "key", "") or f"#{int(char_id)}"))
+            names_by_stage[stage] = stage_names
+        return names_by_stage
+
+    def get_cleric_assess_specialized_support_lines(self, corpse):
+        contributor_ids = set()
+        contributors = corpse.get_stage_contributors() if hasattr(corpse, "get_stage_contributors") else dict(getattr(corpse.db, "stage_contributors", {}) or {})
+        for stage_ids in list(contributors.values()):
+            for char_id in list(stage_ids or []):
+                if int(char_id or 0) > 0:
+                    contributor_ids.add(int(char_id))
+        lines = []
+        for role in ("stabilizer", "restorer", "binder"):
+            for char_id in contributor_ids:
+                result = search_object(f"#{char_id}")
+                actor = result[0] if result else None
+                if actor and hasattr(actor, "get_cleric_specialization") and actor.get_cleric_specialization() == role:
+                    if not lines:
+                        lines.append("Specialized Support:")
+                    lines.append(f"  {self.get_cleric_specialization_label(role)} present")
+                    break
+        return lines
 
     def perceive_cleric_corpse(self, corpse):
         if not self.is_profession("cleric"):
@@ -2465,14 +3371,26 @@ class Character(ObjectParent, DefaultCharacter):
         lines = [f"You study {corpse.key} through a veil of divine perception."]
         condition_state = corpse.get_resurrection_condition_state() if hasattr(corpse, "get_resurrection_condition_state") else corpse.get_condition_tier().upper()
         condition = int(round(corpse.get_condition())) if hasattr(corpse, "get_condition") else int(getattr(corpse.db, "condition", 0) or 0)
-        snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else None
-        favor_present = bool((snapshot or {}).get("favor_before", 0) or ((snapshot or {}).get("resurrection") or {}).get("can_resurrect", False))
+        favor_snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else 0
+        favor_present = int(favor_snapshot or 0) >= 1
         if bool(getattr(corpse.db, "irrecoverable", False)):
             condition_state = "IRRECOVERABLE"
         lines.append(f"Condition: {condition_state.title()} ({condition}/100)")
+        lines.append(f"Favor Snapshot: {int(favor_snapshot or 0)}")
         lines.append(f"Favor: {'Present' if favor_present else 'Absent'}")
+        ritual_state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        lines.append(f"State: {ritual_state.title()}")
         if hasattr(corpse, "get_memory_state"):
             lines.append(f"Memory: {corpse.get_memory_state().title()}")
+        lines.append(f"Memory Stability: {'Stable' if bool(getattr(corpse.db, 'memory_stable', False)) else 'Fading'}")
+        lines.append(f"Soul Binding: {'Bound' if bool(getattr(corpse.db, 'soul_bound', False)) else 'Unbound'}")
+        failures = int(getattr(corpse.db, "ritual_failures", 0) or 0)
+        quality = int(getattr(corpse.db, "ritual_quality", 0) or 0)
+        participant_count = len(list(getattr(corpse.db, "ritual_participants", []) or []))
+        lines.append(f"Failures: {failures}")
+        lines.append(f"Quality: {quality} ({self.get_cleric_quality_band_label(quality).title()})")
+        if participant_count > 0:
+            lines.append(f"Participants: {participant_count}")
         if hasattr(corpse, "get_memory_remaining"):
             lines.append(f"Memory Window: {int(round(corpse.get_memory_remaining()))}s")
         if hasattr(corpse, "get_decay_remaining"):
@@ -2482,8 +3400,141 @@ class Character(ObjectParent, DefaultCharacter):
             lines.append(f"Preparation: {prep_stacks} ritual layer{'s' if prep_stacks != 1 else ''}")
         viability = "Viable" if not bool(getattr(corpse.db, "irrecoverable", False)) and favor_present and condition >= 25 and getattr(corpse, "has_viable_memory", lambda: True)() else "Perilous"
         lines.append(f"Resurrection Outlook: {viability}")
+        lines.append(f"Survivability: {self.get_corpse_revive_survivability_band(corpse).upper()}")
+        warning = self.get_corpse_survivability_warning(corpse)
+        if warning:
+            lines.append(warning)
         self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(12))
         return True, lines
+
+    def can_revive_in_room(self, room=None):
+        room = room or self.location
+        if not room:
+            return False
+        if hasattr(room, "is_no_resurrection_zone") and room.is_no_resurrection_zone():
+            return False
+        if hasattr(room, "is_shrine_room") and room.is_shrine_room():
+            return True
+        if hasattr(room, "is_consecrated_room") and room.is_consecrated_room():
+            return True
+        return bool(getattr(getattr(room, "db", None), "consecrated", False))
+
+    def assess_cleric_corpse(self, corpse):
+        if not self.is_profession("cleric"):
+            return False, ["You do not know how to read a corpse that way."]
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, [message]
+        stage_counts = self.get_cleric_assess_stage_counts(corpse)
+        participant_count = len(corpse.get_ritual_participants()) if hasattr(corpse, "get_ritual_participants") else len(list(getattr(corpse.db, "ritual_participants", []) or []))
+        failures = corpse.get_ritual_failures() if hasattr(corpse, "get_ritual_failures") else int(getattr(corpse.db, "ritual_failures", 0) or 0)
+        quality_value = corpse.get_ritual_quality() if hasattr(corpse, "get_ritual_quality") else int(getattr(corpse.db, "ritual_quality", 0) or 0)
+        quality_label = self.get_cleric_assess_quality_label(quality_value)
+        blockers = self.get_cleric_assess_blockers(corpse)
+        lines = [f"You assess {corpse.key} through the discipline of the rite."]
+        lines.append(f"Ritual State: {self.get_cleric_ritual_state_label(corpse)}")
+        lines.append(f"Participants: {participant_count}")
+        lines.append(f"Failures: {failures}")
+        lines.append(f"Quality: {quality_label}")
+        lines.append("Contributors:")
+        lines.append(f"  Prepare: {stage_counts['prepare']}")
+        lines.append(f"  Stabilize: {stage_counts['stabilize']}")
+        lines.append(f"  Restore: {stage_counts['restore']}")
+        lines.append(f"  Bind: {stage_counts['bind']}")
+        if self.can_view_named_cleric_contributors(corpse):
+            stage_names = self.get_cleric_assess_stage_names(corpse)
+            lines.append("Named Contributors:")
+            lines.append(f"  Prepare: {', '.join(stage_names['prepare']) if stage_names['prepare'] else 'None'}")
+            lines.append(f"  Stabilize: {', '.join(stage_names['stabilize']) if stage_names['stabilize'] else 'None'}")
+            lines.append(f"  Restore: {', '.join(stage_names['restore']) if stage_names['restore'] else 'None'}")
+            lines.append(f"  Bind: {', '.join(stage_names['bind']) if stage_names['bind'] else 'None'}")
+            lines.extend(self.get_cleric_assess_specialized_support_lines(corpse))
+        if participant_count > 1:
+            lines.append("The rite is being strengthened by multiple hands.")
+        lines.append(self.get_cleric_assess_readiness_line(corpse))
+        lines.append(f"Survivability: {self.get_corpse_revive_survivability_band(corpse).upper()}")
+        warning = self.get_corpse_survivability_warning(corpse)
+        if warning:
+            lines.append(warning)
+        if blockers:
+            lines.append("Revive Blockers:")
+            for blocker in blockers:
+                lines.append(f"  {blocker}")
+        else:
+            lines.append("No immediate blocker stands against the final rite.")
+        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(12))
+        return True, lines
+
+    def get_corpse_wounds(self, corpse):
+        return get_corpse_wounds_payload(corpse)
+
+    def build_corpse_wound_payload(self):
+        self.ensure_core_defaults()
+        return normalize_corpse_wounds({
+            "empath": copy.deepcopy(self.get_empath_wounds()),
+            "injuries": copy.deepcopy(dict(getattr(self.db, "injuries", {}) or {})),
+            "baseline": {
+                "external": max(0, sum(max(0, int((part or {}).get("external", 0) or 0)) for part in dict(getattr(self.db, "injuries", {}) or {}).values())),
+                "internal": max(0, sum(max(0, int((part or {}).get("internal", 0) or 0)) for part in dict(getattr(self.db, "injuries", {}) or {}).values())),
+                "bleeding": max(0, int(self.get_empath_wound("bleeding") or 0)),
+                "vitality": max(0, int(self.get_empath_wound("vitality") or 0)),
+            },
+        })
+
+    def apply_corpse_wound_payload(self, payload, sync=True):
+        self.ensure_core_defaults()
+        normalized = normalize_corpse_wounds(payload)
+        self.db.wounds = copy.deepcopy(normalized.get("empath", {}))
+        self.db.injuries = copy.deepcopy(normalized.get("injuries", {}))
+        self.sync_resources_from_empath_wounds()
+        self.update_bleed_state()
+        if sync:
+            self.sync_client_state()
+        return normalized
+
+    def get_corpse_internal_total(self, corpse):
+        wounds = self.get_corpse_wounds(corpse)
+        return max(0, sum(max(0, int((part or {}).get("internal", 0) or 0)) for part in wounds.get("injuries", {}).values()))
+
+    def get_corpse_bleed_total(self, corpse):
+        wounds = self.get_corpse_wounds(corpse)
+        return max(0, sum(max(0, int((part or {}).get("bleed", 0) or 0)) for part in wounds.get("injuries", {}).values()))
+
+    def get_effective_corpse_revive_loads(self, corpse):
+        internal = self.get_corpse_internal_total(corpse)
+        bleed = self.get_corpse_bleed_total(corpse)
+        penalties = corpse.get_decay_stage_penalties() if corpse and hasattr(corpse, "get_decay_stage_penalties") else {}
+        return {
+            "internal": max(0, internal),
+            "bleed": max(0, bleed),
+            "decay_stage": int(penalties.get("stage", 0) or 0),
+            "decay_label": str(penalties.get("label", "Fresh") or "Fresh"),
+            "favor_penalty": 0,
+            "chance_penalty": 0.0,
+        }
+
+    def get_corpse_revive_survivability_band(self, corpse):
+        if not corpse or not getattr(getattr(corpse, "db", None), "is_corpse", False):
+            return "stable"
+        wounds = self.get_corpse_wounds(corpse)
+        if is_stable_corpse_wounds(wounds):
+            return "stable"
+        if is_near_stable_corpse_wounds(wounds):
+            return "critical"
+        return "unsafe"
+
+    def is_corpse_revive_survivable(self, corpse):
+        if not corpse or not getattr(getattr(corpse, "db", None), "is_corpse", False):
+            return True
+        return self.get_corpse_revive_survivability_band(corpse) in {"stable", "critical"}
+
+    def get_corpse_survivability_warning(self, corpse):
+        band = self.get_corpse_revive_survivability_band(corpse)
+        if band == "stable":
+            return "This body is stable enough."
+        if band == "critical":
+            return "This body may not survive."
+        return "This body may not survive the rite. This body will not survive the rite without better preparation."
 
     def preserve_corpse(self, corpse):
         if not self.is_profession("cleric"):
@@ -2506,25 +3557,7 @@ class Character(ObjectParent, DefaultCharacter):
     def prepare_corpse(self, corpse):
         if not self.is_profession("cleric"):
             return False, "Only a cleric can restore coherence to the dead that way."
-        ok, message = self.can_work_corpse(corpse)
-        if not ok:
-            return False, message
-        if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
-            return False, "Too much of the soul's pattern has already faded to prepare this body properly."
-        if float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 0.0) or 0.0) <= 0:
-            return False, "The remains are too ruined to prepare."
-        stacks = int(getattr(corpse.db, "preparation_stacks", 0) or 0)
-        if stacks >= 5:
-            return False, "The body is already as coherent as you can make it."
-        cost = max(4, 8 - min(3, stacks))
-        if not self.spend_attunement(cost):
-            return False, "You lack the attunement to shape that rite."
-        if hasattr(corpse, "add_preparation"):
-            corpse.add_preparation(1)
-        if hasattr(corpse, "adjust_condition"):
-            corpse.adjust_condition(4 + max(1, int(self.get_skill("theurgy") / 20)))
-        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(18 + stacks))
-        return True, "You restore coherence to the body, strengthening the path for a returning soul."
+        return self.start_cleric_corpse_ritual(corpse, "prepare")
 
     def get_cleric_ritual_profile(self, ritual_name):
         ritual = str(ritual_name or "prayer").strip().lower()
@@ -2555,24 +3588,10 @@ class Character(ObjectParent, DefaultCharacter):
         profile = self.get_cleric_ritual_profile(ritual)
         if not profile:
             return False, "You know only the rites: pray, pray focus, and pray devotion."
-        remaining = self.get_cleric_ritual_cooldown_remaining(ritual)
-        if remaining > 0:
-            return False, f"You must let the rite settle before repeating it ({remaining:.0f}s)."
-
-        gain = int(profile.get("gain", 0) or 0) + max(0, int(self.get_profession_rank() / 3))
-        before = self.get_devotion()
-        after = self.adjust_devotion(gain, sync=False)
-        timestamps = dict(getattr(self.db, "cleric_ritual_timestamps", None) or {})
-        now = time.time()
-        timestamps[ritual] = now
-        self.db.cleric_ritual_timestamps = timestamps
-        self.db.last_devotion_drift_at = now
-        self.sync_client_state()
-        self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(12 + max(0, int(profile.get("gain", 0) / 4))))
-
-        if after <= before:
-            return True, "You complete the rite, but your devotion is already at its height."
-        return True, f"{profile['message']} Devotion: {after}/{getattr(self.db, 'max_devotion', CLERIC_DEVOTION_CONFIG['max_devotion'])}."
+        ok, message = self.pray_at_shrine()
+        if ok:
+            self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(12))
+        return ok, message
 
     def get_commune_profile(self, commune_name):
         return CLERIC_DEVOTION_CONFIG["communes"].get(str(commune_name or "").strip().lower())
@@ -2674,32 +3693,54 @@ class Character(ObjectParent, DefaultCharacter):
         return True, "You keep a brief vigil over the corpse, easing decay and steadying what remains."
 
     def process_cleric_tick(self):
-        if not self.is_profession("cleric"):
-            return False
-        interval = float(CLERIC_DEVOTION_CONFIG["drift_interval"])
-        now = time.time()
-        last_tick = float(getattr(self.db, "last_devotion_drift_at", 0.0) or 0.0)
-        if last_tick <= 0:
-            self.db.last_devotion_drift_at = now
-            return False
-        if now - last_tick < interval:
-            return False
-
-        steps = int((now - last_tick) // interval)
-        if steps <= 0:
-            return False
-        current = self.get_devotion()
-        baseline = int(CLERIC_DEVOTION_CONFIG["baseline"])
-        if current == baseline:
-            self.db.last_devotion_drift_at = last_tick + (steps * interval)
-            return False
-
-        delta = min(abs(current - baseline), steps)
-        updated = current - delta if current > baseline else current + delta
-        self.set_devotion(updated, sync=False)
-        self.db.last_devotion_drift_at = last_tick + (steps * interval)
-        self.sync_client_state()
         return True
+
+    def get_cleric_ritual_failure_message(self, corpse, action, interrupted=False, regressed=False):
+        state = corpse.get_ritual_state() if corpse and hasattr(corpse, "get_ritual_state") else "unprepared"
+        failures = corpse.get_ritual_failures() if corpse and hasattr(corpse, "get_ritual_failures") else int(getattr(getattr(corpse, "db", None), "ritual_failures", 0) or 0)
+        if failures >= 3 or not bool(getattr(getattr(corpse, "db", None), "is_valid_for_revive", True)):
+            return "The soul slips further away, beyond the reach of another rite."
+        if action == "revive":
+            return "The ritual falters, and the soul slips further away."
+        if state == "restored":
+            return "The ritual falters, and the soul slips further away."
+        if interrupted:
+            if regressed:
+                return "The ritual slips backward under the strain."
+            return "The rite holds, but your part in it is lost."
+        if regressed:
+            return f"The ritual slips backward to a {state} state."
+        return "The rite strains, but does not collapse."
+
+    def apply_cleric_ritual_failure(self, corpse, action, interrupted=False):
+        if not corpse or not getattr(getattr(corpse, "db", None), "is_corpse", False):
+            return "The ritual falters."
+        state_before = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        if hasattr(corpse, "record_ritual_failure"):
+            corpse.record_ritual_failure(1)
+        else:
+            corpse.db.ritual_failures = int(getattr(corpse.db, "ritual_failures", 0) or 0) + 1
+        if self.get_cleric_group_support_count(corpse) <= 1 and hasattr(corpse, "regress_ritual_state"):
+            corpse.regress_ritual_state(action=action)
+        state_after = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        return self.get_cleric_ritual_failure_message(corpse, action, interrupted=interrupted, regressed=(state_before != state_after))
+
+    def get_cleric_revive_quality_profile(self, corpse):
+        ritual_quality = corpse.get_ritual_quality() if hasattr(corpse, "get_ritual_quality") else max(0, min(15, int(getattr(corpse.db, "ritual_quality", 0) or 0)))
+        failure_count = corpse.get_ritual_failures() if hasattr(corpse, "get_ritual_failures") else max(0, int(getattr(corpse.db, "ritual_failures", 0) or 0))
+        effective_quality = max(0, min(15, ritual_quality + 1))
+        selected_index = len(CLERIC_RITUAL_OUTCOME_BANDS) - 1
+        for index, profile in enumerate(CLERIC_RITUAL_OUTCOME_BANDS):
+            if effective_quality >= int(profile["minimum"]):
+                selected_index = index
+                break
+        if failure_count > 0:
+            selected_index = min(len(CLERIC_RITUAL_OUTCOME_BANDS) - 1, selected_index + 1)
+        profile = dict(CLERIC_RITUAL_OUTCOME_BANDS[selected_index])
+        profile["ritual_quality"] = ritual_quality
+        profile["effective_quality"] = effective_quality
+        profile["failure_count"] = failure_count
+        return profile
 
     def sacrifice_for_favor(self, offered_amount):
         if not self.is_in_shrine():
@@ -2889,6 +3930,115 @@ class Character(ObjectParent, DefaultCharacter):
             "exp_restore_scale": 0.5,
             "favor_before": value,
         }
+
+    def get_corpse_favor_detail_snapshot(self, corpse):
+        snapshot = corpse.get_favor_detail_snapshot() if corpse and hasattr(corpse, "get_favor_detail_snapshot") else None
+        if isinstance(snapshot, Mapping):
+            return dict(snapshot)
+        favor_before = corpse.get_favor_snapshot() if corpse and hasattr(corpse, "get_favor_snapshot") else 0
+        return {
+            "favor_before": int(favor_before or 0),
+            "resurrection": {"can_resurrect": int(favor_before or 0) >= 1},
+        }
+
+    def get_res_success_chance(self, favor):
+        favor_value = max(0, int(favor or 0))
+        if favor_value <= 0:
+            return 0.0
+        return min(0.25 + (favor_value * 0.15), 0.95)
+
+    def roll_resurrection_success(self, favor, corpse=None, caster=None):
+        base_chance = self.get_res_success_chance(favor)
+        chance = base_chance
+        band = "stable"
+        decay_stage = 0
+        if corpse is not None:
+            loads = self.get_effective_corpse_revive_loads(corpse)
+            band = self.get_corpse_revive_survivability_band(corpse)
+            decay_stage = int(loads.get("decay_stage", 0) or 0)
+            chance -= float(loads.get("chance_penalty", 0.0) or 0.0)
+            if band == "critical":
+                chance -= 0.08
+            elif band == "unsafe":
+                chance -= 0.22
+        chance = max(0.0, min(0.95, chance))
+        roll = random.random()
+        success = roll < chance
+        detail = {
+            "favor": max(0, int(favor or 0)),
+            "base_chance": base_chance,
+            "chance": chance,
+            "roll": roll,
+            "success": success,
+            "survivability_band": band,
+            "decay_stage": decay_stage,
+        }
+        if corpse is not None:
+            corpse.db.last_resurrection_roll = dict(detail)
+        if caster is not None:
+            caster.msg(
+                f"Resurrection chance roll: favor={detail['favor']} base={base_chance:.2f} final={chance:.2f} band={band.upper()} decay={decay_stage} roll={roll:.2f} -> {'SUCCESS' if success else 'FAILURE'}."
+            )
+        return detail
+
+    def get_resurrection_stabilization_state(self):
+        state = getattr(self.db, "res_stabilization", None)
+        return dict(state) if isinstance(state, Mapping) else None
+
+    def begin_resurrection_stabilization(self, band="stable"):
+        band_key = str(band or "stable").strip().lower() or "stable"
+        profile = {"ticks_remaining": 1, "bleed_multiplier": 1.0, "internal_pause_ticks": 0, "death_guard_ticks": 1}
+        state = {
+            "band": band_key,
+            "ticks_remaining": int(profile["ticks_remaining"]),
+            "bleed_multiplier": float(profile["bleed_multiplier"]),
+            "internal_pause_ticks": int(profile["internal_pause_ticks"]),
+            "death_guard_ticks": int(profile["death_guard_ticks"]),
+        }
+        self.db.res_stabilization = state
+        self.db.just_revived = True
+        self.db.revive_protection_ticks = int(profile["death_guard_ticks"])
+        return dict(state)
+
+    def get_resurrection_bleed_multiplier(self):
+        state = self.get_resurrection_stabilization_state()
+        if not state:
+            return 1.0
+        return max(0.1, min(1.0, float(state.get("bleed_multiplier", 1.0) or 1.0)))
+
+    def should_pause_resurrection_internal_decay(self):
+        state = self.get_resurrection_stabilization_state()
+        if not state:
+            return False
+        return int(state.get("internal_pause_ticks", 0) or 0) > 0
+
+    def consume_resurrection_death_guard(self):
+        state = self.get_resurrection_stabilization_state()
+        if not state or int(state.get("death_guard_ticks", 0) or 0) <= 0:
+            self.db.revive_protection_ticks = 0
+            return False
+        state["death_guard_ticks"] = max(0, int(state.get("death_guard_ticks", 0) or 0) - 1)
+        self.db.res_stabilization = state
+        self.db.revive_protection_ticks = int(state.get("death_guard_ticks", 0) or 0)
+        return True
+
+    def process_resurrection_stabilization_tick(self):
+        state = self.get_resurrection_stabilization_state()
+        if not state:
+            self.db.just_revived = False
+            self.db.revive_protection_ticks = 0
+            return False
+        state["ticks_remaining"] = max(0, int(state.get("ticks_remaining", 0) or 0) - 1)
+        state["internal_pause_ticks"] = max(0, int(state.get("internal_pause_ticks", 0) or 0) - 1)
+        if state["ticks_remaining"] <= 0:
+            self.db.res_stabilization = None
+            self.db.just_revived = False
+            self.db.revive_protection_ticks = 0
+        else:
+            self.db.res_stabilization = state
+            self.db.just_revived = int(state.get("death_guard_ticks", 0) or 0) > 0
+            self.db.revive_protection_ticks = int(state.get("death_guard_ticks", 0) or 0)
+        return True
 
     def calculate_resurrection_quality_score(self, corpse=None, caster=None, snapshot=None, soul_state=None):
         snapshot = snapshot if isinstance(snapshot, Mapping) else self.get_favor_death_snapshot() or {}
@@ -3171,15 +4321,11 @@ class Character(ObjectParent, DefaultCharacter):
 
     def handle_favor_death_event(self):
         favor_before = self.get_favor()
-        consumed = min(favor_before, self.get_favor_death_consumption()) if favor_before > 0 else 0
-        if consumed > 0:
-            self.adjust_favor(-consumed, emit_message=True)
         self.db.deaths_since_last_shrine = int(getattr(self.db, "deaths_since_last_shrine", 0) or 0) + 1
-        remaining = self.get_favor()
         self.db.death_favor_snapshot = {
             "favor_before": favor_before,
-            "favor_consumed": consumed,
-            "favor_remaining": remaining,
+            "favor_consumed": 0,
+            "favor_remaining": favor_before,
             "soul_decay_rate": self.get_soul_decay_rate(favor=favor_before),
             "soul_strength_floor": self.get_soul_strength_floor(favor=favor_before),
             "resurrection": self.get_resurrection_favor_profile(favor=favor_before),
@@ -3187,14 +4333,11 @@ class Character(ObjectParent, DefaultCharacter):
             "must_depart": favor_before <= 0,
         }
         if favor_before <= 0:
-            self.msg("You have no anchor to return. You must depart.")
+            self.msg("You have no favor left to call upon. You must depart.")
         elif favor_before >= int(FAVOR_SYSTEM_CONFIG["high_favor_threshold"]):
-            self.msg("The divine bond strengthens your return.")
-            self.msg("Your soul remains firmly tethered.")
+            self.msg("A steady reserve of favor holds fast against death.")
         elif favor_before <= int(FAVOR_SYSTEM_CONFIG["low_favor_threshold"]):
-            self.msg("You feel unprepared for what comes next.")
-            self.msg("Your return is strained and uncertain.")
-            self.msg("Your soul feels tenuous and unanchored.")
+            self.msg("Your favor feels thin as death takes hold.")
 
     def get_favor_death_snapshot(self):
         self.ensure_core_defaults()
@@ -3215,7 +4358,7 @@ class Character(ObjectParent, DefaultCharacter):
         return max(5, int(round(float(FAVOR_SYSTEM_CONFIG["resurrection_base_attunement_cost"]) * (1.0 - reduction))))
 
     def get_death_corpse(self):
-        corpse_id = int(getattr(self.db, "last_corpse_id", 0) or 0)
+        corpse_id = int(getattr(self.db, "corpse_id", 0) or getattr(self.db, "last_corpse_id", 0) or 0)
         if corpse_id <= 0:
             return None
         result = search_object(f"#{corpse_id}")
@@ -3229,12 +4372,16 @@ class Character(ObjectParent, DefaultCharacter):
         room = location or self.location
         if not room:
             return None
+        graves = []
         for obj in list(getattr(room, "contents", []) or []):
             if not getattr(getattr(obj, "db", None), "is_grave", False):
                 continue
             if hasattr(obj, "is_owner") and obj.is_owner(self):
-                return obj
-        return None
+                graves.append(obj)
+        if not graves:
+            return None
+        graves.sort(key=lambda grave: float(getattr(grave.db, "created_at", getattr(grave.db, "creation_time", 0.0)) or 0.0), reverse=True)
+        return graves[0]
 
     def get_recoverable_grave(self, location=None):
         room = location or self.location
@@ -3243,12 +4390,53 @@ class Character(ObjectParent, DefaultCharacter):
         owned = self.get_owned_grave(location=room)
         if owned:
             return owned
-        for obj in list(getattr(room, "contents", []) or []):
-            if not getattr(getattr(obj, "db", None), "is_grave", False):
-                continue
-            if hasattr(obj, "is_recovery_allowed") and obj.is_recovery_allowed(self):
-                return obj
         return None
+
+    def calculate_depart_coin_loss(self, coins):
+        total_coins = max(0, int(coins or 0))
+        if total_coins <= 0:
+            return 0, 0
+        config = GRAVE_SYSTEM_CONFIG
+        lost_coins = int(total_coins * float(config.get("base_coin_loss_ratio", 0.10) or 0.10))
+        if self.get_favor() >= int(config.get("high_favor_threshold", 3) or 3):
+            lost_coins = int(round(lost_coins * float(config.get("high_favor_loss_scale", 0.5) or 0.5)))
+        sting_count = self.get_death_sting_count()
+        if sting_count >= 4:
+            lost_coins += int(round(total_coins * float(config.get("severe_sting_bonus_ratio", 0.05) or 0.05)))
+        elif sting_count >= 2:
+            lost_coins += int(round(total_coins * float(config.get("moderate_sting_bonus_ratio", 0.02) or 0.02)))
+        lost_coins = max(0, min(total_coins, lost_coins))
+        return lost_coins, max(0, total_coins - lost_coins)
+
+    def create_depart_grave(self, corpse=None, location=None):
+        self.ensure_core_defaults()
+        now = time.time()
+        grave_location = location or getattr(corpse, "location", None) or self.location or self.home
+        lost_coins = 0
+        if corpse and hasattr(corpse, "decay_to_grave"):
+            corpse_coins = max(0, int(getattr(corpse.db, "stored_coins", 0) or 0))
+            lost_coins, kept_coins = self.calculate_depart_coin_loss(corpse_coins)
+            corpse.db.stored_coins = kept_coins
+            grave = corpse.decay_to_grave(stored_coins=kept_coins, expires_at=now + float(GRAVE_SYSTEM_CONFIG["expiry_seconds"]))
+        else:
+            grave = create_object("typeclasses.grave.Grave", key=f"grave of {self.key}", location=grave_location, home=grave_location)
+            grave.db.owner_id = self.id
+            grave.db.owner_name = self.key
+            grave.db.created_at = now
+            grave.db.creation_time = now
+            grave.db.items = []
+            grave.db.stored_items = []
+            grave.db.coins = 0
+            grave.db.stored_coins = 0
+            grave.db.expires_at = now + float(GRAVE_SYSTEM_CONFIG["expiry_seconds"])
+            grave.db.expiry_time = grave.db.expires_at
+            grave.db.recovery_allowed = [int(self.id or 0)] if int(self.id or 0) > 0 else []
+            if hasattr(grave, "refresh_description"):
+                grave.refresh_description()
+            if hasattr(grave, "sync_storage_metadata"):
+                grave.sync_storage_metadata()
+            grave.scripts.add("typeclasses.scripts.GraveMaintenanceScript")
+        return grave, lost_coins
 
     def create_death_corpse(self):
         corpse = self.get_death_corpse()
@@ -3261,25 +4449,33 @@ class Character(ObjectParent, DefaultCharacter):
             home=self.location,
         )
         corpse.db.owner_id = self.id
+        corpse.db.corpse_owner_id = self.id
         corpse.db.owner_name = self.key
-        corpse.db.death_timestamp = time.time()
-        corpse.db.decay_time = time.time() + (10 * 60)
+        corpse.db.death_timestamp = float(getattr(self.db, "death_timestamp", 0.0) or time.time())
+        corpse.db.death_type = str(getattr(self.db, "death_type", "vitality") or "vitality")
+        corpse.db.location = getattr(self.location, "id", None)
+        corpse.db.decay_end_time = corpse.db.death_timestamp + (30 * 60)
+        corpse.db.decay_time = corpse.db.decay_end_time
         corpse.db.memory_time = time.time() + (7 * 60)
         corpse.db.memory_faded = False
         corpse.db.memory_loss_applied = False
-        corpse.db.favor_snapshot = self.get_favor_death_snapshot()
+        corpse.db.favor_snapshot = self.get_favor()
+        corpse.db.favor_detail_snapshot = self.get_favor_death_snapshot()
+        corpse.db.is_valid_for_revive = corpse.db.death_type != "spirit"
         corpse.db.condition = 100.0
         corpse.db.stabilized = False
         corpse.db.preserve_stacks = 0
         corpse.db.preparation_stacks = 0
         corpse.db.stored_coins = 0
         corpse.db.recovery_allowed = sorted(self.get_recovery_consent_ids() | {int(self.id or 0)})
+        corpse.db.wounds = copy.deepcopy(self.build_corpse_wound_payload())
         if hasattr(corpse, "update_condition_description"):
             corpse.update_condition_description()
         corpse.scripts.add("typeclasses.scripts.CorpseDecayScript")
         if hasattr(corpse, "schedule_decay_transition"):
             corpse.schedule_decay_transition()
         self.db.last_corpse_id = corpse.id
+        self.db.corpse_id = corpse.id
         return corpse
 
     def move_carried_items_to_corpse(self, corpse):
@@ -3297,6 +4493,7 @@ class Character(ObjectParent, DefaultCharacter):
 
     def clear_death_corpse_link(self):
         self.db.last_corpse_id = None
+        self.db.corpse_id = None
 
     def move_coins_to_corpse(self, corpse):
         if not corpse:
@@ -3308,62 +4505,44 @@ class Character(ObjectParent, DefaultCharacter):
 
     def apply_death_sting(self, duration=600, favor=None, had_prior_penalty=False):
         self.ensure_core_defaults()
-        self.db.death_sting = True
+        if not bool(getattr(self.db, "death_penalty_applied", False)):
+            self.db.death_sting = min(DEATH_STING_MAX_STACKS, max(1, self.get_death_sting_count() + 1))
+            self.db.death_penalty_applied = True
+        else:
+            self.db.death_sting = max(1, self.get_death_sting_count())
         self.db.death_sting_active = True
         severity = self.calculate_death_sting_severity(favor=favor)
-        if had_prior_penalty or self.get_exp_debt() > 0:
-            severity = min(0.30, severity + 0.03)
-        protection = self.get_death_protection_state()
-        if protection["active"]:
-            severity *= float(protection["sting_severity_scale"])
         self.db.death_sting_severity = severity
-        self.db.death_sting_end = time.time() + max(0.0, float(duration))
+        self.db.death_sting_end = time.time() + max(0.0, float(duration or DEATH_STING_DECAY_SECONDS))
+        self.db.death_sting_hp_cap_ratio = float(DEATH_STING_HP_CAPS.get(self.get_death_sting_recovery_label(), 1.0))
+        self.db.death_sting_recovery_label = self.get_death_sting_recovery_label()
         self.sync_client_state()
 
-    def at_death(self):
-        self.ensure_core_defaults()
-        if self.db.life_state == LIFE_STATE_DEAD:
-            return None
-        had_prior_penalty = self.get_exp_debt() > 0 or bool(getattr(self.db, "death_sting_active", False) or getattr(self.db, "death_sting", False))
-        self.db.life_state = LIFE_STATE_DEAD
-        self.db.is_dead = True
-        self.db.last_death_time = time.time()
-        self.db.in_combat = False
-        self.db.target = None
-        self.db.aiming = None
-        self.capture_exp_debt_on_death(had_prior_penalty=had_prior_penalty)
-        self.handle_favor_death_event()
-        snapshot = self.get_favor_death_snapshot() or {}
-        self.initialize_soul_state(snapshot=snapshot)
-        self.apply_death_sting(favor=snapshot.get("favor_before", self.get_favor()), had_prior_penalty=had_prior_penalty)
-        corpse = self.create_death_corpse()
-        self.move_carried_items_to_corpse(corpse)
-        lost_coins = self.move_coins_to_corpse(corpse)
-        if bool(getattr(self.db, "is_npc", False)):
-            self.generate_npc_loot()
-        if self.location:
-            room = self.location
-            death_emote = self.get_death_emote()
-            delay(1.0, room.msg_contents, death_emote, exclude=[self])
-        self.emit_death_event("on_character_death", corpse=corpse, room=self.location)
-        self.update_death_analytics("death")
-        self.msg("You have died.")
-        self.msg("You feel yourself slipping free from your body.")
-        if lost_coins > 0 and not bool(getattr(self.db, "is_npc", False)):
-            self.msg("You feel your wealth slip from your grasp as you fall.")
-        return corpse
+    def at_death(self, cause=None, death_type="vitality"):
+        from world.systems.death import handle_death
+
+        return handle_death(self, cause=cause, death_type=death_type)
 
     def revive_from_death(self, via="depart"):
         self.ensure_core_defaults()
         restore_ratio = float(FAVOR_SYSTEM_CONFIG["resurrection_restore_hp_ratio"] if via == "resurrection" else FAVOR_SYSTEM_CONFIG["depart_restore_hp_ratio"])
         self.db.life_state = LIFE_STATE_ALIVE
         self.db.is_dead = False
+        self.db.death_type = None
+        self.db.death_timestamp = 0.0
+        self.db.death_location = None
+        self.db.recovery_state = "revived_weak" if via == "resurrection" else "none"
+        self.db.depart_confirm_mode = None
+        self.db.depart_confirm_expires_at = 0.0
         self.db.in_combat = False
         self.db.target = None
         if via != "resurrection":
             self.clear_state("resurrection_fragility")
             self.clear_state("resurrection_instability")
             self.db.resurrection_vitality_cap_ratio = 1.0
+            self.db.res_stabilization = None
+            self.db.just_revived = False
+            self.db.revive_protection_ticks = 0
         self.db.hp = max(1, int(round((self.db.max_hp or 1) * restore_ratio)))
         self.db.balance = max(0, int(round((self.db.max_balance or 1) * 0.5)))
         self.db.fatigue = min(self.db.max_fatigue or 100, max(int(self.db.fatigue or 0), int(round((self.db.max_fatigue or 100) * 0.35))))
@@ -3372,6 +4551,36 @@ class Character(ObjectParent, DefaultCharacter):
         self.sync_empath_wounds_from_resources()
         self.sync_client_state()
         return True
+
+    def begin_depart_confirmation(self, depart_type="standard"):
+        self.ensure_core_defaults()
+        if self.can_confirm_depart(depart_type=depart_type):
+            return False
+        self.db.depart_confirm_mode = str(depart_type or "standard")
+        self.db.depart_confirm_expires_at = time.time() + DEPART_CONFIRM_WINDOW_SECONDS
+        return True
+
+    def can_confirm_depart(self, depart_type="standard"):
+        self.ensure_core_defaults()
+        expires_at = float(getattr(self.db, "depart_confirm_expires_at", 0.0) or 0.0)
+        pending = str(getattr(self.db, "depart_confirm_mode", "") or "").strip().lower()
+        return pending == str(depart_type or "standard").strip().lower() and expires_at > time.time()
+
+    def is_depart_blocked_by_active_revive(self, corpse=None):
+        corpse = corpse or self.get_death_corpse()
+        if not corpse:
+            return False
+        room = getattr(corpse, "location", None)
+        corpse_id = int(getattr(corpse, "id", 0) or 0)
+        for obj in list(getattr(room, "contents", []) or []):
+            pending = getattr(getattr(obj, "ndb", None), "pending_cleric_ritual_action", None)
+            if not isinstance(pending, dict) or not bool(pending.get("active", False)):
+                continue
+            if int(pending.get("corpse_id", 0) or 0) != corpse_id:
+                continue
+            if str(pending.get("action", "") or "").strip().lower() == "revive":
+                return True
+        return False
 
     def set_recovery_metadata(self, recovery_type, helper=None, quality=None):
         self.db.last_recovery_type = str(recovery_type or "unknown")
@@ -3394,8 +4603,8 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_depart_mode(self, corpse=None, requested_mode=None):
         snapshot = None
-        if corpse and hasattr(corpse, "get_favor_snapshot"):
-            snapshot = corpse.get_favor_snapshot()
+        if corpse:
+            snapshot = self.get_corpse_favor_detail_snapshot(corpse)
         if not isinstance(snapshot, Mapping):
             snapshot = self.get_favor_death_snapshot() or {}
         available_favor = int(snapshot.get("favor_before", 0) or 0)
@@ -3418,36 +4627,39 @@ class Character(ObjectParent, DefaultCharacter):
     def depart_self(self, mode=None):
         if not self.is_dead():
             return False, "You are not dead."
+        requested_mode = str(mode or "standard").strip().lower()
         corpse = self.get_death_corpse()
-        if corpse and bool(getattr(corpse.db, "irrecoverable", False)) and not mode:
-            mode = "grave"
-        depart_mode = self.get_depart_mode(corpse=corpse, requested_mode=mode)
-        if depart_mode is None:
-            return False, "You do not have enough favor for that kind of departure."
-        keep_items = depart_mode in {"items", "full"}
-        keep_coins = depart_mode in {"coins", "full"}
-        if corpse and keep_items:
-            for item in list(corpse.contents):
-                item.move_to(self, quiet=True)
-        if corpse and keep_coins:
-            self.db.coins = int(getattr(self.db, "coins", 0) or 0) + int(getattr(corpse.db, "stored_coins", 0) or 0)
-            corpse.db.stored_coins = 0
+        depart_mode = requested_mode if requested_mode != "standard" else "grave"
+        if corpse and self.is_depart_blocked_by_active_revive(corpse=corpse):
+            return False, "You feel the pull of return. You cannot depart while the final rite is underway."
         destination = self.get_nearest_recovery_point(room=self.location) or self.home or self.location
+        corpse_room = getattr(corpse, "location", None)
+        grave, lost_coins = self.create_depart_grave(corpse=corpse, location=corpse_room or self.location)
         self.db.life_state = LIFE_STATE_DEPARTED
         self.revive_from_death(via="depart")
         self.db.life_state = LIFE_STATE_ALIVE
+        favor_snapshot = 0
+        if corpse and hasattr(corpse, "get_favor_snapshot"):
+            favor_snapshot = int(corpse.get_favor_snapshot() or 0)
+        elif hasattr(self, "get_favor_death_snapshot"):
+            favor_snapshot = int((self.get_favor_death_snapshot() or {}).get("favor_before", 0) or 0)
+        self.apply_death_sting_recovery_effects(favor=favor_snapshot, via="depart")
         if destination and self.location != destination:
             self.move_to(destination, quiet=True)
         self.set_recovery_metadata("depart", helper=None)
         recovery_time = self.get_last_recovery_elapsed()
-        favor_cost = {"grave": 0, "coins": 2, "items": 2, "full": 3}.get(depart_mode, 0)
+        favor_cost = 0
         self.update_death_analytics("depart", favor_used=favor_cost, recovery_time=recovery_time)
         self.emit_death_event("on_depart", mode=depart_mode, destination=destination)
         self.db.soul_state = None
-        if corpse and (keep_items or not corpse.contents) and int(getattr(corpse.db, "stored_coins", 0) or 0) <= 0:
-            corpse.delete()
-            self.clear_death_corpse_link()
-        return True, f"You feel your spirit pulled back into your body. You return by the {depart_mode} path."
+        if grave and hasattr(grave, "sync_storage_metadata"):
+            grave.sync_storage_metadata()
+        if corpse_room:
+            corpse_room.msg_contents("A disturbed patch of ground marks where someone fell.", exclude=[])
+        self.clear_death_corpse_link()
+        if lost_coins > 0:
+            self.msg("Some of your belongings fail to remain with the grave.")
+        return True, "You release your hold on the body and leave a grave behind."
 
     def resurrect_from_corpse(self, corpse, caster=None):
         if not corpse or not getattr(corpse.db, "is_corpse", False):
@@ -3460,7 +4672,7 @@ class Character(ObjectParent, DefaultCharacter):
             return False, "That corpse has no valid owner link to restore."
         if not owner.is_dead():
             return False, "They are no longer dead."
-        snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else owner.get_favor_death_snapshot()
+        snapshot = self.get_corpse_favor_detail_snapshot(corpse) if corpse else owner.get_favor_death_snapshot()
         if not isinstance(snapshot, Mapping):
             return False, "The corpse holds no viable soul pattern."
         soul_state = owner.get_soul_state() if hasattr(owner, "get_soul_state") else None
@@ -3474,6 +4686,12 @@ class Character(ObjectParent, DefaultCharacter):
         res_profile = dict(snapshot.get("resurrection") or {})
         if not bool(res_profile.get("can_resurrect", False)):
             return False, "Their spirit cannot be called back. They lack the favor required."
+        loads = self.get_effective_corpse_revive_loads(corpse)
+        survivability_band = self.get_corpse_revive_survivability_band(corpse)
+        adjusted_favor = max(0, int(snapshot.get("favor_before", 0) or 0) - int(loads.get("favor_penalty", 0) or 0))
+        favor_roll = self.roll_resurrection_success(adjusted_favor, corpse=corpse, caster=caster)
+        if not favor_roll["success"]:
+            return False, "The rite fails to take hold. The remaining favor is not enough this time."
         if not bool(soul_state.get("recoverable", False)):
             return False, "Their soul has slipped beyond your reach."
         if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
@@ -3490,7 +4708,7 @@ class Character(ObjectParent, DefaultCharacter):
             if devotion_cost and hasattr(caster, "get_devotion") and caster.get_devotion() < devotion_cost:
                 return False, "Your connection is too faint to complete the rite."
         condition = float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 100.0) or 0.0)
-        if condition < 25:
+        if condition < 25 and survivability_band == "unsafe":
             return False, "The corpse is too damaged to call back to life."
         quality = owner.get_resurrection_quality_result(corpse=corpse, caster=caster, snapshot=snapshot, soul_state=soul_state)
         if caster is not None and hasattr(caster, "get_resurrection_devotion_profile"):
@@ -3540,7 +4758,17 @@ class Character(ObjectParent, DefaultCharacter):
             quality["hp_ratio"] = min(1.0, float(quality["hp_ratio"]) + min(0.1, int(getattr(corpse.db, "preparation_stacks", 0) or 0) * 0.02))
             quality["hp_ratio"] = max(0.45, min(1.0, float(quality["hp_ratio"]) * (0.75 + (soul_strength / 400.0))))
             quality["exp_restore_scale"] = max(0.3, float(quality["exp_restore_scale"]) * (0.7 + (soul_strength / 250.0)))
+        quality = dict(quality)
+        if survivability_band == "critical":
+            quality["label"] = "fragile"
+            quality["hp_ratio"] = min(float(quality.get("hp_ratio", 1.0) or 1.0), 0.45)
+            quality["exp_restore_scale"] = min(float(quality.get("exp_restore_scale", 1.0) or 1.0), 0.7)
+        elif survivability_band == "unsafe":
+            quality["label"] = "flawed"
+            quality["hp_ratio"] = min(float(quality.get("hp_ratio", 1.0) or 1.0), 0.28)
+            quality["exp_restore_scale"] = min(float(quality.get("exp_restore_scale", 1.0) or 1.0), 0.5)
         owner.revive_from_death(via="resurrection")
+        owner.apply_death_sting_recovery_effects(favor=int(snapshot.get("favor_before", 0) or 0), via="resurrection")
         if owner.is_death_sting_active():
             owner.db.death_sting_severity = max(0.0, float(getattr(owner.db, "death_sting_severity", 0.0) or 0.0) * float(quality["sting_severity_scale"]))
             remaining = owner.get_death_sting_time_remaining()
@@ -3551,6 +4779,7 @@ class Character(ObjectParent, DefaultCharacter):
         if restored_exp > 0:
             owner.reduce_exp_debt(restored_exp, emit_clear_message=True)
         owner.apply_resurrection_aftereffects(quality)
+        owner.begin_resurrection_stabilization(survivability_band)
         if owner.location != corpse.location and corpse.location:
             owner.move_to(corpse.location, quiet=True)
         restored_coins = int(getattr(corpse.db, "stored_coins", 0) or 0)
@@ -3560,10 +4789,12 @@ class Character(ObjectParent, DefaultCharacter):
         for item in list(corpse.contents):
             item.move_to(owner, quiet=True)
         if owner.get_favor() > 0:
-            owner.adjust_favor(-1, emit_message=True)
+            owner.adjust_favor(-1, emit_message=True, reason="revive")
+        owner.db.last_favor_decay_at = time.time()
         owner.db.death_favor_snapshot = None
         owner.db.soul_state = None
         owner.db.last_corpse_id = None
+        label = str(quality.get("label", "stable") or "stable")
         owner.set_recovery_metadata("resurrection", helper=caster, quality=quality.get("label"))
         recovery_time = owner.get_last_recovery_elapsed()
         owner.update_death_analytics("resurrection", favor_used=1, recovery_time=recovery_time)
@@ -3572,16 +4803,382 @@ class Character(ObjectParent, DefaultCharacter):
         if caster is not None:
             caster.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=caster.get_theurgy_training_difficulty(24))
         corpse.delete()
-        label = str(quality.get("label", "stable") or "stable")
         if int(snapshot.get("favor_before", 0) or 0) >= int(FAVOR_SYSTEM_CONFIG["high_favor_threshold"]):
-            owner.msg("The divine bond strengthens your return.")
+            owner.msg("Enough favor remains to steady your return.")
         elif int(snapshot.get("favor_before", 0) or 0) <= int(FAVOR_SYSTEM_CONFIG["low_favor_threshold"]):
-            owner.msg("Your return is strained and uncertain.")
+            owner.msg("You return with little favor left to shield you.")
+        if survivability_band == "critical":
+            owner.msg("Your return holds, but only barely. You need help immediately.")
+        elif survivability_band == "unsafe":
+            owner.msg("You rip back into life in ruinous condition.")
         if label == "perfect":
             return True, f"Life returns as the soul finds its way back. {owner.key} rises in near-perfect form."
         if label == "stable":
             return True, f"Life returns as the soul finds its way back. {owner.key} is restored in stable condition."
         return True, f"{owner.key} is restored to life, but something feels off."
+
+    def cancel_pending_cleric_ritual(self, message=None, emit_message=True):
+        pending = getattr(self.ndb, "pending_cleric_ritual_action", None)
+        if not isinstance(pending, dict) or not bool(pending.get("active", False)):
+            return False
+        action = str(pending.get("action", "") or "").strip().lower()
+        corpse_id = int(pending.get("corpse_id", 0) or 0)
+        result = search_object(f"#{corpse_id}") if corpse_id > 0 else []
+        corpse = result[0] if result else None
+        pending["active"] = False
+        self.ndb.pending_cleric_ritual_action = pending
+        if emit_message:
+            state_before = corpse.get_ritual_state() if corpse and hasattr(corpse, "get_ritual_state") else None
+            consequence = self.apply_cleric_ritual_failure(corpse, action, interrupted=True)
+            state_after = corpse.get_ritual_state() if corpse and hasattr(corpse, "get_ritual_state") else None
+            if corpse:
+                self.emit_ritual_message(corpse, f"interrupt_{int(getattr(self, 'id', 0) or 0)}", f"{self.key}'s part of the rite falters.", cooldown=0.5, exclude=[self])
+                if state_before != state_after:
+                    self.emit_ritual_message(corpse, f"interrupt_regress_{action}", "The ritual slips backward under the strain.", cooldown=0.5, exclude=[self])
+            self.msg(f"{message or 'Your ritual is interrupted.'} {consequence}".strip())
+        return True
+
+    def cancel_pending_revive(self, message=None, emit_message=True):
+        return self.cancel_pending_cleric_ritual(message=message, emit_message=emit_message)
+
+    def _complete_pending_cleric_ritual(self, token):
+        pending = getattr(self.ndb, "pending_cleric_ritual_action", None)
+        if not isinstance(pending, dict) or not bool(pending.get("active", False)) or str(pending.get("token", "")) != str(token or ""):
+            return False
+        action = str(pending.get("action", "") or "").strip().lower()
+        corpse_id = int(pending.get("corpse_id", 0) or 0)
+        result = search_object(f"#{corpse_id}") if corpse_id > 0 else []
+        corpse = result[0] if result else None
+        pending["active"] = False
+        self.ndb.pending_cleric_ritual_action = pending
+        if action == "revive":
+            ok, message = self.perform_cleric_revive(corpse)
+        else:
+            ok, message = self.perform_cleric_corpse_ritual(corpse, action)
+        if not ok:
+            consequence = self.apply_cleric_ritual_failure(corpse, action, interrupted=False)
+            message = f"{message} {consequence}".strip()
+        self.msg(message)
+        return ok
+
+    def _finalize_revive_corpse_cleanup(self, corpse_id):
+        corpse_id = int(corpse_id or 0)
+        if corpse_id <= 0:
+            return False
+        result = search_object(f"#{corpse_id}")
+        corpse = result[0] if result else None
+        if not corpse:
+            return True
+        corpse.delete()
+        return True
+
+    def perform_cleric_revive(self, corpse):
+        if self.is_dead():
+            return False, "The dead cannot perform a revive."
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can guide a soul back."
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, message
+        room = getattr(corpse, "location", None)
+        if not self.can_revive_in_room(room=room):
+            return False, "You can only revive someone in a shrine or consecrated place."
+        ritual_state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        if ritual_state == "unprepared":
+            return False, "The body is not prepared for the rite."
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            return False, "This corpse can no longer sustain life."
+        if not bool(getattr(corpse.db, "is_valid_for_revive", True)) or str(getattr(corpse.db, "death_type", "vitality") or "vitality") == "spirit":
+            return False, "A spirit death cannot be reversed."
+        if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
+            return False, "The corpse's memory has faded beyond recall."
+        if not bool(getattr(corpse.db, "soul_bound", False)) or ritual_state != "bound":
+            return False, "The soul has not been secured."
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if not owner:
+            return False, "That corpse has no soul to call back."
+        if not owner.is_dead():
+            return False, "They are no longer dead."
+        favor_snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else 0
+        if int(favor_snapshot or 0) < 1:
+            return False, "There is not enough lingering favor to revive them."
+        survivability_band = self.get_corpse_revive_survivability_band(corpse)
+        revive_cost = max(1, int(FAVOR_SYSTEM_CONFIG.get("revive_cost", 1) or 1))
+        restored_favor = max(0, min(owner.get_favor_max(), int(favor_snapshot or 0) - revive_cost))
+        self.apply_cleric_group_contribution(corpse, "revive")
+        corpse_wounds = self.get_corpse_wounds(corpse)
+        vitality_burden = max(0, min(100, int(corpse_wounds.get("empath", {}).get("vitality", 0) or 0)))
+        vitality_ratio = max(0.0, min(1.0, float(100 - vitality_burden) / 100.0))
+        survivability_warning = self.get_corpse_survivability_warning(corpse)
+        if survivability_warning:
+            self.msg(survivability_warning)
+        owner.revive_from_death(via="revive")
+        owner.apply_corpse_wound_payload(corpse_wounds, sync=False)
+        owner.apply_death_sting_recovery_effects(favor=int(favor_snapshot or 0), via="revive")
+        owner.begin_resurrection_stabilization(survivability_band)
+        owner.db.hp = max(1, int(round((owner.db.max_hp or 1) * vitality_ratio)))
+        owner.db.favor_current = restored_favor
+        owner.db.favor = restored_favor
+        owner.db.last_favor_decay_at = time.time()
+        owner.db.recovery_state = "revived_stable" if survivability_band == "stable" else "revived_unstable"
+        owner.set_recovery_metadata("revive", helper=self, quality=survivability_band)
+        owner.update_death_analytics("resurrection", favor_used=revive_cost, recovery_time=owner.get_last_recovery_elapsed())
+        owner.emit_death_event("on_resurrection", caster=self, corpse=corpse, quality=survivability_band)
+        owner.sync_client_state()
+        owner.msg(f"{self.key} calls you back from death.")
+        owner.msg("A portion of your favor is spent to complete the return.")
+        if survivability_band == "stable":
+            owner.msg("You return to life, weakened but stable.")
+        else:
+            owner.msg("You return to life, but your body is failing.")
+        if room:
+            self.emit_ritual_message(corpse, f"revive_outcome_{survivability_band}", f"{owner.key} jolts back to life.", cooldown=0.5, exclude=[owner, self])
+        corpse_id = int(getattr(corpse, "id", 0) or 0)
+        owner.clear_death_corpse_link()
+        delay(0, self._finalize_revive_corpse_cleanup, corpse_id)
+        return True, f"You complete the final rite and call {owner.key} back to life."
+
+    def perform_cleric_corpse_ritual(self, corpse, action):
+        if self.is_dead():
+            return False, "The dead cannot perform that rite."
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can perform that rite."
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, message
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            return False, "This corpse can no longer sustain the rite."
+        if not bool(getattr(corpse.db, "is_valid_for_revive", True)) or str(getattr(corpse.db, "death_type", "vitality") or "vitality") == "spirit":
+            return False, "A spirit death cannot be reversed."
+        current_state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        contribution = self.apply_cleric_group_contribution(corpse, action)
+        if action == "prepare":
+            if current_state != "unprepared":
+                return True, "You join the ongoing ritual, but your practiced hands add no new edge to the preparation."
+            corpse.set_ritual_state("prepared") if hasattr(corpse, "set_ritual_state") else setattr(corpse.db, "ritual_state", "prepared")
+            corpse.db.prepared_by = int(getattr(self, "id", 0) or 0)
+            if hasattr(corpse, "adjust_ritual_quality"):
+                corpse.adjust_ritual_quality(CLERIC_RITUAL_QUALITY_STEPS["prepare"])
+            message = "You finish preparing the body for the rites."
+            if contribution["joined"]:
+                message = f"You join the ongoing ritual. {message}"
+            if contribution["specialization_bonus"]:
+                message = f"{message} {self.get_cleric_specialization_match_feedback(action)}"
+            self.emit_ritual_message(corpse, "prepare_complete", self.get_cleric_stage_completion_room_message("prepare"), cooldown=0.5, exclude=[self])
+            self.emit_ritual_message(corpse, "prepare_ready", self.get_cleric_assess_readiness_line(corpse), cooldown=0.5, exclude=[])
+            self.notify_dead_owner_of_ritual_transition(corpse, "prepare")
+            return True, message
+        if action == "stabilize":
+            if current_state == "unprepared":
+                return False, "The body must be prepared before it can be stabilized."
+            if current_state in {"stabilized", "restored", "bound"}:
+                return True, "Another cleric steadies the rite beside you, but you add no further strength to this stage."
+            corpse.set_ritual_state("stabilized") if hasattr(corpse, "set_ritual_state") else setattr(corpse.db, "ritual_state", "stabilized")
+            corpse.db.stabilized = True
+            if hasattr(corpse, "extend_memory"):
+                corpse.extend_memory(180, stacks=0)
+            if hasattr(corpse, "adjust_ritual_quality"):
+                corpse.adjust_ritual_quality(CLERIC_RITUAL_QUALITY_STEPS["stabilize"])
+            message = "You stabilize the body's fading pattern and hold its memories in place."
+            if contribution["joined"]:
+                message = f"You join the ongoing ritual. {message}"
+            if contribution["specialization_bonus"]:
+                message = f"{message} {self.get_cleric_specialization_match_feedback(action)}"
+            self.emit_ritual_message(corpse, "stabilize_complete", self.get_cleric_stage_completion_room_message("stabilize"), cooldown=0.5, exclude=[self])
+            self.emit_ritual_message(corpse, "stabilize_ready", self.get_cleric_assess_readiness_line(corpse), cooldown=0.5, exclude=[])
+            self.notify_dead_owner_of_ritual_transition(corpse, "stabilize")
+            return True, message
+        if action == "restore":
+            if current_state == "unprepared":
+                return False, "The body must be prepared before its memories can be restored."
+            if current_state == "prepared":
+                return False, "The body must be stabilized before its memories can be restored."
+            if current_state in {"restored", "bound"}:
+                return True, "You join the ongoing ritual, but the memories are already as coherent as this stage allows."
+            corpse.set_ritual_state("restored") if hasattr(corpse, "set_ritual_state") else setattr(corpse.db, "ritual_state", "restored")
+            corpse.db.memory_stable = True
+            corpse.db.memory_faded = False
+            if hasattr(corpse, "adjust_ritual_quality"):
+                corpse.adjust_ritual_quality(CLERIC_RITUAL_QUALITY_STEPS["restore"])
+            message = "You restore coherence to the corpse's lingering memories."
+            if contribution["joined"]:
+                message = f"You join the ongoing ritual. {message}"
+            if contribution["specialization_bonus"]:
+                message = f"{message} {self.get_cleric_specialization_match_feedback(action)}"
+            self.emit_ritual_message(corpse, "restore_complete", self.get_cleric_stage_completion_room_message("restore"), cooldown=0.5, exclude=[self])
+            self.emit_ritual_message(corpse, "restore_ready", self.get_cleric_assess_readiness_line(corpse), cooldown=0.5, exclude=[])
+            self.notify_dead_owner_of_ritual_transition(corpse, "restore")
+            return True, message
+        if action == "bind":
+            if current_state == "unprepared":
+                return False, "The body must be prepared before the soul can be bound."
+            if current_state == "prepared":
+                return False, "The body must be stabilized before the soul can be bound."
+            if current_state == "stabilized":
+                return False, "The memories must be restored before the soul can be bound."
+            if current_state == "bound":
+                return True, "You join the ongoing ritual, but the soul is already secured as tightly as this stage allows."
+            corpse.set_ritual_state("bound") if hasattr(corpse, "set_ritual_state") else setattr(corpse.db, "ritual_state", "bound")
+            corpse.db.soul_bound = True
+            if hasattr(corpse, "adjust_ritual_quality"):
+                corpse.adjust_ritual_quality(CLERIC_RITUAL_QUALITY_STEPS["bind"])
+            message = "You secure the soul to the body and make the final rite possible."
+            if contribution["joined"]:
+                message = f"You join the ongoing ritual. {message}"
+            if contribution["specialization_bonus"]:
+                message = f"{message} {self.get_cleric_specialization_match_feedback(action)}"
+            self.emit_ritual_message(corpse, "bind_complete", self.get_cleric_stage_completion_room_message("bind"), cooldown=0.5, exclude=[self])
+            self.emit_ritual_message(corpse, "bind_ready", self.get_cleric_assess_readiness_line(corpse), cooldown=0.5, exclude=[])
+            self.notify_dead_owner_of_ritual_transition(corpse, "bind")
+            return True, message
+        return False, "You cannot perform that rite."
+
+    def start_cleric_revive(self, corpse):
+        pending = getattr(self.ndb, "pending_cleric_ritual_action", None)
+        if isinstance(pending, dict) and bool(pending.get("active", False)):
+            return False, "You are already sustaining a rite."
+        if self.is_dead():
+            return False, "The dead cannot perform a revive."
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can guide a soul back."
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, message
+        room = getattr(corpse, "location", None)
+        if not self.can_revive_in_room(room=room):
+            return False, "You can only revive someone in a shrine or consecrated place."
+        ritual_state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        if ritual_state == "unprepared":
+            return False, "The body is not prepared for the rite."
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            return False, "This corpse can no longer sustain life."
+        if not bool(getattr(corpse.db, "is_valid_for_revive", True)) or str(getattr(corpse.db, "death_type", "vitality") or "vitality") == "spirit":
+            return False, "A spirit death cannot be reversed."
+        if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
+            return False, "The corpse's memory has faded beyond recall."
+        if not bool(getattr(corpse.db, "soul_bound", False)) or ritual_state != "bound":
+            return False, "The soul has not been secured."
+        favor_snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else 0
+        if int(favor_snapshot or 0) < 1:
+            return False, "There is not enough lingering favor to revive them."
+        specialization = self.get_cleric_specialization()
+        revive_cost = CLERIC_REVIVE_RITUAL_COST
+        if specialization and specialization == self.get_cleric_stage_specialization("revive"):
+            revive_cost = max(0, revive_cost - 1)
+        spend_ok, spend_result = self.spend_devotion(revive_cost, failure_message="You do not have the devotion required to continue the rite.")
+        if not spend_ok:
+            return False, spend_result
+        if hasattr(corpse, "add_ritual_participant"):
+            corpse.add_ritual_participant(self)
+        token = f"revive:{int(getattr(self, 'id', 0) or 0)}:{int(getattr(corpse, 'id', 0) or 0)}:{time.time():.6f}"
+        self.ndb.pending_cleric_ritual_action = {
+            "active": True,
+            "action": "revive",
+            "token": token,
+            "corpse_id": int(getattr(corpse, "id", 0) or 0),
+        }
+        self.sync_client_state()
+        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
+        if owner:
+            owner.msg("A distant rite tugs at the edge of your spirit.")
+        delay(self.get_cleric_stage_delay(corpse, "revive"), self._complete_pending_cleric_ritual, token)
+        join_text = " You join the ongoing ritual." if self.get_cleric_group_support_count(corpse) > 1 else ""
+        return True, f"You begin the final rite over {corpse.key}.{join_text} Remain still and unhurt until it is complete."
+
+    def start_cleric_corpse_ritual(self, corpse, action):
+        action_key = str(action or "").strip().lower()
+        pending = getattr(self.ndb, "pending_cleric_ritual_action", None)
+        if isinstance(pending, dict) and bool(pending.get("active", False)):
+            return False, "You are already sustaining a rite."
+        if self.is_dead():
+            return False, "The dead cannot perform that rite."
+        if not self.is_profession("cleric"):
+            return False, "Only a cleric can perform that rite."
+        ok, message = self.can_work_corpse(corpse)
+        if not ok:
+            return False, message
+        if action_key not in CLERIC_CORPSE_RITUAL_ACTIONS:
+            return False, "You cannot perform that rite."
+        if bool(getattr(corpse.db, "irrecoverable", False)):
+            return False, "This corpse can no longer sustain the rite."
+        if not bool(getattr(corpse.db, "is_valid_for_revive", True)) or str(getattr(corpse.db, "death_type", "vitality") or "vitality") == "spirit":
+            return False, "A spirit death cannot be reversed."
+        if hasattr(corpse, "has_viable_memory") and not corpse.has_viable_memory():
+            return False, "The corpse's memory has faded beyond recall."
+        current_state = corpse.get_ritual_state() if hasattr(corpse, "get_ritual_state") else str(getattr(corpse.db, "ritual_state", "unprepared") or "unprepared")
+        if action_key == "prepare" and current_state != "unprepared":
+            if hasattr(corpse, "has_stage_contributor") and corpse.has_stage_contributor(action_key, self):
+                return False, "You have already lent your hand to that stage."
+            return False, "The body is already prepared for the rite."
+        if action_key == "stabilize":
+            if current_state == "unprepared":
+                return False, "The body must be prepared before it can be stabilized."
+            if current_state in {"stabilized", "restored", "bound"}:
+                if hasattr(corpse, "has_stage_contributor") and corpse.has_stage_contributor(action_key, self):
+                    return False, "You have already lent your hand to that stage."
+                return False, "The body's fading pattern is already stabilized."
+        if action_key == "restore":
+            if current_state == "unprepared":
+                return False, "The body must be prepared before its memories can be restored."
+            if current_state == "prepared":
+                return False, "The body must be stabilized before its memories can be restored."
+            if current_state in {"restored", "bound"}:
+                if hasattr(corpse, "has_stage_contributor") and corpse.has_stage_contributor(action_key, self):
+                    return False, "You have already lent your hand to that stage."
+                return False, "The body's memories are already restored."
+        if action_key == "bind":
+            if current_state == "unprepared":
+                return False, "The body must be prepared before the soul can be bound."
+            if current_state == "prepared":
+                return False, "The body must be stabilized before the soul can be bound."
+            if current_state == "stabilized":
+                return False, "The memories must be restored before the soul can be bound."
+            if current_state == "bound":
+                if hasattr(corpse, "has_stage_contributor") and corpse.has_stage_contributor(action_key, self):
+                    return False, "You have already lent your hand to that stage."
+                return False, "The soul is already secured."
+        profile = CLERIC_CORPSE_RITUAL_ACTIONS[action_key]
+        specialization, unlocked = self.maybe_define_cleric_specialization(action_key)
+        devotion_cost = int(profile.get("cost", 0) or 0)
+        if specialization and specialization == self.get_cleric_stage_specialization(action_key):
+            devotion_cost = max(0, devotion_cost - 1)
+        spend_ok, spend_result = self.spend_devotion(devotion_cost, failure_message="You do not have the devotion required to continue the rite.")
+        if not spend_ok:
+            return False, spend_result
+        if hasattr(corpse, "add_ritual_participant"):
+            corpse.add_ritual_participant(self)
+        active_stage_actors = self.get_pending_cleric_stage_actor_ids(corpse, action_key, include_self=False)
+        token = f"{action_key}:{int(getattr(self, 'id', 0) or 0)}:{int(getattr(corpse, 'id', 0) or 0)}:{time.time():.6f}"
+        self.ndb.pending_cleric_ritual_action = {
+            "active": True,
+            "action": action_key,
+            "token": token,
+            "corpse_id": int(getattr(corpse, "id", 0) or 0),
+        }
+        self.sync_client_state()
+        if not active_stage_actors:
+            self.emit_ritual_message(corpse, f"{action_key}_start", self.get_cleric_stage_start_room_message(action_key), cooldown=0.5, exclude=[self])
+        elif self.should_emit_ritual_join_message(corpse, action_key, actor=self, cooldown=6.0):
+            specialization = self.get_cleric_specialization()
+            expected_specialization = self.get_cleric_stage_specialization(action_key)
+            join_message = self.get_cleric_stage_join_room_message(action_key)
+            emitted_join = False
+            if specialization and specialization == expected_specialization:
+                if self.should_emit_ritual_specialization_join_message(corpse, action_key, specialization):
+                    emitted_join = self.emit_ritual_message(corpse, f"{action_key}_join_specialization_{specialization}", join_message, cooldown=0.5, exclude=[self])
+            else:
+                emitted_join = self.emit_ritual_message(corpse, f"{action_key}_join_actor_{int(getattr(self, 'id', 0) or 0)}", join_message, cooldown=0.5, exclude=[self])
+            if emitted_join:
+                self.emit_ritual_message(corpse, f"{action_key}_join_reinforce_{int(getattr(self, 'id', 0) or 0)}", "Another set of practiced hands strengthens the ritual.", cooldown=0.5, exclude=[self])
+        delay(self.get_cleric_stage_delay(corpse, action_key), self._complete_pending_cleric_ritual, token)
+        message = str(profile.get("start_message", "You begin the rite.") or "You begin the rite.")
+        if self.get_cleric_group_support_count(corpse) > 1:
+            message = f"{message} You join the ongoing ritual."
+        if unlocked:
+            unlock_message = self.announce_cleric_specialization_unlock(specialization)
+            if unlock_message:
+                message = f"{message} {unlock_message}"
+        return True, message
 
     def recover_grave_items(self, grave=None):
         self.ensure_core_defaults()
@@ -3592,19 +5189,26 @@ class Character(ObjectParent, DefaultCharacter):
             return False, "You have nothing here to recover."
         if grave.location != self.location:
             return False, "You must stand where your grave rests to recover it."
-        if hasattr(grave, "is_recovery_allowed") and not grave.is_recovery_allowed(self):
+        if hasattr(grave, "is_owner") and not grave.is_owner(self):
             return False, "You do not have permission to disturb that grave."
         moved = []
+        available_weight = max(0.0, self.get_max_carry_weight() - self.get_total_weight()) if hasattr(self, "get_max_carry_weight") and hasattr(self, "get_total_weight") else None
         for item in list(grave.contents):
+            item_weight = self.get_object_total_weight(item) if hasattr(self, "get_object_total_weight") else 0.0
+            if available_weight is not None and item_weight > available_weight + 0.0001:
+                continue
             if item.move_to(self, quiet=True):
                 damage = int(getattr(getattr(item, "db", None), "grave_damage", 0) or 0)
                 if hasattr(item, "at_grave_recovery"):
                     item.at_grave_recovery(damage)
                 item.db.grave_damage = 0
                 moved.append(item)
+                if available_weight is not None:
+                    available_weight = max(0.0, available_weight - item_weight)
         recovered_coins = int(getattr(grave.db, "stored_coins", 0) or 0)
         if recovered_coins > 0:
             self.db.coins = int(getattr(self.db, "coins", 0) or 0) + recovered_coins
+            grave.db.coins = 0
             grave.db.stored_coins = 0
         owner_id = int(getattr(grave.db, "owner_id", 0) or 0)
         if owner_id > 0 and owner_id != int(self.id or 0):
@@ -3613,14 +5217,21 @@ class Character(ObjectParent, DefaultCharacter):
             if owner and hasattr(owner, "notify_recovery_consent_use"):
                 owner.notify_recovery_consent_use(self, "begins assisting with your remains")
         self.emit_death_event("on_grave_recovered", grave=grave, actor=self)
-        grave.delete()
+        if hasattr(grave, "sync_storage_metadata"):
+            grave.sync_storage_metadata()
+        grave_empty = not list(grave.contents) and int(getattr(grave.db, "stored_coins", 0) or 0) <= 0
+        if grave_empty:
+            grave.delete()
         self.sync_client_state()
         if moved or recovered_coins > 0:
-            summary = "You recover your belongings from the grave."
+            if grave_empty:
+                summary = "You recover what remains of your possessions."
+            else:
+                summary = "You recover what you can carry, but some items remain in the grave."
             if recovered_coins > 0:
                 summary = f"{summary} You also recover {recovered_coins} coins."
             return True, summary
-        return True, "You clear away the grave, but nothing remains within it."
+        return False, "You cannot carry anything else from the grave right now."
 
     def get_rejuvenation_strength(self, corpse):
         attunement = self.get_skill("attunement")
@@ -3631,30 +5242,7 @@ class Character(ObjectParent, DefaultCharacter):
     def rejuvenate_corpse(self, corpse):
         if not self.is_profession("cleric"):
             return False, "Only a cleric can weave that rite through dead flesh."
-        if not corpse or getattr(corpse, "location", None) != getattr(self, "location", None):
-            return False, "That corpse is not here."
-        if not getattr(getattr(corpse, "db", None), "is_corpse", False):
-            return False, "You can only rejuvenate a corpse."
-        if hasattr(corpse, "is_recovery_allowed") and not corpse.is_recovery_allowed(self):
-            return False, "You do not have permission to work with that corpse."
-        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
-        if owner and hasattr(owner, "notify_recovery_consent_use"):
-            owner.notify_recovery_consent_use(self)
-        before = float(corpse.get_condition() if hasattr(corpse, "get_condition") else getattr(corpse.db, "condition", 100.0) or 0.0)
-        if before <= 0:
-            return False, "The remains are too ruined for rejuvenation."
-        if before >= 100:
-            return False, "The corpse cannot be improved any further."
-        power = self.get_rejuvenation_strength(corpse)
-        if not self.spend_attunement(max(5, int(round(power / 2)))):
-            return False, "You lack the attunement to complete the rite."
-        owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
-        if owner and hasattr(owner, "notify_recovery_consent_use"):
-            owner.notify_recovery_consent_use(self, "begins assisting with your remains")
-        corpse.db.stabilized = True
-        after = corpse.adjust_condition(power) if hasattr(corpse, "adjust_condition") else before
-        self.use_skill("attunement", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=18)
-        return True, "You bathe the corpse in restorative radiance, renewing what death had taken."
+        return self.start_cleric_corpse_ritual(corpse, "restore")
 
     def maybe_msg_death_sting_combat_feedback(self):
         if not self.is_death_sting_active():
@@ -3692,10 +5280,12 @@ class Character(ObjectParent, DefaultCharacter):
             return False, "They are not suffering from Death's Sting."
         power_value = max(0, int(power or 0))
         if power_value >= 75:
-            self.db.death_sting = False
+            self.db.death_sting = 0
             self.db.death_sting_active = False
             self.db.death_sting_end = 0.0
             self.db.death_sting_severity = 0.0
+            self.db.death_sting_hp_cap_ratio = 1.0
+            self.db.death_sting_recovery_label = "none"
             self.sync_client_state()
             return True, "Death's Sting is lifted completely."
         remaining = self.get_death_sting_time_remaining()
@@ -3742,6 +5332,92 @@ class Character(ObjectParent, DefaultCharacter):
 
     def adjust_empath_shock(self, amount):
         return self.set_empath_shock(self.get_empath_shock() + int(amount or 0))
+
+    def get_empath_circle_distribution_weights(self, members=None):
+        weighted_members = []
+        for member in list(members or self.get_empath_circle_members(include_self=True, validate=True)):
+            if not member or not getattr(member, "is_empath", lambda: False)():
+                continue
+            risk = member.get_empath_transfer_risk_state() if hasattr(member, "get_empath_transfer_risk_state") else {}
+            vitality = max(0, 100 - int(member.get_empath_wound("vitality") if hasattr(member, "get_empath_wound") else 0))
+            shock = max(0, 100 - int(member.get_empath_shock() if hasattr(member, "get_empath_shock") else 0))
+            fatigue = max(0, 100 - int(member.get_empath_wound("fatigue") if hasattr(member, "get_empath_wound") else 0))
+            weight = max(0.25, (vitality * 0.45) + (shock * 0.35) + (fatigue * 0.20))
+            tier = str(risk.get("tier") or "steady")
+            if member.is_medically_critical() if hasattr(member, "is_medically_critical") else False:
+                weight *= 0.55
+            elif tier == "extreme":
+                weight *= 0.6
+            elif tier == "high":
+                weight *= 0.75
+            weighted_members.append((member, max(0.1, float(weight))))
+        return weighted_members
+
+    def distribute_circle_shock(self, amount, source="take"):
+        amount = max(0, int(round(amount or 0)))
+        members = self.get_empath_circle_members(include_self=True, validate=True)
+        if amount <= 0 or len(members) <= 1:
+            self.adjust_empath_shock(amount)
+            return {int(getattr(self, "id", 0) or 0): amount}
+        weighted_members = self.get_empath_circle_distribution_weights(members=members)
+        if not weighted_members:
+            self.adjust_empath_shock(amount)
+            return {int(getattr(self, "id", 0) or 0): amount}
+        total_weight = sum(weight for _member, weight in weighted_members)
+        if total_weight <= 0:
+            self.adjust_empath_shock(amount)
+            return {int(getattr(self, "id", 0) or 0): amount}
+        shares = {}
+        remaining = amount
+        for index, (member, weight) in enumerate(weighted_members):
+            if index == len(weighted_members) - 1:
+                share = remaining
+            else:
+                share = max(0, min(remaining, int(round((amount * weight) / total_weight))))
+            remaining -= share
+            shares[int(getattr(member, "id", 0) or 0)] = share
+        if remaining > 0 and shares:
+            first_member_id = int(getattr(weighted_members[0][0], "id", 0) or 0)
+            shares[first_member_id] = int(shares.get(first_member_id, 0) or 0) + remaining
+        for member, _weight in weighted_members:
+            member_id = int(getattr(member, "id", 0) or 0)
+            share = int(shares.get(member_id, 0) or 0)
+            if share <= 0:
+                continue
+            member.set_empath_shock(member.get_empath_shock() + share)
+            if member == self:
+                member.msg("The strain spreads through your circle.")
+            else:
+                member.msg("You share in the burden.")
+        self.maybe_trigger_empath_circle_cascade(trigger_amount=amount, source=source)
+        return shares
+
+    def get_empath_circle_cascade_risk(self):
+        members = self.get_empath_circle_members(include_self=True, validate=True)
+        near_limit = []
+        for member in members:
+            risk = member.get_empath_transfer_risk_state() if hasattr(member, "get_empath_transfer_risk_state") else {}
+            if str(risk.get("tier") or "") in {"high", "extreme"} or member.get_empath_shock() >= 60:
+                near_limit.append(member)
+        return near_limit
+
+    def maybe_trigger_empath_circle_cascade(self, trigger_amount=0, source="transfer"):
+        members = self.get_empath_circle_members(include_self=True, validate=True)
+        if len(members) <= 1:
+            return False
+        near_limit = self.get_empath_circle_cascade_risk()
+        if len(near_limit) < 2 or int(trigger_amount or 0) < 8:
+            return False
+        shocked_members = []
+        for member in near_limit[:3]:
+            member.db.empath_overload_until = max(float(getattr(member.db, "empath_overload_until", 0.0) or 0.0), time.time() + 6.0)
+            member.set_empath_wound("fatigue", member.get_empath_wound("fatigue") + 5)
+            member.msg("You feel the collapse ripple through you.")
+            shocked_members.append(member)
+        room = getattr(self, "location", None)
+        if room:
+            room.msg_contents("The circle fractures under the strain.")
+        return bool(shocked_members)
 
     def get_empath_shock_modifier(self):
         shock = self.get_empath_shock()
@@ -3915,6 +5591,10 @@ class Character(ObjectParent, DefaultCharacter):
         room = room or self.location
         return str(getattr(getattr(room, "db", None), "empath_guild_room", "") or "").strip().lower() == "office"
 
+    def is_cleric_join_room(self, room=None):
+        room = room or self.location
+        return str(getattr(getattr(room, "db", None), "cleric_guild_room", "") or "").strip().lower() == "office"
+
     def can_begin_profession_oath(self):
         if self.is_dead():
             return False, "The dead do not swear guild oaths."
@@ -4026,7 +5706,9 @@ class Character(ObjectParent, DefaultCharacter):
             if ability_key in {"perceive", "perceive_health", "perceive_target"}:
                 return False, "You sense nothing."
             return False, "You feel completely cut off from others."
-        if state == "dull" and ability_key in {"assess", "perceive", "perceive_health", "perceive_target"}:
+        if float(getattr(self.db, "empath_overload_until", 0.0) or 0.0) > time.time() and ability_key in {"take", "shift", "redirect", "channel"}:
+            return False, "You have taken too much. Your senses still reel."
+        if state == "dull" and ability_key in {"assess"}:
             return False, "Your senses are too dulled."
         return True, None
 
@@ -4528,6 +6210,337 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("The shared bond comes apart.")
         return True
 
+    def _normalize_empath_circle_member_ids(self, raw_members=None):
+        members = []
+        for entry in list(raw_members if raw_members is not None else getattr(self.db, "empath_circle_members", []) or []):
+            try:
+                member_id = int(entry or 0)
+            except (TypeError, ValueError):
+                continue
+            if member_id > 0 and member_id not in members:
+                members.append(member_id)
+        return members
+
+    def _normalize_empath_circle_invites(self):
+        invites = []
+        now = time.time()
+        for entry in list(getattr(self.db, "empath_circle_invites", []) or []):
+            if not isinstance(entry, Mapping):
+                continue
+            leader_id = int(entry.get("leader_id", 0) or 0)
+            expires_at = float(entry.get("expires_at", 0.0) or 0.0)
+            if leader_id <= 0:
+                continue
+            if expires_at and now >= expires_at:
+                continue
+            invites.append({"leader_id": leader_id, "expires_at": expires_at, "created_at": float(entry.get("created_at", now) or now)})
+        self.db.empath_circle_invites = invites
+        return invites
+
+    def get_empath_circle_leader_id(self):
+        leader_id = int(getattr(self.db, "empath_circle_leader", 0) or 0)
+        if leader_id > 0:
+            return leader_id
+        members = self._normalize_empath_circle_member_ids()
+        if int(getattr(self, "id", 0) or 0) in members:
+            return int(getattr(self, "id", 0) or 0)
+        return 0
+
+    def get_empath_circle_member_ids(self, include_self=True):
+        leader_id = self.get_empath_circle_leader_id()
+        members = self._normalize_empath_circle_member_ids()
+        if leader_id > 0 and leader_id not in members:
+            members.insert(0, leader_id)
+        self_id = int(getattr(self, "id", 0) or 0)
+        if include_self and self_id > 0 and self_id not in members and (leader_id == self_id or leader_id > 0):
+            members.append(self_id)
+        if not include_self:
+            members = [member_id for member_id in members if member_id != self_id]
+        return members[:3]
+
+    def get_empath_circle_members(self, include_self=True, validate=False):
+        if validate:
+            self.validate_empath_circle_state(sync_members=True, emit_message=False)
+        seen = []
+        for member_id in self.get_empath_circle_member_ids(include_self=include_self):
+            member = self.get_empath_link_target(member_id)
+            if member and member not in seen:
+                seen.append(member)
+        return seen
+
+    def is_in_empath_circle(self):
+        return bool(self.get_empath_circle_leader_id())
+
+    def is_empath_circle_leader(self):
+        return int(getattr(self, "id", 0) or 0) > 0 and int(getattr(self, "id", 0) or 0) == self.get_empath_circle_leader_id()
+
+    def get_empath_burden_soft_label(self):
+        risk = self.get_empath_transfer_risk_state() if hasattr(self, "get_empath_transfer_risk_state") else {}
+        tier = str(risk.get("tier") or "steady")
+        if self.is_empath_overloaded() if hasattr(self, "is_empath_overloaded") else False:
+            return "reeling"
+        if tier == "extreme":
+            return "breaking"
+        if tier == "high":
+            return "strained"
+        if tier == "elevated":
+            return "loaded"
+        return "steady"
+
+    def get_empath_reputation_label(self):
+        score = int(getattr(self.db, "empath_reputation_score", 0) or 0)
+        if score >= 4:
+            return "trusted"
+        if score <= -3:
+            return "unreliable"
+        return "unknown"
+
+    def record_tip_history(self, target, amount):
+        if not target:
+            return {}
+        history = dict(getattr(self.db, "tip_history", {}) or {})
+        target_id = str(int(getattr(target, "id", 0) or 0))
+        entry = dict(history.get(target_id, {}) or {})
+        entry["total"] = int(entry.get("total", 0) or 0) + int(amount or 0)
+        entry["last"] = time.time()
+        entry["target"] = getattr(target, "key", "")
+        history[target_id] = entry
+        self.db.tip_history = history
+        return entry
+
+    def get_tip_history_for(self, target):
+        if not target:
+            return {}
+        history = dict(getattr(self.db, "tip_history", {}) or {})
+        return dict(history.get(str(int(getattr(target, "id", 0) or 0)), {}) or {})
+
+    def adjust_empath_reputation(self, amount, reason=""):
+        current = int(getattr(self.db, "empath_reputation_score", 0) or 0)
+        updated = max(-20, min(20, current + int(amount or 0)))
+        self.db.empath_reputation_score = updated
+        return updated
+
+    def note_empath_handler_activity(self, target, action="take", duration=12.0):
+        if not target:
+            return {}
+        handlers = dict(getattr(getattr(target, "ndb", None), "empath_active_handlers", {}) or {})
+        target_id = int(getattr(self, "id", 0) or 0)
+        handlers[target_id] = {
+            "handler": self,
+            "handler_name": getattr(self, "key", ""),
+            "action": str(action or "take"),
+            "expires_at": time.time() + max(3.0, float(duration or 0.0)),
+            "circle": bool(self.get_empath_circle_members(include_self=False, validate=True)),
+        }
+        target.ndb.empath_active_handlers = handlers
+        return handlers
+
+    def get_empath_active_handlers(self, target):
+        if not target:
+            return []
+        now = time.time()
+        handlers = []
+        raw_handlers = dict(getattr(getattr(target, "ndb", None), "empath_active_handlers", {}) or {})
+        normalized = {}
+        for handler_id, payload in raw_handlers.items():
+            if not isinstance(payload, Mapping):
+                continue
+            expires_at = float(payload.get("expires_at", 0.0) or 0.0)
+            if expires_at and now >= expires_at:
+                continue
+            normalized[int(handler_id)] = dict(payload)
+            handlers.append(dict(payload))
+        target.ndb.empath_active_handlers = normalized
+        return handlers
+
+    def get_empath_transfer_pressure(self, target):
+        handlers = self.get_empath_active_handlers(target)
+        active_other_handlers = [entry for entry in handlers if int(getattr(entry.get("handler"), "id", 0) or 0) != int(getattr(self, "id", 0) or 0)]
+        shared_circle = any(bool(entry.get("circle", False)) for entry in handlers)
+        corpse_target = bool(getattr(getattr(target, "db", None), "is_corpse", False))
+        return {
+            "active_handlers": handlers,
+            "other_handler_count": len(active_other_handlers),
+            "efficiency_modifier": 1.0 if corpse_target or not active_other_handlers else max(0.6, 1.0 - (0.18 * len(active_other_handlers))),
+            "instability_multiplier": 1.0 if corpse_target or not active_other_handlers else min(1.8, 1.0 + (0.25 * len(active_other_handlers))),
+            "shared_circle": shared_circle,
+        }
+
+    def get_empath_queue_context_labels(self, target):
+        labels = []
+        pressure = self.get_empath_transfer_pressure(target)
+        if pressure.get("other_handler_count", 0) > 0:
+            labels.append("being handled")
+        context = dict(getattr(self.db, "empath_triage_context", {}) or {})
+        cached = dict(context.get(str(int(getattr(target, "id", 0) or 0)), {}) or {})
+        if cached and time.time() - float(cached.get("last_seen_at", 0.0) or 0.0) > 30.0 and pressure.get("other_handler_count", 0) <= 0:
+            labels.append("ignored")
+        if pressure.get("shared_circle"):
+            labels.append("shared load")
+        return labels
+
+    def clear_empath_circle(self, sync_members=True, emit_message=False):
+        member_ids = self.get_empath_circle_member_ids(include_self=False)
+        self.db.empath_circle_members = []
+        self.db.empath_circle_leader = None
+        if emit_message:
+            self.msg("The shock circle comes apart.")
+        if sync_members:
+            for member_id in member_ids:
+                member = self.get_empath_link_target(member_id)
+                if not member or member == self:
+                    continue
+                member.db.empath_circle_members = []
+                member.db.empath_circle_leader = None
+        return True
+
+    def validate_empath_circle_state(self, sync_members=True, emit_message=False):
+        if not self.is_empath():
+            return self.clear_empath_circle(sync_members=sync_members, emit_message=False)
+        leader_id = self.get_empath_circle_leader_id()
+        if leader_id <= 0:
+            self.db.empath_circle_members = []
+            self.db.empath_circle_leader = None
+            return []
+        leader = self.get_empath_link_target(leader_id)
+        if not leader or not getattr(leader, "is_empath", lambda: False)():
+            self.clear_empath_circle(sync_members=sync_members, emit_message=emit_message)
+            return []
+        room = getattr(self, "location", None)
+        if not room or getattr(leader, "location", None) != room:
+            self.clear_empath_circle(sync_members=sync_members, emit_message=emit_message)
+            return []
+        validated_ids = []
+        for member_id in leader._normalize_empath_circle_member_ids(getattr(leader.db, "empath_circle_members", []) or []):
+            member = self.get_empath_link_target(member_id)
+            if not member or getattr(member, "location", None) != room or not getattr(member, "is_empath", lambda: False)():
+                continue
+            validated_ids.append(int(member.id))
+        if leader_id not in validated_ids:
+            validated_ids.insert(0, leader_id)
+        validated_ids = validated_ids[:3]
+        if len(validated_ids) <= 1:
+            leader.db.empath_circle_members = []
+            leader.db.empath_circle_leader = None
+            if self != leader:
+                self.db.empath_circle_members = []
+                self.db.empath_circle_leader = None
+            return []
+        for member_id in validated_ids:
+            member = self.get_empath_link_target(member_id)
+            if not member:
+                continue
+            member.db.empath_circle_leader = leader_id
+            member.db.empath_circle_members = list(validated_ids)
+        return validated_ids
+
+    def invite_empath_circle_member(self, target, duration=30.0):
+        if not self.is_empath():
+            return False, "Only empaths can form a shock circle."
+        if not target or target == self or getattr(target, "location", None) != getattr(self, "location", None):
+            return False, "They are not here."
+        if not getattr(target, "is_empath", lambda: False)():
+            return False, "Only another empath can share a circle with you."
+        if target.is_in_empath_circle() and target.get_empath_circle_leader_id() != int(getattr(self, "id", 0) or 0):
+            return False, f"{target.key} is already committed to another circle."
+        member_ids = self.validate_empath_circle_state(sync_members=True, emit_message=False)
+        leader_id = self.get_empath_circle_leader_id()
+        if leader_id and leader_id != int(getattr(self, "id", 0) or 0):
+            return False, "Only the circle leader can invite another empath."
+        if not leader_id:
+            self.db.empath_circle_leader = int(getattr(self, "id", 0) or 0)
+            self.db.empath_circle_members = [int(getattr(self, "id", 0) or 0)]
+        current_ids = member_ids or [int(getattr(self, "id", 0) or 0)]
+        if len([member_id for member_id in current_ids if member_id > 0]) >= 3:
+            return False, "Your shock circle is already full."
+        invites = [entry for entry in target._normalize_empath_circle_invites() if int(entry.get("leader_id", 0) or 0) != int(getattr(self, "id", 0) or 0)]
+        invites.append({"leader_id": int(getattr(self, "id", 0) or 0), "created_at": time.time(), "expires_at": time.time() + max(10.0, float(duration or 0.0))})
+        target.db.empath_circle_invites = invites
+        target.msg(f"{self.key} invites you into a shock circle. Use 'circle accept {self.key}'.")
+        return True, f"You invite {target.key} into your shock circle."
+
+    def accept_empath_circle_invite(self, target):
+        if not self.is_empath():
+            return False, "Only empaths can join a shock circle."
+        if not target or target == self or getattr(target, "location", None) != getattr(self, "location", None):
+            return False, "They are not here."
+        if not getattr(target, "is_empath", lambda: False)():
+            return False, "Only another empath can lead a shock circle."
+        target.validate_empath_circle_state(sync_members=True, emit_message=False)
+        invites = self._normalize_empath_circle_invites()
+        if int(getattr(target, "id", 0) or 0) not in {int(entry.get("leader_id", 0) or 0) for entry in invites}:
+            return False, f"{target.key} has not invited you into a shock circle."
+        if self.is_in_empath_circle() and self.get_empath_circle_leader_id() != int(getattr(target, "id", 0) or 0):
+            self.clear_empath_circle(sync_members=True, emit_message=False)
+        current_ids = target.get_empath_circle_member_ids(include_self=True)
+        if not current_ids:
+            current_ids = [int(getattr(target, "id", 0) or 0)]
+            target.db.empath_circle_leader = int(getattr(target, "id", 0) or 0)
+            target.db.empath_circle_members = list(current_ids)
+        if len([member_id for member_id in current_ids if member_id > 0]) >= 3 and int(getattr(self, "id", 0) or 0) not in current_ids:
+            return False, f"{target.key}'s shock circle is already full."
+        merged_ids = []
+        for member_id in [*current_ids, int(getattr(self, "id", 0) or 0)]:
+            if member_id > 0 and member_id not in merged_ids:
+                merged_ids.append(member_id)
+        merged_ids = merged_ids[:3]
+        for member_id in merged_ids:
+            member = self.get_empath_link_target(member_id)
+            if not member:
+                continue
+            member.db.empath_circle_leader = int(getattr(target, "id", 0) or 0)
+            member.db.empath_circle_members = list(merged_ids)
+        self.db.empath_circle_invites = [entry for entry in invites if int(entry.get("leader_id", 0) or 0) != int(getattr(target, "id", 0) or 0)]
+        return True, f"You join {target.key}'s shock circle."
+
+    def leave_empath_circle(self):
+        member_ids = self.get_empath_circle_member_ids(include_self=True)
+        if len(member_ids) <= 1:
+            self.clear_empath_circle(sync_members=True, emit_message=False)
+            return False, "You are not part of a shock circle."
+        self_id = int(getattr(self, "id", 0) or 0)
+        remaining_ids = [member_id for member_id in member_ids if member_id != self_id]
+        self.db.empath_circle_members = []
+        self.db.empath_circle_leader = None
+        if len(remaining_ids) <= 1:
+            for member_id in remaining_ids:
+                member = self.get_empath_link_target(member_id)
+                if member:
+                    member.db.empath_circle_members = []
+                    member.db.empath_circle_leader = None
+            return True, "You step out of the shock circle."
+        new_leader_id = remaining_ids[0]
+        for member_id in remaining_ids:
+            member = self.get_empath_link_target(member_id)
+            if not member:
+                continue
+            member.db.empath_circle_leader = new_leader_id
+            member.db.empath_circle_members = list(remaining_ids)
+        return True, "You step out of the shock circle."
+
+    def get_empath_circle_status_lines(self):
+        member_ids = self.validate_empath_circle_state(sync_members=True, emit_message=False)
+        if not member_ids:
+            invites = self._normalize_empath_circle_invites()
+            lines = ["Shock Circle: none"]
+            if invites:
+                inviter_names = []
+                for entry in invites:
+                    inviter = self.get_empath_link_target(entry.get("leader_id"))
+                    if inviter:
+                        inviter_names.append(inviter.key)
+                if inviter_names:
+                    lines.append(f"Invites: {', '.join(inviter_names)}")
+            return lines
+        leader_id = self.get_empath_circle_leader_id()
+        lines = [f"Shock Circle Leader: {getattr(self.get_empath_link_target(leader_id), 'key', self.key)}"]
+        lines.append("Members:")
+        for member in self.get_empath_circle_members(include_self=True):
+            label = member.get_empath_burden_soft_label() if hasattr(member, "get_empath_burden_soft_label") else "steady"
+            reputation = member.get_empath_reputation_label() if hasattr(member, "get_empath_reputation_label") else "unknown"
+            lines.append(f"  {member.key}: {label} ({reputation})")
+        return lines
+
     def create_empath_unity(self, targets):
         if not self.is_empath():
             return False, "You do not know how to weave unity."
@@ -4756,6 +6769,168 @@ class Character(ObjectParent, DefaultCharacter):
     def get_empath_transfer_profile(self, wound_type):
         return dict(EMPATH_TRANSFER_CONFIG.get(self.normalize_empath_wound_key(wound_type), {}))
 
+    def get_medical_severity_state(self):
+        wounds = self.get_empath_wounds() if hasattr(self, "get_empath_wounds") else {}
+        vitality = int(wounds.get("vitality", 0) or 0)
+        bleeding = int(wounds.get("bleeding", 0) or 0)
+        poison = int(wounds.get("poison", 0) or 0)
+        disease = int(wounds.get("disease", 0) or 0)
+        trauma = int(wounds.get("trauma", 0) or 0)
+        aggregate = vitality + bleeding + poison + disease + trauma
+        if vitality >= 70 or bleeding >= 45 or poison >= 45 or disease >= 45 or trauma >= 45 or aggregate >= 120:
+            return "critical"
+        if vitality >= 45 or bleeding >= 25 or poison >= 25 or disease >= 25 or trauma >= 25 or aggregate >= 75:
+            return "badly_injured"
+        if vitality >= 20 or bleeding >= 10 or poison >= 10 or disease >= 10 or trauma >= 10 or aggregate >= 35:
+            return "injured"
+        return "stable"
+
+    def is_medically_critical(self):
+        return self.get_medical_severity_state() == "critical"
+
+    def is_empath_triage_target(self, target):
+        if not target or target == self:
+            return False
+        if bool(getattr(getattr(target, "db", None), "is_house_healer", False)):
+            return False
+        if not hasattr(target, "get_empath_wounds"):
+            return False
+        return True
+
+    def get_empath_triage_social_label(self, target):
+        if not target or bool(getattr(getattr(target, "db", None), "is_house_healer", False)):
+            return ""
+        last_tip_amount = int(getattr(getattr(target, "db", None), "last_tip_amount", 0) or 0)
+        last_tip_time = float(getattr(getattr(target, "db", None), "last_tip_time", 0.0) or 0.0)
+        if last_tip_amount >= 20 and last_tip_time > 0 and (time.time() - last_tip_time) <= 86400.0:
+            return "generous"
+        tip_history = self.get_tip_history_for(target) if hasattr(self, "get_tip_history_for") else {}
+        if int(tip_history.get("total", 0) or 0) >= 20 and time.time() - float(tip_history.get("last", 0.0) or 0.0) <= 86400.0:
+            return "generous"
+        context = dict(getattr(self.db, "empath_triage_context", {}) or {})
+        if str(int(getattr(target, "id", 0) or 0)) in context:
+            return "known"
+        return "no history"
+
+    def update_empath_triage_context(self, targets=None, source="scan", scanned_at=None):
+        if not self.is_empath():
+            return {}
+        scanned_at = float(scanned_at or time.time())
+        context = dict(getattr(self.db, "empath_triage_context", {}) or {})
+        target_list = list(targets or [])
+        for index, target in enumerate(target_list):
+            if not self.is_empath_triage_target(target):
+                continue
+            target_id = str(int(getattr(target, "id", 0) or 0))
+            context[target_id] = {
+                "target": getattr(target, "key", ""),
+                "severity": target.get_medical_severity_state() if hasattr(target, "get_medical_severity_state") else "stable",
+                "critical": bool(getattr(target, "is_medically_critical", lambda: False)()),
+                "last_seen_at": scanned_at,
+                "seen_order": index,
+                "source": str(source or "scan"),
+                "last_tip_amount": int(getattr(getattr(target, "db", None), "last_tip_amount", 0) or 0),
+                "last_tip_time": float(getattr(getattr(target, "db", None), "last_tip_time", 0.0) or 0.0),
+            }
+        self.db.empath_triage_context = context
+        self.db.last_triage_scan_at = scanned_at
+        return context
+
+    def get_empath_queue_entries(self):
+        room = getattr(self, "location", None)
+        if not room:
+            return []
+        context = dict(getattr(self.db, "empath_triage_context", {}) or {})
+        entries = []
+        for index, target in enumerate(getattr(room, "contents", [])):
+            if not self.is_empath_triage_target(target):
+                continue
+            severity = target.get_medical_severity_state() if hasattr(target, "get_medical_severity_state") else "stable"
+            if severity == "stable":
+                continue
+            cached = dict(context.get(str(int(getattr(target, "id", 0) or 0)), {}) or {})
+            entries.append(
+                {
+                    "target": target,
+                    "severity": severity,
+                    "severity_rank": {"stable": 0, "injured": 1, "badly_injured": 2, "critical": 3}.get(severity, 0),
+                    "social": self.get_empath_triage_social_label(target),
+                    "context_labels": self.get_empath_queue_context_labels(target),
+                    "tip_weight": 1 if self.get_empath_triage_social_label(target) == "generous" else 0,
+                    "seen_order": int(cached.get("seen_order", index) or index),
+                }
+            )
+        entries.sort(key=lambda entry: (-int(entry.get("severity_rank", 0) or 0), -int(entry.get("tip_weight", 0) or 0), int(entry.get("seen_order", 0) or 0), str(getattr(entry.get("target"), "key", ""))))
+        return entries
+
+    def get_empath_transfer_risk_state(self):
+        wounds = self.get_empath_wounds()
+        vitality = int(wounds.get("vitality", 0) or 0)
+        fatigue = int(wounds.get("fatigue", 0) or 0)
+        carried = sum(int(value or 0) for value in wounds.values())
+        shock = int(self.get_empath_shock() if hasattr(self, "get_empath_shock") else 0)
+        score = vitality + fatigue + shock + int(round(carried * 0.35))
+        tier = "steady"
+        efficiency_modifier = 1.0
+        backlash_modifier = 1.0
+        if score >= 170 or shock >= int(EMPATH_SHOCK_THRESHOLDS["disconnected"]):
+            tier = "extreme"
+            efficiency_modifier = 0.55
+            backlash_modifier = 1.4
+        elif score >= 130 or shock >= 60:
+            tier = "high"
+            efficiency_modifier = 0.7
+            backlash_modifier = 1.25
+        elif score >= 90 or shock >= 35:
+            tier = "elevated"
+            efficiency_modifier = 0.85
+            backlash_modifier = 1.1
+        return {
+            "vitality": vitality,
+            "fatigue": fatigue,
+            "shock": shock,
+            "carried_wounds": carried,
+            "score": score,
+            "tier": tier,
+            "efficiency_modifier": efficiency_modifier,
+            "backlash_modifier": backlash_modifier,
+        }
+
+    def is_empath_overloaded(self):
+        risk = self.get_empath_transfer_risk_state()
+        return str(risk.get("tier") or "") == "extreme" or self.is_empath_overdrawn()
+
+    def maybe_warn_empath_transfer_risk(self, risk_state=None):
+        risk = risk_state or self.get_empath_transfer_risk_state()
+        tier = str(risk.get("tier") or "steady")
+        if tier == "steady":
+            return False
+        now = time.time()
+        next_warning_at = float(getattr(self.ndb, "next_empath_risk_warning_at", 0.0) or 0.0)
+        if now < next_warning_at:
+            return False
+        self.msg("This may overwhelm you." if tier == "extreme" else "You are carrying too much already.")
+        self.ndb.next_empath_risk_warning_at = now + 8.0
+        return True
+
+    def trigger_empath_overload(self, reason="transfer", duration=8.0):
+        duration = max(4.0, float(duration or 0.0))
+        self.db.empath_overload_until = max(float(getattr(self.db, "empath_overload_until", 0.0) or 0.0), time.time() + duration)
+        self.msg("You have taken too much. Your senses falter.")
+        if getattr(self, "location", None):
+            self.location.msg_contents(f"{self.key} staggers under the weight of pain.", exclude=self)
+        self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 6)
+        for member in self.get_empath_circle_members(include_self=False, validate=True):
+            spill = 3
+            if member.get_empath_shock() >= 60 or member.get_empath_wound("vitality") >= 60:
+                spill = 2
+            member.set_empath_shock(member.get_empath_shock() + spill)
+            member.msg("The strain spreads through your circle.")
+        self.maybe_trigger_empath_circle_cascade(trigger_amount=9, source=reason)
+        if hasattr(self, "set_roundtime"):
+            self.set_roundtime(3.0)
+        return True
+
     def get_empath_trauma_value(self):
         self.ensure_core_defaults()
         injuries = getattr(self.db, "injuries", None) or {}
@@ -4881,7 +7056,7 @@ class Character(ObjectParent, DefaultCharacter):
             return []
         seen = []
         for obj in room.contents:
-            if obj == self or not hasattr(obj, "get_empath_wounds"):
+            if not self.is_empath_triage_target(obj):
                 continue
             seen.append(obj)
         if include_adjacent:
@@ -4903,20 +7078,24 @@ class Character(ObjectParent, DefaultCharacter):
         targets = self.get_empath_perceive_targets(include_adjacent=False)
         if not targets:
             return True, ["You sense no other lifeforms nearby."]
+        self.update_empath_triage_context(targets=targets, source="perceive_room")
         lines = []
-        if self.get_empath_shock() >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
+        shock_state = self.get_empath_shock_state()
+        if shock_state in {"strained", "dull"}:
             lines.append("Your senses are unclear.")
         for target in targets:
             wounds = target.get_empath_wounds() if hasattr(target, "get_empath_wounds") else {}
-            vitality = int(wounds.get("vitality", 0) or 0)
-            if vitality > 60:
-                status = "near collapse"
-            elif vitality > 30:
-                status = "weakened"
-            else:
-                status = "stable"
-            lines.append(f"You sense a presence that is {status}.")
-        self.award_empathy_experience("perceive_health", 10 + (len(targets) * 2), amount=len(targets))
+            severity_label = self.get_empath_room_scan_severity(wounds)
+            if shock_state == "dull" and severity_label in {"critical", "badly injured"}:
+                severity_label = "fading"
+            lines.append(f"{target.key}: {severity_label}")
+        self.award_field_xp(
+            "perceive",
+            difficulty=2 + len(targets),
+            success=True,
+            outcome="success",
+            context_multiplier=min(2.0, 1.0 + (len(targets) * 0.1)),
+        )
         return True, lines
 
     def perceive_empath_target(self, target):
@@ -4929,22 +7108,165 @@ class Character(ObjectParent, DefaultCharacter):
             return False, ["They are not here."]
         if not hasattr(target, "get_empath_wounds"):
             return False, ["You find no living pattern to read there."]
-        link_state = self.get_empath_link_state(require_local=True, target=target, emit_break_messages=True)
-        if link_state:
-            line = "Their life force trembles under strain."
+        self.update_empath_triage_context(targets=[target], source="perceive_target")
+        lines = self.format_empath_perceive_output(target)
+        if self.get_empath_shock_state() in {"strained", "dull"}:
+            return True, ["Your senses are unclear.", *lines]
+        self.award_field_xp("perceive", difficulty=2, success=True, outcome="success")
+        return True, lines
+
+    def get_empath_room_scan_severity(self, wounds):
+        wounds = dict(wounds or {})
+        vitality = int(wounds.get("vitality", 0) or 0)
+        bleeding = int(wounds.get("bleeding", 0) or 0)
+        poison = int(wounds.get("poison", 0) or 0)
+        disease = int(wounds.get("disease", 0) or 0)
+        trauma = int(wounds.get("trauma", 0) or 0)
+        aggregate = vitality + bleeding + poison + disease + trauma
+        if vitality >= 70 or bleeding >= 45 or aggregate >= 120:
+            return "critical"
+        if vitality >= 45 or bleeding >= 25 or aggregate >= 75:
+            return "badly injured"
+        if vitality >= 20 or bleeding >= 10 or aggregate >= 35:
+            return "injured"
+        return "fine"
+
+    def format_empath_perceive_output(self, target):
+        wounds = target.get_empath_wounds() if hasattr(target, "get_empath_wounds") else {}
+        shock_state = self.get_empath_shock_state()
+        severity_state = target.get_medical_severity_state() if hasattr(target, "get_medical_severity_state") else self.get_empath_room_scan_severity(wounds)
+        vitality = int(wounds.get("vitality", 0) or 0)
+        vitality_state = "stable"
+        if vitality > 60:
+            vitality_state = "near collapse"
+        elif vitality > 30:
+            vitality_state = "unstable"
+        wound_parts = []
+        for key in ("bleeding", "poison", "disease", "fatigue", "trauma"):
+            value = int(wounds.get(key, 0) or 0)
+            if value > 0:
+                wound_parts.append(f"{key} {value}%")
+        if shock_state == "dull":
+            lines = [
+                f"Target: {target.key}",
+                f"Condition: {severity_state.replace('_', ' ')}",
+                f"Impression: {'; '.join(wound_parts[:2]) if wound_parts else 'their pattern is hard to read'}",
+            ]
         else:
-            wounds = target.get_empath_wounds() if hasattr(target, "get_empath_wounds") else {}
-            vitality = int(wounds.get("vitality", 0) or 0)
-            if vitality > 60:
-                line = "You sense their life force is near collapse."
-            elif vitality > 30:
-                line = "You sense their life force is unstable."
-            else:
-                line = "You sense their life force is stable."
-        if self.get_empath_shock() >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
-            return True, ["Your senses are unclear.", line]
-        self.award_empathy_experience("perceive_target", 12, target=target)
-        return True, [line]
+            lines = [
+                f"Target: {target.key}",
+                f"Vitality: {vitality_state}",
+                f"Condition: {severity_state.replace('_', ' ')}",
+                f"Wounds: {', '.join(wound_parts) if wound_parts else 'none'}",
+            ]
+        shock = int(target.get_empath_shock() if hasattr(target, "get_empath_shock") else getattr(getattr(target, "db", None), "empath_shock", 0) or 0)
+        if shock > 0 and shock_state == "clear":
+            lines.append(f"Shock: {shock}")
+        return lines
+
+    def has_empath_transfer_connection(self, target):
+        if not target:
+            return False
+        return bool(self.get_empath_link_state(require_local=True, target=target, emit_break_messages=False))
+
+    def take_empath_shock(self, target):
+        if not self.is_empath():
+            return False, "You cannot take on shock that way."
+        allowed, message = self.can_use_empath_ability("take")
+        if not allowed:
+            return False, message
+        if not target or getattr(target, "location", None) != getattr(self, "location", None):
+            return False, "They are not here."
+        if not hasattr(target, "get_empath_shock"):
+            return False, "You find no empathic burden to transfer there."
+        if not self.has_empath_transfer_connection(target):
+            return False, "You must be properly connected to transfer shock."
+        target_shock = int(target.get_empath_shock() or 0)
+        if target_shock <= 0:
+            return False, f"{target.key} is carrying no shock."
+        available_capacity = max(0, 100 - int(self.get_empath_shock() or 0))
+        if available_capacity <= 0:
+            return False, "You cannot تحمل more shock."
+        transfer_amount = min(target_shock, available_capacity)
+        target.adjust_empath_shock(-transfer_amount)
+        self.adjust_empath_shock(transfer_amount)
+        self.award_field_xp("take", success=True, outcome="success", context_multiplier=min(2.0, 0.75 + (transfer_amount / 20.0)))
+        self.msg("You take on the strain.")
+        target.msg("You feel your mental burden lighten.")
+        if transfer_amount < target_shock:
+            return True, "You cannot تحمل more shock."
+        return True, "You take on the strain."
+
+    def resolve_shift_destination_part(self, location_name):
+        normalized = str(location_name or "").strip().lower()
+        mapping = {
+            "arm": "left_arm",
+            "leg": "left_leg",
+            "torso": "chest",
+        }
+        return mapping.get(normalized, "")
+
+    def get_shift_source_part(self, target, destination_part):
+        if not target:
+            return ""
+        injuries = dict(getattr(getattr(target, "db", None), "injuries", None) or {})
+        best_part = ""
+        best_total = 0
+        for part_name in BODY_PART_ORDER:
+            if part_name == destination_part:
+                continue
+            body_part = dict(injuries.get(part_name) or {})
+            total = int(body_part.get("external", 0) or 0) + int(body_part.get("internal", 0) or 0) + int(body_part.get("bleed", 0) or 0)
+            if total > best_total:
+                best_total = total
+                best_part = part_name
+        return best_part
+
+    def shift_empath_injury(self, target, location_name):
+        if not self.is_empath():
+            return False, "You do not know how to shift injuries that way."
+        allowed, message = self.can_use_empath_ability("shift")
+        if not allowed:
+            return False, message
+        if not target or getattr(target, "location", None) != getattr(self, "location", None):
+            return False, "They are not here."
+        if not self.has_empath_transfer_connection(target):
+            return False, "You must be properly connected to transfer shock."
+        destination_part = self.resolve_shift_destination_part(location_name)
+        if not destination_part:
+            return False, "You can only shift toward an arm, leg, or torso."
+        if not hasattr(target, "get_body_part"):
+            return False, f"{target.key} has no wounds you can shift."
+        source_part = self.get_shift_source_part(target, destination_part)
+        if not source_part:
+            return False, f"{target.key} has no wounds you can shift."
+        injuries = dict(getattr(getattr(target, "db", None), "injuries", None) or {})
+        source_body_part = dict(injuries.get(source_part) or {})
+        destination_body_part = dict(injuries.get(destination_part) or {})
+        moved_external = int(source_body_part.get("external", 0) or 0)
+        moved_internal = int(source_body_part.get("internal", 0) or 0)
+        moved_bleed = int(source_body_part.get("bleed", 0) or 0)
+        moved_total = moved_external + moved_internal + moved_bleed
+        if moved_total <= 0:
+            return False, f"{target.key} has no wounds you can shift."
+        destination_body_part["external"] = int(destination_body_part.get("external", 0) or 0) + moved_external
+        destination_body_part["internal"] = int(destination_body_part.get("internal", 0) or 0) + moved_internal
+        destination_body_part["bleed"] = int(destination_body_part.get("bleed", 0) or 0) + moved_bleed
+        source_body_part["external"] = 0
+        source_body_part["internal"] = 0
+        source_body_part["bleed"] = 0
+        injuries[source_part] = source_body_part
+        injuries[destination_part] = destination_body_part
+        target.db.injuries = injuries
+        if hasattr(target, "update_bleed_state"):
+            target.update_bleed_state()
+        if random.random() < 0.1:
+            self.msg("The shift destabilizes the injury.")
+        self.award_field_xp("shift", success=True, outcome="success", context_multiplier=min(2.5, 1.0 + (moved_total / 20.0)))
+        if hasattr(target, "sync_client_state"):
+            target.sync_client_state()
+        self.sync_client_state()
+        return True, f"You shift the worst of {target.key}'s injuries toward the {self.format_body_part_name(destination_part)}."
 
     def get_linked_target(self):
         primary = self.get_empath_link_state(require_local=False, emit_break_messages=False)
@@ -5104,6 +7426,36 @@ class Character(ObjectParent, DefaultCharacter):
                 lines.append("Your connection feels steady.")
         return True, lines
 
+    def assess_empath_corpse(self, corpse):
+        if not self.is_empath():
+            return False, ["You lack the sensitivity to assess a patient that way."]
+        allowed, message = self.can_use_empath_ability("assess")
+        if not allowed:
+            return False, [message]
+        if not corpse or getattr(corpse, "location", None) != getattr(self, "location", None):
+            return False, ["They are not here."]
+        if not getattr(getattr(corpse, "db", None), "is_corpse", False) or not hasattr(corpse, "get_empath_wounds"):
+            return False, ["You find no pattern there you can assess."]
+        wounds = corpse.get_empath_wounds()
+        lines = [
+            f"Vitality: {int(wounds.get('vitality', 0) or 0)}%",
+            f"Bleeding: {int(wounds.get('bleeding', 0) or 0)}%",
+            f"Poison: {int(wounds.get('poison', 0) or 0)}%",
+            f"Disease: {int(wounds.get('disease', 0) or 0)}%",
+            f"Internal Load: {self.get_corpse_internal_total(corpse)}",
+            f"Bleed Load: {self.get_corpse_bleed_total(corpse)}",
+            f"Survivability Band: {self.get_corpse_revive_survivability_band(corpse).upper()}",
+        ]
+        if hasattr(corpse, "get_decay_stage_penalties"):
+            penalties = corpse.get_decay_stage_penalties()
+            lines.append(f"Decay Stage: {int(penalties.get('stage', 0) or 0)} ({str(penalties.get('label', 'Fresh') or 'Fresh')})")
+        if not self.is_corpse_revive_survivable(corpse):
+            lines.append(self.get_corpse_survivability_warning(corpse))
+            lines.append("They will not survive long without intervention.")
+        if hasattr(corpse, "get_empath_prep_remaining") and corpse.get_empath_prep_remaining(self) <= 0:
+            lines.append("You have pushed this body as far as your own hands can. Another empath may still help.")
+        return True, lines
+
     def siphon_empath_bleeding(self, target, wound_amount):
         if not target or not hasattr(target, "get_bleeding_parts"):
             return 0
@@ -5196,18 +7548,14 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             amount = min(20, target_amount)
         amount = min(amount, target_amount)
+        risk_before = self.get_empath_transfer_risk_state()
+        self.maybe_warn_empath_transfer_risk(risk_before)
+        transfer_pressure = self.get_empath_transfer_pressure(target)
+        self.note_empath_handler_activity(target, action="take", duration=12.0)
         if self.is_empath_tutorial_active():
             target.set_empath_wound(wound_key, target_amount - amount)
             self.set_empath_wound(wound_key, self.get_empath_wound(wound_key) + amount)
-            self.award_empathy_experience(
-                learning_action or "take",
-                10 + amount,
-                amount=amount,
-                target=target,
-                wound_key=wound_key,
-                requested_fraction=requested_fraction,
-                rate_key=rate_key,
-            )
+            self.award_field_xp("take", success=True, outcome="success", context_multiplier=min(2.0, 1.0 + (amount / 20.0)))
             self.complete_empath_tutorial_if_ready(target=target)
             if requested_fraction is not None:
                 if selector_key:
@@ -5224,6 +7572,8 @@ class Character(ObjectParent, DefaultCharacter):
         penalty = 1 + (shock / 75.0)
         link_strength = max(1, int(link_state.get("strength", 0) or 0))
         effective_amount = max(0, int((amount * link_strength / 100.0) / penalty))
+        effective_amount = max(0, int(round(effective_amount * float(risk_before.get("efficiency_modifier", 1.0) or 1.0))))
+        effective_amount = max(0, int(round(effective_amount * float(transfer_pressure.get("efficiency_modifier", 1.0) or 1.0))))
         if requested_fraction is not None and amount > 0 and target_amount > 0:
             effective_amount = max(1, min(target_amount, effective_amount))
         if effective_amount <= 0:
@@ -5238,11 +7588,20 @@ class Character(ObjectParent, DefaultCharacter):
         if unity and int(unity.get("primary_target_id", 0) or 0) == int(getattr(target, "id", 0) or 0):
             unity_target = unity.get("secondary_target")
             unity_smoothed = max(0, min(effective_amount - 1, int(effective_amount * EMPATH_UNITY_SMOOTH_RATIO)))
-        target.set_empath_wound(wound_key, target_amount - effective_amount)
+        if getattr(getattr(target, "db", None), "is_corpse", False) and hasattr(target, "reduce_corpse_wound"):
+            actual_removed = target.reduce_corpse_wound(wound_key, effective_amount, selector=selector_key, handler=self)
+            if actual_removed <= 0:
+                if str(getattr(target.db, "last_empath_prep_result", "") or "") == "cap":
+                    return False, "You have pushed the body as far as your own hands can for now. Another empath may still help."
+                return False, f"{target.key} has no wound there you can draw."
+            effective_amount = actual_removed
+            amount = actual_removed
+        else:
+            target.set_empath_wound(wound_key, target_amount - effective_amount)
         if unity_target and unity_smoothed > 0:
             unity_target.set_empath_wound(wound_key, unity_target.get_empath_wound(wound_key) + unity_smoothed)
         empath_take_raw = max(1, effective_amount - unity_smoothed)
-        empath_take = max(1, int(empath_take_raw * mitigation_factor))
+        empath_take = max(1, int(round(empath_take_raw * mitigation_factor * float(risk_before.get("backlash_modifier", 1.0) or 1.0) * float(transfer_pressure.get("instability_multiplier", 1.0) or 1.0))))
         overload_message = ""
         if wound_key == "poison":
             self.set_empath_wound("poison", self.get_empath_wound("poison") + empath_take)
@@ -5257,7 +7616,7 @@ class Character(ObjectParent, DefaultCharacter):
 
             self.set_empath_wound("vitality", self.get_empath_wound("vitality") + empath_take)
             self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + fatigue_gain)
-            self.adjust_empath_shock(shock_gain)
+            self.distribute_circle_shock(shock_gain, source="vitality_take")
             self.set_hp(int(getattr(self.db, "hp", 0) or 0) - hp_cost)
             self.maybe_trigger_empath_overdraw()
             overload_message = self.apply_empath_transfer_overload(effective_amount, wound_key)
@@ -5277,6 +7636,9 @@ class Character(ObjectParent, DefaultCharacter):
             self.decay_empath_link_stability(amount=small_cost, reason="small_transfer", emit_message=True)
         else:
             self.decay_empath_link_stability(amount=None, reason="small_transfer", emit_message=True)
+        if int(transfer_pressure.get("other_handler_count", 0) or 0) > 0 and not bool(getattr(getattr(target, "db", None), "is_corpse", False)):
+            self.decay_empath_link_stability(amount=max(1, int(2 * float(transfer_pressure.get("instability_multiplier", 1.0) or 1.0))), reason="small_transfer", emit_message=False)
+            self.msg("Too many hands on the same pain make the transfer less stable.")
         if wound_key != "vitality" and amount > 25:
             if rate_key:
                 large_cost = max(1, int(round(self.get_empath_link_stability_cost(link_state.get("type"), "large_transfer") * rate_multiplier)))
@@ -5287,17 +7649,21 @@ class Character(ObjectParent, DefaultCharacter):
                 self.adjust_empath_shock(5)
         if unity:
             self.decay_empath_unity_stability(event_key="transfer", emit_message=True)
+        if self.get_empath_circle_members(include_self=False, validate=True):
+            self.msg("You share in the burden.")
         self.ndb.empath_recent_healing_until = time.time() + 20.0
-        self.award_empathy_experience(
-            learning_action or "take",
-            max(10, amount),
-            amount=amount,
-            target=target,
-            wound_key=wound_key,
-            requested_fraction=requested_fraction,
-            rate_key=rate_key,
-            unity=bool(unity),
+        self.award_field_xp(
+            "take",
+            success=True,
+            outcome="success",
+            context_multiplier=min(2.0, 0.75 + (amount / 25.0) + (0.15 if unity else 0.0)),
         )
+        if target.is_medically_critical() if hasattr(target, "is_medically_critical") else False:
+            self.adjust_empath_reputation(1, reason="critical_help")
+        risk_after = self.get_empath_transfer_risk_state()
+        if str(risk_after.get("tier") or "") == "extreme":
+            overload_message = overload_message or "The weight of the transfer leaves you reeling."
+            self.trigger_empath_overload(reason="transfer", duration=8.0)
         if overload_message:
             self.msg(overload_message)
         if shock >= int(EMPATH_SHOCK_THRESHOLDS["dull"]):
@@ -5340,9 +7706,62 @@ class Character(ObjectParent, DefaultCharacter):
         fatigue_spike = max(2, int(round(int(requested or 0) * float(profile.get("risk", 0.0) or 0.0))))
         self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + fatigue_spike)
         self.set_state("empath_transfer_overload", {"expires_at": time.time() + 5.0, "requested": int(requested or 0), "wound": str(wound_key or "")})
+        self.trigger_empath_overload(reason="transfer", duration=max(6.0, float(int(requested or 0)) / 6.0))
         if hasattr(self, "set_roundtime"):
             self.set_roundtime(max(1.5, min(4.0, float(int(requested or 0)) / 12.0)))
         return "The force of the transfer buckles you for a moment."
+
+    def process_medical_decay(self, now=None):
+        self.ensure_core_defaults()
+        now = float(now or time.time())
+        if bool(getattr(self.db, "is_dead", False)):
+            return False
+        wounds = self.get_empath_wounds()
+        severity = self.get_medical_severity_state()
+        if severity == "stable" and int(wounds.get("bleeding", 0) or 0) <= 0:
+            self.db.last_medical_decay_at = now
+            return False
+        last_decay_at = float(getattr(self.db, "last_medical_decay_at", 0.0) or 0.0)
+        if now - last_decay_at < 12.0:
+            return False
+        before_severity = severity
+        bleeding = int(wounds.get("bleeding", 0) or 0)
+        changed = False
+        bleed_multiplier = self.get_resurrection_bleed_multiplier()
+        if bleeding > 0:
+            bleed_vitality_loss = 1
+            if bleeding >= 35:
+                bleed_vitality_loss = 3
+            elif bleeding >= 15:
+                bleed_vitality_loss = 2
+            bleed_vitality_loss = int(round(bleed_vitality_loss * bleed_multiplier))
+            if bleed_vitality_loss > 0:
+                self.set_empath_wound("vitality", self.get_empath_wound("vitality") + bleed_vitality_loss)
+                changed = True
+        recently_stabilized = self.is_stabilized() if hasattr(self, "is_stabilized") else False
+        if severity in {"badly_injured", "critical"} and not recently_stabilized and not self.should_pause_resurrection_internal_decay():
+            worsening_key = max(("vitality", "bleeding", "poison", "disease"), key=lambda key: int(wounds.get(key, 0) or 0))
+            worsen_amount = 2 if severity == "critical" else 1
+            self.set_empath_wound(worsening_key, self.get_empath_wound(worsening_key) + worsen_amount)
+            changed = True
+        self.db.last_medical_decay_at = now
+        after_severity = self.get_medical_severity_state()
+        warning_due = now >= float(getattr(self.db, "last_critical_warning_at", 0.0) or 0.0) + 20.0
+        if warning_due and after_severity == "critical":
+            self.msg("You are slipping away." if before_severity != "critical" else "Your condition is worsening.")
+            room = getattr(self, "location", None)
+            if room:
+                for obj in getattr(room, "contents", []):
+                    if obj == self or not getattr(obj, "is_empath", lambda: False)():
+                        continue
+                    obj.msg(f"Your senses snag on {self.key}. They are fading.")
+                    if hasattr(obj, "get_empath_active_handlers"):
+                        active_handlers = obj.get_empath_active_handlers(self)
+                        if not active_handlers:
+                            obj.adjust_empath_reputation(-1, reason="ignored_critical")
+            self.db.last_critical_warning_at = now
+        self.process_resurrection_stabilization_tick()
+        return changed
 
     def mend_empath_self(self):
         if not self.is_empath():
@@ -5525,6 +7944,9 @@ class Character(ObjectParent, DefaultCharacter):
             if hasattr(target, "refresh_stabilize_tend") and target.refresh_stabilize_tend(part_name, tender=self):
                 treated += 1
         target.sync_empath_wounds_from_resources()
+        self.note_empath_handler_activity(target, action="stabilize", duration=16.0)
+        if target.is_medically_critical() if hasattr(target, "is_medically_critical") else False:
+            self.adjust_empath_reputation(1, reason="critical_stabilize")
         return True, "You steady their condition, slowing the damage."
 
     def start_empath_channel(self, wound_type):
@@ -5640,12 +8062,16 @@ class Character(ObjectParent, DefaultCharacter):
         if not self.is_empath() or not getattr(self, "location", None):
             return False
         now = time.time()
+        changed = False
+        if self.validate_empath_circle_state(sync_members=True, emit_message=False):
+            changed = True
         before_links = {entry.get("target_id"): entry for entry in self.get_empath_links(require_local=False, include_group=False)}
         self.process_empath_links()
         after_links = {entry.get("target_id"): entry for entry in self.get_empath_links(require_local=False, include_group=False)}
         broken = [entry for target_id, entry in before_links.items() if target_id not in after_links]
         if broken:
             self.msg("Your connection slips away.")
+            changed = True
         shock_tick_at = float(getattr(self.ndb, "next_empath_shock_decay_at", 0) or 0)
         if now >= shock_tick_at and self.get_empath_shock() > 0:
             recent_healing_until = float(getattr(self.ndb, "empath_recent_healing_until", 0) or 0)
@@ -5654,6 +8080,7 @@ class Character(ObjectParent, DefaultCharacter):
                 decay += 2
             self.adjust_empath_shock(-decay)
             self.ndb.next_empath_shock_decay_at = now + 10.0
+            changed = True
         strain_tick_at = float(getattr(self.ndb, "next_empath_strain_decay_at", 0) or 0)
         if now >= strain_tick_at and self.get_empath_strain() > 0:
             strain_decay = 3 if self.get_empath_room_zone() == "recovery" else 2
@@ -5661,6 +8088,7 @@ class Character(ObjectParent, DefaultCharacter):
                 strain_decay = 1
             self.decay_empath_strain(strain_decay)
             self.ndb.next_empath_strain_decay_at = now + 20.0
+            changed = True
         link_state = self.get_empath_link_state(require_local=False, emit_break_messages=False)
         if link_state and link_state.get("link_bonus_skill") and now >= float(link_state.get("link_bonus_tick_at", 0.0) or 0.0):
             upkeep = max(1, 1 + int(int(link_state.get("link_bonus_value", 0) or 0) / 5))
@@ -5670,11 +8098,16 @@ class Character(ObjectParent, DefaultCharacter):
             updated_link = dict(link_state)
             updated_link["link_bonus_tick_at"] = now + 10.0
             self.set_empath_link_state(updated_link, sync=True)
+            changed = True
         self.process_empath_channel_tick(now=now)
         smoothing_tick_at = float(getattr(self.ndb, "next_empath_smoothing_at", 0) or 0)
         if now >= smoothing_tick_at:
             self.smooth_empath_linked_wounds()
             self.ndb.next_empath_smoothing_at = now + float(EMPATH_SYSTEM_CONFIG["smoothing"]["tick_seconds"])
+            changed = True
+        for target in self.get_empath_perceive_targets(include_adjacent=False):
+            if hasattr(target, "process_medical_decay") and target.process_medical_decay(now=now):
+                changed = True
         feedback_tick_at = float(getattr(self.ndb, "next_empath_feedback_at", 0) or 0)
         if now >= feedback_tick_at:
             primary = self.get_primary_empath_link(require_local=True, include_group=False)
@@ -5697,16 +8130,17 @@ class Character(ObjectParent, DefaultCharacter):
                     elif score >= 55:
                         self.msg(f"You feel the strain in {patient.key}'s pattern.")
             self.ndb.next_empath_feedback_at = now + 18.0
+            changed = True
         next_ping = float(getattr(self.ndb, "empath_sensitivity_next_at", 0) or 0)
         if now < next_ping:
-            return False
+            return changed
         threshold = 85 if self.get_empath_perception_accuracy() == "poor" else 70
         for target in self.get_empath_perceive_targets(include_adjacent=False):
             if self.get_empath_life_force_score(target) >= threshold:
                 self.msg("You feel a nearby life force faltering.")
                 self.ndb.empath_sensitivity_next_at = now + 20
-                return False
-        return False
+                return True
+        return changed
 
     def normalize_stance(self):
         stance = dict(self.db.stance or {"offense": 50, "defense": 50})
@@ -5790,10 +8224,13 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.roundtime_end = 0
         self.db.life_state = LIFE_STATE_ALIVE
         self.db.is_dead = False
-        self.db.death_sting = False
+        self.db.death_sting = 0
         self.db.death_sting_active = False
         self.db.death_sting_end = 0.0
         self.db.death_sting_severity = 0.0
+        self.db.death_sting_hp_cap_ratio = 1.0
+        self.db.death_sting_recovery_label = "none"
+        self.db.death_penalty_applied = False
         self.db.stunned = False
         self.db.target_body_part = None
         self.db.position = "standing"
@@ -5828,6 +8265,7 @@ class Character(ObjectParent, DefaultCharacter):
 
     def execute_cmd(self, raw_string, session=None, **kwargs):
         from world.systems.metrics import increment_counter, measure
+        from world.systems import justice
 
         command_name = str(raw_string or "").strip().split(None, 1)[0].lower()
         with measure(
@@ -5871,6 +8309,12 @@ class Character(ObjectParent, DefaultCharacter):
             except Exception:
                 LOGGER.exception("Failed to process onboarding input remap for %s", getattr(self, "key", self))
             command_name = str(raw_string or "").strip().split(None, 1)[0].lower()
+            block_message = justice.get_justice_command_block_message(self, command_name)
+            if block_message:
+                self.msg(block_message)
+                return None
+            if bool(getattr(self.db, "guard_attention", False)) and not justice.is_detained(self):
+                justice.note_flee_attempt(self, command_name)
             if self.is_dead() and command_name in {"say", "whisper"}:
                 self.msg("Your voice echoes faintly, barely heard.")
             return super().execute_cmd(raw_string, session=session, **kwargs)
@@ -6664,26 +9108,16 @@ class Character(ObjectParent, DefaultCharacter):
         if getattr(self.db, "warrants", None):
             decay_warrants(self)
 
+        from world.systems import justice
+
+        justice.process_justice_state_tick(self)
+
         if getattr(self.db, "awaiting_plea", False) and time.time() >= float(getattr(self.ndb, "plea_deadline", 0) or 0):
             from utils.crime import resolve_justice_case
 
             self.db.plea = "guilty"
             self.db.awaiting_plea = False
             resolve_justice_case(self)
-
-        if getattr(self.db, "in_stocks", False):
-            next_msg_at = float(getattr(self.ndb, "stocks_msg_at", 0) or 0)
-            if time.time() >= next_msg_at:
-                self.msg("The crowd watches you.")
-                self.ndb.stocks_msg_at = time.time() + 60
-            next_room_msg_at = float(getattr(self.ndb, "stocks_room_msg_at", 0) or 0)
-            if getattr(self, "location", None) and getattr(getattr(self.location, "db", None), "is_stocks", False) and time.time() >= next_room_msg_at:
-                if random.random() < 0.1:
-                    self.location.msg_contents("A passerby jeers at the prisoners in the stocks.", exclude=[])
-                self.ndb.stocks_room_msg_at = time.time() + 60
-
-        if getattr(self.db, "jail_timer", 0):
-            self.db.jail_timer = max(0, int(getattr(self.db, "jail_timer", 0) or 0) - 1)
 
     def process_thief_tick(self):
         now = time.time()
@@ -9169,7 +11603,9 @@ class Character(ObjectParent, DefaultCharacter):
         return ARMOR_COVERAGE_WEIGHTS.get(normalized, 1)
 
     def is_hidden(self):
-        return self.has_state("hidden")
+        from world.systems.stealth import sync_stealth_cache
+
+        return sync_stealth_cache(self)
 
     def is_sneaking(self):
         return bool(self.get_state("sneaking"))
@@ -9206,6 +11642,8 @@ class Character(ObjectParent, DefaultCharacter):
         return self.is_surprised()
 
     def break_stealth(self):
+        self.db.stealthed = False
+        self.db.stealth_value = 0
         self.clear_state("hidden")
         self.clear_state("sneaking")
         self.clear_state("stalking")
@@ -9256,25 +11694,9 @@ class Character(ObjectParent, DefaultCharacter):
         return self.can_perceive(target)
 
     def can_perceive(self, target):
-        if not target or target == self:
-            return True
-        if not hasattr(target, "is_hidden"):
-            return True
-        if not target.is_hidden():
-            return True
+        from world.systems.stealth import can_detect
 
-        perception_bonus = 0
-        stealth_bonus = 0
-        if hasattr(target, "is_profession") and target.is_profession("thief"):
-            stealth_bonus += 10
-        if self.is_profession("empath"):
-            perception_bonus += 5
-
-        perception = self.get_perception_total() + perception_bonus
-        if self.get_state("observing"):
-            perception += 10
-
-        return perception >= (target.get_stealth_total() + target.get_hidden_strength() + stealth_bonus)
+        return can_detect(self, target)
 
     def skin_target(self, target):
         from world.systems import fishing_economy
@@ -12696,6 +15118,13 @@ class Character(ObjectParent, DefaultCharacter):
             joined = self.get_ranger_join_requirement_text()
         return f"Elarion studies you for a long moment. \"Not yet. A Ranger must show at least {joined}.\""
 
+    def get_cleric_join_success_message(self, guide=None):
+        guide_name = getattr(guide, "key", "Esuin") if guide else "Esuin"
+        return (
+            f"{guide_name} bows their head for a measured moment. \"Then take the vow with full knowledge of its weight. Serve with discipline, and do not turn from the burdens set before you.\"\n"
+            "You are now recognized as a Cleric."
+        )
+
     def can_advance_ranger(self):
         if not self.is_profession("ranger"):
             return False, ["You are not a Ranger."]
@@ -12746,6 +15175,14 @@ class Character(ObjectParent, DefaultCharacter):
             eligible, missing_requirements = self.can_join_ranger()
             if not eligible:
                 return False, self.get_ranger_join_failure_message(missing_requirements)
+        if profession == "cleric":
+            ready, ready_message = self.can_begin_profession_oath()
+            if not ready:
+                return False, ready_message
+            if not self.room_matches_profession_join_site(profession) or not self.is_cleric_join_room():
+                return False, "You must stand in the guildleader's office to join the Clerics."
+            if not guide:
+                return False, "No Cleric guildleader is here to receive your vow."
 
         self.set_profession(profession)
         self.set_guild(profession)
@@ -12754,6 +15191,10 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
             self.db.ranger_joined_at = time.time()
             return True, self.get_ranger_join_success_message(guide=guide)
+        if profession == "cleric":
+            self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
+            self.db.cleric_joined_at = time.time()
+            return True, self.get_cleric_join_success_message(guide=guide)
         return True, f"You are accepted into the {self.get_profession_display_name()} profession."
 
     def advance_profession(self):
@@ -12819,7 +15260,12 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
             self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
         elif normalized == "cleric":
+            self.db.devotion_max = int(CLERIC_DEVOTION_CONFIG["max_devotion"])
+            self.db.max_devotion = self.db.devotion_max
             self.set_devotion(max(int(CLERIC_DEVOTION_CONFIG["baseline"]), self.get_devotion()), sync=False)
+            self.db.favor_max = max(5, int(getattr(self.db, "favor_max", 5) or 5))
+            self.db.favor_current = min(self.db.favor_max, max(0, int(getattr(self.db, "favor_current", self.db.favor_max) or self.db.favor_max)))
+            self.db.favor = self.db.favor_current
             skills = dict(self.db.skills or {})
             theurgy = dict(skills.get("theurgy") or {"rank": 0, "mindstate": 0})
             theurgy["rank"] = max(1, int(theurgy.get("rank", 0) or 0))
@@ -12830,6 +15276,11 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.empath_rank = max(0, int(getattr(self.db, "empath_rank", 0) or 0))
             self.db.empath_xp = max(0, int(getattr(self.db, "empath_xp", 0) or 0))
             self.db.empath_training_stage = max(0, int(getattr(self.db, "empath_training_stage", EMPATH_TRAINING_UNSET) or EMPATH_TRAINING_UNSET))
+        else:
+            self.db.devotion_current = 0
+            self.db.devotion = 0
+            self.db.devotion_max = 0
+            self.db.max_devotion = 0
         self.get_subsystem()
         return True
 
@@ -14142,12 +16593,17 @@ class Character(ObjectParent, DefaultCharacter):
             if total_bleed > 10:
                 hp_loss -= (total_bleed - 10)
             hp_loss = max(1, hp_loss)
+            hp_loss = max(1, int(round(hp_loss * self.get_resurrection_bleed_multiplier())))
             self.set_hp((self.db.hp or 0) - hp_loss)
             self.msg("You bleed from your wounds.")
             if total_bleed > 5:
                 self.msg("You are bleeding heavily!")
             if (self.db.hp or 0) <= 0:
-                self.db.is_dead = True
+                if self.consume_resurrection_death_guard():
+                    self.db.hp = 1
+                    self.msg("Your returning life falters, but the rite holds for one heartbeat.")
+                else:
+                    self.db.is_dead = True
 
     def sync_combat_state(self):
         self.ensure_core_defaults()
@@ -14215,6 +16671,10 @@ class Character(ObjectParent, DefaultCharacter):
         if destination and destination != self.location:
             self.break_aim_for_movement(emit_message=not quiet)
         moved = super().move_to(destination, quiet=quiet, *args, **kwargs)
+        if moved and origin and destination and destination != origin and bool(getattr(self.db, "stealthed", False)):
+            self.break_stealth()
+        if moved and origin and destination and destination != origin:
+            self.cancel_pending_revive("You break the rite by moving.", emit_message=not quiet)
         if moved and origin and destination and destination != origin and self.is_empath():
             self.break_empath_connections(reason="distance", emit_message=not quiet)
         if moved and origin and destination and destination != origin and bool(getattr(self.ndb, "is_fishing", False)):

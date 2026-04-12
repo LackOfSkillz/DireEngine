@@ -1,0 +1,70 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 22350,
+        "is_dead": false,
+        "key": "TEST_JUSTICE_FUGITIVE",
+        "life_state": "ALIVE",
+        "location": "TEST_JUSTICE_LAWLESS",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 22347,
+            "key": "TEST_JUSTICE_LAWFUL",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22348,
+            "key": "TEST_JUSTICE_LAWLESS",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22349,
+            "key": "TEST_JUSTICE_ACCUSED",
+            "location": "TEST_JUSTICE_LAWFUL",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22350,
+            "key": "TEST_JUSTICE_FUGITIVE",
+            "location": "TEST_JUSTICE_LAWLESS",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_JUSTICE_ACCUSED"
+        ],
+        "exits": [],
+        "id": 22347,
+        "key": "TEST_JUSTICE_LAWFUL"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775948417.7482839
+    },
+    "label": "final"
+  }
+]

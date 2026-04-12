@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AttributeError: 'Corpse' object has no attribute 'sync_empath_wounds_from_resources'",
+  "mode": "direct",
+  "scenario": "corpse-wound-pipeline",
+  "seed": 663934400
+}

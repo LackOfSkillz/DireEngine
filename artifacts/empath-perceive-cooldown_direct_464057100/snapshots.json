@@ -1,0 +1,65 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17029,
+        "is_dead": false,
+        "key": "TEST_EMPATH_PERCEIVE_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_PERCEIVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17028,
+            "key": "TEST_EMPATH_PERCEIVE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17029,
+            "key": "TEST_EMPATH_PERCEIVE_HEALER",
+            "location": "TEST_EMPATH_PERCEIVE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17030,
+            "key": "TEST_EMPATH_PERCEIVE_PATIENT",
+            "location": "TEST_EMPATH_PERCEIVE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_PERCEIVE_HEALER",
+          "TEST_EMPATH_PERCEIVE_PATIENT"
+        ],
+        "exits": [],
+        "id": 17028,
+        "key": "TEST_EMPATH_PERCEIVE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775822450.5527327
+    },
+    "label": "final"
+  }
+]

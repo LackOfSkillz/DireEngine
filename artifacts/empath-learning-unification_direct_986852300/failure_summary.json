@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Healing another empath should be substantially reduced as a trainer: normal=16.01249999999999, empath_target=16.01249999999999",
+  "mode": "direct",
+  "scenario": "empath-learning-unification",
+  "seed": 986852300
+}

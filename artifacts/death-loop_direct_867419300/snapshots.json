@@ -1,0 +1,273 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 37,
+        "hp": 100,
+        "id": 18667,
+        "is_dead": false,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 18668,
+          "key": "TEST_DEATH_TOKEN",
+          "location": "TEST_DEATH_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "alive",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 18666,
+            "key": "TEST_DEATH_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 18667,
+            "key": "TEST_DEATH_CHAR",
+            "location": "TEST_DEATH_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 18668,
+            "key": "TEST_DEATH_TOKEN",
+            "location": "TEST_DEATH_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 18666,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "alive",
+      "timestamp": 1775909086.3278677
+    },
+    "label": "alive"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 18667,
+        "is_dead": true,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "DEAD",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "dead",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 18669,
+            "key": "corpse of TEST_DEATH_CHAR",
+            "location": "TEST_DEATH_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR",
+          "corpse of TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 18666,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "dead",
+      "timestamp": 1775909086.666767
+    },
+    "label": "dead"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 50,
+        "id": 18667,
+        "is_dead": false,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "departed",
+      "object_deltas": {
+        "created": [],
+        "deleted": [
+          {
+            "id": 18669,
+            "key": "corpse of TEST_DEATH_CHAR",
+            "location": "TEST_DEATH_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ]
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR",
+          "grave of TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 18666,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "departed",
+      "timestamp": 1775909087.4512722
+    },
+    "label": "departed"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 35,
+        "hp": 50,
+        "id": 18667,
+        "is_dead": false,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 18668,
+          "key": "TEST_DEATH_TOKEN",
+          "location": "TEST_DEATH_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "recovered",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 18666,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "recovered",
+      "timestamp": 1775909087.8573515
+    },
+    "label": "recovered"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 35,
+        "hp": 50,
+        "id": 18667,
+        "is_dead": false,
+        "key": "TEST_DEATH_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_DEATH_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 18668,
+          "key": "TEST_DEATH_TOKEN",
+          "location": "TEST_DEATH_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_DEATH_CHAR"
+        ],
+        "exits": [],
+        "id": 18666,
+        "key": "TEST_DEATH_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775909087.8583574
+    },
+    "label": "final"
+  }
+]

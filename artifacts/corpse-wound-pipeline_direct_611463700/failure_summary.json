@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Cleric assess did not warn about lethal corpse state: ['You assess corpse of TEST_CORPSE_PIPELINE_PREPPED through the discipline of the rite.', 'Ritual State: Unprepared', 'Participants: 0', 'Failures: 0', 'Quality: Poor', 'Contributors:', '  Prepare: 0', '  Stabilize: 0', '  Restore: 0', '  Bind: 0', 'The body must be prepared before the rite can progress. This body will not survive the rite.', 'Survivability: UNSAFE', 'This body will not survive the rite.', 'Revive Blockers:', '  The soul has not yet been bound.']",
+  "mode": "direct",
+  "scenario": "corpse-wound-pipeline",
+  "seed": 611463700
+}

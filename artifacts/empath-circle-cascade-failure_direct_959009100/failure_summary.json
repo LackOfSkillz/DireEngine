@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Cascade pressure should overload multiple empaths near the limit: overload_count=0",
+  "mode": "direct",
+  "scenario": "empath-circle-cascade-failure",
+  "seed": 959009100
+}

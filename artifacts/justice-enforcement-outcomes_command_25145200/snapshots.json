@@ -1,0 +1,110 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 2000,
+        "hp": 100,
+        "id": 23432,
+        "is_dead": false,
+        "key": "TEST_JUSTICE_MINOR",
+        "life_state": "ALIVE",
+        "location": "TEST_PILLORY_SQUARE",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 23425,
+            "key": "TEST_TOWN_GREEN",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23426,
+            "key": "TEST_PILLORY_SQUARE",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23427,
+            "key": "TEST_TOWN_JAIL",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23428,
+            "key": "east",
+            "location": "TEST_PILLORY_SQUARE",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23429,
+            "key": "west",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23430,
+            "key": "out",
+            "location": "TEST_TOWN_JAIL",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23431,
+            "key": "wooden pillory",
+            "location": "TEST_PILLORY_SQUARE",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 23432,
+            "key": "TEST_JUSTICE_MINOR",
+            "location": "TEST_PILLORY_SQUARE",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23433,
+            "key": "TEST_JUSTICE_MODERATE",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23434,
+            "key": "TEST_JUSTICE_SEVERE",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "east",
+          "wooden pillory",
+          "TEST_JUSTICE_MINOR"
+        ],
+        "exits": [
+          "east"
+        ],
+        "id": 23426,
+        "key": "TEST_PILLORY_SQUARE"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775959323.7991188
+    },
+    "label": "final"
+  }
+]

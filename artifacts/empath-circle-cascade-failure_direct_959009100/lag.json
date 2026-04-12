@@ -1,0 +1,22 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 0.0,
+  "lag": {
+    "avg_ms": 0.0,
+    "jitter": 0.0,
+    "max_ms": 0.0,
+    "min_ms": 0.0,
+    "p95_ms": 0.0,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": []
+}

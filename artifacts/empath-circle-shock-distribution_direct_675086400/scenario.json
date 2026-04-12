@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Shock-circle distribution coverage validates shared shock burden and conservation of total shock.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-circle-shock-distribution",
+  "seed": 675086400,
+  "started_at": 1775832995.389292
+}

@@ -3,14 +3,11 @@ from commands.command import Command
 
 class CmdDepart(Command):
     """
-    Leave death behind and return by the path your favor allows.
+    Leave death behind and release your claim on the body.
 
     Examples:
         depart
-        depart grave
-        depart coins
-        depart items
-        depart full
+        depart confirm
     """
 
     key = "depart"
@@ -19,9 +16,7 @@ class CmdDepart(Command):
 
     def _clear_confirmation(self, caller):
         caller.db.depart_confirm_mode = None
-
-    def _needs_confirmation(self, mode):
-        return mode in {"coins", "items", "full"}
+        caller.db.depart_confirm_expires_at = 0.0
 
     def func(self):
         caller = self.caller
@@ -42,45 +37,34 @@ class CmdDepart(Command):
             return
 
         raw_args = str(self.args or "").strip().lower()
-        if raw_args in {"", "help", "preview", "status"}:
-            raw_args = "preview"
-        corpse = caller.get_death_corpse() if hasattr(caller, "get_death_corpse") else None
-        if raw_args == "preview":
-            self._clear_confirmation(caller)
-            if hasattr(caller, "get_depart_preview_lines"):
-                caller.msg("\n".join(caller.get_depart_preview_lines(corpse=corpse)))
-            else:
-                caller.msg("You linger between death and return, unsure which path remains open.")
+        if raw_args in {"", "standard"}:
+            if hasattr(caller, "can_confirm_depart"):
+                if not caller.begin_depart_confirmation(depart_type="standard"):
+                    caller.msg("Your choice is already before you. Type DEPART CONFIRM to follow through.")
+                    return
+            caller.msg("Are you sure you wish to depart? This will forfeit your body.")
             return
 
         if raw_args == "confirm":
-            pending_mode = str(getattr(caller.db, "depart_confirm_mode", "") or "").strip().lower()
-            if not pending_mode:
-                caller.msg("You have not chosen a costly departure path yet. Use DEPART to review your options.")
+            pending_mode = str(getattr(caller.db, "depart_confirm_mode", "") or "").strip().lower() or "standard"
+            if hasattr(caller, "can_confirm_depart") and not caller.can_confirm_depart(depart_type=pending_mode):
+                self._clear_confirmation(caller)
+                caller.msg("Your resolve slips. Type DEPART again if you still wish to let go.")
                 return
             mode = pending_mode
+        elif raw_args in {"grave", "coins", "items", "full", "default"}:
+            mode = None if raw_args == "default" else raw_args
+            if raw_args in {"coins", "items", "full"}:
+                if hasattr(caller, "begin_depart_confirmation"):
+                    if not caller.begin_depart_confirmation(depart_type=raw_args):
+                        caller.msg("That departure path is already pending. Type DEPART CONFIRM to proceed.")
+                        return
+                caller.msg(f"DEPART {raw_args} will spend favor. Type DEPART CONFIRM to proceed.")
+                return
         else:
-            mode = raw_args
-
-        chosen_mode = caller.get_depart_mode(corpse=corpse, requested_mode=mode) if hasattr(caller, "get_depart_mode") else None
-
-        if mode and chosen_mode is None:
-            self._clear_confirmation(caller)
-            caller.msg("You do not have enough favor for that departure path. Choose grave, coins, items, or full.")
-            return
-
-        if mode == "default":
-            mode = None
-
-        if mode and mode != "grave" and self._needs_confirmation(mode) and raw_args != "confirm":
-            caller.db.depart_confirm_mode = mode
-            if hasattr(caller, "get_depart_preview_lines"):
-                caller.msg("\n".join(caller.get_depart_preview_lines(corpse=corpse)))
-            caller.msg(f"DEPART {mode} will spend favor. Type DEPART CONFIRM to proceed.")
+            caller.msg("Type DEPART to begin letting go, then DEPART CONFIRM to follow through.")
             return
 
         ok, message = caller.depart_self(mode=mode)
         self._clear_confirmation(caller)
         caller.msg(message)
-        if ok and getattr(caller, "location", None):
-            caller.location.msg_contents(f"{caller.key} draws a ragged breath and returns from the edge of death.", exclude=[caller])

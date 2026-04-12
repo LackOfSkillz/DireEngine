@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Expected 15 spawned guards, saw 14",
+  "mode": "command",
+  "scenario": "guard-ai-basic",
+  "seed": 879026700
+}

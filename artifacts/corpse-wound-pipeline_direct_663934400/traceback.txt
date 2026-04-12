@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 18376, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8399, in run_corpse_wound_pipeline_scenario
+    ok, touch_message = empath.touch_empath_target(prepared_corpse)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\typeclasses\characters.py", line 7030, in touch_empath_target
+    self.create_empath_link(target, link_type=EMPATH_LINK_TOUCH)
+  File "C:\Users\gary\dragonsire\typeclasses\characters.py", line 5803, in create_empath_link
+    self.award_empathy_experience("link", max(10, sum(target.sync_empath_wounds_from_resources().values())), target=target)
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Corpse' object has no attribute 'sync_empath_wounds_from_resources'

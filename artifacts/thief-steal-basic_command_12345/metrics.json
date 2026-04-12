@@ -1,0 +1,288 @@
+{
+  "coin_delta": 30,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "steal TEST_THIEF_NPC_SUCCESS",
+      "first_response_ms": 72.43940001353621,
+      "kind": "command",
+      "ms": 82.23689999431372,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "mark TEST_THIEF_MARK_TARGET",
+      "first_response_ms": 64.21530002262443,
+      "kind": "command",
+      "ms": 64.32180001866072,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    82.23689999431372,
+    64.32180001866072
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 82.21470005810261,
+    "timings_ms": [
+      82.23689999431372,
+      64.32180001866072
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775944548.4169471,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 68.32735001808032,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 1,
+  "lag": {
+    "avg_ms": 73.27935000648722,
+    "jitter": 12.667888678419184,
+    "max_ms": 82.23689999431372,
+    "min_ms": 64.32180001866072,
+    "p95_ms": 81.34114499553107,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "steal TEST_THIEF_NPC_SUCCESS",
+      "ms": 82.23689999431372,
+      "snapshot": "final"
+    },
+    {
+      "command": "mark TEST_THIEF_MARK_TARGET",
+      "ms": 64.32180001866072,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 82.21470005810261,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You cleanly steal 10 coins from TEST_THIEF_NPC_SUCCESS.",
+    "You assess TEST_THIEF_MARK_TARGET. Difficulty: 2",
+    "They seem unsuspecting.",
+    "Attention: idle",
+    "Risk level: 1"
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "baseline_total": 120,
+    "caught_result": {
+      "actor_total": 121,
+      "caught": true,
+      "item": null,
+      "margin": -120,
+      "observer_total": 241,
+      "repeat_penalty": 10,
+      "shop_heat": 0,
+      "success": false,
+      "target_key": "id:22186",
+      "thief_reputation": 2,
+      "wanted_level": 1
+    },
+    "marked_total": 130,
+    "npc_command_coin_delta": 10,
+    "observer_message_count": 0,
+    "player_pvp_open_until": 1775958911.713042,
+    "repeat_penalty": 10,
+    "repeated_total": 110,
+    "shop_heat": 1,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "uncaught_success_hidden": true,
+    "unmarked_total": 120
+  },
+  "scenario_duration_ms": 49971,
+  "scheduler": {
+    "active_job_count": 2,
+    "active_jobs": [
+      {
+        "created_at": 1775944454.8375793,
+        "delay_s": 2.0,
+        "due_at": 1775944456.8375793,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_THIEF_COUNTERPLAY",
+        "job_id": "c782bd9a5dc84ff7aee47efff9a32b9b",
+        "key": "combat:roundtime:22163",
+        "owner": "#22163",
+        "owner_label": "TEST_THIEF_COUNTERPLAY",
+        "source": "thief.roundtime",
+        "system": "thief.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775944505.0857716,
+        "delay_s": 2.0,
+        "due_at": 1775944507.0857716,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_THIEF_ACTOR",
+        "job_id": "7157e57aeb3747caaa719335e513106d",
+        "key": "combat:roundtime:22177",
+        "owner": "#22177",
+        "owner_label": "TEST_THIEF_ACTOR",
+        "source": "thief.roundtime",
+        "system": "thief.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 2.0,
+    "queue_peak": 2.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775944497.5946918,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 2,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 73.25060002040118,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 82.21470005810261,
+          "metadata": {
+            "character": "TEST_THIEF_ACTOR",
+            "command": "steal"
+          },
+          "timestamp": 1775944505.0867689
+        },
+        {
+          "duration_ms": 64.28649998269975,
+          "metadata": {
+            "character": "TEST_THIEF_ACTOR",
+            "command": "mark"
+          },
+          "timestamp": 1775944509.8289382
+        }
+      ],
+      "max_ms": 82.21470005810261,
+      "total_ms": 146.50120004080236
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Grave-recovery scenario ended with the wrong carried coin count.",
+  "mode": "direct",
+  "scenario": "grave-recovery",
+  "seed": 926817600
+}

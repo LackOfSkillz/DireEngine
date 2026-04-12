@@ -1,0 +1,41 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 84.61749996058643,
+  "lag": {
+    "avg_ms": 84.70800006762147,
+    "jitter": 0.0,
+    "max_ms": 84.70800006762147,
+    "min_ms": 84.70800006762147,
+    "p95_ms": 84.70800006762147,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_SHIFT_PATIENT",
+      "ms": 84.70800006762147,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHIFT_PATIENT",
+      "first_response_ms": 84.61749996058643,
+      "kind": "command",
+      "ms": 84.70800006762147,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

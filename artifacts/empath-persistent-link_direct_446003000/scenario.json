@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath persistent-link coverage validates endurance-vs-throughput tradeoffs and clean separation failure without failing on environment-specific latency.",
+    "tags": [
+      "core",
+      "empath",
+      "link"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-persistent-link",
+  "seed": 446003000,
+  "started_at": 1775822455.446943
+}

@@ -1,0 +1,398 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 6,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "first_response_ms": 78.74909997917712,
+      "kind": "command",
+      "ms": 78.83579994086176,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "first_response_ms": 60.924299992620945,
+      "kind": "command",
+      "ms": 60.99940009880811,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "first_response_ms": 2.418600022792816,
+      "kind": "command",
+      "ms": 2.470900071784854,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touch_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "redirect vitality 10 TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "first_response_ms": 2.4504000321030617,
+      "kind": "command",
+      "ms": 2.5037999730557203,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "redirect_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "center",
+      "first_response_ms": 19.401199999265373,
+      "kind": "command",
+      "ms": 65.7571000047028,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "first_response_ms": 85.94090002588928,
+      "kind": "command",
+      "ms": 86.0651999246329,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "relinked"
+    }
+  ],
+  "command_timings_ms": [
+    78.83579994086176,
+    60.99940009880811,
+    2.470900071784854,
+    2.5037999730557203,
+    65.7571000047028,
+    86.0651999246329
+  ],
+  "commands": {
+    "count": 6,
+    "max_ms": 86.02279995102435,
+    "timings_ms": [
+      78.83579994086176,
+      60.99940009880811,
+      2.470900071784854,
+      2.5037999730557203,
+      65.7571000047028,
+      86.0651999246329
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775835403.0131667,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 41.6474166753081,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 49.43870000230769,
+    "jitter": 37.45527737925943,
+    "max_ms": 86.0651999246329,
+    "min_ms": 2.470900071784854,
+    "p95_ms": 84.25784992869012,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "ms": 78.83579994086176,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "ms": 60.99940009880811,
+      "snapshot": "unified"
+    },
+    {
+      "command": "touch TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "ms": 2.470900071784854,
+      "snapshot": "touch_locked"
+    },
+    {
+      "command": "redirect vitality 10 TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "ms": 2.5037999730557203,
+      "snapshot": "redirect_locked"
+    },
+    {
+      "command": "center",
+      "ms": 65.7571000047028,
+      "snapshot": "centered"
+    },
+    {
+      "command": "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "ms": 86.0651999246329,
+      "snapshot": "relinked"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 86.02279995102435,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You settle into a deeper, longer-held connection.",
+    "You weave a frail bond between burdens.",
+    "You feel completely cut off from others.",
+    "You feel completely cut off from others.",
+    "Your connection feels distant and unreliable.",
+    "You steady yourself, regaining clarity.",
+    "You settle into a deeper, longer-held connection."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "unity TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "touch TEST_EMPATH_UNITY_SHOCK_PATIENT",
+      "redirect vitality 10 TEST_EMPATH_UNITY_SHOCK_PARTNER",
+      "center",
+      "link persistent TEST_EMPATH_UNITY_SHOCK_PATIENT"
+    ],
+    "output_log": [
+      "You settle into a deeper, longer-held connection.",
+      "You weave a frail bond between burdens.",
+      "You feel completely cut off from others.",
+      "You feel completely cut off from others.",
+      "Your connection feels distant and unreliable.",
+      "You steady yourself, regaining clarity.",
+      "You settle into a deeper, longer-held connection."
+    ],
+    "redirect_fail_output": [
+      "You feel completely cut off from others."
+    ],
+    "relink_output": [
+      "You settle into a deeper, longer-held connection."
+    ],
+    "shock_after_center": 75,
+    "snapshot_count": 7,
+    "snapshot_labels": [
+      "unified",
+      "disconnected",
+      "touch_locked",
+      "redirect_locked",
+      "centered",
+      "relinked",
+      "final"
+    ],
+    "touch_fail_output": [
+      "You feel completely cut off from others."
+    ]
+  },
+  "scenario_duration_ms": 26630,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775835389.2472177,
+        "delay_s": 2.5,
+        "due_at": 1775835391.7472177,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "job_id": "234b869defa848de8fb067dda9c5e614",
+        "key": "combat:roundtime:17929",
+        "owner": "#17929",
+        "owner_label": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 2,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 3,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "unified",
+    "disconnected",
+    "touch_locked",
+    "redirect_locked",
+    "centered",
+    "relinked",
+    "final"
+  ],
+  "started_at": 1775835375.7675526,
+  "state_transition_count": 6,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath unity-breaks-on-shock coverage validates central cleanup and post-center partial recovery without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 49.39406665895755,
+      "count": 6,
+      "entries": [
+        {
+          "duration_ms": 78.81670002825558,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775835386.0950823
+        },
+        {
+          "duration_ms": 60.878199990838766,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+            "command": "unity"
+          },
+          "timestamp": 1775835386.7358615
+        },
+        {
+          "duration_ms": 2.442499971948564,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775835387.405094
+        },
+        {
+          "duration_ms": 2.4751999881118536,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+            "command": "redirect"
+          },
+          "timestamp": 1775835387.9674656
+        },
+        {
+          "duration_ms": 65.72900002356619,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+            "command": "center"
+          },
+          "timestamp": 1775835388.5483525
+        },
+        {
+          "duration_ms": 86.02279995102435,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775835389.2584224
+        }
+      ],
+      "max_ms": 86.02279995102435,
+      "total_ms": 296.3643999537453
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 1
+}

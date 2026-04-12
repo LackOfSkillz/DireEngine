@@ -1,0 +1,287 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 29,
+        "hp": 100,
+        "id": 18672,
+        "is_dead": false,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 18673,
+          "key": "TEST_GRAVE_TOKEN",
+          "location": "TEST_GRAVE_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "alive",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 18671,
+            "key": "TEST_GRAVE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 18672,
+            "key": "TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 18673,
+            "key": "TEST_GRAVE_TOKEN",
+            "location": "TEST_GRAVE_CHAR",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18671,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "alive",
+      "timestamp": 1775909117.763086
+    },
+    "label": "alive"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 18672,
+        "is_dead": true,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "DEAD",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "dead",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 18674,
+            "key": "corpse of TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR",
+          "corpse of TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18671,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "dead",
+      "timestamp": 1775909118.0890193
+    },
+    "label": "dead"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 50,
+        "id": 18672,
+        "is_dead": false,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "departed",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 18675,
+            "key": "grave of TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.grave.Grave"
+          }
+        ],
+        "deleted": [
+          {
+            "id": 18674,
+            "key": "corpse of TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.corpse.Corpse"
+          }
+        ]
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR",
+          "grave of TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18671,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "departed",
+      "timestamp": 1775909118.896912
+    },
+    "label": "departed"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 27,
+        "hp": 50,
+        "id": 18672,
+        "is_dead": false,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 18673,
+          "key": "TEST_GRAVE_TOKEN",
+          "location": "TEST_GRAVE_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "recovered",
+      "object_deltas": {
+        "created": [],
+        "deleted": [
+          {
+            "id": 18675,
+            "key": "grave of TEST_GRAVE_CHAR",
+            "location": "TEST_GRAVE_ROOM",
+            "typeclass": "typeclasses.grave.Grave"
+          }
+        ]
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18671,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "recovered",
+      "timestamp": 1775909119.29122
+    },
+    "label": "recovered"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 27,
+        "hp": 50,
+        "id": 18672,
+        "is_dead": false,
+        "key": "TEST_GRAVE_CHAR",
+        "life_state": "ALIVE",
+        "location": "TEST_GRAVE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 18673,
+          "key": "TEST_GRAVE_TOKEN",
+          "location": "TEST_GRAVE_CHAR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_GRAVE_CHAR"
+        ],
+        "exits": [],
+        "id": 18671,
+        "key": "TEST_GRAVE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775909119.2922125
+    },
+    "label": "final"
+  }
+]

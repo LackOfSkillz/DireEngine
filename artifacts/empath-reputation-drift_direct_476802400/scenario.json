@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Reputation drift coverage validates that helping critical patients improves standing while neglect under visible pressure degrades it.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-reputation-drift",
+  "seed": 476802400,
+  "started_at": 1775833230.6007547
+}

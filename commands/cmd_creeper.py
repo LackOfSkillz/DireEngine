@@ -1,4 +1,4 @@
-from evennia import Command
+from commands.command import Command
 from evennia.accounts.models import AccountDB
 
 from utils.creeper import get_creeper_config

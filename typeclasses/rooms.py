@@ -56,7 +56,12 @@ class Room(ObjectParent, DefaultRoom):
         self.db.passage_links = []
         self.db.trails = []
         self.db.is_bank = False
+        self.db.is_guardhouse = False
+        self.db.guardhouse_exterior = False
+        self.db.is_jail = False
         self.db.is_stocks = False
+        self.db.pillory = False
+        self.db.high_traffic = False
         self.db.is_shop = False
         self.db.is_shrine = False
         self.db.is_vault = False
@@ -69,6 +74,7 @@ class Room(ObjectParent, DefaultRoom):
         self.db.corpse_decay_scale = 1.0
         self.db.grave_damage_scale = 1.0
         self.db.alert_level = 0
+        self.db.suspicion_level = 0
         self.db.law_type = LAW_STANDARD
         self.db.region = "default_region"
         self.db.fishable = False
@@ -85,6 +91,9 @@ class Room(ObjectParent, DefaultRoom):
             return True
         tags = getattr(self, "tags", None)
         return bool(tags and tags.get("shrine"))
+
+    def is_consecrated_room(self):
+        return bool(getattr(self.db, "consecrated", False))
 
     def is_vault_room(self):
         if bool(getattr(self.db, "is_vault", False)):

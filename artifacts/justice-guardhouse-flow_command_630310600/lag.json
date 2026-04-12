@@ -1,0 +1,97 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 82.42170003359206,
+  "lag": {
+    "avg_ms": 82.50655001029372,
+    "jitter": 82.14196962182835,
+    "max_ms": 183.16590005997568,
+    "min_ms": 13.043500017374754,
+    "p95_ms": 173.07412505033423,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "retrieve items",
+      "ms": 17.929399968124926,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 13.043500017374754,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 500",
+      "ms": 115.88739999569952,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 183.16590005997568,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "retrieve items",
+      "ms": 183.16590005997568
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 17.86829996854067,
+      "kind": "command",
+      "ms": 17.929399968124926,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 12.996400007978082,
+      "kind": "command",
+      "ms": 13.043500017374754,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 500",
+      "first_response_ms": 115.71730009745806,
+      "kind": "command",
+      "ms": 115.88739999569952,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 183.10480006039143,
+      "kind": "command",
+      "ms": 183.16590005997568,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

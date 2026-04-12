@@ -1,0 +1,8 @@
+{
+  "failure_type": "leak_failure",
+  "lag_status": "bad",
+  "message": "1 test objects were not cleaned up.",
+  "mode": "direct",
+  "scenario": "empath-service-foundation",
+  "seed": 382716700
+}

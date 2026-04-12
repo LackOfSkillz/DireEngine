@@ -1,19 +1,8 @@
-﻿import random
 import time
 
-from evennia import Command
-
+from commands.command import Command
+from world.systems.theft import apply_steal_reward, can_steal_from, can_steal_from_container, resolve_theft_attempt
 from utils.crime import call_guards
-
-
-SOFT_FAIL_MARGIN = -5
-
-STATE_AWARENESS_SCORES = {
-    "unaware": 10,
-    "normal": 30,
-    "alert": 50,
-    "searching": 65,
-}
 
 
 class CmdSteal(Command):
@@ -21,56 +10,13 @@ class CmdSteal(Command):
     Attempt to steal from a target's belongings.
 
     Examples:
-        steal pouch from guard
+        steal guard
+        steal coin
     """
 
     key = "steal"
     locks = "cmd:all()"
     help_category = "Stealth"
-
-    def get_target_memory(self, target, caller):
-        return dict(getattr(target.db, "theft_memory", None) or {}).get(caller.id)
-
-    def record_attempt(self, target, caller, now):
-        theft_memory = dict(getattr(target.db, "theft_memory", None) or {})
-        memory = dict(theft_memory.get(caller.id) or {"count": 0, "last_attempt": 0})
-        memory["count"] = int(memory.get("count", 0) or 0) + 1
-        memory["last_attempt"] = now
-        theft_memory[caller.id] = memory
-        target.db.theft_memory = theft_memory
-        return memory
-
-    def get_theft_difficulty_mod(self, caller, target):
-        modifier = 0
-        memory = self.get_target_memory(target, caller)
-        if memory:
-            modifier += min(25, int(memory.get("count", 0) or 0) * 5)
-
-        if getattr(caller.db, "marked_target", None) == getattr(target, "id", None):
-            modifier -= 10
-
-        if "cunning" in (getattr(caller.db, "khri_active", None) or {}):
-            modifier -= 5
-
-        if getattr(target.db, "intimidated", False):
-            modifier -= 10
-
-        attention_state = str(getattr(target.db, "attention_state", "idle") or "idle")
-        if attention_state == "distracted":
-            modifier -= 10
-        elif attention_state == "alert":
-            modifier += 15
-
-        position_state = str(getattr(caller.db, "position_state", "neutral") or "neutral")
-        if position_state == "advantaged":
-            modifier -= 10
-        elif position_state == "exposed":
-            modifier += 10
-
-        if hasattr(caller, "has_recent_action_risk") and caller.has_recent_action_risk():
-            modifier += 5
-
-        return modifier
 
     def get_theft_roundtime(self, caller, base_rt, failed=False):
         roundtime = float(base_rt)
@@ -80,137 +26,98 @@ class CmdSteal(Command):
             roundtime += 1
         return max(1, min(roundtime, 5))
 
-    def get_awareness_score(self, target, extra_bonus=0):
-        if hasattr(target, "get_awareness_score"):
-            return int(target.get_awareness_score(extra_bonus=extra_bonus))
-        awareness = target.get_awareness() if hasattr(target, "get_awareness") else "normal"
-        base = STATE_AWARENESS_SCORES.get(str(awareness).lower(), 30)
-        return int(base + extra_bonus)
+    def _resolve_target(self, caller, room, query):
+        item_query, container_query = self._split_container_query(query)
+        if container_query:
+            container = self._find_container(caller, room, container_query)
+            if not container:
+                caller.msg("You do not see that container here.")
+                return None, None
+            owner = getattr(container, "location", None)
+            awareness_target = owner if owner and owner != room else container
+            return awareness_target, {
+                "requested_item": item_query,
+                "container": container,
+                "awareness_target": awareness_target,
+                "source_label": getattr(container, "key", "container"),
+            }
+        if hasattr(room, "is_shop") and room.is_shop():
+            direct = caller.search(query, location=room, quiet=True)
+            if direct:
+                return direct[0], {"requested_item": query}
+            shopkeeper = room.get_shopkeeper() if hasattr(room, "get_shopkeeper") else None
+            if shopkeeper:
+                return shopkeeper, {"requested_item": query}
+        target = caller.search(query, location=room)
+        if not target:
+            return None, None
+        return target, {"requested_item": query}
 
-    def pick_target_item(self, owner, query):
-        items = [item for item in owner.contents if getattr(item.db, "stealable", True)]
-        if not items:
-            return None, items
+    def _split_container_query(self, query):
+        raw = str(query or "").strip()
+        marker = " from "
+        if marker not in raw.lower():
+            return raw, None
+        index = raw.lower().rfind(marker)
+        return raw[:index].strip(), raw[index + len(marker):].strip()
 
-        if hasattr(self.caller, "resolve_numbered_candidate"):
-            selected, matches, _, _ = self.caller.resolve_numbered_candidate(query, items)
-            if selected:
-                return selected, items
-            if matches:
-                if len(matches) > 1 and hasattr(self.caller, "msg_numbered_matches"):
-                    self.caller.msg_numbered_matches(query, matches)
-                return None, items
-
+    def _find_container(self, caller, room, query):
+        candidates = []
+        for obj in list(getattr(room, "contents", []) or []):
+            if bool(getattr(getattr(obj, "db", None), "is_container", False)):
+                candidates.append(obj)
+            for nested in list(getattr(obj, "contents", []) or []):
+                if bool(getattr(getattr(nested, "db", None), "is_container", False)):
+                    candidates.append(nested)
+        if hasattr(caller, "resolve_numbered_candidate"):
+            container, matches, _, _ = caller.resolve_numbered_candidate(query, candidates, default_first=False)
+            if container:
+                return container
+            if matches and len(matches) > 1 and hasattr(caller, "msg_numbered_matches"):
+                caller.msg_numbered_matches(query, matches)
+                return None
         lowered = str(query or "").strip().lower()
-        if lowered == str(owner.key).strip().lower():
-            return random.choice(items), items
+        for candidate in candidates:
+            if str(getattr(candidate, "key", "") or "").strip().lower() == lowered:
+                return candidate
+        return None
 
-        for item in items:
-            if str(item.key).strip().lower() == lowered:
-                return item, items
-
-        return None, items
-
-    def handle_shoplifting(self, caller, room):
-        shopkeeper = room.get_shopkeeper() if hasattr(room, "get_shopkeeper") else None
-        if not shopkeeper:
-            caller.msg("There is no shopkeeper here to steal from.")
-            return
-
-        is_lawless = bool(hasattr(room, "is_lawless") and room.is_lawless())
-
-        if not caller.is_hidden():
-            caller.msg("You must be hidden to do that.")
-            return
-
-        if caller.is_in_roundtime():
-            caller.msg_roundtime_block()
-            return
-
-        cooldowns = caller.get_ability_cooldowns() if hasattr(caller, "get_ability_cooldowns") else {}
-        now = time.time()
-        if now < float(cooldowns.get("steal", 0) or 0):
-            caller.msg("You need a moment before trying that again.")
-            return
-
-        item, items = self.pick_target_item(shopkeeper, self.args.strip())
-        if not items:
-            caller.msg("There is nothing here you can steal.")
-            return
-        if not item:
-            caller.msg("You do not see that among the shop's stock.")
-            return
-
-        roll = random.randint(1, 100)
-        stealth = 50
-        if caller.is_profession("thief"):
-            stealth += 20
-
-        difficulty_mod = self.get_theft_difficulty_mod(caller, shopkeeper)
-        suspicion = shopkeeper.get_suspicion_for(caller) if hasattr(shopkeeper, "get_suspicion_for") else 0
-        awareness = self.get_awareness_score(shopkeeper, extra_bonus=0 if is_lawless else 30)
-        if hasattr(shopkeeper, "is_shopkeeper") and shopkeeper.is_shopkeeper():
-            awareness += 20
-        awareness += suspicion
-
-        cooldowns["steal"] = now + 3
-        caller.ndb.cooldowns = cooldowns
-
-        caller.db.recent_action = True
-        caller.db.recent_action_timer = now
-        self.record_attempt(shopkeeper, caller, now)
-
-        threshold = awareness + 50 + difficulty_mod
-        margin = (roll + stealth) - threshold
-        success = margin > 0
-
-        if getattr(caller.db, "debug_mode", False):
-            result = "success" if success else "failed"
-            if SOFT_FAIL_MARGIN - 4 <= margin <= 0:
-                result = "soft-fail"
-            caller.msg(f"[Stealth check: {result}]")
-            caller.debug_log(
-                f"[SHOPLIFT] roll={roll} stealth={stealth} awareness={awareness} suspicion={suspicion} difficulty={difficulty_mod} margin={margin}"
-            )
-
-        if success:
-            if not item.move_to(caller, quiet=True, move_type="shoplift"):
-                caller.msg("You are caught trying to steal!")
-                caller.reveal()
-                return
-            caller.msg(f"You discreetly pocket {item.key}.")
-            if hasattr(shopkeeper, "adjust_suspicion_for"):
-                shopkeeper.adjust_suspicion_for(caller, 3)
-            caller.apply_thief_roundtime(self.get_theft_roundtime(caller, 2))
-            return
-
-        if margin >= -9:
-            caller.msg("You falter but recover before being noticed.")
-            caller.apply_thief_roundtime(self.get_theft_roundtime(caller, 2))
-            return
-
-        caller.msg("You are caught trying to steal!")
-        room.msg_contents(f"{caller.key} is trying to steal!", exclude=[])
-        if hasattr(shopkeeper, "adjust_suspicion_for"):
-            shopkeeper.adjust_suspicion_for(caller, 6)
-        if not is_lawless and hasattr(caller, "add_crime"):
-            caller.add_crime(2)
-        elif not is_lawless:
-            caller.db.crime_flag = True
-            caller.db.crime_severity = int(getattr(caller.db, "crime_severity", 0) or 0) + 2
-        shopkeeper.db.witnessed_crime = True
-        if not is_lawless:
-            room.db.alert_level = int(getattr(room.db, "alert_level", 0) or 0) + 2
-        if not is_lawless and hasattr(shopkeeper, "set_awareness"):
-            shopkeeper.set_awareness("alert")
-        if hasattr(shopkeeper, "set_attention_state"):
-            shopkeeper.set_attention_state("alert")
-        if not is_lawless:
-            call_guards(room, caller)
+    def _apply_detection_effects(self, caller, target):
+        room = getattr(caller, "location", None)
+        if hasattr(target, "set_awareness"):
+            target.set_awareness("alert")
+        if hasattr(target, "set_attention_state"):
+            target.set_attention_state("alert")
         if hasattr(caller, "set_position_state"):
             caller.set_position_state("exposed")
+        if hasattr(target, "db"):
+            target.db.witnessed_crime = True
+        if room and not (hasattr(room, "is_lawless") and room.is_lawless()):
+            room.db.alert_level = int(getattr(room.db, "alert_level", 0) or 0) + 2
+            call_guards(room, caller)
         caller.reveal()
-        caller.apply_thief_roundtime(self.get_theft_roundtime(caller, 2, failed=True))
+
+    def _message_success(self, caller, target, reward, result):
+        summary = (reward or {}).get("summary") if reward else None
+        margin = int(result.get("margin", 0) or 0)
+        source_label = str(result.get("source_label") or getattr(target, "key", "them") or "them")
+        if not summary:
+            caller.msg("You find nothing worth stealing.")
+            return
+        if margin >= 25:
+            caller.msg(f"You cleanly steal {summary} from {source_label}.")
+            return
+        caller.msg(f"You clumsily lift {summary} from {source_label}, but escape notice.")
+
+    def _message_failure(self, caller, target, result):
+        if result.get("caught"):
+            caller.msg(f"{target.key} catches you reaching for their belongings!")
+            target.msg(f"You catch {caller.key} trying to steal from you!")
+            room = getattr(caller, "location", None)
+            if room:
+                room.msg_contents(f"{target.key} reacts sharply as {caller.key} is caught stealing!", exclude=[caller, target])
+            return
+        caller.msg("You falter, but recover before anyone notices.")
 
     def func(self):
         caller = self.caller
@@ -223,102 +130,42 @@ class CmdSteal(Command):
             caller.msg("There is no one here to steal from.")
             return
 
-        if hasattr(room, "is_shop") and room.is_shop():
-            self.handle_shoplifting(caller, room)
-            return
-
-        target = caller.search(self.args.strip(), location=room)
+        target, context = self._resolve_target(caller, room, self.args.strip())
         if not target:
-            return
-
-        if target == caller:
-            caller.msg("You cannot steal from yourself.")
-            return
-
-        if getattr(target.db, "is_npc", False):
-            caller.msg("You cannot steal from NPCs yet.")
-            return
-
-        if not caller.is_hidden():
-            caller.msg("You must be hidden to do that.")
             return
 
         if caller.is_in_roundtime():
             caller.msg_roundtime_block()
             return
 
-        cooldowns = caller.get_ability_cooldowns() if hasattr(caller, "get_ability_cooldowns") else {}
         now = time.time()
-        if now < float(cooldowns.get("steal", 0) or 0):
-            caller.msg("You need a moment before trying that again.")
+        if context.get("container") is not None:
+            allowed, message = can_steal_from_container(caller, context.get("container"), requested_item=context.get("requested_item"))
+        else:
+            allowed, message = can_steal_from(caller, target)
+        if not allowed:
+            caller.msg(message)
             return
 
-        items = [
-            item for item in target.contents
-            if item != caller and not getattr(item.db, "steal_protected", False)
-        ]
-        if not items:
-            caller.msg("They have nothing you can steal.")
-            return
-
-        item = random.choice(items) if items else None
-        if not item:
-            caller.msg("They have nothing you can steal.")
-            return
-
-        roll = random.randint(1, 100)
-        stealth = 50
-        if caller.is_profession("thief"):
-            stealth += 20
-
-        difficulty_mod = self.get_theft_difficulty_mod(caller, target)
-        awareness_score = self.get_awareness_score(target)
-
-        total = roll + stealth
-        threshold = awareness_score + 50 + difficulty_mod
-        margin = total - threshold
-
-        caller.ndb.cooldowns = cooldowns
-        caller.ndb.cooldowns["steal"] = now + 3
         caller.db.recent_action = True
         caller.db.recent_action_timer = now
-        self.record_attempt(target, caller, now)
 
-        if getattr(caller.db, "debug_mode", False):
-            result = "success" if margin > 0 else "failed"
-            if margin >= -9:
-                result = "soft-fail"
-            caller.msg(f"[Stealth check: {result}]")
-            caller.debug_log(
-                f"[STEAL] roll={roll} stealth={stealth} awareness={awareness_score} difficulty={difficulty_mod} margin={margin}"
-            )
+        result = resolve_theft_attempt(caller, target, context={**context, "room": room})
+        reward_source = context.get("container") or target
+        reward = apply_steal_reward(caller, reward_source, result.get("item")) if result.get("success") else None
+        result["source_label"] = context.get("source_label") or getattr(target, "key", None)
 
-        if margin > 0:
-            if not item.move_to(caller, quiet=True, move_type="steal"):
-                caller.msg("You fail to steal anything.")
-                caller.reveal()
-                return
-            caller.msg(f"You successfully steal {item.key}.")
+        if result.get("success") and reward:
+            self._message_success(caller, target, reward, result)
             caller.apply_thief_roundtime(self.get_theft_roundtime(caller, 2))
             return
 
-        if margin >= -9:
-            caller.msg("You falter but recover before being noticed.")
+        if result.get("success") and not reward:
+            caller.msg("You come away empty-handed.")
             caller.apply_thief_roundtime(self.get_theft_roundtime(caller, 2))
             return
 
-        caller.msg("You fail to steal anything.")
-        target.msg("You feel someone fumbling with your belongings!")
-        caller.reveal()
-        if hasattr(target, "set_awareness"):
-            target.set_awareness("alert")
-        if hasattr(target, "set_attention_state"):
-            target.set_attention_state("alert")
-        if hasattr(caller, "set_position_state"):
-            caller.set_position_state("exposed")
-        if hasattr(caller, "add_crime"):
-            caller.add_crime(1)
-        room.msg_contents(f"{target.key} reacts suddenly!", exclude=[caller, target])
-        if not (hasattr(room, "is_lawless") and room.is_lawless()):
-            call_guards(room, caller)
-        caller.apply_thief_roundtime(self.get_theft_roundtime(caller, 2, failed=True))
+        self._message_failure(caller, target, result)
+        if result.get("caught"):
+            self._apply_detection_effects(caller, target)
+        caller.apply_thief_roundtime(self.get_theft_roundtime(caller, 2, failed=bool(result.get("caught"))))

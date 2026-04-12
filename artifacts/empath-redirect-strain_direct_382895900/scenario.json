@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath redirect-strain coverage validates conduit strain, stability loss, and large-redirect shock without failing on environment-specific latency.",
+    "tags": [
+      "core",
+      "empath",
+      "unity",
+      "redirect"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-redirect-strain",
+  "seed": 382895900,
+  "started_at": 1775829763.383904
+}

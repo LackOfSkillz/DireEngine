@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Expired detention should auto-clear.",
+  "mode": "command",
+  "scenario": "justice-arrest-basic",
+  "seed": 60655200
+}

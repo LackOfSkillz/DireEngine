@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Cleric ritual stage 'bind' failed unexpectedly: You do not have the devotion required to continue the rite.",
+  "mode": "direct",
+  "scenario": "corpse-wound-pipeline",
+  "seed": 472909900
+}

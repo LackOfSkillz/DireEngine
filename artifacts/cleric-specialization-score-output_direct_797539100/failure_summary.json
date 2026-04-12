@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "multiple causes.",
+  "mode": "direct",
+  "scenario": "cleric-specialization-score-output",
+  "seed": 797539100
+}

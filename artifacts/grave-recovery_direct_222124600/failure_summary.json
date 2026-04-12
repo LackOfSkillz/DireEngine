@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Grave-recovery scenario did not decay the corpse into a grave via scheduler expiry.",
+  "mode": "direct",
+  "scenario": "grave-recovery",
+  "seed": 222124600
+}

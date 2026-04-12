@@ -1,0 +1,116 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 91,
+        "id": 17652,
+        "is_dead": false,
+        "key": "TEST_EMPATH_GROUP_B",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_GROUP_TEAM_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.07,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17648,
+            "key": "TEST_EMPATH_GROUP_SOLO_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17649,
+            "key": "TEST_EMPATH_GROUP_TEAM_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17650,
+            "key": "TEST_EMPATH_GROUP_SOLO",
+            "location": "TEST_EMPATH_GROUP_SOLO_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17651,
+            "key": "TEST_EMPATH_GROUP_A",
+            "location": "TEST_EMPATH_GROUP_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17652,
+            "key": "TEST_EMPATH_GROUP_B",
+            "location": "TEST_EMPATH_GROUP_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17653,
+            "key": "TEST_EMPATH_SOLO_PATIENT_1",
+            "location": "TEST_EMPATH_GROUP_SOLO_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17654,
+            "key": "TEST_EMPATH_SOLO_PATIENT_2",
+            "location": "TEST_EMPATH_GROUP_SOLO_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17655,
+            "key": "TEST_EMPATH_SOLO_PATIENT_3",
+            "location": "TEST_EMPATH_GROUP_SOLO_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17656,
+            "key": "TEST_EMPATH_TEAM_PATIENT_1",
+            "location": "TEST_EMPATH_GROUP_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17657,
+            "key": "TEST_EMPATH_TEAM_PATIENT_2",
+            "location": "TEST_EMPATH_GROUP_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17658,
+            "key": "TEST_EMPATH_TEAM_PATIENT_3",
+            "location": "TEST_EMPATH_GROUP_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_GROUP_A",
+          "TEST_EMPATH_GROUP_B",
+          "TEST_EMPATH_TEAM_PATIENT_1",
+          "TEST_EMPATH_TEAM_PATIENT_2",
+          "TEST_EMPATH_TEAM_PATIENT_3"
+        ],
+        "exits": [],
+        "id": 17649,
+        "key": "TEST_EMPATH_GROUP_TEAM_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775833566.444088
+    },
+    "label": "final"
+  }
+]

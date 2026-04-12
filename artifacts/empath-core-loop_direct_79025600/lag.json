@@ -1,0 +1,148 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 82.7009499965546,
+  "lag": {
+    "avg_ms": 85.54832856836063,
+    "jitter": 87.71962639180182,
+    "max_ms": 265.10610000696033,
+    "min_ms": 6.543099996633828,
+    "p95_ms": 217.88453998742614,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 265.10610000696033,
+      "snapshot": "touched"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 72.89139996282756,
+      "snapshot": "moved_away"
+    },
+    {
+      "command": "DIRECT process_empath_tick",
+      "ms": 19.287000061012805,
+      "snapshot": "post_move_tick"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 34.62529997341335,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 92.68450003582984,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "assess",
+      "ms": 6.543099996633828,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "take bleeding",
+      "ms": 107.70089994184673,
+      "snapshot": "took_bleeding"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "touch TEST_EMPATH_PATIENT",
+      "ms": 265.10610000696033
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 265.0344999274239,
+      "kind": "command",
+      "ms": 265.10610000696033,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 15.255699981935322,
+      "kind": "direct",
+      "ms": 72.89139996282756,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "moved_away"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT process_empath_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 19.287000061012805,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_move_tick"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 12.751800008118153,
+      "kind": "direct",
+      "ms": 34.62529997341335,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 92.61739999055862,
+      "kind": "command",
+      "ms": 92.68450003582984,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 6.442300044000149,
+      "kind": "command",
+      "ms": 6.543099996633828,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 104.10400002729148,
+      "kind": "command",
+      "ms": 107.70089994184673,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 18212, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 9959, in run_grave_nonowner_blocked_scenario
+    raise AssertionError(f"Grave-nonowner-blocked scenario returned the wrong blocker message: {output}")
+AssertionError: Grave-nonowner-blocked scenario returned the wrong blocker message: You have nothing here to recover.

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 17445, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7480, in run_death_favor_softens_sting_scenario
+    raise AssertionError(f"Death-favor-softens-sting scenario did not reduce the sting with favor: low={low_severity}, high={high_severity}")
+AssertionError: Death-favor-softens-sting scenario did not reduce the sting with favor: low=0.08, high=0.08

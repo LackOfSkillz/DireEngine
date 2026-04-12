@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Unlock behavior scenario missed the unlock message: You begin stabilizing the body's fading pattern.",
+  "mode": "direct",
+  "scenario": "cleric-specialization-unlock-behavior",
+  "seed": 814984500
+}

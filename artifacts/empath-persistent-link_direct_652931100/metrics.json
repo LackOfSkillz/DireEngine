@@ -1,0 +1,526 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 10,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_DIRECT_PATIENT",
+      "first_response_ms": 110.73549999855459,
+      "kind": "command",
+      "ms": 110.82900001201779,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 120.02649996429682,
+      "kind": "command",
+      "ms": 123.84990009013563,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 104.34049996547401,
+      "kind": "command",
+      "ms": 107.32509999070317,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 91.27840003930032,
+      "kind": "command",
+      "ms": 93.8542999792844,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "release",
+      "first_response_ms": 19.65509995352477,
+      "kind": "command",
+      "ms": 19.720699987374246,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_PERSISTENT_PATIENT",
+      "first_response_ms": 92.65829995274544,
+      "kind": "command",
+      "ms": 92.7185999462381,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 109.59809995256364,
+      "kind": "command",
+      "ms": 112.39450005814433,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 105.81900004763156,
+      "kind": "command",
+      "ms": 108.58989995904267,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 86.15410001948476,
+      "kind": "command",
+      "ms": 101.25349997542799,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 17.90850004181266,
+      "kind": "command",
+      "ms": 17.989200074225664,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_separated"
+    }
+  ],
+  "command_timings_ms": [
+    110.82900001201779,
+    123.84990009013563,
+    107.32509999070317,
+    93.8542999792844,
+    19.720699987374246,
+    92.7185999462381,
+    112.39450005814433,
+    108.58989995904267,
+    101.25349997542799,
+    17.989200074225664
+  ],
+  "commands": {
+    "count": 10,
+    "max_ms": 123.81529994308949,
+    "timings_ms": [
+      110.82900001201779,
+      123.84990009013563,
+      107.32509999070317,
+      93.8542999792844,
+      19.720699987374246,
+      92.7185999462381,
+      112.39450005814433,
+      108.58989995904267,
+      101.25349997542799,
+      17.989200074225664
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775835179.080507,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 85.81739999353886,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 88.8524700072594,
+    "jitter": 37.987387997289055,
+    "max_ms": 123.84990009013563,
+    "min_ms": 17.989200074225664,
+    "p95_ms": 118.69497007573953,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_DIRECT_PATIENT",
+      "ms": 110.82900001201779,
+      "snapshot": "direct_linked"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 123.84990009013563,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 107.32509999070317,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 93.8542999792844,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "release",
+      "ms": 19.720699987374246,
+      "snapshot": "persistent_linked"
+    },
+    {
+      "command": "link persistent TEST_EMPATH_PERSISTENT_PATIENT",
+      "ms": 92.7185999462381,
+      "snapshot": "persistent_linked"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 112.39450005814433,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 108.58989995904267,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 101.25349997542799,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "assess",
+      "ms": 17.989200074225664,
+      "snapshot": "persistent_separated"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 123.81529994308949,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "You release your connection.",
+    "You settle into a deeper, longer-held connection.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "You feel your empathy settling into dabbling.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "Distance tears your connection apart.",
+    "You are not linked to anyone."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "assess_output": [
+      "Distance tears your connection apart.",
+      "You are not linked to anyone."
+    ],
+    "commands": [
+      "link TEST_EMPATH_DIRECT_PATIENT",
+      "take vitality 10",
+      "take vitality 10",
+      "take vitality 10",
+      "release",
+      "link persistent TEST_EMPATH_PERSISTENT_PATIENT",
+      "take vitality 10",
+      "take vitality 10",
+      "take vitality 10",
+      "assess"
+    ],
+    "direct_empath_vitality": 22,
+    "direct_link": {
+      "stability": 82,
+      "strength": 100
+    },
+    "direct_remaining": 12,
+    "output_log": [
+      "You deepen your connection, taking in the shape of their suffering.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "You release your connection.",
+      "You settle into a deeper, longer-held connection.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "You feel your empathy settling into dabbling.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "Distance tears your connection apart.",
+      "You are not linked to anyone."
+    ],
+    "persistent_empath_vitality": 20,
+    "persistent_link": {
+      "stability": 108,
+      "strength": 90
+    },
+    "persistent_remaining": 17,
+    "snapshot_count": 7,
+    "snapshot_labels": [
+      "initial",
+      "direct_linked",
+      "direct_strain",
+      "persistent_linked",
+      "persistent_strain",
+      "persistent_separated",
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 22444,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775835166.846076,
+        "delay_s": 2.5,
+        "due_at": 1775835169.3470788,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "job_id": "ee648e093aaa4f49a2813ad5fe4abd0d",
+        "key": "combat:roundtime:17892",
+        "owner": "#17892",
+        "owner_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "direct_linked",
+    "direct_strain",
+    "persistent_linked",
+    "persistent_strain",
+    "persistent_separated",
+    "final"
+  ],
+  "started_at": 1775835156.0977998,
+  "state_transition_count": 6,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath persistent-link coverage validates endurance-vs-throughput tradeoffs and clean separation failure without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 88.808530010283,
+      "count": 10,
+      "entries": [
+        {
+          "duration_ms": 110.78460002318025,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775835162.779853
+        },
+        {
+          "duration_ms": 123.81529994308949,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835163.6657846
+        },
+        {
+          "duration_ms": 107.28920006658882,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835164.5884836
+        },
+        {
+          "duration_ms": 93.82040007039905,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835165.4775362
+        },
+        {
+          "duration_ms": 19.60889995098114,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "release"
+          },
+          "timestamp": 1775835166.063413
+        },
+        {
+          "duration_ms": 92.68810006324202,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775835166.8597975
+        },
+        {
+          "duration_ms": 112.35750000923872,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835167.5952413
+        },
+        {
+          "duration_ms": 108.55400003492832,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835168.2899628
+        },
+        {
+          "duration_ms": 101.22239997144789,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775835168.9650831
+        },
+        {
+          "duration_ms": 17.94489996973425,
+          "metadata": {
+            "character": "TEST_EMPATH_PERSISTENT_HEALER",
+            "command": "assess"
+          },
+          "timestamp": 1775835169.7148447
+        }
+      ],
+      "max_ms": 123.81529994308949,
+      "total_ms": 888.0853001028299
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

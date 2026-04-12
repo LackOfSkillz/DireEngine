@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Cascade coverage validates multi-overload behavior when multiple circle members are already near collapse.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-circle-cascade-failure",
+  "seed": 959009100,
+  "started_at": 1775832861.6345646
+}

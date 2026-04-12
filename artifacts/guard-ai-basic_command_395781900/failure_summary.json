@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "TypeError: int() argument must be a string, a bytes-like object or a real number, not '_SaverDict'",
+  "mode": "command",
+  "scenario": "guard-ai-basic",
+  "seed": 395781900
+}

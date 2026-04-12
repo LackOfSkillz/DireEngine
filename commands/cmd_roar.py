@@ -1,4 +1,4 @@
-from evennia import Command
+from commands.command import Command
 
 from world.systems.warrior import ROAR_DATA, format_roar_name
 

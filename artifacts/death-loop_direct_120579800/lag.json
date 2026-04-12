@@ -1,0 +1,109 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 41.417566632541515,
+  "lag": {
+    "avg_ms": 512.2091999898354,
+    "jitter": 428.72541535642154,
+    "max_ms": 862.0646999916062,
+    "min_ms": 33.955999999307096,
+    "p95_ms": 839.9189199903049,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 640.606899978593,
+      "snapshot": "dead"
+    },
+    {
+      "command": "depart full",
+      "ms": 33.955999999307096,
+      "snapshot": "departed"
+    },
+    {
+      "command": "depart confirm",
+      "ms": 862.0646999916062,
+      "snapshot": "departed"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 640.606899978593
+    },
+    {
+      "cmd": "depart confirm",
+      "ms": 862.0646999916062
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 124.02059999294579,
+      "kind": "direct",
+      "ms": 640.606899978593,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart confirm",
+      "first_response_ms": 0.12399989645928144,
+      "kind": "command",
+      "ms": 862.0646999916062,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 124.02059999294579,
+      "kind": "direct",
+      "ms": 640.606899978593,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart full",
+      "first_response_ms": 0.10810000821948051,
+      "kind": "command",
+      "ms": 33.955999999307096,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart confirm",
+      "first_response_ms": 0.12399989645928144,
+      "kind": "command",
+      "ms": 862.0646999916062,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    }
+  ]
+}

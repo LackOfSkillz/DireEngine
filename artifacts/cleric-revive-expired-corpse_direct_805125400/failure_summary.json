@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Expired-corpse scenario unexpectedly allowed revive startup.",
+  "mode": "direct",
+  "scenario": "cleric-revive-expired-corpse",
+  "seed": 805125400
+}

@@ -8,6 +8,9 @@ class CmdCircle(Command):
     Examples:
         circle
         circle advance
+        circle invite <target>
+        circle accept <target>
+        circle leave
     """
 
     key = "circle"
@@ -44,13 +47,41 @@ def _build_empath_circle_lines(caller):
 
 
 def run_empath_circle_command(caller, raw_args="", force_advance=False):
-    args = str(raw_args or "").strip().lower()
+    raw_text = str(raw_args or "").strip()
+    args = raw_text.lower()
     if not hasattr(caller, "is_profession") or not caller.is_profession("empath"):
         caller.msg("Only Empaths can circle this way.")
         return True
+    parts = raw_text.split()
+    command = parts[0].lower() if parts else ""
+    remainder = " ".join(parts[1:]).strip() if len(parts) > 1 else ""
+    if command == "invite":
+        if not remainder:
+            caller.msg("Usage: circle invite <target>")
+            return True
+        target = caller.search(remainder, location=caller.location)
+        if not target:
+            return True
+        ok, message = caller.invite_empath_circle_member(target) if hasattr(caller, "invite_empath_circle_member") else (False, "You cannot form a shock circle right now.")
+        caller.msg(message)
+        return True
+    if command == "accept":
+        if not remainder:
+            caller.msg("Usage: circle accept <target>")
+            return True
+        target = caller.search(remainder, location=caller.location)
+        if not target:
+            return True
+        ok, message = caller.accept_empath_circle_invite(target) if hasattr(caller, "accept_empath_circle_invite") else (False, "You cannot join a shock circle right now.")
+        caller.msg(message)
+        return True
+    if command == "leave":
+        ok, message = caller.leave_empath_circle() if hasattr(caller, "leave_empath_circle") else (False, "You are not part of a shock circle.")
+        caller.msg(message)
+        return True
     should_advance = force_advance or args in {"advance", "up", "next"}
     if args and not should_advance:
-        caller.msg("Usage: circle or circle advance")
+        caller.msg("Usage: circle, circle advance, circle invite <target>, circle accept <target>, or circle leave")
         return True
     if should_advance:
         ok, lines, _status = caller.advance_circle() if hasattr(caller, "advance_circle") else (False, ["You cannot circle right now."], None)
@@ -58,5 +89,7 @@ def run_empath_circle_command(caller, raw_args="", force_advance=False):
             caller.msg(line)
         return True
     for line in _build_empath_circle_lines(caller):
+        caller.msg(line)
+    for line in caller.get_empath_circle_status_lines() if hasattr(caller, "get_empath_circle_status_lines") else []:
         caller.msg(line)
     return True

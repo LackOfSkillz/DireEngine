@@ -1,0 +1,368 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17559,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.6,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "unified",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17558,
+            "key": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17559,
+            "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+            "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17560,
+            "key": "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+            "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17561,
+            "key": "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+            "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17562,
+            "key": "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+            "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17563,
+            "key": "TEST_EMPATH_UNITY_SHOCK_FOE_TWO",
+            "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_SHOCK_HEALER",
+          "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+          "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17558,
+        "key": "TEST_EMPATH_UNITY_SHOCK_ROOM"
+      },
+      "snapshot_label": "unified",
+      "timestamp": 1775831028.294639
+    },
+    "label": "unified"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17559,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.49,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "disconnected",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_SHOCK_HEALER",
+          "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+          "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17558,
+        "key": "TEST_EMPATH_UNITY_SHOCK_ROOM"
+      },
+      "snapshot_label": "disconnected",
+      "timestamp": 1775831028.4022114
+    },
+    "label": "disconnected"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17559,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.74,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "touch_locked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_SHOCK_HEALER",
+          "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+          "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17558,
+        "key": "TEST_EMPATH_UNITY_SHOCK_ROOM"
+      },
+      "snapshot_label": "touch_locked",
+      "timestamp": 1775831029.1593802
+    },
+    "label": "touch_locked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17559,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "redirect_locked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_SHOCK_HEALER",
+          "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+          "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17558,
+        "key": "TEST_EMPATH_UNITY_SHOCK_ROOM"
+      },
+      "snapshot_label": "redirect_locked",
+      "timestamp": 1775831029.9048965
+    },
+    "label": "redirect_locked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17559,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.44,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "centered",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_SHOCK_HEALER",
+          "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+          "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17558,
+        "key": "TEST_EMPATH_UNITY_SHOCK_ROOM"
+      },
+      "snapshot_label": "centered",
+      "timestamp": 1775831030.7181435
+    },
+    "label": "centered"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17559,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.46,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "relinked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_SHOCK_HEALER",
+          "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+          "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17558,
+        "key": "TEST_EMPATH_UNITY_SHOCK_ROOM"
+      },
+      "snapshot_label": "relinked",
+      "timestamp": 1775831031.7447426
+    },
+    "label": "relinked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17559,
+        "is_dead": false,
+        "key": "TEST_EMPATH_UNITY_SHOCK_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_UNITY_SHOCK_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.45,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_UNITY_SHOCK_HEALER",
+          "TEST_EMPATH_UNITY_SHOCK_PATIENT",
+          "TEST_EMPATH_UNITY_SHOCK_PARTNER",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_ONE",
+          "TEST_EMPATH_UNITY_SHOCK_FOE_TWO"
+        ],
+        "exits": [],
+        "id": 17558,
+        "key": "TEST_EMPATH_UNITY_SHOCK_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775831031.7542582
+    },
+    "label": "final"
+  }
+]

@@ -1,0 +1,219 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 130.93181001022458,
+  "lag": {
+    "avg_ms": 136.1470100004226,
+    "jitter": 55.648007993162686,
+    "max_ms": 194.94379998650402,
+    "min_ms": 35.61579994857311,
+    "p95_ms": 188.49993495387022,
+    "slow_count": 6,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_DIRECT_PATIENT",
+      "ms": 163.77720003947616,
+      "snapshot": "direct_linked"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 135.21900004707277,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 159.26880005281419,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 194.94379998650402,
+      "snapshot": "direct_strain"
+    },
+    {
+      "command": "release",
+      "ms": 38.10090001206845,
+      "snapshot": "persistent_linked"
+    },
+    {
+      "command": "link persistent TEST_EMPATH_PERSISTENT_PATIENT",
+      "ms": 131.37560000177473,
+      "snapshot": "persistent_linked"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 153.1723999651149,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 180.62409991398454,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 169.37250003684312,
+      "snapshot": "persistent_strain"
+    },
+    {
+      "command": "assess",
+      "ms": 35.61579994857311,
+      "snapshot": "persistent_separated"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "link TEST_EMPATH_DIRECT_PATIENT",
+      "ms": 163.77720003947616
+    },
+    {
+      "cmd": "take vitality 10",
+      "ms": 159.26880005281419
+    },
+    {
+      "cmd": "take vitality 10",
+      "ms": 194.94379998650402
+    },
+    {
+      "cmd": "take vitality 10",
+      "ms": 153.1723999651149
+    },
+    {
+      "cmd": "take vitality 10",
+      "ms": 180.62409991398454
+    },
+    {
+      "cmd": "take vitality 10",
+      "ms": 169.37250003684312
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_DIRECT_PATIENT",
+      "first_response_ms": 163.68050000164658,
+      "kind": "command",
+      "ms": 163.77720003947616,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 131.57139997929335,
+      "kind": "command",
+      "ms": 135.21900004707277,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 152.85439998842776,
+      "kind": "command",
+      "ms": 159.26880005281419,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 188.89230000786483,
+      "kind": "command",
+      "ms": 194.94379998650402,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "direct_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "release",
+      "first_response_ms": 38.0266000283882,
+      "kind": "command",
+      "ms": 38.10090001206845,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link persistent TEST_EMPATH_PERSISTENT_PATIENT",
+      "first_response_ms": 131.29980000667274,
+      "kind": "command",
+      "ms": 131.37560000177473,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 149.214000091888,
+      "kind": "command",
+      "ms": 153.1723999651149,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 175.03480007871985,
+      "kind": "command",
+      "ms": 180.62409991398454,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 143.21139990352094,
+      "kind": "command",
+      "ms": 169.37250003684312,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_strain"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 35.53290001582354,
+      "kind": "command",
+      "ms": 35.61579994857311,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "persistent_separated"
+    }
+  ]
+}

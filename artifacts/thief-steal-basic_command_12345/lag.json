@@ -1,0 +1,58 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 68.32735001808032,
+  "lag": {
+    "avg_ms": 73.27935000648722,
+    "jitter": 12.667888678419184,
+    "max_ms": 82.23689999431372,
+    "min_ms": 64.32180001866072,
+    "p95_ms": 81.34114499553107,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "steal TEST_THIEF_NPC_SUCCESS",
+      "ms": 82.23689999431372,
+      "snapshot": "final"
+    },
+    {
+      "command": "mark TEST_THIEF_MARK_TARGET",
+      "ms": 64.32180001866072,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "steal TEST_THIEF_NPC_SUCCESS",
+      "first_response_ms": 72.43940001353621,
+      "kind": "command",
+      "ms": 82.23689999431372,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "mark TEST_THIEF_MARK_TARGET",
+      "first_response_ms": 64.21530002262443,
+      "kind": "command",
+      "ms": 64.32180001866072,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

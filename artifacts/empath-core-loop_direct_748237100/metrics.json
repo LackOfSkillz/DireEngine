@@ -1,0 +1,529 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 9,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 93.50129996892065,
+      "kind": "command",
+      "ms": 93.58900005463511,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touched"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 18.162599997594953,
+      "kind": "direct",
+      "ms": 79.95620009023696,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "moved_away"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT process_empath_tick",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 17.399400006979704,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "post_move_tick"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 12.15080008842051,
+      "kind": "direct",
+      "ms": 36.772800027392805,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_PATIENT",
+      "first_response_ms": 56.78849993273616,
+      "kind": "command",
+      "ms": 56.85479997191578,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 4.093499970622361,
+      "kind": "command",
+      "ms": 4.168699961155653,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assessed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding",
+      "first_response_ms": 86.27220010384917,
+      "kind": "command",
+      "ms": 88.49150000605732,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_bleeding"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 20",
+      "first_response_ms": 94.4734999211505,
+      "kind": "command",
+      "ms": 96.93580004386604,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_vitality"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "mend self",
+      "first_response_ms": 53.92550001852214,
+      "kind": "command",
+      "ms": 53.984700003638864,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mended"
+    }
+  ],
+  "command_timings_ms": [
+    93.58900005463511,
+    79.95620009023696,
+    17.399400006979704,
+    36.772800027392805,
+    56.85479997191578,
+    4.168699961155653,
+    88.49150000605732,
+    96.93580004386604,
+    53.984700003638864
+  ],
+  "commands": {
+    "count": 9,
+    "max_ms": 96.90739994402975,
+    "timings_ms": [
+      93.58900005463511,
+      79.95620009023696,
+      17.399400006979704,
+      36.772800027392805,
+      56.85479997191578,
+      4.168699961155653,
+      88.49150000605732,
+      96.93580004386604,
+      53.984700003638864
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775823293.026865,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 52.420987500227056,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 58.68365557398647,
+    "jitter": 33.91979326289362,
+    "max_ms": 96.93580004386604,
+    "min_ms": 4.168699961155653,
+    "p95_ms": 95.59708004817367,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 93.58900005463511,
+      "snapshot": "touched"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 79.95620009023696,
+      "snapshot": "moved_away"
+    },
+    {
+      "command": "DIRECT process_empath_tick",
+      "ms": 17.399400006979704,
+      "snapshot": "post_move_tick"
+    },
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 36.772800027392805,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "touch TEST_EMPATH_PATIENT",
+      "ms": 56.85479997191578,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "assess",
+      "ms": 4.168699961155653,
+      "snapshot": "assessed"
+    },
+    {
+      "command": "take bleeding",
+      "ms": 88.49150000605732,
+      "snapshot": "took_bleeding"
+    },
+    {
+      "command": "take vitality 20",
+      "ms": 96.93580004386604,
+      "snapshot": "took_vitality"
+    },
+    {
+      "command": "mend self",
+      "ms": 53.984700003638864,
+      "snapshot": "mended"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 96.90739994402975,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You reach out and sense the condition of your patient.",
+    "|cTEST_EMPATH_AWAY_ROOM|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}",
+    "Distance tears the shared burden apart.",
+    "RETURN True",
+    "RETURN False",
+    "|cTEST_EMPATH_ROOM|n\nThis is a room.\nCharacters: TEST_EMPATH_PATIENT",
+    "OPTIONS {'type': 'look'}",
+    "RETURN True",
+    "You reach out and sense the condition of your patient.",
+    "Vitality: 60%",
+    "Bleeding: 30%",
+    "Poison: 0%",
+    "Disease: 0%",
+    "You lessen the burden as you take it.",
+    "You draw out living force, lessening the burden even as it tears through you.",
+    "You focus inward, stabilizing your condition."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "assess_output": [
+      "Vitality: 60%",
+      "Bleeding: 30%",
+      "Poison: 0%",
+      "Disease: 0%"
+    ],
+    "commands": [
+      "touch TEST_EMPATH_PATIENT",
+      "DIRECT <lambda>",
+      "DIRECT process_empath_tick",
+      "DIRECT <lambda>",
+      "touch TEST_EMPATH_PATIENT",
+      "assess",
+      "take bleeding",
+      "take vitality 20",
+      "mend self"
+    ],
+    "dangerous_bleeding_threshold": 12,
+    "empath_after_bleeding": {
+      "bleeding": 13,
+      "disease": 0,
+      "fatigue": 0,
+      "poison": 0,
+      "vitality": 0
+    },
+    "empath_after_mend": {
+      "bleeding": 8,
+      "disease": 0,
+      "fatigue": 4,
+      "poison": 0,
+      "vitality": 0
+    },
+    "empath_after_vitality": {
+      "bleeding": 13,
+      "disease": 0,
+      "fatigue": 4,
+      "poison": 0,
+      "vitality": 9
+    },
+    "mend_output": [
+      "You focus inward, stabilizing your condition."
+    ],
+    "move_output": [
+      "|cTEST_EMPATH_AWAY_ROOM|n\nThis is a room.",
+      "OPTIONS {'type': 'look'}",
+      "Distance tears the shared burden apart.",
+      "RETURN True"
+    ],
+    "output_log": [
+      "You reach out and sense the condition of your patient.",
+      "|cTEST_EMPATH_AWAY_ROOM|n\nThis is a room.",
+      "OPTIONS {'type': 'look'}",
+      "Distance tears the shared burden apart.",
+      "RETURN True",
+      "RETURN False",
+      "|cTEST_EMPATH_ROOM|n\nThis is a room.\nCharacters: TEST_EMPATH_PATIENT",
+      "OPTIONS {'type': 'look'}",
+      "RETURN True",
+      "You reach out and sense the condition of your patient.",
+      "Vitality: 60%",
+      "Bleeding: 30%",
+      "Poison: 0%",
+      "Disease: 0%",
+      "You lessen the burden as you take it.",
+      "You draw out living force, lessening the burden even as it tears through you.",
+      "You focus inward, stabilizing your condition."
+    ],
+    "patient_after_bleeding": {
+      "bleeding": 18,
+      "disease": 0,
+      "fatigue": 0,
+      "poison": 0,
+      "vitality": 60
+    },
+    "patient_after_vitality": {
+      "bleeding": 18,
+      "disease": 0,
+      "fatigue": 0,
+      "poison": 0,
+      "vitality": 48
+    },
+    "post_move_feedback_output": [
+      "RETURN False"
+    ],
+    "snapshot_count": 9,
+    "snapshot_labels": [
+      "initial",
+      "touched",
+      "moved_away",
+      "post_move_tick",
+      "assessed",
+      "took_bleeding",
+      "took_vitality",
+      "mended",
+      "final"
+    ],
+    "take_bleeding_output": [
+      "You lessen the burden as you take it."
+    ],
+    "take_vitality_output": [
+      "You draw out living force, lessening the burden even as it tears through you."
+    ],
+    "touch_output": [
+      "You reach out and sense the condition of your patient."
+    ]
+  },
+  "scenario_duration_ms": 11879,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "touched",
+    "moved_away",
+    "post_move_tick",
+    "assessed",
+    "took_bleeding",
+    "took_vitality",
+    "mended",
+    "final"
+  ],
+  "started_at": 1775823280.6901407,
+  "state_transition_count": 8,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath loop regression coverage validates command and wound-transfer behavior; emit lag telemetry without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 65.63091666127245,
+      "count": 6,
+      "entries": [
+        {
+          "duration_ms": 93.5522000072524,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775823284.6934335
+        },
+        {
+          "duration_ms": 56.76609999500215,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775823285.6790106
+        },
+        {
+          "duration_ms": 4.139899974688888,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "assess"
+          },
+          "timestamp": 1775823286.2315512
+        },
+        {
+          "duration_ms": 88.46560004167259,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775823286.9281995
+        },
+        {
+          "duration_ms": 96.90739994402975,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775823287.5770388
+        },
+        {
+          "duration_ms": 53.95430000498891,
+          "metadata": {
+            "character": "TEST_EMPATH_HEALER",
+            "command": "mend"
+          },
+          "timestamp": 1775823288.2030492
+        }
+      ],
+      "max_ms": 96.90739994402975,
+      "total_ms": 393.7854999676347
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

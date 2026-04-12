@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Group-speed scenario did not accumulate the expected group quality: 5",
+  "mode": "direct",
+  "scenario": "cleric-group-speed-quality",
+  "seed": 726948000
+}

@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath completion coverage validates mitigation, scars, center scaling, link borrowing, channel pulse, stabilize scaling, and guild-zone effects without depending on real-time waits.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-completion-pass",
+  "seed": 163158800,
+  "started_at": 1775830670.1640582
+}

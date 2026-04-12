@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "bad",
+  "message": "AssertionError: Retrieval should succeed after debt is cleared, saw: ['You open the evidence locker and retrieve your belongings.']",
+  "mode": "command",
+  "scenario": "justice-enforcement-outcomes",
+  "seed": 362816800
+}

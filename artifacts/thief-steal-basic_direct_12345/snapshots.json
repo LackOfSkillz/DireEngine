@@ -1,0 +1,125 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 30,
+        "hp": 100,
+        "id": 22372,
+        "is_dead": false,
+        "key": "TEST_THIEF_ACTOR",
+        "life_state": "ALIVE",
+        "location": "TEST_THIEF_SHOP_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "hidden": {
+            "source": "test",
+            "strength": 150
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 22380,
+          "key": "silver ring",
+          "location": "TEST_THIEF_ACTOR",
+          "typeclass": "typeclasses.objects.Object"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 22371,
+            "key": "TEST_THIEF_STEAL_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22372,
+            "key": "TEST_THIEF_ACTOR",
+            "location": "TEST_THIEF_SHOP_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22373,
+            "key": "TEST_THIEF_NPC_SUCCESS",
+            "location": "TEST_THIEF_STEAL_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22374,
+            "key": "TEST_THIEF_STEAL_OBSERVER",
+            "location": "TEST_THIEF_STEAL_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22375,
+            "key": "TEST_THIEF_REPEAT_TARGET",
+            "location": "TEST_THIEF_STEAL_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22376,
+            "key": "TEST_THIEF_MARK_TARGET",
+            "location": "TEST_THIEF_STEAL_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22377,
+            "key": "TEST_THIEF_PLAYER_TARGET",
+            "location": "TEST_THIEF_STEAL_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 22378,
+            "key": "TEST_THIEF_SHOP_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 22379,
+            "key": "TEST_THIEF_SHOPKEEPER",
+            "location": "TEST_THIEF_SHOP_ROOM",
+            "typeclass": "typeclasses.vendor.Vendor"
+          },
+          {
+            "id": 22380,
+            "key": "silver ring",
+            "location": "TEST_THIEF_ACTOR",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 22381,
+            "key": "TEST_THIEF_CAUGHT_TARGET",
+            "location": "TEST_THIEF_SHOP_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_THIEF_SHOPKEEPER",
+          "TEST_THIEF_CAUGHT_TARGET",
+          "TEST_THIEF_ACTOR"
+        ],
+        "exits": [],
+        "id": 22378,
+        "key": "TEST_THIEF_SHOP_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775950101.3666444
+    },
+    "label": "final"
+  }
+]

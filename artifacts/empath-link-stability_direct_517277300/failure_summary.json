@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Direct large transfer should consume the new typed stability costs: {'target_id': 16915, 'type': 'direct', 'strength': 100, 'stability': 88, 'link_bonus_skill': None, 'link_bonus_value': 0, 'link_bonus_tick_at': 0.0, 'created_at': 1775821951.5363996, 'target': TEST_EMPATH_LINK_PATIENT, 'is_local': True, 'priority': 2, 'strength_label': 'Strong', 'condition': 'steady', 'remaining': 0}",
+  "mode": "direct",
+  "scenario": "empath-link-stability",
+  "seed": 517277300
+}

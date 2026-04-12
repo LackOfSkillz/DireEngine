@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "psycopg.ProgrammingError: only '%s', '%b', '%t' are allowed as placeholders, got '%''",
+  "mode": "command",
+  "scenario": "canon-seed-validation",
+  "seed": 356045600
+}

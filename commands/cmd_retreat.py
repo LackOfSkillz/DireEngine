@@ -1,6 +1,6 @@
 import random
 
-from evennia import Command
+from commands.command import Command
 
 
 class CmdRetreat(Command):

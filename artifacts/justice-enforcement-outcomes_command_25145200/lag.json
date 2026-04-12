@@ -1,0 +1,41 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 1.9608000293374062,
+  "lag": {
+    "avg_ms": 1.983199967071414,
+    "jitter": 0.0,
+    "max_ms": 1.983199967071414,
+    "min_ms": 1.983199967071414,
+    "p95_ms": 1.983199967071414,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "east",
+      "ms": 1.983199967071414,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "east",
+      "first_response_ms": 1.9608000293374062,
+      "kind": "command",
+      "ms": 1.983199967071414,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

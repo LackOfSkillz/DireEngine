@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath shock lockout coverage validates offensive shock gain, automatic link breakage, and center-based recovery without failing on environment-specific latency.",
+    "tags": [
+      "core",
+      "empath",
+      "shock",
+      "smoke"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-shock-lockout",
+  "seed": 887767500,
+  "started_at": 1775830932.8888614
+}

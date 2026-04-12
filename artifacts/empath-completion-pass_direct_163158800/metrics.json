@@ -1,0 +1,476 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 8,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 124.20920003205538,
+      "kind": "command",
+      "ms": 124.31750004179776,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 95.69630003534257,
+      "kind": "command",
+      "ms": 99.08199997153133,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "mitigated"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "link focus scholarship",
+      "first_response_ms": 42.58260002825409,
+      "kind": "command",
+      "ms": 42.66529995948076,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "focused"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "channel bleeding",
+      "first_response_ms": 21.814200095832348,
+      "kind": "command",
+      "ms": 21.888299961574376,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "channeled"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "channel stop",
+      "first_response_ms": 14.00720002129674,
+      "kind": "command",
+      "ms": 14.082500012591481,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "center",
+      "first_response_ms": 15.615199925377965,
+      "kind": "command",
+      "ms": 58.25280002318323,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "centered"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "stabilize TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 118.94049996044487,
+      "kind": "command",
+      "ms": 119.03489998076111,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "stabilized"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "heal scars TEST_EMPATH_COMPLETION_PATIENT",
+      "first_response_ms": 42.150900000706315,
+      "kind": "command",
+      "ms": 89.14940000977367,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "scar_healed"
+    }
+  ],
+  "command_timings_ms": [
+    124.31750004179776,
+    99.08199997153133,
+    42.66529995948076,
+    21.888299961574376,
+    14.082500012591481,
+    58.25280002318323,
+    119.03489998076111,
+    89.14940000977367
+  ],
+  "commands": {
+    "count": 8,
+    "max_ms": 124.26070007495582,
+    "timings_ms": [
+      124.31750004179776,
+      99.08199997153133,
+      42.66529995948076,
+      21.888299961574376,
+      14.082500012591481,
+      58.25280002318323,
+      119.03489998076111,
+      89.14940000977367
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775830690.4124632,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 59.377012512413785,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 71.05908749508671,
+    "jitter": 42.903523262654886,
+    "max_ms": 124.31750004179776,
+    "min_ms": 14.082500012591481,
+    "p95_ms": 122.46859002043493,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 124.31750004179776,
+      "snapshot": "linked"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 99.08199997153133,
+      "snapshot": "mitigated"
+    },
+    {
+      "command": "link focus scholarship",
+      "ms": 42.66529995948076,
+      "snapshot": "focused"
+    },
+    {
+      "command": "channel bleeding",
+      "ms": 21.888299961574376,
+      "snapshot": "channeled"
+    },
+    {
+      "command": "channel stop",
+      "ms": 14.082500012591481,
+      "snapshot": "centered"
+    },
+    {
+      "command": "center",
+      "ms": 58.25280002318323,
+      "snapshot": "centered"
+    },
+    {
+      "command": "stabilize TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 119.03489998076111,
+      "snapshot": "stabilized"
+    },
+    {
+      "command": "heal scars TEST_EMPATH_COMPLETION_PATIENT",
+      "ms": 89.14940000977367,
+      "snapshot": "scar_healed"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 124.26070007495582,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You lessen the burden as you take it.",
+    "You tune the link toward Scholarship.",
+    "You settle into a sustained channel.",
+    "You let the sustained channel go.",
+    "Your empathy steadies again.",
+    "You steady yourself, regaining clarity.",
+    "You steady their condition, slowing the damage.",
+    "Your focus wavers slightly.",
+    "You work at the old scarring in TEST_EMPATH_COMPLETION_PATIENT's head."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "center_output": [
+      "Your empathy steadies again.",
+      "You steady yourself, regaining clarity."
+    ],
+    "channel_output": [
+      "You settle into a sustained channel."
+    ],
+    "commands": [
+      "link TEST_EMPATH_COMPLETION_PATIENT",
+      "take disease 20",
+      "link focus scholarship",
+      "channel bleeding",
+      "channel stop",
+      "center",
+      "stabilize TEST_EMPATH_COMPLETION_PATIENT",
+      "heal scars TEST_EMPATH_COMPLETION_PATIENT"
+    ],
+    "focus_output": [
+      "You tune the link toward Scholarship."
+    ],
+    "mitigation_output": [
+      "You lessen the burden as you take it."
+    ],
+    "output_log": [
+      "You deepen your connection, taking in the shape of their suffering.",
+      "You lessen the burden as you take it.",
+      "You tune the link toward Scholarship.",
+      "You settle into a sustained channel.",
+      "You let the sustained channel go.",
+      "Your empathy steadies again.",
+      "You steady yourself, regaining clarity.",
+      "You steady their condition, slowing the damage.",
+      "Your focus wavers slightly.",
+      "You work at the old scarring in TEST_EMPATH_COMPLETION_PATIENT's head."
+    ],
+    "scar_heal_output": [
+      "Your focus wavers slightly.",
+      "You work at the old scarring in TEST_EMPATH_COMPLETION_PATIENT's head."
+    ],
+    "snapshot_count": 10,
+    "snapshot_labels": [
+      "initial",
+      "linked",
+      "mitigated",
+      "focused",
+      "focus_upkeep",
+      "channeled",
+      "centered",
+      "stabilized",
+      "scar_healed",
+      "final"
+    ],
+    "stabilize_output": [
+      "You steady their condition, slowing the damage."
+    ]
+  },
+  "scenario_duration_ms": 19625,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775830682.3898582,
+        "delay_s": 3.5,
+        "due_at": 1775830685.8898582,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "506b9156a9e748908f5d36d9b2015518",
+        "key": "combat:roundtime:17496",
+        "owner": "#17496",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 3,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 4,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "mitigated",
+    "focused",
+    "focus_upkeep",
+    "channeled",
+    "centered",
+    "stabilized",
+    "scar_healed",
+    "final"
+  ],
+  "started_at": 1775830670.1640582,
+  "state_transition_count": 9,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath completion coverage validates mitigation, scars, center scaling, link borrowing, channel pulse, stabilize scaling, and guild-zone effects without depending on real-time waits."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 71.02123752702028,
+      "count": 8,
+      "entries": [
+        {
+          "duration_ms": 124.26070007495582,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775830675.7981079
+        },
+        {
+          "duration_ms": 99.04730005655438,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775830676.62924
+        },
+        {
+          "duration_ms": 42.6242999965325,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775830677.4062989
+        },
+        {
+          "duration_ms": 21.853000042028725,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "channel"
+          },
+          "timestamp": 1775830678.5373213
+        },
+        {
+          "duration_ms": 14.037000015377998,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "channel"
+          },
+          "timestamp": 1775830679.4644868
+        },
+        {
+          "duration_ms": 58.22270002681762,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "center"
+          },
+          "timestamp": 1775830680.3989742
+        },
+        {
+          "duration_ms": 119.0063999965787,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "stabilize"
+          },
+          "timestamp": 1775830681.5108056
+        },
+        {
+          "duration_ms": 89.11850000731647,
+          "metadata": {
+            "character": "TEST_EMPATH_COMPLETION_HEALER",
+            "command": "heal"
+          },
+          "timestamp": 1775830682.4278557
+        }
+      ],
+      "max_ms": 124.26070007495582,
+      "total_ms": 568.1699002161622
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

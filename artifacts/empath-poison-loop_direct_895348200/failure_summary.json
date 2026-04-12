@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Perceive health did not produce the expected room scan signal: ['You are not yet ready to read nearby life forces clearly.']",
+  "mode": "direct",
+  "scenario": "empath-poison-loop",
+  "seed": 895348200
+}

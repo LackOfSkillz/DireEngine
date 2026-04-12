@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Shock overflow handling did not cap and partially transfer as expected: healer=95 patient=20",
+  "mode": "direct",
+  "scenario": "empath-shock-transfer",
+  "seed": 286087500
+}

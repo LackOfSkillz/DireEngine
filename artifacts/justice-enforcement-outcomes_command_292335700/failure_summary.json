@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Debt should block item retrieval, saw: ['You must go to the guardhouse to reclaim your belongings.']",
+  "mode": "command",
+  "scenario": "justice-enforcement-outcomes",
+  "seed": 292335700
+}

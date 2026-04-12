@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Favor-pray-loop scenario did not gain favor on the first prayer.",
+  "mode": "direct",
+  "scenario": "favor-pray-loop",
+  "seed": 393551000
+}

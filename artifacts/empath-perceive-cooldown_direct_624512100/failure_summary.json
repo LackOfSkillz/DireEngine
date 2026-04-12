@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Perceive room scan did not emit the expected compressed severity output: ['You are not yet ready to read nearby life forces clearly.']",
+  "mode": "direct",
+  "scenario": "empath-perceive-cooldown",
+  "seed": 624512100
+}

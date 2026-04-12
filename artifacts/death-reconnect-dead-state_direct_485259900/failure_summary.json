@@ -1,0 +1,8 @@
+{
+  "failure_type": null,
+  "lag_status": null,
+  "message": "",
+  "mode": "direct",
+  "scenario": "death-reconnect-dead-state",
+  "seed": 485259900
+}

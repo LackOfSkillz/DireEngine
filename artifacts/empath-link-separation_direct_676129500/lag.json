@@ -1,0 +1,93 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 125.5878333079939,
+  "lag": {
+    "avg_ms": 125.64060002720605,
+    "jitter": 191.20317196342538,
+    "max_ms": 345.89650004636496,
+    "min_ms": 2.3158000549301505,
+    "p95_ms": 314.17780003976077,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "ms": 345.89650004636496,
+      "snapshot": "linked"
+    },
+    {
+      "command": "assess",
+      "ms": 28.709499980323017,
+      "snapshot": "assess_after_move"
+    },
+    {
+      "command": "take vitality 10",
+      "ms": 2.3158000549301505,
+      "snapshot": "take_after_move"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "ms": 345.89650004636496
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "first_response_ms": 345.8402999676764,
+      "kind": "command",
+      "ms": 345.89650004636496,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_SEPARATION_PATIENT",
+      "first_response_ms": 345.8402999676764,
+      "kind": "command",
+      "ms": 345.89650004636496,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "assess",
+      "first_response_ms": 28.64379994571209,
+      "kind": "command",
+      "ms": 28.709499980323017,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "assess_after_move"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take vitality 10",
+      "first_response_ms": 2.2794000105932355,
+      "kind": "command",
+      "ms": 2.3158000549301505,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "take_after_move"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 4773, in scenario
+    raise AssertionError(f"Ignoring a visible critical patient should reduce reputation: before={before_observer}, after={after_observer}")
+AssertionError: Ignoring a visible critical patient should reduce reputation: before=0, after=0

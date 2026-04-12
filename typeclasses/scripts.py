@@ -174,7 +174,7 @@ class CorpseDecayScript(Script):
 class GraveMaintenanceScript(Script):
     def at_script_creation(self):
         self.key = "grave_maintenance"
-        self.interval = 2 * 60 * 60
+        self.interval = 60
         self.start_delay = True
         self.repeats = 0
         self.persistent = True
@@ -193,11 +193,10 @@ class GraveMaintenanceScript(Script):
                 return
             expiry_remaining = float(getattr(obj, "get_expiry_remaining", lambda: 0.0)() or 0.0)
             owner = obj.get_owner() if hasattr(obj, "get_owner") else None
-            if expiry_remaining > 0 and expiry_remaining <= 3600 and owner and not bool(getattr(obj.db, "expiry_warned", False)):
+            if expiry_remaining > 0 and expiry_remaining <= 300 and owner and not bool(getattr(obj.db, "expiry_warned", False)):
                 owner.msg("You feel your connection to your lost possessions fading.")
                 obj.db.expiry_warned = True
-            if float(getattr(obj.db, "expiry_time", 0.0) or 0.0) > 0 and expiry_remaining <= 0:
-                obj.delete()
+            if hasattr(obj, "process_expiry") and obj.process_expiry(now=time.time()):
                 return
             if hasattr(obj, "increment_grave_damage"):
                 obj.increment_grave_damage(1)

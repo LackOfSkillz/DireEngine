@@ -5,6 +5,7 @@ from evennia.utils.create import create_object
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
 NPC_TYPECLASS = "typeclasses.npcs.NPC"
+HEALER_TYPECLASS = "typeclasses.npcs.HealerNPC"
 GUILDLEADER_TYPECLASS = "typeclasses.npcs.EmpathGuildleader"
 AREA_NAME = "Empath Guild"
 AREA_SPACE_TAG = "empath_guild_space"
@@ -277,6 +278,13 @@ def _ensure_ambient_npcs(rooms):
         infirmary,
         aliases=["patient", "resting patient"],
         desc="A recovering patient lies still beneath a folded blanket while a careful dressing dries cleanly.",
+    )
+    _ensure_npc(
+        HEALER_TYPECLASS,
+        "House Healer",
+        infirmary,
+        aliases=["healer", "attending healer", "house healer"],
+        desc="A composed healer stands ready to provide practical treatment for those who cannot wait on player charity.",
     )
     _ensure_npc(
         NPC_TYPECLASS,

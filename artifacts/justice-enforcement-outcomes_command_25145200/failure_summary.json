@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Pillory release should return the actor to the release room.",
+  "mode": "command",
+  "scenario": "justice-enforcement-outcomes",
+  "seed": 25145200
+}

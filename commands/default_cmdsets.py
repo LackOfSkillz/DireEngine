@@ -19,6 +19,7 @@ from evennia import default_cmds
 from commands.cmd_analyze import CmdAnalyze
 from commands.cmd_admin_identity import CmdCheckIdentityIntegrity, CmdHealIdentityIntegrity
 from commands.cmd_appraise import CmdAppraise
+from commands.cmd_shift import CmdShift
 from commands.cmd_ask import CmdAsk
 from commands.cmd_assess import CmdAssess
 from commands.cmd_assessstance import CmdAssessStance
@@ -65,7 +66,9 @@ from commands.cmd_climb import CmdClimb
 from commands.cmd_companion import CmdCompanion
 from commands.cmd_compare import CmdCompare
 from commands.cmd_commune import CmdCommune
+from commands.cmd_contact import CmdContact
 from commands.cmd_blend import CmdBlend
+from commands.cmd_bind import CmdBind
 from commands.cmd_covertracks import CmdCoverTracks
 from commands.cmd_disarm import CmdDisarm
 from commands.cmd_draw import CmdDraw
@@ -107,6 +110,7 @@ from commands.cmd_bounty import CmdBounty
 from commands.cmd_bounties import CmdBounties
 from commands.cmd_acceptbounty import CmdAcceptBounty
 from commands.cmd_bribe import CmdBribe
+from commands.cmd_burgle import CmdBurgle
 from commands.cmd_capture import CmdCapture
 from commands.cmd_laylow import CmdLayLow
 from commands.cmd_language import CmdLanguage
@@ -139,6 +143,9 @@ from commands.cmd_recall import CmdRecall
 from commands.cmd_consent import CmdConsent
 from commands.cmd_corpse import CmdCorpse
 from commands.cmd_redirect import CmdRedirect
+from commands.cmd_request_healing import CmdRequestHealing
+from commands.cmd_restore import CmdRestore
+from commands.cmd_queue import CmdQueue
 from commands.cmd_racemods import CmdRaceMods
 from commands.cmd_race import CmdRace
 from commands.cmd_races import CmdRaces
@@ -193,6 +200,7 @@ from commands.cmd_teach import CmdTeach
 from commands.cmd_center import CmdCenter
 from commands.cmd_touch import CmdTouch
 from commands.cmd_throw import CmdThrow
+from commands.cmd_tip import CmdTip
 from commands.cmd_train import CmdTrain
 from commands.cmd_surrender import CmdSurrender
 from commands.cmd_testgodot import CmdTestGodot
@@ -200,6 +208,7 @@ from commands.cmd_timingaudit import CmdTimingAudit
 from commands.cmd_track import CmdTrack
 from commands.cmd_stopcast import CmdStopCast
 from commands.cmd_study import CmdStudy
+from commands.cmd_study_anatomy import CmdStudyAnatomy
 from commands.cmd_unhide import CmdUnhide
 from commands.cmd_unity import CmdUnity
 from commands.cmd_unwield import CmdUnwield
@@ -245,6 +254,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdAsk())
         self.add(CmdAssess())
         self.add(CmdAssessStance())
+        self.add(CmdShift())
         self.add(CmdAdvance())
         self.add(CmdAim())
         self.add(CmdAbilities())
@@ -255,12 +265,14 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdBalance())
         self.add(CmdBeseech())
         self.add(CmdBlend())
+        self.add(CmdBind())
         self.add(CmdBerserk())
         self.add(CmdBuy())
         self.add(CmdBounty())
         self.add(CmdBounties())
         self.add(CmdAcceptBounty())
         self.add(CmdBribe())
+        self.add(CmdBurgle())
         self.add(CmdCast())
         self.add(CmdCapture())
         self.add(CmdCenter())
@@ -272,6 +284,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdClimb())
         self.add(CmdCompanion())
         self.add(CmdCompare())
+        self.add(CmdContact())
         self.add(CmdConsent())
         self.add(CmdCorpse())
         self.add(CmdCoverTracks())
@@ -349,6 +362,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdPayFine())
         self.add(CmdPassageTravel())
         self.add(CmdPerceive())
+        self.add(CmdQueue())
         self.add(CmdPreserve())
         self.add(CmdPray())
         self.add(CmdPurge())
@@ -363,6 +377,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdRecall())
         self.add(CmdRecover())
         self.add(CmdRedirect())
+        self.add(CmdRequestHealing())
+        self.add(CmdRestore())
         self.add(CmdRetrieve())
         self.add(CmdRelease())
         self.add(CmdRemove())
@@ -406,6 +422,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSurrender())
         self.add(CmdStopCast())
         self.add(CmdStudy())
+        self.add(CmdStudyAnatomy())
         self.add(CmdSurvivalDebug())
         self.add(CmdSwim())
         self.add(CmdTake())
@@ -423,6 +440,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdTeach())
         self.add(CmdTimingAudit())
         self.add(CmdThrow())
+        self.add(CmdTip())
         self.add(CmdTrain())
         self.add(CmdTestGodot())
         self.add(CmdUnhide())

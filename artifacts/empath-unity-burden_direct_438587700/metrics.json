@@ -1,0 +1,306 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "first_response_ms": 116.4252000162378,
+      "kind": "command",
+      "ms": 116.52190005406737,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "first_response_ms": 70.52469998598099,
+      "kind": "command",
+      "ms": 70.60800003819168,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "unified"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take disease 20",
+      "first_response_ms": 199.63269995059818,
+      "kind": "command",
+      "ms": 204.70230001956224,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "took_with_unity"
+    }
+  ],
+  "command_timings_ms": [
+    116.52190005406737,
+    70.60800003819168,
+    204.70230001956224
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 204.6254000160843,
+    "timings_ms": [
+      116.52190005406737,
+      70.60800003819168,
+      204.70230001956224
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775830102.1281943,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 128.860866650939,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 130.6107333706071,
+    "jitter": 68.14830694917798,
+    "max_ms": 204.70230001956224,
+    "min_ms": 70.60800003819168,
+    "p95_ms": 195.88426002301276,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "link TEST_EMPATH_UNITY_PATIENT",
+      "ms": 116.52190005406737,
+      "snapshot": "unified"
+    },
+    {
+      "command": "unity TEST_EMPATH_UNITY_PARTNER",
+      "ms": 70.60800003819168,
+      "snapshot": "unified"
+    },
+    {
+      "command": "take disease 20",
+      "ms": 204.70230001956224,
+      "snapshot": "took_with_unity"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 204.6254000160843,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You deepen your connection, taking in the shape of their suffering.",
+    "You weave a frail bond between burdens.",
+    "You lessen the burden as you take it."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "commands": [
+      "link TEST_EMPATH_UNITY_PATIENT",
+      "unity TEST_EMPATH_UNITY_PARTNER",
+      "take disease 20"
+    ],
+    "empath_disease": 14,
+    "output_log": [
+      "You deepen your connection, taking in the shape of their suffering.",
+      "You weave a frail bond between burdens.",
+      "You lessen the burden as you take it."
+    ],
+    "partner_disease": 3,
+    "patient_disease": 20,
+    "snapshot_count": 4,
+    "snapshot_labels": [
+      "initial",
+      "unified",
+      "took_with_unity",
+      "final"
+    ],
+    "unity_after": {
+      "condition": "strained",
+      "stability": 65
+    },
+    "unity_before": {
+      "condition": "steady",
+      "stability": 80
+    }
+  },
+  "scenario_duration_ms": 18962,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775830090.240978,
+        "delay_s": 2.5,
+        "due_at": 1775830092.740978,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_UNITY_HEALER",
+        "job_id": "cdaab2c4c7374846a3bd3c6aceb83aa6",
+        "key": "combat:roundtime:17394",
+        "owner": "#17394",
+        "owner_label": "TEST_EMPATH_UNITY_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "take disease 20",
+      "ms": 204.70230001956224
+    }
+  ],
+  "snapshot_labels": [
+    "initial",
+    "unified",
+    "took_with_unity",
+    "final"
+  ],
+  "started_at": 1775830082.4532366,
+  "state_transition_count": 3,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath unity-burden coverage validates partial smoothing without creating free group healing."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 130.56130001010993,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 116.48309999145567,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_HEALER",
+            "command": "link"
+          },
+          "timestamp": 1775830090.2596486
+        },
+        {
+          "duration_ms": 70.57540002278984,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_HEALER",
+            "command": "unity"
+          },
+          "timestamp": 1775830091.063422
+        },
+        {
+          "duration_ms": 204.6254000160843,
+          "metadata": {
+            "character": "TEST_EMPATH_UNITY_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775830092.3113658
+        }
+      ],
+      "max_ms": 204.6254000160843,
+      "total_ms": 391.6839000303298
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

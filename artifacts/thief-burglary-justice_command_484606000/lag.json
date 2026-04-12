@@ -1,0 +1,76 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 64.33210003888234,
+  "lag": {
+    "avg_ms": 177.701500011608,
+    "jitter": 218.6628726288445,
+    "max_ms": 332.31950004119426,
+    "min_ms": 23.08349998202175,
+    "p95_ms": 316.85770003823563,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "burgle TEST_BURGLE_WINDOW",
+      "ms": 332.31950004119426,
+      "snapshot": "final"
+    },
+    {
+      "command": "burgle TEST_LOCKED_GATE",
+      "ms": 23.08349998202175,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "burgle TEST_BURGLE_WINDOW",
+      "ms": 332.31950004119426
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "burgle TEST_BURGLE_WINDOW",
+      "first_response_ms": 105.64520000480115,
+      "kind": "command",
+      "ms": 332.31950004119426,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "burgle TEST_BURGLE_WINDOW",
+      "first_response_ms": 105.64520000480115,
+      "kind": "command",
+      "ms": 332.31950004119426,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "burgle TEST_LOCKED_GATE",
+      "first_response_ms": 23.019000072963536,
+      "kind": "command",
+      "ms": 23.08349998202175,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

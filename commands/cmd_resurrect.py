@@ -10,8 +10,8 @@ class CmdResurrect(Command):
         resurrect corpse of arannis
     """
 
-    key = "resurrect"
-    aliases = ["raise"]
+    key = "revive"
+    aliases = ["resurrect", "raise"]
     locks = "cmd:all()"
     help_category = "Character"
 
@@ -26,12 +26,12 @@ class CmdResurrect(Command):
 
         room = getattr(caller, "location", None)
         if room is None:
-            caller.msg("There is no corpse here to restore.")
+            caller.msg("There is no corpse here to revive.")
             return
 
         corpses = [obj for obj in room.contents if getattr(getattr(obj, "db", None), "is_corpse", False)]
         if not corpses:
-            caller.msg("There is no corpse here to restore.")
+            caller.msg("There is no corpse here to revive.")
             return
 
         query = str(self.args or "").strip()
@@ -51,18 +51,8 @@ class CmdResurrect(Command):
         elif len(corpses) == 1:
             corpse = corpses[0]
         else:
-            caller.msg("Resurrect which corpse?")
+            caller.msg("Revive which corpse?")
             return
 
-        restored = corpse.get_owner() if hasattr(corpse, "get_owner") else None
-        ok, message = caller.resurrect_from_corpse(corpse, caster=caller) if hasattr(caller, "resurrect_from_corpse") else (False, "You cannot perform that rite.")
+        ok, message = caller.start_cleric_revive(corpse) if hasattr(caller, "start_cleric_revive") else (False, "You cannot perform that rite.")
         caller.msg(message)
-        if ok:
-            if restored and restored.location:
-                quality = str(getattr(getattr(restored, 'db', None), 'last_recovery_quality', '') or '')
-                room_message = f"{restored.key} stirs, breath returning."
-                if quality == "perfect":
-                    room_message = f"{restored.key} rises with startling clarity as life returns."
-                elif quality in {"fragile", "flawed"}:
-                    room_message = f"{restored.key} stirs weakly, breath returning with visible strain."
-                restored.location.msg_contents(room_message, exclude=[restored])

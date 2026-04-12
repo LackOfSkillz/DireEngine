@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Vitality redirect should move the wound between the pair.",
+  "mode": "direct",
+  "scenario": "empath-redirect-strain",
+  "seed": 341617600
+}

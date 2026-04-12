@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Shock transfer coverage validates linked transfer, overflow capping, and connection enforcement without real-time waits.",
+    "tags": [
+      "core",
+      "empath",
+      "shock"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-shock-transfer",
+  "seed": 608487900,
+  "started_at": 1775829840.6094892
+}

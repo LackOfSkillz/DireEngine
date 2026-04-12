@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath link compatibility coverage validates that persisted link mappings still resolve through the current link helpers and command flow.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-link-state-compat",
+  "seed": 809272000,
+  "started_at": 1775835098.23574
+}

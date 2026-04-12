@@ -1,0 +1,114 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 164.20270001981407,
+  "lag": {
+    "avg_ms": 198.55657502193935,
+    "jitter": 157.71684913828415,
+    "max_ms": 376.3367000501603,
+    "min_ms": 28.691999963484704,
+    "p95_ms": 361.68527005356736,
+    "slow_count": 2,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "request healing",
+      "ms": 28.691999963484704,
+      "snapshot": "final"
+    },
+    {
+      "command": "request healing confirm",
+      "ms": 278.66050007287413,
+      "snapshot": "final"
+    },
+    {
+      "command": "tip 25",
+      "ms": 376.3367000501603,
+      "snapshot": "final"
+    },
+    {
+      "command": "study anatomy anatomy chart",
+      "ms": 110.53710000123829,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 4.9597000470384955,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "request healing confirm",
+      "ms": 278.66050007287413
+    },
+    {
+      "cmd": "tip 25",
+      "ms": 376.3367000501603
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "tip 25",
+      "first_response_ms": 376.260899938643,
+      "kind": "command",
+      "ms": 376.3367000501603,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "request healing",
+      "first_response_ms": 4.9597000470384955,
+      "kind": "command",
+      "ms": 28.691999963484704,
+      "npc_response_delay_ms": 4.9597000470384955,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "request healing confirm",
+      "first_response_ms": 269.8310000123456,
+      "kind": "command",
+      "ms": 278.66050007287413,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "tip 25",
+      "first_response_ms": 376.260899938643,
+      "kind": "command",
+      "ms": 376.3367000501603,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "study anatomy anatomy chart",
+      "first_response_ms": 5.75920008122921,
+      "kind": "command",
+      "ms": 110.53710000123829,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

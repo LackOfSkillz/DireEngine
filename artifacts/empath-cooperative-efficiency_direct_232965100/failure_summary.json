@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Cooperative triage should leave the team patient in better condition than the solo patient: solo=badly_injured, team=badly_injured",
+  "mode": "direct",
+  "scenario": "empath-cooperative-efficiency",
+  "seed": 232965100
+}

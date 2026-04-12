@@ -1,0 +1,442 @@
+{
+  "coin_delta": -500,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 7,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "east",
+      "first_response_ms": 2.295200014486909,
+      "kind": "command",
+      "ms": 2.315100049600005,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal nobody",
+      "first_response_ms": 31.13180003128946,
+      "kind": "command",
+      "ms": 31.147999921813607,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 42.5734999589622,
+      "kind": "command",
+      "ms": 42.69679996650666,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 501",
+      "first_response_ms": 19.031299976632,
+      "kind": "command",
+      "ms": 19.103200058452785,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 50",
+      "first_response_ms": 531.5846999874339,
+      "kind": "command",
+      "ms": 531.6723000723869,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 450",
+      "first_response_ms": 54.84549992252141,
+      "kind": "command",
+      "ms": 54.90380001720041,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 223.00769994035363,
+      "kind": "command",
+      "ms": 223.05469994898885,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    2.315100049600005,
+    31.147999921813607,
+    42.69679996650666,
+    19.103200058452785,
+    531.6723000723869,
+    54.90380001720041,
+    223.05469994898885
+  ],
+  "commands": {
+    "count": 7,
+    "max_ms": 531.6252999473363,
+    "timings_ms": [
+      2.315100049600005,
+      31.147999921813607,
+      42.69679996650666,
+      19.103200058452785,
+      531.6723000723869,
+      54.90380001720041,
+      223.05469994898885
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775961391.7204494,
+  "exit_code": 1,
+  "failure_type": "lag_failure",
+  "first_response_ms": 129.20995711881136,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 2,
+  "lag": {
+    "avg_ms": 129.27055714784987,
+    "jitter": 192.19375165005488,
+    "max_ms": 531.6723000723869,
+    "min_ms": 2.315100049600005,
+    "p95_ms": 439.08702003536723,
+    "slow_count": 2,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "east",
+      "ms": 2.315100049600005,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal nobody",
+      "ms": 31.147999921813607,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 42.69679996650666,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 501",
+      "ms": 19.103200058452785,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 50",
+      "ms": 531.6723000723869,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 450",
+      "ms": 54.90380001720041,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 223.05469994898885,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 531.6252999473363,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You are locked into the pillory. You cannot move.",
+    "You are detained in jail and cannot do that.",
+    "You must clear your debt before reclaiming your belongings.",
+    "You cannot pay more than you owe.",
+    "You pay 50 silver to the authorities. Remaining debt: 450 silver.",
+    "You pay 450 silver to the authorities. Remaining debt: 0 silver.",
+    "You open the evidence locker and retrieve your belongings."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "audit": {
+      "debt_assigned": 500,
+      "items_confiscated": 2,
+      "items_recovered": 2,
+      "jail_used": true,
+      "pillory_used": true
+    },
+    "minor_outcome": {
+      "completed": true,
+      "confiscated_count": 0,
+      "crime_count": 1,
+      "detained_until": 1775961543.9511557,
+      "law_reputation": -1,
+      "outcome": "pillory",
+      "outstanding_fine": 50,
+      "penalty": {
+        "confiscate": false,
+        "detain_seconds": 180,
+        "fine": 50,
+        "outcome": "pillory",
+        "reputation_loss": 1,
+        "severity": "minor",
+        "wanted_reduction": 2
+      },
+      "wanted_after": 3
+    },
+    "moderate_outcome": {
+      "completed": true,
+      "confiscated_count": 0,
+      "crime_count": 1,
+      "detained_until": 1775961665.4022982,
+      "law_reputation": -2,
+      "outcome": "jail",
+      "outstanding_fine": 200,
+      "penalty": {
+        "confiscate": false,
+        "detain_seconds": 300,
+        "fine": 200,
+        "outcome": "jail",
+        "reputation_loss": 2,
+        "severity": "moderate",
+        "wanted_reduction": 3
+      },
+      "wanted_after": 2
+    },
+    "severe_outcome": {
+      "completed": true,
+      "confiscated_count": 2,
+      "crime_count": 1,
+      "detained_until": 1775961847.7773726,
+      "law_reputation": -4,
+      "outcome": "jail",
+      "outstanding_fine": 500,
+      "penalty": {
+        "confiscate": true,
+        "detain_seconds": 480,
+        "fine": 500,
+        "outcome": "jail",
+        "reputation_loss": 4,
+        "severity": "severe",
+        "wanted_reduction": 4
+      },
+      "wanted_after": 1
+    },
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 33736,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "payfine 50",
+      "ms": 531.6723000723869
+    },
+    {
+      "cmd": "retrieve items",
+      "ms": 223.05469994898885
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775961356.7914844,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 129.22185715953154,
+      "count": 7,
+      "entries": [
+        {
+          "duration_ms": 2.2953000152483582,
+          "metadata": {
+            "character": "TEST_JUSTICE_MINOR",
+            "command": "east"
+          },
+          "timestamp": 1775961364.6760585
+        },
+        {
+          "duration_ms": 31.117900041863322,
+          "metadata": {
+            "character": "TEST_JUSTICE_MODERATE",
+            "command": "steal"
+          },
+          "timestamp": 1775961366.1288433
+        },
+        {
+          "duration_ms": 42.607199982739985,
+          "metadata": {
+            "character": "TEST_JUSTICE_SEVERE",
+            "command": "retrieve"
+          },
+          "timestamp": 1775961369.2007582
+        },
+        {
+          "duration_ms": 19.03000008314848,
+          "metadata": {
+            "character": "TEST_JUSTICE_SEVERE",
+            "command": "payfine"
+          },
+          "timestamp": 1775961370.3159697
+        },
+        {
+          "duration_ms": 531.6252999473363,
+          "metadata": {
+            "character": "TEST_JUSTICE_SEVERE",
+            "command": "payfine"
+          },
+          "timestamp": 1775961371.794117
+        },
+        {
+          "duration_ms": 54.875100031495094,
+          "metadata": {
+            "character": "TEST_JUSTICE_SEVERE",
+            "command": "payfine"
+          },
+          "timestamp": 1775961372.5396
+        },
+        {
+          "duration_ms": 223.00220001488924,
+          "metadata": {
+            "character": "TEST_JUSTICE_SEVERE",
+            "command": "retrieve"
+          },
+          "timestamp": 1775961373.5356894
+        }
+      ],
+      "max_ms": 531.6252999473363,
+      "total_ms": 904.5530001167208
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

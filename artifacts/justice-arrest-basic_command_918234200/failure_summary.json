@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Detention should block thief actions, saw: ['You are locked in jail and cannot do that.']",
+  "mode": "command",
+  "scenario": "justice-arrest-basic",
+  "seed": 918234200
+}

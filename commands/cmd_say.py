@@ -1,6 +1,7 @@
 from commands.command import Command
 
 from world.languages import apply_language_exposure, get_language_display_name
+from world.systems.stealth import break_stealth
 
 
 class CmdSay(Command):
@@ -23,6 +24,9 @@ class CmdSay(Command):
         if not speech:
             caller.msg("Say what?")
             return
+
+        if caller.is_hidden() or bool(getattr(caller.db, "stealthed", False)):
+            break_stealth(caller)
 
         spoken_text = caller.render_spoken_text(speech) if hasattr(caller, "render_spoken_text") else speech
         active_language = caller.get_active_language() if hasattr(caller, "get_active_language") else "common"

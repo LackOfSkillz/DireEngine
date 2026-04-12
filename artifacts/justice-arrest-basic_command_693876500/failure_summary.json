@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Owning guard should briefly follow a fleeing target.",
+  "mode": "command",
+  "scenario": "justice-arrest-basic",
+  "seed": 693876500
+}

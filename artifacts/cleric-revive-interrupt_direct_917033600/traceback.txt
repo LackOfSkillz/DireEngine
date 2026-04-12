@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 15930, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7374, in run_cleric_revive_interrupt_scenario
+    raise AssertionError("Revive interrupt scenario did not regress the corpse to restored state.")
+AssertionError: Revive interrupt scenario did not regress the corpse to restored state.

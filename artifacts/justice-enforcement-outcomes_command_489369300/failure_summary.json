@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Confiscated severe-crime items should be moved into virtual custody.",
+  "mode": "command",
+  "scenario": "justice-enforcement-outcomes",
+  "seed": 489369300
+}

@@ -15,9 +15,6 @@ class CmdStabilize(Command):
 
     def func(self):
         caller = self.caller
-        if not getattr(caller, "is_empath", lambda: False)():
-            caller.msg("You cannot do that.")
-            return
         if not self.args:
             caller.msg("Stabilize whom?")
             return
@@ -25,10 +22,18 @@ class CmdStabilize(Command):
         if not target:
             return
         if getattr(getattr(target, "db", None), "is_corpse", False):
-            ok, message = caller.stabilize_corpse(target) if hasattr(caller, "stabilize_corpse") else (False, "You fail to preserve the corpse.")
+            if getattr(caller, "is_profession", lambda *_: False)("cleric"):
+                ok, message = caller.start_cleric_corpse_ritual(target, "stabilize") if hasattr(caller, "start_cleric_corpse_ritual") else (False, "You fail to stabilize the corpse.")
+            elif getattr(caller, "is_empath", lambda: False)():
+                ok, message = caller.stabilize_corpse(target) if hasattr(caller, "stabilize_corpse") else (False, "You fail to preserve the corpse.")
+            else:
+                ok, message = (False, "You cannot do that.")
             caller.msg(message)
             if ok and getattr(caller, "location", None):
                 caller.location.msg_contents(f"{caller.key} carefully tends to {target.key}, slowing its decay.", exclude=[caller])
+            return
+        if not getattr(caller, "is_empath", lambda: False)():
+            caller.msg("You cannot do that.")
             return
         ok, message = caller.stabilize_empath_target(target) if hasattr(caller, "stabilize_empath_target") else (False, "You fail to steady their condition.")
         caller.msg(message)

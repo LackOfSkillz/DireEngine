@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Shock circle should spread some burden onto both empaths: leader=6, partner=0",
+  "mode": "direct",
+  "scenario": "empath-circle-shock-distribution",
+  "seed": 698850500
+}

@@ -7,22 +7,52 @@ from .objects import ObjectParent
 
 
 class Grave(ObjectParent, DefaultObject):
-    """Owner-visible grave holding items left behind after corpse decay."""
+    """A visible grave holding the remains of a departed character's possessions."""
 
     def at_object_creation(self):
         super().at_object_creation()
         self.db.is_grave = True
         self.db.owner_id = None
         self.db.owner_name = self.key
+        self.db.created_at = 0.0
         self.db.creation_time = 0.0
+        self.db.items = []
         self.db.stored_items = []
+        self.db.coins = 0
         self.db.stored_coins = 0
         self.db.recovery_allowed = []
         self.db.grave_damage_max = 66
         self.db.last_grave_damage_tick = 0.0
+        self.db.expires_at = 0.0
         self.db.expiry_time = 0.0
         self.db.expiry_warned = False
         self.locks.add("get:false()")
+
+    def sync_storage_metadata(self):
+        item_ids = [int(getattr(item, "id", 0) or 0) for item in list(self.contents) if int(getattr(item, "id", 0) or 0) > 0]
+        self.db.items = list(item_ids)
+        self.db.stored_items = list(item_ids)
+        coins = max(0, int(getattr(self.db, "coins", getattr(self.db, "stored_coins", 0)) or 0))
+        self.db.coins = coins
+        self.db.stored_coins = coins
+        created_at = float(getattr(self.db, "created_at", getattr(self.db, "creation_time", 0.0)) or 0.0)
+        self.db.created_at = created_at
+        self.db.creation_time = created_at
+        expires_at = float(getattr(self.db, "expires_at", getattr(self.db, "expiry_time", 0.0)) or 0.0)
+        self.db.expires_at = expires_at
+        self.db.expiry_time = expires_at
+        return {
+            "items": list(item_ids),
+            "coins": coins,
+            "created_at": created_at,
+            "expires_at": expires_at,
+        }
+
+    def refresh_description(self):
+        owner_name = str(getattr(self.db, "owner_name", self.key) or self.key).strip() or self.key
+        self.key = f"grave of {owner_name}"
+        self.db.desc = f"A grave bearing signs of recent disturbance ({owner_name})."
+        return self.db.desc
 
     def get_owner(self):
         owner_id = int(getattr(self.db, "owner_id", 0) or 0)
@@ -35,7 +65,10 @@ class Grave(ObjectParent, DefaultObject):
         return self.get_owner() is None
 
     def get_expiry_remaining(self):
-        return max(0.0, float(getattr(self.db, "expiry_time", 0.0) or 0.0) - time.time())
+        expires_at = float(getattr(self.db, "expires_at", getattr(self.db, "expiry_time", 0.0)) or 0.0)
+        self.db.expires_at = expires_at
+        self.db.expiry_time = expires_at
+        return max(0.0, expires_at - time.time())
 
     def is_owner(self, player):
         return int(getattr(player, "id", 0) or 0) == int(getattr(self.db, "owner_id", 0) or 0)
@@ -56,8 +89,7 @@ class Grave(ObjectParent, DefaultObject):
         return allowed
 
     def is_recovery_allowed(self, player):
-        player_id = int(getattr(player, "id", 0) or 0)
-        return player_id > 0 and player_id in self.get_recovery_allowed_ids()
+        return self.is_owner(player)
 
     def grant_recovery_access(self, player):
         allowed = self.get_recovery_allowed_ids()
@@ -102,8 +134,18 @@ class Grave(ObjectParent, DefaultObject):
         return account.check_permstring("Admin") or account.check_permstring("Developer")
 
     def access(self, accessing_obj, access_type="read", default=False, **kwargs):
-        if access_type in {"view", "read", "search", "get"}:
-            if self.is_recovery_allowed(accessing_obj) or self._has_admin_access(accessing_obj):
-                return super().access(accessing_obj, access_type=access_type, default=default, **kwargs)
+        if access_type in {"view", "read", "search", "examine", "look"}:
+            return True
+        if access_type == "get":
             return False
         return super().access(accessing_obj, access_type=access_type, default=default, **kwargs)
+
+    def process_expiry(self, now=None):
+        now = float(now or time.time())
+        expires_at = float(getattr(self.db, "expires_at", getattr(self.db, "expiry_time", 0.0)) or 0.0)
+        self.db.expires_at = expires_at
+        self.db.expiry_time = expires_at
+        if expires_at > 0.0 and now >= expires_at:
+            self.delete()
+            return True
+        return False

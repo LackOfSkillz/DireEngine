@@ -3,7 +3,7 @@ from commands.command import Command
 
 class CmdRejuvenate(Command):
     """
-    Improve a corpse's condition before resurrection.
+    Legacy wrapper for the restore rite.
 
     Examples:
         rejuvenate corpse

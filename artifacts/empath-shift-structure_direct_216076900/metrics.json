@@ -1,0 +1,220 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 1,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHIFT_PATIENT",
+      "first_response_ms": 68.87590000405908,
+      "kind": "command",
+      "ms": 69.08870011102408,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    69.08870011102408
+  ],
+  "commands": {
+    "count": 1,
+    "max_ms": 69.04649990610778,
+    "timings_ms": [
+      69.08870011102408
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775835291.3332143,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 68.87590000405908,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 69.08870011102408,
+    "jitter": 0.0,
+    "max_ms": 69.08870011102408,
+    "min_ms": 69.08870011102408,
+    "p95_ms": 69.08870011102408,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_SHIFT_PATIENT",
+      "ms": 69.08870011102408,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 69.04649990610778,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You reach out and sense the condition of your patient."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "chest_after": {
+      "bleed": 2,
+      "external": 8,
+      "internal": 5
+    },
+    "commands": [
+      "touch TEST_EMPATH_SHIFT_PATIENT"
+    ],
+    "head_after": {
+      "bleed": 0,
+      "external": 0,
+      "internal": 0
+    },
+    "output_log": [
+      "You reach out and sense the condition of your patient."
+    ],
+    "shift_output": [
+      "You shift the worst of TEST_EMPATH_SHIFT_PATIENT's injuries toward the chest."
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 10434,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775835280.3742104,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Shift structure coverage validates wound relocation while preserving total severity."
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 69.04649990610778,
+      "count": 1,
+      "entries": [
+        {
+          "duration_ms": 69.04649990610778,
+          "metadata": {
+            "character": "TEST_EMPATH_SHIFT_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775835284.65713
+        }
+      ],
+      "max_ms": 69.04649990610778,
+      "total_ms": 69.04649990610778
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

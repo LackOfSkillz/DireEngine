@@ -1,0 +1,114 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 26.347750041168183,
+  "lag": {
+    "avg_ms": 202.12127501145005,
+    "jitter": 253.57115924416323,
+    "max_ms": 529.8234999645501,
+    "min_ms": 0.520800007507205,
+    "p95_ms": 491.5886499744373,
+    "slow_count": 2,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 274.9245000304654,
+      "snapshot": "dead"
+    },
+    {
+      "command": "DIRECT schedule_decay_transition",
+      "ms": 0.520800007507205,
+      "snapshot": "graved"
+    },
+    {
+      "command": "DIRECT flush_due",
+      "ms": 529.8234999645501,
+      "snapshot": "graved"
+    },
+    {
+      "command": "recover",
+      "ms": 3.2163000432774425,
+      "snapshot": "recovered"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 274.9245000304654
+    },
+    {
+      "cmd": "DIRECT flush_due",
+      "ms": 529.8234999645501
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 529.8234999645501,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 49.50020008254796,
+      "kind": "direct",
+      "ms": 274.9245000304654,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT schedule_decay_transition",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 0.520800007507205,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT flush_due",
+      "first_response_ms": null,
+      "kind": "direct",
+      "ms": 529.8234999645501,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "graved"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "recover",
+      "first_response_ms": 3.1952999997884035,
+      "kind": "command",
+      "ms": 3.2163000432774425,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "recovered"
+    }
+  ]
+}

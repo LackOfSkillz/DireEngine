@@ -16,8 +16,9 @@ class CmdFavor(Command):
     def func(self):
         caller = self.caller
         favor = caller.get_favor() if hasattr(caller, "get_favor") else 0
+        favor_max = caller.get_favor_max() if hasattr(caller, "get_favor_max") else favor
         message = caller.get_favor_state_message() if hasattr(caller, "get_favor_state_message") else ""
-        lines = [f"Favor: {favor}"]
+        lines = [f"Favor: {favor} / {favor_max}"]
         if message:
             lines.append(message)
         for line in lines:

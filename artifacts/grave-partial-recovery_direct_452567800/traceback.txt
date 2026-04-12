@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 18217, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 10013, in run_grave_partial_recovery_scenario
+    raise AssertionError(f"Grave-partial-recovery scenario did not split the recovery as expected: carried={carried}, remaining={remaining}")
+AssertionError: Grave-partial-recovery scenario did not split the recovery as expected: carried=['TEST_PARTIAL_FILLER', 'TEST_PARTIAL_ONE'], remaining=['TEST_PARTIAL_TWO']

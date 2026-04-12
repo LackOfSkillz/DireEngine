@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 18506, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8468, in run_corpse_wound_pipeline_scenario
+    raise AssertionError("Prepared corpse path still redied during the post-res bleed window.")
+AssertionError: Prepared corpse path still redied during the post-res bleed window.

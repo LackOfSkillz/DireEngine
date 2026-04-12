@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Repeated bleeding transfers should consume both configured stability costs: {'target_id': 17292, 'type': 'direct', 'strength': 100, 'stability': 88, 'link_bonus_skill': None, 'link_bonus_value': 0, 'link_bonus_tick_at': 0.0, 'created_at': 1775829318.863056, 'target': TEST_EMPATH_LINK_PATIENT, 'is_local': True, 'priority': 2, 'strength_label': 'Strong', 'condition': 'steady', 'remaining': 0}",
+  "mode": "direct",
+  "scenario": "empath-link-stability",
+  "seed": 930692300
+}

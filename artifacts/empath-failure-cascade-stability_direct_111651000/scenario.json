@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Failure stability coverage validates that circle cascade overloads recover cleanly without infinite loops or unrecoverable state corruption.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-failure-cascade-stability",
+  "seed": 111651000,
+  "started_at": 1775834205.1116512
+}

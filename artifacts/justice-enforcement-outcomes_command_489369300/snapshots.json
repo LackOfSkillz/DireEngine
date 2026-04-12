@@ -1,0 +1,151 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 2000,
+        "hp": 100,
+        "id": 23871,
+        "is_dead": false,
+        "key": "TEST_JUSTICE_MODERATE",
+        "life_state": "ALIVE",
+        "location": "TEST_GUARDHOUSE_EXTERIOR",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 23858,
+            "key": "TEST_TOWN_GREEN",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23859,
+            "key": "TEST_PILLORY_SQUARE",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23860,
+            "key": "TEST_TOWN_JAIL",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23861,
+            "key": "TEST_GUARDHOUSE_EXTERIOR",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23862,
+            "key": "TEST_GUARDHOUSE_INTERIOR",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 23863,
+            "key": "east",
+            "location": "TEST_PILLORY_SQUARE",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23864,
+            "key": "west",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23865,
+            "key": "out",
+            "location": "TEST_TOWN_JAIL",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23866,
+            "key": "inside",
+            "location": "TEST_GUARDHOUSE_EXTERIOR",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23867,
+            "key": "outside",
+            "location": "TEST_GUARDHOUSE_INTERIOR",
+            "typeclass": "typeclasses.exits.Exit"
+          },
+          {
+            "id": 23868,
+            "key": "wooden pillory",
+            "location": "TEST_PILLORY_SQUARE",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 23869,
+            "key": "evidence locker",
+            "location": "TEST_GUARDHOUSE_INTERIOR",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 23870,
+            "key": "TEST_JUSTICE_MINOR",
+            "location": "TEST_TOWN_GREEN",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23871,
+            "key": "TEST_JUSTICE_MODERATE",
+            "location": "TEST_GUARDHOUSE_EXTERIOR",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23872,
+            "key": "TEST_JUSTICE_SEVERE",
+            "location": "TEST_TOWN_JAIL",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 23873,
+            "key": "confiscated satchel",
+            "location": "evidence locker",
+            "typeclass": "typeclasses.objects.Object"
+          },
+          {
+            "id": 23874,
+            "key": "confiscated knife",
+            "location": "evidence locker",
+            "typeclass": "typeclasses.objects.Object"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "out",
+          "TEST_JUSTICE_SEVERE"
+        ],
+        "exits": [
+          "out"
+        ],
+        "id": 23860,
+        "key": "TEST_TOWN_JAIL"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775961264.1445045
+    },
+    "label": "final"
+  }
+]

@@ -1,0 +1,382 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "first_response_ms": 67.65400001313537,
+      "kind": "command",
+      "ms": 67.70940008573234,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "linked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "first_response_ms": 1.7506000585854053,
+      "kind": "command",
+      "ms": 1.7948000459000468,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "touch_locked"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 1.1634000111371279,
+      "kind": "command",
+      "ms": 1.2066999915987253,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "perceive_locked"
+    }
+  ],
+  "command_timings_ms": [
+    67.70940008573234,
+    1.7948000459000468,
+    1.2066999915987253
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 67.68640002701432,
+    "timings_ms": [
+      67.70940008573234,
+      1.7948000459000468,
+      1.2066999915987253
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775822529.8861425,
+  "exit_code": 1,
+  "failure_type": "unexpected_exception",
+  "first_response_ms": 23.52266669428597,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 23.570300041077036,
+    "jitter": 38.22671291103297,
+    "max_ms": 67.70940008573234,
+    "min_ms": 1.2066999915987253,
+    "p95_ms": 61.117940081749104,
+    "slow_count": 0,
+    "spike_count": 0,
+    "status": "ok"
+  },
+  "lag_events": [
+    {
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "ms": 67.70940008573234,
+      "snapshot": "linked"
+    },
+    {
+      "command": "touch TEST_EMPATH_SHOCK_PATIENT",
+      "ms": 1.7948000459000468,
+      "snapshot": "touch_locked"
+    },
+    {
+      "command": "perceive health",
+      "ms": 1.2066999915987253,
+      "snapshot": "perceive_locked"
+    }
+  ],
+  "lag_status": "ok",
+  "leaks": [],
+  "max_command_time_ms": 67.68640002701432,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You reach out and sense the condition of your patient.",
+    "You feel completely cut off from others.",
+    "You are not yet ready to read nearby life forces clearly."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": null,
+  "scenario_duration_ms": 15754,
+  "scheduler": {
+    "active_job_count": 7,
+    "active_jobs": [
+      {
+        "created_at": 1775822370.9582117,
+        "delay_s": 3.5,
+        "due_at": 1775822374.4582117,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "job_id": "63f06397508542cdb464d0b14181a803",
+        "key": "combat:roundtime:17002",
+        "owner": "#17002",
+        "owner_label": "TEST_EMPATH_COMPLETION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822393.9832563,
+        "delay_s": 2.5,
+        "due_at": 1775822396.4832563,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LEARNING_HEALER",
+        "job_id": "963d5d9851d547ce91788b6d687775e4",
+        "key": "combat:roundtime:17009",
+        "owner": "#17009",
+        "owner_label": "TEST_EMPATH_LEARNING_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822406.0760007,
+        "delay_s": 2.5,
+        "due_at": 1775822408.5770004,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "job_id": "1e330994f8b445deac00e6bb3ae5b623",
+        "key": "combat:roundtime:17015",
+        "owner": "#17015",
+        "owner_label": "TEST_EMPATH_SEPARATION_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822415.052473,
+        "delay_s": 2.5,
+        "due_at": 1775822417.552473,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_HEALER",
+        "job_id": "8d7505e293dc41cdaa9d33b7ab4e6f03",
+        "key": "combat:roundtime:17018",
+        "owner": "#17018",
+        "owner_label": "TEST_EMPATH_LINK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822437.8197951,
+        "delay_s": 2.5,
+        "due_at": 1775822440.320804,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "job_id": "facf4019239e48de8e1185e900b65edc",
+        "key": "combat:roundtime:17024",
+        "owner": "#17024",
+        "owner_label": "TEST_EMPATH_LINK_SHOCK_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822460.2084463,
+        "delay_s": 2.5,
+        "due_at": 1775822462.7084463,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "job_id": "1532d3cea3a44574ac7c77698cc6cfa7",
+        "key": "combat:roundtime:17033",
+        "owner": "#17033",
+        "owner_label": "TEST_EMPATH_PERSISTENT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      },
+      {
+        "created_at": 1775822488.6107757,
+        "delay_s": 2.5,
+        "due_at": 1775822491.1107757,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_REDIRECT_HEALER",
+        "job_id": "09139efc0a5c4ebda507099c93f58762",
+        "key": "combat:roundtime:17040",
+        "owner": "#17040",
+        "owner_label": "TEST_EMPATH_REDIRECT_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 0.0,
+    "reschedule_total": 0,
+    "scheduled_total": 0,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [],
+  "snapshot_labels": [
+    "initial",
+    "linked",
+    "first_kill",
+    "second_kill",
+    "touch_locked",
+    "perceive_locked",
+    "final"
+  ],
+  "started_at": 1775822513.7195692,
+  "state_transition_count": 6,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath shock lockout coverage validates offensive shock gain, automatic link breakage, and center-based recovery without failing on environment-specific latency."
+    },
+    "scheduler_job_count": 7,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 23.545166671586532,
+      "count": 3,
+      "entries": [
+        {
+          "duration_ms": 67.68640002701432,
+          "metadata": {
+            "character": "TEST_EMPATH_SHOCK_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775822519.4383109
+        },
+        {
+          "duration_ms": 1.7649000510573387,
+          "metadata": {
+            "character": "TEST_EMPATH_SHOCK_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775822519.9125853
+        },
+        {
+          "duration_ms": 1.1841999366879463,
+          "metadata": {
+            "character": "TEST_EMPATH_SHOCK_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775822520.329252
+        }
+      ],
+      "max_ms": 67.68640002701432,
+      "total_ms": 70.6355000147596
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

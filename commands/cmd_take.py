@@ -6,6 +6,7 @@ class CmdTake(Command):
     Draw a linked patient's wound into yourself.
 
     Examples:
+        take shock jekar
         take vitality 20
         take bleeding all
         take poison
@@ -25,9 +26,20 @@ class CmdTake(Command):
         caller = self.caller
         parts = str(self.args or "").strip().split()
         if not parts:
-            caller.msg("Usage: take <vitality|bleeding|poison|disease> [amount|all] | take <arm|leg|chest|head> | take <percent|slow|fast> [selector]")
+            caller.msg("Usage: take shock <target> | take <vitality|bleeding|poison|disease> [amount|all] | take <arm|leg|chest|head> | take <percent|slow|fast> [selector]")
             return
         wound_type = parts[0]
+        if wound_type.lower() == "shock":
+            if len(parts) < 2:
+                caller.msg("Usage: take shock <target>")
+                return
+            target_name = " ".join(parts[1:]).strip()
+            target = caller.search(target_name, location=caller.location)
+            if not target:
+                return
+            ok, message = caller.take_empath_shock(target) if hasattr(caller, "take_empath_shock") else (False, "You cannot take that burden right now.")
+            caller.msg(message)
+            return
         if wound_type.endswith("%") or wound_type.lower() in {"slow", "fast"}:
             requested_fraction = None
             requested_rate = None

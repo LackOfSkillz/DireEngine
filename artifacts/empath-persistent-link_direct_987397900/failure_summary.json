@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AttributeError: 'NoneType' object has no attribute 'get'",
+  "mode": "direct",
+  "scenario": "empath-persistent-link",
+  "seed": 987397900
+}

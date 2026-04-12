@@ -863,7 +863,8 @@ Hide roundtimes preserved:
 | 180 | 3 seconds |
 | 240 | 2 seconds for Survival-primary |
 
-Stalk roundtimes preserved:
+Stalk roun
+dtimes preserved:
 
 | Effective ranks | Roundtime |
 | ---: | --- |

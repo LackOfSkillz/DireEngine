@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Surrender should reset the enforcing guard state.",
+  "mode": "command",
+  "scenario": "justice-arrest-basic",
+  "seed": 617171500
+}

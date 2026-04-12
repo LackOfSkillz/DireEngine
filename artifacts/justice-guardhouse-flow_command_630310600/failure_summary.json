@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Law reputation should drift toward zero over time, saw: -4",
+  "mode": "command",
+  "scenario": "justice-guardhouse-flow",
+  "seed": 630310600
+}

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "warning",
+  "message": "AssertionError: Two empaths should leave fewer critical patients than one: solo=2, team=2",
+  "mode": "direct",
+  "scenario": "empath-group-survival",
+  "seed": 583317000
+}

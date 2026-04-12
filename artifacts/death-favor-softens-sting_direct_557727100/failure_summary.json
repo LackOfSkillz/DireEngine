@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Death-favor-softens-sting scenario did not reduce the sting with favor: low=0.08, high=0.08",
+  "mode": "direct",
+  "scenario": "death-favor-softens-sting",
+  "seed": 557727100
+}

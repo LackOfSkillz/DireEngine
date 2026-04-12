@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Shift should succeed on a connected patient: TEST_EMPATH_SHIFT_PATIENT has no wounds you can shift.",
+  "mode": "direct",
+  "scenario": "empath-shift-structure",
+  "seed": 593505400
+}

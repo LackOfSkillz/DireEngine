@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Redirect should be blocked while disconnected: ['You are not yet ready to redirect wounds through yourself.']",
+  "mode": "direct",
+  "scenario": "empath-unity-breaks-on-shock",
+  "seed": 101127600
+}

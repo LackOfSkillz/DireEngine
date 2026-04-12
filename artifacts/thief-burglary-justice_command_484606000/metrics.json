@@ -1,0 +1,274 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 2,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "burgle TEST_BURGLE_WINDOW",
+      "first_response_ms": 105.64520000480115,
+      "kind": "command",
+      "ms": 332.31950004119426,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "burgle TEST_LOCKED_GATE",
+      "first_response_ms": 23.019000072963536,
+      "kind": "command",
+      "ms": 23.08349998202175,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    332.31950004119426,
+    23.08349998202175
+  ],
+  "commands": {
+    "count": 2,
+    "max_ms": 332.2977999923751,
+    "timings_ms": [
+      332.31950004119426,
+      23.08349998202175
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775962135.5539982,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 64.33210003888234,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 177.701500011608,
+    "jitter": 218.6628726288445,
+    "max_ms": 332.31950004119426,
+    "min_ms": 23.08349998202175,
+    "p95_ms": 316.85770003823563,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "burgle TEST_BURGLE_WINDOW",
+      "ms": 332.31950004119426,
+      "snapshot": "final"
+    },
+    {
+      "command": "burgle TEST_LOCKED_GATE",
+      "ms": 23.08349998202175,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "bad",
+  "leaks": [],
+  "max_command_time_ms": 332.2977999923751,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "You feel your locksmithing settling into learning.",
+    "|cTEST_BURGLE_INTERIOR|n\nThis is a room.",
+    "OPTIONS {'type': 'look'}",
+    "You feel your athletics settling into dabbling.",
+    "You work your way through TEST_BURGLE_WINDOW and slip inside.",
+    "You need a lockpick before you can try that."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "athletics_pool_after_success": 50.66628945325818,
+    "burgle_heat": 3,
+    "burgle_success": true,
+    "contact_result": {
+      "cost": 4,
+      "message": "whisper keeps their distance. Your local heat is too obvious right now.",
+      "ok": false,
+      "quality": -4,
+      "service": "heat"
+    },
+    "guard_attention": true,
+    "justice_incident_count": 1,
+    "locksmithing_pool_after_success": 91.875,
+    "missing_tools_blocked": true,
+    "passage_denied": true,
+    "reputation_after": -3,
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "stealth_pool_after_success": 6.614999999999999,
+    "trap_triggered": true,
+    "wanted_level": 5
+  },
+  "scenario_duration_ms": 7643,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775962131.2681699,
+        "delay_s": 5.0,
+        "due_at": 1775962136.2681699,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_BURGLE_THIEF",
+        "job_id": "f802c0fee1dd4afcb9039de594565569",
+        "key": "combat:roundtime:24051",
+        "owner": "#24051",
+        "owner_label": "TEST_BURGLE_THIEF",
+        "source": "thief.roundtime",
+        "system": "thief.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 1,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "burgle TEST_BURGLE_WINDOW",
+      "ms": 332.31950004119426
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775962127.2948184,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 177.67419997835532,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 332.2977999923751,
+          "metadata": {
+            "character": "TEST_BURGLE_THIEF",
+            "command": "burgle"
+          },
+          "timestamp": 1775962130.057379
+        },
+        {
+          "duration_ms": 23.05059996433556,
+          "metadata": {
+            "character": "TEST_BURGLE_THIEF",
+            "command": "burgle"
+          },
+          "timestamp": 1775962130.8416293
+        }
+      ],
+      "max_ms": 332.2977999923751,
+      "total_ms": 355.34839995671064
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

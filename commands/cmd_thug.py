@@ -1,6 +1,6 @@
-﻿import time
+import time
 
-from evennia import Command
+from commands.command import Command
 
 from utils.crime import call_guards
 

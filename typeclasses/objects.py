@@ -112,6 +112,12 @@ class Object(ObjectParent, DefaultObject):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.stealable = True
+        self.db.burglary_enabled = False
+        self.db.lock_difficulty = 0
+        self.db.trap_difficulty = 0
+        self.db.entry_open = False
+        self.db.last_burgled_at = 0
+        self.db.burgle_heat = 0
 
     def get_base_weight(self):
         weight = getattr(self.db, "weight", None)

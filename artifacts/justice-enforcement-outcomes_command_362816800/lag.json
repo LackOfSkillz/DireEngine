@@ -1,0 +1,148 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 62.660671437957454,
+  "lag": {
+    "avg_ms": 62.72447142483933,
+    "jitter": 102.81513151049172,
+    "max_ms": 288.73449994716793,
+    "min_ms": 1.9779999274760485,
+    "p95_ms": 222.2445999621412,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "bad"
+  },
+  "lag_events": [
+    {
+      "command": "east",
+      "ms": 2.863400033675134,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal nobody",
+      "ms": 1.9779999274760485,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 18.05930002592504,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 501",
+      "ms": 8.515299996361136,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 50",
+      "ms": 51.81930004619062,
+      "snapshot": "final"
+    },
+    {
+      "command": "payfine 450",
+      "ms": 67.10149999707937,
+      "snapshot": "final"
+    },
+    {
+      "command": "retrieve items",
+      "ms": 288.73449994716793,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "retrieve items",
+      "ms": 288.73449994716793
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "east",
+      "first_response_ms": 2.837100066244602,
+      "kind": "command",
+      "ms": 2.863400033675134,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal nobody",
+      "first_response_ms": 1.9666999578475952,
+      "kind": "command",
+      "ms": 1.9779999274760485,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 17.93049997650087,
+      "kind": "command",
+      "ms": 18.05930002592504,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 501",
+      "first_response_ms": 8.459500037133694,
+      "kind": "command",
+      "ms": 8.515299996361136,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 50",
+      "first_response_ms": 51.746100070886314,
+      "kind": "command",
+      "ms": 51.81930004619062,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "payfine 450",
+      "first_response_ms": 67.03379994723946,
+      "kind": "command",
+      "ms": 67.10149999707937,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "retrieve items",
+      "first_response_ms": 288.65100000984967,
+      "kind": "command",
+      "ms": 288.73449994716793,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

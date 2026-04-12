@@ -1,7 +1,9 @@
-﻿import random
+import random
 import time
 
-from evennia import Command
+from commands.command import Command
+from world.systems.skills import award_exp_skill
+from world.systems.theft import record_mark_attempt
 
 
 class CmdMark(Command):
@@ -44,10 +46,22 @@ class CmdMark(Command):
         attention = str(getattr(target.db, "attention_state", "idle") or "idle")
 
         caller.db.marked_target = target.id
+        caller.db.last_mark_target = target.id
+        caller.db.last_mark_time = time.time()
         caller.db.mark_data = {
             "difficulty": difficulty,
-            "timestamp": time.time(),
+            "timestamp": caller.db.last_mark_time,
         }
+        record_mark_attempt(caller, target)
+
+        perception_difficulty = 10
+        if hasattr(target, "get_skill_rank"):
+            try:
+                perception_difficulty = max(10, int(target.get_skill_rank("perception") or 0))
+            except Exception:
+                perception_difficulty = 10
+        award_exp_skill(caller, "appraisal", perception_difficulty, success=True, outcome="success", event_key="mark")
+        award_exp_skill(caller, "perception", max(10, perception_difficulty - 5), success=True, outcome="success", event_key="mark")
 
         caller.msg(f"You assess {target.key}. Difficulty: {difficulty}")
         caller.msg("They seem wary of you." if memory else "They seem unsuspecting.")

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Visible confrontation should message the player, saw: []",
+  "mode": "command",
+  "scenario": "justice-arrest-basic",
+  "seed": 823678400
+}

@@ -1,0 +1,439 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 3,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT at_death",
+      "first_response_ms": 95.31330002937466,
+      "kind": "direct",
+      "ms": 418.1516000535339,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "dead"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart full",
+      "first_response_ms": 0.06430002395063639,
+      "kind": "command",
+      "ms": 27.235099929384887,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "depart confirm",
+      "first_response_ms": 0.10830000974237919,
+      "kind": "command",
+      "ms": 659.5831000013277,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "departed"
+    }
+  ],
+  "command_timings_ms": [
+    418.1516000535339,
+    27.235099929384887,
+    659.5831000013277
+  ],
+  "commands": {
+    "count": 3,
+    "max_ms": 659.5272000413388,
+    "timings_ms": [
+      418.1516000535339,
+      27.235099929384887,
+      659.5831000013277
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775846547.5775628,
+  "exit_code": 1,
+  "failure_type": "lag_failure",
+  "first_response_ms": 31.82863335435589,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 368.3232666614155,
+    "jitter": 319.1052262267472,
+    "max_ms": 659.5831000013277,
+    "min_ms": 27.235099929384887,
+    "p95_ms": 635.4399500065483,
+    "slow_count": 2,
+    "spike_count": 2,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT at_death",
+      "ms": 418.1516000535339,
+      "snapshot": "dead"
+    },
+    {
+      "command": "depart full",
+      "ms": 27.235099929384887,
+      "snapshot": "departed"
+    },
+    {
+      "command": "depart confirm",
+      "ms": 659.5831000013277,
+      "snapshot": "departed"
+    }
+  ],
+  "lag_status": "critical",
+  "leaks": [],
+  "max_command_time_ms": 659.5272000413388,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "A thread of divine favor is consumed.",
+    "You have died.",
+    "You feel yourself slipping free from your body.",
+    "You feel your wealth slip from your grasp as you fall.",
+    "RETURN corpse of TEST_DEATH_CHAR",
+    "[You are dead. Type DEPART to return.]",
+    "You have 10 favors.\nAvailable options:\n- depart grave (cost: 0)\n- depart coins (cost: 2)\n- depart items (cost: 2)\n- depart full (cost: 3) [default]\nType DEPART <mode> to choose, or DEPART DEFAULT to take the default path.",
+    "DEPART full will spend favor. Type DEPART CONFIRM to proceed.",
+    "[You are dead. Type DEPART to return.]",
+    "You feel your spirit pulled back into your body. You return by the full path."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "coins": 37,
+    "commands": [
+      "DIRECT at_death",
+      "depart full",
+      "depart confirm"
+    ],
+    "corpse_key": "corpse of TEST_DEATH_CHAR",
+    "death_diff": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "dead",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "alive",
+        "coins_after": 0,
+        "coins_before": 37,
+        "coins_delta": -37,
+        "died": true,
+        "hp_after": 100,
+        "hp_before": 100,
+        "hp_delta": 0,
+        "is_dead_after": true,
+        "is_dead_before": false,
+        "life_state_after": "DEAD",
+        "life_state_before": "ALIVE",
+        "location_after": "TEST_DEATH_ROOM",
+        "location_before": "TEST_DEATH_ROOM",
+        "revived": false
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [],
+        "removed": [
+          "TEST_DEATH_TOKEN"
+        ]
+      },
+      "object_delta_changes": {
+        "created": [
+          "corpse of TEST_DEATH_CHAR"
+        ],
+        "deleted": []
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [
+          "corpse of TEST_DEATH_CHAR"
+        ],
+        "contents_removed": [],
+        "room_after": "TEST_DEATH_ROOM",
+        "room_before": "TEST_DEATH_ROOM"
+      }
+    },
+    "depart_diff": {
+      "attribute_changes": {
+        "changed": {}
+      },
+      "character_changes": {
+        "after_label": "departed",
+        "bank_coins_after": 0,
+        "bank_coins_before": 0,
+        "bank_coins_delta": 0,
+        "before_label": "dead",
+        "coins_after": 37,
+        "coins_before": 0,
+        "coins_delta": 37,
+        "died": false,
+        "hp_after": 50,
+        "hp_before": 100,
+        "hp_delta": -50,
+        "is_dead_after": false,
+        "is_dead_before": true,
+        "life_state_after": "ALIVE",
+        "life_state_before": "DEAD",
+        "location_after": "TEST_DEATH_ROOM",
+        "location_before": "TEST_DEATH_ROOM",
+        "revived": true
+      },
+      "combat_changes": {
+        "entered_combat": false,
+        "exited_combat": false,
+        "in_combat_after": false,
+        "in_combat_before": false,
+        "range_changed": false,
+        "roundtime_after": 0.0,
+        "roundtime_before": 0.0,
+        "target_after": null,
+        "target_assigned": false,
+        "target_before": null,
+        "target_cleared": false,
+        "target_hp_after": null,
+        "target_hp_before": null,
+        "target_hp_delta": null,
+        "target_range_after": null,
+        "target_range_before": null
+      },
+      "equipment_changes": {
+        "added": [],
+        "removed": []
+      },
+      "inventory_changes": {
+        "added": [
+          "TEST_DEATH_TOKEN"
+        ],
+        "removed": []
+      },
+      "object_delta_changes": {
+        "created": [],
+        "deleted": [
+          "corpse of TEST_DEATH_CHAR"
+        ]
+      },
+      "room_changes": {
+        "changed": false,
+        "contents_added": [],
+        "contents_removed": [
+          "corpse of TEST_DEATH_CHAR"
+        ],
+        "room_after": "TEST_DEATH_ROOM",
+        "room_before": "TEST_DEATH_ROOM"
+      }
+    },
+    "output_log": [
+      "A thread of divine favor is consumed.",
+      "You have died.",
+      "You feel yourself slipping free from your body.",
+      "You feel your wealth slip from your grasp as you fall.",
+      "RETURN corpse of TEST_DEATH_CHAR",
+      "[You are dead. Type DEPART to return.]",
+      "You have 10 favors.\nAvailable options:\n- depart grave (cost: 0)\n- depart coins (cost: 2)\n- depart items (cost: 2)\n- depart full (cost: 3) [default]\nType DEPART <mode> to choose, or DEPART DEFAULT to take the default path.",
+      "DEPART full will spend favor. Type DEPART CONFIRM to proceed.",
+      "[You are dead. Type DEPART to return.]",
+      "You feel your spirit pulled back into your body. You return by the full path."
+    ],
+    "snapshot_count": 4,
+    "snapshot_labels": [
+      "alive",
+      "dead",
+      "departed",
+      "final"
+    ]
+  },
+  "scenario_duration_ms": 8234,
+  "scheduler": {
+    "active_job_count": 0,
+    "active_jobs": [],
+    "cancel_total": 2,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 0.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 2,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "DIRECT at_death",
+      "ms": 418.1516000535339
+    },
+    {
+      "cmd": "depart confirm",
+      "ms": 659.5831000013277
+    }
+  ],
+  "snapshot_labels": [
+    "alive",
+    "dead",
+    "departed",
+    "final"
+  ],
+  "started_at": 1775846538.5572171,
+  "state_transition_count": 3,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": true,
+      "reason": ""
+    },
+    "scheduler_job_count": 0,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 343.3656499837525,
+      "count": 2,
+      "entries": [
+        {
+          "duration_ms": 27.204099926166236,
+          "metadata": {
+            "character": "TEST_DEATH_CHAR",
+            "command": "depart"
+          },
+          "timestamp": 1775846542.436976
+        },
+        {
+          "duration_ms": 659.5272000413388,
+          "metadata": {
+            "character": "TEST_DEATH_CHAR",
+            "command": "depart"
+          },
+          "timestamp": 1775846543.826945
+        }
+      ],
+      "max_ms": 659.5272000413388,
+      "total_ms": 686.731299967505
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Shock transfer should require a valid connection: ['You feel completely cut off from others.']",
+  "mode": "direct",
+  "scenario": "empath-shock-transfer",
+  "seed": 657378700
+}

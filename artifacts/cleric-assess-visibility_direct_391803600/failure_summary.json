@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AttributeError: 'Character' object has no attribute 'get_cleric_assess_specialized_support_lines'",
+  "mode": "direct",
+  "scenario": "cleric-assess-visibility",
+  "seed": 391803600
+}

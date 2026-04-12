@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 16887, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7989, in run_cleric_specialization_score_output_scenario
+    raise AssertionError(f"Score specialization scenario did not report '{expected_line}': {output}")
+AssertionError: Score specialization scenario did not report 'Specialization: None': 
+No command sets found! This is a critical bug that can have
+multiple causes.
+

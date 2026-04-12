@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath learning unification coverage validates transient pools and legacy mindstate isolation without depending on wall-clock waits.",
+    "tags": [
+      "core",
+      "empath",
+      "exp"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-learning-unification",
+  "seed": 735741200,
+  "started_at": 1775822804.1907816
+}

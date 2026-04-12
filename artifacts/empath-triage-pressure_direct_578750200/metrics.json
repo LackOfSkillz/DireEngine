@@ -1,0 +1,418 @@
+{
+  "coin_delta": 0,
+  "combat_responsiveness_ms": 0.0,
+  "command_count": 6,
+  "command_timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "DIRECT <lambda>",
+      "first_response_ms": 38.94779994152486,
+      "kind": "direct",
+      "ms": 48.545299912802875,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "perceive health",
+      "first_response_ms": 84.44060001056641,
+      "kind": "command",
+      "ms": 92.62300003319979,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "queue",
+      "first_response_ms": 36.421500029973686,
+      "kind": "command",
+      "ms": 36.54510003980249,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "touch TEST_EMPATH_CRITICAL",
+      "first_response_ms": 88.00079999491572,
+      "kind": "command",
+      "ms": 88.09480001218617,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "take bleeding 20",
+      "first_response_ms": 39.16190005838871,
+      "kind": "command",
+      "ms": 204.2838999768719,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "shift TEST_EMPATH_INJURED arm",
+      "first_response_ms": 3.021299955435097,
+      "kind": "command",
+      "ms": 3.0908999033272266,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "command_timings_ms": [
+    48.545299912802875,
+    92.62300003319979,
+    36.54510003980249,
+    88.09480001218617,
+    204.2838999768719,
+    3.0908999033272266
+  ],
+  "commands": {
+    "count": 6,
+    "max_ms": 204.23969998955727,
+    "timings_ms": [
+      48.545299912802875,
+      92.62300003319979,
+      36.54510003980249,
+      88.09480001218617,
+      204.2838999768719,
+      3.0908999033272266
+    ]
+  },
+  "deletion_failures": [],
+  "ended_at": 1775828897.1663952,
+  "exit_code": 0,
+  "failure_type": null,
+  "first_response_ms": 48.33231666513408,
+  "interest": {
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
+    "source_add_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_count_current": 0,
+    "source_count_peak": 0,
+    "source_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_peak_counts": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "source_remove_totals": {
+      "direct": 0,
+      "proximity": 0,
+      "room": 0,
+      "scheduled": 0,
+      "zone": 0
+    },
+    "transition_counts": {
+      "activate": 0,
+      "deactivate": 0
+    },
+    "transition_event_counts": {},
+    "transition_total": 0
+  },
+  "invariant_results": [
+    {
+      "message": "Character exists.",
+      "name": "character_exists",
+      "passed": true
+    },
+    {
+      "message": "Room state is valid.",
+      "name": "valid_room_state",
+      "passed": true
+    }
+  ],
+  "item_delta_count": 0,
+  "lag": {
+    "avg_ms": 78.86383331303175,
+    "jitter": 69.93760737671745,
+    "max_ms": 204.2838999768719,
+    "min_ms": 3.0908999033272266,
+    "p95_ms": 176.36867499095388,
+    "slow_count": 1,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "DIRECT <lambda>",
+      "ms": 48.545299912802875,
+      "snapshot": "final"
+    },
+    {
+      "command": "perceive health",
+      "ms": 92.62300003319979,
+      "snapshot": "final"
+    },
+    {
+      "command": "queue",
+      "ms": 36.54510003980249,
+      "snapshot": "final"
+    },
+    {
+      "command": "touch TEST_EMPATH_CRITICAL",
+      "ms": 88.09480001218617,
+      "snapshot": "final"
+    },
+    {
+      "command": "take bleeding 20",
+      "ms": 204.2838999768719,
+      "snapshot": "final"
+    },
+    {
+      "command": "shift TEST_EMPATH_INJURED arm",
+      "ms": 3.0908999033272266,
+      "snapshot": "final"
+    }
+  ],
+  "lag_status": "warning",
+  "leaks": [],
+  "max_command_time_ms": 204.23969998955727,
+  "mindstate_delta": {},
+  "npc_response_delay_ms": 0.0,
+  "output_log": [
+    "Your senses snag on TEST_EMPATH_CRITICAL. They are fading.",
+    "RETURN True",
+    "Your senses are unclear.",
+    "TEST_EMPATH_CRITICAL: fading",
+    "TEST_EMPATH_INJURED: injured",
+    "Triage queue:",
+    "1. TEST_EMPATH_CRITICAL: critical [generous]",
+    "2. TEST_EMPATH_INJURED: injured [known]",
+    "You reach out and sense the condition of your patient.",
+    "This may overwhelm you.",
+    "You have taken too much. Your senses falter.",
+    "The weight of the transfer leaves you reeling.",
+    "Your connection feels dulled.",
+    "You draw the injury into yourself.",
+    "You have taken too much. Your senses still reel."
+  ],
+  "payload_timing_ms": 0.0,
+  "preexisting_cleanup_failures": [],
+  "preexisting_leaks": [],
+  "result": {
+    "critical_after_decay": {
+      "bleeding": 34,
+      "disease": 0,
+      "fatigue": 0,
+      "poison": 0,
+      "vitality": 76
+    },
+    "decay_output": [
+      "Your senses snag on TEST_EMPATH_CRITICAL. They are fading.",
+      "RETURN True"
+    ],
+    "empath_wounds": {
+      "bleeding": 27,
+      "disease": 0,
+      "fatigue": 48,
+      "poison": 0,
+      "vitality": 55
+    },
+    "overload_until": 1775828891.6132784,
+    "perceive_output": [
+      "Your senses are unclear.",
+      "TEST_EMPATH_CRITICAL: fading",
+      "TEST_EMPATH_INJURED: injured"
+    ],
+    "queue_output": [
+      "Triage queue:",
+      "1. TEST_EMPATH_CRITICAL: critical [generous]",
+      "2. TEST_EMPATH_INJURED: injured [known]"
+    ],
+    "shift_output": [
+      "You have taken too much. Your senses still reel."
+    ],
+    "snapshot_count": 1,
+    "snapshot_labels": [
+      "final"
+    ],
+    "transfer_output": [
+      "This may overwhelm you.",
+      "You have taken too much. Your senses falter.",
+      "The weight of the transfer leaves you reeling.",
+      "Your connection feels dulled.",
+      "You draw the injury into yourself."
+    ],
+    "triage_context": {
+      "17216": "{'target': 'TEST_EMPATH_CRITICAL', 'severity': 'critical', 'critical': True, 'last_seen_at': 1775828881.8128858, 'seen_order': 0, 'source': 'queue', 'last_tip_amount': 25, 'last_tip_time': 1775828880.2264757}",
+      "17217": "{'target': 'TEST_EMPATH_INJURED', 'severity': 'injured', 'critical': False, 'last_seen_at': 1775828881.8128858, 'seen_order': 1, 'source': 'queue', 'last_tip_amount': 0, 'last_tip_time': 0.0}"
+    }
+  },
+  "scenario_duration_ms": 24960,
+  "scheduler": {
+    "active_job_count": 1,
+    "active_jobs": [
+      {
+        "created_at": 1775828883.668047,
+        "delay_s": 3.0,
+        "due_at": 1775828886.668047,
+        "inactive_defer_count": 0,
+        "inactive_policy": "defer",
+        "interest_object_key": null,
+        "interest_object_label": "TEST_EMPATH_TRIAGE_HEALER",
+        "job_id": "7d2ef9f173614b93a5d50ffad13aacff",
+        "key": "combat:roundtime:17215",
+        "owner": "#17215",
+        "owner_label": "TEST_EMPATH_TRIAGE_HEALER",
+        "source": "combat.roundtime",
+        "system": "combat.roundtime",
+        "timing_mode": "scheduled_expiry"
+      }
+    ],
+    "cancel_total": 0,
+    "defer_total": 0,
+    "events": 0,
+    "flush_executed_total": 0,
+    "flush_total": 0,
+    "job_key_breakdown": {},
+    "queue_current": 1.0,
+    "queue_peak": 1.0,
+    "reschedule_total": 0,
+    "scheduled_total": 1,
+    "skip_total": 0,
+    "system_counts": {},
+    "systems_exercised": [],
+    "timing_mode_counts": {},
+    "timing_modes_exercised": []
+  },
+  "scheduler_events": 0,
+  "script_delay_ms": 0.0,
+  "scripts": {
+    "count": 0,
+    "sources": [],
+    "total_ms": 0
+  },
+  "slow_commands": [
+    {
+      "cmd": "take bleeding 20",
+      "ms": 204.2838999768719
+    }
+  ],
+  "snapshot_labels": [
+    "final"
+  ],
+  "started_at": 1775828871.5356927,
+  "state_transition_count": 0,
+  "ticker": {
+    "avg_ms": 0.0,
+    "count": 0,
+    "execution_count": 0,
+    "max_ms": 0.0,
+    "performance": {},
+    "sources": [],
+    "total_ms": 0
+  },
+  "timing_model": {
+    "flush_usage": {
+      "flush_executed_total": 0,
+      "flush_total": 0
+    },
+    "lag_policy": {
+      "fail_on_critical_lag": false,
+      "reason": "Empath pressure coverage validates decay, overload, and queue ordering under room triage load."
+    },
+    "scheduler_job_count": 1,
+    "scheduler_job_key_breakdown": {},
+    "script_activity": {
+      "count": 0,
+      "sources": [],
+      "total_ms": 0
+    },
+    "ticker_usage": {
+      "avg_ms": 0.0,
+      "count": 0,
+      "execution_count": 0,
+      "max_ms": 0.0,
+      "performance": {},
+      "sources": [],
+      "total_ms": 0
+    },
+    "timing_modes_exercised": []
+  },
+  "timings": {
+    "command_execute": {
+      "avg_ms": 84.88671998493373,
+      "count": 5,
+      "entries": [
+        {
+          "duration_ms": 92.57999993860722,
+          "metadata": {
+            "character": "TEST_EMPATH_TRIAGE_HEALER",
+            "command": "perceive"
+          },
+          "timestamp": 1775828881.1211386
+        },
+        {
+          "duration_ms": 36.507499986328185,
+          "metadata": {
+            "character": "TEST_EMPATH_TRIAGE_HEALER",
+            "command": "queue"
+          },
+          "timestamp": 1775828881.8479424
+        },
+        {
+          "duration_ms": 88.05620006751269,
+          "metadata": {
+            "character": "TEST_EMPATH_TRIAGE_HEALER",
+            "command": "touch"
+          },
+          "timestamp": 1775828882.6854143
+        },
+        {
+          "duration_ms": 204.23969998955727,
+          "metadata": {
+            "character": "TEST_EMPATH_TRIAGE_HEALER",
+            "command": "take"
+          },
+          "timestamp": 1775828883.673037
+        },
+        {
+          "duration_ms": 3.050199942663312,
+          "metadata": {
+            "character": "TEST_EMPATH_TRIAGE_HEALER",
+            "command": "shift"
+          },
+          "timestamp": 1775828884.415796
+        }
+      ],
+      "max_ms": 204.23969998955727,
+      "total_ms": 424.43359992466867
+    },
+    "scheduler_execute": {}
+  },
+  "xp_delta": 0
+}

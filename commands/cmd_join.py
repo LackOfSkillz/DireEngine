@@ -1,4 +1,4 @@
-﻿from evennia import Command
+from commands.command import Command
 
 from typeclasses.characters import VALID_GUILDS
 

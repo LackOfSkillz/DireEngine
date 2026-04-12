@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\tests\scenarios\justice_arrest_basic.py", line 119, in scenario
+    raise AssertionError(f"Detention should block thief actions, saw: {detained_messages}")
+AssertionError: Detention should block thief actions, saw: ['You are locked in jail and cannot do that.']

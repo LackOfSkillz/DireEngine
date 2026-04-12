@@ -1,4 +1,4 @@
-from evennia import Command
+from commands.command import Command
 
 from commands.cmd_circle import run_empath_circle_command
 

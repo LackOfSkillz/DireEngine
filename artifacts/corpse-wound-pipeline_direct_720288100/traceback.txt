@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 18376, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8429, in run_corpse_wound_pipeline_scenario
+    _run_cleric_ritual_chain(cleric, raw_corpse, scheduled, ("prepare", "stabilize", "restore", "bind"))
+  File "C:\Users\gary\dragonsire\diretest.py", line 7804, in _run_cleric_ritual_chain
+    raise AssertionError(f"Cleric ritual stage '{stage}' failed unexpectedly: {message}")
+AssertionError: Cleric ritual stage 'bind' failed unexpectedly: You do not have the devotion required to continue the rite.

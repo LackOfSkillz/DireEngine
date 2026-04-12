@@ -33,6 +33,7 @@ from utils.contests import run_contest
 from world.systems.metrics import increment_counter, record_event
 from world.systems.timing_audit import register_ticker_metadata, unregister_ticker_metadata
 from world.systems.exp_pulse import EXP_TICKER_IDSTRING, PULSE_TICK, exp_pulse_tick, start_exp_ticker
+from world.systems.guards import GUARD_TICK_INTERVAL, ensure_landing_guards, process_guard_tick
 from world.the_landing import build_the_landing
 from world.area_forge.map_api import prime_zone_map_cache
 
@@ -85,6 +86,145 @@ def _configure_brookhollow_justice():
     town_square = ObjectDB.objects.filter(db_key="Town Square", db_typeclass_path=ROOM_TYPECLASS).first()
     if town_square and not any(str(getattr(obj, "key", "") or "").lower() == "a bounty board" for obj in town_square.contents):
         create_object(BountyBoard, key="a bounty board", location=town_square)
+
+    _ensure_brookhollow_justice_spaces()
+
+
+def _should_enable_landing_guard_patrol(room):
+    if room is None:
+        return False
+    if bool(getattr(getattr(room, "db", None), "no_guard", False)):
+        return False
+    if str(getattr(getattr(room, "db", None), "law_type", "standard") or "standard").strip().lower() == "none":
+        return False
+
+    area_name = str(getattr(getattr(room, "db", None), "area", "") or "").strip().lower()
+    region_name = str(getattr(getattr(room, "db", None), "region_name", "") or "").strip().lower()
+    street_name = str(getattr(getattr(room, "db", None), "street_name", "") or "").strip()
+    lane_name = str(getattr(getattr(room, "db", None), "lane_name", "") or "").strip()
+    room_key = str(getattr(room, "key", "") or "").strip().lower()
+
+    if room_key in {"pillory square", "town jail", "town square", "town green ne"}:
+        return True
+    if area_name == "the landing" and (street_name or lane_name):
+        return True
+    if region_name == "the landing" and (street_name or lane_name):
+        return True
+    return False
+
+
+def _configure_landing_guard_patrols():
+    for room in ObjectDB.objects.filter(db_typeclass_path=ROOM_TYPECLASS):
+        if not _should_enable_landing_guard_patrol(room):
+            continue
+        room.db.zone = "landing"
+        room.db.guard_zone = "landing"
+        room.db.is_lawful = True
+        room.db.guard_patrol = True
+
+
+def _ensure_brookhollow_justice_spaces():
+    town_green = _ensure_fishing_supplier_room() or ObjectDB.objects.filter(db_key__iexact="Town Green NE", db_typeclass_path=ROOM_TYPECLASS).first()
+    if not town_green:
+        return
+
+    guardhouse_exterior = _ensure_room(
+        "Guardhouse Exterior",
+        (
+            "A squat stone guardhouse faces the green with a barred lamp over the door and boot-worn steps below it. "
+            "Petitioners, released prisoners, and nervous townsfolk linger here beneath the eyes of posted watchmen."
+        ),
+        aliases=["guardhouse exterior", "guardhouse entry", "guardhouse"],
+        home=town_green,
+    )
+    guardhouse_exterior.db.is_lawful = True
+    guardhouse_exterior.db.law_type = "standard"
+    guardhouse_exterior.db.no_guard = False
+    guardhouse_exterior.db.high_traffic = True
+    guardhouse_exterior.db.guardhouse_exterior = True
+    guardhouse_exterior.db.guard_patrol = True
+    guardhouse_exterior.db.region = getattr(town_green.db, "region", None) or "brookhollow"
+
+    guardhouse_interior = _ensure_room(
+        "Guardhouse Interior",
+        (
+            "Benches, ledgers, and a heavy evidence locker crowd the narrow room beyond the guardhouse doors. "
+            "A clerk's counter faces the entrance while a secure passage deeper inside leads toward the town cells."
+        ),
+        aliases=["guardhouse interior", "watch office", "evidence room"],
+        home=guardhouse_exterior,
+    )
+    guardhouse_interior.db.is_guardhouse = True
+    guardhouse_interior.db.is_lawful = True
+    guardhouse_interior.db.law_type = "standard"
+    guardhouse_interior.db.no_guard = False
+    guardhouse_interior.db.guard_patrol = True
+    guardhouse_interior.db.region = getattr(town_green.db, "region", None) or "brookhollow"
+
+    pillory_room = _ensure_room(
+        "Pillory Square",
+        (
+            "A bare public square opens just off the green, built to be seen rather than avoided. "
+            "A weathered wooden pillory stands on a low platform where every passerby can judge the day's offenders. "
+            "Merchants, idlers, and children on errands all drift through the space, making shame part of the sentence."
+        ),
+        aliases=["pillory square", "pillory"],
+        home=town_green,
+    )
+    pillory_room.db.is_lawful = True
+    pillory_room.db.law_type = "standard"
+    pillory_room.db.no_guard = False
+    pillory_room.db.high_traffic = True
+    pillory_room.db.pillory = True
+    pillory_room.db.guard_patrol = True
+    pillory_room.db.region = getattr(town_green.db, "region", None) or "brookhollow"
+
+    town_jail = _ensure_room(
+        "Town Jail",
+        (
+            "Iron-barred cells line a cramped stone chamber that smells of damp straw, old lamp smoke, and cold metal. "
+            "A turnkey's desk sits beneath a rack of keys while the front of the room opens toward the lawful center of town."
+        ),
+        aliases=["town jail", "jail"],
+        home=town_green,
+    )
+    town_jail.db.is_lawful = True
+    town_jail.db.law_type = "standard"
+    town_jail.db.no_guard = False
+    town_jail.db.is_jail = True
+    town_jail.db.guard_patrol = True
+    town_jail.db.region = getattr(town_green.db, "region", None) or "brookhollow"
+
+    _ensure_custom_exit(town_green, "guardhouse", guardhouse_exterior, aliases=["watchhouse"], desc="A short walk leads to the guardhouse beside the green.")
+    _ensure_custom_exit(guardhouse_exterior, "green", town_green, aliases=["square", "out"], desc="The town green lies just beyond the guardhouse steps.")
+    _ensure_custom_exit(guardhouse_exterior, "inside", guardhouse_interior, aliases=["in", "office"], desc="The main guardroom lies inside the building.")
+    _ensure_custom_exit(guardhouse_interior, "outside", guardhouse_exterior, aliases=["out", "entry"], desc="The guardhouse steps lead back toward the green.")
+    _ensure_custom_exit(guardhouse_interior, "jail", town_jail, aliases=["cells"], desc="A secured passage leads from the guardroom to the town cells.")
+    _ensure_custom_exit(town_jail, "guardhouse", guardhouse_interior, aliases=["office"], desc="The guardhouse interior lies beyond the cell corridor.")
+    _ensure_custom_exit(town_green, "pillory", pillory_room, aliases=["stocks"], desc="A short walk leads to the public pillory.")
+    _ensure_custom_exit(pillory_room, "green", town_green, aliases=["town green", "square"], desc="The town green lies just beyond the pillory platform.")
+    _ensure_custom_exit(pillory_room, "jail", town_jail, aliases=["guardhouse"], desc="A guarded doorway leads toward the town jail.")
+    _ensure_custom_exit(town_jail, "square", town_green, aliases=["green", "out"], desc="The lawful heart of town waits outside.")
+
+    evidence_locker = None
+    for obj in list(getattr(guardhouse_interior, "contents", []) or []):
+        if bool(getattr(getattr(obj, "db", None), "is_evidence_locker", False)):
+            evidence_locker = obj
+            break
+    if not evidence_locker:
+        evidence_locker = create_object("typeclasses.objects.Object", key="evidence locker", location=guardhouse_interior, home=guardhouse_interior)
+    evidence_locker.db.is_evidence_locker = True
+    evidence_locker.db.desc = "A reinforced evidence locker secured with iron bands and a ledger tag for confiscated property."
+
+    pillory = None
+    for obj in list(getattr(pillory_room, "contents", []) or []):
+        if str(getattr(obj, "key", "") or "").strip().lower() == "wooden pillory":
+            pillory = obj
+            break
+    if not pillory:
+        pillory = create_object("typeclasses.objects.Object", key="wooden pillory", location=pillory_room, home=pillory_room)
+    pillory.db.is_pillory = True
+    pillory.db.desc = "A heavy wooden pillory with iron fittings, positioned where the whole town can see who has been set in it."
 
 
 def _get_cached_tick_npcs():
@@ -603,6 +743,7 @@ def _cleanup_tutorial_helper_characters(rooms):
 def _ensure_new_player_tutorial():
     from typeclasses.objects import ChargenMirror, Object
     from systems import aftermath
+    from world.areas.crossing.cleric_guild import ensure_crossing_cleric_guildhall
     from world.areas.crossing.empath_guild import ensure_crossing_empath_guildhall
 
     room_specs = {
@@ -665,6 +806,8 @@ def _ensure_new_player_tutorial():
     empath_guild = empath_rooms["main_hall"]
     empath_guild.db.desc = aftermath.append_guild_triage_detail(str(getattr(empath_guild.db, "desc", "") or ""))
     aftermath.ensure_empath_orderly(empath_guild)
+
+    ensure_crossing_cleric_guildhall()
 
     ranger_guild = _find_tagged_room("guild_ranger")
     if not ranger_guild:
@@ -1183,9 +1326,12 @@ def process_status_tick():
             [
                 bool(getattr(character.db, "is_captured", False)),
                 bool(getattr(character.db, "in_stocks", False)),
+                bool(getattr(character.db, "in_pillory", False)),
+                bool(getattr(character.db, "in_jail", False)),
                 bool(getattr(character.db, "awaiting_plea", False)),
                 bool(getattr(character.db, "jail_timer", 0)),
                 bool(getattr(character.db, "fine_due", 0)),
+                bool(getattr(character.db, "justice_debt", 0)),
                 bool(getattr(character.db, "warrants", None)),
             ]
         )
@@ -1391,6 +1537,12 @@ def at_server_start():
         pass
 
     try:
+        TICKER_HANDLER.remove(GUARD_TICK_INTERVAL, process_guard_tick, idstring="global_guard_tick", persistent=True)
+        unregister_ticker_metadata(GUARD_TICK_INTERVAL, idstring="global_guard_tick", persistent=True)
+    except Exception:
+        pass
+
+    try:
         from world.systems.tick_audit import scan_for_tick_violations
 
         for warning in scan_for_tick_violations()[:25]:
@@ -1403,6 +1555,7 @@ def at_server_start():
     if getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
         TICKER_HANDLER.add(1, process_status_tick, idstring="global_status_tick", persistent=True)
         TICKER_HANDLER.add(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
+        TICKER_HANDLER.add(GUARD_TICK_INTERVAL, process_guard_tick, idstring="global_guard_tick", persistent=True)
         start_exp_ticker()
         register_ticker_metadata(
             1,
@@ -1420,6 +1573,14 @@ def at_server_start():
             system="world.learning_tick",
             reason="Frequency-separated learning and teaching pulse processing.",
         )
+        register_ticker_metadata(
+            GUARD_TICK_INTERVAL,
+            process_guard_tick,
+            idstring="global_guard_tick",
+            persistent=True,
+            system="world.guards",
+            reason="Validated guard patrol, watch-state, pursuit, and justice response processing.",
+        )
 
     for character in ObjectDB.objects.filter(
         db_typeclass_path__in=["typeclasses.characters.Character", "typeclasses.npcs.NPC"]
@@ -1434,7 +1595,7 @@ def at_server_start():
     _ensure_limbo_training_dummy()
     build_the_landing()
     try:
-        primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map"])
+        primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map", "ranger-guild-map"])
         if primed_zones:
             logger.log_info(f"Primed AreaForge zone map cache: {', '.join(primed_zones)}")
     except Exception:
@@ -1451,6 +1612,8 @@ def at_server_start():
         logger.log_warn("[Aftermath] Failed to ensure POI tags during server start.")
     _warn_empath_guild_duplicates()
     _configure_brookhollow_justice()
+    _configure_landing_guard_patrols()
+    ensure_landing_guards(count=15)
     _ensure_fishing_supplier_npc()
 
 

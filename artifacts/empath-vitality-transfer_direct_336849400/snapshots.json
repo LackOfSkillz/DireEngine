@@ -1,0 +1,342 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17943,
+        "is_dead": false,
+        "key": "TEST_EMPATH_VITALITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_VITALITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17942,
+            "key": "TEST_EMPATH_VITALITY_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17943,
+            "key": "TEST_EMPATH_VITALITY_HEALER",
+            "location": "TEST_EMPATH_VITALITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17944,
+            "key": "TEST_EMPATH_VITALITY_PATIENT",
+            "location": "TEST_EMPATH_VITALITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17945,
+            "key": "TEST_EMPATH_VITALITY_PARTNER",
+            "location": "TEST_EMPATH_VITALITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17946,
+            "key": "TEST_EMPATH_VITALITY_FATALIST",
+            "location": "TEST_EMPATH_VITALITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17947,
+            "key": "TEST_EMPATH_VITALITY_FATAL_PATIENT",
+            "location": "TEST_EMPATH_VITALITY_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_VITALITY_HEALER",
+          "TEST_EMPATH_VITALITY_PATIENT",
+          "TEST_EMPATH_VITALITY_PARTNER",
+          "TEST_EMPATH_VITALITY_FATALIST",
+          "TEST_EMPATH_VITALITY_FATAL_PATIENT"
+        ],
+        "exits": [],
+        "id": 17942,
+        "key": "TEST_EMPATH_VITALITY_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1775835452.0817575
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17943,
+        "is_dead": false,
+        "key": "TEST_EMPATH_VITALITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_VITALITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.05,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "unified",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_VITALITY_HEALER",
+          "TEST_EMPATH_VITALITY_PATIENT",
+          "TEST_EMPATH_VITALITY_PARTNER",
+          "TEST_EMPATH_VITALITY_FATALIST",
+          "TEST_EMPATH_VITALITY_FATAL_PATIENT"
+        ],
+        "exits": [],
+        "id": 17942,
+        "key": "TEST_EMPATH_VITALITY_ROOM"
+      },
+      "snapshot_label": "unified",
+      "timestamp": 1775835452.9892845
+    },
+    "label": "unified"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17943,
+        "is_dead": false,
+        "key": "TEST_EMPATH_VITALITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_VITALITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.65,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "partial_blocked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_VITALITY_HEALER",
+          "TEST_EMPATH_VITALITY_PATIENT",
+          "TEST_EMPATH_VITALITY_PARTNER",
+          "TEST_EMPATH_VITALITY_FATALIST",
+          "TEST_EMPATH_VITALITY_FATAL_PATIENT"
+        ],
+        "exits": [],
+        "id": 17942,
+        "key": "TEST_EMPATH_VITALITY_ROOM"
+      },
+      "snapshot_label": "partial_blocked",
+      "timestamp": 1775835453.3937294
+    },
+    "label": "partial_blocked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 90,
+        "id": 17943,
+        "is_dead": false,
+        "key": "TEST_EMPATH_VITALITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_VITALITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.12,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "vitality_taken",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_VITALITY_HEALER",
+          "TEST_EMPATH_VITALITY_PATIENT",
+          "TEST_EMPATH_VITALITY_PARTNER",
+          "TEST_EMPATH_VITALITY_FATALIST",
+          "TEST_EMPATH_VITALITY_FATAL_PATIENT"
+        ],
+        "exits": [],
+        "id": 17942,
+        "key": "TEST_EMPATH_VITALITY_ROOM"
+      },
+      "snapshot_label": "vitality_taken",
+      "timestamp": 1775835453.9221961
+    },
+    "label": "vitality_taken"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 44,
+        "id": 17943,
+        "is_dead": false,
+        "key": "TEST_EMPATH_VITALITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_VITALITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "empath_overdraw": {
+            "carried": 144,
+            "expires_at": 1775835479.4180436,
+            "fatigue": 0
+          },
+          "empath_transfer_overload": {
+            "expires_at": 1775835459.433281,
+            "requested": 92,
+            "wound": "vitality"
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.99,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "overdrawn",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_VITALITY_HEALER",
+          "TEST_EMPATH_VITALITY_PATIENT",
+          "TEST_EMPATH_VITALITY_PARTNER",
+          "TEST_EMPATH_VITALITY_FATALIST",
+          "TEST_EMPATH_VITALITY_FATAL_PATIENT"
+        ],
+        "exits": [],
+        "id": 17942,
+        "key": "TEST_EMPATH_VITALITY_ROOM"
+      },
+      "snapshot_label": "overdrawn",
+      "timestamp": 1775835454.5312245
+    },
+    "label": "overdrawn"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 44,
+        "id": 17943,
+        "is_dead": false,
+        "key": "TEST_EMPATH_VITALITY_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_VITALITY_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal",
+          "empath_overdraw": {
+            "carried": 144,
+            "expires_at": 1775835479.4180436,
+            "fatigue": 0
+          },
+          "empath_transfer_overload": {
+            "expires_at": 1775835459.433281,
+            "requested": 92,
+            "wound": "vitality"
+          }
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.63,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_VITALITY_HEALER",
+          "TEST_EMPATH_VITALITY_PATIENT",
+          "TEST_EMPATH_VITALITY_PARTNER",
+          "TEST_EMPATH_VITALITY_FATALIST",
+          "TEST_EMPATH_VITALITY_FATAL_PATIENT",
+          "corpse of TEST_EMPATH_VITALITY_FATALIST"
+        ],
+        "exits": [],
+        "id": 17942,
+        "key": "TEST_EMPATH_VITALITY_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775835454.8877327
+    },
+    "label": "final"
+  }
+]

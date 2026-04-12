@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Grave-nonowner-blocked scenario returned the wrong blocker message: You have nothing here to recover.",
+  "mode": "direct",
+  "scenario": "grave-nonowner-blocked",
+  "seed": 859296400
+}

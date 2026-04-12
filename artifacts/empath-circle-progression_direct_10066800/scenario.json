@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath circle progression coverage validates manual-only circling, transient-rank checks, and advance-command delegation without depending on wall-clock timing.",
+    "tags": [
+      "core",
+      "empath",
+      "circles"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-circle-progression",
+  "seed": 10066800,
+  "started_at": 1775833965.011068
+}

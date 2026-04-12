@@ -1,0 +1,152 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 61.54617143329233,
+  "lag": {
+    "avg_ms": 79.16909998415836,
+    "jitter": 86.51457176611001,
+    "max_ms": 227.8256999561563,
+    "min_ms": 0.8062999695539474,
+    "p95_ms": 208.6429199785925,
+    "slow_count": 2,
+    "spike_count": 0,
+    "status": "warning"
+  },
+  "lag_events": [
+    {
+      "command": "search",
+      "ms": 84.03379993978888,
+      "snapshot": "final"
+    },
+    {
+      "command": "search",
+      "ms": 0.8062999695539474,
+      "snapshot": "final"
+    },
+    {
+      "command": "observe TEST_OBSERVE_TARGET",
+      "ms": 36.34220000822097,
+      "snapshot": "final"
+    },
+    {
+      "command": "observe TEST_OBSERVE_TARGET",
+      "ms": 0.8345999522134662,
+      "snapshot": "final"
+    },
+    {
+      "command": "observe TEST_OBSERVE_TARGET",
+      "ms": 40.45800003223121,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal moonstone from shadow chest",
+      "ms": 163.88310003094375,
+      "snapshot": "final"
+    },
+    {
+      "command": "passage",
+      "ms": 227.8256999561563,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "steal moonstone from shadow chest",
+      "ms": 163.88310003094375
+    },
+    {
+      "cmd": "passage",
+      "ms": 227.8256999561563
+    }
+  ],
+  "spike_events": [],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "search",
+      "first_response_ms": 60.40299998130649,
+      "kind": "command",
+      "ms": 84.03379993978888,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "search",
+      "first_response_ms": 0.7668000180274248,
+      "kind": "command",
+      "ms": 0.8062999695539474,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "observe TEST_OBSERVE_TARGET",
+      "first_response_ms": 27.715599979273975,
+      "kind": "command",
+      "ms": 36.34220000822097,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "observe TEST_OBSERVE_TARGET",
+      "first_response_ms": 0.7969000143930316,
+      "kind": "command",
+      "ms": 0.8345999522134662,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "observe TEST_OBSERVE_TARGET",
+      "first_response_ms": 23.798399954102933,
+      "kind": "command",
+      "ms": 40.45800003223121,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal moonstone from shadow chest",
+      "first_response_ms": 154.69460003077984,
+      "kind": "command",
+      "ms": 163.88310003094375,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "passage",
+      "first_response_ms": 162.6479000551626,
+      "kind": "command",
+      "ms": 227.8256999561563,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

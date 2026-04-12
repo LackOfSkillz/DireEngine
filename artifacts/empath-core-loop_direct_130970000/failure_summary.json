@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Empath vitality transfer did not accumulate transferred damage on the healer: {'fatigue': 4, 'vitality': 10, 'bleeding': 14, 'poison': 0, 'disease': 0}",
+  "mode": "direct",
+  "scenario": "empath-core-loop",
+  "seed": 130970000
+}

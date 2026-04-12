@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Cooperative efficiency coverage validates that split roles outperform solo triage while overlapping handling remains risky.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-cooperative-efficiency",
+  "seed": 878649900,
+  "started_at": 1775833772.5077114
+}

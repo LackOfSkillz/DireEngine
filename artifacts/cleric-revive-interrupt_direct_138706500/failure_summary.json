@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: Revive interrupt scenario did not record the interruption failure.",
+  "mode": "direct",
+  "scenario": "cleric-revive-interrupt",
+  "seed": 138706500
+}

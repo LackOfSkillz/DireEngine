@@ -1,0 +1,90 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 90,
+        "id": 17614,
+        "is_dead": false,
+        "key": "TEST_EMPATH_TEAM_LEAD",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_TEAM_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.09,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17611,
+            "key": "TEST_EMPATH_SOLO_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17612,
+            "key": "TEST_EMPATH_TEAM_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17613,
+            "key": "TEST_EMPATH_SOLO",
+            "location": "TEST_EMPATH_SOLO_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17614,
+            "key": "TEST_EMPATH_TEAM_LEAD",
+            "location": "TEST_EMPATH_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17615,
+            "key": "TEST_EMPATH_TEAM_SUPPORT",
+            "location": "TEST_EMPATH_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17616,
+            "key": "TEST_EMPATH_SOLO_PATIENT",
+            "location": "TEST_EMPATH_SOLO_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17617,
+            "key": "TEST_EMPATH_TEAM_PATIENT",
+            "location": "TEST_EMPATH_TEAM_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_TEAM_LEAD",
+          "TEST_EMPATH_TEAM_SUPPORT",
+          "TEST_EMPATH_TEAM_PATIENT"
+        ],
+        "exits": [],
+        "id": 17612,
+        "key": "TEST_EMPATH_TEAM_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775833200.4700148
+    },
+    "label": "final"
+  }
+]

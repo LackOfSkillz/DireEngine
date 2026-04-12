@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": null,
+  "message": "AssertionError: You do not have permission to work with that corpse.",
+  "mode": "direct",
+  "scenario": "cleric-revive-loop",
+  "seed": 704662500
+}

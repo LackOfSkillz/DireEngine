@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Empath unity-burden coverage validates partial smoothing without creating free group healing.",
+    "tags": [
+      "core",
+      "empath",
+      "unity"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-unity-burden",
+  "seed": 782294100,
+  "started_at": 1775835406.1134236
+}

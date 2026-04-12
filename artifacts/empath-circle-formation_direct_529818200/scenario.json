@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "fail_on_critical_lag": false,
+    "lag_policy_reason": "Shock-circle formation coverage validates invite, accept, leave, and consistent shared state.",
+    "tags": [
+      "core",
+      "empath"
+    ]
+  },
+  "mode": "direct",
+  "name": "empath-circle-formation",
+  "seed": 529818200,
+  "started_at": 1775832964.0766299
+}

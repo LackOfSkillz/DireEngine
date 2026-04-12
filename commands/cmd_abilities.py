@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from evennia import Command
+from commands.command import Command
 
 from typeclasses.abilities import get_ability_map
 

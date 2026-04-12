@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 15930, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7307, in run_cleric_revive_loop_scenario
+    raise AssertionError("Revive loop scenario did not consume the expected devotion across the full rite.")
+AssertionError: Revive loop scenario did not consume the expected devotion across the full rite.

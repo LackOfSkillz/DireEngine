@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Mitigation pass did not remove the full effective amount from the patient: {'fatigue': 0, 'vitality': 20, 'bleeding': 20, 'poison': 0, 'disease': 40}",
+  "mode": "direct",
+  "scenario": "empath-completion-pass",
+  "seed": 560579800
+}

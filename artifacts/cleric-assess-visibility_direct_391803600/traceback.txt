@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 16892, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 8222, in run_cleric_assess_visibility_scenario
+    ok, lines = cleric.assess_cleric_corpse(corpse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\typeclasses\characters.py", line 3146, in assess_cleric_corpse
+    lines.extend(self.get_cleric_assess_specialized_support_lines(corpse))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Character' object has no attribute 'get_cleric_assess_specialized_support_lines'

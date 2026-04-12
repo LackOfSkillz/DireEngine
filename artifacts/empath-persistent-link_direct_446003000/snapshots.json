@@ -1,0 +1,303 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17033,
+        "is_dead": false,
+        "key": "TEST_EMPATH_PERSISTENT_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_PERSISTENT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17031,
+            "key": "TEST_EMPATH_PERSISTENT_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17032,
+            "key": "TEST_EMPATH_PERSISTENT_FAR_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17033,
+            "key": "TEST_EMPATH_PERSISTENT_HEALER",
+            "location": "TEST_EMPATH_PERSISTENT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17034,
+            "key": "TEST_EMPATH_DIRECT_PATIENT",
+            "location": "TEST_EMPATH_PERSISTENT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17035,
+            "key": "TEST_EMPATH_PERSISTENT_PATIENT",
+            "location": "TEST_EMPATH_PERSISTENT_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_PERSISTENT_HEALER",
+          "TEST_EMPATH_DIRECT_PATIENT",
+          "TEST_EMPATH_PERSISTENT_PATIENT"
+        ],
+        "exits": [],
+        "id": 17031,
+        "key": "TEST_EMPATH_PERSISTENT_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1775822459.67005
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17033,
+        "is_dead": false,
+        "key": "TEST_EMPATH_PERSISTENT_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_PERSISTENT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.48,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "direct_linked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_PERSISTENT_HEALER",
+          "TEST_EMPATH_DIRECT_PATIENT",
+          "TEST_EMPATH_PERSISTENT_PATIENT"
+        ],
+        "exits": [],
+        "id": 17031,
+        "key": "TEST_EMPATH_PERSISTENT_ROOM"
+      },
+      "snapshot_label": "direct_linked",
+      "timestamp": 1775822460.2246675
+    },
+    "label": "direct_linked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 87,
+        "id": 17033,
+        "is_dead": false,
+        "key": "TEST_EMPATH_PERSISTENT_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_PERSISTENT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.91,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "direct_strain",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_PERSISTENT_HEALER",
+          "TEST_EMPATH_DIRECT_PATIENT",
+          "TEST_EMPATH_PERSISTENT_PATIENT"
+        ],
+        "exits": [],
+        "id": 17031,
+        "key": "TEST_EMPATH_PERSISTENT_ROOM"
+      },
+      "snapshot_label": "direct_strain",
+      "timestamp": 1775822461.7964027
+    },
+    "label": "direct_strain"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 87,
+        "id": 17033,
+        "is_dead": false,
+        "key": "TEST_EMPATH_PERSISTENT_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_PERSISTENT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.03,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "persistent_linked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_PERSISTENT_HEALER",
+          "TEST_EMPATH_DIRECT_PATIENT",
+          "TEST_EMPATH_PERSISTENT_PATIENT"
+        ],
+        "exits": [],
+        "id": 17031,
+        "key": "TEST_EMPATH_PERSISTENT_ROOM"
+      },
+      "snapshot_label": "persistent_linked",
+      "timestamp": 1775822462.6733677
+    },
+    "label": "persistent_linked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 87,
+        "id": 17033,
+        "is_dead": false,
+        "key": "TEST_EMPATH_PERSISTENT_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_PERSISTENT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "persistent_strain",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_PERSISTENT_HEALER",
+          "TEST_EMPATH_DIRECT_PATIENT",
+          "TEST_EMPATH_PERSISTENT_PATIENT"
+        ],
+        "exits": [],
+        "id": 17031,
+        "key": "TEST_EMPATH_PERSISTENT_ROOM"
+      },
+      "snapshot_label": "persistent_strain",
+      "timestamp": 1775822463.9493482
+    },
+    "label": "persistent_strain"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 87,
+        "id": 17033,
+        "is_dead": false,
+        "key": "TEST_EMPATH_PERSISTENT_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_PERSISTENT_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_PERSISTENT_HEALER",
+          "TEST_EMPATH_DIRECT_PATIENT",
+          "TEST_EMPATH_PERSISTENT_PATIENT"
+        ],
+        "exits": [],
+        "id": 17031,
+        "key": "TEST_EMPATH_PERSISTENT_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775822463.9685411
+    },
+    "label": "final"
+  }
+]

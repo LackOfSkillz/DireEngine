@@ -1,0 +1,127 @@
+{
+  "combat_responsiveness_ms": 0.0,
+  "first_response_ms": 169.84377996996045,
+  "lag": {
+    "avg_ms": 198.93594002351165,
+    "jitter": 397.6288433960933,
+    "max_ms": 909.6860999707133,
+    "min_ms": 1.2023000745102763,
+    "p95_ms": 735.510419984348,
+    "slow_count": 1,
+    "spike_count": 1,
+    "status": "critical"
+  },
+  "lag_events": [
+    {
+      "command": "justice",
+      "ms": 33.987100003287196,
+      "snapshot": "final"
+    },
+    {
+      "command": "laylow",
+      "ms": 10.99650003015995,
+      "snapshot": "final"
+    },
+    {
+      "command": "surrender",
+      "ms": 909.6860999707133,
+      "snapshot": "final"
+    },
+    {
+      "command": "steal nobody",
+      "ms": 1.2023000745102763,
+      "snapshot": "final"
+    },
+    {
+      "command": "passage",
+      "ms": 38.80770003888756,
+      "snapshot": "final"
+    }
+  ],
+  "npc_response_delay_ms": 0.0,
+  "payload_timing_ms": 0.0,
+  "replay_comparison": {},
+  "script_delay_ms": 0.0,
+  "slow_commands": [
+    {
+      "cmd": "surrender",
+      "ms": 909.6860999707133
+    }
+  ],
+  "spike_events": [
+    {
+      "combat_response_ms": null,
+      "command": "surrender",
+      "first_response_ms": 771.6578999534249,
+      "kind": "command",
+      "ms": 909.6860999707133,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ],
+  "timing_entries": [
+    {
+      "combat_response_ms": null,
+      "command": "justice",
+      "first_response_ms": 33.79359992686659,
+      "kind": "command",
+      "ms": 33.987100003287196,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "laylow",
+      "first_response_ms": 10.95210004132241,
+      "kind": "command",
+      "ms": 10.99650003015995,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "surrender",
+      "first_response_ms": 771.6578999534249,
+      "kind": "command",
+      "ms": 909.6860999707133,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "steal nobody",
+      "first_response_ms": 1.1853999458253384,
+      "kind": "command",
+      "ms": 1.2023000745102763,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    },
+    {
+      "combat_response_ms": null,
+      "command": "passage",
+      "first_response_ms": 31.629899982362986,
+      "kind": "command",
+      "ms": 38.80770003888756,
+      "npc_response_delay_ms": null,
+      "payload_ms": 0.0,
+      "script_delay_ms": 0.0,
+      "script_delay_sources": [],
+      "snapshot": "final"
+    }
+  ]
+}

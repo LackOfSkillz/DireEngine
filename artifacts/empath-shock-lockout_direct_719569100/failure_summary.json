@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Perceive should return nothing while disconnected: ['You are not yet ready to read nearby life forces clearly.']",
+  "mode": "direct",
+  "scenario": "empath-shock-lockout",
+  "seed": 719569100
+}

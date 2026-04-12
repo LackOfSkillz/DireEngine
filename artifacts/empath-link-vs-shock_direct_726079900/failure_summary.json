@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Perceive target should remain blocked while disconnected: ['You are not yet ready to read nearby life forces clearly.']",
+  "mode": "direct",
+  "scenario": "empath-link-vs-shock",
+  "seed": 726079900
+}

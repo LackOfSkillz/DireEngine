@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\diretest.py", line 16161, in _execute_cli_scenario
+    handler_result = args.handler(args)
+                     ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\diretest.py", line 7781, in run_cleric_group_speed_quality_scenario
+    raise AssertionError(f"Group-speed scenario did not accumulate the expected group quality: {ritual_quality}")
+AssertionError: Group-speed scenario did not accumulate the expected group quality: 5

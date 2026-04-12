@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "C:\Users\gary\dragonsire\tools\diretest\core\runner.py", line 109, in run_scenario
+    result = scenario_func(ctx)
+             ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\tests\scenarios\guard_ai_basic.py", line 29, in scenario
+    spawned = guards.spawn_guards_in_landing(count=15)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\world\systems\guards.py", line 59, in spawn_guards_in_landing
+    guard = create_object(
+            ^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\utils\create.py", line 117, in create_object
+    return ObjectDB.objects.create_object(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\objects\manager.py", line 660, in create_object
+    typeclass = class_from_module(typeclass, settings.TYPECLASS_PATHS)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\dragonsire\.venv\Lib\site-packages\evennia\utils\utils.py", line 1643, in class_from_module
+    mod = importlib.import_module(testpath, package="evennia")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gary\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1206, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1178, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1149, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 936, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1074, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1004, in source_to_code
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "C:\Users\gary\dragonsire\typeclasses\npcs.py", line 536
+    def training_response(self, speaker):
+IndentationError: unexpected indent

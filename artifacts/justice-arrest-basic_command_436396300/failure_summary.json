@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Flee flag should worsen the eventual forced-arrest penalty.",
+  "mode": "command",
+  "scenario": "justice-arrest-basic",
+  "seed": 436396300
+}

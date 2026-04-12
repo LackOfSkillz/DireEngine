@@ -1,0 +1,244 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17015,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SEPARATION_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "initial",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 17013,
+            "key": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17014,
+            "key": "TEST_EMPATH_LINK_FAR_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 17015,
+            "key": "TEST_EMPATH_SEPARATION_HEALER",
+            "location": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 17016,
+            "key": "TEST_EMPATH_SEPARATION_PATIENT",
+            "location": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SEPARATION_HEALER",
+          "TEST_EMPATH_SEPARATION_PATIENT"
+        ],
+        "exits": [],
+        "id": 17013,
+        "key": "TEST_EMPATH_LINK_SEPARATION_ROOM"
+      },
+      "snapshot_label": "initial",
+      "timestamp": 1775822405.3127542
+    },
+    "label": "initial"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17015,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SEPARATION_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 2.48,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "linked",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SEPARATION_HEALER",
+          "TEST_EMPATH_SEPARATION_PATIENT"
+        ],
+        "exits": [],
+        "id": 17013,
+        "key": "TEST_EMPATH_LINK_SEPARATION_ROOM"
+      },
+      "snapshot_label": "linked",
+      "timestamp": 1775822406.0870962
+    },
+    "label": "linked"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17015,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SEPARATION_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.97,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "assess_after_move",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SEPARATION_HEALER"
+        ],
+        "exits": [],
+        "id": 17013,
+        "key": "TEST_EMPATH_LINK_SEPARATION_ROOM"
+      },
+      "snapshot_label": "assess_after_move",
+      "timestamp": 1775822406.5957634
+    },
+    "label": "assess_after_move"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17015,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SEPARATION_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.54,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "take_after_move",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SEPARATION_HEALER"
+        ],
+        "exits": [],
+        "id": 17013,
+        "key": "TEST_EMPATH_LINK_SEPARATION_ROOM"
+      },
+      "snapshot_label": "take_after_move",
+      "timestamp": 1775822407.0333285
+    },
+    "label": "take_after_move"
+  },
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 0,
+        "hp": 100,
+        "id": 17015,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SEPARATION_HEALER",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_LINK_SEPARATION_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 1.54,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [],
+      "label": "final",
+      "object_deltas": {
+        "created": [],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SEPARATION_HEALER"
+        ],
+        "exits": [],
+        "id": 17013,
+        "key": "TEST_EMPATH_LINK_SEPARATION_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775822407.0333285
+    },
+    "label": "final"
+  }
+]

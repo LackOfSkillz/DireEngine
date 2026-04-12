@@ -1,0 +1,78 @@
+[
+  {
+    "data": {
+      "attributes": {},
+      "character": {
+        "bank_coins": 0,
+        "coins": 50,
+        "hp": 100,
+        "id": 16862,
+        "is_dead": false,
+        "key": "TEST_EMPATH_SERVICE_PATIENT",
+        "life_state": "ALIVE",
+        "location": "TEST_EMPATH_SERVICE_ROOM",
+        "max_hp": 100,
+        "states": {
+          "awareness": "normal"
+        }
+      },
+      "combat": {
+        "in_combat": false,
+        "roundtime": 0.0,
+        "target": null,
+        "target_summary": null
+      },
+      "equipment": [],
+      "inventory": [
+        {
+          "id": 16864,
+          "key": "anatomy chart",
+          "location": "TEST_EMPATH_SERVICE_PATIENT",
+          "typeclass": "typeclasses.study_item.StudyItem"
+        }
+      ],
+      "label": "final",
+      "object_deltas": {
+        "created": [
+          {
+            "id": 16861,
+            "key": "TEST_EMPATH_SERVICE_ROOM",
+            "location": null,
+            "typeclass": "typeclasses.rooms.Room"
+          },
+          {
+            "id": 16862,
+            "key": "TEST_EMPATH_SERVICE_PATIENT",
+            "location": "TEST_EMPATH_SERVICE_ROOM",
+            "typeclass": "typeclasses.characters.Character"
+          },
+          {
+            "id": 16863,
+            "key": "TEST_EMPATH_HOUSE_HEALER",
+            "location": "TEST_EMPATH_SERVICE_ROOM",
+            "typeclass": "typeclasses.npcs.HealerNPC"
+          },
+          {
+            "id": 16864,
+            "key": "anatomy chart",
+            "location": "TEST_EMPATH_SERVICE_PATIENT",
+            "typeclass": "typeclasses.study_item.StudyItem"
+          }
+        ],
+        "deleted": []
+      },
+      "room": {
+        "contents": [
+          "TEST_EMPATH_SERVICE_PATIENT",
+          "TEST_EMPATH_HOUSE_HEALER"
+        ],
+        "exits": [],
+        "id": 16861,
+        "key": "TEST_EMPATH_SERVICE_ROOM"
+      },
+      "snapshot_label": "final",
+      "timestamp": 1775821378.5732772
+    },
+    "label": "final"
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "ok",
+  "message": "AssertionError: Primary patient should lose the full requested burden: 40",
+  "mode": "direct",
+  "scenario": "empath-unity-burden",
+  "seed": 924170000
+}

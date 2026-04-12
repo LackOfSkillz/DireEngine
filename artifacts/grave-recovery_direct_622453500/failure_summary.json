@@ -1,0 +1,8 @@
+{
+  "failure_type": "unexpected_exception",
+  "lag_status": "critical",
+  "message": "AssertionError: Grave recover diff did not restore the grave item: {'character_changes': {'before_label': 'departed', 'after_label': 'recovered', 'location_before': 'TEST_GRAVE_ROOM', 'location_after': 'TEST_GRAVE_ROOM', 'hp_before': 50, 'hp_after': 50, 'hp_delta': 0, 'coins_before': 0, 'coins_after': 0, 'coins_delta': 0, 'bank_coins_before': 0, 'bank_coins_after': 0, 'bank_coins_delta': 0, 'life_state_before': 'ALIVE', 'life_state_after': 'ALIVE', 'is_dead_before': False, 'is_dead_after': False, 'died': False, 'revived': False}, 'room_changes': {'room_before': 'TEST_GRAVE_ROOM', 'room_after': 'TEST_GRAVE_ROOM', 'changed': False, 'contents_added': [], 'contents_removed': []}, 'inventory_changes': {'added': [], 'removed': []}, 'equipment_changes': {'added': [], 'removed': []}, 'combat_changes': {'target_before': None, 'target_after': None, 'target_assigned': False, 'target_cleared': False, 'in_combat_before': False, 'in_combat_after': False, 'entered_combat': False, 'exited_combat': False, 'roundtime_before': 0.0, 'roundtime_after': 0.0, 'target_hp_before': None, 'target_hp_after': None, 'target_hp_delta': None, 'target_range_before': None, 'target_range_after': None, 'range_changed': False}, 'attribute_changes': {'changed': {}}, 'object_delta_changes': {'created': [], 'deleted': []}}",
+  "mode": "direct",
+  "scenario": "grave-recovery",
+  "seed": 622453500
+}
