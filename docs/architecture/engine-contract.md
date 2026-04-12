@@ -1,89 +1,46 @@
 # Engine Contract
 
-## Layers
+## Dependency Direction
 
-### Engine Layer
+Allowed directions:
 
-The Engine Layer owns time, scheduling, metrics, timing instrumentation, and execution guardrails.
+- `commands -> services -> domain`
+- `typeclasses -> services`
+- `services -> domain + infrastructure`
+- `domain -> nothing`
 
-Examples:
+Reusable world and system modules may still support gameplay flows, but mutation authority stays in services.
 
-- scheduler wrappers
-- timing helpers
-- metrics collection
-- timing audits
+## Mutation Authority
 
-The Engine Layer may coordinate systems, but it does not contain gameplay policy.
+- `CombatService` owns combat resolution entry.
+- `SkillService` owns skill XP mutation.
+- `StateService` owns generic state mutation such as damage, balance, fatigue, and roundtime delegation.
+- `world.systems.scheduler` owns timed execution.
 
-### System Layer
+## Command Rule
 
-The System Layer contains reusable gameplay logic.
+- commands translate player intent, resolve targets, call services, and emit messages
+- commands must not own combat math, XP mutation, or timing behavior
 
-Examples:
+## Character Rule
 
-- combat state transitions
-- onboarding orchestration
-- death and grave flows
-- justice and theft handling
-- profession subsystem logic
+- `typeclasses/characters.py` is a state container and compatibility surface
+- Character methods may validate, read state, or delegate
+- Character must not become the home for combat math, XP rules, or timing ownership
 
-Systems may request time from the engine, but they do not own clocks.
+## Domain Rule
 
-### Command Layer
+- domain code is pure rule and value logic
+- domain code may not import commands, typeclasses, or services
 
-The Command Layer is input translation only.
+## Timing Rule
 
-Commands should:
+- all timed execution must go through scheduler contract APIs
+- direct `delay(...)` calls outside scheduler internals are forbidden
 
-- validate user intent
-- resolve targets
-- call systems or character helpers
-- emit user-facing messages
+## Validation Rule
 
-Commands must not become the long-term home for core gameplay rules.
-
-### Content Layer
-
-The Content Layer contains rooms, NPCs, items, authored data, static definitions, and area content.
-
-Examples:
-
-- room and NPC setup
-- item definitions
-- map and AreaForge content
-- race and profession data tables
-
-Content can configure behavior, but should not implement infrastructure.
-
-## Rules
-
-- Commands do not contain game logic.
-- Systems do not run implicit loops.
-- Engine owns time.
-- Content does not define infrastructure policy.
-- Timing and execution visibility are engine responsibilities.
-
-## No Implicit Tick Rule
-
-No system may run periodic logic unless it is registered through engine timing.
-
-Forbidden patterns:
-
-- `while True` loops for gameplay processing
-- ad hoc per-object tick methods that are not explicitly registered through engine timing
-- polling state every second when a keyed expiry or one-shot event would work
-- silently adding new global/shared ticker work without an engine-facing registration point
-
-Allowed patterns:
-
-- keyed scheduled expirations
-- one-shot delay-based callbacks
-- controller Scripts for persistent out-of-band state
-- shared ticker work only when many objects truly need the same interval and the cost is measurable
-
-## Ownership Summary
-
-- Engine decides how time and execution are scheduled.
-- Systems decide gameplay rules and transitions.
-- Commands translate player input into system calls.
-- Content supplies the world and data the systems act on.
+- new service entrypoints return `ActionResult`
+- service failures must be explicit through `errors` or typed exceptions
+- docs must describe the current authoritative path, not aspirational alternatives

@@ -4,13 +4,13 @@ import time
 from collections.abc import Mapping
 
 from evennia.objects.models import ObjectDB
-from evennia.utils import delay
 from evennia.utils.create import create_object
 from evennia.utils.search import search_tag
 
+from engine.services.skill_service import SkillService
 from utils.survival_loot import create_simple_item
 from world.area_forge.paths import area_namespace
-from world.systems.skills import award_exp_skill
+from world.systems.scheduler import schedule_event
 
 
 NEW_PLAYER_TAG = "new_player"
@@ -248,7 +248,14 @@ def note_room_entry(character, room=None):
 
     token = int(_now() * 1000)
     character.db.aftermath_orderly_idle_token = token
-    delay(random.uniform(ORDERLY_IDLE_MIN, ORDERLY_IDLE_MAX), _emit_idle_orderly_prompt, character, room_id, token)
+    schedule_event(
+        key="orderly_idle_prompt",
+        owner=character,
+        delay=random.uniform(ORDERLY_IDLE_MIN, ORDERLY_IDLE_MAX),
+        callback=_emit_idle_orderly_prompt,
+        payload={"args": [character, room_id, token]},
+        metadata={"system": "aftermath", "type": "delayed_effect"},
+    )
     return True
 
 
@@ -647,7 +654,7 @@ def handle_pick(character, query):
     bonus_lines.append("The coffer's lid slips loose.")
     bonus_lines.append("")
     bonus_lines.append("There is nothing more to take.")
-    award_exp_skill(character, "locksmithing", 20, success=True, outcome="success", event_key="locksmithing")
+    SkillService.award_xp(character, "locksmithing", 20, source={"mode": "difficulty"}, success=True, outcome="success", event_key="locksmithing")
     character.msg("\n".join(bonus_lines))
     return True
 

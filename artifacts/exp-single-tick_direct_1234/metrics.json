@@ -6,15 +6,15 @@
     {
       "combat_response_ms": null,
       "command": "skilldebug tick",
-      "first_response_ms": 92.79489998880308,
+      "first_response_ms": 106.47620004601777,
       "kind": "command",
-      "ms": 92.87310000217985,
+      "ms": 106.53900005854666,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
-      "script_delay_ms": 0.06710000161547214,
+      "script_delay_ms": 37.99579991027713,
       "script_delay_sources": [
         {
-          "ms": 0.06710000161547214,
+          "ms": 37.99579991027713,
           "source": "ticker:exp_pulse_tick"
         }
       ],
@@ -22,49 +22,45 @@
     }
   ],
   "command_timings_ms": [
-    92.87310000217985
+    106.53900005854666
   ],
   "commands": {
     "count": 1,
-    "max_ms": 92.85699999600183,
+    "max_ms": 106.5208000363782,
     "timings_ms": [
-      92.87310000217985
+      106.53900005854666
     ]
   },
   "deletion_failures": [],
-  "ended_at": 1775335285.9847097,
+  "ended_at": 1776005611.4271746,
   "exit_code": 0,
   "failure_type": null,
-  "first_response_ms": 92.79489998880308,
+  "first_response_ms": 106.47620004601777,
   "interest": {
-    "active_object_count": 2,
-    "active_object_peak": 2,
-    "active_source_types": [
-      "room"
-    ],
-    "exercised_source_types": [
-      "room"
-    ],
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
     "source_add_totals": {
       "direct": 0,
       "proximity": 0,
-      "room": 2,
+      "room": 0,
       "scheduled": 0,
       "zone": 0
     },
-    "source_count_current": 2,
-    "source_count_peak": 2,
+    "source_count_current": 0,
+    "source_count_peak": 0,
     "source_counts": {
       "direct": 0,
       "proximity": 0,
-      "room": 2,
+      "room": 0,
       "scheduled": 0,
       "zone": 0
     },
     "source_peak_counts": {
       "direct": 0,
       "proximity": 0,
-      "room": 2,
+      "room": 0,
       "scheduled": 0,
       "zone": 0
     },
@@ -76,22 +72,20 @@
       "zone": 0
     },
     "transition_counts": {
-      "activate": 2,
+      "activate": 0,
       "deactivate": 0
     },
-    "transition_event_counts": {
-      "activate": 2
-    },
-    "transition_total": 2
+    "transition_event_counts": {},
+    "transition_total": 0
   },
   "invariant_results": [],
   "item_delta_count": 0,
   "lag": {
-    "avg_ms": 92.87310000217985,
+    "avg_ms": 106.53900005854666,
     "jitter": 0.0,
-    "max_ms": 92.87310000217985,
-    "min_ms": 92.87310000217985,
-    "p95_ms": 92.87310000217985,
+    "max_ms": 106.53900005854666,
+    "min_ms": 106.53900005854666,
+    "p95_ms": 106.53900005854666,
     "slow_count": 0,
     "spike_count": 0,
     "status": "ok"
@@ -99,13 +93,13 @@
   "lag_events": [
     {
       "command": "skilldebug tick",
-      "ms": 92.87310000217985,
+      "ms": 106.53900005854666,
       "snapshot": "final"
     }
   ],
   "lag_status": "ok",
   "leaks": [],
-  "max_command_time_ms": 92.85699999600183,
+  "max_command_time_ms": 106.5208000363782,
   "mindstate_delta": {},
   "npc_response_delay_ms": 0.0,
   "output_log": [
@@ -122,13 +116,13 @@
     "output_log": [
       "Tick executed"
     ],
-    "remaining_pool": 933.0,
+    "remaining_pool": 937.02,
     "snapshot_count": 1,
     "snapshot_labels": [
       "final"
     ]
   },
-  "scenario_duration_ms": 6299,
+  "scenario_duration_ms": 4319,
   "scheduler": {
     "active_job_count": 0,
     "active_jobs": [],
@@ -149,7 +143,7 @@
     "timing_modes_exercised": []
   },
   "scheduler_events": 0,
-  "script_delay_ms": 0.06710000161547214,
+  "script_delay_ms": 37.99579991027713,
   "scripts": {
     "count": 0,
     "sources": [],
@@ -159,29 +153,29 @@
   "snapshot_labels": [
     "final"
   ],
-  "started_at": 1775335279.2319853,
+  "started_at": 1776005606.490447,
   "state_transition_count": 0,
   "ticker": {
-    "avg_ms": 0.06710000161547214,
+    "avg_ms": 37.99579991027713,
     "count": 1,
     "execution_count": 1,
-    "max_ms": 0.06710000161547214,
+    "max_ms": 37.99579991027713,
     "performance": {
       "exp_pulse_tick": {
-        "avg_ms": 0.06710000161547214,
+        "avg_ms": 37.99579991027713,
         "count": 1,
-        "max_ms": 0.06710000161547214,
-        "total_ms": 0.06710000161547214
+        "max_ms": 37.99579991027713,
+        "total_ms": 37.99579991027713
       }
     },
     "sources": [
       {
         "count": 1,
         "source": "ticker:exp_pulse_tick",
-        "total_ms": 0.06710000161547214
+        "total_ms": 37.99579991027713
       }
     ],
-    "total_ms": 0.06710000161547214
+    "total_ms": 37.99579991027713
   },
   "timing_model": {
     "flush_usage": {
@@ -200,45 +194,45 @@
       "total_ms": 0
     },
     "ticker_usage": {
-      "avg_ms": 0.06710000161547214,
+      "avg_ms": 37.99579991027713,
       "count": 1,
       "execution_count": 1,
-      "max_ms": 0.06710000161547214,
+      "max_ms": 37.99579991027713,
       "performance": {
         "exp_pulse_tick": {
-          "avg_ms": 0.06710000161547214,
+          "avg_ms": 37.99579991027713,
           "count": 1,
-          "max_ms": 0.06710000161547214,
-          "total_ms": 0.06710000161547214
+          "max_ms": 37.99579991027713,
+          "total_ms": 37.99579991027713
         }
       },
       "sources": [
         {
           "count": 1,
           "source": "ticker:exp_pulse_tick",
-          "total_ms": 0.06710000161547214
+          "total_ms": 37.99579991027713
         }
       ],
-      "total_ms": 0.06710000161547214
+      "total_ms": 37.99579991027713
     },
     "timing_modes_exercised": []
   },
   "timings": {
     "command_execute": {
-      "avg_ms": 92.85699999600183,
+      "avg_ms": 106.5208000363782,
       "count": 1,
       "entries": [
         {
-          "duration_ms": 92.85699999600183,
+          "duration_ms": 106.5208000363782,
           "metadata": {
             "character": "TEST_EXP_SINGLE_TICK_CHAR",
             "command": "skilldebug"
           },
-          "timestamp": 1775335282.6433094
+          "timestamp": 1776005608.4072492
         }
       ],
-      "max_ms": 92.85699999600183,
-      "total_ms": 92.85699999600183
+      "max_ms": 106.5208000363782,
+      "total_ms": 106.5208000363782
     },
     "scheduler_execute": {}
   },

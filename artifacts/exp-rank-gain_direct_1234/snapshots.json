@@ -6,7 +6,7 @@
         "bank_coins": 0,
         "coins": 0,
         "hp": 100,
-        "id": 8832,
+        "id": 24432,
         "is_dead": false,
         "key": "TEST_EXP_RANK_GAIN_CHAR",
         "life_state": "ALIVE",
@@ -28,13 +28,13 @@
       "object_deltas": {
         "created": [
           {
-            "id": 8831,
+            "id": 24431,
             "key": "TEST_EXP_RANK_GAIN_CHAR_ROOM",
             "location": null,
             "typeclass": "typeclasses.rooms.Room"
           },
           {
-            "id": 8832,
+            "id": 24432,
             "key": "TEST_EXP_RANK_GAIN_CHAR",
             "location": "TEST_EXP_RANK_GAIN_CHAR_ROOM",
             "typeclass": "typeclasses.characters.Character"
@@ -47,11 +47,11 @@
           "TEST_EXP_RANK_GAIN_CHAR"
         ],
         "exits": [],
-        "id": 8831,
+        "id": 24431,
         "key": "TEST_EXP_RANK_GAIN_CHAR_ROOM"
       },
       "snapshot_label": "final",
-      "timestamp": 1775335260.0958462
+      "timestamp": 1776005615.6875837
     },
     "label": "final"
   }

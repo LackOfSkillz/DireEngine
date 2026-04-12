@@ -1,7 +1,8 @@
 from django.conf import settings
 
 from evennia.server.portal import telnet as evennia_telnet
-from evennia.utils.utils import delay
+
+from world.systems.scheduler import schedule_event
 
 
 class NoMCCPTelnetProtocol(evennia_telnet.TelnetProtocol):
@@ -23,7 +24,14 @@ class NoMCCPTelnetProtocol(evennia_telnet.TelnetProtocol):
         self.oob = evennia_telnet.telnet_oob.TelnetOOB(self)
         self.mxp = evennia_telnet.Mxp(self)
 
-        self._handshake_delay = delay(2, callback=self.handshake_done, timeout=True)
+        self._handshake_delay = schedule_event(
+            key="handshake_done",
+            owner=f"telnet-{id(self)}",
+            delay=2,
+            callback=self.handshake_done,
+            payload={"kwargs": {"timeout": True}},
+            metadata={"system": "network", "type": "delayed_effect"},
+        )
         self.transport.setTcpKeepAlive(1)
         self.protocol_flags["NOPKEEPALIVE"] = True
         self.nop_keep_alive = None

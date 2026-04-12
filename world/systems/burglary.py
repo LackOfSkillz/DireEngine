@@ -2,8 +2,9 @@ import time
 
 from evennia.utils import logger
 
+from engine.services.skill_service import SkillService
+from engine.services.state_service import StateService
 from utils.contests import run_contest
-from world.systems.skills import award_exp_skill
 from world.systems.theft import adjust_thief_reputation, increase_room_suspicion, trigger_justice_response
 
 
@@ -143,7 +144,7 @@ def _apply_trap_consequence(actor, target, room):
         actor.apply_box_trap_effect(trap_type)
     elif hasattr(actor, "set_hp"):
         current_hp = int(getattr(getattr(actor, "db", None), "hp", 0) or 0)
-        actor.set_hp(current_hp - 5)
+        StateService.apply_damage(actor, min(5, max(0, current_hp)), damage_type="impact")
     if room is not None:
         increase_room_suspicion(room, amount=2)
 
@@ -183,8 +184,8 @@ def _result_with_state(actor, target, result):
 def _award_burglary_movement_training(actor, difficulty_total, *, success):
     difficulty = max(10, int(difficulty_total or 0))
     outcome = "success" if success else "failure"
-    award_exp_skill(actor, "stealth", difficulty, success=success, outcome=outcome, event_key="burglary")
-    award_exp_skill(actor, "athletics", difficulty, success=success, outcome=outcome, event_key="burglary")
+    SkillService.award_xp(actor, "stealth", difficulty, source={"mode": "difficulty"}, success=success, outcome=outcome, event_key="burglary")
+    SkillService.award_xp(actor, "athletics", difficulty, source={"mode": "difficulty"}, success=success, outcome=outcome, event_key="burglary")
 
 
 def attempt_entry(actor, target):
@@ -228,10 +229,11 @@ def attempt_entry(actor, target):
         trap_contest = _run_locksmith_contest(actor, trap_difficulty)
         trap_diff = int(trap_contest.get("diff", 0) or 0)
         trap_outcome = str(trap_contest.get("outcome", "fail") or "fail")
-        award_exp_skill(
+        SkillService.award_xp(
             actor,
             "locksmithing",
             max(10, trap_difficulty),
+            source={"mode": "difficulty"},
             success=trap_outcome != "fail",
             outcome=trap_outcome,
             event_key="trap_disarm",
@@ -271,10 +273,11 @@ def attempt_entry(actor, target):
         lock_contest = _run_locksmith_contest(actor, lock_difficulty)
         lock_diff = int(lock_contest.get("diff", 0) or 0)
         lock_outcome = str(lock_contest.get("outcome", "fail") or "fail")
-        award_exp_skill(
+        SkillService.award_xp(
             actor,
             "locksmithing",
             max(10, lock_difficulty),
+            source={"mode": "difficulty"},
             success=lock_outcome != "fail",
             outcome=lock_outcome,
             event_key="locksmithing",

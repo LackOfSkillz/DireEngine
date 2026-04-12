@@ -1,12 +1,12 @@
 {
   "combat_responsiveness_ms": 0.0,
-  "first_response_ms": 29.188299995439593,
+  "first_response_ms": 36.96435003075749,
   "lag": {
-    "avg_ms": 19.497200002660975,
-    "jitter": 33.70371912247008,
-    "max_ms": 58.41490000602789,
-    "min_ms": 0.026000008801929653,
-    "p95_ms": 52.578480004740406,
+    "avg_ms": 47.76916664559394,
+    "jitter": 17.936639703368563,
+    "max_ms": 66.11409992910922,
+    "min_ms": 30.27079999446869,
+    "p95_ms": 64.19494993751869,
     "slow_count": 0,
     "spike_count": 0,
     "status": "ok"
@@ -14,17 +14,17 @@
   "lag_events": [
     {
       "command": "DIRECT award_xp",
-      "ms": 0.050699993153102696,
+      "ms": 30.27079999446869,
       "snapshot": "final"
     },
     {
       "command": "DIRECT pulse",
-      "ms": 0.026000008801929653,
+      "ms": 46.92260001320392,
       "snapshot": "final"
     },
     {
       "command": "skilldebug evasion",
-      "ms": 58.41490000602789,
+      "ms": 66.11409992910922,
       "snapshot": "final"
     }
   ],
@@ -38,9 +38,9 @@
     {
       "combat_response_ms": null,
       "command": "DIRECT award_xp",
-      "first_response_ms": 0.03029999788850546,
+      "first_response_ms": 7.863100036047399,
       "kind": "direct",
-      "ms": 0.050699993153102696,
+      "ms": 30.27079999446869,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -52,7 +52,7 @@
       "command": "DIRECT pulse",
       "first_response_ms": null,
       "kind": "direct",
-      "ms": 0.026000008801929653,
+      "ms": 46.92260001320392,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,
@@ -62,9 +62,9 @@
     {
       "combat_response_ms": null,
       "command": "skilldebug evasion",
-      "first_response_ms": 58.34629999299068,
+      "first_response_ms": 66.06560002546757,
       "kind": "command",
-      "ms": 58.41490000602789,
+      "ms": 66.11409992910922,
       "npc_response_delay_ms": null,
       "payload_ms": 0.0,
       "script_delay_ms": 0.0,

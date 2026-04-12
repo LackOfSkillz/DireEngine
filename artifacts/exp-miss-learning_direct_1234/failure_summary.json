@@ -1,7 +1,7 @@
 {
-  "failure_type": null,
+  "failure_type": "leak_failure",
   "lag_status": "ok",
-  "message": "",
+  "message": "Preexisting leaked TEST_ objects blocked scenario start.",
   "mode": "direct",
   "scenario": "exp-miss-learning",
   "seed": 1234

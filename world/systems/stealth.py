@@ -2,7 +2,7 @@ import random
 
 from evennia.utils import logger
 
-from world.systems.skills import award_exp_skill
+from engine.services.skill_service import SkillService
 
 
 def _get_skill_rank(character, skill_name):
@@ -151,7 +151,7 @@ def resolve_detection(observer, target, award_xp=False, active=False, context=No
     margin = int(detect_score - stealth_value)
     result = margin >= 0
     if result and award_xp:
-        award_exp_skill(observer, "perception", 1, success=True, outcome="success", event_key="perception")
+        SkillService.award_xp(observer, "perception", 1, source={"mode": "difficulty"}, success=True, outcome="success", event_key="perception")
 
     hint = "none"
     if result and margin >= 20:

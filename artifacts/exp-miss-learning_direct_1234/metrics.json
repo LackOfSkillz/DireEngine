@@ -1,79 +1,44 @@
 {
   "coin_delta": 0,
   "combat_responsiveness_ms": 0.0,
-  "command_count": 2,
-  "command_timing_entries": [
-    {
-      "combat_response_ms": null,
-      "command": "DIRECT train",
-      "first_response_ms": 0.04260000423528254,
-      "kind": "direct",
-      "ms": 0.06560000474564731,
-      "npc_response_delay_ms": null,
-      "payload_ms": 0.0,
-      "script_delay_ms": 0.0,
-      "script_delay_sources": [],
-      "snapshot": "final"
-    },
-    {
-      "combat_response_ms": null,
-      "command": "DIRECT train",
-      "first_response_ms": null,
-      "kind": "direct",
-      "ms": 0.014900011592544615,
-      "npc_response_delay_ms": null,
-      "payload_ms": 0.0,
-      "script_delay_ms": 0.0,
-      "script_delay_sources": [],
-      "snapshot": "final"
-    }
-  ],
-  "command_timings_ms": [
-    0.06560000474564731,
-    0.014900011592544615
-  ],
+  "command_count": 0,
+  "command_timing_entries": [],
+  "command_timings_ms": [],
   "commands": {
-    "count": 2,
+    "count": 0,
     "max_ms": 0.0,
-    "timings_ms": [
-      0.06560000474564731,
-      0.014900011592544615
-    ]
+    "timings_ms": []
   },
   "deletion_failures": [],
-  "ended_at": 1775335232.6416578,
-  "exit_code": 0,
-  "failure_type": null,
-  "first_response_ms": 0.04260000423528254,
+  "ended_at": 1776005301.139669,
+  "exit_code": 1,
+  "failure_type": "leak_failure",
+  "first_response_ms": 0.0,
   "interest": {
-    "active_object_count": 2,
-    "active_object_peak": 2,
-    "active_source_types": [
-      "room"
-    ],
-    "exercised_source_types": [
-      "room"
-    ],
+    "active_object_count": 0,
+    "active_object_peak": 0,
+    "active_source_types": [],
+    "exercised_source_types": [],
     "source_add_totals": {
       "direct": 0,
       "proximity": 0,
-      "room": 2,
+      "room": 0,
       "scheduled": 0,
       "zone": 0
     },
-    "source_count_current": 2,
-    "source_count_peak": 2,
+    "source_count_current": 0,
+    "source_count_peak": 0,
     "source_counts": {
       "direct": 0,
       "proximity": 0,
-      "room": 2,
+      "room": 0,
       "scheduled": 0,
       "zone": 0
     },
     "source_peak_counts": {
       "direct": 0,
       "proximity": 0,
-      "room": 2,
+      "room": 0,
       "scheduled": 0,
       "zone": 0
     },
@@ -85,69 +50,42 @@
       "zone": 0
     },
     "transition_counts": {
-      "activate": 2,
+      "activate": 0,
       "deactivate": 0
     },
-    "transition_event_counts": {
-      "activate": 2
-    },
-    "transition_total": 2
+    "transition_event_counts": {},
+    "transition_total": 0
   },
   "invariant_results": [],
   "item_delta_count": 0,
   "lag": {
-    "avg_ms": 0.04025000816909596,
-    "jitter": 0.035850308964670445,
-    "max_ms": 0.06560000474564731,
-    "min_ms": 0.014900011592544615,
-    "p95_ms": 0.06306500508799218,
+    "avg_ms": 0.0,
+    "jitter": 0.0,
+    "max_ms": 0.0,
+    "min_ms": 0.0,
+    "p95_ms": 0.0,
     "slow_count": 0,
     "spike_count": 0,
     "status": "ok"
   },
-  "lag_events": [
-    {
-      "command": "DIRECT train",
-      "ms": 0.06560000474564731,
-      "snapshot": "final"
-    },
-    {
-      "command": "DIRECT train",
-      "ms": 0.014900011592544615,
-      "snapshot": "final"
-    }
-  ],
+  "lag_events": [],
   "lag_status": "ok",
   "leaks": [],
   "max_command_time_ms": 0.0,
   "mindstate_delta": {},
   "npc_response_delay_ms": 0.0,
-  "output_log": [
-    "You feel your evasion settling into dabbling.",
-    "RETURN 53.37402885682575",
-    "RETURN 21.3496115427303"
-  ],
+  "output_log": [],
   "payload_timing_ms": 0.0,
   "preexisting_cleanup_failures": [],
-  "preexisting_leaks": [],
-  "result": {
-    "commands": [
-      "DIRECT train",
-      "DIRECT train"
-    ],
-    "hit_gain": 53.37402885682575,
-    "miss_gain": 21.3496115427303,
-    "output_log": [
-      "You feel your evasion settling into dabbling.",
-      "RETURN 53.37402885682575",
-      "RETURN 21.3496115427303"
-    ],
-    "snapshot_count": 1,
-    "snapshot_labels": [
-      "final"
-    ]
-  },
-  "scenario_duration_ms": 6115,
+  "preexisting_leaks": [
+    {
+      "id": 24405,
+      "key": "TEST_STAGE6_EDGE_ATTACKER_2",
+      "type": "typeclasses.characters.Character"
+    }
+  ],
+  "result": null,
+  "scenario_duration_ms": 1179,
   "scheduler": {
     "active_job_count": 0,
     "active_jobs": [],
@@ -175,10 +113,8 @@
     "total_ms": 0
   },
   "slow_commands": [],
-  "snapshot_labels": [
-    "final"
-  ],
-  "started_at": 1775335226.168868,
+  "snapshot_labels": [],
+  "started_at": 1776005298.9168255,
   "state_transition_count": 0,
   "ticker": {
     "avg_ms": 0.0,

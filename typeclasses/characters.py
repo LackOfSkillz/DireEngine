@@ -1,3 +1,7 @@
+# ARCHITECTURE RULE:
+# Character is a state container only.
+# No combat or game logic should be implemented here.
+
 """
 Characters
 
@@ -17,10 +21,13 @@ import random
 import time
 
 from evennia.objects.objects import DefaultCharacter
-from evennia.utils import delay
 from evennia.utils.create import create_object
 from evennia.utils.search import search_object, search_tag
 
+from domain.wounds.constants import BODY_PART_ORDER as WOUND_BODY_PART_ORDER, DEFAULT_INJURIES as DEFAULT_WOUND_INJURIES
+from domain.wounds.models import copy_default_injuries as copy_default_wound_map
+from domain.wounds import rules as wound_rules
+from engine.services.injury_service import InjuryService
 from typeclasses.abilities import get_ability
 from typeclasses.box import Box
 from typeclasses.corpse import get_corpse_wounds as get_corpse_wounds_payload, is_near_stable as is_near_stable_corpse_wounds, is_stable as is_stable_corpse_wounds, normalize_corpse_wounds
@@ -121,7 +128,7 @@ from world.systems.interest import (
     sync_direct_interest,
     sync_subject_interest,
 )
-from world.systems.skills import MINDSTATE_MAX, SkillHandler, TEMPLATE_EXP_SKILLS, award_exp_skill, is_active
+from world.systems.skills import MINDSTATE_MAX, SkillHandler, TEMPLATE_EXP_SKILLS, is_active
 from world.systems.circles import (
     get_circle_requirements,
     get_highest_configured_circle,
@@ -468,20 +475,9 @@ STEALTH_FATIGUE_STEP = 0.4
 STEALTH_FATIGUE_WINDOW = 90.0
 STEALTH_MOVE_ROUNDTIME = 0.5
 
-DEFAULT_INJURIES = {
-    "head": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 100, "vital": True},
-    "chest": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 120, "vital": True},
-    "abdomen": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 110, "vital": True},
-    "back": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 110, "vital": True},
-    "left_arm": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 80, "vital": False},
-    "right_arm": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 80, "vital": False},
-    "left_hand": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 60, "vital": False},
-    "right_hand": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 60, "vital": False},
-    "left_leg": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 90, "vital": False},
-    "right_leg": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 90, "vital": False},
-}
+DEFAULT_INJURIES = DEFAULT_WOUND_INJURIES
 
-BODY_PART_ORDER = tuple(DEFAULT_INJURIES.keys())
+BODY_PART_ORDER = WOUND_BODY_PART_ORDER
 
 DEFAULT_WEAPON_PROFILE = {
     "damage": 1,
@@ -887,12 +883,7 @@ ARMOR_COVERAGE_WEIGHTS = {
 
 
 def _copy_default_injuries():
-    injuries = {}
-    for part, data in DEFAULT_INJURIES.items():
-        copied = data.copy()
-        copied["tend"] = dict(data.get("tend", {"strength": 0, "duration": 0}))
-        injuries[part] = copied
-    return injuries
+    return copy_default_wound_map()
 
 
 def _copy_default_weapon_profile():
@@ -1283,9 +1274,13 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.exp_skill_state = store
 
         skills = dict(self.db.skills or {})
-        legacy_entry = dict(skills.get(skill.name) or {"rank": 0, "mindstate": 0})
-        legacy_entry["rank"] = max(int(legacy_entry.get("rank", 0) or 0), int(getattr(skill, "rank", 0) or 0))
-        legacy_entry.setdefault("mindstate", int(legacy_entry.get("mindstate", 0) or 0))
+        legacy_entry = dict(skills.get(skill.name) or {"rank": 0, "pool": 0.0, "mindstate": 0})
+        legacy_entry["rank"] = int(getattr(skill, "rank", 0) or 0)
+        legacy_entry["pool"] = float(getattr(skill, "pool", 0.0) or 0.0)
+        if skill.name not in TEMPLATE_EXP_SKILLS:
+            legacy_entry["mindstate"] = int(getattr(skill, "mindstate", 0) or 0)
+        else:
+            legacy_entry.setdefault("mindstate", int(legacy_entry.get("mindstate", 0) or 0))
         skills[skill.name] = legacy_entry
         self.db.skills = skills
         return skill
@@ -1300,24 +1295,21 @@ class Character(ObjectParent, DefaultCharacter):
             return category
         return "primary"
 
+    # SKILL_GAIN_ENTRYPOINT
+    # DEPRECATED: use SkillService
     def award_skill_experience(self, skill_name, difficulty, success=True, outcome=None, event_key=None, context_multiplier=1.0):
-        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
-        if not normalized:
-            return 0.0
-        exp_skill = self._sync_exp_skill_state(normalized)
-        exp_skill.skillset = self.get_exp_skillset_tier(normalized)
-        exp_skill.recalc_pool()
-        gained = award_exp_skill(
+        from engine.services.skill_service import SkillService
+
+        return SkillService.award_xp(
             self,
-            normalized,
+            skill_name,
             difficulty,
+            source={"mode": "difficulty"},
             success=success,
             outcome=outcome,
             event_key=event_key,
             context_multiplier=context_multiplier,
-        )
-        self._persist_exp_skill_state(exp_skill)
-        return gained
+        ).amount
 
     def award_field_xp(self, action_key, difficulty=None, success=True, outcome=None, context_multiplier=1.0):
         normalized_action = str(action_key or "").strip().lower()
@@ -2322,6 +2314,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_core_defaults()
         return self.db.hp, self.db.max_hp
 
+    # CANDIDATE_FOR_EXTRACTION
+    # MIXED: state mutation plus death/ritual side effects.
     def set_hp(self, value):
         self.ensure_core_defaults()
         old_hp = int(self.db.hp or 0)
@@ -2344,6 +2338,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_all_defaults()
         return self.db.balance, self.db.max_balance
 
+    # CANDIDATE_FOR_EXTRACTION
+    # STATE_ONLY
     def set_balance(self, value):
         self.ensure_all_defaults()
         self.db.balance = max(0, min(value, self.db.max_balance))
@@ -2353,6 +2349,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_all_defaults()
         return self.db.fatigue, self.db.max_fatigue
 
+    # CANDIDATE_FOR_EXTRACTION
+    # MIXED: state mutation plus empath resource sync.
     def set_fatigue(self, value):
         self.ensure_all_defaults()
         self.db.fatigue = max(0, min(value, self.db.max_fatigue))
@@ -4818,9 +4816,12 @@ class Character(ObjectParent, DefaultCharacter):
         return True, f"{owner.key} is restored to life, but something feels off."
 
     def cancel_pending_cleric_ritual(self, message=None, emit_message=True):
+        from world.systems.scheduler import cancel_event
+
         pending = getattr(self.ndb, "pending_cleric_ritual_action", None)
         if not isinstance(pending, dict) or not bool(pending.get("active", False)):
             return False
+        cancel_event("cleric_ritual", self)
         action = str(pending.get("action", "") or "").strip().lower()
         corpse_id = int(pending.get("corpse_id", 0) or 0)
         result = search_object(f"#{corpse_id}") if corpse_id > 0 else []
@@ -4935,7 +4936,16 @@ class Character(ObjectParent, DefaultCharacter):
             self.emit_ritual_message(corpse, f"revive_outcome_{survivability_band}", f"{owner.key} jolts back to life.", cooldown=0.5, exclude=[owner, self])
         corpse_id = int(getattr(corpse, "id", 0) or 0)
         owner.clear_death_corpse_link()
-        delay(0, self._finalize_revive_corpse_cleanup, corpse_id)
+        from world.systems.scheduler import schedule_event
+
+        schedule_event(
+            key=f"revive_cleanup:{corpse_id}",
+            owner=self,
+            delay=0,
+            callback=self._finalize_revive_corpse_cleanup,
+            payload={"args": [corpse_id]},
+            metadata={"system": "cleric", "type": "delayed_effect"},
+        )
         return True, f"You complete the final rite and call {owner.key} back to life."
 
     def perform_cleric_corpse_ritual(self, corpse, action):
@@ -5081,7 +5091,16 @@ class Character(ObjectParent, DefaultCharacter):
         owner = corpse.get_owner() if hasattr(corpse, "get_owner") else None
         if owner:
             owner.msg("A distant rite tugs at the edge of your spirit.")
-        delay(self.get_cleric_stage_delay(corpse, "revive"), self._complete_pending_cleric_ritual, token)
+        from world.systems.scheduler import schedule_event
+
+        schedule_event(
+            key="cleric_ritual",
+            owner=self,
+            delay=self.get_cleric_stage_delay(corpse, "revive"),
+            callback=self._complete_pending_cleric_ritual,
+            payload={"args": [token]},
+            metadata={"system": "cleric", "type": "delayed_effect"},
+        )
         join_text = " You join the ongoing ritual." if self.get_cleric_group_support_count(corpse) > 1 else ""
         return True, f"You begin the final rite over {corpse.key}.{join_text} Remain still and unhurt until it is complete."
 
@@ -5170,7 +5189,16 @@ class Character(ObjectParent, DefaultCharacter):
                 emitted_join = self.emit_ritual_message(corpse, f"{action_key}_join_actor_{int(getattr(self, 'id', 0) or 0)}", join_message, cooldown=0.5, exclude=[self])
             if emitted_join:
                 self.emit_ritual_message(corpse, f"{action_key}_join_reinforce_{int(getattr(self, 'id', 0) or 0)}", "Another set of practiced hands strengthens the ritual.", cooldown=0.5, exclude=[self])
-        delay(self.get_cleric_stage_delay(corpse, action_key), self._complete_pending_cleric_ritual, token)
+        from world.systems.scheduler import schedule_event
+
+        schedule_event(
+            key="cleric_ritual",
+            owner=self,
+            delay=self.get_cleric_stage_delay(corpse, action_key),
+            callback=self._complete_pending_cleric_ritual,
+            payload={"args": [token]},
+            metadata={"system": "cleric", "type": "delayed_effect"},
+        )
         message = str(profile.get("start_message", "You begin the rite.") or "You begin the rite.")
         if self.get_cleric_group_support_count(corpse) > 1:
             message = f"{message} You join the ongoing ritual."
@@ -6682,18 +6710,14 @@ class Character(ObjectParent, DefaultCharacter):
     def apply_empath_unity_share(self, location, amount, damage_type="impact"):
         return int(amount or 0)
 
+    # CANDIDATE_FOR_EXTRACTION
+    # DEPRECATED: logic should live in services
+    # MIXED: state mutation plus combat-side conditional behavior.
     def apply_incoming_damage(self, location, amount, damage_type="impact"):
-        self.ensure_core_defaults()
-        final_amount = self.apply_empath_unity_share(location, int(amount or 0), damage_type=damage_type)
-        if final_amount <= 0:
-            return 0
-        self.set_hp((self.db.hp or 0) - final_amount)
-        self.apply_damage(location, final_amount, damage_type)
-        if self.is_empath() and self.get_empath_link_state(require_local=False, emit_break_messages=False):
-            self.decay_empath_link_stability(amount=None, reason="damage", emit_message=True)
-        if self.is_empath() and self.get_empath_unity_state():
-            self.decay_empath_unity_stability(event_key="damage", emit_message=True)
-        return final_amount
+        from engine.services.state_service import StateService
+
+        result = StateService.apply_damage(self, amount, location=location, damage_type=damage_type)
+        return int(result.amount or 0)
 
     def process_empath_links(self):
         if not self.is_empath():
@@ -8699,38 +8723,7 @@ class Character(ObjectParent, DefaultCharacter):
         return f"{self.key}'s"
 
     def get_injury_display_lines(self, looker=None):
-        self.ensure_core_defaults()
-        lines = []
-
-        for part_name in BODY_PART_ORDER:
-            body_part = self.get_body_part(part_name)
-            if not body_part:
-                continue
-
-            trauma = self.get_part_trauma(body_part)
-            bleed = body_part.get("bleed", 0)
-            tended = bool(body_part.get("tended", False))
-            if trauma <= 0 and bleed <= 0:
-                continue
-
-            part_display = self.format_body_part_name(part_name)
-            wound_text = self.describe_body_part_wounds(body_part)
-            tended_text = " (tended)" if tended else ""
-
-            if looker == self:
-                if bleed > 0:
-                    lines.append(f"You are bleeding from your {part_display}{tended_text}.")
-                else:
-                    lines.append(f"Your {part_display} is {wound_text}{tended_text}.")
-                continue
-
-            owner_name = self.get_possessive_name(looker=looker)
-            if bleed > 0:
-                lines.append(f"{owner_name.capitalize()} {part_display} is bleeding{tended_text}.")
-            else:
-                lines.append(f"{owner_name.capitalize()} {part_display} is {wound_text}{tended_text}.")
-
-        return lines
+        return InjuryService.get_injury_display_lines(self, looker=looker)
 
     def get_flavor_text(self):
         return None
@@ -9007,8 +9000,7 @@ class Character(ObjectParent, DefaultCharacter):
         context_multiplier *= 1.0 / (1.0 + max(0, attempt_count - 1) * STEALTH_FATIGUE_STEP)
         context_multiplier *= self._get_stealth_position_modifier(pending)
 
-        gained = award_exp_skill(
-            self,
+        gained = self.award_skill_experience(
             "stealth",
             max(1, int(pending.get("difficulty", 1) or 1)),
             success=outcome != "fail",
@@ -9449,8 +9441,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You notice no obvious sign of a trap.")
 
-        award_exp_skill(
-            self,
+        self.award_skill_experience(
             "locksmithing",
             max(10, int(box.db.lock_difficulty or 0)),
             success=True,
@@ -9487,8 +9478,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         if outcome == "partial":
             self.msg("You think you understand part of the trap, but not enough to safely disarm it.")
-            award_exp_skill(
-                self,
+            self.award_skill_experience(
                 "locksmithing",
                 max(10, int(box.db.trap_difficulty or 0)),
                 success=False,
@@ -9504,8 +9494,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.last_disarmed_trap_difficulty = int(box.db.trap_difficulty or 0)
             self.db.last_disarmed_trap_source = getattr(box, "id", None)
             self.msg("You successfully disarm the trap.")
-            award_exp_skill(
-                self,
+            self.award_skill_experience(
                 "locksmithing",
                 max(10, int(box.db.trap_difficulty or 0)),
                 success=True,
@@ -9589,8 +9578,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You cannot determine its exact function.")
 
-        award_exp_skill(
-            self,
+        self.award_skill_experience(
             "locksmithing",
             max(10, int(box.db.trap_difficulty or 0)),
             success=True,
@@ -9632,8 +9620,7 @@ class Character(ObjectParent, DefaultCharacter):
         if outcome == "partial":
             self.msg("You recover a few damaged components.")
             self.create_trap_component_with_tier(trap, "low", rare=False)
-            award_exp_skill(
-                self,
+            self.award_skill_experience(
                 "locksmithing",
                 max(10, int(box.db.trap_difficulty or 0)),
                 success=False,
@@ -9645,8 +9632,7 @@ class Character(ObjectParent, DefaultCharacter):
             tier = "standard" if outcome == "success" else "high"
             rare = random.random() < 0.1
             self.create_trap_component_with_tier(trap, tier, rare=rare)
-            award_exp_skill(
-                self,
+            self.award_skill_experience(
                 "locksmithing",
                 max(10, int(box.db.trap_difficulty or 0)),
                 success=True,
@@ -9702,8 +9688,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.last_disarmed_trap = None
         self.db.last_disarmed_trap_difficulty = 0
         self.db.last_disarmed_trap_source = None
-        award_exp_skill(
-            self,
+        self.award_skill_experience(
             "locksmithing",
             difficulty,
             success=outcome != "partial",
@@ -10456,13 +10441,13 @@ class Character(ObjectParent, DefaultCharacter):
             quality_name = QUALITY_NAMES.get(int(getattr(target.db, "quality_tier", 2) or 2), "average")
             gem_type = str(getattr(target.db, "gem_type", "quartz") or "quartz")
             self.msg(f"This appears to be a {size_name} {gem_type} of {quality_name} make.")
-            award_exp_skill(self, "appraisal", 10)
+            self.award_skill_experience("appraisal", 10)
             return
 
         if getattr(target.db, "is_box", False):
             if bool(getattr(target.db, "strict_loot_box", False)):
                 self.msg("This appears to be a locked container of moderate weight.")
-                award_exp_skill(self, "appraisal", 10)
+                self.award_skill_experience("appraisal", 10)
                 return
             lock_desc = self.describe_lock_difficulty(int(getattr(target.db, "lock_difficulty", 0) or 0))
             if tier == "vague":
@@ -10502,7 +10487,7 @@ class Character(ObjectParent, DefaultCharacter):
             else:
                 self.msg(f"You judge it to be worth about {self.format_coins(value)}.")
 
-        award_exp_skill(self, "appraisal", 10)
+        self.award_skill_experience("appraisal", 10)
         self.set_roundtime(5)
 
     def compare_items(self, first_item, second_item):
@@ -10522,7 +10507,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("They seem roughly equal in value.")
 
-        award_exp_skill(self, "appraisal", 10)
+        self.award_skill_experience("appraisal", 10)
         self.set_roundtime(5)
 
     def is_vendor_target(self, obj):
@@ -11325,7 +11310,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.set_spell_cooldown(spell_name, max(2, int(total_power / 10)))
             self.msg(f"You sustain {spell_name}.")
             if category == "targeted_magic":
-                award_exp_skill(self, "targeted_magic", max(10, int(total_power)), success=True)
+                self.award_skill_experience("targeted_magic", max(10, int(total_power)), success=True)
             else:
                 self.use_skill(category, apply_roundtime=False, emit_placeholder=False, require_known=False)
             self.clear_state("prepared_spell")
@@ -11453,8 +11438,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         if outcome == "partial":
             self.msg("You make a little progress, but the lock still resists you.")
-            award_exp_skill(
-                self,
+            self.award_skill_experience(
                 "locksmithing",
                 max(10, int(box.db.lock_difficulty or 0)),
                 success=False,
@@ -11466,8 +11450,7 @@ class Character(ObjectParent, DefaultCharacter):
         if outcome in ("success", "strong"):
             box.db.locked = False
             self.msg("You successfully pick the lock.")
-            award_exp_skill(
-                self,
+            self.award_skill_experience(
                 "locksmithing",
                 max(10, int(box.db.lock_difficulty or 0)),
                 success=True,
@@ -11584,19 +11567,13 @@ class Character(ObjectParent, DefaultCharacter):
         self.generate_box_loot(box)
 
     def get_arm_penalty(self):
-        right_arm = (self.get_body_part("right_arm") or {}).get("external", 0)
-        left_arm = (self.get_body_part("left_arm") or {}).get("external", 0)
-        return min(25, int(math.sqrt(max(right_arm, left_arm))))
+        return int(InjuryService.get_active_penalties(self).get("arm_penalty", 0) or 0)
 
     def get_leg_penalty(self):
-        left_leg = (self.get_body_part("left_leg") or {}).get("external", 0)
-        right_leg = (self.get_body_part("right_leg") or {}).get("external", 0)
-        return min(25, int(math.sqrt(max(left_leg, right_leg))))
+        return int(InjuryService.get_active_penalties(self).get("leg_penalty", 0) or 0)
 
     def get_hand_penalty(self):
-        left_hand = (self.get_body_part("left_hand") or {}).get("external", 0)
-        right_hand = (self.get_body_part("right_hand") or {}).get("external", 0)
-        return min(25, int(math.sqrt(max(left_hand, right_hand))))
+        return int(InjuryService.get_active_penalties(self).get("hand_penalty", 0) or 0)
 
     def get_coverage_weight(self, coverage):
         normalized = self.normalize_body_part_name(coverage)
@@ -12010,8 +11987,7 @@ class Character(ObjectParent, DefaultCharacter):
         contest_total = self._get_climb_skill_total(exit_obj)
         outcome = self._resolve_climb_outcome(contest_total, difficulty)
 
-        gained = award_exp_skill(
-            self,
+        gained = self.award_skill_experience(
             "athletics",
             difficulty,
             success=outcome != "failure",
@@ -12081,7 +12057,7 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(random.choice(CLIMB_OUTCOME_MESSAGES["mid"]["success"]))
             self.set_roundtime(1.0)
 
-        gained = award_exp_skill(self, "athletics", difficulty, success=outcome != "failure", outcome=outcome, event_key="athletics")
+        gained = self.award_skill_experience("athletics", difficulty, success=outcome != "failure", outcome=outcome, event_key="athletics")
         self._maybe_emit_climb_learning_feedback(gained)
         return True
 
@@ -12101,7 +12077,7 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             self.msg("You swim successfully.")
 
-        award_exp_skill(self, "athletics", difficulty, success=result["outcome"] != "fail")
+        self.award_skill_experience("athletics", difficulty, success=result["outcome"] != "fail")
         return True
 
     def split_numbered_query(self, query):
@@ -12429,16 +12405,18 @@ class Character(ObjectParent, DefaultCharacter):
 
             normalized[skill_name] = {
                 "rank": skill_data.get("rank", 0),
+                "pool": skill_data.get("pool", 0.0),
                 "mindstate": skill_data.get("mindstate", 0),
             }
 
         if dict(current_skills or {}) != normalized:
             self.db.skills = normalized
 
+    # DEPRECATED: use SkillService
     def update_skill(self, skill_name, **updates):
         self.ensure_skill_defaults()
         skills = dict(self.db.skills)
-        current = dict(skills.get(skill_name, {"rank": 0, "mindstate": 0}))
+        current = dict(skills.get(skill_name, {"rank": 0, "pool": 0.0, "mindstate": 0}))
         current.update(updates)
         skills[skill_name] = current
         self.db.skills = skills
@@ -13159,15 +13137,21 @@ class Character(ObjectParent, DefaultCharacter):
 
         return profile
 
+    # CANDIDATE_FOR_EXTRACTION
+    # STATE_ONLY
     def is_in_roundtime(self):
         self.ensure_core_defaults()
         return time.time() < (self.db.roundtime_end or 0)
 
+    # CANDIDATE_FOR_EXTRACTION
+    # STATE_ONLY
     def get_remaining_roundtime(self):
         self.ensure_core_defaults()
         remaining = (self.db.roundtime_end or 0) - time.time()
         return max(0, round(remaining, 2))
 
+    # CANDIDATE_FOR_EXTRACTION
+    # LOGIC (must move later)
     def _get_roundtime_schedule_key(self):
         object_id = int(getattr(self, "id", 0) or 0)
         if object_id > 0:
@@ -13178,6 +13162,9 @@ class Character(ObjectParent, DefaultCharacter):
         stable_name = str(getattr(self, "key", "character") or "character").strip().lower().replace(" ", "-")
         return f"combat:roundtime:{stable_name}"
 
+    # CANDIDATE_FOR_EXTRACTION
+    # DEPRECATED: logic should live in services
+    # MIXED: state mutation plus timing/scheduling logic.
     def _expire_roundtime(self, expected_end=None):
         self.ensure_core_defaults()
         current_end = float(self.db.roundtime_end or 0.0)
@@ -13191,34 +13178,40 @@ class Character(ObjectParent, DefaultCharacter):
         self.sync_client_state()
         return True
 
+    # CANDIDATE_FOR_EXTRACTION
+    # DEPRECATED: logic should live in services
+    # MIXED: state mutation plus scheduler orchestration.
     def set_roundtime(self, seconds):
         self.ensure_core_defaults()
-        from world.systems.scheduler import cancel, schedule
+        from world.systems.scheduler import cancel_event, schedule_event
         from world.systems.time_model import SCHEDULED_EXPIRY
 
         seconds = max(0.0, float(seconds or 0.0))
         if seconds <= 0.0:
             self.db.roundtime_end = 0
-            cancel(self._get_roundtime_schedule_key())
+            cancel_event("roundtime_end", self)
             self.sync_client_state()
             return 0.0
 
         target_end = time.time() + seconds
         self.db.roundtime_end = target_end
-        schedule(
-            seconds,
-            self._expire_roundtime,
-            key=self._get_roundtime_schedule_key(),
-            system="combat.roundtime",
-            timing_mode=SCHEDULED_EXPIRY,
-            expected_end=target_end,
+        schedule_event(
+            key="roundtime_end",
+            owner=self,
+            delay=seconds,
+            callback="combat:clear_roundtime",
+            payload={"expected_end": target_end},
+            metadata={"system": "combat", "type": "roundtime", "timing_mode": SCHEDULED_EXPIRY},
         )
         self.sync_client_state()
         return target_end
 
+    # CANDIDATE_FOR_EXTRACTION
+    # DEPRECATED: logic should live in services
+    # MIXED: state mutation plus thief-specific timing rules.
     def apply_thief_roundtime(self, seconds, minimum=0.5):
         self.ensure_core_defaults()
-        from world.systems.scheduler import schedule
+        from world.systems.scheduler import schedule_event
         from world.systems.time_model import SCHEDULED_EXPIRY
 
         seconds = max(float(minimum), float(seconds))
@@ -13226,13 +13219,13 @@ class Character(ObjectParent, DefaultCharacter):
         now = time.time()
         target_end = max(current_end, now) + seconds
         self.db.roundtime_end = target_end
-        schedule(
-            max(0.0, target_end - now),
-            self._expire_roundtime,
-            key=self._get_roundtime_schedule_key(),
-            system="thief.roundtime",
-            timing_mode=SCHEDULED_EXPIRY,
-            expected_end=target_end,
+        schedule_event(
+            key="roundtime_end",
+            owner=self,
+            delay=max(0.0, target_end - now),
+            callback="combat:clear_roundtime",
+            payload={"expected_end": target_end},
+            metadata={"system": "thief", "type": "roundtime", "timing_mode": SCHEDULED_EXPIRY},
         )
         self.sync_client_state()
         return target_end
@@ -13241,6 +13234,8 @@ class Character(ObjectParent, DefaultCharacter):
         remaining = self.get_remaining_roundtime()
         self.msg(f"You must wait {remaining:.2f} seconds before acting.")
 
+    # SKILL_GAIN_ENTRYPOINT
+    # DEPRECATED: use SkillService
     def use_skill(self, skill_name, *args, **kwargs):
         self.ensure_core_defaults()
         apply_roundtime = kwargs.get("apply_roundtime", True)
@@ -13262,38 +13257,23 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("You do not know that skill.")
             return (0, "unknown") if return_learning else False
 
-        amount, band = self.get_learning_amount(skill_name, difficulty)
-        skillset = self.get_skillset(skill_name)
-        weight = self.get_skill_weight(skillset)
-        amount *= weight
-        print(f"[XP] {self} {skillset} x{weight}")
-        amount *= learning_multiplier
-        amount *= self.get_scholarship_learning_multiplier()
-        amount *= self.get_race_learning_modifier(skill_name=skill_name)
-        amount = int(amount) if amount > 0 else 0
-        if amount > 0:
-            amount = max(1, amount)
+        from engine.services.skill_service import SkillService
 
-        debt_multiplier = self.get_xp_debt_gain_multiplier()
-        if amount > 0 and debt_multiplier < 1.0:
-            amount = max(1, int(round(amount * debt_multiplier)))
-
-        if amount > 0:
-            self.db.total_xp = int(getattr(self.db, "total_xp", 0) or 0) + amount
-            self.adjust_unabsorbed_xp(amount)
-            self.reduce_exp_debt(amount)
-            if not bool(FAVOR_SYSTEM_CONFIG.get("route_xp_only", False)):
-                skill = self.db.skills.get(skill_name)
-                if skill:
-                    cap = self.get_mindstate_cap()
-                    self.update_skill(skill_name, mindstate=min(skill.get("mindstate", 0) + amount, cap))
+        practice_result = SkillService.award_practice(
+            self,
+            skill_name,
+            difficulty,
+            learning_multiplier=learning_multiplier,
+        )
+        gained = practice_result.amount
+        band = practice_result.band
 
         if emit_placeholder:
             self.msg(f"You try to use {skill_name}, but it is not implemented.")
         if apply_roundtime:
             self.set_roundtime(3)
         if return_learning:
-            return amount, band
+            return int(round(gained)), band
         return True
 
     def use_ability(self, key, target=None):
@@ -15717,14 +15697,14 @@ class Character(ObjectParent, DefaultCharacter):
 
         hit_quality = self.resolve_hit_quality(offense, defense)
         if hit_quality == "miss":
-            award_exp_skill(self, "targeted_magic", max(10, int(defense)), success=False)
-            award_exp_skill(target, "evasion", max(10, int(offense)), success=True)
+            self.award_skill_experience("targeted_magic", max(10, int(defense)), success=False)
+            target.award_skill_experience("evasion", max(10, int(offense)), success=True)
             self.msg(f"Your {name} misses {target.key}.")
             target.msg(f"{self.key}'s {name} misses you.")
             return True
 
-        award_exp_skill(self, "targeted_magic", max(10, int(defense)), success=True)
-        award_exp_skill(target, "evasion", max(10, int(offense)), success=False)
+        self.award_skill_experience("targeted_magic", max(10, int(defense)), success=True)
+        target.award_skill_experience("evasion", max(10, int(offense)), success=False)
 
         multiplier = {"graze": 0.5, "hit": 1.0, "strong": 1.5}[hit_quality]
         if quality == "weak":
@@ -15737,10 +15717,9 @@ class Character(ObjectParent, DefaultCharacter):
         damage = max(0, self.apply_ward_absorption(target, damage))
         damage = max(1, damage)
 
-        if hasattr(target, "apply_incoming_damage"):
-            target.apply_incoming_damage("chest", damage, "impact")
-        else:
-            target.set_hp((target.db.hp or 0) - damage)
+        from engine.services.state_service import StateService
+
+        StateService.apply_damage(target, damage, location="chest", damage_type="impact")
         self.msg(f"Your {name} {hit_quality}s {target.key} for {damage} damage.")
         target.msg(f"{self.key}'s {name} {hit_quality}s you for {damage} damage.")
         if self.location:
@@ -15777,10 +15756,10 @@ class Character(ObjectParent, DefaultCharacter):
             defense = max(1, defense - pressure_penalty)
             hit_quality = self.resolve_hit_quality(offense, defense)
             if hit_quality == "miss":
-                award_exp_skill(target, "evasion", max(10, int(offense)), success=True)
+                target.award_skill_experience("evasion", max(10, int(offense)), success=True)
                 continue
 
-            award_exp_skill(target, "evasion", max(10, int(offense)), success=False)
+            target.award_skill_experience("evasion", max(10, int(offense)), success=False)
 
             multiplier = {"graze": 0.5, "hit": 1.0, "strong": 1.5}[hit_quality]
             if quality == "weak":
@@ -15793,14 +15772,13 @@ class Character(ObjectParent, DefaultCharacter):
             damage = max(0, self.apply_ward_absorption(target, damage))
             damage = max(1, damage)
             hit_any = True
-            if hasattr(target, "apply_incoming_damage"):
-                target.apply_incoming_damage("chest", damage, "impact")
-            else:
-                target.set_hp((target.db.hp or 0) - damage)
+            from engine.services.state_service import StateService
+
+            StateService.apply_damage(target, damage, location="chest", damage_type="impact")
             if getattr(target, "account", None):
                 target.msg(f"{self.key}'s {name} washes over you!")
 
-        award_exp_skill(self, "targeted_magic", max(10, int(effective_power)), success=hit_any)
+        self.award_skill_experience("targeted_magic", max(10, int(effective_power)), success=hit_any)
 
         return True
 
@@ -15846,7 +15824,7 @@ class Character(ObjectParent, DefaultCharacter):
         if ratio < 0.7:
             self.msg(f"{target.key} resists your {name}.")
             target.msg(f"You resist {self.key}'s {name}.")
-            award_exp_skill(self, "debilitation", max(10, int(defense)), success=False)
+            self.award_skill_experience("debilitation", max(10, int(defense)), success=False)
             return True
 
         penalty = int(effective_power / 10)
@@ -15869,14 +15847,14 @@ class Character(ObjectParent, DefaultCharacter):
                 self.apply_exposed_state(target, duration=6)
                 self.msg(f"Your {name} reinforces the lingering hindrance on {target.key}.")
                 target.msg(f"{self.key}'s {name} intensifies the pressure already on you.")
-                award_exp_skill(self, "debilitation", max(10, int(defense)), success=True)
+                self.award_skill_experience("debilitation", max(10, int(defense)), success=True)
                 return True
 
         target.set_state("debilitated", {"penalty": penalty, "duration": duration, "type": debuff_type})
         self.apply_exposed_state(target, duration=6)
         self.msg(f"Your {name} hampers {target.key}.")
         target.msg(f"You feel your movements hindered by {self.key}'s {name}.")
-        award_exp_skill(self, "debilitation", max(10, int(defense)), success=True)
+        self.award_skill_experience("debilitation", max(10, int(defense)), success=True)
         return True
 
     def resolve_warding_spell(self, name, power, spell_def, quality):
@@ -16193,31 +16171,8 @@ class Character(ObjectParent, DefaultCharacter):
         return max(duration, min_remaining)
 
     def apply_tend(self, part, tender=None):
-        body_part = self.get_body_part(part)
-        if not body_part:
-            return False
-
-        healer = tender or self
-        skill = healer.get_skill("first_aid") if hasattr(healer, "get_skill") else 0
-        current_bleed = int(body_part.get("bleed", 0))
-        strength = max(3, current_bleed + 1, 2 + (skill // 6))
-        duration = 12 + (skill // 2)
-        last_applied = float((body_part.get("tend") or {}).get("last_applied", 0.0))
-        recently_tended = self.is_tended(part) or ((time.time() - last_applied) < RECENT_TEND_WINDOW)
-
-        if recently_tended:
-            strength = max(2, int(strength * 0.6))
-            duration = max(6, int(duration * 0.6))
-
-        body_part["tend"] = {
-            "strength": strength,
-            "duration": duration,
-            "last_applied": time.time(),
-            "min_until": time.time() + 120,
-        }
-        body_part["tended"] = True
-        self.start_first_aid_training_window(part, tender=healer)
-        return True
+        result = InjuryService.stabilize_wound(self, self.normalize_body_part_name(part), tender=tender)
+        return bool(result.success)
 
     def normalize_body_part_name(self, part):
         if not part:
@@ -16258,45 +16213,10 @@ class Character(ObjectParent, DefaultCharacter):
         return body_part
 
     def get_part_trauma(self, body_part):
-        if not body_part:
-            return 0
-        return max(
-            body_part.get("external", 0),
-            body_part.get("internal", 0),
-            body_part.get("bruise", 0),
-        )
+        return wound_rules.get_part_trauma(body_part)
 
     def get_body_part_wound_descriptions(self, body_part):
-        if not body_part:
-            return []
-
-        severity_phrases = {
-            "light": "lightly",
-            "moderate": "moderately",
-            "severe": "severely",
-            "critical": "critically",
-        }
-        descriptions = []
-
-        bruise = body_part.get("bruise", 0)
-        if bruise > 0:
-            severity = self.get_injury_level(bruise)
-            descriptions.append(f"{severity_phrases[severity]} bruised")
-
-        external = body_part.get("external", 0)
-        if external > 0:
-            severity = self.get_injury_level(external)
-            descriptions.append(f"{severity_phrases[severity]} wounded")
-
-        internal = body_part.get("internal", 0)
-        if internal > 0:
-            severity = self.get_injury_level(internal)
-            descriptions.append(f"{severity_phrases[severity]} internally injured")
-        scars = int(body_part.get("scar", 0) or 0)
-        if scars > 0:
-            descriptions.append("marked by old scarring" if scars == 1 else "marked by heavy scarring")
-
-        return descriptions
+        return InjuryService.get_body_part_wound_descriptions(body_part)
 
     def get_part_scar_count(self, part):
         body_part = self.get_body_part(part)
@@ -16308,21 +16228,8 @@ class Character(ObjectParent, DefaultCharacter):
         body_part = self.get_body_part(location)
         if not body_part:
             return 0
-        previous = dict(before_part or {})
-        previous_peak = max(int(previous.get("external", 0) or 0), int(previous.get("internal", 0) or 0))
-        previous_trauma = int(previous.get("external", 0) or 0) + int(previous.get("internal", 0) or 0)
-        current_peak = max(int(body_part.get("external", 0) or 0), int(body_part.get("internal", 0) or 0))
-        current_trauma = int(body_part.get("external", 0) or 0) + int(body_part.get("internal", 0) or 0)
-        scar_gain = 0
-        if previous_peak < int(EMPATH_SCAR_RULES["severity_threshold"]) <= current_peak:
-            scar_gain += 1
-        if previous_trauma < int(EMPATH_SCAR_RULES["trauma_threshold"]) <= current_trauma:
-            scar_gain += 1
-        if previous_trauma >= int(EMPATH_SCAR_RULES["repeat_gate"]) and (current_trauma - previous_trauma) >= int(EMPATH_SCAR_RULES["repeat_threshold"]):
-            scar_gain += 1
-        if scar_gain <= 0:
-            return 0
-        body_part["scar"] = min(int(EMPATH_SCAR_RULES["max_scars"]), int(body_part.get("scar", 0) or 0) + scar_gain)
+        updated_part, scar_gain = wound_rules.apply_scar_progress(body_part, before_part=before_part)
+        self.db.injuries[location] = updated_part
         return scar_gain
 
     def describe_body_part_wounds(self, body_part):
@@ -16331,68 +16238,11 @@ class Character(ObjectParent, DefaultCharacter):
             return "uninjured"
         return ", ".join(descriptions)
 
+    # CANDIDATE_FOR_EXTRACTION
+    # DEPRECATED: logic should live in services
+    # LOGIC (must move later)
     def apply_damage(self, location, amount, damage_type="impact"):
-        self.ensure_core_defaults()
-        if location not in self.db.injuries:
-            return
-
-        self.maybe_break_ranger_aim_on_hit(amount)
-
-        if getattr(self.db, "disguised", False):
-            self.clear_disguise()
-        if getattr(self.db, "post_ambush_grace", False) and time.time() < float(getattr(self.db, "post_ambush_grace_until", 0) or 0):
-            amount = max(0, int(round(amount * 0.8)))
-
-        if bool(getattr(self.db, "is_npc", False)) and self.is_surprised():
-            self.set_awareness("alert")
-
-        body_part = self.db.injuries[location]
-        before_part = dict(body_part)
-        damage_kind = (damage_type or "impact").lower()
-
-        if damage_kind == "impact":
-            body_part["tended"] = False
-            previous_bruise = body_part.get("bruise", 0)
-            body_part["bruise"] += amount
-
-            if amount >= 8:
-                body_part["internal"] += max(1, amount // 4)
-
-            head_thresholds = (8, 18, 30)
-            if location == "head":
-                bleed_gain = sum(
-                    1 for threshold in head_thresholds if previous_bruise < threshold <= body_part["bruise"]
-                )
-                if bleed_gain:
-                    body_part["bleed"] += bleed_gain
-                    body_part["external"] += bleed_gain
-            elif amount >= 10:
-                body_part["bleed"] += 1
-        else:
-            body_part["tended"] = False
-            body_part["external"] += amount
-            if damage_kind in {"slice", "pierce", "stab"}:
-                if amount >= 4:
-                    body_part["bleed"] += 1 + (1 if amount >= 8 else 0)
-            elif amount >= 10:
-                body_part["bleed"] += 1
-
-        body_part["external"] = min(body_part.get("external", 0), 100)
-        body_part["internal"] = min(body_part.get("internal", 0), 100)
-        scar_gain = self.apply_scar_progress(location, before_part=before_part)
-
-        if self.get_injury_severity(body_part.get("external", 0)) == "severe":
-            self.msg(f"Your {self.format_body_part_name(location)} is badly damaged!")
-        if scar_gain > 0:
-            self.msg(f"The hurt leaves lasting damage in your {self.format_body_part_name(location)}.")
-
-        if location == "chest" and body_part.get("internal", 0) > 50:
-            self.msg("You are in critical condition!")
-
-        self.update_bleed_state()
-
-        if self.is_vital_destroyed():
-            self.db.is_dead = True
+        InjuryService.apply_hit_wound(self, location, amount, damage_type=damage_type)
 
     def is_vital_destroyed(self):
         self.ensure_core_defaults()
@@ -16402,32 +16252,10 @@ class Character(ObjectParent, DefaultCharacter):
         return False
 
     def stop_bleeding(self, part):
-        bp = self.get_body_part(part)
-        if not bp:
-            return
-
-        bp["bleed"] = 0
-        bp["tended"] = True
-        bp["tend"] = {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}
-        self.update_bleed_state()
+        InjuryService.stop_bleeding(self, self.normalize_body_part_name(part))
 
     def heal_body_part(self, part, amount):
-        bp = self.get_body_part(part)
-        if not bp:
-            return
-
-        remaining = amount
-        if bp.get("external", 0) > 0:
-            healed = min(bp["external"], remaining)
-            bp["external"] -= healed
-            remaining -= healed
-        if remaining > 0 and bp.get("bruise", 0) > 0:
-            bp["bruise"] = max(0, bp["bruise"] - remaining)
-        if self.get_part_trauma(bp) <= 0 and bp.get("bleed", 0) <= 0:
-            bp["tended"] = False
-            bp["tend"] = {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}
-
-        self.update_bleed_state()
+        InjuryService.heal_wound(self, self.normalize_body_part_name(part), amount)
 
     def get_most_scarred_part(self):
         self.ensure_core_defaults()
@@ -16472,46 +16300,19 @@ class Character(ObjectParent, DefaultCharacter):
         return True, f"You work at the old scarring in your {part_display}."
 
     def get_bleed_severity(self, total_bleed):
-        if total_bleed == 0:
-            return "none"
-        elif total_bleed <= 2:
-            return "light"
-        elif total_bleed <= 5:
-            return "moderate"
-        elif total_bleed <= 10:
-            return "severe"
-        else:
-            return "critical"
+        return InjuryService.get_bleed_severity(total_bleed)
 
     def get_total_bleed(self):
         self.ensure_core_defaults()
-        if not self.db.injuries:
-            return 0
-        return sum(part["bleed"] for part in self.db.injuries.values())
+        return wound_rules.get_total_bleed(self.db.injuries or {})
 
     def get_effective_bleed_total(self):
         self.ensure_core_defaults()
-        total = 0
-        for part in (self.db.injuries or {}).values():
-            bleed = int(part.get("bleed", 0) or 0)
-            tend_state = part.get("tend") or {}
-            duration = int(tend_state.get("duration", 0) or 0)
-            min_until = float(tend_state.get("min_until", 0.0) or 0.0)
-            strength = int(tend_state.get("strength", 0) or 0)
-            if duration > 0 or time.time() < min_until:
-                bleed = max(0, bleed - strength)
-            total += bleed
-        return total
+        return wound_rules.get_effective_bleed_total(self.db.injuries or {}, now=time.time())
 
     def update_bleed_state(self):
         self.ensure_core_defaults()
-        total_bleed = self.get_total_bleed()
-        new_state = self.get_bleed_severity(total_bleed)
-        old_state = self.db.bleed_state
-
-        if new_state != old_state:
-            self.db.bleed_state = new_state
-            self.on_bleed_state_change(old_state, new_state)
+        InjuryService.update_bleed_state(self)
 
     def on_bleed_state_change(self, old, new):
         if new == "none":
@@ -16527,83 +16328,14 @@ class Character(ObjectParent, DefaultCharacter):
 
     def is_bleeding(self):
         self.ensure_core_defaults()
-        return self.get_total_bleed() > 0
+        return wound_rules.get_total_bleed(self.db.injuries or {}) > 0
 
     def get_injury_level(self, value):
-        if value == 0:
-            return "none"
-        elif value <= 10:
-            return "light"
-        elif value <= 25:
-            return "moderate"
-        elif value <= 50:
-            return "severe"
-        else:
-            return "critical"
+        return InjuryService.get_injury_level(value)
 
     def process_bleed(self):
         self.ensure_core_defaults()
-        if not self.db.injuries:
-            return
-
-        now = time.time()
-        stabilized_until = float(getattr(self.db, "stabilized_until", 0.0) or 0.0)
-        is_stabilized = now < stabilized_until
-        stability_strength = max(0.0, min(1.0, float(getattr(self.db, "stability_strength", 0.0) or 0.0))) if is_stabilized else 0.0
-        total_bleed = 0
-        for part_name, part in self.db.injuries.items():
-            if part.get("internal", 0) > 20:
-                worsening_rate = 1.0
-                if is_stabilized:
-                    worsening_rate *= max(0.0, 1.0 - stability_strength)
-                bleed_gain = int(worsening_rate)
-                fractional = max(0.0, worsening_rate - bleed_gain)
-                if fractional > 0.0 and random.random() < fractional:
-                    bleed_gain += 1
-                if bleed_gain > 0:
-                    part["bleed"] += bleed_gain
-
-            tend_state = part.get("tend") or {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}
-            duration = int(tend_state.get("duration", 0))
-            strength = int(tend_state.get("strength", 0))
-            min_until = float(tend_state.get("min_until", 0.0))
-            was_tended = bool(part.get("tended", False))
-
-            effective_bleed = part.get("bleed", 0)
-            if duration > 0 or now < min_until:
-                effective_bleed = max(0, effective_bleed - strength)
-                if now >= min_until and duration > 0:
-                    duration -= 1
-                    if part.get("external", 0) > 45:
-                        duration -= 1
-                    if self.db.in_combat:
-                        duration -= 1
-                tend_state["duration"] = max(0, duration)
-                part["tend"] = tend_state
-                part["tended"] = tend_state["duration"] > 0 or now < min_until
-                if was_tended and not part["tended"] and part.get("bleed", 0) > 0:
-                    self.msg(f"Your {self.format_body_part_name(part_name)} begins bleeding again!")
-
-            total_bleed += max(0, effective_bleed)
-
-        self.process_first_aid_tend_training(now=now)
-
-        if total_bleed > 0:
-            hp_loss = total_bleed + int(total_bleed * 0.3)
-            if total_bleed > 10:
-                hp_loss -= (total_bleed - 10)
-            hp_loss = max(1, hp_loss)
-            hp_loss = max(1, int(round(hp_loss * self.get_resurrection_bleed_multiplier())))
-            self.set_hp((self.db.hp or 0) - hp_loss)
-            self.msg("You bleed from your wounds.")
-            if total_bleed > 5:
-                self.msg("You are bleeding heavily!")
-            if (self.db.hp or 0) <= 0:
-                if self.consume_resurrection_death_guard():
-                    self.db.hp = 1
-                    self.msg("Your returning life falters, but the rite holds for one heartbeat.")
-                else:
-                    self.db.is_dead = True
+        InjuryService.process_bleed_tick(self)
 
     def sync_combat_state(self):
         self.ensure_core_defaults()

@@ -87,6 +87,7 @@ DRAIN_RATES = {
 BASE_POOL_NUMERATOR = 15000.0
 BASE_POOL_OFFSET = 900.0
 BASE_POOL_FLOOR = 1000.0
+MINDSTATE_CURVE_EXPONENT = 0.7
 
 SKILL_GAIN_MODIFIERS = {
     "perception": 0.40,
@@ -142,7 +143,7 @@ def calculate_mindstate(pool, max_pool):
     if max_pool <= 0:
         return 0
     ratio = max(0.0, min(1.0, float(pool) / float(max_pool)))
-    return max(0, min(MINDSTATE_MAX, int(ratio * MINDSTATE_MAX)))
+    return max(0, min(MINDSTATE_MAX, int(MINDSTATE_MAX * (ratio ** MINDSTATE_CURVE_EXPONENT))))
 
 
 def get_mindstate_name(value):
@@ -277,23 +278,20 @@ def train(skill, difficulty, success=True, outcome=None, event_key=None, context
     return award_xp(skill, xp_amount)
 
 
+ # SKILL_GAIN_ENTRYPOINT
 def award_exp_skill(char, skill_name, difficulty, success=True, outcome=None, event_key=None, context_multiplier=1.0):
-    if char is None:
-        return 0.0
-    if hasattr(char, "ensure_core_defaults"):
-        char.ensure_core_defaults()
-    handler = getattr(char, "exp_skills", None)
-    if handler is None:
-        return 0.0
-    skill = handler.get(skill_name)
-    return train(
-        skill,
+    from engine.services.skill_service import SkillService
+
+    return SkillService.award_xp(
+        char,
+        skill_name,
         difficulty,
+        source={"mode": "difficulty"},
         success=success,
         outcome=outcome,
         event_key=event_key,
         context_multiplier=context_multiplier,
-    )
+    ).amount
 
 
 def is_active(skill, now=None):

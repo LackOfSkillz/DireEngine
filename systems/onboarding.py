@@ -2,8 +2,9 @@ import time
 from collections.abc import Mapping
 
 from evennia.objects.models import ObjectDB
-from evennia.utils import delay
 from evennia.utils.create import create_object
+
+from world.systems.scheduler import schedule_event
 
 
 STEP_START = "start"
@@ -255,7 +256,14 @@ def _scene_token_matches(character, token):
 
 def _queue_pending_scene(character, scene_name, delay_seconds, token):
     _schedule_pending_scene(character, scene_name, delay_seconds, token)
-    delay(max(0.05, float(delay_seconds or 0.0)), _process_pending_scene, character)
+    schedule_event(
+        key="pending_scene",
+        owner=character,
+        delay=max(0.05, float(delay_seconds or 0.0)),
+        callback=_process_pending_scene,
+        payload={"args": [character]},
+        metadata={"system": "onboarding", "type": "delayed_effect"},
+    )
     return True
 
 
@@ -609,7 +617,14 @@ def _process_transport_sequence(character, *, force=False):
     state["pending_scene_at"] = 0.0 if force else next_at
     character.db.onboarding_state = state
     if not force:
-        delay(max(0.05, next_at - time.time()), _process_pending_scene, character)
+        schedule_event(
+            key="pending_scene",
+            owner=character,
+            delay=max(0.05, next_at - time.time()),
+            callback=_process_pending_scene,
+            payload={"args": [character]},
+            metadata={"system": "onboarding", "type": "delayed_effect"},
+        )
     return progressed
 
 
@@ -658,7 +673,14 @@ def _process_between_sequence(character, *, force=False):
     state["pending_scene_at"] = 0.0 if force else next_at
     character.db.onboarding_state = state
     if not force:
-        delay(max(0.05, next_at - time.time()), _process_pending_scene, character)
+        schedule_event(
+            key="pending_scene",
+            owner=character,
+            delay=max(0.05, next_at - time.time()),
+            callback=_process_pending_scene,
+            payload={"args": [character]},
+            metadata={"system": "onboarding", "type": "delayed_effect"},
+        )
     return progressed
 
 

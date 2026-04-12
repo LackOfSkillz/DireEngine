@@ -4,6 +4,13 @@ extends Control
 signal room_clicked(room_id)
 
 
+const BASE_ROOM_SPACING := 40.0
+const MIN_ZOOM := 0.5
+const MAX_ZOOM := 3.0
+const FIT_PADDING := Vector2(48.0, 48.0)
+const AUTO_FIT_DELAY := 0.35
+
+
 var rooms: Array = []
 var edges: Array = []
 var pois: Array = []
@@ -14,6 +21,7 @@ var hovered_room_id = null
 var offset := Vector2.ZERO
 var target_offset := Vector2.ZERO
 var zoom := 1.0
+var auto_fit_request_id := 0
 
 
 func render_map(data: Dictionary) -> void:
@@ -23,6 +31,7 @@ func render_map(data: Dictionary) -> void:
 	player_room_id = data.get("player_room_id")
 	build_adjacency()
 	center_on_player()
+	_queue_auto_fit()
 	queue_redraw()
 
 
@@ -80,10 +89,12 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			zoom = clamp(zoom * 1.1, 0.5, 3.0)
+			zoom = clamp(zoom * 1.1, MIN_ZOOM, MAX_ZOOM)
+			auto_fit_request_id += 1
 			center_on_player()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			zoom = clamp(zoom * 0.9, 0.5, 3.0)
+			zoom = clamp(zoom * 0.9, MIN_ZOOM, MAX_ZOOM)
+			auto_fit_request_id += 1
 			center_on_player()
 
 
@@ -112,6 +123,36 @@ func center_on_player() -> void:
 	target_offset = (size / 2.0) - _room_world_position(player_room)
 
 
+func fit_to_window(apply_immediately: bool = false) -> void:
+	if rooms.is_empty():
+		return
+
+	var bounds := _map_bounds()
+	if bounds.size.x <= 0.0 or bounds.size.y <= 0.0:
+		zoom = clamp(1.0, MIN_ZOOM, MAX_ZOOM)
+		var only_room := _room_by_id(player_room_id)
+		if only_room.is_empty():
+			only_room = rooms[0]
+		var only_pos := Vector2(float(only_room.get("x", 0)), float(only_room.get("y", 0))) * BASE_ROOM_SPACING * zoom
+		target_offset = (size / 2.0) - only_pos
+		if apply_immediately:
+			offset = target_offset
+		return
+
+	var available := size - FIT_PADDING
+	if available.x <= 0.0 or available.y <= 0.0:
+		return
+
+	var fit_zoom_x := available.x / max(bounds.size.x, 1.0)
+	var fit_zoom_y := available.y / max(bounds.size.y, 1.0)
+	zoom = clamp(min(fit_zoom_x, fit_zoom_y), MIN_ZOOM, MAX_ZOOM)
+
+	var center := bounds.get_center() * zoom
+	target_offset = (size / 2.0) - center
+	if apply_immediately:
+		offset = target_offset
+
+
 func update_tooltip() -> void:
 	var tooltip = $Tooltip
 	if hovered_room_id == null:
@@ -127,7 +168,7 @@ func update_tooltip() -> void:
 
 
 func _room_world_position(room: Dictionary) -> Vector2:
-	return Vector2(float(room.get("x", 0)), float(room.get("y", 0))) * 40.0 * zoom
+	return Vector2(float(room.get("x", 0)), float(room.get("y", 0))) * BASE_ROOM_SPACING * zoom
 
 
 func _room_screen_position(room: Dictionary) -> Vector2:
@@ -158,6 +199,36 @@ func _room_color(room: Dictionary, is_player: bool) -> Color:
 			return Color(0.7, 0.3, 0.95)
 		_:
 			return Color(0.2, 0.8, 0.35)
+
+
+func _map_bounds() -> Rect2:
+	if rooms.is_empty():
+		return Rect2()
+
+	var min_pos := Vector2(float(rooms[0].get("x", 0)), float(rooms[0].get("y", 0))) * BASE_ROOM_SPACING
+	var max_pos := min_pos
+	for room in rooms:
+		var pos := Vector2(float(room.get("x", 0)), float(room.get("y", 0))) * BASE_ROOM_SPACING
+		min_pos.x = min(min_pos.x, pos.x)
+		min_pos.y = min(min_pos.y, pos.y)
+		max_pos.x = max(max_pos.x, pos.x)
+		max_pos.y = max(max_pos.y, pos.y)
+
+	var room_padding := Vector2(24.0, 24.0)
+	return Rect2(min_pos - room_padding, (max_pos - min_pos) + (room_padding * 2.0))
+
+
+func _queue_auto_fit() -> void:
+	auto_fit_request_id += 1
+	var request_id := auto_fit_request_id
+	_schedule_auto_fit(request_id)
+
+
+func _schedule_auto_fit(request_id: int) -> void:
+	await get_tree().create_timer(AUTO_FIT_DELAY).timeout
+	if request_id != auto_fit_request_id:
+		return
+	fit_to_window(true)
 
 
 func _get_minimum_size() -> Vector2:

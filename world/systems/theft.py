@@ -3,8 +3,8 @@ import time
 
 from evennia.utils import logger
 
+from engine.services.skill_service import SkillService
 from world.systems import awareness
-from world.systems.skills import award_exp_skill
 
 
 SHOP_HEAT_DECAY_BUCKET = 300.0
@@ -622,7 +622,7 @@ def resolve_theft_attempt(actor, target, context=None):
         theft_outcome = "failure"
     else:
         theft_outcome = "partial"
-    award_exp_skill(actor, "thievery", theft_difficulty, success=success, outcome=theft_outcome, event_key="theft")
+    SkillService.award_xp(actor, "thievery", theft_difficulty, source={"mode": "difficulty"}, success=success, outcome=theft_outcome, event_key="theft")
 
     record_theft_attempt(actor, target_key, success)
     if _is_shop_target(observer):

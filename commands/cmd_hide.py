@@ -1,7 +1,7 @@
 from commands.command import Command
 import time
 
-from world.systems.skills import award_exp_skill
+from engine.services.skill_service import SkillService
 from world.systems.stealth import detect, enter_stealth
 
 
@@ -37,7 +37,7 @@ class CmdHide(Command):
             return
 
         caller.apply_thief_roundtime(2)
-        award_exp_skill(caller, "stealth", 1, success=True, outcome="success", event_key="stealth")
+        SkillService.award_xp(caller, "stealth", 1, source={"mode": "difficulty"}, success=True, outcome="success", event_key="stealth")
         caller.msg("You blend into the surroundings.")
 
         room = caller.location

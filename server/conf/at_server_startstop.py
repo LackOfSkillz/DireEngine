@@ -28,6 +28,7 @@ from django.conf import settings
 from evennia.utils import logger
 from evennia.utils.create import create_object
 
+from engine.services.injury_service import InjuryService
 from typeclasses.objects import BountyBoard
 from utils.contests import run_contest
 from world.systems.metrics import increment_counter, record_event
@@ -1416,11 +1417,6 @@ def process_status_tick():
             character.process_magic_states()
         if active_cyclic and hasattr(character, "process_cyclic"):
             character.process_cyclic()
-        if total_bleed > 0:
-            if hasattr(character, "process_bleed"):
-                character.process_bleed()
-            if hasattr(character, "update_bleed_state"):
-                character.update_bleed_state()
         if has_wound_conditions and hasattr(character, "process_wound_conditions"):
             character.process_wound_conditions()
         if awareness != "normal" or observing:
@@ -1587,6 +1583,7 @@ def at_server_start():
     ):
         if hasattr(character, "ensure_core_defaults"):
             character.ensure_core_defaults()
+        InjuryService.bootstrap_scheduled_effects(character)
 
     for script in search_script("bleed_ticker"):
         if script.typeclass_path == "typeclasses.scripts.BleedTicker":

@@ -3,12 +3,11 @@ import random
 import time
 import uuid
 
-from evennia.utils import delay
 from evennia.utils.create import create_object
 
+from engine.services.skill_service import SkillService
 from typeclasses.rooms import is_fishable
 from world.systems import fishing_economy
-from world.systems.skills import award_exp_skill
 
 
 LOGGER = logging.getLogger(__name__)
@@ -706,11 +705,20 @@ def _clear_session_callbacks(session, callback_key=None):
 
 
 def _schedule_session_callback(actor, session, callback_key, seconds, callback, *callback_args):
+    from world.systems.scheduler import schedule_event
+
     if actor is None or session is None:
         return None
     callbacks = dict(getattr(session, "scheduled_callbacks", {}) or {})
     _cancel_scheduled_task(callbacks.get(callback_key))
-    task = delay(float(seconds), callback, actor, *callback_args)
+    task = schedule_event(
+        key=f"fishing_{callback_key}",
+        owner=actor,
+        delay=float(seconds),
+        callback=callback,
+        payload={"args": [actor, *callback_args]},
+        metadata={"system": "fishing", "type": "delayed_effect"},
+    )
     callbacks[callback_key] = task
     session.scheduled_callbacks = callbacks
     return task
@@ -838,6 +846,8 @@ def _finalize_borrowed_return_cleanup(actor, borrowed_item_ids, fallback_locatio
 
 
 def return_borrowed_gear(actor, source_location=None, direction=None):
+    from world.systems.scheduler import schedule_event
+
     if actor is None or source_location is None or not is_borrowed_return_room(source_location):
         return False
     destination = getattr(actor, "location", None)
@@ -851,7 +861,14 @@ def return_borrowed_gear(actor, source_location=None, direction=None):
     travel_direction = str(direction or getattr(getattr(actor, "ndb", None), "last_traverse_direction", None) or "away").strip().lower()
     paused_flavor = bool(getattr(getattr(source_location, "db", None), "borrowed_gear_return_pause_flavor", False))
     actor.msg(format_borrowed_return_message(travel_direction, paused=paused_flavor))
-    delay(0, _finalize_borrowed_return_cleanup, actor, [int(getattr(item, "id", 0) or 0) for item in borrowed_items], source_location)
+    schedule_event(
+        key="borrowed_return_cleanup",
+        owner=actor,
+        delay=0,
+        callback=_finalize_borrowed_return_cleanup,
+        payload={"args": [actor, [int(getattr(item, "id", 0) or 0) for item in borrowed_items], source_location]},
+        metadata={"system": "fishing", "type": "delayed_effect"},
+    )
     return True
 
 
@@ -865,7 +882,7 @@ def _award_outdoorsmanship(actor, room_or_group, *, success, outcome, multiplier
     if actor is None:
         return
     difficulty = _get_fishing_difficulty(room_or_group)
-    award_exp_skill(actor, "outdoorsmanship", difficulty, success=success, outcome=outcome, event_key="fishing", context_multiplier=multiplier)
+    SkillService.award_xp(actor, "outdoorsmanship", difficulty, source={"mode": "difficulty"}, success=success, outcome=outcome, event_key="fishing", context_multiplier=multiplier)
 
 
 def _spawn_junk_item(actor, junk_profile):
@@ -991,12 +1008,12 @@ def rig_fishing_pole(actor):
     success_chance = clamp(0.40 + (skill * 0.01), 0.40, 0.92)
     if float(random.random()) > success_chance:
         pole.db.line_tangled = True
-        award_exp_skill(actor, "mechanical_lore", 8, success=False, outcome="failure", event_key="fishing_rig", context_multiplier=0.20)
+        SkillService.award_xp(actor, "mechanical_lore", 8, source={"mode": "difficulty"}, success=False, outcome="failure", event_key="fishing_rig", context_multiplier=0.20)
         return False, "You fumble the rigging and snarl the line."
     pole.db.hook_attached = True
     pole.db.line_attached = True
     pole.db.line_tangled = False
-    award_exp_skill(actor, "mechanical_lore", 10, success=True, outcome="success", event_key="fishing_rig", context_multiplier=0.22)
+    SkillService.award_xp(actor, "mechanical_lore", 10, source={"mode": "difficulty"}, success=True, outcome="success", event_key="fishing_rig", context_multiplier=0.22)
     session = get_fishing_session(actor, create=False)
     if session is not None and session.state == "broken":
         session.state = "baited" if bool(getattr(session, "baited", False)) else "idle"
@@ -1014,10 +1031,10 @@ def untangle_fishing_pole(actor):
     skill = _safe_actor_rank(actor, "mechanical_lore") + (_safe_actor_stat(actor, "discipline", 10.0) * 0.4)
     success_chance = clamp(0.45 + (skill * 0.01), 0.45, 0.94)
     if float(random.random()) > success_chance:
-        award_exp_skill(actor, "mechanical_lore", 8, success=False, outcome="failure", event_key="fishing_untangle", context_multiplier=0.20)
+        SkillService.award_xp(actor, "mechanical_lore", 8, source={"mode": "difficulty"}, success=False, outcome="failure", event_key="fishing_untangle", context_multiplier=0.20)
         return False, "You work at the knot, but only tighten it."
     pole.db.line_tangled = False
-    award_exp_skill(actor, "mechanical_lore", 10, success=True, outcome="success", event_key="fishing_untangle", context_multiplier=0.22)
+    SkillService.award_xp(actor, "mechanical_lore", 10, source={"mode": "difficulty"}, success=True, outcome="success", event_key="fishing_untangle", context_multiplier=0.22)
     session = get_fishing_session(actor, create=False)
     if session is not None and session.state == "tangled":
         session.state = "baited" if bool(getattr(session, "baited", False)) else "idle"

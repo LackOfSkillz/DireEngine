@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import re
 from threading import RLock
 import time
@@ -40,6 +41,7 @@ SYSTEM_QUOTA_BEHAVIOR = DEFAULT_QUOTA_BEHAVIOR
 GLOBAL_QUOTA_BEHAVIOR = DEFAULT_QUOTA_BEHAVIOR
 DEFAULT_QUOTA_DELAY_SECONDS = 0.25
 DEFAULT_MAX_QUOTA_DELAY_ATTEMPTS = 3
+_EVENT_CALLBACKS = {}
 
 
 class _DeferredTask:
@@ -55,6 +57,124 @@ class _DeferredTask:
 def _normalize_key(key):
     raw = str(key or "").strip()
     return raw or None
+
+
+def _normalize_event_segment(value, fallback="event"):
+    text = str(value or "").strip().lower()
+    if not text:
+        text = str(fallback or "event").strip().lower()
+    text = re.sub(r"[^a-z0-9:]+", "-", text)
+    return text.strip("-:") or str(fallback or "event")
+
+
+def _event_owner_token(owner):
+    _, owner_ref, owner_label = _normalize_owner(owner)
+    token = str(owner_ref or owner_label or owner or "").strip().lower().lstrip("#")
+    token = re.sub(r"[^a-z0-9:]+", "-", token)
+    return token.strip("-:") or "owner"
+
+
+def _build_event_schedule_key(key, owner):
+    return f"event:{_normalize_event_segment(key)}:{_event_owner_token(owner)}"
+
+
+def register_event_callback(name, callback):
+    normalized_name = str(name or "").strip().lower()
+    if not normalized_name:
+        raise ValueError("Missing callback name.")
+    if not callable(callback):
+        raise TypeError("Scheduler event callback must be callable.")
+    _EVENT_CALLBACKS[normalized_name] = callback
+    return callback
+
+
+def _resolve_event_callback(callback_ref):
+    if callable(callback_ref):
+        return callback_ref
+    normalized_name = str(callback_ref or "").strip().lower()
+    callback = _EVENT_CALLBACKS.get(normalized_name)
+    if callback is None:
+        raise ValueError(f"Unknown scheduler event callback: {callback_ref}")
+    return callback
+
+
+def _dispatch_scheduled_event(owner, callback_ref, payload=None):
+    callback = _resolve_event_callback(callback_ref)
+    payload_data = dict(payload or {}) if isinstance(payload, Mapping) else {"value": payload}
+    if isinstance(callback_ref, str):
+        return callback(owner, payload_data)
+    args = list(payload_data.get("args", []) or [])
+    kwargs = dict(payload_data.get("kwargs", {}) or {})
+    return callback(*args, **kwargs)
+
+
+def schedule_event(key, owner, delay, callback, payload=None, metadata=None, **schedule_kwargs):
+    assert key, "Missing key"
+    assert owner is not None, "Missing owner"
+    assert callback, "Missing callback"
+
+    metadata = dict(metadata or {})
+    system_name = str(metadata.get("system", "") or "").strip().lower()
+    event_type = str(metadata.get("type", "") or "").strip().lower()
+    assert system_name, "Missing metadata.system"
+    assert event_type, "Missing metadata.type"
+
+    payload_data = dict(payload or {}) if isinstance(payload, Mapping) else {"value": payload}
+    payload_data.setdefault("metadata", {"system": system_name, "type": event_type})
+
+    timing_mode = metadata.get("timing_mode")
+    if timing_mode is not None:
+        schedule_kwargs.setdefault("timing_mode", timing_mode)
+    schedule_kwargs.setdefault("owner", owner)
+    schedule_kwargs.setdefault("system", f"{system_name}.{event_type}")
+
+    return schedule(
+        delay,
+        _dispatch_scheduled_event,
+        owner,
+        callback,
+        payload_data,
+        key=_build_event_schedule_key(key, owner),
+        **schedule_kwargs,
+    )
+
+
+def cancel_event(key, owner):
+    assert key, "Missing key"
+    assert owner is not None, "Missing owner"
+    return cancel(_build_event_schedule_key(key, owner))
+
+
+def _callback_clear_roundtime(owner, payload=None):
+    payload = dict(payload or {})
+    expected_end = payload.get("expected_end")
+    if owner is None or not getattr(owner, "pk", None):
+        return False
+    if hasattr(owner, "_expire_roundtime"):
+        return owner._expire_roundtime(expected_end=expected_end)
+    owner.db.roundtime_end = 0
+    if hasattr(owner, "sync_client_state"):
+        owner.sync_client_state()
+    return True
+
+
+def _callback_process_skill_pulse(owner, payload=None):
+    from world.systems.exp_pulse import process_scheduled_pulse
+
+    return process_scheduled_pulse(owner, payload or {})
+
+
+def _callback_clear_observe(owner, payload=None):
+    if owner is None or not getattr(owner, "pk", None):
+        return False
+    owner.set_awareness("normal")
+    owner.clear_state("observing")
+    return True
+
+
+register_event_callback("combat:clear_roundtime", _callback_clear_roundtime)
+register_event_callback("skills:process_pulse", _callback_process_skill_pulse)
+register_event_callback("perception:clear_observe", _callback_clear_observe)
 
 
 def _warn_once(message):

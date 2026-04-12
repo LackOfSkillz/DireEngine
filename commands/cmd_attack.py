@@ -1,10 +1,14 @@
+# ARCHITECTURE RULE:
+# Do NOT add new combat logic here.
+# All new logic must go through CombatService.
+
 import random
 import time
 from collections.abc import Mapping
 
 from commands.command import Command
+from engine.services.combat_service import CombatService
 from world.systems.ranger import RANGER_SNIPE_CONFIG
-from world.systems.skills import award_exp_skill
 from world.systems.stealth import break_stealth
 
 from utils.contests import run_contest
@@ -112,6 +116,8 @@ class CmdAttack(Command):
         if target == self.caller:
             self.caller.msg("Attacking yourself would accomplish very little.")
             return
+
+        attacker = self.caller
 
         try:
             from systems import onboarding
@@ -310,145 +316,42 @@ class CmdAttack(Command):
         if hasattr(self.caller, "get_exhaustion_fatigue_multiplier"):
             fatigue_cost = max(0, int(round(fatigue_cost * self.caller.get_exhaustion_fatigue_multiplier())))
 
-        hit_roll = random.randint(1, 100)
-        attacker_reflex = self.caller.get_stat("reflex")
-        attacker_agility = self.caller.get_stat("agility")
-        skill_rank = self.caller.get_skill(skill_name)
-        accuracy = 50 + attacker_reflex + attacker_agility + skill_rank
-        stance = self.caller.db.stance or {"offense": 50, "defense": 50}
-        accuracy += stance.get("offense", 50) * 0.2
-        attacker_position_mods = self.caller.get_position_modifiers()
-        accuracy += attacker_position_mods["offense"]
-        maneuver_hindrance, _ = self.caller.get_total_hindrance()
-        attack_penalty = min(25, int(round(maneuver_hindrance * 0.2)) + self.caller.get_arm_penalty())
-        accuracy -= attack_penalty
-        accuracy += suitability
-        accuracy += (weapon_balance - 50) * 0.1
-        accuracy += weapon_effects.get("accuracy", 0)
-        accuracy += int(self.caller.get_skill("tactics") / 10)
-        if hasattr(self.caller, "is_staggered") and self.caller.is_staggered():
-            accuracy -= 10
-        if hasattr(self.caller, "get_pressure_accuracy_penalty"):
-            accuracy -= self.caller.get_pressure_accuracy_penalty()
-        if hasattr(self.caller, "get_exhaustion_accuracy_penalty"):
-            accuracy -= self.caller.get_exhaustion_accuracy_penalty()
-        debilitation = self.caller.get_state("debilitated") if hasattr(self.caller, "get_state") else None
-        if debilitation:
-            accuracy -= int(debilitation.get("penalty", 0) or 0)
-        nearby_engaged = 0
-        if self.caller.location:
-            for obj in self.caller.location.contents:
-                if obj in {self.caller, target} or not hasattr(obj, "get_target"):
-                    continue
-                if obj.get_target() == self.caller:
-                    nearby_engaged += 1
-        if nearby_engaged > 0:
-            accuracy += int(self.caller.get_skill("tactics") / 5)
-        if skill_rank < 10:
-            accuracy -= 10
-        att_awareness = self.caller.get_awareness() if hasattr(self.caller, "get_awareness") else "normal"
-        if att_awareness == "alert":
-            accuracy += 5
-        elif att_awareness == "unaware":
-            accuracy -= 10
-        if self.caller.db.aiming == target.id:
-            accuracy += 15 if not is_ranged_weapon else 10 + (ranger_aim_stacks * 5)
-        if is_ranged_weapon:
-            if current_range == "melee":
-                accuracy -= 35
-            elif current_range == "near":
-                accuracy += 5
-            elif current_range == "far":
-                accuracy += 10
-        if ambush:
-            accuracy += ambush_accuracy_bonus
-        if attacker_tempo_state == "surging":
-            accuracy += 3
-        elif attacker_tempo_state == "frenzied":
-            accuracy += 5
-        if hasattr(self.caller, "get_rhythm_accuracy_bonus"):
-            accuracy += self.caller.get_rhythm_accuracy_bonus()
-        if isinstance(surge_state, dict):
-            accuracy += int(surge_state.get("bonus", 0) or 0)
-        if isinstance(press_state, dict):
-            accuracy += int(press_state.get("accuracy", 0) or 0)
-        if isinstance(frenzy_state, dict):
-            accuracy += int(frenzy_state.get("accuracy", 0) or 0)
-        if attacker_berserk:
-            accuracy += int(attacker_berserk.get("accuracy_bonus", 0) or 0)
-        for effect in [attacker_disrupt, attacker_unnerving, attacker_intimidate]:
-            if isinstance(effect, dict):
-                accuracy -= int(effect.get("accuracy_penalty", 0) or 0)
-        tactics_prep = self.caller.get_state("tactics_prep") if hasattr(self.caller, "get_state") else None
-        ranger_pounce = self.caller.get_state("ranger_pounce") if hasattr(self.caller, "get_state") else None
-        if tactics_prep and tactics_prep.get("target") == target.id:
-            accuracy += int(tactics_prep.get("bonus", 0) or 0)
-            if hasattr(self.caller, "clear_state"):
-                self.caller.clear_state("tactics_prep")
-        if isinstance(ranger_pounce, Mapping) and ranger_pounce.get("target_id") == target.id:
-            accuracy += int(ranger_pounce.get("accuracy_bonus", 0) or 0)
-        if snipe_active:
-            accuracy += int(ranger_snipe.get("accuracy_bonus", 0) or 0)
-        if isinstance(ranger_mark, Mapping):
-            accuracy += int(ranger_mark.get("accuracy_bonus", 0) or 0)
-        if bool(getattr(self.caller.db, "is_npc", False)):
-            npc_max_hp = self.caller.db.max_hp or 0
-            npc_hp_ratio = (self.caller.db.hp or 0) / npc_max_hp if npc_max_hp else 1
-            if npc_hp_ratio > 0.7:
-                accuracy += 5
-
         target.incoming_attackers = getattr(target, "incoming_attackers", 0) + 1
-
-        defender_reflex = target.get_stat("reflex")
-        defender_agility = target.get_stat("agility")
-        evasion = defender_reflex + defender_agility
-        target_stance = target.db.stance or {"offense": 50, "defense": 50}
-        evasion += target_stance.get("defense", 50) * 0.2
-        target_position_mods = target.get_position_modifiers()
-        evasion += target_position_mods["defense"]
-        target_maneuver_hindrance, _ = target.get_total_hindrance()
-        evasion -= target_maneuver_hindrance * 2
-        target_awareness = target.get_awareness() if hasattr(target, "get_awareness") else "normal"
-        if target_awareness == "alert":
-            evasion += 10
-        elif target_awareness == "unaware":
-            evasion -= 10
-        if hasattr(target, "is_surprised") and target.is_surprised():
-            evasion -= 20
-        target_debilitation = target.get_state("debilitated") if hasattr(target, "get_state") else None
-        if target_debilitation and target_debilitation.get("type") == "evasion":
-            evasion -= int(target_debilitation.get("penalty", 0) or 0)
-        if isinstance(hold_state, dict):
-            evasion += int(hold_state.get("defense", 0) or 0)
-        if hasattr(target, "has_warrior_passive") and target.has_warrior_passive("multitarget_defense_1") and target.incoming_attackers > 1:
-            evasion += 3
-        if defender_tempo_state == "frenzied":
-            evasion -= 8
-        if hasattr(target, "get_exhaustion_defense_penalty"):
-            evasion -= target.get_exhaustion_defense_penalty()
-        if defender_berserk:
-            evasion += int(defender_berserk.get("defense_bonus", 0) or 0)
-        defensive_roar = defender_roars.get("defensive") if isinstance(defender_roars, dict) else None
-        if isinstance(defensive_roar, dict):
-            evasion += int(defensive_roar.get("defense_bonus", 0) or 0)
-        if strong_ambush:
-            evasion = 0
-
-        if hasattr(self.caller, "apply_death_sting_to_contest_value"):
-            accuracy = self.caller.apply_death_sting_to_contest_value(accuracy)
-        if hasattr(target, "apply_death_sting_to_contest_value"):
-            evasion = target.apply_death_sting_to_contest_value(evasion)
-
         aimed_location, aimed_part = self.caller.resolve_targeted_body_part()
-        if aimed_part == "head":
-            accuracy -= 20
-        elif aimed_part in ["arm", "leg"]:
-            accuracy -= 10
 
-        final_chance = max(10, accuracy - evasion)
-        final_chance = min(95, final_chance)
-        if final_chance < 95:
-            award_exp_skill(target, "evasion", max(10, int(accuracy)), success=hit_roll > final_chance)
+        combat_context = {
+            "aimed_part": aimed_part,
+            "ambush": ambush,
+            "ambush_accuracy_bonus": ambush_accuracy_bonus,
+            "ambush_damage_multiplier": ambush_damage_multiplier,
+            "attacker_berserk": attacker_berserk,
+            "attacker_disrupt": attacker_disrupt,
+            "attacker_intimidate": attacker_intimidate,
+            "attacker_tempo_state": attacker_tempo_state,
+            "attacker_unnerving": attacker_unnerving,
+            "crush_state": crush_state,
+            "current_range": current_range,
+            "defender_berserk": defender_berserk,
+            "defender_roars": defender_roars,
+            "defender_tempo_state": defender_tempo_state,
+            "fatigue_cost": fatigue_cost,
+            "frenzy_state": frenzy_state,
+            "hold_state": hold_state,
+            "is_ranged_weapon": is_ranged_weapon,
+            "partial_ambush": partial_ambush,
+            "press_state": press_state,
+            "profile": profile,
+            "ranger_aim_stacks": ranger_aim_stacks,
+            "ranger_mark": ranger_mark,
+            "ranger_snipe": ranger_snipe,
+            "skill_name": skill_name,
+            "snipe_active": snipe_active,
+            "strong_ambush": strong_ambush,
+            "suitability": suitability,
+            "surge_state": surge_state,
+            "weapon_effects": weapon_effects,
+        }
+
         damage_profile = dict(profile.get("damage_types") or {})
         if not damage_profile:
             fallback_damage_type = (profile.get("damage_type") or "impact").lower()
@@ -459,6 +362,23 @@ class CmdAttack(Command):
         verb_target = conjugate(verb, False)
         weapon_phrase = get_weapon_phrase(weapon)
         self.caller.clear_aim()
+
+        offensive_roar = attacker_roars.get("offensive") if isinstance(attacker_roars, dict) else None
+        combat_context.update(
+            {
+                "aimed_location": aimed_location,
+                "damage_type": damage_type,
+                "offensive_roar": offensive_roar,
+                "weapon": weapon,
+            }
+        )
+        result = CombatService.attack(attacker, target, context=combat_context)
+        combat_context = result.details
+        hit = result.hit
+        damage = result.damage
+        hit_roll = combat_context["hit_roll"]
+        final_chance = combat_context["final_chance"]
+        ranger_pounce = combat_context.get("ranger_pounce")
 
         def resolve_snipe_concealment(hit=False):
             if not snipe_active:
@@ -491,29 +411,7 @@ class CmdAttack(Command):
             range_phrase = "from nearby cover"
 
         if hit_roll > final_chance:
-            self.caller.set_fatigue(self.caller.db.fatigue + fatigue_cost)
-            if hasattr(self.caller, "gain_war_tempo"):
-                self.caller.gain_war_tempo(5)
-            if hasattr(self.caller, "advance_combat_rhythm"):
-                self.caller.advance_combat_rhythm(hit=False)
-            for state_key in ["warrior_surge", "warrior_crush", "warrior_press", "warrior_sweep", "warrior_whirl", "ranger_pounce"]:
-                if hasattr(self.caller, "clear_state"):
-                    self.caller.clear_state(state_key)
-            miss_roundtime = profile.get("speed", profile.get("roundtime", 3.0))
-            if attacker_berserk:
-                miss_roundtime = max(1.0, miss_roundtime + float(attacker_berserk.get("roundtime_modifier", 0.0) or 0.0))
-            if hasattr(self.caller, "is_warrior_overextended") and self.caller.is_warrior_overextended():
-                miss_roundtime += 1
-            if ambush:
-                if getattr(self.caller.db, "position_state", "neutral") == "advantaged":
-                    miss_roundtime -= 1
-                miss_roundtime = max(1, min(miss_roundtime + 1, 5))
-                self.caller.apply_thief_roundtime(miss_roundtime)
-            else:
-                self.caller.set_roundtime(miss_roundtime)
             if is_ranged_weapon:
-                if hasattr(self.caller, "consume_loaded_ammo"):
-                    self.caller.consume_loaded_ammo()
                 if snipe_active:
                     self.caller.msg("Your concealed shot misses its mark.")
                     target.msg("An arrow flies from nowhere and misses you.")
@@ -536,123 +434,13 @@ class CmdAttack(Command):
                 )
             return
 
-        base = max(1, int(profile.get("damage") or 1)) if weapon else 1
-        if weapon:
-            damage_min = max(1, int(profile.get("damage_min") or base))
-            damage_max = max(damage_min, int(profile.get("damage_max") or damage_min))
-            base = max(base, random.randint(damage_min, damage_max))
-        damage = base + int(skill_rank * 0.2) + int(suitability * 0.3)
-        if skill_rank > 30:
-            damage += 2
-        damage += int(weapon_effects.get("damage_bonus", 0))
-        damage -= min(25, self.caller.get_hand_penalty())
-        diff = final_chance - hit_roll
-        quality = "good"
-        if diff > 40:
-            quality = "devastating"
-            damage = int(round(damage * 1.8))
-        elif diff > 25:
-            quality = "solid"
-            damage = int(round(damage * 1.4))
-        elif diff > 10:
-            quality = "good"
-            damage = int(round(damage * 1.1))
-        elif diff > 0:
-            quality = "glancing"
-            damage = max(1, int(round(damage * 0.7)))
-
-        critical = random.randint(1, 100) < 5
-        if snipe_active and hasattr(self.caller, "get_wilderness_bond") and hasattr(self.caller, "get_nature_focus"):
-            if self.caller.get_wilderness_bond() >= int(RANGER_SNIPE_CONFIG.get("mastery_bond_threshold", 80) or 80) and self.caller.get_nature_focus() >= int(RANGER_SNIPE_CONFIG.get("mastery_focus_threshold", 60) or 60):
-                critical = critical or random.randint(1, 100) <= int(RANGER_SNIPE_CONFIG.get("mastery_crit_bonus", 8) or 8)
-        if critical:
-            damage *= 2
-
-        if is_ranged_weapon:
-            if current_range == "melee":
-                damage = int(round(damage * 0.75))
-            elif current_range == "near":
-                damage = int(round(damage * 1.05))
-            elif current_range == "far":
-                damage = int(round(damage * 1.10))
-            if ranger_aim_stacks:
-                damage = int(round(damage * (1 + (ranger_aim_stacks * float(RANGER_SNIPE_CONFIG.get("aim_damage_per_stack", 0.05) or 0.05)))))
-
-        if ambush:
-            damage = int(round(damage * ambush_damage_multiplier))
-        if attacker_tempo_state == "surging":
-            damage = int(round(damage * 1.10))
-        elif attacker_tempo_state == "frenzied":
-            damage = int(round(damage * 1.20))
-        if isinstance(surge_state, dict):
-            damage += int(surge_state.get("damage", 0) or 0)
-        if isinstance(crush_state, dict):
-            damage = int(round(damage * float(crush_state.get("damage_multiplier", 1.0) or 1.0)))
-        if isinstance(frenzy_state, dict):
-            damage = int(round(damage * float(frenzy_state.get("damage_multiplier", 1.0) or 1.0)))
-        if attacker_berserk:
-            damage = int(round(damage * float(attacker_berserk.get("damage_multiplier", 1.0) or 1.0)))
-        offensive_roar = attacker_roars.get("offensive") if isinstance(attacker_roars, dict) else None
-        if isinstance(offensive_roar, dict):
-            damage = int(round(damage * 1.05))
-        if isinstance(ranger_pounce, Mapping) and ranger_pounce.get("target_id") == target.id:
-            damage = int(round(damage * (1 + float(ranger_pounce.get("damage_bonus", 0) or 0.0))))
-        if snipe_active:
-            damage = int(round(damage * float(ranger_snipe.get("damage_multiplier", 1.0) or 1.0)))
-
-        if getattr(target.db, "roughed", False):
-            damage = int(round(damage * 1.1))
-
-        if aimed_part == "head":
-            damage += 2
-        elif aimed_part == "arm":
-            damage += 1
-
-        if aimed_location:
-            hit_location = aimed_location
-            location_name = aimed_part
-        else:
-            hit_location = random.choice(list(target.db.injuries.keys()))
-            location_name = target.format_body_part_name(hit_location)
-
-        attack_context = {"damage_type": damage_type}
-
-        armor_list = target.get_armor_for_bodypart(hit_location) if hasattr(target, "get_armor_for_bodypart") else target.get_armor_covering(hit_location)
-        protection = target.get_total_armor_protection(hit_location) if hasattr(target, "get_total_armor_protection") else sum(target.get_armor_protection_value(armor) for armor in armor_list)
-        if protection:
-            damage = max(1, damage - int(round(protection)))
+        attack_context = combat_context["attack_context"]
+        critical = combat_context["critical"]
+        hit_location = combat_context["hit_location"]
+        location_name = combat_context["location_name"]
+        quality = combat_context["quality"]
+        if combat_context.get("armor_absorbed"):
             target.msg("Your armor absorbs part of the blow.")
-
-        if hasattr(self.caller, "apply_death_sting_to_damage"):
-            damage = self.caller.apply_death_sting_to_damage(damage)
-        damage = max(0, int(damage))
-        if final_chance < 95:
-            difficulty = target.get_stat("reflex") + target.get_stat("agility")
-            if skill_name == "brawling":
-                brawling_difficulty = max(10, int(target.get_skill("evasion") + difficulty))
-                award_exp_skill(self.caller, "brawling", brawling_difficulty, success=True)
-            elif skill_name == "light_edge":
-                light_edge_difficulty = max(10, int(target.get_skill("evasion") + difficulty))
-                award_exp_skill(self.caller, "light_edge", light_edge_difficulty, success=True)
-            else:
-                _, band = self.caller.get_learning_amount(skill_name, difficulty)
-                if band != "trivial":
-                    self.caller.use_skill(
-                        skill_name,
-                        apply_roundtime=False,
-                        emit_placeholder=False,
-                        require_known=False,
-                        difficulty=difficulty,
-                        return_learning=True,
-                    )
-        target_was_dead = bool(getattr(target.db, "is_dead", False))
-        if hasattr(target, "apply_incoming_damage"):
-            target.apply_incoming_damage(hit_location, damage, attack_context["damage_type"])
-        else:
-            target.set_hp(target.db.hp - damage)
-            target.apply_damage(hit_location, damage, attack_context["damage_type"])
-        if not target_was_dead and bool(getattr(target.db, "is_dead", False)) and hasattr(self.caller, "register_empath_offensive_action"):
-            self.caller.register_empath_offensive_action(target=target, context="kill", amount=30)
         if isinstance(sweep_state, dict):
             balance_resist = 0
             if hasattr(target, "has_warrior_passive") and target.has_warrior_passive("balance_resist_1"):
@@ -699,8 +487,6 @@ class CmdAttack(Command):
 
         quality_phrase = f"critical {quality}" if critical else quality
         if is_ranged_weapon:
-            if hasattr(self.caller, "consume_loaded_ammo"):
-                self.caller.consume_loaded_ammo()
             if snipe_active:
                 self.caller.msg(f"You release a carefully placed shot from concealment and strike {target.key}'s {location_name}.")
                 target.msg(f"An arrow flies from nowhere and strikes your {location_name}.")
@@ -737,42 +523,16 @@ class CmdAttack(Command):
             target.db.stunned = True
             target.msg("The blow leaves you stunned.")
 
-        self.caller.set_balance(self.caller.db.balance - profile["balance_cost"])
-        self.caller.set_fatigue(self.caller.db.fatigue + fatigue_cost)
-        if hasattr(self.caller, "gain_war_tempo"):
-            self.caller.gain_war_tempo(8)
-        if hasattr(self.caller, "advance_combat_rhythm"):
-            self.caller.advance_combat_rhythm(hit=True)
-        for state_key in ["warrior_surge", "warrior_crush", "warrior_press", "warrior_sweep", "warrior_whirl", "ranger_pounce"]:
-            if hasattr(self.caller, "clear_state"):
-                self.caller.clear_state(state_key)
-        self.caller.db.recent_action = True
-        self.caller.db.recent_action_timer = time.time()
-        action_roundtime = profile.get("speed", profile.get("roundtime", 3.0))
-        if attacker_berserk:
-            action_roundtime = max(1.0, action_roundtime + float(attacker_berserk.get("roundtime_modifier", 0.0) or 0.0))
-        if hasattr(self.caller, "is_warrior_overextended") and self.caller.is_warrior_overextended():
-            action_roundtime += 1
-        if ambush:
-            action_roundtime = max(action_roundtime, 3.0)
-            if getattr(self.caller.db, "position_state", "neutral") == "advantaged":
-                action_roundtime -= 1
-            if partial_ambush:
-                action_roundtime += 1
-            action_roundtime = max(1, min(action_roundtime, 5))
-            if hasattr(self.caller, "record_stealth_contest"):
-                self.caller.record_stealth_contest(
-                    "ambush",
-                    max(10, int(target.get_perception_total() or 0)),
-                    result=ambush_result,
-                    target=target,
-                    roundtime=action_roundtime,
-                    event_key="stealth",
-                    require_hidden=False,
-                )
-            self.caller.apply_thief_roundtime(action_roundtime)
-        else:
-            self.caller.set_roundtime(action_roundtime)
+        if ambush and hasattr(self.caller, "record_stealth_contest"):
+            self.caller.record_stealth_contest(
+                "ambush",
+                max(10, int(target.get_perception_total() or 0)),
+                result=ambush_result,
+                target=target,
+                roundtime=result.roundtime,
+                event_key="stealth",
+                require_hidden=False,
+            )
 
         if self.caller.is_hidden() or bool(getattr(self.caller.db, "stealthed", False)):
             break_stealth(self.caller)

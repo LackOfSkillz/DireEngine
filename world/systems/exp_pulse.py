@@ -1,23 +1,20 @@
-"""
-Global EXP pulse system (Evennia ticker-based)
-"""
+"""Global EXP pulse system driven by the scheduler."""
 
 import time
 from weakref import WeakSet
 
-from evennia import TICKER_HANDLER
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
 
 from world.systems.metrics import increment_counter, record_event
-from world.systems.skills import SKILL_GROUPS, is_active, pulse
-from world.systems.timing_audit import register_ticker_metadata
+from world.systems.time_model import SHARED_TICKER
 
 
 PULSE_TICK = 20
 FULL_CYCLE = 200
 GLOBAL_TICK = 0
 EXP_TICKER_IDSTRING = "global_exp_pulse_tick"
+EXP_PULSE_OWNER = "global-exp-pulse"
 MAX_SKILLS_PER_TICK = 10
 _ACTIVE_EXP_CHARACTERS = WeakSet()
 
@@ -66,63 +63,50 @@ def _log_exp_tick(started_at, threshold):
         logger.log_warn(f"exp_pulse_tick slow: {duration:.4f}s")
 
 
-def _ticker_registered():
-    entries = dict(TICKER_HANDLER.all(PULSE_TICK) or {})
-    callbacks = dict(entries.get(PULSE_TICK, {}) or {})
-    for store_key, payload in callbacks.items():
-        key_tuple = tuple(store_key or ())
-        callback = (payload or {}).get("_callback")
-        idstring = key_tuple[4] if len(key_tuple) >= 5 else ""
-        persistent = bool(key_tuple[5]) if len(key_tuple) >= 6 else False
-        if callback is exp_pulse_tick and idstring == EXP_TICKER_IDSTRING and persistent:
-            return True
-    return False
-
-
 def exp_pulse_tick():
     global GLOBAL_TICK
+
+    from engine.services.pulse_service import PulseService
 
     started_at = time.perf_counter()
     GLOBAL_TICK = (GLOBAL_TICK + PULSE_TICK) % FULL_CYCLE
 
     try:
         for char in get_active_characters():
-            if not hasattr(char, "exp_skills"):
-                continue
-
-            processed = 0
-            for skill_name, skill in char.exp_skills.skills.items():
-                if processed >= MAX_SKILLS_PER_TICK:
-                    break
-                if not is_active(skill):
-                    continue
-                group = SKILL_GROUPS.get(skill_name, 100)
-                offset = SKILL_GROUP_OFFSETS.get(group, 0)
-                if GLOBAL_TICK != offset:
-                    continue
-                pulse(skill)
-                processed += 1
+            PulseService.process_skill_pulse(
+                char,
+                global_tick=GLOBAL_TICK,
+                max_skills=MAX_SKILLS_PER_TICK,
+                skill_group_offsets=SKILL_GROUP_OFFSETS,
+            )
     finally:
         _log_exp_tick(started_at, 0.25)
 
     return GLOBAL_TICK
 
 
+def process_scheduled_pulse(owner=None, payload=None):
+    result = exp_pulse_tick()
+    start_exp_ticker()
+    return result
+
+
 def start_exp_ticker():
-    if not _ticker_registered():
-        TICKER_HANDLER.add(PULSE_TICK, exp_pulse_tick, idstring=EXP_TICKER_IDSTRING, persistent=True)
-    register_ticker_metadata(
-        PULSE_TICK,
-        exp_pulse_tick,
-        idstring=EXP_TICKER_IDSTRING,
-        persistent=True,
-        system="world.exp_pulse",
-        reason="Ticker-driven staggered EXP pool draining and rank progression across character skill groups.",
+    from world.systems.scheduler import schedule_event
+
+    schedule_event(
+        key=EXP_TICKER_IDSTRING,
+        owner=EXP_PULSE_OWNER,
+        delay=PULSE_TICK,
+        callback="skills:process_pulse",
+        payload={"tick_seconds": PULSE_TICK},
+        metadata={"system": "skills", "type": "pulse", "timing_mode": SHARED_TICKER},
     )
 
 
 __all__ = [
     "EXP_TICKER_IDSTRING",
+    "EXP_PULSE_OWNER",
     "FULL_CYCLE",
     "GLOBAL_TICK",
     "MAX_SKILLS_PER_TICK",
@@ -130,6 +114,7 @@ __all__ = [
     "SKILL_GROUP_OFFSETS",
     "exp_pulse_tick",
     "get_active_characters",
+    "process_scheduled_pulse",
     "register_exp_character",
     "start_exp_ticker",
 ]

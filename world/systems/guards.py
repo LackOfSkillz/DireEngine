@@ -7,7 +7,6 @@ from uuid import uuid4
 
 from django.db import connection
 from evennia.objects.models import ObjectDB
-from evennia.utils import delay
 from evennia.utils.create import create_object
 
 from world.systems.justice import begin_arrest, can_be_arrested, complete_arrest, get_wanted_tier
@@ -717,10 +716,19 @@ def _select_targeted_exit(guard, exits):
 
 
 def _mark_clump_exit(guard, room):
+    from world.systems.scheduler import schedule_event
+
     now = time.time()
     guard.db.pending_clump_exit_at = now + GUARD_CLUMP_EXIT_DELAY
     guard.db.last_idle_time = min(float(getattr(guard.db, "last_idle_time", now) or now), now - GUARD_IDLE_MAX)
-    delay(GUARD_CLUMP_EXIT_DELAY, guard_movement_tick, guard)
+    schedule_event(
+        key="guard_clump_exit",
+        owner=guard,
+        delay=GUARD_CLUMP_EXIT_DELAY,
+        callback=guard_movement_tick,
+        payload={"args": [guard]},
+        metadata={"system": "guards", "type": "delayed_effect"},
+    )
 
 
 def _emit_guard_entry_message(guard):

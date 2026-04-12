@@ -54,3 +54,8 @@ nosetests.xml
 
 # VSCode config
 .vscode
+
+# Local artifacts and debug output
+artifacts/
+logs/
+debug/

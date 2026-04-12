@@ -1,9 +1,8 @@
-from evennia.utils import delay
-
 from typeclasses.abilities import Ability, register_ability
+from engine.services.skill_service import SkillService
 from utils.contests import run_contest
 from utils.survival_messaging import msg_actor, msg_room, react_or_message_target
-from world.systems.skills import award_exp_skill
+from world.systems.scheduler import schedule_event
 
 
 class SearchAbility(Ability):
@@ -40,7 +39,7 @@ class SearchAbility(Ability):
         if hasattr(user, "detect_traps_in_room"):
             user.detect_traps_in_room()
 
-        award_exp_skill(user, "perception", highest_difficulty)
+        SkillService.award_xp(user, "perception", highest_difficulty, source={"mode": "difficulty"})
 
 
 class ObserveAbility(Ability):
@@ -58,14 +57,14 @@ class ObserveAbility(Ability):
         if hasattr(user, "detect_traps_in_room"):
             user.detect_traps_in_room()
 
-        def clear_observe():
-            if not getattr(user, "pk", None):
-                return
-            user.set_awareness("normal")
-            user.clear_state("observing")
-
-        delay(10, clear_observe)
-        award_exp_skill(user, "perception", 10)
+        schedule_event(
+            key="observe_reset",
+            owner=user,
+            delay=10,
+            callback="perception:clear_observe",
+            metadata={"system": "perception", "type": "cooldown"},
+        )
+        SkillService.award_xp(user, "perception", 10, source={"mode": "difficulty"})
 
 
 register_ability(SearchAbility())
