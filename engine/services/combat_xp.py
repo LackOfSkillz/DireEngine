@@ -10,7 +10,10 @@ class CombatXP:
 
     @staticmethod
     def award(attacker, target, context, hit):
-        final_chance = int(context.get("final_chance", 95) or 95)
+        final_chance = context.get("final_chance")
+        if final_chance is None:
+            final_chance = 95
+        final_chance = int(final_chance)
         difficulty_scale = max(CONTEST_XP_FLOOR, 1.0 - (final_chance / 100.0))
         if final_chance < 95:
             SkillService.award_xp(
