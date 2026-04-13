@@ -1,6 +1,8 @@
 DireMud Builder Mode + AI Content System
 Full Engineering Blueprint
 
+Implementation log for concrete Builder decisions and completed slices lives in `direBuilderAsBuilt.md` and should be updated as substantive work lands.
+
 0. Canonical Live World Schema
 
 This section defines the authoritative structure of the game world as stored and manipulated in Evennia. All systems such as Builder Mode, AreaForge, startup scripts, and future APIs must produce and operate on this structure.
@@ -12,7 +14,7 @@ The Evennia world is the single source of truth.
 All mutations must occur through:
 
 - Evennia typeclasses
-- builder service layer
+- builder service layer when Builder is installed
 - controlled API endpoints
 
 No system may maintain a parallel live world model.
@@ -215,6 +217,183 @@ It exists to prevent:
 - placement drift between tools
 - exit inconsistencies
 - incompatible world mutation paths
+
+0.14 Builder Isolation and Optionality
+
+This section defines a hard architectural constraint for DireBuilder.
+
+DireBuilder must be:
+
+- fully isolated from core DireEngine code
+- safe to exclude from the public repository
+- safe to ignore via `.gitignore`
+- non-breaking when not present
+- dynamically enabled only when installed
+
+0.14.1 Core Dependency Rule
+
+DireEngine must never depend on DireBuilder.
+
+DireBuilder may depend on DireEngine.
+
+The dependency direction is one-way only.
+
+0.14.2 Required Directory Isolation
+
+Builder code should live in its own isolated tree so it can be excluded cleanly.
+
+Target structure:
+
+```text
+world/
+  builder/
+	__init__.py
+	services/
+	api/
+	content_generation/
+	templates/
+	validators/
+	config.py
+```
+
+If the project remains private, that tree can be ignored entirely without affecting core engine runtime.
+
+Practical rule:
+
+- no builder code in core Evennia typeclass modules
+- no builder code in unrelated engine services
+- no builder-only modules mixed into mandatory startup paths
+
+0.14.3 Safe Import Rule
+
+Core code must never use unconditional imports of builder modules.
+
+Forbidden pattern:
+
+```python
+from world.builder.services.room_service import update_room
+```
+
+Allowed pattern:
+
+```python
+try:
+	import world.builder
+	BUILDER_AVAILABLE = True
+except ImportError:
+	BUILDER_AVAILABLE = False
+```
+
+Preferred pattern:
+
+- central capability check such as `is_builder_available()`
+- all builder feature exposure guarded behind that capability check
+
+0.14.4 Feature Gating Rule
+
+All builder-only functionality must fail closed when Builder is absent.
+
+Examples:
+
+- builder UI hidden
+- builder endpoints not registered
+- builder commands unavailable
+- builder API returns a controlled unavailable error instead of crashing
+
+Core gameplay must continue normally.
+
+0.14.5 API Isolation Rule
+
+Builder web/API surfaces must remain isolated from the core API tree and only load conditionally.
+
+Examples:
+
+- builder routes grouped under a dedicated builder API surface
+- URL registration only happens when Builder is installed
+- no mandatory import of builder URL modules from core URL configuration
+
+0.14.6 Service Isolation Rule
+
+Builder services are optional extension services, not core engine dependencies.
+
+Allowed:
+
+- Builder calling core services
+- Builder mutating Evennia rooms, exits, and objects through approved mutation paths
+
+Not allowed:
+
+- core systems calling builder services as a requirement for normal runtime
+- startup logic assuming builder services exist
+
+0.14.7 Data Compatibility Rule
+
+Builder must use the live Evennia world model and compatible `.db` fields.
+
+Safe examples:
+
+- `room.db.map_layer = 1`
+- `obj.db.template_id = "vendor_blacksmith_t1"`
+
+Unsafe direction:
+
+- core runtime logic depending on builder-only metadata structures to function
+
+Builder data may extend the world model, but core gameplay must not require Builder-specific storage in order to run.
+
+0.14.8 No Core Mutation Assumptions
+
+DireEngine must not assume the existence of:
+
+- template registries
+- builder services
+- AI generation services
+- vendor-template tooling
+- builder validation subsystems
+
+Those are optional builder concerns unless and until they are promoted into the open core intentionally.
+
+0.14.9 Valid Runtime States
+
+Two runtime states must be supported.
+
+With Builder installed:
+
+- builder UI may be enabled
+- builder API may be enabled
+- template tooling may be enabled
+- AI-assisted authoring may be enabled
+
+Without Builder installed:
+
+- the game still boots normally
+- rooms, exits, items, NPCs, and movement still work
+- no builder endpoints are required
+- no builder imports are required
+- no runtime errors occur because Builder is missing
+
+0.14.10 Test Requirement
+
+Builder isolation is not complete until this removal test passes:
+
+1. exclude or ignore `world/builder/`
+2. start DireEngine
+3. confirm there are no import errors
+4. confirm normal gameplay still works
+
+This is a release gate, not a nice-to-have.
+
+0.14.11 Future Packaging Outcome
+
+This isolation model keeps DireBuilder viable as any of the following later:
+
+- a private in-repo plugin
+- a separate private repository
+- a package installed into selected environments only
+
+Final rule:
+
+DireBuilder must behave like a plugin that hooks into DireEngine, not like a subsystem DireEngine requires in order to run.
 
 1. Product Goal
 

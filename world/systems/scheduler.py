@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from functools import partial
 import re
 from threading import RLock
 import time
@@ -128,13 +129,12 @@ def schedule_event(key, owner, delay, callback, payload=None, metadata=None, **s
     schedule_kwargs.setdefault("owner", owner)
     schedule_kwargs.setdefault("system", f"{system_name}.{event_type}")
 
+    dispatch_callback = partial(_dispatch_scheduled_event, owner, callback, payload_data)
+
     return schedule(
         delay,
-        _dispatch_scheduled_event,
-        _build_event_schedule_key(key, owner),
-        owner,
-        callback,
-        payload_data,
+        dispatch_callback,
+        key=_build_event_schedule_key(key, owner),
         **schedule_kwargs,
     )
 
