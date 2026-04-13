@@ -29,6 +29,7 @@ from evennia.utils import logger
 from evennia.utils.create import create_object
 
 from engine.services.injury_service import InjuryService
+from engine.services.mana_service import ManaService
 from typeclasses.objects import BountyBoard
 from utils.contests import run_contest
 from world.systems.metrics import increment_counter, record_event
@@ -55,6 +56,9 @@ DIR_ALIASES = {
     "up": ["u"],
     "down": ["d"],
 }
+
+LANDING_AREA_ID = "new_landing"
+LANDING_AREA_NAME = "New Landing"
 
 _BROOKHOLLOW_LAWLESS_KEYS = {
     "Crooked Alley",
@@ -104,12 +108,13 @@ def _should_enable_landing_guard_patrol(room):
     street_name = str(getattr(getattr(room, "db", None), "street_name", "") or "").strip()
     lane_name = str(getattr(getattr(room, "db", None), "lane_name", "") or "").strip()
     room_key = str(getattr(room, "key", "") or "").strip().lower()
+    canonical_area_name = LANDING_AREA_NAME.lower()
 
     if room_key in {"pillory square", "town jail", "town square", "town green ne"}:
         return True
-    if area_name == "the landing" and (street_name or lane_name):
+    if area_name == canonical_area_name and (street_name or lane_name):
         return True
-    if region_name == "the landing" and (street_name or lane_name):
+    if region_name == canonical_area_name and (street_name or lane_name):
         return True
     return False
 
@@ -122,6 +127,19 @@ def _configure_landing_guard_patrols():
         room.db.guard_zone = "landing"
         room.db.is_lawful = True
         room.db.guard_patrol = True
+
+
+def _get_landing_guard_bootstrap_count():
+    for room in ObjectDB.objects.filter(db_typeclass_path=ROOM_TYPECLASS):
+        if not bool(getattr(getattr(room, "db", None), "guard_patrol", False)):
+            continue
+        zone = str(getattr(getattr(room, "db", None), "zone", "") or "").strip().lower()
+        if zone != "landing":
+            continue
+        area_name = str(getattr(getattr(room, "db", None), "area", "") or "").strip().lower()
+        if area_name == LANDING_AREA_NAME.lower():
+            return 15
+    return 15
 
 
 def _ensure_brookhollow_justice_spaces():
@@ -257,8 +275,8 @@ def _npc_needs_status_tick(npc):
     observing = bool(states.get("observing"))
     has_magic_state = any(
         bool(states.get(key))
-        for key in ["augmentation_buff", "debilitated", "warding_barrier", "utility_light", "exposed_magic", "active_cyclic"]
-    )
+        for key in ["augmentation_buff", "debilitated", "warding_barrier", "utility_light", "exposed_magic"]
+    ) or bool(dict(states.get("active_effects") or {}))
     if has_magic_state:
         return True
 
@@ -1320,9 +1338,8 @@ def process_status_tick():
         has_wound_conditions = bool(int(wound_state.get("poison", 0) or 0) > 0 or int(wound_state.get("disease", 0) or 0) > 0)
         has_magic_state = any(
             bool(states.get(key))
-            for key in ["augmentation_buff", "debilitated", "warding_barrier", "utility_light", "exposed_magic", "active_cyclic"]
-        )
-        active_cyclic = bool(states.get("active_cyclic"))
+            for key in ["augmentation_buff", "debilitated", "warding_barrier", "utility_light", "exposed_magic"]
+        ) or bool(dict(states.get("active_effects") or {}))
         has_justice_state = any(
             [
                 bool(getattr(character.db, "is_captured", False)),
@@ -1391,7 +1408,6 @@ def process_status_tick():
             or total_bleed > 0
             or has_wound_conditions
             or has_magic_state
-            or active_cyclic
             or has_ai_target
             or awareness != "normal"
             or observing
@@ -1415,8 +1431,6 @@ def process_status_tick():
             character.regen_attunement()
         if has_magic_state and hasattr(character, "process_magic_states"):
             character.process_magic_states()
-        if active_cyclic and hasattr(character, "process_cyclic"):
-            character.process_cyclic()
         if has_wound_conditions and hasattr(character, "process_wound_conditions"):
             character.process_wound_conditions()
         if awareness != "normal" or observing:
@@ -1584,13 +1598,14 @@ def at_server_start():
         if hasattr(character, "ensure_core_defaults"):
             character.ensure_core_defaults()
         InjuryService.bootstrap_scheduled_effects(character)
+        ManaService.bootstrap_scheduled_effects(character)
 
     for script in search_script("bleed_ticker"):
         if script.typeclass_path == "typeclasses.scripts.BleedTicker":
             script.delete()
 
     _ensure_limbo_training_dummy()
-    build_the_landing()
+    build_the_landing(area_id=LANDING_AREA_ID)
     try:
         primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map", "ranger-guild-map"])
         if primed_zones:
@@ -1610,7 +1625,7 @@ def at_server_start():
     _warn_empath_guild_duplicates()
     _configure_brookhollow_justice()
     _configure_landing_guard_patrols()
-    ensure_landing_guards(count=15)
+    ensure_landing_guards(count=_get_landing_guard_bootstrap_count())
     _ensure_fishing_supplier_npc()
 
 
@@ -1626,6 +1641,8 @@ def at_server_reload_start():
     """
     This is called only when server starts back up after a reload.
     """
+    _configure_landing_guard_patrols()
+    ensure_landing_guards(count=_get_landing_guard_bootstrap_count())
     _ensure_fishing_supplier_npc()
 
 

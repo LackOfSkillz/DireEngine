@@ -74,9 +74,13 @@ def calculate_hit(attacker, target, context=None):
         accuracy -= attacker.get_pressure_accuracy_penalty()
     if hasattr(attacker, "get_exhaustion_accuracy_penalty"):
         accuracy -= attacker.get_exhaustion_accuracy_penalty()
-    debilitation = attacker.get_state("debilitated") if hasattr(attacker, "get_state") else None
-    if debilitation:
-        accuracy -= int(debilitation.get("penalty", 0) or 0)
+    structured_accuracy_penalty = attacker.get_effect_modifier("accuracy") if hasattr(attacker, "get_effect_modifier") else 0
+    if structured_accuracy_penalty:
+        accuracy -= int(structured_accuracy_penalty or 0)
+    else:
+        debilitation = attacker.get_state("debilitated") if hasattr(attacker, "get_state") else None
+        if debilitation:
+            accuracy -= int(debilitation.get("penalty", 0) or 0)
     nearby_engaged = 0
     if attacker.location:
         for obj in attacker.location.contents:
@@ -155,9 +159,13 @@ def calculate_hit(attacker, target, context=None):
         evasion -= 10
     if hasattr(target, "is_surprised") and target.is_surprised():
         evasion -= 20
-    target_debilitation = target.get_state("debilitated") if hasattr(target, "get_state") else None
-    if target_debilitation and target_debilitation.get("type") == "evasion":
-        evasion -= int(target_debilitation.get("penalty", 0) or 0)
+    structured_evasion_penalty = target.get_effect_modifier("evasion") if hasattr(target, "get_effect_modifier") else 0
+    if structured_evasion_penalty:
+        evasion -= int(structured_evasion_penalty or 0)
+    else:
+        target_debilitation = target.get_state("debilitated") if hasattr(target, "get_state") else None
+        if target_debilitation and target_debilitation.get("type") == "evasion":
+            evasion -= int(target_debilitation.get("penalty", 0) or 0)
     if isinstance(hold_state, dict):
         evasion += int(hold_state.get("defense", 0) or 0)
     if hasattr(target, "has_warrior_passive") and target.has_warrior_passive("multitarget_defense_1") and getattr(target, "incoming_attackers", 0) > 1:

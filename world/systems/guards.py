@@ -33,6 +33,11 @@ GUARD_WARNING_COOLDOWN = 10.0
 GUARD_CONFRONT_TIMEOUT = 30.0
 REPEAT_OFFENDER_WARNING_THRESHOLD = 3
 GUARD_DISPLAY_NAME = "Town Guard"
+GUARD_TYPECLASS_PATHS = (
+    "typeclasses.npcs.GuardNPC",
+    "typeclasses.npcs.guard.GuardNPC",
+    "typeclasses._guard_npc_impl.GuardNPC",
+)
 
 
 def get_valid_guard_templates(limit=15, refresh=False):
@@ -41,10 +46,14 @@ def get_valid_guard_templates(limit=15, refresh=False):
     if refresh or not GUARD_TEMPLATE_CACHE:
         GUARD_TEMPLATE_CACHE = _load_valid_guard_templates()
 
-    templates = [dict(template) for template in GUARD_TEMPLATE_CACHE[: max(0, int(limit or 0))]]
-    if len(templates) < int(limit or 0):
+    requested = max(0, int(limit or 0))
+    templates = []
+    if GUARD_TEMPLATE_CACHE and requested > 0:
+        for index in range(requested):
+            templates.append(dict(GUARD_TEMPLATE_CACHE[index % len(GUARD_TEMPLATE_CACHE)]))
+    if not GUARD_TEMPLATE_CACHE and requested > 0:
         warnings.warn(
-            f"Only {len(templates)} validated guard templates were available; guard spawning will not substitute other NPC types.",
+            "No validated guard templates were available; guard spawning will not substitute other NPC types.",
             RuntimeWarning,
         )
     return templates
@@ -328,9 +337,7 @@ def iter_active_guards():
         guards.append(guard)
         seen_ids.add(guard_id)
 
-    for guard in ObjectDB.objects.filter(
-        db_typeclass_path__in=["typeclasses.npcs.GuardNPC", "typeclasses.npcs.guard.GuardNPC"]
-    ):
+    for guard in ObjectDB.objects.filter(db_typeclass_path__in=GUARD_TYPECLASS_PATHS):
         guard_id = int(getattr(guard, "id", 0) or 0)
         if guard_id <= 0 or guard_id in seen_ids or not _is_active_guard(guard):
             continue

@@ -183,6 +183,7 @@ from commands.cmd_spawnbox import CmdSpawnBox
 from commands.cmd_spawnlockpick import CmdSpawnLockpick
 from commands.cmd_sneak import CmdSneak
 from commands.cmd_spawnvendor import CmdSpawnVendor
+from commands.cmd_spellbook import CmdSpellbook
 from commands.cmd_stats import CmdStats
 from commands.cmd_stabilize import CmdStabilize
 from commands.cmd_steal import CmdSteal
@@ -412,6 +413,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSpawnLockpick())
         self.add(CmdSpawnVendor())
         self.add(CmdSpawnWeapon())
+        self.add(CmdSpellbook())
         self.add(CmdSneak())
         self.add(CmdSlip())
         self.add(CmdStats())

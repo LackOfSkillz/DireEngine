@@ -131,10 +131,10 @@ def schedule_event(key, owner, delay, callback, payload=None, metadata=None, **s
     return schedule(
         delay,
         _dispatch_scheduled_event,
+        _build_event_schedule_key(key, owner),
         owner,
         callback,
         payload_data,
-        key=_build_event_schedule_key(key, owner),
         **schedule_kwargs,
     )
 

@@ -164,7 +164,7 @@ def refresh_new_player_state(character):
 
 
 def _landing_rooms():
-    namespace = area_namespace("the_landing")
+    namespace = area_namespace("new_landing")
     rooms = []
     for obj in search_tag(namespace["area_tag"][0], category=namespace["area_tag"][1]):
         if getattr(obj, "destination", None) is not None:

@@ -24,17 +24,24 @@ from evennia.objects.objects import DefaultCharacter
 from evennia.utils.create import create_object
 from evennia.utils.search import search_object, search_tag
 
+from domain.spells.spell_definitions import SPELLCASTING_PROFESSIONS, get_spell as get_structured_spell
 from domain.wounds.constants import BODY_PART_ORDER as WOUND_BODY_PART_ORDER, DEFAULT_INJURIES as DEFAULT_WOUND_INJURIES
 from domain.wounds.models import copy_default_injuries as copy_default_wound_map
 from domain.wounds import rules as wound_rules
 from engine.presenters.injury_presenter import InjuryPresenter
+from engine.presenters.mana_presenter import ManaPresenter
+from engine.presenters.spell_effect_presenter import SpellEffectPresenter
 from engine.services.injury_service import InjuryService
+from engine.services.mana_service import ManaService
+from engine.services.spell_effect_service import SpellEffectService
+from engine.services.result import ActionResult
+from engine.services.spell_access_service import SpellAccessService
+from engine.services.spellbook_service import SpellbookService
 from typeclasses.abilities import get_ability
 from typeclasses.box import Box
 from typeclasses.corpse import get_corpse_wounds as get_corpse_wounds_payload, is_near_stable as is_near_stable_corpse_wounds, is_stable as is_stable_corpse_wounds, normalize_corpse_wounds
 from typeclasses.items.gem import QUALITY_NAMES, SIZE_NAMES, build_gem_data, create_gem, downgrade_gem_data
 from typeclasses.lockpick import Lockpick
-from typeclasses.spells import SPELLS, SPELLCASTING_GUILDS
 from typeclasses.study_item import StudyItem
 from typeclasses.trap_device import TrapDevice
 from utils.contests import run_contest
@@ -399,7 +406,7 @@ SKILL_REGISTRY = {
     "brawling": {"category": "combat", "visibility": "shared", "description": "unarmed fighting", "starter_rank": 0},
     "chain_armor": {"category": "armor", "visibility": "shared", "description": "training in chain armor use", "starter_rank": 0},
     "combat": {"category": "combat", "visibility": "shared", "description": "general combat sense and technique", "starter_rank": 0},
-    "debilitation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_GUILDS, "description": "hindering and control magic", "starter_rank": 0},
+    "debilitation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "hindering and control magic", "starter_rank": 0},
     "disengage": {"category": "combat", "visibility": "shared", "description": "breaking away from combat pressure", "starter_rank": 0},
     "empathy": {"category": "magic", "visibility": "shared", "description": "transferring and reading wounds through empathy", "starter_rank": 0},
     "attunement": {"category": "magic", "visibility": "shared", "description": "ability to perceive and channel radiance", "starter_rank": 1},
@@ -419,11 +426,11 @@ SKILL_REGISTRY = {
     "scholarship": {"category": "lore", "visibility": "shared", "description": "improves learning and knowledge systems", "starter_rank": 0},
     "tactics": {"category": "lore", "visibility": "shared", "description": "improves combat awareness and positioning", "starter_rank": 0},
     "theurgy": {"category": "magic", "visibility": "guild_locked", "guilds": ("cleric",), "description": "ritual practice, communes, and divine mediation", "starter_rank": 0},
-    "targeted_magic": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_GUILDS, "description": "direct offensive spellcasting", "starter_rank": 0},
+    "targeted_magic": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "direct offensive spellcasting", "starter_rank": 0},
     "trading": {"category": "lore", "visibility": "shared", "description": "improves buying and selling prices", "starter_rank": 1},
-    "utility": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_GUILDS, "description": "general purpose magical effects", "starter_rank": 0},
-    "augmentation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_GUILDS, "description": "beneficial enhancement magic", "starter_rank": 0},
-    "warding": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_GUILDS, "description": "protective and defensive magic", "starter_rank": 0},
+    "utility": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "general purpose magical effects", "starter_rank": 0},
+    "augmentation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "beneficial enhancement magic", "starter_rank": 0},
+    "warding": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "protective and defensive magic", "starter_rank": 0},
     "skinning": {"category": "survival", "visibility": "shared", "description": "harvesting useful parts from slain creatures", "starter_rank": 0},
     "stealth": {"category": "survival", "visibility": "shared", "description": "hiding, sneaking, and stalking unseen", "starter_rank": 0},
     "thanatology": {"category": "survival", "visibility": "guild_locked", "description": "death/body handling placeholder", "starter_rank": 0},
@@ -1087,6 +1094,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.max_fatigue = 100
         self.db.attunement = 100
         self.db.max_attunement = 100
+        self.db.spellbook = {"known_spells": {}}
         self.db.bleed_state = "none"
         self.db.roundtime_end = 0
         self.db.coins = 0
@@ -1199,6 +1207,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.get_subsystem()
         sync_subject_interest(self)
         self.sync_client_state(include_map=True)
+        ManaService.bootstrap_scheduled_effects(self)
         if self.is_dead():
             self.msg("You are dead. You must wait for resurrection or type DEPART to let go.")
 
@@ -1208,6 +1217,7 @@ class Character(ObjectParent, DefaultCharacter):
             from world.systems.fishing import cancel_fishing_session
 
             cancel_fishing_session(self)
+        ManaService.cancel_scheduled_effects(self)
         clear_subject_interest(self)
         self.reset_thief_pressure_states()
 
@@ -2206,6 +2216,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_combat_defaults()
         self.ensure_equipment_defaults()
         self.ensure_injury_defaults()
+        self.ensure_spellbook_defaults()
         self.ensure_starter_skills()
         self.ensure_skill_defaults()
         self._seed_template_exp_skills()
@@ -3535,6 +3546,13 @@ class Character(ObjectParent, DefaultCharacter):
             return "This body may not survive."
         return "This body may not survive the rite. This body will not survive the rite without better preparation."
 
+    # CLERIC ENTRY POINTS:
+    # - preserve_corpse
+    # - commune_with_divine
+    # - start_cleric_corpse_ritual
+    # - start_cleric_revive
+
+    # MANA BACKFILL TARGET
     def preserve_corpse(self, corpse):
         if not self.is_profession("cleric"):
             return False, "Only a cleric can shield lingering memories that way."
@@ -3544,9 +3562,10 @@ class Character(ObjectParent, DefaultCharacter):
         if not hasattr(corpse, "has_viable_memory") or not corpse.has_viable_memory():
             return False, "The corpse's memories have already faded beyond your reach."
         attunement_cost = 6
-        if not self.spend_attunement(attunement_cost):
-            return False, "You lack the attunement to preserve those memories."
-        extension = self.get_corpse_memory_extension()
+        _mana_result, mana_failure = self.gate_mana_effect("holy", attunement_cost)
+        if mana_failure:
+            return mana_failure
+        extension = max(1, int(round(self.get_corpse_memory_extension() * self.get_devotion_effect_multiplier())))
         remaining = corpse.extend_memory(extension)
         self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(16))
         if hasattr(corpse, "update_condition_description"):
@@ -3636,6 +3655,7 @@ class Character(ObjectParent, DefaultCharacter):
         favor_discount = min(6, max(0, favor_before // 3))
         return max(8, 12 + damage_penalty - favor_discount)
 
+    # MANA BACKFILL TARGET
     def commune_with_divine(self, commune_name, target=None):
         if not self.is_profession("cleric"):
             return False, "Only a cleric can call upon a commune."
@@ -3648,22 +3668,27 @@ class Character(ObjectParent, DefaultCharacter):
             return False, "You may commune solace, ward, or vigil."
 
         cost = int(profile.get("cost", 0) or 0)
+        _mana_result, mana_failure = self.gate_mana_effect("holy", max(1, cost))
+        if mana_failure:
+            return mana_failure
         if self.get_devotion() < cost:
             return False, f"You lack the devotion for that commune. {self.get_devotion_state_message()}"
+
+        devotion_multiplier = self.get_devotion_effect_multiplier()
 
         if commune_key == "solace":
             missing = max(0, int((self.db.max_attunement or 0) - (self.db.attunement or 0)))
             if missing <= 0:
                 return False, "The commune finds nothing in you that needs soothing."
-            restored = min(missing, 10 + max(0, self.get_profession_rank() * 2))
-            self.db.attunement = min(int(self.db.max_attunement or 0), int(self.db.attunement or 0) + restored)
+            restored = min(missing, max(1, int(round((10 + max(0, self.get_profession_rank() * 2)) * devotion_multiplier))))
+            ManaService.restore_attunement(self, restored)
             self.adjust_devotion(-cost, sync=False)
             self.sync_client_state()
             self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(14))
             return True, "A quiet warmth settles through you, restoring your spiritual reserve."
 
         if commune_key == "ward":
-            strength = max(1, 1 + int(self.get_profession_rank() / 3))
+            strength = max(1, int(round((1 + int(self.get_profession_rank() / 3)) * devotion_multiplier)))
             duration = 8 + max(0, int(self.get_profession_rank() / 2))
             self.apply_warding_barrier(self, "commune ward", strength, duration)
             self.adjust_devotion(-cost, sync=False)
@@ -3684,7 +3709,7 @@ class Character(ObjectParent, DefaultCharacter):
             owner.notify_recovery_consent_use(self)
         corpse.db.stabilized = True
         if hasattr(corpse, "adjust_condition"):
-            corpse.adjust_condition(5 + max(0, self.get_profession_rank()))
+            corpse.adjust_condition(max(1, int(round((5 + max(0, self.get_profession_rank())) * devotion_multiplier))))
         corpse.db.devotional_vigil_until = time.time() + 300
         self.adjust_devotion(-cost, sync=False)
         self.sync_client_state()
@@ -5044,6 +5069,7 @@ class Character(ObjectParent, DefaultCharacter):
             return True, message
         return False, "You cannot perform that rite."
 
+    # MANA BACKFILL TARGET
     def start_cleric_revive(self, corpse):
         pending = getattr(self.ndb, "pending_cleric_ritual_action", None)
         if isinstance(pending, dict) and bool(pending.get("active", False)):
@@ -5072,6 +5098,9 @@ class Character(ObjectParent, DefaultCharacter):
         favor_snapshot = corpse.get_favor_snapshot() if hasattr(corpse, "get_favor_snapshot") else 0
         if int(favor_snapshot or 0) < 1:
             return False, "There is not enough lingering favor to revive them."
+        _mana_result, mana_failure = self.gate_mana_effect("holy", max(8, int(self.get_skill("theurgy") / 10) or 8))
+        if mana_failure:
+            return mana_failure
         specialization = self.get_cleric_specialization()
         revive_cost = CLERIC_REVIVE_RITUAL_COST
         if specialization and specialization == self.get_cleric_stage_specialization("revive"):
@@ -5105,6 +5134,7 @@ class Character(ObjectParent, DefaultCharacter):
         join_text = " You join the ongoing ritual." if self.get_cleric_group_support_count(corpse) > 1 else ""
         return True, f"You begin the final rite over {corpse.key}.{join_text} Remain still and unhurt until it is complete."
 
+    # MANA BACKFILL TARGET
     def start_cleric_corpse_ritual(self, corpse, action):
         action_key = str(action or "").strip().lower()
         pending = getattr(self.ndb, "pending_cleric_ritual_action", None)
@@ -5157,6 +5187,15 @@ class Character(ObjectParent, DefaultCharacter):
                 if hasattr(corpse, "has_stage_contributor") and corpse.has_stage_contributor(action_key, self):
                     return False, "You have already lent your hand to that stage."
                 return False, "The soul is already secured."
+        mana_costs = {
+            "prepare": 6,
+            "stabilize": 8,
+            "restore": 10,
+            "bind": 12,
+        }
+        _mana_result, mana_failure = self.gate_mana_effect("holy", mana_costs.get(action_key, 6))
+        if mana_failure:
+            return mana_failure
         profile = CLERIC_CORPSE_RITUAL_ACTIONS[action_key]
         specialization, unlocked = self.maybe_define_cleric_specialization(action_key)
         devotion_cost = int(profile.get("cost", 0) or 0)
@@ -7506,6 +7545,7 @@ class Character(ObjectParent, DefaultCharacter):
             target.update_bleed_state()
         return removed
 
+    # MANA BACKFILL TARGET
     def take_empath_wound(self, wound_type, amount_spec="", target=None, selector=None, requested_fraction=None, requested_rate=None, learning_action=None):
         if not self.is_empath():
             return False, "You cannot draw another's wounds into yourself."
@@ -7574,6 +7614,11 @@ class Character(ObjectParent, DefaultCharacter):
         else:
             amount = min(20, target_amount)
         amount = min(amount, target_amount)
+
+        _mana_result, mana_failure = self.gate_mana_effect("life", max(1, amount))
+        if mana_failure:
+            return mana_failure
+
         risk_before = self.get_empath_transfer_risk_state()
         self.maybe_warn_empath_transfer_risk(risk_before)
         transfer_pressure = self.get_empath_transfer_pressure(target)
@@ -7789,15 +7834,22 @@ class Character(ObjectParent, DefaultCharacter):
         self.process_resurrection_stabilization_tick()
         return changed
 
+    # MANA BACKFILL TARGET
     def mend_empath_self(self):
         if not self.is_empath():
             return False, "You do not know how to mend yourself that way."
         wounds = self.get_empath_wounds()
         before_vitality = int(wounds.get("vitality", 0) or 0)
         before_bleeding = int(wounds.get("bleeding", 0) or 0)
+        if before_vitality <= 0 and before_bleeding <= 0:
+            return False, "You are already carrying no wounds that require mending."
+        _mana_result, mana_failure = self.gate_mana_effect("life", max(1, before_vitality + before_bleeding))
+        if mana_failure:
+            return mana_failure
         penalty = get_disease_penalty(self)
-        heal_vitality = max(0, int(10 / penalty))
-        heal_bleeding = max(0, int(5 / penalty))
+        healing_modifier = max(0.0, float(self.get_empath_healing_modifier()))
+        heal_vitality = max(0, int(round((10 / penalty) * healing_modifier)))
+        heal_bleeding = max(0, int(round((5 / penalty) * healing_modifier)))
         after_vitality = self.set_empath_wound("vitality", before_vitality - heal_vitality)
         after_bleeding = self.set_empath_wound("bleeding", before_bleeding - heal_bleeding)
         if before_vitality == after_vitality and before_bleeding == after_bleeding:
@@ -7851,6 +7903,7 @@ class Character(ObjectParent, DefaultCharacter):
         strength = float(config["base_strength"]) + (skill * float(config["strength_scale"]))
         return max(0.0, min(float(config["max_strength"]), strength))
 
+    # MANA BACKFILL TARGET
     def purge_empath_condition(self, wound_type):
         if not self.is_empath():
             return False, "You cannot purge corruption that way."
@@ -7861,6 +7914,11 @@ class Character(ObjectParent, DefaultCharacter):
         if before <= 0:
             return False, f"You are not carrying any {wound_key}."
         reduction = 15 if wound_key == "poison" else 10
+        _mana_result, mana_failure = self.gate_mana_effect("life", reduction)
+        if mana_failure:
+            return mana_failure
+        healing_modifier = max(0.0, float(self.get_empath_healing_modifier()))
+        reduction = max(1, int(round(reduction * healing_modifier)))
         self.set_empath_wound(wound_key, before - reduction)
         self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 10)
         self.award_empathy_experience("purge", 18, amount=before, target=self, wound_key=wound_key)
@@ -8385,14 +8443,16 @@ class Character(ObjectParent, DefaultCharacter):
 
     def regen_attunement(self):
         self.ensure_all_defaults()
-        current = int(self.db.attunement or 0)
-        maximum = int(self.db.max_attunement or 0)
+        current = float(getattr(self.db, "attunement", 0) or 0)
+        maximum = float(getattr(self.db, "max_attunement", 0) or 0)
         if current >= maximum:
             return False
-
-        regen = 1 + int(self.get_skill("attunement") / 10)
-        self.db.attunement = min(maximum, current + max(1, regen))
-        return True
+        result = ManaService.regenerate_attunement(
+            self,
+            attunement_skill=self.get_skill("attunement"),
+            wisdom=self.get_stat("wisdom"),
+        )
+        return bool(result.success and float(result.data.get("regen", 0.0) or 0.0) > 0.0)
 
     def spend_attunement(self, amount):
         self.ensure_all_defaults()
@@ -8404,11 +8464,10 @@ class Character(ObjectParent, DefaultCharacter):
         if amount <= 0:
             return False
 
-        current = int(self.db.attunement or 0)
-        if current < amount:
+        current = ManaService._get_attunement_state(self)
+        if float(current.get("current", 0.0) or 0.0) < float(amount):
             return False
-
-        self.db.attunement = current - amount
+        ManaService.spend_attunement(self, amount)
         return True
 
     def get_stat(self, name):
@@ -9310,6 +9369,13 @@ class Character(ObjectParent, DefaultCharacter):
             return "severe"
         return "critical"
 
+    # EMPATH ENTRY POINTS:
+    # - transfer_wounds
+    # - take_empath_wound
+    # - mend_empath_self
+    # - purge_empath_condition
+    # - heal_empath_scars
+
     def transfer_bodypart(self, target, part, skill, transfer_budget):
         self.ensure_body_state()
         target.ensure_body_state()
@@ -9347,6 +9413,7 @@ class Character(ObjectParent, DefaultCharacter):
             "spent": spent,
         }
 
+    # MANA BACKFILL TARGET
     def transfer_wounds(self, target):
         self.ensure_body_state()
         target.ensure_body_state()
@@ -9370,6 +9437,13 @@ class Character(ObjectParent, DefaultCharacter):
 
         if total_damage <= 0:
             return False
+
+        _mana_result, mana_failure = self.gate_mana_effect("life", max(1, min(transfer_budget, total_damage)))
+        if mana_failure:
+            return mana_failure[0]
+
+        healing_modifier = max(0.0, float(self.get_empath_healing_modifier()))
+        transfer_budget = max(1, int(round(transfer_budget * healing_modifier)))
 
         remaining_budget = transfer_budget
         ordered_parts = [part for part in BODY_PART_ORDER if part in part_totals]
@@ -11206,6 +11280,40 @@ class Character(ObjectParent, DefaultCharacter):
                 return int(amount * efficiency)
         return 0
 
+    def get_mana_realm(self):
+        profession_to_realm = {
+            "cleric": "holy",
+            "empath": "life",
+            "ranger": "life",
+            "warrior_mage": "elemental",
+            "bard": "elemental",
+            "moon_mage": "lunar",
+            "paladin": "holy",
+        }
+        return profession_to_realm.get(self.get_profession(), "elemental")
+
+    def get_devotion_effect_multiplier(self):
+        if not self.is_profession("cleric"):
+            return 1.0
+        devotion = self.get_devotion()
+        devotion_max = self.get_devotion_max()
+        devotion_ratio = (float(devotion) / float(devotion_max)) if devotion_max > 0 else 0.0
+        return 1.0 + (devotion_ratio * 0.25)
+
+    def _fail_mana_gate(self, result):
+        message = ManaPresenter.render_failure(result) or "The mana will not answer."
+        self.msg(message)
+        return False, message
+
+    def gate_mana_effect(self, realm, mana_input, min_prep=1, max_prep=None):
+        requested = max(int(mana_input or 0), int(min_prep or 1))
+        maximum = max(requested, int(max_prep if max_prep is not None else requested))
+        result = ManaService.prepare_spell(self, getattr(self, "location", None), realm, requested, int(min_prep or 1), maximum)
+        if not result.success:
+            return None, self._fail_mana_gate(result)
+        ManaService.clear_prepared_mana(self)
+        return result, None
+
     def prepare_spell(self, args):
         parts = [part for part in str(args or "").split() if part]
         if not parts:
@@ -11239,9 +11347,22 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(f"You can only prepare between {mana_min} and {mana_max} Radiance for that spell.")
             return False
 
-        if not self.spend_attunement(mana):
-            self.msg("You cannot gather enough Radiance.")
+        realm = self.get_mana_realm()
+        result = ManaService.prepare_spell(self, getattr(self, "location", None), realm, mana, mana_min, mana_max)
+        if not result.success:
+            for line in ManaPresenter.render_prepare(result):
+                self.msg(line)
             return False
+
+        prepared_mana = ManaService._get_prepared_mana_state(self)
+        if prepared_mana is not None:
+            prepared_mana["safe_mana"] = int(spell_def.get("safe_mana", mana) or mana)
+            prepared_mana["tier"] = int(spell_def.get("tier", 1) or 1)
+            prepared_mana["spell_category"] = str(spell_def.get("category", "utility") or "utility")
+            prepared_mana["base_difficulty"] = float(
+                spell_def.get("base_difficulty", 10 + int(spell_def.get("tier", 1) or 1) * 3)
+            )
+            ManaService._set_prepared_mana_state(self, prepared_mana)
 
         stability = self.calculate_preparation_stability(mana, spell_def["category"])
         self.set_state(
@@ -11249,12 +11370,16 @@ class Character(ObjectParent, DefaultCharacter):
             {
                 "name": spell_name,
                 "mana": mana,
+                "realm": realm,
                 "category": spell_def["category"],
                 "stability": stability,
                 "target_mode": spell_def.get("target_mode", "self"),
             },
         )
-        self.msg(f"You begin preparing {spell_name}.")
+        for line in ManaPresenter.render_prepare(
+            result.__class__.ok(data=dict(result.data) | {"spell_name": spell_name})
+        ):
+            self.msg(line)
         self.use_skill("attunement", apply_roundtime=False, emit_placeholder=False, require_known=False)
         if self.is_profession("cleric"):
             self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(max(8, mana)))
@@ -11267,6 +11392,12 @@ class Character(ObjectParent, DefaultCharacter):
             return False
 
         spell_name = str(data.get("name") or "spell")
+        ok, msg = self.can_access_spell(spell_name)
+        if not ok:
+            self.msg(msg)
+            ManaService.clear_prepared_mana(self)
+            self.clear_state("prepared_spell")
+            return False
         if self.get_state(f"cooldown_{spell_name}"):
             self.msg("You are not ready to cast that again yet.")
             return False
@@ -11274,7 +11405,6 @@ class Character(ObjectParent, DefaultCharacter):
         spell_metadata = self.get_spell_metadata(spell_name) or {}
         category = data.get("category") or spell_metadata.get("category", "targeted_magic")
         target_mode = spell_metadata.get("target_mode", data.get("target_mode", "self"))
-        mana = int(data.get("mana", 0) or 0)
         luminar_bonus = self.invoke_luminar()
         if luminar_bonus > 0:
             self.msg("Your luminar flares as it feeds power into the spell.")
@@ -11286,39 +11416,48 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("You must specify a target.")
             return False
 
-        total_mana = mana + luminar_bonus
-        backlash = self.resolve_spell_backlash(total_mana, category)
-        if backlash == "fizzle":
-            self.msg("The spell slips from your control and dissipates.")
+        realm = str(data.get("realm", "") or "").strip().lower()
+        primary_magic_skill = self.get_skill(category)
+        profession_cast_modifier = self.get_cleric_magic_modifier() if self.is_profession("cleric") else 1.0
+        cast_result = ManaService._cast_spell(
+            self,
+            realm,
+            primary_magic_skill,
+            profession_cast_modifier=profession_cast_modifier,
+            clear_prepared=False,
+        )
+        if not cast_result.success:
+            for line in ManaPresenter.render_cast(cast_result):
+                self.msg(line)
+            return False
+
+        success_band = str(cast_result.data.get("success_band", "solid") or "solid").strip().lower()
+        if success_band in {"failure", "backlash"}:
+            for line in ManaPresenter.render_cast(
+                cast_result.__class__.ok(data=dict(cast_result.data) | {"spell_name": spell_name})
+            ):
+                self.msg(line)
+            ManaService.clear_prepared_mana(self)
             self.clear_state("prepared_spell")
             return False
 
-        if backlash == "backlash":
-            self.msg("The spell recoils painfully through you!")
-            self.set_hp((self.db.hp or 0) - max(1, int(total_mana / 4)))
-            self.clear_state("prepared_spell")
-            return False
+        total_power = float(cast_result.data.get("final_spell_power", 0.0) or 0.0) + float(luminar_bonus)
 
-        wild_modifier = 0.75 if backlash == "wild" else 1.0
-        if backlash == "wild":
-            self.msg("The spell surges out in an unstable burst!")
+        wild_modifier = 1.0
 
         quality = self.resolve_cast_quality(data.get("stability", 1.0))
-        total_power = self.get_spell_power(category, total_mana)
+        if getattr(self, "ndb", None) is not None:
+            self.ndb.spell_environment_context = {
+                "effective_env_mana": float(cast_result.data.get("effective_env_mana", 1.0) or 1.0),
+                "environmental_mana_modifier": float(cast_result.data.get("environmental_mana_modifier", 1.0) or 1.0),
+            }
 
-        if spell_metadata.get("cyclic"):
-            if not self.start_cyclic_spell(spell_name, total_power):
-                return False
-            self.set_spell_cooldown(spell_name, max(2, int(total_power / 10)))
-            self.msg(f"You sustain {spell_name}.")
-            if category == "targeted_magic":
-                self.award_skill_experience("targeted_magic", max(10, int(total_power)), success=True)
-            else:
-                self.use_skill(category, apply_roundtime=False, emit_placeholder=False, require_known=False)
+        if spell_metadata.get("cyclic") and spell_metadata.get("spell_type") != "cyclic":
+            self.msg(f"{spell_name} still depends on retired legacy cyclic handling and must be migrated before use.")
+            ManaService.clear_prepared_mana(self)
             self.clear_state("prepared_spell")
-            return True
+            return False
 
-        self.msg(f"You release {spell_name}.")
         if target_mode == "single" and target is not None:
             with direct_interest(self, [target], channel="spell"):
                 resolved = self.resolve_spell(
@@ -11349,34 +11488,53 @@ class Character(ObjectParent, DefaultCharacter):
                 emit_placeholder=False,
                 require_known=False,
             )
+        for line in ManaPresenter.render_cast(
+            cast_result.__class__.ok(data=dict(cast_result.data) | {"spell_name": spell_name})
+        ):
+            self.msg(line)
+        ManaService.clear_prepared_mana(self)
         self.clear_state("prepared_spell")
+        if getattr(self, "ndb", None) is not None and hasattr(self.ndb, "spell_environment_context"):
+            self.ndb.spell_environment_context = None
         return True
 
     def resolve_spell(self, name, power, spell_def=None, quality="normal", target=None, wild_modifier=1.0):
+        _spell_def = spell_def
+        _wild_modifier = wild_modifier
         spell_name = str(name or "spell").lower()
-        spell_def = spell_def or self.get_spell_def(spell_name) or {}
-        category = spell_def.get("category", "utility")
+        structured_spell = self._resolve_structured_spell(spell_name)
+        if structured_spell is None:
+            raise ValueError(f"Unregistered spell: {spell_name}")
 
-        if spell_name == "cleanse":
-            return self.resolve_cleanse_spell(power, quality)
-
-        if category == "targeted_magic" and spell_def.get("target_mode") == "room":
-            return self.resolve_room_targeted_spell(spell_name, power, spell_def, quality, wild_modifier=wild_modifier)
-        if category == "targeted_magic":
-            return self.resolve_targeted_spell(spell_name, power, target, spell_def, quality, wild_modifier=wild_modifier)
-        if category == "augmentation":
-            return self.resolve_augmentation_spell(spell_name, power, spell_def, quality)
-        if category == "debilitation":
-            return self.resolve_debilitation_spell(spell_name, power, target, spell_def, quality, wild_modifier=wild_modifier)
-        if category == "warding" and spell_def.get("target_mode") == "group":
-            return self.resolve_group_warding_spell(spell_name, power, spell_def, quality)
-        if category == "warding":
-            return self.resolve_warding_spell(spell_name, power, spell_def, quality)
-        if category == "utility":
-            return self.resolve_utility_spell(spell_name, power, spell_def, quality)
-
-        self.msg(f"{spell_name} takes effect.")
+        effect_result = SpellEffectService.apply_spell(self, structured_spell, power, quality=quality, target=target)
+        if not effect_result.success:
+            for line in SpellEffectPresenter.render_self(effect_result):
+                self.msg(line)
+            return False
+        for line in SpellEffectPresenter.render_self(effect_result):
+            self.msg(line)
+        if target is not None and target != self and hasattr(target, "msg"):
+            for line in SpellEffectPresenter.render_target(effect_result):
+                target.msg(line)
+        room_line = SpellEffectPresenter.render_room(effect_result, self.key)
+        if room_line and self.location:
+            exclude = [self]
+            if target is not None and target != self:
+                exclude.append(target)
+            self.location.msg_contents(room_line, exclude=exclude)
         return True
+
+    def stop_cyclic_spell(self, spell_id=None):
+        from engine.services.state_service import StateService
+
+        active = self.get_active_cyclic_effects()
+        if not active:
+            return False
+        if spell_id:
+            result = StateService.remove_effect(self, "cyclic", spell_id)
+            return bool((result.data or {}).get("removed", False))
+        result = StateService.remove_effect(self, "cyclic", None)
+        return bool((result.data or {}).get("removed", False))
 
     def check_room_traps_for_enemy(self, attacker):
         if not self.location or not attacker:
@@ -13433,6 +13591,32 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_core_defaults()
         self.db.states = {}
 
+    def get_active_effects(self, category=None):
+        active_effects = self.get_state("active_effects") or {}
+        if not isinstance(active_effects, Mapping):
+            active_effects = {}
+        normalized = {str(effect_category): dict(effect_map or {}) for effect_category, effect_map in dict(active_effects).items()}
+        if category is None:
+            return normalized
+        return dict(normalized.get(str(category), {}) or {})
+
+    def get_active_cyclic_effects(self):
+        return dict(self.get_active_effects("cyclic") or {})
+
+    def get_effect(self, effect_type, category="debilitation"):
+        return dict(self.get_active_effects(category).get(str(effect_type or "").strip().lower().replace(" ", "_"), {}) or {})
+
+    def get_effect_modifier(self, modifier_key, category="debilitation"):
+        modifier_name = str(modifier_key or "").strip().lower().replace(" ", "_")
+        total = 0.0
+        for effect in self.get_active_effects(category).values():
+            modifiers = dict(effect.get("modifiers") or {})
+            scale = float(modifiers.get(modifier_name, 0.0) or 0.0)
+            if scale <= 0.0:
+                continue
+            total += float(effect.get("strength", 0) or 0) * scale
+        return int(round(total))
+
     def has_skill(self, skill_name):
         self.ensure_core_defaults()
         return skill_name in (self.db.skills or {})
@@ -15402,23 +15586,97 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_spell_def(self, name):
         normalized = str(name or "").strip().lower().replace("-", "_")
-        if normalized not in SPELLS:
-            return None
-        return dict(SPELLS.get(normalized, {}))
+        structured_spell = self._resolve_structured_spell(normalized)
+        if structured_spell is not None:
+            return self._build_structured_spell_metadata(structured_spell)
+        return None
 
     def get_spell_metadata(self, spell_name):
         return self.get_spell_def(spell_name)
 
     def can_access_spell(self, spell_name):
-        metadata = self.get_spell_def(spell_name)
-        if not metadata:
-            return False, "You do not know how to prepare that spell."
+        structured_spell = self._resolve_structured_spell(spell_name)
+        if structured_spell is not None:
+            result = SpellAccessService.can_use_spell(self, structured_spell)
+            if result.success:
+                return True, ""
+            return False, str((result.errors or ["You cannot comprehend that spell."])[0])
 
-        guilds = metadata.get("guilds") or ()
-        if guilds and self.get_profession() not in guilds:
-            return False, "Your guild does not have access to that spell."
+        return False, "You do not know how to prepare that spell."
 
-        return True, ""
+    def ensure_spellbook_defaults(self):
+        return SpellbookService.ensure_spellbook_defaults(self)
+
+    def has_spell(self, spell_id):
+        return SpellbookService.has_spell(self, spell_id)
+
+    def learn_spell(self, spell_id, method):
+        return SpellbookService.learn_spell(self, spell_id, method)
+
+    def _resolve_structured_spell(self, identifier):
+        normalized = str(identifier or "").strip().lower().replace("-", "_").replace(" ", "_")
+        structured_spell = get_structured_spell(normalized)
+        if structured_spell is not None:
+            return structured_spell
+
+        for spell in SpellAccessService.list_known_spells(self):
+            aliases = {
+                spell.id,
+                str(spell.name or "").strip().lower().replace("-", "_").replace(" ", "_"),
+                str(spell.abbr or "").strip().lower().replace("-", "_").replace(" ", "_"),
+            }
+            if normalized in aliases:
+                return spell
+
+        return None
+
+    def _build_structured_spell_metadata(self, spell):
+        spell_type_to_category = {
+            "aoe": "aoe",
+            "augmentation": "augmentation",
+            "cyclic": "cyclic",
+            "debilitation": "debilitation",
+            "targeted_magic": "targeted_magic",
+            "warding": "warding",
+            "utility": "utility",
+            "healing": "healing",
+        }
+        category = spell_type_to_category.get(str(spell.spell_type or "").strip().lower(), "utility")
+        normalized_target_type = str(getattr(spell, "target_type", "") or "").strip().lower()
+        target_mode = "single" if category in {"healing", "targeted_magic", "debilitation"} else "self"
+        if normalized_target_type in {"room", "group", "single"}:
+            target_mode = normalized_target_type
+        elif normalized_target_type == "self" and category not in {"healing", "targeted_magic", "debilitation"}:
+            target_mode = "self"
+        if category == "cyclic":
+            if str(getattr(spell, "target_type", "") or "").strip().lower() == "room":
+                target_mode = "room"
+            else:
+                target_mode = "single" if str(spell.cast_style or "").strip().lower() == "targeted" else "self"
+        mana_max = max(int(spell.safe_mana or 1), int(spell.safe_mana or 1) * 2)
+        tier = max(1, int((int(spell.min_circle or 1) - 1) / 25) + 1)
+        return {
+            "id": spell.id,
+            "name": spell.name,
+            "abbr": spell.abbr,
+            "category": category,
+            "spell_type": spell.spell_type,
+            "cast_style": spell.cast_style,
+            "guilds": tuple(spell.allowed_professions),
+            "mana_min": 1,
+            "mana_max": mana_max,
+            "safe_mana": int(spell.safe_mana or 1),
+            "base_difficulty": float(spell.base_difficulty or 0),
+            "tier": tier,
+            "cyclic": str(spell.spell_type or "").strip().lower() == "cyclic" or str(spell.cast_style or "").strip().lower() == "cyclic",
+            "ritual": str(spell.cast_style or "").strip().lower() == "ritual",
+            "targeted": category in {"targeted_magic", "debilitation", "aoe"},
+            "target_mode": target_mode,
+            "spellbook": spell.spellbook,
+            "acquisition_methods": list(spell.acquisition_methods),
+            "flags": list(spell.flags),
+            "description": f"{spell.name} is managed by the structured spell registry.",
+        }
 
     def get_safe_mana_limit(self, category=None):
         attunement = self.get_skill("attunement")
@@ -15518,79 +15776,6 @@ class Character(ObjectParent, DefaultCharacter):
             return self.get_target()
         return None
 
-    def start_cyclic_spell(self, name, power):
-        if self.get_state("active_cyclic"):
-            self.msg("You are already sustaining a spell.")
-            return False
-
-        spell_def = self.get_spell_def(name) or {}
-        self.set_state(
-            "active_cyclic",
-            {
-                "name": name,
-                "power": power,
-                "drain": max(1, int(power / 5)),
-                "category": spell_def.get("category", "augmentation"),
-                "mode": spell_def.get("target_mode", "self"),
-            },
-        )
-        return True
-
-    def process_cyclic(self):
-        data = self.get_state("active_cyclic")
-        if not data:
-            return False
-
-        drain = int(data.get("drain", 0) or 0)
-        if not self.spend_attunement(drain):
-            bonus = self.invoke_luminar(drain)
-            if bonus < drain:
-                self.msg("You lose control of your sustained spell.")
-                self.clear_state("active_cyclic")
-                return False
-
-        self.apply_cyclic_effect()
-        return True
-
-    def apply_cyclic_effect(self):
-        data = self.get_state("active_cyclic")
-        if not data:
-            return False
-
-        power = float(data.get("power", 0) or 0)
-        category = data.get("category", "augmentation")
-        if category == "augmentation":
-            self.set_state(
-                "augmentation_buff",
-                {
-                    "name": data.get("name", "cyclic spell"),
-                    "strength": max(1, int(power / 10)),
-                    "duration": 2,
-                },
-            )
-            return True
-
-        if category == "warding":
-            self.apply_warding_barrier(
-                self,
-                data.get("name", "cyclic spell"),
-                max(1, int(power / 12)),
-                2,
-            )
-            return True
-
-        if category == "utility":
-            self.set_state(
-                "utility_light",
-                {
-                    "name": data.get("name", "cyclic spell"),
-                    "duration": 2,
-                },
-            )
-            return True
-
-        return False
-
     def get_spell_recipients(self, target_mode, target=None):
         if target_mode == "self":
             return [self]
@@ -15666,254 +15851,31 @@ class Character(ObjectParent, DefaultCharacter):
             target.set_state("warding_barrier", updated)
         return remaining
 
-    def resolve_targeted_spell(self, name, power, target, spell_def, quality, wild_modifier=1.0):
-        if not target or target == self:
-            self.msg("You need a valid target for that spell.")
-            return False
-
-        if not hasattr(target, "set_hp") or getattr(target.db, "hp", None) is None:
-            self.msg("That is not a valid target for this spell.")
-            return False
-
-        self.register_empath_offensive_action(target=target, context="targeted_magic", amount=8)
-
-        factor = self.get_multi_skill_factor("targeted_magic", "attunement")
-        effective_power = float(power) * (0.5 + factor) * wild_modifier
-        setattr(target, "incoming_attackers", getattr(target, "incoming_attackers", 0) + 1)
-        offense = effective_power + self.get_skill("targeted_magic")
-        debuff = self.get_state("debilitated")
-        if debuff:
-            debuff_type = debuff.get("type", "accuracy")
-            if debuff_type in {"accuracy", "offense"}:
-                offense -= int(debuff.get("penalty", 0) or 0)
-        exposed = target.get_state("exposed_magic")
-        if exposed:
-            offense += 5
-        defense = target.get_skill("evasion") + target.db.stats.get("reflex", 10)
-        target_debuff = target.get_state("debilitated")
-        if target_debuff and target_debuff.get("type") == "evasion":
-            defense -= int(target_debuff.get("penalty", 0) or 0)
-        attackers = getattr(target, "incoming_attackers", 1)
-        pressure_penalty = int(attackers ** 0.5)
-        defense = max(1, defense - pressure_penalty)
-
-        hit_quality = self.resolve_hit_quality(offense, defense)
-        if hit_quality == "miss":
-            self.award_skill_experience("targeted_magic", max(10, int(defense)), success=False)
-            target.award_skill_experience("evasion", max(10, int(offense)), success=True)
-            self.msg(f"Your {name} misses {target.key}.")
-            target.msg(f"{self.key}'s {name} misses you.")
-            return True
-
-        self.award_skill_experience("targeted_magic", max(10, int(defense)), success=True)
-        target.award_skill_experience("evasion", max(10, int(offense)), success=False)
-
-        multiplier = {"graze": 0.5, "hit": 1.0, "strong": 1.5}[hit_quality]
-        if quality == "weak":
-            multiplier *= 0.75
-        elif quality == "strong":
-            multiplier *= 1.25
-
-        damage = max(1, int(effective_power * multiplier / 3))
-        damage = max(1, int(target.apply_magic_resistance(damage)))
-        damage = max(0, self.apply_ward_absorption(target, damage))
-        damage = max(1, damage)
-
+    def process_magic_states(self):
+        from engine.presenters.spell_effect_presenter import SpellEffectPresenter
         from engine.services.state_service import StateService
 
-        damage_result = StateService.apply_damage(target, damage, location="chest", damage_type="impact")
-        InjuryPresenter.present_result(target, damage_result)
-        self.msg(f"Your {name} {hit_quality}s {target.key} for {damage} damage.")
-        target.msg(f"{self.key}'s {name} {hit_quality}s you for {damage} damage.")
-        if self.location:
-            self.location.msg_contents(
-                f"{self.key}'s {name} {hit_quality}s {target.key}.",
-                exclude=[self, target],
-            )
-        return True
+        # PERFORMANCE RULE:
+        # This path may run for many characters per tick.
+        # Avoid per-effect expensive lookups or new nested scans unless justified.
+        cyclic_tick = StateService.process_cyclic_effects(self)
+        for collapsed in list((cyclic_tick.data or {}).get("collapsed_effects", []) or []):
+            for line in SpellEffectPresenter.render_expiration(collapsed):
+                self.msg(line)
+        effect_tick = StateService.tick_active_effects(self)
+        for expired in list((effect_tick.data or {}).get("expired_effects", []) or []):
+            for line in SpellEffectPresenter.render_expiration(expired):
+                self.msg(line)
 
-    def resolve_room_targeted_spell(self, name, power, spell_def, quality, wild_modifier=1.0):
-        recipients = self.get_spell_recipients("room")
-        if not recipients:
-            self.msg(f"Your {name} finds no targets.")
-            return False
-
-        self.adjust_empath_shock(10) if self.is_empath() else None
-
-        self.msg(f"Your {name} erupts outward!")
-        if self.location:
-            self.location.msg_contents(f"{self.key}'s {name} erupts outward!", exclude=[self])
-
-        factor = self.get_multi_skill_factor("targeted_magic", "attunement")
-        effective_power = float(power) * (0.5 + factor) * wild_modifier
-        hit_any = False
-        for target in recipients:
-            setattr(target, "incoming_attackers", getattr(target, "incoming_attackers", 0) + 1)
-            offense = effective_power + self.get_skill("targeted_magic")
-            defense = target.get_skill("evasion") + target.db.stats.get("reflex", 10)
-            target_debuff = target.get_state("debilitated")
-            if target_debuff and target_debuff.get("type") == "evasion":
-                defense -= int(target_debuff.get("penalty", 0) or 0)
-            attackers = getattr(target, "incoming_attackers", 1)
-            pressure_penalty = int(attackers ** 0.5)
-            defense = max(1, defense - pressure_penalty)
-            hit_quality = self.resolve_hit_quality(offense, defense)
-            if hit_quality == "miss":
-                target.award_skill_experience("evasion", max(10, int(offense)), success=True)
-                continue
-
-            target.award_skill_experience("evasion", max(10, int(offense)), success=False)
-
-            multiplier = {"graze": 0.5, "hit": 1.0, "strong": 1.5}[hit_quality]
-            if quality == "weak":
-                multiplier *= 0.75
-            elif quality == "strong":
-                multiplier *= 1.25
-
-            damage = max(1, int(effective_power * multiplier / 4))
-            damage = max(1, int(target.apply_magic_resistance(damage)))
-            damage = max(0, self.apply_ward_absorption(target, damage))
-            damage = max(1, damage)
-            hit_any = True
-            from engine.services.state_service import StateService
-
-            damage_result = StateService.apply_damage(target, damage, location="chest", damage_type="impact")
-            InjuryPresenter.present_result(target, damage_result)
-            if getattr(target, "account", None):
-                target.msg(f"{self.key}'s {name} washes over you!")
-
-        self.award_skill_experience("targeted_magic", max(10, int(effective_power)), success=hit_any)
-
-        return True
-
-    def resolve_augmentation_spell(self, name, power, spell_def, quality):
-        if self.get_state("active_cyclic") and spell_def.get("category") == "augmentation":
-            self.msg("Your sustained magic interferes with that spell.")
-            return False
-
-        strength = 1 + int(power / 10)
-        duration = 10 + int(power / 2)
-        if quality == "weak":
-            strength = max(1, strength - 1)
-        elif quality == "strong":
-            strength += 1
-
-        existing = self.get_state("augmentation_buff")
-        if existing:
-            existing_strength = int(existing.get("strength", 0) or 0)
-            if existing_strength > strength:
-                refreshed = dict(existing)
-                refreshed["duration"] = max(int(refreshed.get("duration", 0) or 0), duration)
-                self.set_state("augmentation_buff", refreshed)
-                self.msg("You are already under a stronger similar effect.")
-                return True
-
-        self.set_state("augmentation_buff", {"name": name, "strength": strength, "duration": duration})
-        self.msg(f"You feel {name} settle into place around you.")
-        return True
-
-    def resolve_debilitation_spell(self, name, power, target, spell_def, quality, wild_modifier=1.0):
-        if not target or target == self:
-            self.msg("You need a valid target for that spell.")
-            return False
-
-        self.register_empath_offensive_action(target=target, context="debilitation", amount=6)
-
-        factor = self.get_multi_skill_factor("debilitation", "attunement")
-        effective_power = float(power) * (0.5 + factor) * wild_modifier
-        offense = effective_power + self.get_skill("debilitation")
-        defense = target.get_skill("warding") + target.db.stats.get("discipline", 10)
-        defense += target.get_magic_resistance()
-        ratio = offense / max(1, defense)
-        if ratio < 0.7:
-            self.msg(f"{target.key} resists your {name}.")
-            target.msg(f"You resist {self.key}'s {name}.")
-            self.award_skill_experience("debilitation", max(10, int(defense)), success=False)
-            return True
-
-        penalty = int(effective_power / 10)
-        duration = 6 + int(effective_power / 3)
-        debuff_type = spell_def.get("debuff_type", "accuracy")
-        if ratio < 1.0:
-            penalty = max(1, penalty // 2)
-        existing = target.get_state("debilitated")
-        if existing:
-            penalty = max(1, penalty // 2)
-        if quality == "strong":
-            penalty += 1
-
-        if existing:
-            existing_penalty = int(existing.get("penalty", 0) or 0)
-            if existing_penalty > penalty and existing.get("type") == debuff_type:
-                refreshed = dict(existing)
-                refreshed["duration"] = max(int(refreshed.get("duration", 0) or 0), duration)
-                target.set_state("debilitated", refreshed)
-                self.apply_exposed_state(target, duration=6)
-                self.msg(f"Your {name} reinforces the lingering hindrance on {target.key}.")
-                target.msg(f"{self.key}'s {name} intensifies the pressure already on you.")
-                self.award_skill_experience("debilitation", max(10, int(defense)), success=True)
-                return True
-
-        target.set_state("debilitated", {"penalty": penalty, "duration": duration, "type": debuff_type})
-        self.apply_exposed_state(target, duration=6)
-        self.msg(f"Your {name} hampers {target.key}.")
-        target.msg(f"You feel your movements hindered by {self.key}'s {name}.")
-        self.award_skill_experience("debilitation", max(10, int(defense)), success=True)
-        return True
-
-    def resolve_warding_spell(self, name, power, spell_def, quality):
-        strength = 1 + int(power / 10)
-        duration = 10 + int(power / 2)
-        if quality == "strong":
-            strength += 1
-        self.apply_warding_barrier(self, name, strength, duration)
-        self.msg("A protective barrier settles around you.")
-        return True
-
-    def resolve_group_warding_spell(self, name, power, spell_def, quality):
-        recipients = self.get_spell_recipients("group")
-        if not recipients:
-            self.msg(f"{name} finds no one to protect.")
-            return False
-
-        strength = 1 + int(power / 12)
-        duration = 8 + int(power / 3)
-        if quality == "strong":
-            strength += 1
-
-        for target in recipients:
-            self.apply_warding_barrier(target, name, strength, duration)
-            if getattr(target, "account", None) and target != self:
-                target.msg(f"A protective field settles over you from {self.key}'s magic.")
-
-        self.msg(f"You extend {name} over your group.")
-        if self.location:
-            self.location.msg_contents(f"{self.key} extends a protective spell over the group.", exclude=[self])
-        return True
-
-    def resolve_utility_spell(self, name, power, spell_def, quality):
-        duration = 20 + int(power)
-        self.set_state("utility_light", {"name": name, "duration": duration})
-        self.msg("A soft light forms around you.")
-        return True
-
-    def resolve_cleanse_spell(self, power, quality):
-        removed = False
-        for state_name in ["debilitated", "exposed_magic"]:
-            if self.get_state(state_name):
-                self.clear_state(state_name)
-                removed = True
-
-        if removed:
-            self.msg("You feel lingering effects wash away.")
-        else:
-            self.msg("You feel momentarily refreshed.")
-        return True
-
-    def process_magic_states(self):
-        for key in ["augmentation_buff", "debilitated", "warding_barrier", "utility_light", "exposed_magic"]:
+        for key in ["augmentation_buff", "warding_barrier", "utility_light", "exposed_magic"]:
             data = self.get_state(key)
             if not data:
+                continue
+            if key == "augmentation_buff" and dict((self.get_state("active_effects") or {}).get("augmentation", {}) or {}):
+                continue
+            if key == "warding_barrier" and dict((self.get_state("active_effects") or {}).get("warding", {}) or {}):
+                continue
+            if key == "utility_light" and dict((self.get_state("active_effects") or {}).get("utility", {}) or {}):
                 continue
             updated = dict(data)
             updated["duration"] = int(updated.get("duration", 0) or 0) - 1
@@ -16279,6 +16241,7 @@ class Character(ObjectParent, DefaultCharacter):
                 best_value = scars
         return best_part
 
+    # MANA BACKFILL TARGET
     def heal_empath_scars(self, target=None):
         subject = target or self
         if not self.is_empath():
@@ -16295,6 +16258,9 @@ class Character(ObjectParent, DefaultCharacter):
         body_part = subject.get_body_part(part_name) if hasattr(subject, "get_body_part") else None
         if not body_part or int(body_part.get("scar", 0) or 0) <= 0:
             return False, f"{subject.key if subject != self else 'You'} bear no scars you can heal."
+        _mana_result, mana_failure = self.gate_mana_effect("life", 8)
+        if mana_failure:
+            return mana_failure
         body_part["scar"] = max(0, int(body_part.get("scar", 0) or 0) - 1)
         self.set_empath_wound("fatigue", self.get_empath_wound("fatigue") + 12)
         self.adjust_empath_shock(3)

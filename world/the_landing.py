@@ -1192,7 +1192,7 @@ def extract_the_landing_area_spec(
     map_path=None,
     use_ocr=USE_OCR,
     use_ai_adjudication=USE_AI_ADJUDICATION,
-    area_id="the_landing",
+    area_id="new_landing",
     profile=None,
     style_settings=None,
 ):
@@ -1351,7 +1351,7 @@ def build_the_landing(
     map_path=None,
     use_ocr=USE_OCR,
     use_ai_adjudication=USE_AI_ADJUDICATION,
-    area_id="the_landing",
+    area_id="new_landing",
     profile=None,
     style_settings=None,
 ):
