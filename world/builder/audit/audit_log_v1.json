@@ -1,0 +1,321 @@
+[
+  {
+    "action": "validation",
+    "details": {
+      "source": "hardening-check"
+    },
+    "object_id": 0,
+    "timestamp": 1776120537.4456303
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "create_room",
+      "operation_id": "auto-0",
+      "payload": {
+        "op": "create_room",
+        "room": {
+          "description": "A",
+          "id": "diff-del-a",
+          "map_layer": 0,
+          "map_x": 0,
+          "map_y": 0,
+          "name": "Delete Room A"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776122529.1092865
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "create_room",
+      "operation_id": "auto-1",
+      "payload": {
+        "op": "create_room",
+        "room": {
+          "description": "B",
+          "id": "diff-del-b",
+          "map_layer": 0,
+          "map_x": 1,
+          "map_y": 0,
+          "name": "Delete Room B"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776122529.3129427
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "set_exit",
+      "operation_id": "auto-2",
+      "payload": {
+        "direction": "west",
+        "op": "set_exit",
+        "source_id": "diff-del-b",
+        "target_id": "diff-del-a"
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776122529.3565383
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "create_room",
+      "operation_id": "op-create-a",
+      "payload": {
+        "id": "op-create-a",
+        "op": "create_room",
+        "room": {
+          "description": "A",
+          "id": "diff-meta-a",
+          "map_layer": 0,
+          "map_x": 0,
+          "map_y": 0,
+          "name": "Meta Room A"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776122935.919426
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "update_room",
+      "operation_id": "op-pre",
+      "payload": {
+        "id": "op-pre",
+        "op": "update_room",
+        "room_id": "diff-meta-a",
+        "updates": {
+          "description": "pre"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776122935.9502723
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "update_room",
+      "operation_id": "auto-0",
+      "payload": {
+        "op": "update_room",
+        "room_id": "diff-meta-a",
+        "updates": {
+          "description": "again"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776122935.982542
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "create_room",
+      "operation_id": "op-create-a",
+      "payload": {
+        "id": "op-create-a",
+        "op": "create_room",
+        "room": {
+          "description": "A",
+          "id": "diff-payload-a",
+          "map_layer": 0,
+          "map_x": 0,
+          "map_y": 0,
+          "name": "Payload Room A"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776123247.068279
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "update_room",
+      "operation_id": "op-pre",
+      "payload": {
+        "id": "op-pre",
+        "op": "update_room",
+        "room_id": "diff-payload-a",
+        "updates": {
+          "description": "pre"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776123247.1027167
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "create_room",
+      "operation_id": "setup-a",
+      "payload": {
+        "id": "setup-a",
+        "op": "create_room",
+        "room": {
+          "description": "A",
+          "id": "history-type-room-a",
+          "map_layer": 0,
+          "map_x": 0,
+          "map_y": 0,
+          "name": "A"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.195802
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "create_room",
+      "operation_id": "setup-b",
+      "payload": {
+        "id": "setup-b",
+        "op": "create_room",
+        "room": {
+          "description": "B",
+          "id": "history-type-room-b",
+          "map_layer": 0,
+          "map_x": 1,
+          "map_y": 0,
+          "name": "B"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.3985028
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "update_room",
+      "operation_id": "rename-a",
+      "payload": {
+        "id": "rename-a",
+        "op": "update_room",
+        "room_id": "history-type-room-a",
+        "updates": {
+          "name": "A Prime"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.4585154
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "set_exit",
+      "operation_id": "link-east",
+      "payload": {
+        "direction": "east",
+        "id": "link-east",
+        "op": "set_exit",
+        "source_id": "history-type-room-a",
+        "target_id": "history-type-room-b"
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.5097983
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "delete_exit",
+      "operation_id": "auto-0",
+      "payload": {
+        "direction": "east",
+        "op": "delete_exit",
+        "source_id": "history-type-room-a"
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.6034853
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "update_room",
+      "operation_id": "auto-1",
+      "payload": {
+        "op": "update_room",
+        "room_id": "history-type-room-a",
+        "updates": {
+          "name": "A"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.6417134
+  },
+  {
+    "action": "undo_apply",
+    "details": {
+      "applied": 2,
+      "area_id": "history-type-check",
+      "operation_ids": [
+        "auto-0",
+        "auto-1"
+      ]
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.6851954
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "update_room",
+      "operation_id": "rename-a",
+      "payload": {
+        "id": "rename-a",
+        "op": "update_room",
+        "room_id": "history-type-room-a",
+        "updates": {
+          "name": "A Prime"
+        }
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.7474298
+  },
+  {
+    "action": "diff_apply",
+    "details": {
+      "operation": "set_exit",
+      "operation_id": "link-east",
+      "payload": {
+        "direction": "east",
+        "id": "link-east",
+        "op": "set_exit",
+        "source_id": "history-type-room-a",
+        "target_id": "history-type-room-b"
+      }
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.8030126
+  },
+  {
+    "action": "redo_apply",
+    "details": {
+      "applied": 2,
+      "area_id": "history-type-check",
+      "operation_ids": [
+        "rename-a",
+        "link-east"
+      ]
+    },
+    "object_id": 0,
+    "timestamp": 1776124597.84996
+  }
+]

@@ -444,9 +444,13 @@
     return state.map.rooms.find((room) => room.id === roomId);
   }
 
+  function isPlayerRoom(room) {
+    return Boolean(room && (room.is_player || room.current || room.id === state.map.player_room_id));
+  }
+
   function roomColor(room) {
     if (room.map_color) return room.map_color;
-    if (room.is_player) return "#df564a";
+    if (isPlayerRoom(room)) return "#df564a";
     if (room.has_guild_entrance) return "#f0d45f";
     if (room.has_poi) return "#69b8ff";
     if (room.type === "guild_entrance") return "#f0d45f";
@@ -489,7 +493,8 @@
 
     state.map.rooms.forEach((room) => {
       const pos = state.roomPositions.get(room.id);
-      const radius = room.is_player ? 9 : 6;
+      const playerRoom = isPlayerRoom(room);
+      const radius = playerRoom ? 9 : 6;
       if (room.id === state.hoveredRoomId) {
         ctx.fillStyle = "rgba(255,255,255,0.25)";
         ctx.beginPath();

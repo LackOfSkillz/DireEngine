@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from web.api.views import (
     AccountMeApiView,
@@ -11,6 +11,11 @@ from web.api.views import (
     DebugSessionApiView,
 )
 
+try:
+    from world.builder.capabilities import builder_ready
+except ImportError:  # pragma: no cover - builder is optional
+    builder_ready = None
+
 
 urlpatterns = [
     path("account/me", AccountMeApiView.as_view(), name="api-account-me"),
@@ -22,3 +27,8 @@ urlpatterns = [
     path("characters/select", CharacterSelectApiView.as_view(), name="api-character-select"),
     path("debug/session", DebugSessionApiView.as_view(), name="api-debug-session"),
 ]
+
+if builder_ready and builder_ready():
+    urlpatterns += [
+        path("builder/", include("web.api.builder.urls")),
+    ]

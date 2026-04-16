@@ -7,6 +7,7 @@ var socket := WebSocketPeer.new()
 var command_history: Array[String] = []
 var command_history_index := -1
 var command_history_draft := ""
+var launch_context: Dictionary = {}
 
 
 func _ready() -> void:
@@ -22,12 +23,46 @@ func _ready() -> void:
 	$CommandInput.text_submitted.connect(_on_command_input_text_submitted)
 	$CommandInput.gui_input.connect(_on_command_input_gui_input)
 	$MapPanel.room_clicked.connect(_on_room_clicked)
+	$BuilderController.feedback.connect(_on_builder_feedback)
 	$InventoryPanel.item_action.connect(_on_item_action)
 	$CharacterPanel.equip_item.connect(_on_equip_item)
 	$Hotbar.hotbar_action.connect(_on_hotbar_action)
 	$Hotbar.set_slot(0, "look")
 	$Hotbar.set_slot(1, "inventory")
 	$Hotbar.set_slot(2, "stats")
+	_apply_launch_context_from_args()
+
+
+func _extract_launch_context(args: Array) -> Dictionary:
+	var context := {}
+	for arg in args:
+		var raw_arg := str(arg)
+		if not raw_arg.begins_with("--"):
+			continue
+		var parts := raw_arg.substr(2).split("=", false, 1)
+		if parts.size() != 2:
+			continue
+		var key := str(parts[0]).strip_edges()
+		var value := str(parts[1]).strip_edges()
+		if key.is_empty() or value.is_empty():
+			continue
+		if key in ["area_id", "room_id", "character_name"]:
+			context[key] = value
+	return context
+
+
+func _apply_launch_context_from_args() -> void:
+	var args := OS.get_cmdline_args()
+	var user_args := OS.get_cmdline_user_args()
+	print("CMD ARGS:", args)
+	print("USER CMD ARGS:", user_args)
+	var context := _extract_launch_context(user_args)
+	if context.is_empty():
+		context = _extract_launch_context(args)
+	if not context.is_empty():
+		launch_context = context.duplicate(true)
+		print("Builder launch context: %s" % [str(context)])
+		$BuilderController.apply_launch_context(context)
 
 
 func _process(_delta: float) -> void:
@@ -79,12 +114,16 @@ func handle_message(message: Dictionary) -> void:
 		"map":
 			if args.size() > 0:
 				$MapPanel.render_map(args[0])
+				$BuilderController.ingest_live_map(args[0])
 		"character":
 			if args.size() > 0:
 				$CharacterPanel.update_character(args[0])
 				$CharacterPanel.update_equipment(args[0].get("equipment", {}))
 				$CharacterPanel.update_status(args[0].get("status", []))
 				$InventoryPanel.update_inventory(args[0].get("inventory", []))
+				$BuilderController.update_character_context(args[0])
+				if not launch_context.is_empty():
+					$BuilderController.apply_launch_context(launch_context)
 		"combat":
 			if args.size() > 0:
 				handle_combat(args[0])
@@ -201,6 +240,11 @@ func handle_combat(data: Dictionary) -> void:
 	var damage = int(data.get("damage", 0))
 	$TextLog.add_line("You hit %s for %d damage." % [target, damage])
 	$CharacterPanel.flash_damage()
+
+
+func _on_builder_feedback(message: String) -> void:
+	if not message.strip_edges().is_empty():
+		$TextLog.add_line("[builder] %s" % message)
 
 
 func _exit_tree() -> void:

@@ -67,12 +67,12 @@ func _on_item_list_item_activated(index: int) -> void:
 
 
 func get_drag_data(position: Vector2):
-	var local_position := position - $ItemList.position
-	var index := $ItemList.get_item_at_position(local_position, true)
+	var local_position: Vector2 = position - $ItemList.position
+	var index: int = $ItemList.get_item_at_position(local_position, true)
 	if index < 0:
 		return null
 
-	var item_name := $ItemList.get_item_text(index)
+	var item_name: String = $ItemList.get_item_text(index)
 	var preview := Label.new()
 	preview.text = item_name
 	preview.add_theme_color_override("font_color", Color("#fff7ef"))

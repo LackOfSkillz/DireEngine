@@ -104,10 +104,12 @@ def _room_map_flags(room):
     }
 
 
-def _get_cached_zone_template(area_tag):
+def _get_cached_zone_template(area_tag, build_if_missing=True):
     cached = _ZONE_MAP_TEMPLATE_CACHE.get(area_tag)
     if cached:
         return cached["template"]
+    if not build_if_missing:
+        return None
 
     tagged_objects = list(search_tag(area_tag, category="build"))
     zone_rooms = [obj for obj in tagged_objects if getattr(obj, "destination", None) is None and getattr(obj, "id", None) is not None]
@@ -418,7 +420,7 @@ def get_local_map(character, radius=3):
     return payload
 
 
-def get_zone_map(character):
+def get_zone_map(character, build_cache=True):
     started_at = time.perf_counter()
     origin = getattr(character, "location", None)
     if not origin:
@@ -430,28 +432,12 @@ def get_zone_map(character):
     if not area_tag:
         return get_local_map(character)
 
-    template = _get_cached_zone_template(area_tag)
+    template = _get_cached_zone_template(area_tag, build_if_missing=build_cache)
     if not template:
         return get_local_map(character)
 
-    serialized_rooms = [
-        {
-            "id": room["id"],
-            "x": room["x"],
-            "y": room["y"],
-            "name": room["name"],
-            "current": room["id"] == origin.id,
-            "is_player": room["id"] == origin.id,
-            "has_poi": bool(room.get("has_poi")),
-            "has_guild_entrance": bool(room.get("has_guild_entrance")),
-            "type": room.get("type") or "room",
-            "map_color": room.get("map_color") or "#5f8f57",
-        }
-        for room in template["rooms"]
-    ]
-
     payload = {
-        "rooms": serialized_rooms,
+        "rooms": template["rooms"],
         "edges": template["edges"],
         "exits": template["edges"],
         "player_room_id": origin.id,
@@ -462,7 +448,12 @@ def get_zone_map(character):
 
 
 def send_map_update(character, radius=3, session=None, mode="zone"):
-    map_data = get_zone_map(character) if mode == "zone" else get_local_map(character, radius=radius)
+    if mode == "zone":
+        map_data = get_zone_map(character)
+    elif mode == "cached-zone":
+        map_data = get_zone_map(character, build_cache=False)
+    else:
+        map_data = get_local_map(character, radius=radius)
     sent = 0
     if not suppress_client_payloads():
         sent = send_structured(character, "map", map_data, session=session)

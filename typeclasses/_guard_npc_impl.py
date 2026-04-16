@@ -1,0 +1,1 @@
+from typeclasses.npcs import GuardNPC

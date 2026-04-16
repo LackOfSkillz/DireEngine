@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/builder/ObjectNode.gd" id="1_object_node"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rect"]
+size = Vector2(36, 16)
+
+[node name="ObjectNode" type="Area2D"]
+script = ExtResource("1_object_node")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0)
+shape = SubResource("RectangleShape2D_rect")
+
+[node name="HitBox" type="ColorRect" parent="."]
+offset_left = -18.0
+offset_top = -8.0
+offset_right = 18.0
+offset_bottom = 8.0
+color = Color(0.28, 0.48, 0.86, 1.0)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -18.0
+offset_top = -24.0
+offset_right = 30.0
+offset_bottom = -8.0
+theme_override_font_sizes/font_size = 10
+text = "Object"

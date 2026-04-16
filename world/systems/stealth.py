@@ -150,7 +150,7 @@ def resolve_detection(observer, target, award_xp=False, active=False, context=No
 
     margin = int(detect_score - stealth_value)
     result = margin >= 0
-    if result and award_xp:
+    if result and award_xp and hasattr(observer, "_sync_exp_skill_state"):
         SkillService.award_xp(observer, "perception", 1, source={"mode": "difficulty"}, success=True, outcome="success", event_key="perception")
 
     hint = "none"

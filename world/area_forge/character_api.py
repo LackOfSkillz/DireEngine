@@ -4,6 +4,36 @@ from tools.diretest.core.runtime import record_payload_timing, suppress_client_p
 from typeclasses.abilities import get_ability_map
 from world.area_forge.utils.messages import send_structured
 
+try:
+    from world.builder.permissions import is_builder as is_builder_user
+except ImportError:  # pragma: no cover - builder is optional
+    is_builder_user = None
+
+
+def _get_builder_payload(character):
+    account = getattr(character, "account", None)
+    character_permissions = getattr(character, "permissions", None)
+
+    def _has_staff_access(perm_source) -> bool:
+        if perm_source is None:
+            return False
+        if bool(getattr(perm_source, "is_superuser", False)):
+            return True
+        permissions = getattr(perm_source, "permissions", None)
+        if permissions is None:
+            return False
+        return bool(permissions.check("Admin") or permissions.check("Builder"))
+
+    character_can_build = _has_staff_access(character)
+    account_can_build = _has_staff_access(account)
+    plugin_builder_access = bool(is_builder_user(account)) if is_builder_user and account is not None else False
+    builder_enabled = bool(character_can_build or account_can_build or plugin_builder_access)
+    return {
+        "is_builder": builder_enabled,
+        "builder_mode_available": builder_enabled,
+        "builder_session_id": "",
+    }
+
 
 def _item_actions(character, item):
     actions = ["look", "drop"]
@@ -372,6 +402,7 @@ def get_character_payload(character):
         "cooldowns": cooldowns,
         "abilities": _get_ability_payload(character, cooldowns),
     }
+    payload.update(_get_builder_payload(character))
     record_payload_timing((time.perf_counter() - started_at) * 1000.0)
     return payload
 

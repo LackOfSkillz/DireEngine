@@ -47,6 +47,8 @@ class CmdHide(Command):
         for obj in list(room.contents):
             if obj == caller or not hasattr(obj, "msg"):
                 continue
+            if not hasattr(obj, "_sync_exp_skill_state"):
+                continue
 
             if detect(obj, caller, award_xp=True):
                 obj.msg(f"You notice {caller.key} trying to hide.")

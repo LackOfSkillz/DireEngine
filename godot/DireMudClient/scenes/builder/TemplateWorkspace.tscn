@@ -1,0 +1,273 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/builder/TemplateWorkspace.gd" id="1_template_workspace"]
+
+[node name="TemplateWorkspace" type="PanelContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+clip_contents = true
+script = ExtResource("1_template_workspace")
+
+[node name="FloatingBackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 148.0
+offset_bottom = 38.0
+text = "Back"
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 46
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+text = "Templates"
+
+[node name="TopButtonRow" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="Margin/VBox/TopButtonRow"]
+layout_mode = 2
+text = "Back to Inspector"
+
+[node name="TopSpacer" type="Control" parent="Margin/VBox/TopButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Search" type="LineEdit" parent="Margin/VBox"]
+layout_mode = 2
+placeholder_text = "Search templates"
+
+[node name="ResultsSection" type="PanelContainer" parent="Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/ResultsSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/ResultsSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Margin/VBox/ResultsSection/Margin/VBox"]
+layout_mode = 2
+text = "Library"
+
+[node name="EmptyState" type="Label" parent="Margin/VBox/ResultsSection/Margin/VBox"]
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+text = "No templates found. Create one with New, or add templates to the builder registry."
+
+[node name="Results" type="ItemList" parent="Margin/VBox/ResultsSection/Margin/VBox"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EditorSection" type="PanelContainer" parent="Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+clip_contents = true
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/VBox/EditorSection"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/EditorSection/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/EditorSection/Scroll/Margin"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+text = "Editor"
+
+[node name="TemplateIdLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+text = "Template Id"
+
+[node name="TemplateIdInput" type="LineEdit" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+text = "Name"
+
+[node name="NameInput" type="LineEdit" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+text = "Description"
+
+[node name="DescriptionInput" type="TextEdit" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="TagsLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+text = "Tags"
+
+[node name="TagsInput" type="LineEdit" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+placeholder_text = "guard, city_watch"
+
+[node name="NpcSection" type="PanelContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox"]
+layout_mode = 2
+text = "Stats"
+
+[node name="StatsGrid" type="GridContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="StrLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "STR"
+
+[node name="StrInput" type="SpinBox" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/StatsGrid"]
+layout_mode = 2
+min_value = 1.0
+max_value = 99.0
+step = 1.0
+value = 10.0
+
+[node name="DexLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "DEX"
+
+[node name="DexInput" type="SpinBox" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/StatsGrid"]
+layout_mode = 2
+min_value = 1.0
+max_value = 99.0
+step = 1.0
+value = 10.0
+
+[node name="ConLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/StatsGrid"]
+layout_mode = 2
+text = "CON"
+
+[node name="ConInput" type="SpinBox" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/StatsGrid"]
+layout_mode = 2
+min_value = 1.0
+max_value = 99.0
+step = 1.0
+value = 10.0
+
+[node name="FlagsLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox"]
+layout_mode = 2
+text = "Behavior"
+
+[node name="FlagsRow" type="HBoxContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AggressiveToggle" type="CheckButton" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/FlagsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Aggressive"
+
+[node name="PatrolToggle" type="CheckButton" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/NpcSection/Margin/VBox/FlagsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Patrol"
+
+[node name="ItemSection" type="PanelContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox"]
+layout_mode = 2
+text = "Item Properties"
+
+[node name="TypeRow" type="HBoxContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TypeLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox/TypeRow"]
+layout_mode = 2
+text = "Type"
+
+[node name="TypeInput" type="OptionButton" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox/TypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropertiesGrid" type="GridContainer" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="WeightLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox/PropertiesGrid"]
+layout_mode = 2
+text = "Weight"
+
+[node name="WeightInput" type="SpinBox" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox/PropertiesGrid"]
+layout_mode = 2
+min_value = 0.0
+max_value = 100000.0
+step = 0.5
+
+[node name="ValueLabel" type="Label" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox/PropertiesGrid"]
+layout_mode = 2
+text = "Value"
+
+[node name="ValueInput" type="SpinBox" parent="Margin/VBox/EditorSection/Scroll/Margin/VBox/ItemSection/Margin/VBox/PropertiesGrid"]
+layout_mode = 2
+min_value = 0.0
+max_value = 1000000.0
+step = 1.0
+
+[node name="Message" type="Label" parent="Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ButtonRow" type="GridContainer" parent="Margin/VBox"]
+layout_mode = 2
+columns = 3
+
+[node name="NewButton" type="Button" parent="Margin/VBox/ButtonRow"]
+layout_mode = 2
+text = "New"
+
+[node name="SaveButton" type="Button" parent="Margin/VBox/ButtonRow"]
+layout_mode = 2
+text = "Save Template"
+
+[node name="CloseButton" type="Button" parent="Margin/VBox/ButtonRow"]
+layout_mode = 2
+text = "Close"

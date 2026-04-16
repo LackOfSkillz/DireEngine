@@ -288,6 +288,45 @@ Preferred pattern:
 
 - central capability check such as `is_builder_available()`
 - all builder feature exposure guarded behind that capability check
+- explicit required-service probing rather than hand-written chained boolean expressions
+
+Recommended capability pattern:
+
+```python
+REQUIRED_SERVICES = [
+	"room_service",
+	"template_service",
+	"spawn_service",
+	"placement_service",
+	"instance_service",
+]
+
+for service_name in REQUIRED_SERVICES:
+	__import__(f"world.builder.services.{service_name}")
+```
+
+This avoids:
+
+- silent typos in availability checks
+- stale partial-import conditions
+- malformed chained boolean expressions as Builder services grow
+
+0.14.3.1 Evennia Search Import Rule
+
+When Builder code needs Evennia object lookup helpers, import them explicitly from the stable utility module.
+
+Required pattern:
+
+```python
+from evennia.utils.search import search_object
+```
+
+Do not rely on:
+
+- `from evennia import search_object`
+- implicit or re-exported search helpers
+
+This rule is intentionally strict so Builder API and service code does not drift across mixed Evennia import surfaces or runtime-specific re-export behavior.
 
 0.14.4 Feature Gating Rule
 
@@ -533,6 +572,246 @@ Export/import JSON
 3.9 Map Import and Export
 
 map.json → Evennia importer → creates rooms and exits
+
+3.9.1 Deterministic Map Diff Model
+
+Map diff must be treated as explicit world mutation, not inferred reconciliation.
+
+Builder must not implement:
+
+- compare two full maps and guess intended deletes
+- implicit reconciliation side effects
+- rename detection
+- hidden exit cleanup
+
+Builder should implement:
+
+- explicit change sets
+- deterministic ordered application
+- service-driven orchestration over existing room and exit services
+
+The canonical diff shape for the first implementation is:
+
+```json
+{
+	"area_id": "area-1",
+	"operations": [
+		{"id": "op-001", "op": "create_room", "room": {...}},
+		{"id": "op-002", "op": "update_room", "room_id": "r1", "updates": {...}},
+		{"id": "op-003", "op": "delete_room", "room_id": "r1"},
+		{"id": "op-004", "op": "set_exit", "source_id": "r1", "direction": "east", "target_id": "r2"},
+		{"id": "op-005", "op": "delete_exit", "source_id": "r1", "direction": "east"}
+	]
+}
+```
+
+Operation `id` should be supported as an optional field in `v1`.
+
+Rules:
+
+- if present, it must be a non-empty string
+- it is for traceability, audit linking, and future undo support
+- it must not change execution semantics
+- operation order still comes from list order, not lexical id order
+
+Internal normalization rule:
+
+```python
+operation_id = op.get("id") or f"auto-{index}"
+```
+
+Where `index` is the zero-based position in the `operations` list.
+
+Implications:
+
+- callers are not required to provide ids in `v1`
+- every applied operation still gets a stable trace id within a single diff payload
+- audit entries can always include an `operation_id`
+- preview responses should include normalized `operation_ids` in execution order so UI, debugging, and audit correlation can map validation results directly to the diff payload
+
+Design rule:
+
+- explicit operation ids are required for any persistent, replayable, collaborative, or undo-capable diff
+- fallback ids are acceptable for testing, ad-hoc usage, and immediate runtime traceability only
+
+Only these operations should be supported in `v1`:
+
+- `create_room`
+- `update_room`
+- `delete_room`
+- `set_exit`
+- `delete_exit`
+
+No additional operation types should be added until the first deterministic workflow is stable.
+
+3.9.2 Diff Service Contract
+
+The first diff implementation should live at:
+
+```text
+world/builder/services/map_diff_service.py
+```
+
+Primary entry point:
+
+```python
+def apply_diff(diff: dict):
+```
+
+Execution model:
+
+- validate the diff payload first
+- apply operations in listed order
+- stop immediately on first failure
+- do not batch
+- do not parallelize
+- treat diff state as progressive, not snapshot-based
+- validate and execute each operation against the state produced by all earlier operations in the same diff
+- capture undo pre-state immediately before each invertible operation executes against that progressive state
+
+Recommended dispatcher shape:
+
+```python
+def apply_operation(op):
+		op_type = op["op"]
+
+		if op_type == "create_room":
+				...
+		elif op_type == "update_room":
+				...
+		elif op_type == "delete_room":
+				...
+		elif op_type == "set_exit":
+				...
+		elif op_type == "delete_exit":
+				...
+		else:
+				raise ValueError("Unknown operation")
+```
+
+3.9.3 Diff Integration Rule
+
+The diff service is an orchestrator only.
+
+It must not:
+
+- mutate `.db` fields directly
+- create Evennia objects directly
+- bypass validation already owned by lower services
+- replace the importer or exit reconciliation model
+
+It must reuse existing Builder services:
+
+- `room_service.create_room`
+- `room_service.update_room`
+- `instance_service.delete_instance`
+- `exit_service.ensure_exit`
+- `exit_service.delete_exit`
+
+3.9.4 Diff Validation Rule
+
+The first validation layer should remain minimal but explicit.
+
+Required checks:
+
+- `area_id` exists and is non-empty
+- `operations` exists and is a list
+- each operation includes the required fields for its `op`
+- optional operation `id`, if present, must be a non-empty string
+- unknown operation types fail immediately
+
+This layer should validate structure, not infer intent.
+
+3.9.5 Diff Safety Rules
+
+The following rules are non-negotiable for the first implementation:
+
+1. No hidden deletes.
+2. No continuation after failure.
+3. Deterministic application order.
+4. Reapplying the same diff must converge without corrupting state.
+
+The first room deletion policy should be conservative:
+
+- room delete should fail when incoming exits still reference the room
+- incoming exits should not be auto-removed implicitly in `v1`
+
+3.9.6 Diff Audit Rule
+
+Each applied operation should emit a structured audit event.
+
+Recommended audit shape:
+
+```python
+log_audit_event("diff_apply", object_id, {
+	"operation_id": operation_id,
+		"operation": op_type,
+		"payload": op,
+})
+```
+
+This keeps diff history aligned with the existing audit-first Builder model.
+
+If operation ids are present, audit entries should carry them through unchanged. If they are absent, the normalized fallback id should be used instead.
+
+If a diff is submitted with a top-level `group_id`, audit entries should also carry that `group_id` through as metadata for logical UI grouping only.
+
+3.9.7 Diff API Rule
+
+The first diff endpoint should be:
+
+```text
+POST /api/builder/map/diff/
+```
+
+Request shape:
+
+```json
+{
+	"diff": {...}
+}
+```
+
+Response shape:
+
+```json
+{
+	"ok": true,
+	"applied": 5
+}
+```
+
+The endpoint should remain thin and delegate fully to the diff service.
+
+When diff application fails, the API should return structured failure context including:
+
+- `failed_operation_index`
+- `failed_operation_id`
+- `failed_operation`
+
+This is for debugging and UI feedback only and does not change execution semantics.
+
+Optional request metadata may include:
+
+- `session_id`
+- `group_id`
+
+Rules:
+
+- `session_id` identifies a logical editing context only; it is not an auth session and does not change diff execution semantics
+- `group_id` is metadata for logical grouping only; it does not change execution order, validation, or failure behavior
+- neither field should introduce batching, nesting, or transactional semantics in `v1`
+
+3.9.8 Diff Test Targets
+
+Minimum required validation targets for the first slice:
+
+1. create room then update room
+2. set exit then replace the same exit target
+3. create exit then delete exit
+4. successful operation followed by failing operation stops further application
+
+These are workflow tests for deterministic mutation, not inference tests.
 
 3.10 Template System
 
@@ -906,6 +1185,10 @@ Phase 12 — Validation and Safety
 validation rules
 audit logs
 basic undo support
+Phase 13 — Diff-Based Map Editing
+explicit diff payloads
+ordered application
+thin diff API endpoint
 11. Risks
 Mixing builder UI with player UI
 Skipping template system
@@ -1060,6 +1343,31 @@ Implication:
 
 The future map import/export workflow should target the Evennia world structure and current map API first, with optional bridges to or from AreaForge artifacts only where that is useful.
 
+14.6.1 Diff Workflow Rule
+
+Map editing should evolve toward:
+
+- export current world state when needed
+- emit explicit diffs for edits
+- apply diffs deterministically through Builder services
+
+It should not evolve toward broad full-map comparison with inferred destructive behavior.
+
+Implication:
+
+The preferred future builder workflow is:
+
+- current world state
+- explicit edit intent
+- deterministic diff operations
+- audit trail
+
+not:
+
+- full map replacement
+- guesswork reconciliation
+- hidden cleanup
+
 14.7 Placement and Containment Reality
 
 The blueprint describes placement as explicit relationships like:
@@ -1115,6 +1423,11 @@ Examples are already present in builder/admin commands, including `commands/cmd_
 Implication:
 
 Builder mode authorization should reuse the same permission language and not invent a separate role system first.
+
+Lock rule:
+
+- all Builder API mutations must pass an API-layer Builder permission gate before calling Builder services
+- Builder services themselves must remain permission-agnostic so internal scripts and CLI usage stay available
 
 14.10 Recommended Repo-Specific Start Order
 

@@ -41,7 +41,7 @@
         {% else %}
         <a href="/characters/create" class="action-pill action-pill-dark">Create Character</a>
         {% endif %}
-        <a href="/play" class="action-pill action-pill-brass">Play Selected</a>
+        <a href="//localhost:4001/play" class="action-pill action-pill-brass">Play Selected</a>
       </div>
     </section>
 
@@ -125,7 +125,7 @@
         event.preventDefault();
         try {
           await postJson('/api/characters/select', { character_id: playButton.dataset.playCharacter });
-          window.location.assign('/play');
+          window.location.assign('//localhost:4001/play');
         } catch (error) {
           window.alert(error.message);
         }

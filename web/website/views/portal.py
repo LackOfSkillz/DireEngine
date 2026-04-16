@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import View
@@ -16,6 +17,25 @@ from web.character_helpers import (
     set_selected_character,
 )
 from web.character_builder import get_character_builder_config
+
+
+def _web_proxy_port():
+    ports = getattr(settings, "WEBSERVER_PORTS", None) or []
+    if ports and isinstance(ports[0], (list, tuple)) and ports[0]:
+        try:
+            return int(ports[0][0])
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
+def _external_webclient_redirect(request):
+    target_path = reverse("webclient:index")
+    host = request.get_host().split(":", 1)[0]
+    proxy_port = _web_proxy_port()
+    if not proxy_port:
+        return target_path
+    return f"{request.scheme}://{host}:{proxy_port}{target_path}"
 
 
 class PlayNowRedirectView(View):
@@ -38,7 +58,7 @@ class PlayNowRedirectView(View):
             logger.log_info(
                 f"Play Now used selected character: account={request.user.username} character={selected_character.key} id={selected_character.id}"
             )
-            return redirect(reverse("webclient:index"))
+            return redirect(_external_webclient_redirect(request))
 
         if len(characters) == 1:
             character = characters[0]
@@ -46,7 +66,7 @@ class PlayNowRedirectView(View):
             logger.log_info(
                 f"Play Now auto-selected: account={request.user.username} character={character.key} id={character.id}"
             )
-            return redirect(reverse("webclient:index"))
+            return redirect(_external_webclient_redirect(request))
 
         messages.info(request, "Select a character first, or use Play on a specific character.")
         return redirect("/characters/")

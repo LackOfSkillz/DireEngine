@@ -13,8 +13,23 @@ just overloads its hooks to have it perform its function.
 """
 
 import time
+import random
 
 from evennia.scripts.scripts import DefaultScript
+from evennia.utils import logger
+
+
+GUARD_BEHAVIOR_MIN_INTERVAL = 25.0
+GUARD_BEHAVIOR_MAX_INTERVAL = 45.0
+
+
+def _roll_guard_behavior_interval():
+    return random.uniform(GUARD_BEHAVIOR_MIN_INTERVAL, GUARD_BEHAVIOR_MAX_INTERVAL)
+
+
+def _roll_guard_behavior_start_delay(interval_seconds):
+    interval_seconds = max(1.0, float(interval_seconds or GUARD_BEHAVIOR_MIN_INTERVAL))
+    return random.uniform(0.0, interval_seconds)
 
 
 class Script(DefaultScript):
@@ -203,3 +218,175 @@ class GraveMaintenanceScript(Script):
             obj.db.last_grave_damage_tick = time.time()
 
         self._track_repeat_timing("script:GraveMaintenanceScript", _run)
+
+
+class GlobalGuardPatrolScript(Script):
+    def at_script_creation(self):
+        from world.systems.guards import GUARD_TICK_INTERVAL
+
+        self.key = "global_guard_patrol"
+        self.interval = GUARD_TICK_INTERVAL
+        self.start_delay = True
+        self.repeats = 0
+        self.persistent = True
+
+    def at_start(self):
+        now = time.time()
+        self.db.start_count = int(getattr(self.db, "start_count", 0) or 0) + 1
+        self.db.last_started_at = now
+        self.db.last_started_message = (
+            f"GlobalGuardPatrolScript STARTED at {now:.3f} interval={float(getattr(self, 'interval', 0.0) or 0.0)}"
+        )
+
+    def at_repeat(self):
+        from django.conf import settings
+        from world.systems.guards import GUARD_TICK_INTERVAL, emit_legacy_guard_tripwire, get_last_guard_tick_time, is_diresim_enabled, log_legacy_guard_runtime_block, process_guard_tick
+
+        def _run():
+            now = time.time()
+            self.db.repeat_count = int(getattr(self.db, "repeat_count", 0) or 0) + 1
+            self.db.last_repeat_at = now
+            if is_diresim_enabled():
+                self.db.last_repeat_result = "blocked_by_diresim"
+                emit_legacy_guard_tripwire("GlobalGuardPatrolScript.at_repeat")
+                log_legacy_guard_runtime_block("GlobalGuardPatrolScript.at_repeat")
+                return
+            owner = str(getattr(settings, "GUARD_PATROL_OWNER", "global_script") or "global_script").strip().lower()
+            mode = str(getattr(settings, "GUARD_PATROL_MODE", "global") or "global").strip().lower()
+            if owner != "global_script" or not bool(getattr(settings, "ENABLE_GUARD_SYSTEM", True)):
+                self.db.last_repeat_result = "owner_disabled"
+                return
+            if mode == "per_guard":
+                self.db.last_repeat_result = "per_guard_mode"
+                return
+            if (time.time() - get_last_guard_tick_time()) < float(GUARD_TICK_INTERVAL):
+                self.db.last_repeat_result = "cooldown_skip"
+                return
+            summary = process_guard_tick(source="global_script")
+            self.db.last_repeat_result = str(summary.get("source", "global_script")) if isinstance(summary, dict) else "processed"
+
+        self._track_repeat_timing("script:GlobalGuardPatrolScript", _run)
+
+
+class GlobalSimulationKernelScript(Script):
+    def at_script_creation(self):
+        self.key = "global_simulation_kernel"
+        self.interval = 1.0
+        self.start_delay = True
+        self.repeats = 0
+        self.persistent = True
+
+    def at_start(self):
+        now = time.time()
+        self.db.start_count = int(getattr(self.db, "start_count", 0) or 0) + 1
+        self.db.last_started_at = now
+        self.db.last_started_message = (
+            f"GlobalSimulationKernelScript STARTED at {now:.3f} interval={float(getattr(self, 'interval', 0.0) or 0.0)}"
+        )
+
+    def at_repeat(self):
+        from django.conf import settings
+        from world.simulation.kernel import SIM_KERNEL
+
+        def _run():
+            now = time.time()
+            self.db.repeat_count = int(getattr(self.db, "repeat_count", 0) or 0) + 1
+            self.db.last_repeat_at = now
+            if not bool(getattr(settings, "ENABLE_DIRESIM_KERNEL", True)):
+                self.db.last_repeat_result = "disabled"
+                return
+            SIM_KERNEL.tick_fast()
+            SIM_KERNEL.tick_normal()
+            SIM_KERNEL.tick_slow()
+            self.db.last_repeat_result = "ticked"
+
+        self._track_repeat_timing("script:GlobalSimulationKernelScript", _run)
+
+
+class GuardBehaviorScript(Script):
+    """
+    Owns patrol/enforcement cadence for exactly one guard via ``self.obj``.
+
+    This script is an object-attached per-guard owner and must never iterate
+    all guards or recreate global scheduling behavior.
+    """
+
+    def at_script_creation(self):
+        self.key = "guard_behavior"
+        self.interval = _roll_guard_behavior_interval()
+        self.start_delay = True
+        self.repeats = 0
+        self.persistent = True
+        self.db.base_interval = float(self.interval)
+        self.db.start_delay_seconds = _roll_guard_behavior_start_delay(self.interval)
+
+    def roll_timing(self):
+        self.interval = _roll_guard_behavior_interval()
+        self.db.base_interval = float(self.interval)
+        self.db.start_delay_seconds = _roll_guard_behavior_start_delay(self.interval)
+        return float(self.interval), float(self.db.start_delay_seconds or 0.0)
+
+    def is_valid(self):
+        obj = self.obj
+        return bool(obj and getattr(obj, "pk", None) and bool(getattr(getattr(obj, "db", None), "is_guard", False)))
+
+    def at_start(self, **kwargs):
+        from world.systems.guards import is_guard_script_diagnostic_target
+
+        now = time.time()
+        guard = self.obj
+        guard_id = int(getattr(guard, "id", 0) or 0) if guard else 0
+        self.db.start_count = int(getattr(self.db, "start_count", 0) or 0) + 1
+        self.db.last_started_at = now
+        self.db.last_start_guard_id = guard_id
+        self.db.last_start_interval = float(getattr(self, "interval", 0.0) or 0.0)
+        self.db.last_start_delay = bool(getattr(self, "start_delay", False))
+        self.db.last_start_delay_seconds = float(getattr(self.db, "start_delay_seconds", 0.0) or 0.0)
+        self.db.last_start_repeats = int(getattr(self, "repeats", 0) or 0)
+        self.db.last_started_message = f"GuardBehaviorScript STARTED for guard {guard_id}"
+        if is_guard_script_diagnostic_target(guard):
+            logger.log_info(
+                f"[Guards][Diag] GuardBehaviorScript STARTED for guard {guard_id} interval={self.interval} start_delay={self.start_delay} start_delay_seconds={self.db.last_start_delay_seconds} repeats={self.repeats}"
+            )
+
+    def at_repeat(self):
+        from world.systems.guards import emit_legacy_guard_tripwire, is_diresim_enabled, is_guard_script_diagnostic_target, log_legacy_guard_runtime_block, process_guard_behavior_tick, should_guard_use_per_guard_execution
+
+        def _run():
+            now = time.time()
+            guard = self.obj
+            guard_id = int(getattr(guard, "id", 0) or 0) if guard else 0
+            self.db.repeat_fire_count = int(getattr(self.db, "repeat_fire_count", 0) or 0) + 1
+            self.db.last_repeat_at = now
+            self.db.last_repeat_guard_id = guard_id
+            self.db.last_interval_seconds = float(getattr(self, "interval", 0.0) or 0.0)
+            self.db.last_is_active = bool(getattr(self, "is_active", False))
+            self.db.last_fired_message = f"GuardBehaviorScript fired for guard {guard_id}"
+
+            if is_diresim_enabled():
+                self.db.last_behavior_called = False
+                self.db.last_behavior_result = "blocked_by_diresim"
+                emit_legacy_guard_tripwire(f"GuardBehaviorScript.at_repeat:{guard_id}")
+                log_legacy_guard_runtime_block(f"GuardBehaviorScript.at_repeat:{guard_id}")
+                return
+
+            if not guard or not getattr(guard, "pk", None):
+                self.db.last_behavior_result = "missing_obj"
+                return
+            if not bool(getattr(getattr(guard, "db", None), "is_guard", False)):
+                self.db.last_behavior_result = "not_guard"
+                return
+            if not should_guard_use_per_guard_execution(guard):
+                self.db.last_behavior_result = "not_owned_by_per_guard"
+                return
+
+            if is_guard_script_diagnostic_target(guard):
+                logger.log_info(f"[Guards][Diag] GuardBehaviorScript fired for guard {guard_id} at {now:.3f}")
+
+            result = process_guard_behavior_tick(guard, source=f"per_guard_script:{guard_id}")
+            self.db.last_behavior_called = True
+            self.db.last_behavior_result = str(result)
+            if is_guard_script_diagnostic_target(guard):
+                logger.log_info(f"[Guards][Diag] GuardBehaviorScript guard {guard_id} behavior result={result}")
+
+        self._track_repeat_timing("script:GuardBehaviorScript", _run)

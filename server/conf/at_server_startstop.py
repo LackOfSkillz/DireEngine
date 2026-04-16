@@ -24,9 +24,12 @@ from evennia import SESSION_HANDLER
 from evennia import search_object
 from evennia import search_script
 from evennia.objects.models import ObjectDB
+from evennia.scripts.models import ScriptDB
+from evennia.server.models import ServerConfig
 from django.conf import settings
 from evennia.utils import logger
-from evennia.utils.create import create_object
+from evennia.utils.create import create_object, create_script
+from twisted.internet import reactor
 
 from engine.services.injury_service import InjuryService
 from engine.services.mana_service import ManaService
@@ -35,12 +38,18 @@ from utils.contests import run_contest
 from world.systems.metrics import increment_counter, record_event
 from world.systems.timing_audit import register_ticker_metadata, unregister_ticker_metadata
 from world.systems.exp_pulse import EXP_TICKER_IDSTRING, PULSE_TICK, exp_pulse_tick, start_exp_ticker
-from world.systems.guards import GUARD_TICK_INTERVAL, ensure_landing_guards, process_guard_tick
+from world.systems.guards import GUARD_TICK_INTERVAL, LEGACY_GUARD_RUNTIME_BLOCK_MSG, cleanup_legacy_guard_behavior_scripts, ensure_landing_guards, get_guard_patrol_mode, get_last_guard_tick_time, guard_has_per_guard_ownership, has_guard_behavior_script, is_diresim_enabled, iter_active_guards, log_legacy_guard_runtime_block, process_guard_tick, sync_all_guard_behavior_scripts
 from world.the_landing import build_the_landing
 from world.area_forge.map_api import prime_zone_map_cache
 
 
 _NPC_TICK_CACHE = {"expires_at": 0.0, "objects": []}
+_GUARD_REACTOR_CALL = None
+_SERVER_START_BOOTSTRAP_CALL = None
+_VALID_GUARD_PATROL_OWNERS = {"global_script", "ticker", "reactor", "disabled"}
+_GUARD_STARTUP_TRACE_CONFIG_KEY = "guard_startup_diag_trace"
+_GUARD_OWNER_HEARTBEAT_CONFIG_KEY = "guard_owner_heartbeat"
+_SERVER_START_BOOTSTRAP_CHARACTER_BATCH_SIZE = 25
 IDLE_RECOVERY_INTERVAL = 2.0
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
@@ -69,6 +78,101 @@ _BROOKHOLLOW_LAWLESS_KEYS = {
     "Rag Shop",
     "Pawn Counter",
 }
+
+
+def _guard_startup_trace_enabled():
+    return bool(getattr(settings, "ENABLE_GUARD_STARTUP_TRACE", False))
+
+
+def _guard_startup_force_sync_enabled():
+    return bool(getattr(settings, "ENABLE_GUARD_STARTUP_FORCE_SYNC_DIAGNOSTIC", False))
+
+
+def _append_guard_startup_trace(hook_name, stage, **details):
+    if not _guard_startup_trace_enabled():
+        return None
+    event = {
+        "ts": time.time(),
+        "hook": str(hook_name),
+        "stage": str(stage),
+        "details": details,
+    }
+    trace = list(ServerConfig.objects.conf(key=_GUARD_STARTUP_TRACE_CONFIG_KEY, default=[]) or [])
+    trace.append(event)
+    trace = trace[-100:]
+    ServerConfig.objects.conf(key=_GUARD_STARTUP_TRACE_CONFIG_KEY, value=trace)
+    logger.log_info(f"[Guards][StartupDiag] {hook_name} {stage} {details}")
+    return event
+
+
+def _append_guard_owner_heartbeat(owner_name, **details):
+    if not _guard_startup_trace_enabled():
+        return None
+    event = {"ts": time.time(), "owner": str(owner_name), "details": details or {}}
+    history = list(ServerConfig.objects.conf(key=_GUARD_OWNER_HEARTBEAT_CONFIG_KEY, default=[]) or [])
+    history.append(event)
+    if len(history) > 50:
+        history = history[-50:]
+    ServerConfig.objects.conf(key=_GUARD_OWNER_HEARTBEAT_CONFIG_KEY, value=history)
+    return event
+
+
+def _coerce_bootstrap_int(value, default=0):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return int(default)
+
+
+def _find_scripts_by_key(script_key):
+    if callable(search_script):
+        try:
+            return list(search_script(script_key) or [])
+        except Exception:
+            pass
+    try:
+        return list(ScriptDB.objects.filter(db_key=script_key))
+    except Exception:
+        return []
+
+
+def _collect_guard_startup_counts():
+    guards = list(iter_active_guards())
+    return {
+        "guard_count": len(guards),
+        "script_attached_count": sum(1 for guard in guards if has_guard_behavior_script(guard)),
+        "per_guard_owned_count": sum(1 for guard in guards if guard_has_per_guard_ownership(guard)),
+    }
+
+
+def _run_guard_startup_sync_probe(hook_name, phase, force=False):
+    if is_diresim_enabled():
+        cleanup = cleanup_legacy_guard_behavior_scripts()
+        _append_guard_startup_trace(hook_name, f"{phase}_skipped", reason="diresim_enabled", force=bool(force), **cleanup)
+        return cleanup
+
+    if not getattr(settings, "ENABLE_GUARD_SYSTEM", True):
+        _append_guard_startup_trace(hook_name, f"{phase}_skipped", reason="guard_system_disabled")
+        return None
+
+    before_counts = _collect_guard_startup_counts()
+    _append_guard_startup_trace(hook_name, f"{phase}_before_sync", force=bool(force), **before_counts)
+    try:
+        sync_result = sync_all_guard_behavior_scripts()
+    except Exception as error:
+        _append_guard_startup_trace(hook_name, f"{phase}_sync_exception", force=bool(force), error=str(error), **before_counts)
+        logger.log_trace(f"[Guards][StartupDiag] {hook_name} {phase} sync exception: {error}")
+        return None
+
+    after_counts = _collect_guard_startup_counts()
+    _append_guard_startup_trace(
+        hook_name,
+        f"{phase}_after_sync",
+        force=bool(force),
+        sync_result=sync_result,
+        **after_counts,
+    )
+    return sync_result
 
 
 def _configure_brookhollow_justice():
@@ -1272,6 +1376,22 @@ def _ensure_new_player_tutorial():
     return rooms["Intake Chamber"]
 
 
+def _new_player_tutorial_is_built():
+    required_room_keys = [
+        "Intake Chamber",
+        "Training Hall",
+        "Practice Yard",
+        "Outer Yard",
+        "Market Approach",
+        "Side Passage",
+    ]
+    for room_key in required_room_keys:
+        room = ObjectDB.objects.filter(db_key__iexact=room_key).first()
+        if room is None:
+            return False
+    return True
+
+
 def _log_slow_tick(name, started_at, threshold):
     duration = time.perf_counter() - started_at
     from tools.diretest.core.runtime import record_script_delay
@@ -1317,6 +1437,13 @@ def process_status_tick():
     # activity rather than total object count.
     started_at = time.perf_counter()
     now = time.time()
+
+    guard_fallback_due = bool(
+        not is_diresim_enabled()
+        and getattr(settings, "ENABLE_GUARD_SYSTEM", True)
+        and _get_guard_patrol_owner() == "status_fallback"
+        and (now - get_last_guard_tick_time()) >= float(GUARD_TICK_INTERVAL)
+    )
 
     for character in _iter_tick_characters():
         character.incoming_attackers = 0
@@ -1468,6 +1595,16 @@ def process_status_tick():
         if is_npc and hasattr(character, "ai_tick"):
             character.ai_tick()
 
+    if guard_fallback_due:
+        process_guard_tick(source="status_fallback")
+    elif (
+        bool(getattr(settings, "ENABLE_GUARD_SYSTEM", True))
+        and bool(getattr(settings, "ENABLE_GUARD_PATROL_DEBUG", False))
+        and (now - get_last_guard_tick_time()) >= float(GUARD_TICK_INTERVAL)
+        and _get_guard_patrol_owner() != "status_fallback"
+    ):
+        logger.log_info(f"[Guards] Status fallback skipped because owner={_get_guard_patrol_owner()}")
+
     _log_slow_tick(
         "process_status_tick",
         started_at,
@@ -1504,6 +1641,418 @@ def process_learning_tick():
     )
 
 
+def _ensure_global_guard_patrol_script():
+    from world.systems.guards import _guard_behavior_script_is_zombie
+
+    if is_diresim_enabled():
+        log_legacy_guard_runtime_block("_ensure_global_guard_patrol_script")
+        _disable_global_guard_patrol_scripts()
+        return None
+
+    existing = []
+    for script in _find_scripts_by_key("global_guard_patrol"):
+        if getattr(script, "typeclass_path", "") == "typeclasses.scripts.GlobalGuardPatrolScript":
+            existing.append(script)
+
+    keeper = existing[0] if existing else None
+    for duplicate in existing[1:]:
+        try:
+            duplicate.delete()
+        except Exception:
+            pass
+
+    if keeper is not None:
+        try:
+            if _guard_behavior_script_is_zombie(keeper):
+                logger.log_info("[Guards] Resetting broken global_guard_patrol script during startup ensure.")
+                keeper.stop()
+                keeper.start()
+            else:
+                keeper.start()
+        except Exception as error:
+            logger.log_trace(f"_ensure_global_guard_patrol_script failed to start existing script: {error}")
+        return keeper
+    script = create_script("typeclasses.scripts.GlobalGuardPatrolScript", key="global_guard_patrol")
+    try:
+        script.start()
+    except Exception as error:
+        logger.log_trace(f"_ensure_global_guard_patrol_script failed to start new script: {error}")
+    return script
+
+
+def _ensure_global_simulation_kernel_script():
+    existing = []
+    for script in _find_scripts_by_key("global_simulation_kernel"):
+        if getattr(script, "typeclass_path", "") == "typeclasses.scripts.GlobalSimulationKernelScript":
+            existing.append(script)
+
+    keeper = existing[0] if existing else None
+    for duplicate in existing[1:]:
+        try:
+            duplicate.delete()
+        except Exception:
+            pass
+
+    if keeper is not None:
+        try:
+            keeper.start()
+        except Exception as error:
+            logger.log_trace(f"_ensure_global_simulation_kernel_script failed to start existing script: {error}")
+        return keeper
+
+    script = create_script("typeclasses.scripts.GlobalSimulationKernelScript", key="global_simulation_kernel")
+    try:
+        script.start()
+    except Exception as error:
+        logger.log_trace(f"_ensure_global_simulation_kernel_script failed to start new script: {error}")
+    return script
+
+
+def _get_guard_patrol_owner():
+    owner = str(getattr(settings, "GUARD_PATROL_OWNER", "global_script") or "global_script").strip().lower()
+    if owner not in _VALID_GUARD_PATROL_OWNERS:
+        logger.log_warn(f"[Guards] Invalid GUARD_PATROL_OWNER={owner!r}; defaulting to 'global_script'.")
+        return "global_script"
+    return owner
+
+
+def _guard_patrol_owner_enabled(owner_name):
+    if is_diresim_enabled():
+        return False
+    return bool(getattr(settings, "ENABLE_GUARD_SYSTEM", True) and _get_guard_patrol_owner() == owner_name)
+
+
+def _disable_global_guard_patrol_scripts():
+    for script in _find_scripts_by_key("global_guard_patrol"):
+        if getattr(script, "typeclass_path", "") != "typeclasses.scripts.GlobalGuardPatrolScript":
+            continue
+        try:
+            script.delete()
+        except Exception:
+            pass
+
+
+def _log_guard_patrol_owner_state():
+    owner = _get_guard_patrol_owner()
+    mode = get_guard_patrol_mode()
+    skipped = []
+    for candidate in ("global_script", "ticker", "reactor", "status_fallback", "reactor_fallback"):
+        if candidate == owner:
+            continue
+        skipped.append(candidate)
+    logger.log_info(f"[Guards] Patrol owner={owner}; mode={mode}; skipped={', '.join(skipped) if skipped else 'none'}")
+
+
+def _bootstrap_guard_patrols(hook_name, phase_label="bootstrap"):
+    if is_diresim_enabled():
+        _append_guard_startup_trace(hook_name, "guard_bootstrap_skipped", phase=phase_label, reason="diresim_enabled")
+        _cancel_guard_reactor_tick()
+        _disable_global_guard_patrol_scripts()
+        cleanup_legacy_guard_behavior_scripts()
+        return
+
+    if not getattr(settings, "ENABLE_GUARD_SYSTEM", True):
+        return
+    _append_guard_startup_trace(hook_name, "guard_bootstrap_entered", phase=phase_label)
+    _configure_landing_guard_patrols()
+    ensure_landing_guards(count=_get_landing_guard_bootstrap_count())
+    if _guard_patrol_owner_enabled("reactor"):
+        _schedule_guard_reactor_tick()
+    else:
+        _cancel_guard_reactor_tick()
+    if _guard_patrol_owner_enabled("global_script"):
+        _ensure_global_guard_patrol_script()
+    else:
+        _disable_global_guard_patrol_scripts()
+    _run_guard_startup_sync_probe(hook_name, phase_label)
+
+
+def _bootstrap_diresim_kernel(hook_name):
+    if not bool(getattr(settings, "ENABLE_DIRESIM_KERNEL", True)):
+        _append_guard_startup_trace(hook_name, "diresim_bootstrap_skipped", reason="kernel_disabled")
+        return
+    try:
+        from world.simulation.registry import register_existing_guards
+
+        _append_guard_startup_trace(hook_name, "diresim_bootstrap_entered")
+        script = _ensure_global_simulation_kernel_script()
+        summary = register_existing_guards()
+        cleanup = cleanup_legacy_guard_behavior_scripts()
+        _append_guard_startup_trace(
+            hook_name,
+            "diresim_bootstrap_finished",
+            script_id=_coerce_bootstrap_int(getattr(script, "id", 0) or 0),
+            registered=_coerce_bootstrap_int(summary.get("registered", 0) or 0),
+            service_count=_coerce_bootstrap_int(summary.get("service_count", 0) or 0),
+            removed_legacy_scripts=_coerce_bootstrap_int(cleanup.get("removed_script_count", 0) or 0),
+        )
+        logger.log_info(
+            f"[DireSim] Bootstrap complete from {hook_name}: script={_coerce_bootstrap_int(getattr(script, 'id', 0) or 0)} registered={_coerce_bootstrap_int(summary.get('registered', 0) or 0)} services={_coerce_bootstrap_int(summary.get('service_count', 0) or 0)} removed_legacy_scripts={_coerce_bootstrap_int(cleanup.get('removed_script_count', 0) or 0)}"
+        )
+    except Exception as error:
+        _append_guard_startup_trace(hook_name, "diresim_bootstrap_exception", error=str(error))
+        logger.log_err(f"[DireSim] Bootstrap failed during {hook_name}: {error}")
+        logger.log_trace(f"[DireSim] Bootstrap failed during {hook_name}: {error}")
+
+
+def get_diresim_guard_lock_report():
+    from world.simulation.kernel import SIM_KERNEL
+
+    active_global_scripts = 0
+    for script in _find_scripts_by_key("global_guard_patrol"):
+        if getattr(script, "typeclass_path", "") != "typeclasses.scripts.GlobalGuardPatrolScript":
+            continue
+        if bool(getattr(script, "is_active", False)):
+            active_global_scripts += 1
+
+    guard_services = [service for service in SIM_KERNEL.services.values() if hasattr(service, "npc_ids")]
+    raw_owner = str(getattr(settings, "GUARD_PATROL_OWNER", "") or "").strip().lower()
+    reactor_active = bool(_GUARD_REACTOR_CALL is not None and getattr(_GUARD_REACTOR_CALL, "active", lambda: False)())
+    legacy_fallback_registered = bool(
+        reactor_active
+        or (bool(getattr(settings, "ENABLE_GUARD_SYSTEM", True)) and raw_owner in {"ticker", "status_fallback"})
+    )
+    return {
+        "diresim_enabled": bool(is_diresim_enabled()),
+        "legacy_per_guard_scripts_found": sum(1 for guard in iter_active_guards() if has_guard_behavior_script(guard)),
+        "legacy_global_guard_script_active": active_global_scripts > 0,
+        "legacy_fallback_registered": legacy_fallback_registered,
+        "guard_zone_service_count": len(guard_services),
+        "guard_zone_registered_count": sum(len(getattr(service, "npc_ids", []) or []) for service in guard_services),
+        "legacy_runtime_block_message": LEGACY_GUARD_RUNTIME_BLOCK_MSG,
+    }
+
+
+def _validate_diresim_guard_lock(hook_name):
+    report = get_diresim_guard_lock_report()
+    if not bool(report.get("diresim_enabled", False)):
+        return report
+
+    violations = []
+    if int(report.get("legacy_per_guard_scripts_found", 0) or 0) > 0:
+        violations.append(f"legacy_per_guard_scripts_found={int(report.get('legacy_per_guard_scripts_found', 0) or 0)}")
+    if bool(report.get("legacy_global_guard_script_active", False)):
+        violations.append("legacy_global_guard_script_active=True")
+    if bool(report.get("legacy_fallback_registered", False)):
+        violations.append("legacy_fallback_registered=True")
+
+    if violations:
+        logger.log_err(f"[DireSim] Legacy guard seal validation failed during {hook_name}: {'; '.join(violations)}")
+        if bool(getattr(settings, "STRICT_DIRESIM_LEGACY_GUARD_SEAL", False)):
+            raise RuntimeError(f"DireSim legacy guard seal violation: {'; '.join(violations)}")
+    else:
+        logger.log_info(
+            f"[DireSim] Guard seal validated during {hook_name}: services={int(report.get('guard_zone_service_count', 0) or 0)} registered_guards={int(report.get('guard_zone_registered_count', 0) or 0)}"
+        )
+    return report
+
+
+def _cancel_server_start_bootstrap_call():
+    global _SERVER_START_BOOTSTRAP_CALL
+
+    if _SERVER_START_BOOTSTRAP_CALL is not None and getattr(_SERVER_START_BOOTSTRAP_CALL, "active", lambda: False)():
+        try:
+            _SERVER_START_BOOTSTRAP_CALL.cancel()
+        except Exception:
+            pass
+    _SERVER_START_BOOTSTRAP_CALL = None
+
+
+def _run_deferred_server_start_bootstrap_after_character_init():
+    try:
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_character_init", deferred=True)
+
+        for script in search_script("bleed_ticker"):
+            if script.typeclass_path == "typeclasses.scripts.BleedTicker":
+                script.delete()
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_bleed_cleanup", deferred=True)
+
+        _ensure_limbo_training_dummy()
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_limbo_dummy", deferred=True)
+        build_the_landing(
+            area_id=LANDING_AREA_ID,
+            skip_if_built=True,
+            diag_hook=lambda stage, **details: _append_guard_startup_trace(
+                "at_server_start",
+                f"build_the_landing_{stage}",
+                deferred=True,
+                **details,
+            ),
+        )
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_build_landing", deferred=True)
+        try:
+            primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map", "ranger-guild-map"])
+            if primed_zones:
+                logger.log_info(f"Primed AreaForge zone map cache: {', '.join(primed_zones)}")
+        except Exception:
+            logger.log_warn("AreaForge zone map cache priming failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_zone_prime", deferred=True)
+        if _new_player_tutorial_is_built():
+            _append_guard_startup_trace("at_server_start", "bootstrap_skip_tutorial", deferred=True, reason="warm_start_already_built")
+        else:
+            logger.log_info("Ensuring new player tutorial bootstrap.")
+            tutorial_entry = _ensure_new_player_tutorial()
+            if tutorial_entry:
+                logger.log_info(f"New player tutorial ready at {tutorial_entry.key}(#{tutorial_entry.id}).")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_tutorial", deferred=True)
+        try:
+            from systems import aftermath
+
+            aftermath.ensure_poi_tags()
+        except Exception:
+            logger.log_warn("[Aftermath] Failed to ensure POI tags during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_aftermath", deferred=True)
+        _warn_empath_guild_duplicates()
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_duplicate_warn", deferred=True)
+        _configure_brookhollow_justice()
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_justice", deferred=True)
+        _ensure_fishing_supplier_npc()
+        _append_guard_startup_trace("at_server_start", "bootstrap_finished", deferred=True)
+
+        if _guard_startup_force_sync_enabled():
+            _run_guard_startup_sync_probe("at_server_start", "final", force=True)
+
+        _append_guard_startup_trace("at_server_start", "finished", deferred=True)
+    except Exception as error:
+        _append_guard_startup_trace("at_server_start", "exception", deferred=True, error=str(error))
+        logger.log_trace(f"[Guards][StartupDiag] deferred at_server_start exception: {error}")
+        raise
+
+
+def _run_deferred_character_bootstrap_batch(characters, start_index=0):
+    batch_size = int(getattr(settings, "SERVER_START_BOOTSTRAP_CHARACTER_BATCH_SIZE", _SERVER_START_BOOTSTRAP_CHARACTER_BATCH_SIZE) or _SERVER_START_BOOTSTRAP_CHARACTER_BATCH_SIZE)
+    end_index = min(len(characters), int(start_index) + max(1, batch_size))
+
+    try:
+        for character in characters[int(start_index):end_index]:
+            if hasattr(character, "ensure_core_defaults"):
+                character.ensure_core_defaults()
+            InjuryService.bootstrap_scheduled_effects(character)
+            ManaService.bootstrap_scheduled_effects(character)
+    except Exception as error:
+        _append_guard_startup_trace("at_server_start", "exception", deferred=True, error=str(error))
+        logger.log_trace(f"[Guards][StartupDiag] deferred character bootstrap exception: {error}")
+        raise
+
+    if end_index >= len(characters):
+        reactor.callLater(0, _run_deferred_server_start_bootstrap_after_character_init)
+        return
+
+    reactor.callLater(0, _run_deferred_character_bootstrap_batch, characters, end_index)
+
+
+def _run_deferred_server_start_bootstrap():
+    global _SERVER_START_BOOTSTRAP_CALL
+
+    _SERVER_START_BOOTSTRAP_CALL = None
+    try:
+        if getattr(settings, "ENABLE_SERVER_STARTUP_BOOTSTRAP", True):
+            _append_guard_startup_trace("at_server_start", "bootstrap_entered", deferred=True)
+            characters = list(
+                ObjectDB.objects.filter(db_typeclass_path__in=["typeclasses.characters.Character", "typeclasses.npcs.NPC"])
+            )
+            reactor.callLater(0, _run_deferred_character_bootstrap_batch, characters, 0)
+            return
+
+        if _guard_startup_force_sync_enabled():
+            _run_guard_startup_sync_probe("at_server_start", "final", force=True)
+
+        _append_guard_startup_trace("at_server_start", "finished", deferred=True)
+    except Exception as error:
+        _append_guard_startup_trace("at_server_start", "exception", deferred=True, error=str(error))
+        logger.log_trace(f"[Guards][StartupDiag] deferred at_server_start exception: {error}")
+        raise
+
+
+def _schedule_server_start_bootstrap():
+    global _SERVER_START_BOOTSTRAP_CALL
+
+    _cancel_server_start_bootstrap_call()
+    _append_guard_startup_trace("at_server_start", "bootstrap_deferred_scheduled")
+    _SERVER_START_BOOTSTRAP_CALL = reactor.callLater(1.0, _run_deferred_server_start_bootstrap)
+
+
+def _run_guard_ticker_tick():
+    if is_diresim_enabled():
+        log_legacy_guard_runtime_block("_run_guard_ticker_tick")
+        _append_guard_owner_heartbeat("ticker", tick_source="ticker", ok=False, skipped="blocked_by_diresim")
+        return
+
+    summary = process_guard_tick(source="ticker")
+    _append_guard_owner_heartbeat(
+        "ticker",
+        tick_source=str(summary.get("source") or "ticker"),
+        ok=bool(summary.get("ok", False)),
+        skipped=str(summary.get("skipped") or ""),
+        moved_count=int(summary.get("moved_count", 0) or 0),
+        idle_count=int(summary.get("idle_count", 0) or 0),
+        global_owned_count=int(summary.get("global_owned_count", 0) or 0),
+        per_guard_owned_count=int(summary.get("per_guard_owned_count", 0) or 0),
+        skipped_per_guard_owned_count=int(summary.get("skipped_per_guard_owned_count", 0) or 0),
+    )
+
+
+def _cancel_guard_reactor_tick():
+    global _GUARD_REACTOR_CALL
+
+    if _GUARD_REACTOR_CALL is not None and getattr(_GUARD_REACTOR_CALL, "active", lambda: False)():
+        try:
+            _GUARD_REACTOR_CALL.cancel()
+            _append_guard_startup_trace("guard_reactor", "cancelled_active_call")
+        except Exception:
+            pass
+    _GUARD_REACTOR_CALL = None
+
+
+def _schedule_guard_reactor_tick():
+    global _GUARD_REACTOR_CALL
+
+    if is_diresim_enabled():
+        log_legacy_guard_runtime_block("_schedule_guard_reactor_tick")
+        _append_guard_startup_trace("guard_reactor", "schedule_skipped", reason="diresim_enabled")
+        _GUARD_REACTOR_CALL = None
+        return
+
+    if not _guard_patrol_owner_enabled("reactor"):
+        _append_guard_startup_trace("guard_reactor", "schedule_skipped", reason="owner_disabled")
+        _GUARD_REACTOR_CALL = None
+        return
+
+    if _GUARD_REACTOR_CALL is not None and getattr(_GUARD_REACTOR_CALL, "active", lambda: False)():
+        _append_guard_startup_trace("guard_reactor", "schedule_skipped", reason="already_active")
+        return
+
+    def _run_guard_tick():
+        global _GUARD_REACTOR_CALL
+
+        _GUARD_REACTOR_CALL = None
+        try:
+            summary = None
+            skipped = ""
+            if (time.time() - get_last_guard_tick_time()) >= float(GUARD_TICK_INTERVAL):
+                summary = process_guard_tick(source="reactor_fallback")
+            else:
+                skipped = "guard_tick_interval_gate"
+            _append_guard_owner_heartbeat(
+                "reactor",
+                tick_source=str((summary or {}).get("source") or "reactor_fallback"),
+                ok=bool((summary or {}).get("ok", False)),
+                skipped=str((summary or {}).get("skipped") or skipped),
+                moved_count=int((summary or {}).get("moved_count", 0) or 0),
+                idle_count=int((summary or {}).get("idle_count", 0) or 0),
+                global_owned_count=int((summary or {}).get("global_owned_count", 0) or 0),
+                per_guard_owned_count=int((summary or {}).get("per_guard_owned_count", 0) or 0),
+                skipped_per_guard_owned_count=int((summary or {}).get("skipped_per_guard_owned_count", 0) or 0),
+            )
+        except Exception as error:
+            logger.log_trace(f"Guard reactor tick failed: {error}")
+        finally:
+            _schedule_guard_reactor_tick()
+
+    _append_guard_startup_trace("guard_reactor", "scheduled", interval=float(GUARD_TICK_INTERVAL))
+    _GUARD_REACTOR_CALL = reactor.callLater(float(GUARD_TICK_INTERVAL), _run_guard_tick)
+
+
 def at_server_init():
     """
     This is called first as the server is starting up, regardless of how.
@@ -1516,117 +2065,125 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
+    _append_guard_startup_trace(
+        "at_server_start",
+        "entered",
+        startup_hooks=bool(getattr(settings, "ENABLE_SERVER_STARTUP_HOOKS", True)),
+        startup_bootstrap=bool(getattr(settings, "ENABLE_SERVER_STARTUP_BOOTSTRAP", True)),
+        guard_system=bool(getattr(settings, "ENABLE_GUARD_SYSTEM", True)),
+        patrol_mode=get_guard_patrol_mode(),
+    )
+    if not getattr(settings, "ENABLE_SERVER_STARTUP_HOOKS", True):
+        _append_guard_startup_trace("at_server_start", "skipped", reason="startup_hooks_disabled")
+        return
     try:
-        TICKER_HANDLER.remove(1, process_status_tick, idstring="global_status_tick", persistent=True)
-        unregister_ticker_metadata(1, idstring="global_status_tick", persistent=True)
-    except Exception:
-        pass
+        _append_guard_startup_trace("at_server_start", "pre_cleanup")
+        try:
+            TICKER_HANDLER.remove(1, process_status_tick, idstring="global_status_tick", persistent=True)
+            unregister_ticker_metadata(1, idstring="global_status_tick", persistent=True)
+        except Exception:
+            pass
 
-    try:
-        TICKER_HANDLER.remove(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
-        unregister_ticker_metadata(10, idstring="global_learning_tick", persistent=True)
-    except Exception:
-        pass
+        try:
+            TICKER_HANDLER.remove(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
+            unregister_ticker_metadata(10, idstring="global_learning_tick", persistent=True)
+        except Exception:
+            pass
 
-    try:
-        TICKER_HANDLER.remove(1, process_status_tick, idstring="global_bleed_tick", persistent=True)
-        unregister_ticker_metadata(1, idstring="global_bleed_tick", persistent=True)
-    except Exception:
-        pass
+        try:
+            TICKER_HANDLER.remove(1, process_status_tick, idstring="global_bleed_tick", persistent=True)
+            unregister_ticker_metadata(1, idstring="global_bleed_tick", persistent=True)
+        except Exception:
+            pass
 
-    try:
-        TICKER_HANDLER.remove(1, process_learning_tick, idstring="global_bleed_tick", persistent=True)
-        unregister_ticker_metadata(1, idstring="global_bleed_tick", persistent=True)
-    except Exception:
-        pass
+        try:
+            TICKER_HANDLER.remove(1, process_learning_tick, idstring="global_bleed_tick", persistent=True)
+            unregister_ticker_metadata(1, idstring="global_bleed_tick", persistent=True)
+        except Exception:
+            pass
 
-    try:
-        TICKER_HANDLER.remove(PULSE_TICK, exp_pulse_tick, idstring=EXP_TICKER_IDSTRING, persistent=True)
-        unregister_ticker_metadata(PULSE_TICK, idstring=EXP_TICKER_IDSTRING, persistent=True)
-    except Exception:
-        pass
+        try:
+            TICKER_HANDLER.remove(PULSE_TICK, exp_pulse_tick, idstring=EXP_TICKER_IDSTRING, persistent=True)
+            unregister_ticker_metadata(PULSE_TICK, idstring=EXP_TICKER_IDSTRING, persistent=True)
+        except Exception:
+            pass
 
-    try:
-        TICKER_HANDLER.remove(GUARD_TICK_INTERVAL, process_guard_tick, idstring="global_guard_tick", persistent=True)
-        unregister_ticker_metadata(GUARD_TICK_INTERVAL, idstring="global_guard_tick", persistent=True)
-    except Exception:
-        pass
+        try:
+            TICKER_HANDLER.remove(GUARD_TICK_INTERVAL, _run_guard_ticker_tick, idstring="global_guard_tick", persistent=True)
+            unregister_ticker_metadata(GUARD_TICK_INTERVAL, idstring="global_guard_tick", persistent=True)
+        except Exception:
+            pass
 
-    try:
-        from world.systems.tick_audit import scan_for_tick_violations
+        try:
+            TICKER_HANDLER.remove(GUARD_TICK_INTERVAL, process_guard_tick, idstring="global_guard_tick", persistent=True)
+            unregister_ticker_metadata(GUARD_TICK_INTERVAL, idstring="global_guard_tick", persistent=True)
+        except Exception:
+            pass
 
-        for warning in scan_for_tick_violations()[:25]:
-            logger.log_warn(
-                f"[TickAudit] {warning.get('kind')}: {warning.get('path')}:{int(warning.get('line', 0) or 0)} - {warning.get('message', '')}"
+        _append_guard_startup_trace("at_server_start", "post_cleanup")
+
+        try:
+            from world.systems.tick_audit import scan_for_tick_violations
+
+            for warning in scan_for_tick_violations()[:25]:
+                logger.log_warn(
+                    f"[TickAudit] {warning.get('kind')}: {warning.get('path')}:{int(warning.get('line', 0) or 0)} - {warning.get('message', '')}"
+                )
+        except Exception:
+            logger.log_warn("[TickAudit] Soft timing audit failed during server start.")
+
+        _cancel_guard_reactor_tick()
+        if _get_guard_patrol_owner() != "global_script":
+            _disable_global_guard_patrol_scripts()
+
+        if getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
+            TICKER_HANDLER.add(1, process_status_tick, idstring="global_status_tick", persistent=True)
+            TICKER_HANDLER.add(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
+            if _guard_patrol_owner_enabled("ticker"):
+                TICKER_HANDLER.add(GUARD_TICK_INTERVAL, _run_guard_ticker_tick, idstring="global_guard_tick", persistent=True)
+            elif _guard_patrol_owner_enabled("global_script"):
+                _ensure_global_guard_patrol_script()
+            else:
+                _disable_global_guard_patrol_scripts()
+            if _guard_patrol_owner_enabled("reactor"):
+                _schedule_guard_reactor_tick()
+            start_exp_ticker()
+            register_ticker_metadata(
+                1,
+                process_status_tick,
+                idstring="global_status_tick",
+                persistent=True,
+                system="world.status_tick",
+                reason="State-gated global status processing for recovery, subsystem state, justice/thief/warrior updates, and AI.",
             )
-    except Exception:
-        logger.log_warn("[TickAudit] Soft timing audit failed during server start.")
+            register_ticker_metadata(
+                10,
+                process_learning_tick,
+                idstring="global_learning_tick",
+                persistent=True,
+                system="world.learning_tick",
+                reason="Frequency-separated learning and teaching pulse processing.",
+            )
+            if _guard_patrol_owner_enabled("ticker"):
+                register_ticker_metadata(
+                    GUARD_TICK_INTERVAL,
+                    _run_guard_ticker_tick,
+                    idstring="global_guard_tick",
+                    persistent=True,
+                    system="world.guards",
+                    reason="Validated guard patrol, watch-state, pursuit, and justice response processing.",
+                )
 
-    if getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
-        TICKER_HANDLER.add(1, process_status_tick, idstring="global_status_tick", persistent=True)
-        TICKER_HANDLER.add(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
-        TICKER_HANDLER.add(GUARD_TICK_INTERVAL, process_guard_tick, idstring="global_guard_tick", persistent=True)
-        start_exp_ticker()
-        register_ticker_metadata(
-            1,
-            process_status_tick,
-            idstring="global_status_tick",
-            persistent=True,
-            system="world.status_tick",
-            reason="State-gated global status processing for recovery, subsystem state, justice/thief/warrior updates, and AI.",
-        )
-        register_ticker_metadata(
-            10,
-            process_learning_tick,
-            idstring="global_learning_tick",
-            persistent=True,
-            system="world.learning_tick",
-            reason="Frequency-separated learning and teaching pulse processing.",
-        )
-        register_ticker_metadata(
-            GUARD_TICK_INTERVAL,
-            process_guard_tick,
-            idstring="global_guard_tick",
-            persistent=True,
-            system="world.guards",
-            reason="Validated guard patrol, watch-state, pursuit, and justice response processing.",
-        )
-
-    for character in ObjectDB.objects.filter(
-        db_typeclass_path__in=["typeclasses.characters.Character", "typeclasses.npcs.NPC"]
-    ):
-        if hasattr(character, "ensure_core_defaults"):
-            character.ensure_core_defaults()
-        InjuryService.bootstrap_scheduled_effects(character)
-        ManaService.bootstrap_scheduled_effects(character)
-
-    for script in search_script("bleed_ticker"):
-        if script.typeclass_path == "typeclasses.scripts.BleedTicker":
-            script.delete()
-
-    _ensure_limbo_training_dummy()
-    build_the_landing(area_id=LANDING_AREA_ID)
-    try:
-        primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map", "ranger-guild-map"])
-        if primed_zones:
-            logger.log_info(f"Primed AreaForge zone map cache: {', '.join(primed_zones)}")
-    except Exception:
-        logger.log_warn("AreaForge zone map cache priming failed during server start.")
-    logger.log_info("Ensuring new player tutorial bootstrap.")
-    tutorial_entry = _ensure_new_player_tutorial()
-    if tutorial_entry:
-        logger.log_info(f"New player tutorial ready at {tutorial_entry.key}(#{tutorial_entry.id}).")
-    try:
-        from systems import aftermath
-
-        aftermath.ensure_poi_tags()
-    except Exception:
-        logger.log_warn("[Aftermath] Failed to ensure POI tags during server start.")
-    _warn_empath_guild_duplicates()
-    _configure_brookhollow_justice()
-    _configure_landing_guard_patrols()
-    ensure_landing_guards(count=_get_landing_guard_bootstrap_count())
-    _ensure_fishing_supplier_npc()
+        _append_guard_startup_trace("at_server_start", "post_tick_setup")
+        _log_guard_patrol_owner_state()
+        _bootstrap_guard_patrols("at_server_start", phase_label="early")
+        _bootstrap_diresim_kernel("at_server_start")
+        _validate_diresim_guard_lock("at_server_start")
+        _schedule_server_start_bootstrap()
+    except Exception as error:
+        _append_guard_startup_trace("at_server_start", "exception", error=str(error))
+        logger.log_trace(f"[Guards][StartupDiag] at_server_start exception: {error}")
+        raise
 
 
 def at_server_stop():
@@ -1641,16 +2198,53 @@ def at_server_reload_start():
     """
     This is called only when server starts back up after a reload.
     """
-    _configure_landing_guard_patrols()
-    ensure_landing_guards(count=_get_landing_guard_bootstrap_count())
-    _ensure_fishing_supplier_npc()
+    _append_guard_startup_trace(
+        "at_server_reload_start",
+        "entered",
+        startup_hooks=bool(getattr(settings, "ENABLE_SERVER_STARTUP_HOOKS", True)),
+        startup_bootstrap=bool(getattr(settings, "ENABLE_SERVER_STARTUP_BOOTSTRAP", True)),
+        guard_system=bool(getattr(settings, "ENABLE_GUARD_SYSTEM", True)),
+        patrol_mode=get_guard_patrol_mode(),
+    )
+    if not getattr(settings, "ENABLE_SERVER_STARTUP_HOOKS", True):
+        _append_guard_startup_trace("at_server_reload_start", "skipped", reason="startup_hooks_disabled")
+        return
+
+    try:
+        if getattr(settings, "ENABLE_SERVER_STARTUP_BOOTSTRAP", True):
+            _append_guard_startup_trace("at_server_reload_start", "bootstrap_entered")
+            _bootstrap_guard_patrols("at_server_reload_start", phase_label="bootstrap")
+            _bootstrap_diresim_kernel("at_server_reload_start")
+            _ensure_fishing_supplier_npc()
+            _append_guard_startup_trace("at_server_reload_start", "bootstrap_finished")
+
+        if _guard_startup_force_sync_enabled():
+            _run_guard_startup_sync_probe("at_server_reload_start", "final", force=True)
+
+        _log_guard_patrol_owner_state()
+        _validate_diresim_guard_lock("at_server_reload_start")
+        _append_guard_startup_trace("at_server_reload_start", "finished")
+    except Exception as error:
+        _append_guard_startup_trace("at_server_reload_start", "exception", error=str(error))
+        logger.log_trace(f"[Guards][StartupDiag] at_server_reload_start exception: {error}")
+        raise
 
 
 def at_server_reload_stop():
     """
     This is called only time the server stops before a reload.
     """
+    if not getattr(settings, "ENABLE_SERVER_STARTUP_HOOKS", True):
+        return
+
     _ensure_fishing_supplier_npc()
+
+
+def at_server_cold_stop():
+    """
+    This is called only when the server goes down due to a shutdown or reset.
+    """
+    _cancel_guard_reactor_tick()
 
 
 def at_server_cold_start():

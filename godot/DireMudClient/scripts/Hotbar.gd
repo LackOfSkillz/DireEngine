@@ -54,7 +54,7 @@ func drop_data(position: Vector2, data) -> void:
 
 
 func get_slot_index(position: Vector2) -> int:
-	var local_position := position - $HBoxContainer.position
+	var local_position: Vector2 = position - $HBoxContainer.position
 	for index in range($HBoxContainer.get_child_count()):
 		var button = $HBoxContainer.get_child(index)
 		var button_rect := Rect2(button.position, button.size)

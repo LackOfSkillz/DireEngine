@@ -65,6 +65,7 @@
         <button class="chrome-tab" data-view="chat">Chat</button>
         <button class="chrome-tab" data-view="map">Map</button>
         <button class="chrome-tab" data-view="inventory">Inventory</button>
+        <button id="builder-launch-godot" class="chrome-tab builder-launch-button" type="button" hidden>Launch Builder</button>
       </div>
       <div id="connection-indicator">Connecting</div>
     </div>
@@ -144,6 +145,46 @@
       </div>
     </section>
 
+    <section id="builder-panel" class="panel obsidian-panel rail-panel" data-panel-key="builder" draggable="true" hidden>
+      <div class="panel-title-row">
+        <div class="panel-title">Builder</div>
+        <div class="panel-subtitle" id="builder-availability">Locked</div>
+      </div>
+      <div id="builder-status" class="status-tag">Builder mode unavailable</div>
+      <div class="builder-field-row">
+        <label class="builder-field" for="builder-area-id">
+          <span>Area ID</span>
+          <input id="builder-area-id" type="text" placeholder="starter_town" autocomplete="off">
+        </label>
+      </div>
+      <div class="action-row builder-row-3">
+        <button id="builder-use-zone" type="button">Use Zone</button>
+        <button id="builder-export" type="button">Export</button>
+        <button id="builder-history-refresh" type="button">History</button>
+      </div>
+      <div class="subpanel builder-subpanel">
+        <div class="subpanel-title">Diff Editor</div>
+        <textarea id="builder-diff-editor" class="builder-textarea" spellcheck="false" placeholder='{
+  "area_id": "starter_town",
+  "operations": []
+}'></textarea>
+      </div>
+      <div class="action-row builder-row-4">
+        <button id="builder-preview" type="button">Preview</button>
+        <button id="builder-apply" type="button">Apply</button>
+        <button id="builder-undo" type="button">Undo</button>
+        <button id="builder-redo" type="button">Redo</button>
+      </div>
+      <div class="subpanel builder-subpanel">
+        <div class="subpanel-title">Result</div>
+        <pre id="builder-output" class="builder-output">Awaiting Builder action.</pre>
+      </div>
+      <div class="subpanel builder-subpanel">
+        <div class="subpanel-title">Recent History</div>
+        <div id="builder-history" class="list-panel compact"></div>
+      </div>
+    </section>
+
     <section id="inventory-panel" class="panel obsidian-panel rail-panel" data-panel-key="inventory" draggable="true">
       <div class="panel-title-row">
         <div class="panel-title">Inventory</div>
@@ -187,7 +228,7 @@
 
 {% endblock %}
 {% block scripts %}
-<link rel="stylesheet" href="/static/webclient/css/dragonsire-browser.css?v=7">
-<script src="/static/webclient/js/dragonsire-browser-v2.js?v=10"></script>
+<link rel="stylesheet" href="/static/webclient/css/dragonsire-browser.css?v=9">
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=15"></script>
 
 {% endblock %}

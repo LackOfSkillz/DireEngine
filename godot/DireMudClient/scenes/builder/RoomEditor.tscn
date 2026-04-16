@@ -1,0 +1,339 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/builder/RoomEditor.gd" id="1_room_editor"]
+
+[node name="RoomEditor" type="PanelContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+size_flags_horizontal = 3
+clip_contents = true
+script = ExtResource("1_room_editor")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="Margin/VBoxContainer"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Selected Room"
+
+[node name="InfoPanel" type="PanelContainer" parent="Margin/VBoxContainer"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBoxContainer/InfoPanel"]
+layout_mode = 2
+
+[node name="InfoGrid" type="GridContainer" parent="Margin/VBoxContainer/InfoPanel/Margin"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 6
+
+[node name="RoomIdKey" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "Room"
+
+[node name="RoomIdValue" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "-"
+
+[node name="TypeKey" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "Type"
+
+[node name="TypeValue" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "-"
+
+[node name="CoordKey" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "Coords"
+
+[node name="CoordValue" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "-"
+
+[node name="ExitsKey" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "Exits"
+
+[node name="ExitsValue" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "0"
+
+[node name="ObjectKey" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "Objects"
+
+[node name="ObjectValue" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
+layout_mode = 2
+autowrap_mode = 0
+text = "0"
+
+[node name="EmptyState" type="Label" parent="Margin/VBoxContainer"]
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+text = "No room selected\nClick a room on the map"
+
+[node name="ExitsSection" type="PanelContainer" parent="Margin/VBoxContainer"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBoxContainer/ExitsSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBoxContainer/ExitsSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
+layout_mode = 2
+text = "Exits"
+
+[node name="Empty" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "No exits on this room"
+
+[node name="ExitList" type="ItemList" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="ExitEditor" type="PanelContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
+visible = false
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectedExitId" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+visible = false
+layout_mode = 2
+text = "-"
+
+[node name="DirectionRow" type="HBoxContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DirectionLabel" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionRow"]
+layout_mode = 2
+text = "Exit"
+
+[node name="DirectionValue" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "-"
+
+[node name="DirectionGrid" type="GridContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+columns = 6
+
+[node name="North" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "N"
+
+[node name="South" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "S"
+
+[node name="East" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "E"
+
+[node name="West" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "W"
+
+[node name="Up" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "U"
+
+[node name="Down" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "D"
+
+[node name="Northeast" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "NE"
+
+[node name="Northwest" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "NW"
+
+[node name="Southeast" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "SE"
+
+[node name="Southwest" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "SW"
+
+[node name="In" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "IN"
+
+[node name="Out" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionGrid"]
+layout_mode = 2
+toggle_mode = true
+text = "OUT"
+
+[node name="TargetZoneLabel" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+text = "Target Zone"
+
+[node name="TargetZone" type="OptionButton" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+
+[node name="TargetLabel" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+text = "Target Room"
+
+[node name="TargetRoom" type="OptionButton" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+
+[node name="LabelText" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+text = "Label"
+
+[node name="LabelInput" type="LineEdit" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+placeholder_text = "Archway"
+
+[node name="AliasesText" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+text = "Aliases"
+
+[node name="AliasesInput" type="LineEdit" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+placeholder_text = "hidden panel, secret door"
+
+[node name="Help" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Direction remains system-facing. Target, label, and aliases update the selected exit record."
+
+[node name="ButtonRow" type="HBoxContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Save" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/ButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save Exit"
+
+[node name="Delete" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/ButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Delete Exit"
+
+[node name="ContentBlock" type="VBoxContainer" parent="Margin/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ContentHeader" type="Label" parent="Margin/VBoxContainer/ContentBlock"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Room Content"
+
+[node name="NameLabel" type="Label" parent="Margin/VBoxContainer/ContentBlock"]
+layout_mode = 2
+text = "Name"
+
+[node name="Name" type="LineEdit" parent="Margin/VBoxContainer/ContentBlock"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+placeholder_text = "Room name"
+
+[node name="DescriptionLabel" type="Label" parent="Margin/VBoxContainer/ContentBlock"]
+layout_mode = 2
+text = "Description"
+
+[node name="DescriptionPanel" type="PanelContainer" parent="Margin/VBoxContainer/ContentBlock"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBoxContainer/ContentBlock/DescriptionPanel"]
+layout_mode = 2
+
+[node name="Description" type="TextEdit" parent="Margin/VBoxContainer/ContentBlock/DescriptionPanel/Margin"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ActionsHeader" type="Label" parent="Margin/VBoxContainer/ContentBlock"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Actions"
+
+[node name="Tags" type="LineEdit" parent="Margin/VBoxContainer/ContentBlock"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+placeholder_text = "Tags"
+
+[node name="ButtonRow" type="HBoxContainer" parent="Margin/VBoxContainer/ContentBlock"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Save" type="Button" parent="Margin/VBoxContainer/ContentBlock/ButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Stage Changes"
+
+[node name="Close" type="Button" parent="Margin/VBoxContainer/ContentBlock/ButtonRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Close"
+
+[node name="SpawnRow" type="HBoxContainer" parent="Margin/VBoxContainer/ContentBlock"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AddNpc" type="Button" parent="Margin/VBoxContainer/ContentBlock/SpawnRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Add NPC"
+
+[node name="AddItem" type="Button" parent="Margin/VBoxContainer/ContentBlock/SpawnRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Add Object"

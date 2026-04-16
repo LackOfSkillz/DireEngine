@@ -77,6 +77,12 @@ class Room(ObjectParent, DefaultRoom):
         self.db.suspicion_level = 0
         self.db.law_type = LAW_STANDARD
         self.db.region = "default_region"
+        self.db.zone = "default_region"
+        self.db.zone_id = "default_region"
+        self.db.room_type = "room"
+        self.db.no_npc_wander = False
+        self.db.guild_area = False
+        self.db.npc_boundary = False
         self.db.fishable = False
         self.db.fish_group = "River 1"
 

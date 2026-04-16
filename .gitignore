@@ -59,4 +59,3 @@ nosetests.xml
 artifacts/
 logs/
 debug/
-world/builder/

@@ -11,6 +11,7 @@ def scenario(ctx):
     for index in range(18):
         room = ctx.harness.create_test_room(key=f"TEST_GUARD_ROOM_{index}")
         room.db.zone = "landing"
+        room.db.zone_id = "landing"
         room.db.is_lawful = True
         room.db.law_type = "standard"
         room.db.guard_patrol = True
@@ -21,6 +22,41 @@ def scenario(ctx):
     for left, right in zip(rooms, rooms[1:]):
         ctx.harness.create_test_exit(left, right, f"east_{left.id}", aliases=["e"])
         ctx.harness.create_test_exit(right, left, f"west_{right.id}", aliases=["w"])
+
+    boundary_room = ctx.harness.create_test_room(key="TEST_GUARD_BOUNDARY")
+    boundary_room.db.zone = "landing"
+    boundary_room.db.zone_id = "landing"
+    boundary_room.db.is_lawful = True
+    boundary_room.db.law_type = "standard"
+    boundary_room.db.guard_patrol = True
+    boundary_room.db.npc_boundary = True
+
+    restricted_room = ctx.harness.create_test_room(key="TEST_GUARD_GUILD")
+    restricted_room.db.zone = "landing"
+    restricted_room.db.zone_id = "landing"
+    restricted_room.db.is_lawful = True
+    restricted_room.db.law_type = "standard"
+    restricted_room.db.guard_patrol = True
+    restricted_room.db.guild_area = True
+
+    foreign_room = ctx.harness.create_test_room(key="TEST_GUARD_FOREIGN")
+    foreign_room.db.zone = "foreign"
+    foreign_room.db.zone_id = "foreign"
+    foreign_room.db.is_lawful = True
+    foreign_room.db.law_type = "standard"
+    foreign_room.db.guard_patrol = True
+
+    walkway_room = ctx.harness.create_test_room(key="TEST_GUARD_WALKWAY")
+    walkway_room.db.zone = "landing"
+    walkway_room.db.zone_id = "landing"
+    walkway_room.db.is_lawful = True
+    walkway_room.db.law_type = "standard"
+    walkway_room.db.guard_patrol = True
+
+    ctx.harness.create_test_exit(rooms[0], boundary_room, "path", aliases=[])
+    ctx.harness.create_test_exit(boundary_room, walkway_room, "walkway", aliases=[])
+    ctx.harness.create_test_exit(boundary_room, restricted_room, "gate", aliases=[])
+    ctx.harness.create_test_exit(boundary_room, foreign_room, "archway", aliases=[])
 
     templates = guards.get_valid_guard_templates(limit=15, refresh=True)
     if len(templates) < 15:
@@ -46,6 +82,8 @@ def scenario(ctx):
         guard_room_counts[room_id] = guard_room_counts.get(room_id, 0) + 1
         if str(getattr(getattr(guard, "db", None), "zone", "") or "") != "landing":
             raise AssertionError("Spawned guard did not inherit landing zone.")
+        if str(getattr(getattr(guard, "db", None), "zone_id", "") or "") != "landing":
+            raise AssertionError("Spawned guard did not inherit landing zone_id.")
         if str(getattr(getattr(guard, "db", None), "template_id", "") or "") == "":
             raise AssertionError("Spawned guard did not receive a guard template id.")
     if max(guard_room_counts.values()) > 1:
@@ -61,6 +99,24 @@ def scenario(ctx):
         raise AssertionError("Guard movement tick should move an idle guard with available exits.")
     if patrol_guard.location == patrol_start:
         raise AssertionError("Guard movement tick did not change rooms.")
+
+    boundary_guard = spawned[9]
+    boundary_guard.move_to(boundary_room, quiet=True, move_type="test")
+    boundary_guard.db.patrol_anchor = boundary_room
+    boundary_guard.db.patrol_radius = 4
+    boundary_guard.db.last_move_time = time.time() - 30.0
+    boundary_guard.db.last_idle_time = time.time() - 120.0
+    boundary_exits = guards._get_valid_guard_exits(boundary_guard, boundary_room)
+    boundary_exit_labels = {str(getattr(exit_obj, "key", "") or "") for exit_obj in boundary_exits}
+    if "gate" in boundary_exit_labels or "archway" in boundary_exit_labels:
+        raise AssertionError(f"Restricted or foreign exits should not remain patrol-valid: {boundary_exit_labels}")
+    if "walkway" not in boundary_exit_labels:
+        raise AssertionError(f"Non-standard in-zone exits should remain patrol-valid: {boundary_exit_labels}")
+    selected_boundary_exit, _ = guards._select_guard_exit(boundary_guard, boundary_exits, force_move=True)
+    if str(getattr(selected_boundary_exit, "key", "") or "") != "walkway":
+        raise AssertionError("Boundary guard should select the in-zone walkway instead of blocked exits.")
+    if guards.get_exit_label(selected_boundary_exit) != "the walkway":
+        raise AssertionError("Non-standard exit labels should normalize for messaging.")
 
     clump_guard = spawned[1]
     clump_guard.move_to(patrol_guard.location, quiet=True, move_type="test")

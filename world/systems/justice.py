@@ -1,5 +1,12 @@
 import time
 
+from evennia.objects.models import ObjectDB
+from evennia.utils import logger
+
+from world.simulation.custody import release_player as diresim_release_player
+from world.simulation.events import SimEvent
+from world.simulation.registry import get_guard_zone_service_for_room
+
 
 WANTED_DECAY_BUCKET = 600.0
 CRIME_DECAY_BUCKET = 3600.0
@@ -83,9 +90,19 @@ FLEE_TRIGGER_COMMANDS = {
 }
 
 
+def _actor_can_store_justice_state(actor):
+    actor_id = int(getattr(actor, "id", 0) or 0) if actor is not None else 0
+    if actor_id <= 0:
+        return False
+    try:
+        return ObjectDB.objects.filter(id=actor_id).exists()
+    except Exception:
+        return False
+
+
 def _ensure_actor_state(actor):
-    if actor is None:
-        return
+    if actor is None or not _actor_can_store_justice_state(actor):
+        return False
     defaults = {
         "wanted_level": 0,
         "last_wanted_update": 0,
@@ -122,7 +139,12 @@ def _ensure_actor_state(actor):
     }
     for key, value in defaults.items():
         if getattr(getattr(actor, "db", None), key, None) is None:
-            setattr(actor.db, key, value)
+            try:
+                setattr(actor.db, key, value)
+            except Exception as error:
+                logger.log_trace(f"justice._ensure_actor_state failed for actor #{getattr(actor, 'id', '?')}: {error}")
+                return False
+    return True
 
 
 def _find_room_by_key(*keys):
@@ -297,7 +319,8 @@ def _classify_arrest_outcome(actor):
 
 
 def get_wanted_tier(actor):
-    _ensure_actor_state(actor)
+    if not _ensure_actor_state(actor):
+        return "clear"
     wanted = int(getattr(getattr(actor, "db", None), "wanted_level", 0) or 0)
     if wanted <= 0:
         return "clear"
@@ -688,6 +711,18 @@ def release_from_jail(actor, *, notify=False):
     destination = _get_guardhouse_exterior(actor=actor) or _get_release_room(actor=actor)
     if destination and getattr(actor, "location", None) != destination:
         actor.move_to(destination, quiet=True, move_type="jail_release")
+    diresim_release_player(actor)
+    release_room = getattr(actor, "location", None) or destination
+    service = get_guard_zone_service_for_room(release_room)
+    release_room_id = int(getattr(release_room, "id", 0) or 0) or None
+    if service is not None and release_room_id is not None and int(getattr(actor, "id", 0) or 0) > 0:
+        service.enqueue_event(
+            SimEvent(
+                "PLAYER_RELEASED",
+                release_room_id,
+                payload={"target_id": int(getattr(actor, "id", 0) or 0)},
+            )
+        )
     if notify:
         actor.msg("You are released from custody.")
         if list(getattr(actor.db, "confiscated_items", None) or []):
@@ -897,6 +932,31 @@ def trigger_justice_response(actor, target, action_type, severity, *, was_caught
     actor.db.crime_flag = True
     actor.db.wanted_level = int(getattr(actor.db, "wanted_level", 0) or 0) + severity
     actor.db.last_wanted_update = time.time()
+    try:
+        from world.simulation.cache.room_facts import get_or_create_room_facts
+        from world.simulation.cache.zone_facts import get_or_create_zone_facts
+        from world.simulation.events import SimEvent
+        from world.simulation.registry import get_guard_zone_service_for_room, get_zone_facts_for_room
+        from world.systems.guards import is_diresim_enabled
+
+        room = getattr(actor, "location", None)
+        room_id = int(getattr(room, "id", 0) or 0)
+        if is_diresim_enabled() and room_id > 0:
+            facts = get_or_create_room_facts(room_id)
+            facts.mark_crime()
+            facts.touch()
+            zone_facts = get_zone_facts_for_room(room)
+            if zone_facts is not None:
+                zone_facts.mark_room_hot(room_id)
+                zone_facts.mark_incident_room(room_id)
+            service = get_guard_zone_service_for_room(room)
+            if service is not None:
+                service.zonefacts_feed_metrics["zonefacts_hot_room_updates"] += 1
+                service.zonefacts_feed_metrics["zonefacts_incident_updates"] += 1
+                actor_id = int(getattr(actor, "id", 0) or 0)
+                service.enqueue_event(SimEvent("CRIME_COMMITTED", room_id, payload={"actor_id": actor_id, "target_id": actor_id, "severity": int(severity or 0)}))
+    except Exception:
+        pass
     crime_result = apply_crime_if_caught(actor, action_type, was_caught, severity=severity)
 
     room = getattr(actor, "location", None)

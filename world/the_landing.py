@@ -1,14 +1,17 @@
+import time
 from collections import deque
 from pathlib import Path
 
 from evennia import create_object
+from evennia.utils import logger
 from evennia.utils.search import search_tag
+from django.conf import settings
 from world.area_forge.ai.adjudicator import adjudicate_area_spec
 from world.area_forge.extract.ocr import extract_ocr_bundle, is_exit_command
 from world.area_forge.model.confidence import classify_confidence, score_label_confidence
 from world.area_forge.paths import area_namespace, artifact_paths
 from world.area_forge.review import generate_review_flags, save_review_report
-from world.area_forge.serializer import save_area_spec
+from world.area_forge.serializer import load_area_spec, save_area_spec
 
 try:
     from PIL import Image
@@ -422,6 +425,63 @@ REGION_RULES = [
 def _get_tagged(tag, category):
     matches = list(search_tag(tag, category=category))
     return matches[0] if matches else None
+
+
+def _landing_startup_diag_enabled():
+    return bool(getattr(settings, "ENABLE_STARTUP_BUILD_LANDING_DIAGNOSTICS", True))
+
+
+def _landing_startup_warn_seconds():
+    return float(getattr(settings, "STARTUP_BUILD_LANDING_WARN_SECONDS", 15.0) or 15.0)
+
+
+def _log_landing_startup(stage, diag_hook=None, **details):
+    if not _landing_startup_diag_enabled():
+        if callable(diag_hook):
+            diag_hook(stage, **details)
+        return
+    logger.log_info(f"[Landing][Startup] {stage} {details}")
+    if callable(diag_hook):
+        diag_hook(stage, **details)
+
+
+def _count_existing_area_objects(namespace):
+    tagged_objects = list(search_tag(namespace["area_tag"][0], category=namespace["area_tag"][1]))
+    room_count = 0
+    exit_count = 0
+    for obj in tagged_objects:
+        if getattr(obj, "destination", None) is not None:
+            exit_count += 1
+        else:
+            room_count += 1
+    return {
+        "tagged_count": len(tagged_objects),
+        "room_count": room_count,
+        "exit_count": exit_count,
+    }
+
+
+def _get_expected_node_count(area_id):
+    artifacts = artifact_paths(area_id)
+    area_spec = load_area_spec(artifacts["areaspec"])
+    if not isinstance(area_spec, dict):
+        return 0
+    meta = area_spec.get("meta") or {}
+    try:
+        return int(meta.get("node_count", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def landing_area_build_state(area_id="new_landing"):
+    namespace = area_namespace(area_id)
+    counts = _count_existing_area_objects(namespace)
+    expected_node_count = _get_expected_node_count(area_id)
+    counts["expected_node_count"] = expected_node_count
+    counts["is_built"] = counts["room_count"] > 0 and (
+        expected_node_count <= 0 or counts["room_count"] >= expected_node_count
+    )
+    return counts
 
 
 def _cleanup_existing_area(valid_node_ids, valid_exit_ids, namespace):
@@ -1354,13 +1414,115 @@ def build_the_landing(
     area_id="new_landing",
     profile=None,
     style_settings=None,
+    skip_if_built=False,
+    diag_hook=None,
 ):
-    area_spec = extract_the_landing_area_spec(
-        map_path=map_path,
-        use_ocr=use_ocr,
-        use_ai_adjudication=use_ai_adjudication,
-        area_id=area_id,
-        profile=profile,
-        style_settings=style_settings,
+    overall_started_at = time.time()
+    warn_seconds = _landing_startup_warn_seconds()
+    state_before = landing_area_build_state(area_id)
+    _log_landing_startup(
+        "enter_build_the_landing",
+        diag_hook=diag_hook,
+        area_id=str(area_id),
+        skip_if_built=bool(skip_if_built),
+        use_ocr=bool(use_ocr),
+        use_ai_adjudication=bool(use_ai_adjudication),
+        **state_before,
     )
-    return build_the_landing_from_area_spec(area_spec)
+
+    if skip_if_built and state_before["is_built"]:
+        _log_landing_startup(
+            "skip_existing_landing",
+            diag_hook=diag_hook,
+            area_id=str(area_id),
+            reason="warm_start_already_built",
+            **state_before,
+        )
+        return {
+            "skipped": True,
+            "reason": "already_built",
+            "meta": {
+                "area_id": area_id,
+                "room_count": state_before["room_count"],
+                "exit_count": state_before["exit_count"],
+                "expected_node_count": state_before["expected_node_count"],
+            },
+        }
+
+    try:
+        phase_extract_started_at = time.time()
+        _log_landing_startup("phase_extract_start", diag_hook=diag_hook, area_id=str(area_id))
+        area_spec = extract_the_landing_area_spec(
+            map_path=map_path,
+            use_ocr=use_ocr,
+            use_ai_adjudication=use_ai_adjudication,
+            area_id=area_id,
+            profile=profile,
+            style_settings=style_settings,
+        )
+        extract_duration = time.time() - phase_extract_started_at
+        _log_landing_startup(
+            "phase_extract_end",
+            diag_hook=diag_hook,
+            area_id=str(area_id),
+            duration=round(extract_duration, 3),
+            node_count=int((area_spec.get("meta") or {}).get("node_count", 0) or 0),
+            edge_count=int((area_spec.get("meta") or {}).get("edge_count", 0) or 0),
+        )
+        if extract_duration > warn_seconds:
+            _log_landing_startup(
+                "phase_extract_warning",
+                diag_hook=diag_hook,
+                area_id=str(area_id),
+                duration=round(extract_duration, 3),
+                warn_seconds=warn_seconds,
+            )
+
+        phase_build_started_at = time.time()
+        _log_landing_startup("phase_build_start", diag_hook=diag_hook, area_id=str(area_id))
+        result = build_the_landing_from_area_spec(area_spec)
+        build_duration = time.time() - phase_build_started_at
+        _log_landing_startup(
+            "phase_build_end",
+            diag_hook=diag_hook,
+            area_id=str(area_id),
+            duration=round(build_duration, 3),
+            room_count=len(result.get("rooms", {}) or {}),
+            edge_count=len(result.get("edges", []) or []),
+        )
+        if build_duration > warn_seconds:
+            _log_landing_startup(
+                "phase_build_warning",
+                diag_hook=diag_hook,
+                area_id=str(area_id),
+                duration=round(build_duration, 3),
+                warn_seconds=warn_seconds,
+            )
+
+        overall_duration = time.time() - overall_started_at
+        state_after = landing_area_build_state(area_id)
+        _log_landing_startup(
+            "exit_build_the_landing",
+            diag_hook=diag_hook,
+            area_id=str(area_id),
+            duration=round(overall_duration, 3),
+            **state_after,
+        )
+        if overall_duration > warn_seconds:
+            _log_landing_startup(
+                "build_the_landing_warning",
+                diag_hook=diag_hook,
+                area_id=str(area_id),
+                duration=round(overall_duration, 3),
+                warn_seconds=warn_seconds,
+            )
+        return result
+    except Exception as error:
+        _log_landing_startup(
+            "build_the_landing_exception",
+            diag_hook=diag_hook,
+            area_id=str(area_id),
+            duration=round(time.time() - overall_started_at, 3),
+            error=str(error),
+        )
+        raise

@@ -21,6 +21,7 @@ import random
 import time
 
 from evennia.objects.objects import DefaultCharacter
+from evennia.server.models import ServerConfig
 from evennia.utils.create import create_object
 from evennia.utils.search import search_object, search_tag
 
@@ -156,6 +157,117 @@ from .objects import ObjectParent
 
 
 LOGGER = logging.getLogger(__name__)
+DIRESIM_MOVE_TRACE_CONFIG_KEY = "diresim_move_event_trace"
+
+
+def _append_diresim_move_trace(event_type, **details):
+    event = {
+        "ts": time.time(),
+        "event_type": str(event_type),
+        "details": details,
+    }
+    trace = list(ServerConfig.objects.conf(key=DIRESIM_MOVE_TRACE_CONFIG_KEY, default=[]) or [])
+    trace.append(event)
+    if len(trace) > 200:
+        trace = trace[-200:]
+    ServerConfig.objects.conf(key=DIRESIM_MOVE_TRACE_CONFIG_KEY, value=trace)
+    return event
+
+
+def _update_room_facts_for_actor_move(actor, source_location, destination_room):
+    try:
+        from world.simulation.cache.room_facts import get_or_create_room_facts
+        from world.simulation.cache.zone_facts import get_or_create_zone_facts
+        from world.simulation.events import SimEvent
+        from world.simulation.registry import get_guard_zone_service_for_room, get_zone_facts_for_room
+        from world.systems.guards import is_diresim_enabled
+    except Exception as error:
+        _append_diresim_move_trace("import_failed", error=str(error))
+        return
+
+    if not is_diresim_enabled():
+        return
+    if not actor or not getattr(actor, "pk", None):
+        return
+
+    is_guard = bool(getattr(getattr(actor, "db", None), "is_guard", False))
+    is_generic_npc = bool(getattr(getattr(actor, "db", None), "is_npc", False) and not is_guard)
+    is_player = bool(not is_guard and not is_generic_npc)
+
+    def _decrement(facts):
+        if is_guard:
+            facts.dec_guards()
+        elif is_player:
+            facts.dec_players()
+        elif is_generic_npc:
+            facts.dec_npcs()
+        facts.touch()
+
+    def _increment(facts):
+        if is_guard:
+            facts.inc_guards()
+        elif is_player:
+            facts.inc_players()
+        elif is_generic_npc:
+            facts.inc_npcs()
+        facts.touch()
+
+    source_room_id = int(getattr(source_location, "id", 0) or 0)
+    destination_room_id = int(getattr(destination_room, "id", 0) or 0)
+
+    if source_room_id > 0:
+        _decrement(get_or_create_room_facts(source_room_id))
+        if is_player:
+            source_zone_facts = get_zone_facts_for_room(source_location)
+            if source_zone_facts is not None:
+                source_zone_facts.clear_player_room_active(source_room_id)
+
+    if destination_room_id > 0:
+        _increment(get_or_create_room_facts(destination_room_id))
+        service = get_guard_zone_service_for_room(destination_room)
+        actor_id = int(getattr(actor, "id", 0) or 0)
+        _append_diresim_move_trace(
+            "move",
+            actor_id=actor_id,
+            source_room_id=source_room_id,
+            destination_room_id=destination_room_id,
+            is_player=is_player,
+            is_guard=is_guard,
+            service_id=getattr(service, "service_id", None),
+        )
+        zone_facts = get_zone_facts_for_room(destination_room)
+        if zone_facts is not None and is_player:
+            zone_facts.mark_player_room_active(destination_room_id)
+            zone_facts.mark_room_hot(destination_room_id)
+            if service is not None:
+                service.zonefacts_feed_metrics["zonefacts_player_room_updates"] += 1
+                service.zonefacts_feed_metrics["zonefacts_hot_room_updates"] += 1
+        if service is not None:
+            if is_player:
+                event_type = "PLAYER_ENTER"
+            elif is_guard:
+                event_type = "GUARD_ENTER"
+            elif is_generic_npc:
+                event_type = "NPC_ENTER"
+            else:
+                event_type = "ACTOR_ENTER"
+            service.enqueue_event(SimEvent(event_type, destination_room_id, payload={"actor_id": actor_id, "target_id": actor_id}))
+            _append_diresim_move_trace(
+                "enqueue",
+                actor_id=actor_id,
+                room_id=destination_room_id,
+                service_id=getattr(service, "service_id", None),
+                queued_event_type=event_type,
+            )
+        if service is not None and is_player and source_room_id > 0:
+            service.enqueue_event(SimEvent("PLAYER_LEAVE", source_room_id, payload={"actor_id": actor_id, "target_id": actor_id}))
+            _append_diresim_move_trace(
+                "enqueue",
+                actor_id=actor_id,
+                room_id=source_room_id,
+                service_id=getattr(service, "service_id", None),
+                queued_event_type="PLAYER_LEAVE",
+            )
 
 
 DEFAULT_STATS = {
@@ -1502,6 +1614,13 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_after_move(self, source_location, **kwargs):
         super().at_after_move(source_location, **kwargs)
+        _append_diresim_move_trace(
+            "at_after_move",
+            actor_id=int(getattr(self, "id", 0) or 0),
+            source_room_id=int(getattr(source_location, "id", 0) or 0),
+            destination_room_id=int(getattr(getattr(self, "location", None), "id", 0) or 0),
+        )
+        _update_room_facts_for_actor_move(self, source_location, getattr(self, "location", None))
         self.ndb.is_busy = False
         self.ndb.is_walking = False
         try:
@@ -1534,12 +1653,19 @@ class Character(ObjectParent, DefaultCharacter):
         if hasattr(self.location, "is_lawless"):
             self.db.is_hidden_from_tracking = bool(self.location.is_lawless())
         current_region = self.location.get_region() if hasattr(self.location, "get_region") else None
-        if not getattr(self.db, "is_captured", False) and current_region and (getattr(self.db, "warrants", None) or {}).get(current_region) and not self.location.is_lawless():
+        if (
+            not getattr(self.db, "is_captured", False)
+            and not bool(getattr(self.db, "is_jailed", False))
+            and not bool(getattr(self.db, "is_in_custody", False))
+            and current_region
+            and (getattr(self.db, "warrants", None) or {}).get(current_region)
+            and not self.location.is_lawless()
+        ):
             from utils.crime import call_guards
 
             call_guards(self.location, self)
 
-    def sync_client_state(self, include_map=False, include_subsystem=True, include_character=True, session=None):
+    def sync_client_state(self, include_map=False, include_subsystem=True, include_character=True, session=None, map_mode="zone"):
         sessions_attr = getattr(self, "sessions", None)
         sessions = [session] if session else list(sessions_attr.all()) if sessions_attr else []
         if not sessions:
@@ -1551,7 +1677,7 @@ class Character(ObjectParent, DefaultCharacter):
             session = structured_sessions[0]
         if include_map:
             try:
-                send_map_update(self, session=session)
+                send_map_update(self, session=session, mode=map_mode)
             except Exception:
                 LOGGER.exception("Failed to sync map state for %s in %s", getattr(self, "key", self), getattr(getattr(self, "location", None), "key", None))
         if include_subsystem:
@@ -9920,7 +10046,8 @@ class Character(ObjectParent, DefaultCharacter):
         return max_carry
 
     def get_coin_weight(self, coins=None):
-        return max(0, int(getattr(self.db, "coins", 0) if coins is None else coins or 0)) * COIN_WEIGHT
+        coin_value = getattr(self.db, "coins", 0) if coins is None else coins
+        return max(0, int(coin_value or 0)) * COIN_WEIGHT
 
     def get_object_total_weight(self, obj, depth=0, seen=None):
         if not obj:
@@ -16401,6 +16528,12 @@ class Character(ObjectParent, DefaultCharacter):
         return moved
 
     def at_pre_move(self, destination, **kwargs):
+        if bool(getattr(self.db, "is_jailed", False)) and not bool(kwargs.get("allow_custody_transport", False)):
+            self.msg("You cannot leave jail.")
+            return False
+        if bool(getattr(self.db, "is_in_custody", False)) and not bool(kwargs.get("allow_custody_transport", False)):
+            self.msg("You are in custody and cannot break away.")
+            return False
         if self.is_dead():
             self.msg("You cannot move while dead.")
             return False
@@ -16480,6 +16613,13 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_move(self, source_location, **kwargs):
         super().at_post_move(source_location, **kwargs)
+        _append_diresim_move_trace(
+            "at_post_move",
+            actor_id=int(getattr(self, "id", 0) or 0),
+            source_room_id=int(getattr(source_location, "id", 0) or 0),
+            destination_room_id=int(getattr(getattr(self, "location", None), "id", 0) or 0),
+        )
+        _update_room_facts_for_actor_move(self, source_location, getattr(self, "location", None))
         sync_subject_interest(self, previous_room=source_location)
         try:
             from systems.onboarding import handle_room_entry
@@ -16546,7 +16686,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         self.detect_traps_in_room()
 
-        self.sync_client_state(include_map=True, include_subsystem=False, include_character=False)
+        self.sync_client_state(include_map=True, include_subsystem=False, include_character=False, map_mode="cached-zone")
 
         self.ndb.sneak_move_active = False
         self.ndb.sneak_partial_observer_ids = []

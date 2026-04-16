@@ -4,12 +4,23 @@
 
   const state = {
     map: { rooms: [], edges: [], exits: [], player_room_id: null, zone: null },
+    builder: {
+      enabled: false,
+      areaId: "",
+      busy: false,
+      launcherBusy: false,
+      lastExport: null,
+      lastDiff: null,
+      lastUndoDiff: null,
+      history: [],
+    },
     roomPositions: new Map(),
     hoveredRoomId: null,
     zoom: 1,
     mapScale: 1,
     mapOffset: { x: 24, y: 24 },
     mapAutoFit: true,
+    mapRefitRequestId: 0,
     isDragging: false,
     suppressMapClick: false,
     lastMouse: { x: 0, y: 0 },
@@ -488,6 +499,7 @@
         UI_PREFS_STORAGE_KEY,
         JSON.stringify({
           activeView: state.activeView,
+          builderAreaId: state.builder.areaId,
           zoom: state.zoom,
           debugEnabled: state.debugEnabled,
           audioEnabled: state.audioEnabled,
@@ -505,6 +517,7 @@
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
         state.activeView = parsed.activeView || state.activeView;
+        state.builder.areaId = String(parsed.builderAreaId || state.builder.areaId || "").trim();
         state.zoom = Number(parsed.zoom) || state.zoom;
         state.debugEnabled = Boolean(parsed.debugEnabled);
         state.audioEnabled = parsed.audioEnabled !== undefined ? Boolean(parsed.audioEnabled) : state.audioEnabled;
@@ -617,6 +630,429 @@
     }
   }
 
+  function getCookie(name) {
+    const prefix = `${name}=`;
+    return document.cookie
+      .split(";")
+      .map((chunk) => chunk.trim())
+      .find((chunk) => chunk.startsWith(prefix))
+      ?.slice(prefix.length) || "";
+  }
+
+  function getCsrfToken() {
+    return getCookie("csrftoken");
+  }
+
+  function setBuilderLastAction(text) {
+    const node = byId("builder-availability");
+    if (node) {
+      node.textContent = text;
+    }
+  }
+
+  function setBuilderStatus(text, stateKey = "idle") {
+    const node = byId("builder-status");
+    if (!node) return;
+    node.textContent = text;
+    node.dataset.state = stateKey;
+  }
+
+  function currentBuilderLaunchContext() {
+    return {
+      target: "builder",
+      area_id: getBuilderAreaId() || String((state.map && state.map.zone) || "").trim(),
+      room_id: String((state.map && state.map.player_room_id) || "").trim(),
+      character_name: String((state.character && state.character.name) || "").trim(),
+    };
+  }
+
+  function setBuilderOutput(value) {
+    const node = byId("builder-output");
+    if (!node) return;
+    node.textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+  }
+
+  function setBuilderAreaId(value, { overwrite = false } = {}) {
+    const normalized = String(value || "").trim();
+    const input = byId("builder-area-id");
+    const current = input ? String(input.value || "").trim() : state.builder.areaId;
+    if (!overwrite && current) {
+      return current;
+    }
+    state.builder.areaId = normalized;
+    if (input) {
+      input.value = normalized;
+    }
+    saveUiPrefs();
+    return normalized;
+  }
+
+  function getBuilderAreaId() {
+    const input = byId("builder-area-id");
+    const normalized = String((input && input.value) || state.builder.areaId || "").trim();
+    state.builder.areaId = normalized;
+    saveUiPrefs();
+    return normalized;
+  }
+
+  function syncBuilderAreaFromMap() {
+    const zone = String((state.map && state.map.zone) || "").trim();
+    if (!zone) {
+      return;
+    }
+    setBuilderAreaId(zone, { overwrite: false });
+  }
+
+  function renderBuilderHistory(entries) {
+    const list = byId("builder-history");
+    if (!list) return;
+    list.innerHTML = "";
+    (entries || []).forEach((entry) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "inventory-item builder-history-entry";
+      const type = String(entry.type || "apply");
+      const opCount = Array.isArray(entry.operation_ids)
+        ? entry.operation_ids.length
+        : Array.isArray((entry.diff || {}).operations)
+          ? entry.diff.operations.length
+          : 0;
+      const timestamp = entry.timestamp
+        ? new Date(Number(entry.timestamp) * 1000).toLocaleString()
+        : "Unknown time";
+      button.innerHTML = `<span><strong>${type}</strong><small>${timestamp}</small></span><span class="builder-history-meta">${opCount} ops</span>`;
+      button.addEventListener("click", () => {
+        const editor = byId("builder-diff-editor");
+        const payload = entry.type === "undo" ? entry.undo_diff : entry.diff;
+        if (editor && payload) {
+          editor.value = JSON.stringify(payload, null, 2);
+          setBuilderOutput(payload);
+          setBuilderStatus(`Loaded ${type} entry into the diff editor.`, "ready");
+          toast(`Loaded ${type} history entry`);
+        }
+      });
+      list.appendChild(button);
+    });
+
+    if (!list.children.length) {
+      const empty = document.createElement("div");
+      empty.className = "status-tag";
+      empty.textContent = "No Builder history loaded";
+      list.appendChild(empty);
+    }
+  }
+
+  function setBuilderEnabled(payload) {
+    const enabled = Boolean(payload && (payload.is_builder || payload.builder_mode_available));
+    state.builder.enabled = enabled;
+    const panel = byId("builder-panel");
+    const launchButton = byId("builder-launch-godot");
+    if (panel) {
+      panel.hidden = !enabled;
+    }
+    if (launchButton) {
+      launchButton.hidden = !enabled;
+    }
+    if (!enabled) {
+      setBuilderLastAction("Locked");
+      setBuilderStatus("Builder mode unavailable", "idle");
+      return;
+    }
+    syncBuilderAreaFromMap();
+    setBuilderLastAction(payload.builder_session_id ? `Session ${payload.builder_session_id}` : "Ready");
+    setBuilderStatus("Builder mode available in the browser client.", "ready");
+  }
+
+  async function builderRequest(url, options = {}) {
+    const requestOptions = {
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        ...(options.headers || {}),
+      },
+      ...options,
+    };
+    const method = String(requestOptions.method || "GET").toUpperCase();
+    if (method !== "GET" && method !== "HEAD") {
+      requestOptions.headers["Content-Type"] = requestOptions.headers["Content-Type"] || "application/json";
+      const csrfToken = getCsrfToken();
+      if (csrfToken) {
+        requestOptions.headers["X-CSRFToken"] = csrfToken;
+      }
+    }
+    const response = await window.fetch(url, requestOptions);
+    let payload = null;
+    try {
+      payload = await response.json();
+    } catch (_) {
+      payload = null;
+    }
+    if (!response.ok || (payload && payload.ok === false)) {
+      const errorMessage = payload && payload.error ? payload.error : `HTTP ${response.status}`;
+      const error = new Error(errorMessage);
+      error.payload = payload;
+      throw error;
+    }
+    return payload || { ok: response.ok };
+  }
+
+  async function builderLauncherRequest(path, options = {}) {
+    const controller = new AbortController();
+    const timeoutMs = options.timeoutMs || 4000;
+    const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const requestOptions = {
+        method: options.method || "GET",
+        headers: {
+          Accept: "application/json",
+          ...(options.headers || {}),
+        },
+        signal: controller.signal,
+        mode: "cors",
+      };
+      if (options.body !== undefined) {
+        requestOptions.headers["Content-Type"] = "application/json";
+        requestOptions.body = JSON.stringify(options.body);
+      }
+      const response = await window.fetch(`http://127.0.0.1:7777${path}`, requestOptions);
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch (_) {
+        payload = null;
+      }
+      if (!response.ok || (payload && payload.ok === false)) {
+        const error = new Error((payload && payload.error) || `HTTP ${response.status}`);
+        error.payload = payload;
+        throw error;
+      }
+      return payload || { ok: response.ok };
+    } catch (error) {
+      if (error.name === "AbortError") {
+        throw new Error("Launcher did not respond.");
+      }
+      if (error instanceof TypeError) {
+        throw new Error("Local Builder Launcher is not running. Start tools/builder_launcher/launcher.py and try again.");
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  }
+
+  async function checkBuilderLauncher() {
+    return builderLauncherRequest("/health", { method: "GET", timeoutMs: 2500 });
+  }
+
+  async function launchGodotBuilder(payload = {}) {
+    return builderLauncherRequest("/launch-builder", {
+      method: "POST",
+      body: payload,
+      timeoutMs: 4000,
+    });
+  }
+
+  function parseBuilderDiffEditor() {
+    const editor = byId("builder-diff-editor");
+    const raw = String((editor && editor.value) || "").trim();
+    const parsed = raw ? JSON.parse(raw) : {};
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("Diff payload must be a JSON object.");
+    }
+    const areaId = String(parsed.area_id || getBuilderAreaId() || "").trim();
+    if (!areaId) {
+      throw new Error("Area ID is required before running Builder actions.");
+    }
+    return {
+      ...parsed,
+      area_id: areaId,
+      operations: Array.isArray(parsed.operations) ? parsed.operations : [],
+    };
+  }
+
+  function setBuilderBusy(isBusy, label) {
+    state.builder.busy = isBusy;
+    document.querySelectorAll("#builder-panel button, #builder-panel input, #builder-panel textarea").forEach((node) => {
+      node.disabled = isBusy;
+    });
+    if (label) {
+      setBuilderStatus(label, isBusy ? "idle" : "ready");
+    }
+  }
+
+  async function openGodotBuilder() {
+    if (state.builder.launcherBusy) {
+      return;
+    }
+    state.builder.launcherBusy = true;
+    const launchButton = byId("builder-launch-godot");
+    if (launchButton) {
+      launchButton.disabled = true;
+      launchButton.textContent = "Launching...";
+    }
+    setBuilderStatus("Checking local launcher...", "idle");
+    try {
+      await checkBuilderLauncher();
+      const response = await launchGodotBuilder(currentBuilderLaunchContext());
+      setBuilderStatus("Launching Godot Builder...", "ready");
+      setBuilderLastAction("Launched");
+      setBuilderOutput(response);
+      toast("Launching Godot Builder...");
+    } catch (error) {
+      setBuilderStatus(error.message, "error");
+      toast(error.message);
+    } finally {
+      state.builder.launcherBusy = false;
+      if (launchButton) {
+        launchButton.disabled = false;
+        launchButton.textContent = "Launch Builder";
+      }
+    }
+  }
+
+  async function exportBuilderMap() {
+    const areaId = getBuilderAreaId();
+    if (!areaId) {
+      toast("Enter an area id first.");
+      return;
+    }
+    setBuilderBusy(true, `Exporting ${areaId}...`);
+    try {
+      const response = await builderRequest(`/api/builder/map/export/${encodeURIComponent(areaId)}/`);
+      const exported = (response.data && response.data.map) || response.map || null;
+      state.builder.lastExport = exported;
+      setBuilderOutput(exported || {});
+      setBuilderStatus(`Exported ${areaId} with ${((exported && exported.rooms) || []).length} rooms.`, "ready");
+      setBuilderLastAction("Exported");
+      const editor = byId("builder-diff-editor");
+      if (editor && !String(editor.value || "").trim()) {
+        editor.value = JSON.stringify({ area_id: areaId, operations: [] }, null, 2);
+      }
+      toast(`Loaded Builder export for ${areaId}`);
+    } catch (error) {
+      setBuilderStatus(`Export failed: ${error.message}`, "error");
+      setBuilderOutput(error.payload || error.message);
+      toast(`Builder export failed: ${error.message}`);
+    } finally {
+      setBuilderBusy(false);
+    }
+  }
+
+  async function loadBuilderHistory() {
+    const areaId = getBuilderAreaId();
+    if (!areaId) {
+      toast("Enter an area id first.");
+      return;
+    }
+    setBuilderBusy(true, `Loading history for ${areaId}...`);
+    try {
+      const response = await builderRequest(`/api/builder/map/history/?area_id=${encodeURIComponent(areaId)}&limit=8`);
+      const history = Array.isArray(response.history)
+        ? response.history
+        : Array.isArray(response.data && response.data.history)
+          ? response.data.history
+          : [];
+      state.builder.history = history;
+      renderBuilderHistory(history);
+      setBuilderStatus(`Loaded ${history.length} history entries for ${areaId}.`, "ready");
+      setBuilderLastAction("History");
+    } catch (error) {
+      setBuilderStatus(`History failed: ${error.message}`, "error");
+      toast(`Builder history failed: ${error.message}`);
+    } finally {
+      setBuilderBusy(false);
+    }
+  }
+
+  async function runBuilderDiff(preview) {
+    let diff = null;
+    try {
+      diff = parseBuilderDiffEditor();
+    } catch (error) {
+      setBuilderStatus(error.message, "error");
+      toast(error.message);
+      return;
+    }
+    setBuilderBusy(true, preview ? "Previewing diff..." : "Applying diff...");
+    try {
+      const response = await builderRequest("/api/builder/map/diff/", {
+        method: "POST",
+        body: JSON.stringify({ diff, preview }),
+      });
+      const result = (response.data && response.data.result) || response.result || response;
+      setBuilderOutput(result);
+      if (!preview) {
+        state.builder.lastDiff = diff;
+        state.builder.lastUndoDiff = result.undo_diff || null;
+        await loadBuilderHistory();
+        await exportBuilderMap();
+      }
+      setBuilderStatus(preview ? "Diff preview completed." : "Diff applied.", "ready");
+      setBuilderLastAction(preview ? "Preview" : "Applied");
+      toast(preview ? "Builder preview ready" : "Builder diff applied");
+    } catch (error) {
+      setBuilderStatus(`${preview ? "Preview" : "Apply"} failed: ${error.message}`, "error");
+      setBuilderOutput(error.payload || error.message);
+      toast(`Builder ${preview ? "preview" : "apply"} failed: ${error.message}`);
+    } finally {
+      setBuilderBusy(false);
+    }
+  }
+
+  async function runBuilderUndo() {
+    if (!state.builder.lastUndoDiff) {
+      toast("No undo diff is cached yet.");
+      return;
+    }
+    setBuilderBusy(true, "Applying undo...");
+    try {
+      const response = await builderRequest("/api/builder/map/undo/", {
+        method: "POST",
+        body: JSON.stringify({ undo_diff: state.builder.lastUndoDiff }),
+      });
+      const result = response.result || (response.data && response.data.result) || response;
+      setBuilderOutput(result);
+      setBuilderStatus("Undo applied.", "ready");
+      setBuilderLastAction("Undo");
+      await loadBuilderHistory();
+      await exportBuilderMap();
+      toast("Builder undo applied");
+    } catch (error) {
+      setBuilderStatus(`Undo failed: ${error.message}`, "error");
+      setBuilderOutput(error.payload || error.message);
+      toast(`Builder undo failed: ${error.message}`);
+    } finally {
+      setBuilderBusy(false);
+    }
+  }
+
+  async function runBuilderRedo() {
+    if (!state.builder.lastDiff) {
+      toast("No applied diff is cached yet.");
+      return;
+    }
+    setBuilderBusy(true, "Applying redo...");
+    try {
+      const response = await builderRequest("/api/builder/map/redo/", {
+        method: "POST",
+        body: JSON.stringify({ diff: state.builder.lastDiff }),
+      });
+      const result = response.result || (response.data && response.data.result) || response;
+      setBuilderOutput(result);
+      setBuilderStatus("Redo applied.", "ready");
+      setBuilderLastAction("Redo");
+      await loadBuilderHistory();
+      await exportBuilderMap();
+      toast("Builder redo applied");
+    } catch (error) {
+      setBuilderStatus(`Redo failed: ${error.message}`, "error");
+      setBuilderOutput(error.payload || error.message);
+      toast(`Builder redo failed: ${error.message}`);
+    } finally {
+      setBuilderBusy(false);
+    }
+  }
+
   function updateCharacterPanel(data) {
     if (!data) return;
     const professionNode = byId("char-profession");
@@ -629,6 +1065,7 @@
     if (rankNode) {
       rankNode.textContent = `Rank ${data.profession_rank || "Unknown"}`;
     }
+    setBuilderEnabled(data);
   }
 
   function updateSubsystemUI(data) {
@@ -771,8 +1208,12 @@
     return state.map.rooms.find((room) => room.id === roomId);
   }
 
+  function isPlayerRoom(room) {
+    return Boolean(room && (room.is_player || room.current || room.id === state.map.player_room_id));
+  }
+
   function roomColor(room) {
-    if (room.is_player) {
+    if (isPlayerRoom(room)) {
       const profession = state.character && state.character.profession;
       const professionColors = {
         thief: "#66ccff",
@@ -823,7 +1264,7 @@
   }
 
   function mapRoomRadius(room, compactMap) {
-    if (room.is_player) {
+    if (isPlayerRoom(room)) {
       return compactMap ? 9 : 6;
     }
     if (room.id === state.hoveredRoomId) {
@@ -849,7 +1290,7 @@
       const roomX = (Number(room.x) || 0) * scale;
       const roomY = (Number(room.y) || 0) * scale;
       const radius = mapRoomRadius(room, compactMap);
-      const outline = room.is_player ? 4 : 0;
+      const outline = isPlayerRoom(room) ? 4 : 0;
 
       minX = Math.min(minX, roomX - radius - outline);
       maxX = Math.max(maxX, roomX + radius + outline);
@@ -860,9 +1301,9 @@
         continue;
       }
 
-      const fontSize = room.is_player ? 12 : 11;
+      const fontSize = isPlayerRoom(room) ? 12 : 11;
       ctx.save();
-      ctx.font = room.is_player ? "600 12px Georgia" : "11px Georgia";
+  ctx.font = isPlayerRoom(room) ? "600 12px Georgia" : "11px Georgia";
       const textWidth = ctx.measureText(room.name || "").width;
       ctx.restore();
 
@@ -903,8 +1344,14 @@
   }
 
   function scheduleMapRefit(centerCurrent = false) {
+    state.mapRefitRequestId += 1;
+    const requestId = state.mapRefitRequestId;
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
+        if (requestId !== state.mapRefitRequestId) {
+          return;
+        }
+        resizeMapCanvas();
         if (centerCurrent) {
           centerOnCurrentRoom();
         } else {
@@ -966,10 +1413,8 @@
   function renderMap() {
     const canvas = byId("map-canvas");
     if (!canvas) return;
-    const resized = resizeMapCanvas();
-    if (resized && state.mapAutoFit) {
-      fitMapToCanvas();
-    }
+    resizeMapCanvas();
+    fitMapToCanvas();
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     state.roomPositions.clear();
@@ -999,13 +1444,14 @@
     state.map.rooms.forEach((room) => {
       const pos = state.roomPositions.get(room.id);
       const radius = mapRoomRadius(room, compactMap);
+      const playerRoom = isPlayerRoom(room);
       if (room.id === state.hoveredRoomId) {
         ctx.fillStyle = "rgba(255,255,255,0.25)";
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, radius + 5, 0, Math.PI * 2);
         ctx.fill();
       }
-      if (room.is_player) {
+      if (playerRoom) {
         ctx.strokeStyle = "rgba(255, 240, 200, 0.9)";
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -1018,8 +1464,8 @@
       ctx.fill();
 
       if (compactMap) {
-        ctx.fillStyle = room.is_player ? "rgba(255, 245, 220, 0.96)" : "rgba(230, 219, 194, 0.88)";
-        ctx.font = room.is_player ? "600 12px Georgia" : "11px Georgia";
+        ctx.fillStyle = playerRoom ? "rgba(255, 245, 220, 0.96)" : "rgba(230, 219, 194, 0.88)";
+        ctx.font = playerRoom ? "600 12px Georgia" : "11px Georgia";
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
         ctx.fillText(room.name, pos.x, pos.y - (radius + 8));
@@ -1070,21 +1516,18 @@
 
   function updateMap(payload) {
     console.log("MAP DATA:", payload);
+    const nextRoomId = payload.player_room_id;
     state.map = {
       rooms: payload.rooms || [],
       edges: payload.edges || payload.exits || [],
       exits: payload.exits || payload.edges || [],
-      player_room_id: payload.player_room_id,
+      player_room_id: nextRoomId,
       zone: payload.zone || null,
     };
-    if (!state.isDragging) {
-      if (state.mapAutoFit) {
-        fitMapToCanvas();
-      } else {
-        centerOnCurrentRoom();
-      }
-    }
-    renderMap();
+    state.mapAutoFit = true;
+    state.isDragging = false;
+    syncBuilderAreaFromMap();
+    scheduleMapRefit(false);
     saveUiPrefs();
   }
 
@@ -1246,29 +1689,14 @@
     if (!canvas) return;
 
     canvas.addEventListener("mousedown", (event) => {
-      event.preventDefault();
-      state.isDragging = true;
-      state.mapAutoFit = false;
       state.suppressMapClick = false;
-      state.lastMouse = { x: event.clientX, y: event.clientY };
-      canvas.classList.add("is-dragging");
     });
 
     window.addEventListener("mousemove", (event) => {
-      if (!state.isDragging) return;
-      const dx = event.clientX - state.lastMouse.x;
-      const dy = event.clientY - state.lastMouse.y;
-      if (dx !== 0 || dy !== 0) {
-        state.suppressMapClick = true;
-      }
-      state.mapOffset.x += dx;
-      state.mapOffset.y += dy;
-      state.lastMouse = { x: event.clientX, y: event.clientY };
-      renderMap();
+      void event;
     });
 
     window.addEventListener("mouseup", () => {
-      if (!state.isDragging) return;
       state.isDragging = false;
       canvas.classList.remove("is-dragging");
     });
@@ -1279,12 +1707,12 @@
         ((event.clientX - rect.left) / rect.width) * canvas.width,
         ((event.clientY - rect.top) / rect.height) * canvas.height
       );
-      canvas.style.cursor = room ? "pointer" : (state.isDragging ? "grabbing" : "grab");
+      canvas.style.cursor = room ? "pointer" : "default";
       updateTooltip(event.clientX, event.clientY, room);
     });
 
     canvas.addEventListener("mouseleave", () => {
-      canvas.style.cursor = state.isDragging ? "grabbing" : "grab";
+      canvas.style.cursor = "default";
       updateTooltip(0, 0, null);
     });
 
@@ -1303,14 +1731,7 @@
     });
 
     window.addEventListener("resize", () => {
-      if (!state.isDragging) {
-        if (state.mapAutoFit) {
-          fitMapToCanvas();
-        } else {
-          centerOnCurrentRoom();
-        }
-      }
-      renderMap();
+      scheduleMapRefit(false);
     });
   }
 
@@ -1561,9 +1982,9 @@
       toast("Map fit to viewport.");
     });
     byId("map-center-toggle")?.addEventListener("click", () => {
-      state.mapAutoFit = false;
-      scheduleMapRefit(true);
-      toast("Map centered on current room.");
+      state.mapAutoFit = true;
+      scheduleMapRefit(false);
+      toast("Map kept fit to the full viewport.");
     });
     byId("map-fullscreen-toggle")?.addEventListener("click", () => {
       const panel = byId("map-panel");
@@ -1575,9 +1996,49 @@
       state.mapAutoFit = true;
       scheduleMapRefit(false);
     });
+    byId("builder-area-id")?.addEventListener("change", () => {
+      getBuilderAreaId();
+    });
+    byId("builder-use-zone")?.addEventListener("click", () => {
+      const zone = String((state.map && state.map.zone) || "").trim();
+      if (!zone) {
+        toast("No live zone id is available yet.");
+        return;
+      }
+      setBuilderAreaId(zone, { overwrite: true });
+      setBuilderStatus(`Builder area set from live zone: ${zone}`, "ready");
+      toast(`Using zone ${zone}`);
+    });
+    byId("builder-export")?.addEventListener("click", () => {
+      void exportBuilderMap();
+    });
+    byId("builder-history-refresh")?.addEventListener("click", () => {
+      void loadBuilderHistory();
+    });
+    byId("builder-preview")?.addEventListener("click", () => {
+      void runBuilderDiff(true);
+    });
+    byId("builder-apply")?.addEventListener("click", () => {
+      void runBuilderDiff(false);
+    });
+    byId("builder-undo")?.addEventListener("click", () => {
+      void runBuilderUndo();
+    });
+    byId("builder-redo")?.addEventListener("click", () => {
+      void runBuilderRedo();
+    });
+    byId("builder-launch-godot")?.addEventListener("click", () => {
+      void openGodotBuilder();
+    });
     switchView(state.activeView);
     ensureRailBrandPresent();
     resetLeftRailScroll();
+
+    if (state.builder.areaId) {
+      setBuilderAreaId(state.builder.areaId, { overwrite: true });
+    }
+    renderBuilderHistory(state.builder.history);
+    setBuilderOutput("Awaiting Builder action.");
 
     appendRichLine(primaryFeedId(), "<strong>Client feed online.</strong>", "sys");
 

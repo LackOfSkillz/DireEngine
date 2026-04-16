@@ -553,6 +553,7 @@ def _load_guard_npc_class():
         raise ImportError(f"Unable to load guard NPC typeclass from {guard_module_path}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    module.GuardNPC.__module__ = __name__
     return module.GuardNPC
 
 

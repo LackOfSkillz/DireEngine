@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/MapPanel.gd" id="2_map"]
@@ -6,6 +6,13 @@
 [ext_resource type="Script" path="res://scripts/CharacterPanel.gd" id="4_character"]
 [ext_resource type="Script" path="res://scripts/InventoryPanel.gd" id="5_inventory"]
 [ext_resource type="Script" path="res://scripts/Hotbar.gd" id="6_hotbar"]
+[ext_resource type="Script" path="res://scenes/builder/BuilderController.gd" id="7_builder_controller"]
+[ext_resource type="PackedScene" path="res://scenes/builder/MapGrid.tscn" id="8_map_grid"]
+[ext_resource type="PackedScene" path="res://scenes/builder/RoomEditor.tscn" id="9_room_editor"]
+[ext_resource type="PackedScene" path="res://scenes/builder/TemplateSelector.tscn" id="10_template_selector"]
+[ext_resource type="PackedScene" path="res://scenes/builder/ContentTree.tscn" id="11_content_tree"]
+[ext_resource type="PackedScene" path="res://scenes/builder/InstanceEditor.tscn" id="12_instance_editor"]
+[ext_resource type="PackedScene" path="res://scenes/builder/TemplateWorkspace.tscn" id="13_template_workspace"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -31,6 +38,397 @@ layout_mode = 0
 offset_right = 180.0
 offset_bottom = 24.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="BuilderController" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+clip_contents = true
+mouse_filter = 2
+script = ExtResource("7_builder_controller")
+
+[node name="BuilderRoot" type="MarginContainer" parent="BuilderController"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+
+[node name="BuilderColumns" type="HBoxContainer" parent="BuilderController/BuilderRoot"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="LeftPanel" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns"]
+visible = false
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+size_flags_vertical = 3
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BuilderModeToggle" type="CheckButton" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox"]
+visible = false
+layout_mode = 2
+text = "Builder Mode"
+
+[node name="ToolsSection" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox"]
+layout_mode = 2
+text = "Tools"
+
+[node name="ZoneRow" type="HBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ZoneLabel" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/ZoneRow"]
+layout_mode = 2
+text = "Zone"
+
+[node name="ZoneDropdown" type="OptionButton" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/ZoneRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CreateZoneButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/ZoneRow"]
+layout_mode = 2
+text = "New"
+
+[node name="AreaIdInput" type="LineEdit" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 34)
+placeholder_text = "Area id"
+
+[node name="Buttons" type="GridContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="LoadMapButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Load Zone"
+
+[node name="CreateRoomButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+toggle_mode = true
+text = "Create Room"
+
+[node name="DrawExitButton" type="CheckButton" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Draw Exit"
+
+[node name="DeleteRoomButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Delete Room"
+
+[node name="UndoButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Undo"
+
+[node name="RedoButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Redo"
+
+[node name="StatusLabel" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Builder idle."
+
+[node name="RoomTypesSection" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox"]
+layout_mode = 2
+text = "Room Types"
+
+[node name="Grid" type="GridContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox"]
+layout_mode = 2
+columns = 3
+
+[node name="TypeForest" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox/Grid"]
+layout_mode = 2
+toggle_mode = true
+text = "Forest"
+tooltip_text = "Wilderness"
+
+[node name="TypeRiver" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox/Grid"]
+layout_mode = 2
+toggle_mode = true
+text = "River"
+tooltip_text = "River"
+
+[node name="TypeCity" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox/Grid"]
+layout_mode = 2
+toggle_mode = true
+text = "City"
+tooltip_text = "City"
+
+[node name="TypeHome" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox/Grid"]
+layout_mode = 2
+toggle_mode = true
+text = "Home"
+tooltip_text = "Home / Indoors"
+
+[node name="TypeCoast" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox/Grid"]
+layout_mode = 2
+toggle_mode = true
+text = "Coast"
+tooltip_text = "Coastal"
+
+[node name="TypeGuild" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/RoomTypesSection/Margin/VBox/Grid"]
+layout_mode = 2
+toggle_mode = true
+text = "Guild"
+tooltip_text = "Guild"
+
+[node name="ObjectsSection" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ObjectsSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ObjectsSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ObjectsSection/Margin/VBox"]
+layout_mode = 2
+text = "Objects"
+
+[node name="Buttons" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ObjectsSection/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AddItemButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ObjectsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Add Item"
+
+[node name="AddNpcButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ObjectsSection/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Add NPC"
+
+[node name="CenterPanel" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/CenterPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MapGrid" parent="BuilderController/BuilderRoot/BuilderColumns/CenterPanel/Margin" instance=ExtResource("8_map_grid")]
+
+[node name="RightPanel" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns"]
+visible = false
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_vertical = 3
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="WorkspaceTabs" type="HBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InspectorTabButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/WorkspaceTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_pressed = true
+text = "Inspector"
+
+[node name="NpcTemplatesTabButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/WorkspaceTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "NPC Templates"
+
+[node name="ItemTemplatesTabButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/WorkspaceTabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "Item Templates"
+
+[node name="InspectorHeader" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorHeader"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorHeader/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorHeader/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "No room selected"
+
+[node name="State" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorHeader/Margin/HBox"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "✓ Saved"
+
+[node name="InspectorScroll" type="ScrollContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+clip_contents = true
+size_flags_vertical = 3
+
+[node name="InspectorSections" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="RoomEditor" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("9_room_editor")]
+
+[node name="InstanceEditor" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("12_instance_editor")]
+
+[node name="TemplateSelector" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("10_template_selector")]
+
+[node name="ContentTree" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("11_content_tree")]
+
+[node name="BuilderLogSection" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections"]
+layout_mode = 2
+size_flags_horizontal = 3
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin/VBox"]
+layout_mode = 2
+text = "Log / Output"
+
+[node name="LogScroll" type="ScrollContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin/VBox"]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+clip_contents = true
+size_flags_vertical = 3
+
+[node name="BuilderLog" type="RichTextLabel" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin/VBox/LogScroll"]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+scroll_following = true
+
+[node name="NpcTemplateWorkspace" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox" instance=ExtResource("13_template_workspace")]
+visible = false
+layout_mode = 2
+
+[node name="ItemTemplateWorkspace" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox" instance=ExtResource("13_template_workspace")]
+visible = false
+layout_mode = 2
+
+[node name="SaveBar" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox"]
+layout_mode = 2
+clip_contents = true
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar"]
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SaveMapButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save Map"
+
+[node name="DirtyLabel" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = "Saved"
+
+[node name="DeleteRoomConfirm" type="ConfirmationDialog" parent="BuilderController"]
+title = "Delete Room"
+dialog_text = "Delete this room and all of its exits and contents?"
+
+[node name="CreateZoneDialog" type="ConfirmationDialog" parent="BuilderController"]
+title = "Create Zone"
+dialog_text = "Create a new builder zone"
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/CreateZoneDialog"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/CreateZoneDialog/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ZoneNameLabel" type="Label" parent="BuilderController/CreateZoneDialog/Margin/VBox"]
+layout_mode = 2
+text = "Zone Name"
+
+[node name="ZoneNameInput" type="LineEdit" parent="BuilderController/CreateZoneDialog/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(280, 34)
+placeholder_text = "Northern Wilds"
+
+[node name="ZoneIdLabel" type="Label" parent="BuilderController/CreateZoneDialog/Margin/VBox"]
+layout_mode = 2
+text = "Zone Id"
+
+[node name="ZoneIdInput" type="LineEdit" parent="BuilderController/CreateZoneDialog/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(280, 34)
+placeholder_text = "northern_wilds"
 
 [node name="TextLog" type="RichTextLabel" parent="."]
 layout_mode = 0
@@ -59,6 +457,7 @@ offset_bottom = 32.0
 text = "Character"
 
 [node name="HPBar" type="ProgressBar" parent="CharacterPanel"]
+visible = false
 layout_mode = 0
 offset_left = 8.0
 offset_top = 48.0
@@ -68,6 +467,7 @@ max_value = 100.0
 value = 100.0
 
 [node name="StaminaBar" type="ProgressBar" parent="CharacterPanel"]
+visible = false
 layout_mode = 0
 offset_left = 8.0
 offset_top = 92.0
@@ -109,7 +509,7 @@ offset_bottom = 396.0
 [node name="InventoryPanel" type="Control" parent="."]
 layout_mode = 0
 offset_left = 940.0
-offset_top = 360.0
+offset_top = 364.0
 offset_right = 1260.0
 offset_bottom = 660.0
 script = ExtResource("5_inventory")

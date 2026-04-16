@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/builder/MapGrid.gd" id="1_map_grid"]
+
+[node name="MapGrid" type="Control"]
+visible = false
+custom_minimum_size = Vector2(320, 320)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+clip_contents = true
+mouse_filter = 1
+script = ExtResource("1_map_grid")
+
+[node name="Tooltip" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 180.0
+offset_bottom = 24.0
+z_index = 10
+theme_override_colors/font_color = Color(1, 1, 1, 1)

@@ -21,7 +21,16 @@ var hovered_room_id = null
 var offset := Vector2.ZERO
 var target_offset := Vector2.ZERO
 var zoom := 1.0
-var auto_fit_request_id := 0
+var auto_fit_timer: Timer
+
+
+func _ready() -> void:
+	auto_fit_timer = Timer.new()
+	auto_fit_timer.one_shot = true
+	auto_fit_timer.wait_time = AUTO_FIT_DELAY
+	auto_fit_timer.timeout.connect(_on_auto_fit_timeout)
+	add_child(auto_fit_timer)
+	resized.connect(_on_panel_resized)
 
 
 func render_map(data: Dictionary) -> void:
@@ -31,7 +40,7 @@ func render_map(data: Dictionary) -> void:
 	player_room_id = data.get("player_room_id")
 	build_adjacency()
 	center_on_player()
-	_queue_auto_fit()
+	_restart_auto_fit()
 	queue_redraw()
 
 
@@ -56,7 +65,7 @@ func _draw() -> void:
 
 	for room in rooms:
 		var pos = room_positions.get(room.get("id"), size / 2.0)
-		var is_player := bool(room.get("is_player", false))
+		var is_player: bool = room.get("id") == player_room_id or bool(room.get("is_player", false))
 		var color := _room_color(room, is_player)
 		var radius := 6.0 if not is_player else 8.0
 		if room.get("id") == hovered_room_id:
@@ -90,11 +99,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			zoom = clamp(zoom * 1.1, MIN_ZOOM, MAX_ZOOM)
-			auto_fit_request_id += 1
 			center_on_player()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			zoom = clamp(zoom * 0.9, MIN_ZOOM, MAX_ZOOM)
-			auto_fit_request_id += 1
 			center_on_player()
 
 
@@ -143,8 +150,8 @@ func fit_to_window(apply_immediately: bool = false) -> void:
 	if available.x <= 0.0 or available.y <= 0.0:
 		return
 
-	var fit_zoom_x := available.x / max(bounds.size.x, 1.0)
-	var fit_zoom_y := available.y / max(bounds.size.y, 1.0)
+	var fit_zoom_x: float = available.x / max(bounds.size.x, 1.0)
+	var fit_zoom_y: float = available.y / max(bounds.size.y, 1.0)
 	zoom = clamp(min(fit_zoom_x, fit_zoom_y), MIN_ZOOM, MAX_ZOOM)
 
 	var center := bounds.get_center() * zoom
@@ -218,17 +225,20 @@ func _map_bounds() -> Rect2:
 	return Rect2(min_pos - room_padding, (max_pos - min_pos) + (room_padding * 2.0))
 
 
-func _queue_auto_fit() -> void:
-	auto_fit_request_id += 1
-	var request_id := auto_fit_request_id
-	_schedule_auto_fit(request_id)
-
-
-func _schedule_auto_fit(request_id: int) -> void:
-	await get_tree().create_timer(AUTO_FIT_DELAY).timeout
-	if request_id != auto_fit_request_id:
+func _restart_auto_fit() -> void:
+	if auto_fit_timer == null:
 		return
+	auto_fit_timer.start()
+
+
+func _on_auto_fit_timeout() -> void:
 	fit_to_window(true)
+
+
+func _on_panel_resized() -> void:
+	if rooms.is_empty():
+		return
+	_restart_auto_fit()
 
 
 func _get_minimum_size() -> Vector2:
