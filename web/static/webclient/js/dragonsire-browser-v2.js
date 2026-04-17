@@ -47,10 +47,23 @@
     commandHistory: [],
     commandHistoryIndex: -1,
     commandHistoryDraft: "",
+    sceneRotation: {
+      timer: null,
+      index: 0,
+      key: "",
+    },
   };
 
   const HOTBAR_STORAGE_KEY = "dragonsire.hotbar";
   const UI_PREFS_STORAGE_KEY = "dragonsire.browser.ui";
+  const BUILDER_LAST_ROOM_STORAGE_KEY = "dragonsire.builder.lastRoomId";
+  const BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY = "dragonsire.builder.roomListScrollTop";
+  const BUILDER_ZONE_CAMERA_STORAGE_KEY = "dragonsire.builder.zoneCamera";
+  const BUILDER_ZONE_MIN_ZOOM = 0.01;
+  const DIRECTIONS = ["north", "south", "east", "west", "up", "down"];
+  const SCENE_IMAGE_ROTATION_MS = 120000;
+  const DESKTOP_SHELL_FIT_WIDTH = 1460;
+  const DESKTOP_SHELL_FIT_HEIGHT = 940;
   const ROOM_IMAGE_LIBRARY = {
     city: "Nightwatch atop the city rooftops.png",
     market: "Twilight market antics.png",
@@ -65,6 +78,25 @@
     village: "Moonlit guardians of the hamlet.png",
     fallback: "hero.png",
   };
+  const builderState = {
+    currentRoomId: null,
+    currentZoneId: "",
+    rooms: [],
+    currentRoom: null,
+    zoneGraph: null,
+    zoneSurface: null,
+    zoneMapBounds: null,
+    zoneMapNeedsFit: true,
+    zonePan: { x: 0, y: 0 },
+    zoneZoom: 1,
+    zoneDrag: null,
+    previewTimer: null,
+  };
+  let hasInitialized = false;
+
+  function isBuilderPage() {
+    return Boolean(byId("builder-layout"));
+  }
 
   function getRequestedInitialMode() {
     const requested = String(new URLSearchParams(window.location.search).get("mode") || "").trim().toLowerCase();
@@ -89,20 +121,792 @@
     return `/static/website/images/${encodeURIComponent(fileName)}`;
   }
 
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function roomNameById(roomId) {
+    const numericId = Number(roomId || 0);
+    const zoneRoom = builderState.zoneGraph?.roomLookup?.get(numericId);
+    if (zoneRoom) {
+      return zoneRoom.name || `Room ${numericId}`;
+    }
+    const match = builderState.rooms.find((room) => Number(room.id) === numericId);
+    return match ? (match.db_key || `Room ${numericId}`) : `Room ${numericId}`;
+  }
+
+  function zoneCameraStorageKey(zoneId) {
+    return `${BUILDER_ZONE_CAMERA_STORAGE_KEY}.${zoneId || "default"}`;
+  }
+
+  function saveZoneCamera() {
+    if (!builderState.currentZoneId) {
+      return;
+    }
+    window.localStorage.setItem(
+      zoneCameraStorageKey(builderState.currentZoneId),
+      JSON.stringify({ pan: builderState.zonePan, zoom: builderState.zoneZoom })
+    );
+  }
+
+  function loadZoneCamera(zoneId) {
+    if (!zoneId) {
+      return null;
+    }
+    try {
+      const raw = window.localStorage.getItem(zoneCameraStorageKey(zoneId));
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+      return {
+        pan: {
+          x: Number(parsed.pan?.x || 0),
+          y: Number(parsed.pan?.y || 0),
+        },
+        zoom: Math.min(Math.max(Number(parsed.zoom || 1), 0.08), 2.5),
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function setBuilderPageStatus(message) {
+    const status = byId("builder-status");
+    if (status) {
+      status.textContent = message;
+    }
+  }
+
+  function showSavingState() {
+    const saveButton = byId("save-room");
+    if (!saveButton) {
+      return;
+    }
+    saveButton.textContent = "Saving...";
+    saveButton.disabled = true;
+  }
+
+  function showSavedState() {
+    const saveButton = byId("save-room");
+    if (!saveButton) {
+      return;
+    }
+    saveButton.textContent = "Saved";
+    window.setTimeout(() => {
+      saveButton.textContent = "Save";
+      saveButton.disabled = false;
+    }, 1200);
+  }
+
+  function resetSaveState() {
+    const saveButton = byId("save-room");
+    if (!saveButton) {
+      return;
+    }
+    saveButton.textContent = "Save";
+    saveButton.disabled = false;
+  }
+
+  function currentBuilderDraft() {
+    const shortDescValue = byId("room-short-desc")?.value || "";
+    return {
+      id: builderState.currentRoomId,
+      name: byId("room-name")?.value || "",
+      shortDesc: shortDescValue,
+      desc: byId("room-desc")?.value || "",
+      environment: byId("room-environment")?.value || "city",
+      exits: collectBuilderExits(),
+      zone_id: builderState.currentZoneId || builderState.currentRoom?.zone_id || "",
+    };
+  }
+
+  function normalizeBuilderExit(exit, index = 0) {
+    const direction = String(exit?.direction || DIRECTIONS[index % DIRECTIONS.length] || "north").trim().toLowerCase();
+    const targetId = Number(exit?.target_id || exit?.targetId || 0);
+    return {
+      id: Number(exit?.id || 0),
+      direction: DIRECTIONS.includes(direction) ? direction : DIRECTIONS[index % DIRECTIONS.length],
+      target_id: targetId,
+      target_name: exit?.target_name || (targetId ? roomNameById(targetId) : ""),
+    };
+  }
+
+  function createExitRow(exit, index) {
+    const normalized = normalizeBuilderExit(exit, index);
+    const directionOptions = DIRECTIONS.map((direction) => (
+      `<option value="${direction}"${direction === normalized.direction ? " selected" : ""}>${direction}</option>`
+    )).join("");
+    const roomOptions = ['<option value="">Select room</option>']
+      .concat(builderState.rooms.map((room) => (
+        `<option value="${room.id}"${Number(room.id) === Number(normalized.target_id || 0) ? " selected" : ""}>${escapeHtml(room.db_key)}</option>`
+      )))
+      .join("");
+    return `
+      <div class="builder-exit-row" data-index="${index}">
+        <select class="builder-exit-direction" aria-label="Exit direction">
+          ${directionOptions}
+        </select>
+        <select class="builder-exit-target" aria-label="Exit target room">
+          ${roomOptions}
+        </select>
+        <button type="button" class="builder-exit-remove">Delete</button>
+      </div>
+    `;
+  }
+
+  function renderBuilderExitList(exits = []) {
+    const list = byId("exit-list");
+    if (!list) {
+      return;
+    }
+    const rows = (Array.isArray(exits) && exits.length ? exits : []).map((exit, index) => createExitRow(exit, index));
+    list.innerHTML = rows.join("");
+  }
+
+  function collectBuilderExits() {
+    return Array.from(document.querySelectorAll("#exit-list .builder-exit-row"))
+      .map((row) => ({
+        direction: row.querySelector(".builder-exit-direction")?.value || "",
+        target_id: Number(row.querySelector(".builder-exit-target")?.value || 0),
+      }))
+      .filter((exit) => exit.direction || exit.target_id);
+  }
+
+  function validateBuilderExits(exits) {
+    const seenDirections = new Set();
+    for (const exit of exits) {
+      const direction = String(exit.direction || "").trim().toLowerCase();
+      const targetId = Number(exit.target_id || 0);
+      if (!DIRECTIONS.includes(direction)) {
+        return `Invalid exit direction: ${direction || "blank"}.`;
+      }
+      if (seenDirections.has(direction)) {
+        return `Duplicate exit direction: ${direction}.`;
+      }
+      if (!targetId || !builderState.rooms.some((room) => Number(room.id) === targetId)) {
+        return `Exit target for ${direction} must be an existing room.`;
+      }
+      seenDirections.add(direction);
+    }
+    return "";
+  }
+
+  function scrollSelectedBuilderRoomIntoView() {
+    const selected = document.querySelector("#room-list .room-item.active");
+    if (selected && typeof selected.scrollIntoView === "function") {
+      selected.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function deriveBuilderShortDesc(data) {
+    const explicit = String(data.shortDesc || "").trim();
+    if (explicit) {
+      return explicit;
+    }
+    const description = String(data.desc || "").trim();
+    if (!description) {
+      return String(data.name || "").trim();
+    }
+    const firstLine = description.split(/\r?\n/).find((line) => line.trim());
+    const firstSentence = String(firstLine || description).split(/[.!?]/)[0].trim();
+    return firstSentence || String(data.name || "").trim();
+  }
+
+  function triggerBuilderPreviewFlash() {
+    const previewPanel = byId("room-preview");
+    if (!previewPanel) {
+      return;
+    }
+    previewPanel.classList.remove("preview-updated");
+    void previewPanel.offsetWidth;
+    previewPanel.classList.add("preview-updated");
+  }
+
+  function scheduleBuilderPreviewUpdate() {
+    if (builderState.previewTimer) {
+      window.clearTimeout(builderState.previewTimer);
+    }
+    builderState.previewTimer = window.setTimeout(() => {
+      builderState.previewTimer = null;
+      renderBuilderPreview(currentBuilderDraft(), { flash: true });
+    }, 150);
+  }
+
+  function highlightSelectedBuilderRoom() {
+    document.querySelectorAll("#room-list .room-item").forEach((node) => {
+      const roomId = Number(node.dataset.id || 0);
+      node.classList.toggle("active", roomId === Number(builderState.currentRoomId || 0));
+    });
+    scrollSelectedBuilderRoomIntoView();
+  }
+
+  function renderBuilderRoomList() {
+    const list = byId("room-list");
+    if (!list) {
+      return;
+    }
+    list.innerHTML = builderState.rooms
+      .map(
+        (room) => `<div class="room-item${Number(room.id) === Number(builderState.currentRoomId || 0) ? " active" : ""}" data-id="${room.id}">${escapeHtml(room.db_key)}</div>`
+      )
+      .join("");
+  }
+
+  function renderBuilderPreview(data, options = {}) {
+    const previewName = byId("builder-preview-room-name");
+    const previewDesc = byId("builder-preview-room-desc");
+    const previewExits = byId("builder-preview-room-exits");
+    const previewContext = byId("room-context");
+    const currentLabel = byId("builder-current-room");
+    const shortDesc = deriveBuilderShortDesc(data);
+    const exits = Array.isArray(data.exits) ? data.exits.map((exit, index) => normalizeBuilderExit(exit, index)) : [];
+    if (previewName) {
+      previewName.textContent = shortDesc || data.name || "Untitled room";
+    }
+    if (previewDesc) {
+      previewDesc.innerHTML = escapeHtml(data.desc || "").replace(/\n/g, "<br>");
+    }
+    if (previewExits) {
+      previewExits.textContent = exits.length
+        ? `Exits: ${exits.map((exit) => exit.direction).join(", ")}`
+        : "Exits: none";
+    }
+    if (previewContext) {
+      previewContext.textContent = `${String(data.environment || "city").toUpperCase()} preview`;
+    }
+    if (currentLabel) {
+      currentLabel.textContent = data.name || "Untitled room";
+    }
+    if (options.flash) {
+      triggerBuilderPreviewFlash();
+    }
+  }
+
+  function zoneMapCanvas() {
+    return byId("zone-map-canvas");
+  }
+
+  function normalizeBuilderZoneRooms(rooms) {
+    return (rooms || []).map((room) => ({
+      ...room,
+      x: Number(room.map_x || 0),
+      y: Number(room.map_y || 0),
+      current: Number(room.id) === Number(builderState.currentRoomId || 0),
+      is_player: Number(room.id) === Number(builderState.currentRoomId || 0),
+    }));
+  }
+
+  function builderZoneWorldPosition(roomId) {
+    const room = builderState.zoneGraph?.roomLookup?.get(Number(roomId || 0));
+    if (!room) {
+      return null;
+    }
+    return {
+      x: Number(room.x || 0),
+      y: Number(room.y || 0),
+    };
+  }
+
+  function builderZoneScreenPosition(roomId) {
+    const world = builderZoneWorldPosition(roomId);
+    if (!world) {
+      return null;
+    }
+    return {
+      x: world.x * builderState.zoneZoom + builderState.zonePan.x,
+      y: world.y * builderState.zoneZoom + builderState.zonePan.y,
+    };
+  }
+
+  function fitZoneMapToViewport() {
+    const canvas = zoneMapCanvas();
+    const rooms = builderState.zoneGraph?.rooms || [];
+    if (!canvas || !rooms.length) {
+      return;
+    }
+    const fitted = fitRoomsToCanvas(canvas, rooms, BUILDER_ZONE_MIN_ZOOM);
+    builderState.zoneZoom = fitted.scale;
+    builderState.zonePan = fitted.offset;
+    saveZoneCamera();
+  }
+
+  function isZoneCameraValid(camera, rooms, canvas) {
+    if (!camera || !rooms || !rooms.length || !canvas) {
+      return false;
+    }
+    const zoom = Number(camera.zoom || 0);
+    if (!Number.isFinite(zoom) || zoom < BUILDER_ZONE_MIN_ZOOM || zoom > 2.5) {
+      return false;
+    }
+    const bounds = renderedMapBoundsForRooms(canvas, rooms, zoom, null);
+    const maxPanX = Math.max(bounds.width, canvas.width) * 1.25;
+    const maxPanY = Math.max(bounds.height, canvas.height) * 1.25;
+    return Math.abs(Number(camera.pan?.x || 0)) <= maxPanX && Math.abs(Number(camera.pan?.y || 0)) <= maxPanY;
+  }
+
+  function centerZoneMapOnRoom(roomId) {
+    const canvas = zoneMapCanvas();
+    const position = builderZoneWorldPosition(roomId);
+    if (!canvas || !position) {
+      return;
+    }
+    builderState.zonePan = {
+      x: Math.round(canvas.width / 2 - position.x * builderState.zoneZoom),
+      y: Math.round(canvas.height / 2 - position.y * builderState.zoneZoom),
+    };
+    saveZoneCamera();
+    renderZoneMap();
+  }
+
+  function ensureZoneMapCanvas(viewport) {
+    let canvas = zoneMapCanvas();
+    if (!canvas) {
+      viewport.innerHTML = '<canvas id="zone-map-canvas" aria-label="Zone map graph"></canvas>';
+      canvas = zoneMapCanvas();
+    }
+    if (!canvas) {
+      return null;
+    }
+    const nextWidth = Math.max(320, Math.round(viewport.clientWidth || 320));
+    const nextHeight = Math.max(320, Math.round(viewport.clientHeight || 320));
+    if (canvas.width !== nextWidth) {
+      canvas.width = nextWidth;
+    }
+    if (canvas.height !== nextHeight) {
+      canvas.height = nextHeight;
+    }
+    return canvas;
+  }
+
+  function renderBuilderMapCanvas(canvas, rooms) {
+    const compactMap = rooms.length > 0 && rooms.length <= 16;
+    builderState.zoneRoomPositions = drawCanvasMap(canvas, rooms, mapEdgesFromZoneRooms(rooms), {
+      getPosition: (room) => builderZoneScreenPosition(room.id),
+      getColor: (room) => roomColor(room),
+      getRadius: (room) => mapRoomRadiusForHover(room, compactMap, null),
+      selectedRoomId: Number(builderState.currentRoomId || 0),
+      showLabels: compactMap,
+      edgeColor: () => compactMap ? "rgba(220, 188, 120, 0.82)" : "rgba(195, 164, 104, 0.6)",
+      edgeWidth: () => compactMap ? 2.4 : 1.5,
+    });
+  }
+
+  function mapEdgesFromZoneRooms(rooms) {
+    const edges = [];
+    const seen = new Set();
+    for (const room of rooms || []) {
+      for (const [direction, targetId] of Object.entries(room.exitMap || {})) {
+        const signature = `${room.id}:${targetId}:${direction}`;
+        if (seen.has(signature)) {
+          continue;
+        }
+        seen.add(signature);
+        edges.push({ from: Number(room.id), to: Number(targetId || 0), dir: direction });
+      }
+    }
+    return edges;
+  }
+
+  function renderZoneMap() {
+    const viewport = byId("zone-map");
+    const title = byId("zone-map-title");
+    if (!viewport) {
+      return;
+    }
+    const payload = builderState.zoneGraph;
+    if (!payload || !Array.isArray(payload.rooms) || !payload.rooms.length) {
+      viewport.innerHTML = '<div class="builder-map-empty">No zone map available.</div>';
+      return;
+    }
+
+    if (title) {
+      title.textContent = payload.name || payload.zone_id || "Current zone";
+    }
+    const canvas = ensureZoneMapCanvas(viewport);
+    if (!canvas) {
+      return;
+    }
+
+    const rooms = normalizeBuilderZoneRooms(payload.rooms);
+    builderState.zoneGraph.rooms = rooms;
+    builderState.zoneGraph.roomLookup = new Map(rooms.map((room) => [Number(room.id), room]));
+
+    const savedCamera = loadZoneCamera(builderState.currentZoneId);
+    if (isZoneCameraValid(savedCamera, rooms, canvas)) {
+      builderState.zonePan = savedCamera.pan;
+      builderState.zoneZoom = savedCamera.zoom;
+    } else {
+      fitZoneMapToViewport();
+    }
+    renderBuilderMapCanvas(canvas, rooms);
+  }
+
+  function syncZoneGraphRoom(roomPayload) {
+    if (!builderState.zoneGraph || !roomPayload) {
+      return;
+    }
+    const roomId = Number(roomPayload.id || 0);
+    const roomIndex = builderState.zoneGraph.rooms.findIndex((room) => Number(room.id) === roomId);
+    const exitMap = {};
+    (roomPayload.exits || []).forEach((exit) => {
+      exitMap[String(exit.direction || "").toLowerCase()] = Number(exit.target_id || 0);
+    });
+    const nextRoom = {
+      ...roomPayload,
+      short_desc: roomPayload.short_desc || deriveBuilderShortDesc(roomPayload),
+      exitMap,
+    };
+    if (roomIndex >= 0) {
+      builderState.zoneGraph.rooms[roomIndex] = nextRoom;
+    }
+    builderState.zoneGraph.roomLookup.set(roomId, nextRoom);
+  }
+
+  async function loadBuilderZone(zoneId, options = {}) {
+    const normalizedZoneId = String(zoneId || "").trim().toLowerCase();
+    if (!normalizedZoneId) {
+      return;
+    }
+    if (!options.force && builderState.currentZoneId === normalizedZoneId && builderState.zoneGraph) {
+      return;
+    }
+    const payload = await builderFetchJson(`/builder/api/zone/${encodeURIComponent(normalizedZoneId)}/`);
+    const rooms = (payload.rooms || []).map((room) => {
+      const exitMap = {};
+      (room.exits || []).forEach((exit) => {
+        exitMap[String(exit.direction || "").toLowerCase()] = Number(exit.target_id || 0);
+      });
+      return {
+        ...room,
+        exitMap,
+      };
+    });
+    builderState.currentZoneId = payload.zone_id || normalizedZoneId;
+    builderState.zoneGraph = {
+      ...payload,
+      rooms,
+      roomLookup: new Map(rooms.map((room) => [Number(room.id), room])),
+    };
+    renderZoneMap();
+  }
+
+  async function builderFetchJson(url, options) {
+    const response = await window.fetch(url, options);
+    let payload = {};
+    try {
+      payload = await response.json();
+    } catch (error) {
+      payload = {};
+    }
+    if (!response.ok) {
+      const message = payload.error || payload.detail || `Request failed (${response.status})`;
+      throw new Error(message);
+    }
+    return payload;
+  }
+
+  async function loadBuilderRoom(id) {
+    if (!id) {
+      return;
+    }
+    const roomId = Number(id);
+    builderState.currentRoomId = roomId;
+    window.localStorage.setItem(BUILDER_LAST_ROOM_STORAGE_KEY, String(roomId));
+    highlightSelectedBuilderRoom();
+    setBuilderPageStatus(`Loading room ${roomId}...`);
+    const data = await builderFetchJson(`/builder/api/room/${roomId}/`);
+    if (data.zone_id) {
+      await loadBuilderZone(data.zone_id);
+    }
+    builderState.currentRoom = data;
+    syncZoneGraphRoom(data);
+    if (byId("room-name")) {
+      byId("room-name").value = data.name || "";
+    }
+    if (byId("room-short-desc")) {
+      byId("room-short-desc").value = deriveBuilderShortDesc(data);
+    }
+    if (byId("room-desc")) {
+      byId("room-desc").value = data.desc || "";
+    }
+    if (byId("room-environment")) {
+      byId("room-environment").value = data.environment || "city";
+    }
+    renderBuilderExitList(data.exits || []);
+    renderBuilderPreview(data);
+    renderZoneMap();
+    setBuilderPageStatus(`Editing ${data.name || `room ${roomId}`}`);
+  }
+
+  async function loadBuilderRoomList() {
+    builderState.rooms = await builderFetchJson("/builder/api/rooms/");
+    renderBuilderRoomList();
+    const list = byId("room-list");
+    const savedScrollTop = Number(window.localStorage.getItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY) || 0);
+    if (list && Number.isFinite(savedScrollTop) && savedScrollTop > 0) {
+      list.scrollTop = savedScrollTop;
+    }
+    const persistedRoomId = Number(window.localStorage.getItem(BUILDER_LAST_ROOM_STORAGE_KEY) || 0);
+    const nextRoomId = persistedRoomId && builderState.rooms.some((room) => Number(room.id) === persistedRoomId)
+      ? persistedRoomId
+      : Number((builderState.rooms[0] || {}).id || 0);
+    if (nextRoomId) {
+      await loadBuilderRoom(nextRoomId);
+    } else {
+      setBuilderPageStatus("No rooms found.");
+    }
+  }
+
+  async function saveBuilderRoom() {
+    const draft = currentBuilderDraft();
+    if (!draft.id) {
+      window.alert("Select a room first.");
+      return;
+    }
+    if (!draft.name.trim()) {
+      window.alert("Room name cannot be empty.");
+      return;
+    }
+    if (!draft.desc.trim()) {
+      window.alert("Room description cannot be empty.");
+      return;
+    }
+    const exitValidation = validateBuilderExits(draft.exits);
+    if (exitValidation) {
+      window.alert(exitValidation);
+      return;
+    }
+    showSavingState();
+    setBuilderPageStatus(`Saving ${draft.name}...`);
+    try {
+      const response = await builderFetchJson(`/builder/api/room/${draft.id}/save/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: draft.name,
+          desc: draft.desc,
+          environment: draft.environment,
+          exits: draft.exits,
+        }),
+      });
+      builderState.rooms = builderState.rooms.map((room) => (
+        Number(room.id) === Number(draft.id)
+          ? { ...room, db_key: draft.name }
+          : room
+      ));
+      const list = byId("room-list");
+      const scrollTop = list ? list.scrollTop : 0;
+      renderBuilderRoomList();
+      if (list) {
+        list.scrollTop = scrollTop;
+        window.localStorage.setItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY, String(scrollTop));
+      }
+      highlightSelectedBuilderRoom();
+      builderState.currentRoom = response.room || { ...draft, exits: response.exits || draft.exits };
+      syncZoneGraphRoom(builderState.currentRoom);
+      renderZoneMap();
+      renderBuilderExitList(builderState.currentRoom.exits || []);
+      renderBuilderPreview(builderState.currentRoom, { flash: true });
+      setBuilderPageStatus(`Saved ${draft.name}.`);
+      showSavedState();
+    } catch (error) {
+      resetSaveState();
+      throw error;
+    }
+  }
+
+  function bindBuilderInputs() {
+    ["room-name", "room-short-desc", "room-desc", "room-environment"].forEach((id) => {
+      byId(id)?.addEventListener("input", () => {
+        scheduleBuilderPreviewUpdate();
+      });
+      byId(id)?.addEventListener("change", () => {
+        scheduleBuilderPreviewUpdate();
+      });
+    });
+
+    byId("room-list")?.addEventListener("scroll", (event) => {
+      window.localStorage.setItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY, String(event.target.scrollTop || 0));
+    });
+
+    byId("save-room")?.addEventListener("click", () => {
+      void saveBuilderRoom().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Save failed.");
+        resetSaveState();
+        window.alert(error.message || "Save failed.");
+      });
+    });
+
+    byId("add-exit")?.addEventListener("click", () => {
+      const exits = collectBuilderExits();
+      const nextDirection = DIRECTIONS.find((direction) => !exits.some((exit) => exit.direction === direction)) || DIRECTIONS[0];
+      renderBuilderExitList(exits.concat([{ direction: nextDirection, target_id: 0 }]));
+      scheduleBuilderPreviewUpdate();
+    });
+
+    byId("zone-map-center-selected")?.addEventListener("click", () => {
+      if (builderState.currentRoomId) {
+        centerZoneMapOnRoom(builderState.currentRoomId);
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const roomItem = event.target.closest(".room-item");
+      if (!roomItem) {
+        return;
+      }
+      void loadBuilderRoom(roomItem.dataset.id).catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Unable to load room.");
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      const removeButton = event.target.closest(".builder-exit-remove");
+      if (removeButton) {
+        removeButton.closest(".builder-exit-row")?.remove();
+        scheduleBuilderPreviewUpdate();
+        return;
+      }
+
+      const mapNode = event.target.closest(".builder-map-node");
+      if (!mapNode) {
+        return;
+      }
+    });
+
+    document.addEventListener("change", (event) => {
+      if (!event.target.closest("#exit-list")) {
+        return;
+      }
+      scheduleBuilderPreviewUpdate();
+    });
+
+    const zoneMap = byId("zone-map");
+    zoneMap?.addEventListener("click", (event) => {
+      const rect = zoneMap.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const clickY = event.clientY - rect.top;
+      const room = roomAtPosition(clickX, clickY, builderState.zoneGraph?.rooms || [], builderState.zoneRoomPositions, 10);
+      if (!room) {
+        return;
+      }
+      const roomId = Number(room.id || 0);
+      if (!roomId || roomId === Number(builderState.currentRoomId || 0)) {
+        return;
+      }
+      void loadBuilderRoom(roomId).catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Unable to load room.");
+      });
+    });
+
+    zoneMap?.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      const nextZoom = event.deltaY < 0 ? builderState.zoneZoom * 1.1 : builderState.zoneZoom / 1.1;
+      builderState.zoneZoom = Math.min(Math.max(nextZoom, BUILDER_ZONE_MIN_ZOOM), 2.5);
+      saveZoneCamera();
+      renderZoneMap();
+    }, { passive: false });
+
+    zoneMap?.addEventListener("pointerdown", (event) => {
+      if (event.target.closest(".builder-map-node")) {
+        return;
+      }
+      builderState.zoneDrag = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        panX: builderState.zonePan.x,
+        panY: builderState.zonePan.y,
+      };
+      zoneMap.classList.add("is-dragging");
+    });
+
+    zoneMap?.addEventListener("pointermove", (event) => {
+      if (!builderState.zoneDrag) {
+        return;
+      }
+      const deltaX = event.clientX - builderState.zoneDrag.startX;
+      const deltaY = event.clientY - builderState.zoneDrag.startY;
+      builderState.zonePan = {
+        x: builderState.zoneDrag.panX + deltaX,
+        y: builderState.zoneDrag.panY + deltaY,
+      };
+      renderZoneMap();
+    });
+
+    ["pointerup", "pointerleave", "pointercancel"].forEach((eventName) => {
+      zoneMap?.addEventListener(eventName, () => {
+        if (!builderState.zoneDrag) {
+          return;
+        }
+        builderState.zoneDrag = null;
+        zoneMap.classList.remove("is-dragging");
+        saveZoneCamera();
+      });
+    });
+  }
+
+  function initBuilderPage() {
+    bindBuilderInputs();
+    renderBuilderExitList([]);
+    renderBuilderPreview({
+      name: "No room selected",
+      desc: "Choose a room from the list to inspect and edit it.",
+      environment: "city",
+      exits: [],
+    });
+    renderZoneMap();
+    loadBuilderRoomList().catch((error) => {
+      console.error(error);
+      setBuilderPageStatus(error.message || "Unable to load builder rooms.");
+    });
+  }
+
+  function sceneImageCatalog(preferredFileName) {
+    const catalog = Array.from(new Set(Object.values(ROOM_IMAGE_LIBRARY)));
+    if (!preferredFileName) {
+      return catalog;
+    }
+    return [preferredFileName].concat(catalog.filter((fileName) => fileName !== preferredFileName));
+  }
+
+  function currentSceneRoom() {
+    return roomById(state.map.player_room_id);
+  }
+
   function resolveRoomImage(currentRoom) {
     if (!currentRoom) {
       return {
         src: staticRoomImageUrl(ROOM_IMAGE_LIBRARY.fallback),
         caption: "Dragonsire",
+        rotationKey: "fallback",
+        images: sceneImageCatalog(ROOM_IMAGE_LIBRARY.fallback),
       };
     }
 
     if (currentRoom.image_key) {
+      const fileName = String(currentRoom.image_key);
       return {
-        src: String(currentRoom.image_key).startsWith("/")
-          ? String(currentRoom.image_key)
-          : staticRoomImageUrl(String(currentRoom.image_key)),
+        src: fileName.startsWith("/")
+          ? fileName
+          : staticRoomImageUrl(fileName),
         caption: currentRoom.name || "Dragonsire",
+        rotationKey: `explicit:${fileName}`,
+        images: [fileName],
       };
     }
 
@@ -126,9 +930,12 @@
     ];
 
     const matched = keywordMap.find(([keywords]) => keywords.some((keyword) => sceneText.includes(keyword)));
+    const preferredFileName = matched ? matched[1] : ROOM_IMAGE_LIBRARY.fallback;
     return {
-      src: staticRoomImageUrl(matched ? matched[1] : ROOM_IMAGE_LIBRARY.fallback),
+      src: staticRoomImageUrl(preferredFileName),
       caption: currentRoom.name || String(state.map.zone || "Dragonsire"),
+      rotationKey: `${currentRoom.id || currentRoom.name || "room"}:${preferredFileName}`,
+      images: sceneImageCatalog(preferredFileName),
     };
   }
 
@@ -136,10 +943,83 @@
     const sceneImage = byId("scene-image");
     if (!sceneImage) return;
     const resolved = resolveRoomImage(currentRoom);
-    sceneImage.style.backgroundImage = `linear-gradient(180deg, rgba(15, 11, 8, 0.08), rgba(15, 11, 8, 0.35)), url("${resolved.src}")`;
+    if (state.sceneRotation.key !== resolved.rotationKey) {
+      state.sceneRotation.key = resolved.rotationKey;
+      state.sceneRotation.index = 0;
+    }
+    const images = Array.isArray(resolved.images) && resolved.images.length ? resolved.images : [ROOM_IMAGE_LIBRARY.fallback];
+    const fileName = images[state.sceneRotation.index % images.length];
+    const imageUrl = fileName.startsWith("/") ? fileName : staticRoomImageUrl(fileName);
+    sceneImage.style.backgroundImage = `linear-gradient(180deg, rgba(15, 11, 8, 0.08), rgba(15, 11, 8, 0.35)), url("${imageUrl}")`;
     sceneImage.dataset.caption = resolved.caption || "";
     sceneImage.setAttribute("aria-label", resolved.caption || "Room illustration");
     sceneImage.title = resolved.caption || "";
+  }
+
+  function advanceSceneImageRotation() {
+    const currentRoom = currentSceneRoom();
+    const resolved = resolveRoomImage(currentRoom);
+    const images = Array.isArray(resolved.images) ? resolved.images : [];
+    if (images.length <= 1) {
+      updateSceneImage(currentRoom);
+      return;
+    }
+    if (state.sceneRotation.key !== resolved.rotationKey) {
+      state.sceneRotation.key = resolved.rotationKey;
+      state.sceneRotation.index = 0;
+    } else {
+      state.sceneRotation.index = (state.sceneRotation.index + 1) % images.length;
+    }
+    updateSceneImage(currentRoom);
+  }
+
+  function startSceneImageRotation() {
+    if (state.sceneRotation.timer) {
+      return;
+    }
+    state.sceneRotation.timer = window.setInterval(() => {
+      advanceSceneImageRotation();
+    }, SCENE_IMAGE_ROTATION_MS);
+  }
+
+  function updateWindowFitShell() {
+    const modePlay = byId("mode-play");
+    if (!modePlay) {
+      return;
+    }
+
+    if (state.mode !== "play") {
+      modePlay.removeAttribute("data-shell-fit");
+      modePlay.style.setProperty("--window-shell-scale", "1");
+      modePlay.style.setProperty("--window-shell-unscale", "1");
+      return;
+    }
+
+    const availableWidth = Math.max(window.innerWidth - 24, 0);
+    const availableHeight = Math.max(window.innerHeight - 24, 0);
+
+    if (availableWidth < 1100) {
+      modePlay.removeAttribute("data-shell-fit");
+      modePlay.style.setProperty("--window-shell-scale", "1");
+      modePlay.style.setProperty("--window-shell-unscale", "1");
+      return;
+    }
+
+    const widthScale = availableWidth / DESKTOP_SHELL_FIT_WIDTH;
+    const heightScale = availableHeight / DESKTOP_SHELL_FIT_HEIGHT;
+    const scale = Math.min(widthScale, heightScale, 1);
+
+    if (scale >= 0.995) {
+      modePlay.removeAttribute("data-shell-fit");
+      modePlay.style.setProperty("--window-shell-scale", "1");
+      modePlay.style.setProperty("--window-shell-unscale", "1");
+      return;
+    }
+
+    const appliedScale = Math.max(scale, 0.68);
+    modePlay.dataset.shellFit = "scaled";
+    modePlay.style.setProperty("--window-shell-scale", String(appliedScale));
+    modePlay.style.setProperty("--window-shell-unscale", String(1 / appliedScale));
   }
 
   function railContainer() {
@@ -189,6 +1069,7 @@
     console.log("Mode:", state.mode);
     syncModeInUrl();
     renderMode();
+    updateWindowFitShell();
     if ((state.mode === "play" || state.mode === "build") && !state.initialRefreshSent) {
       requestInitialRefresh();
     }
@@ -1424,8 +2305,7 @@
     return rooms.length > 0 && rooms.length <= 16;
   }
 
-  function mapBounds() {
-    const rooms = state.map.rooms || [];
+  function mapBoundsForRooms(rooms) {
     if (!rooms.length) {
       return { minX: 0, maxX: 0, minY: 0, maxY: 0, width: 1, height: 1 };
     }
@@ -1445,23 +2325,30 @@
     };
   }
 
-  function mapRoomRadius(room, compactMap) {
+  function mapBounds() {
+    return mapBoundsForRooms(state.map.rooms || []);
+  }
+
+  function mapRoomRadiusForHover(room, compactMap, hoveredRoomId = state.hoveredRoomId) {
     if (isPlayerRoom(room)) {
       return compactMap ? 9 : 6;
     }
-    if (room.id === state.hoveredRoomId) {
+    if (room.id === hoveredRoomId) {
       return compactMap ? 6 : 4;
     }
     return compactMap ? 5 : 3;
   }
 
-  function renderedMapBounds(canvas, scale) {
-    const rooms = state.map.rooms || [];
+  function mapRoomRadius(room, compactMap) {
+    return mapRoomRadiusForHover(room, compactMap, state.hoveredRoomId);
+  }
+
+  function renderedMapBoundsForRooms(canvas, rooms, scale, hoveredRoomId = state.hoveredRoomId) {
     if (!canvas || !rooms.length) {
       return { minX: 0, maxX: 1, minY: 0, maxY: 1, width: 1, height: 1 };
     }
 
-    const compactMap = isCompactMap();
+    const compactMap = rooms.length > 0 && rooms.length <= 16;
     const ctx = canvas.getContext("2d");
     let minX = Infinity;
     let maxX = -Infinity;
@@ -1471,7 +2358,7 @@
     for (const room of rooms) {
       const roomX = (Number(room.x) || 0) * scale;
       const roomY = (Number(room.y) || 0) * scale;
-      const radius = mapRoomRadius(room, compactMap);
+      const radius = mapRoomRadiusForHover(room, compactMap, hoveredRoomId);
       const outline = isPlayerRoom(room) ? 4 : 0;
 
       minX = Math.min(minX, roomX - radius - outline);
@@ -1485,7 +2372,7 @@
 
       const fontSize = isPlayerRoom(room) ? 12 : 11;
       ctx.save();
-  ctx.font = isPlayerRoom(room) ? "600 12px Georgia" : "11px Georgia";
+      ctx.font = isPlayerRoom(room) ? "600 12px Georgia" : "11px Georgia";
       const textWidth = ctx.measureText(room.name || "").width;
       ctx.restore();
 
@@ -1504,6 +2391,41 @@
       maxY,
       width: Math.max(1, maxX - minX),
       height: Math.max(1, maxY - minY),
+    };
+  }
+
+  function renderedMapBounds(canvas, scale) {
+    return renderedMapBoundsForRooms(canvas, state.map.rooms || [], scale, state.hoveredRoomId);
+  }
+
+  function fitRoomsToCanvas(canvas, rooms, minScale = 0.12) {
+    const padding = 24;
+    const usableWidth = Math.max(40, canvas.width - padding * 2);
+    const usableHeight = Math.max(40, canvas.height - padding * 2);
+    const rawBounds = mapBoundsForRooms(rooms);
+    let nextScale = Math.max(minScale, Math.min(usableWidth / rawBounds.width, usableHeight / rawBounds.height));
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const bounds = renderedMapBoundsForRooms(canvas, rooms, nextScale, null);
+      const scaleFactor = Math.min(usableWidth / bounds.width, usableHeight / bounds.height);
+      if (!Number.isFinite(scaleFactor) || scaleFactor <= 0) {
+        break;
+      }
+      const adjustedScale = Math.max(minScale, nextScale * scaleFactor);
+      if (Math.abs(adjustedScale - nextScale) < 0.01) {
+        nextScale = adjustedScale;
+        break;
+      }
+      nextScale = adjustedScale;
+    }
+
+    const bounds = renderedMapBoundsForRooms(canvas, rooms, nextScale, null);
+    return {
+      scale: nextScale,
+      offset: {
+        x: padding + (usableWidth - bounds.width) / 2 - bounds.minX,
+        y: padding + (usableHeight - bounds.height) / 2 - bounds.minY,
+      },
     };
   }
 
@@ -1547,30 +2469,10 @@
   function fitMapToCanvas() {
     const canvas = byId("map-canvas");
     if (!canvas || !state.map || !(state.map.rooms || []).length) return;
-    const padding = 24;
-    const usableWidth = Math.max(40, canvas.width - padding * 2);
-    const usableHeight = Math.max(40, canvas.height - padding * 2);
-    const rawBounds = mapBounds();
-    let nextScale = Math.max(0.12, Math.min(usableWidth / rawBounds.width, usableHeight / rawBounds.height));
-
-    for (let attempt = 0; attempt < 4; attempt += 1) {
-      const bounds = renderedMapBounds(canvas, nextScale);
-      const scaleFactor = Math.min(usableWidth / bounds.width, usableHeight / bounds.height);
-      if (!Number.isFinite(scaleFactor) || scaleFactor <= 0) {
-        break;
-      }
-      const adjustedScale = Math.max(0.12, nextScale * scaleFactor);
-      if (Math.abs(adjustedScale - nextScale) < 0.01) {
-        nextScale = adjustedScale;
-        break;
-      }
-      nextScale = adjustedScale;
-    }
-
-    state.mapScale = nextScale;
-    const bounds = renderedMapBounds(canvas, state.mapScale);
-    state.mapOffset.x = padding + (usableWidth - bounds.width) / 2 - bounds.minX;
-    state.mapOffset.y = padding + (usableHeight - bounds.height) / 2 - bounds.minY;
+    const fitted = fitRoomsToCanvas(canvas, state.map.rooms || [], 0.12);
+    state.mapScale = fitted.scale;
+    state.mapOffset.x = fitted.offset.x;
+    state.mapOffset.y = fitted.offset.y;
   }
 
   function getCurrentRoomId() {
@@ -1592,67 +2494,102 @@
     };
   }
 
-  function renderMap() {
-    const canvas = byId("map-canvas");
-    if (!canvas) return;
-    resizeMapCanvas();
-    fitMapToCanvas();
+  function drawCanvasMap(canvas, rooms, edges, options = {}) {
+    if (!canvas || !Array.isArray(rooms)) {
+      return new Map();
+    }
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    state.roomPositions.clear();
-
-    if (!state.map || !Array.isArray(state.map.rooms)) {
-      return;
-    }
-
-    state.map.rooms.forEach((room) => {
-      state.roomPositions.set(room.id, worldPosition(room, canvas));
+    const positions = new Map();
+    const getPosition = options.getPosition || ((room) => ({ x: 0, y: 0 }));
+    const getColor = options.getColor || (() => "#5f8f57");
+    const getRadius = options.getRadius || (() => 4);
+    const linkedRoomIds = options.linkedRoomIds || new Set();
+    const hoveredRoomId = options.hoveredRoomId;
+    const selectedRoomId = options.selectedRoomId;
+    const showLabels = Boolean(options.showLabels);
+    const drawEdge = options.drawEdge || ((drawCtx, from, to) => {
+      drawCtx.beginPath();
+      drawCtx.moveTo(from.x, from.y);
+      drawCtx.lineTo(to.x, to.y);
+      drawCtx.stroke();
     });
 
-    const compactMap = isCompactMap();
+    rooms.forEach((room) => {
+      positions.set(room.id, getPosition(room));
+    });
 
-    mapEdges().forEach((edge) => {
-      const from = state.roomPositions.get(edge.from);
-      const to = state.roomPositions.get(edge.to);
+    (edges || []).forEach((edge) => {
+      const from = positions.get(edge.from);
+      const to = positions.get(edge.to);
       if (!from || !to) return;
-      ctx.strokeStyle = compactMap ? "rgba(220, 188, 120, 0.82)" : "rgba(195, 164, 104, 0.6)";
-      ctx.lineWidth = compactMap ? 2.4 : 1.5;
-      ctx.beginPath();
-      ctx.moveTo(from.x, from.y);
-      ctx.lineTo(to.x, to.y);
-      ctx.stroke();
+      ctx.strokeStyle = options.edgeColor ? options.edgeColor(edge) : "rgba(195, 164, 104, 0.6)";
+      ctx.lineWidth = options.edgeWidth ? options.edgeWidth(edge) : 1.5;
+      drawEdge(ctx, from, to, edge);
     });
 
-    state.map.rooms.forEach((room) => {
-      const pos = state.roomPositions.get(room.id);
-      const radius = mapRoomRadius(room, compactMap);
-      const playerRoom = isPlayerRoom(room);
-      if (room.id === state.hoveredRoomId) {
+    rooms.forEach((room) => {
+      const pos = positions.get(room.id);
+      const radius = getRadius(room);
+      const selected = room.id === selectedRoomId;
+      const linked = linkedRoomIds.has(room.id);
+      if (room.id === hoveredRoomId) {
         ctx.fillStyle = "rgba(255,255,255,0.25)";
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, radius + 5, 0, Math.PI * 2);
         ctx.fill();
       }
-      if (playerRoom) {
+      if (selected) {
         ctx.strokeStyle = "rgba(255, 240, 200, 0.9)";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, radius + 4, 0, Math.PI * 2);
         ctx.stroke();
       }
-      ctx.fillStyle = roomColor(room);
+      ctx.fillStyle = linked ? "#69b8ff" : getColor(room);
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
       ctx.fill();
 
-      if (compactMap) {
-        ctx.fillStyle = playerRoom ? "rgba(255, 245, 220, 0.96)" : "rgba(230, 219, 194, 0.88)";
-        ctx.font = playerRoom ? "600 12px Georgia" : "11px Georgia";
+      if (showLabels) {
+        ctx.fillStyle = selected ? "rgba(255, 245, 220, 0.96)" : "rgba(230, 219, 194, 0.88)";
+        ctx.font = selected ? "600 12px Georgia" : "11px Georgia";
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
         ctx.fillText(room.name, pos.x, pos.y - (radius + 8));
       }
     });
+
+    return positions;
+  }
+
+  function renderPlayerMapCanvas(canvas) {
+    const compactMap = isCompactMap();
+    state.roomPositions = drawCanvasMap(canvas, state.map.rooms || [], mapEdges(), {
+      getPosition: (room) => worldPosition(room, canvas),
+      getColor: (room) => roomColor(room),
+      getRadius: (room) => mapRoomRadius(room, compactMap),
+      hoveredRoomId: state.hoveredRoomId,
+      selectedRoomId: state.map.player_room_id,
+      showLabels: compactMap,
+      edgeColor: () => compactMap ? "rgba(220, 188, 120, 0.82)" : "rgba(195, 164, 104, 0.6)",
+      edgeWidth: () => compactMap ? 2.4 : 1.5,
+    });
+  }
+
+  function renderMap() {
+    const canvas = byId("map-canvas");
+    if (!canvas) return;
+    resizeMapCanvas();
+    fitMapToCanvas();
+
+    if (!state.map || !Array.isArray(state.map.rooms)) {
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+
+    renderPlayerMapCanvas(canvas);
 
     const currentRoom = roomById(state.map.player_room_id);
     if (currentRoom) {
@@ -1851,12 +2788,16 @@
   }
 
   function roomAtCanvasPosition(x, y) {
-    for (const room of state.map.rooms) {
-      const pos = state.roomPositions.get(room.id);
+    return roomAtPosition(x, y, state.map.rooms || [], state.roomPositions, 12);
+  }
+
+  function roomAtPosition(x, y, rooms, positions, radius = 12) {
+    for (const room of rooms || []) {
+      const pos = positions.get(room.id);
       if (!pos) continue;
       const dx = pos.x - x;
       const dy = pos.y - y;
-      if (Math.sqrt(dx * dx + dy * dy) <= 12) {
+      if (Math.sqrt(dx * dx + dy * dy) <= radius) {
         return room;
       }
     }
@@ -1910,6 +2851,7 @@
     });
 
     window.addEventListener("resize", () => {
+      updateWindowFitShell();
       scheduleMapRefit(false);
     });
   }
@@ -2114,6 +3056,16 @@
   }
 
   function init() {
+    if (hasInitialized) {
+      return;
+    }
+    hasInitialized = true;
+
+    if (isBuilderPage()) {
+      initBuilderPage();
+      return;
+    }
+
     loadHotbar();
     loadUiPrefs();
     renderMode();
@@ -2127,6 +3079,8 @@
     setupMapInteractions();
     bindRailPanels();
     bindInputControls();
+    startSceneImageRotation();
+    updateWindowFitShell();
     setSessionStatus("Ready");
     const debugToggle = byId("debug-toggle");
     if (debugToggle) {
@@ -2313,7 +3267,6 @@
       onUnknownCmd: onUnknownCmd,
       onConnectionClose: () => updateConnection(false),
     });
-  } else {
-    window.addEventListener("load", init);
   }
+  window.addEventListener("load", init);
 })();

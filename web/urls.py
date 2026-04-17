@@ -15,11 +15,18 @@ Search the Django documentation for "URL dispatcher" for more help.
 
 from django.urls import include, path
 
+from web import views
+
 # default evennia patterns
 from evennia.web.urls import urlpatterns as evennia_default_urlpatterns
 
 # add patterns
 urlpatterns = [
+    path("builder/", views.builder_view, name="builder"),
+    path("builder/api/rooms/", views.builder_room_list, name="builder-room-list"),
+    path("builder/api/zone/<str:zone_id>/", views.builder_zone_detail, name="builder-zone-detail"),
+    path("builder/api/room/<int:room_id>/", views.builder_room_detail, name="builder-room-detail"),
+    path("builder/api/room/<int:room_id>/save/", views.builder_room_save, name="builder-room-save"),
     # website
     path("", include("web.website.urls")),
     # local api wrappers

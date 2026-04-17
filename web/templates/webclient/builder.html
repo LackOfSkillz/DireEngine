@@ -1,0 +1,115 @@
+{% extends "webclient/builder_base.html" %}
+
+{% block content %}
+<div id="builder-page">
+  <header id="builder-topbar" class="panel brass-panel">
+    <div id="play-header-main">
+      <div id="title-cluster">
+        <div id="titlebar"><span>Dragonsire Builder</span></div>
+        <div id="subtitlebar"><span>Builder V1</span><span class="identity-separator">•</span><span>Zone Graph + Room Inspector</span></div>
+      </div>
+      <div id="topbar-tabs">
+        <a href="/play" class="chrome-tab">PLAY</a>
+        <a href="/builder/" class="chrome-tab active">BUILDER</a>
+        <a href="/" class="chrome-tab">EXIT</a>
+      </div>
+    </div>
+    <div id="topbar-utility">
+      <div id="topbar-status-strip">
+        <span class="status-tag">Builder V1</span>
+        <span id="builder-status">Select a room to begin.</span>
+      </div>
+    </div>
+  </header>
+
+  <div id="builder-layout">
+    <aside id="builder-left" class="panel obsidian-panel">
+      <section class="ds-card section card builder-browser-panel builder-panel">
+        <div class="panel-title-row">
+          <div class="panel-title">Rooms</div>
+          <div class="panel-subtitle">Room browser</div>
+        </div>
+        <div class="builder-panel-note">Click a room to load it into the inspector and preview workspace.</div>
+        <div id="room-list"></div>
+      </section>
+    </aside>
+
+    <main id="builder-center" class="panel obsidian-panel">
+      <section id="room-editor" class="ds-card section card builder-inspector-panel builder-panel">
+        <div class="panel-title-row">
+          <div class="panel-title">Room Editor</div>
+          <div class="panel-subtitle" id="builder-current-room">No room selected</div>
+        </div>
+        <label class="builder-field" for="room-name">
+          <span class="builder-label">Name</span>
+          <input id="room-name" type="text" autocomplete="off">
+        </label>
+        <label class="builder-field" for="room-short-desc">
+          <span class="builder-label">Short Description</span>
+          <input id="room-short-desc" type="text" autocomplete="off" placeholder="Used in lists and quick look text">
+        </label>
+        <label class="builder-field" for="room-desc">
+          <span class="builder-label">Full Description</span>
+          <textarea id="room-desc"></textarea>
+        </label>
+        <label class="builder-field" for="room-environment">
+          <span class="builder-label">Environment</span>
+          <select id="room-environment">
+            <option value="city">City</option>
+            <option value="forest">Forest</option>
+            <option value="swamp">Swamp</option>
+            <option value="tavern">Tavern</option>
+          </select>
+        </label>
+        <div id="room-exits" class="builder-field">
+          <div class="panel-title">Exits</div>
+          <div id="exit-list"></div>
+          <button id="add-exit" type="button">Add Exit</button>
+        </div>
+        <div class="action-row">
+          <button id="save-room" type="button">Save</button>
+        </div>
+      </section>
+    </main>
+
+    <aside id="builder-right" class="panel obsidian-panel">
+      <section id="room-preview" class="section card builder-panel">
+        <div id="feed-header" class="ds-card">
+          <div class="panel-title-row console-header">
+            <div class="panel-title">Zone Map</div>
+            <div id="room-context">Builder preview</div>
+            <button id="zone-map-center-selected" type="button">Center Selected</button>
+          </div>
+        </div>
+        <div id="feed-body">
+          <div id="zone-map-panel" class="ds-card">
+            <div id="zone-map-toolbar">
+              <div id="zone-map-title">Current zone</div>
+            </div>
+            <div id="zone-map" aria-label="Zone map graph"></div>
+          </div>
+          <div id="feed-text" class="ds-card">
+            <div class="panel-title">Room Preview</div>
+            <div id="console-panel">
+              <div id="feed-overlay"></div>
+              <div id="console-views">
+                <div id="feed-world" class="feed-view active">
+                  <div id="feed-surface" class="preview-content">
+                    <h3 id="builder-preview-room-name" class="preview-title">No room selected</h3>
+                    <div id="builder-preview-room-desc" class="preview-description">Choose a room from the list to inspect and edit it.</div>
+                    <div id="builder-preview-room-exits" class="preview-meta">Exits: none</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=23"></script>
+{% endblock %}
