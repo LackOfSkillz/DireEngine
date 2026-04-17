@@ -45,10 +45,10 @@ class RoomNode:
 
 
 const CELL_SIZE := 56.0
-const TILE_SIZE := Vector2(44.0, 44.0)
+const TILE_SIZE := Vector2(38.0, 38.0)
 const GRID_PADDING := Vector2(32.0, 32.0)
 const MIN_ROOM_PIXEL_SIZE := 10.0
-const MAX_ROOM_PIXEL_SIZE := 26.0
+const MAX_ROOM_PIXEL_SIZE := 24.0
 const MIN_ZOOM := 0.35
 const MAX_ZOOM := 2.4
 const ZOOM_STEP := 1.12
@@ -72,6 +72,7 @@ var selected_object_id := ""
 var hover_object_id := ""
 var create_room_mode := false
 var draw_exit_mode := false
+var active_tool_key := "select"
 var hover_room_id := ""
 var hover_edge_index := -1
 var conflict_room_ids: Array[String] = []
@@ -287,6 +288,31 @@ func set_draw_exit_mode(enabled: bool) -> void:
 	queue_redraw()
 
 
+func set_active_tool(tool_name: String) -> void:
+	active_tool_key = tool_name.strip_edges().to_lower()
+	if active_tool_key.is_empty():
+		active_tool_key = "select"
+	create_room_mode = active_tool_key == "create_room"
+	draw_exit_mode = active_tool_key == "draw_exit"
+	if active_tool_key != "draw_exit":
+		pending_exit_source_id = ""
+	if active_tool_key != "select":
+		drag_room_id = ""
+		drag_started = false
+		drag_preview_cell = {}
+	_update_cursor_shape()
+	queue_redraw()
+
+
+func set_pending_exit_source(room_id: String) -> void:
+	pending_exit_source_id = room_id.strip_edges()
+	queue_redraw()
+
+
+func get_direction_between_rooms(source_id: String, target_id: String) -> String:
+	return _direction_between_rooms(source_id, target_id)
+
+
 func set_conflict_rooms(room_ids: Array[String]) -> void:
 	conflict_room_ids = room_ids.duplicate()
 	queue_redraw()
@@ -370,7 +396,9 @@ func _gui_input(event: InputEvent) -> void:
 
 func _handle_left_press(position: Vector2) -> void:
 	var clicked_object := _object_at_position(position)
-	if not clicked_object.is_empty() and not draw_exit_mode:
+	if not clicked_object.is_empty():
+		if active_tool_key != "select":
+			return
 		var object_id := str(clicked_object.get("object_id", clicked_object.get("id", ""))).strip_edges()
 		if str(clicked_object.get("type", "")).strip_edges().to_lower() == "npc" and debug_rtsync:
 			print("Clicked NPC:", object_id)
@@ -381,40 +409,22 @@ func _handle_left_press(position: Vector2) -> void:
 		return
 
 	var clicked_room = _room_at_position(position)
-	if draw_exit_mode:
-		if clicked_room == null:
-			pending_exit_source_id = ""
-			queue_redraw()
-			return
-		if pending_exit_source_id.is_empty():
-			pending_exit_source_id = str(clicked_room)
-			emit_signal("room_selected", pending_exit_source_id)
-			queue_redraw()
-			return
-		if str(clicked_room) == pending_exit_source_id:
-			pending_exit_source_id = ""
-			queue_redraw()
-			return
-		var direction := _direction_between_rooms(pending_exit_source_id, str(clicked_room))
-		if direction.is_empty():
-			return
-		emit_signal("exit_requested", pending_exit_source_id, direction, str(clicked_room))
-		pending_exit_source_id = ""
-		queue_redraw()
-		return
 
 	if clicked_room != null:
-		selected_object_id = ""
-		drag_room_id = str(clicked_room)
-		drag_started = false
-		drag_start_position = position
-		drag_preview_cell = {}
+		if active_tool_key == "select":
+			selected_object_id = ""
+			drag_room_id = str(clicked_room)
+			drag_started = false
+			drag_start_position = position
+			drag_preview_cell = {}
 		emit_signal("room_selected", str(clicked_room))
 		queue_redraw()
 		return
 
 	var edge_index := _edge_at_position(position)
 	if edge_index >= 0 and edge_index < exits.size():
+		if active_tool_key != "select":
+			return
 		var edge: Dictionary = exits[edge_index]
 		emit_signal("exit_clicked", str(edge.get("source_id", "")), str(edge.get("direction", "")), str(edge.get("target_id", "")))
 		return
@@ -436,7 +446,7 @@ func _handle_left_release(position: Vector2) -> void:
 
 
 func _draw_grid() -> void:
-	var line_color := Color(0.18, 0.18, 0.18, 0.8)
+	var line_color := Color(0.388235, 0.243137, 0.129412, 0.18)
 	for x_index in range(0, int(size.x / CELL_SIZE) + 2):
 		var x_pos := float(x_index) * CELL_SIZE
 		draw_line(Vector2(x_pos, 0.0), Vector2(x_pos, size.y), line_color, 1.0)
@@ -452,10 +462,11 @@ func _draw_rooms() -> void:
 		var rect := Rect2(_room_position(room_node) - room_draw_size / 2.0, room_draw_size)
 		var color := _get_room_color(room_node)
 		if room_node.room_id == selected_room_id:
-			var glow_rect := rect.grow(6.0)
-			draw_rect(glow_rect, Color(0.18, 0.86, 1.0, 0.15))
+			color = color.lerp(Color(0.878431, 0.721569, 0.352941, 1.0), 0.22)
+			var glow_rect := rect.grow(8.0)
+			draw_rect(glow_rect, Color(0.784314, 0.607843, 0.235294, 0.24))
 		draw_rect(rect, color)
-		var border_color := Color(0.06, 0.06, 0.08, 1.0)
+		var border_color := Color(0.203922, 0.14902, 0.117647, 1.0)
 		var border_width := 2.0
 		if room_node.room_id == drop_target_room_id:
 			border_color = Color(0.64, 0.92, 0.64, 1.0)
@@ -464,13 +475,15 @@ func _draw_rooms() -> void:
 			border_color = Color(0.88, 0.28, 0.28, 1.0)
 			border_width = 3.0
 		elif room_node.room_id == selected_room_id:
-			border_color = Color(0.18, 0.86, 1.0, 1.0)
+			border_color = Color(0.878431, 0.721569, 0.352941, 1.0)
 			border_width = 4.0
 		draw_rect(rect, border_color, false, border_width)
+		if room_node.room_id == selected_room_id:
+			draw_rect(rect.grow(6.0), Color(0.784314, 0.607843, 0.235294, 0.7), false, 2.0)
 		if room_node.room_id == hover_room_id:
-			draw_rect(rect.grow(4.0), Color(1.0, 1.0, 1.0, 0.18), false, 2.0)
+			draw_rect(rect.grow(4.0), Color(0.909804, 0.862745, 0.784314, 0.18), false, 2.0)
 		if font != null and _should_draw_room_label(room_node):
-			draw_string(font, rect.position + Vector2(4.0, rect.size.y + 12.0), room_node.name.substr(0, 18), HORIZONTAL_ALIGNMENT_LEFT, maxf(room_draw_size.x * 6.0, 120.0), font_size, Color.WHITE)
+			draw_string(font, rect.position + Vector2(4.0, rect.size.y + 12.0), room_node.name.substr(0, 18), HORIZONTAL_ALIGNMENT_LEFT, maxf(room_draw_size.x * 6.0, 120.0), font_size, Color(0.909804, 0.862745, 0.784314, 1.0))
 
 
 func _draw_exits() -> void:
@@ -481,9 +494,9 @@ func _draw_exits() -> void:
 		var target := _find_room(str(edge.get("target_id", "")))
 		if source == null or target == null:
 			continue
-		var color := Color(0.82, 0.84, 0.9, 1.0)
+		var color := Color(0.717647, 0.658824, 0.572549, 0.9)
 		if index == hover_edge_index:
-			color = Color(1.0, 0.54, 0.2, 1.0)
+			color = Color(0.878431, 0.721569, 0.352941, 1.0)
 		draw_line(_room_position(source), _room_position(target), color, line_width)
 		_draw_arrow(_room_position(source), _room_position(target), color)
 
@@ -495,7 +508,7 @@ func _draw_pending_exit() -> void:
 	var target := _find_room(hover_room_id)
 	if source == null or target == null:
 		return
-	draw_line(_room_position(source), _room_position(target), Color(0.92, 0.92, 1.0, 0.55), clampf(room_draw_size.x * 0.12, 1.0, 2.0))
+	draw_line(_room_position(source), _room_position(target), Color(0.878431, 0.721569, 0.352941, 0.5), clampf(room_draw_size.x * 0.12, 1.0, 2.0))
 
 
 func _draw_arrow(from_pos: Vector2, to_pos: Vector2, color: Color) -> void:
@@ -928,7 +941,7 @@ func _draw_debug_overlay() -> void:
 	if font == null:
 		return
 	var overlay_text := "rooms=%d npcs=%d visible=%s" % [rooms.size(), npc_nodes.size(), str(visible)]
-	draw_string(font, Vector2(8.0, 18.0), overlay_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 12, Color.WHITE)
+	draw_string(font, Vector2(8.0, 18.0), overlay_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 12, Color(0.909804, 0.862745, 0.784314, 1.0))
 
 
 func _update_view_transform() -> void:

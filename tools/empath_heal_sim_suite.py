@@ -10,7 +10,7 @@ if REPO_ROOT not in sys.path:
 from diretest import _build_fake_delay_queue, _diretest_set_progression_rank, _run_fake_delay_queue, _setup_django
 
 
-LOG_PATH = "empathHealLog.md"
+LOG_PATH = os.path.join(REPO_ROOT, "docs", "logs", "empathHealLog.md")
 SCENARIO_ITERATIONS = 5
 SCENARIO_ORDER = ("A", "B", "C")
 SCENARIO_NAMES = {

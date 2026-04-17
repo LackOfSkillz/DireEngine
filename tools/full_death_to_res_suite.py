@@ -11,7 +11,7 @@ if REPO_ROOT not in sys.path:
 from diretest import _build_fake_delay_queue, _run_fake_delay_queue, _setup_django
 
 
-LOG_PATH = "fullDeathToRes.md"
+LOG_PATH = os.path.join(REPO_ROOT, "docs", "logs", "fullDeathToRes.md")
 FAVOR_LEVELS = (0, 1, 5, 15)
 WOUND_ORDER = ("A", "B", "C", "D")
 WOUND_NAMES = {
@@ -1132,7 +1132,7 @@ def _build_report(results, run_sections):
         "DireTest Scenario: resurrection-stabilization-decay",
         "Baseline Declaration: I will not optimize, tweak, or adjust any system during these runs.",
         "",
-        "[INIT] Previous fullDeathToRes.md deleted",
+        "[INIT] Previous docs/logs/fullDeathToRes.md deleted",
         "",
     ]
     lines = []

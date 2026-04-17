@@ -3,8 +3,18 @@ extends Control
 
 const BuilderApiScript = preload("res://scripts/builder_api.gd")
 const BuilderOpsScript = preload("res://scenes/builder/builder_ops.gd")
+enum ToolMode {
+	SELECT,
+	CREATE_ROOM,
+	DRAW_EXIT,
+	DELETE,
+}
 const BUILDER_LEFT_COLUMN_WIDTH := 240.0
 const BUILDER_RIGHT_COLUMN_WIDTH := 360.0
+const DBV2_LEFT_DOCK_WIDTH := 176.0
+const DBV2_RIGHT_DOCK_WIDTH := 320.0
+const DBV2_RIGHT_TOP_DOCK_HEIGHT := 218.0
+const DBV2_BOTTOM_DOCK_HEIGHT := 148.0
 const POLL_INTERVAL := 1.0
 const MAX_LOG_LINES := 40
 const SHELL_NODES_TO_HIDE := [
@@ -47,14 +57,15 @@ var builder_log_lines: Array[String] = []
 var npc_nodes := {}
 var room_nodes := {}
 var seen_npcs := {}
-var create_room_mode := false
 var selected_palette_room_type := "forest"
+var active_tool := ToolMode.SELECT
 var active_workspace := "inspector"
 var active_context := {"type": "", "id": ""}
 var pending_context_switch: Callable = Callable()
 var operation_debug_panel: PanelContainer
 var operation_debug_label: RichTextLabel
 var DEBUG_RTSYNC := true
+var exit_start_room_id := ""
 
 
 @onready var left_panel: PanelContainer = $BuilderRoot/BuilderColumns/LeftPanel
@@ -62,31 +73,45 @@ var DEBUG_RTSYNC := true
 @onready var builder_root: MarginContainer = $BuilderRoot
 @onready var mode_toggle: CheckButton = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/BuilderModeToggle
 @onready var tools_panel: PanelContainer = $BuilderRoot/BuilderColumns/RightPanel
-@onready var zone_dropdown: OptionButton = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/ZoneRow/ZoneDropdown
+@onready var zone_dropdown: OptionButton = $BuilderRoot/RootVBox/TopBar/ZoneDropdown
+@onready var top_save_button: Button = $BuilderRoot/RootVBox/TopBar/SaveButton
+@onready var top_undo_button: Button = $BuilderRoot/RootVBox/TopBar/UndoButton
+@onready var top_redo_button: Button = $BuilderRoot/RootVBox/TopBar/RedoButton
+@onready var active_tool_value_label: Label = $BuilderRoot/RootVBox/TopBar/ActiveToolValue
+@onready var work_split: VSplitContainer = $BuilderRoot/RootVBox/WorkSplit
+@onready var outer_split: HSplitContainer = $BuilderRoot/RootVBox/WorkSplit/OuterSplit
+@onready var inner_split: HSplitContainer = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit
+@onready var left_dock: PanelContainer = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock
+@onready var zone_stub_value_label: Label = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox/ZoneStubValue
+@onready var right_split: VSplitContainer = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit
+@onready var select_tool_button: BaseButton = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox/SelectToolButton
 @onready var create_zone_button: Button = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/ZoneRow/CreateZoneButton
 @onready var area_input: LineEdit = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/AreaIdInput
 @onready var load_button: Button = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons/LoadMapButton
-@onready var save_map_button: Button = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin/HBox/SaveMapButton
-@onready var create_room_button: Button = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons/CreateRoomButton
-@onready var draw_exit_button: CheckButton = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons/DrawExitButton
-@onready var delete_room_button: Button = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons/DeleteRoomButton
-@onready var undo_button: Button = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons/UndoButton
-@onready var redo_button: Button = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/Buttons/RedoButton
+@onready var save_map_button: Button = $BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/SaveBar/Margin/HBox/SaveMapButton
+@onready var create_room_button: BaseButton = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox/CreateRoomToolButton
+@onready var draw_exit_button: BaseButton = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox/DrawExitToolButton
+@onready var delete_room_button: Button = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox/DeleteToolButton
+@onready var undo_button: Button = $BuilderRoot/RootVBox/TopBar/UndoButton
+@onready var redo_button: Button = $BuilderRoot/RootVBox/TopBar/RedoButton
 @onready var status_label: Label = $BuilderRoot/BuilderColumns/LeftPanel/Margin/VBox/ToolsSection/Margin/VBox/StatusLabel
-@onready var dirty_label: Label = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin/HBox/DirtyLabel
+@onready var dirty_label: Label = $BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/SaveBar/Margin/HBox/DirtyLabel
 @onready var inspector_tab_button: Button = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/WorkspaceTabs/InspectorTabButton
 @onready var npc_templates_tab_button: Button = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/WorkspaceTabs/NpcTemplatesTabButton
 @onready var item_templates_tab_button: Button = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/WorkspaceTabs/ItemTemplatesTabButton
 @onready var inspector_title_label: Label = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorHeader/Margin/HBox/Title
 @onready var inspector_state_label: Label = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorHeader/Margin/HBox/State
 @onready var inspector_scroll: ScrollContainer = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll
-@onready var builder_log: RichTextLabel = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin/VBox/LogScroll/BuilderLog
+@onready var builder_log: RichTextLabel = $BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/BuilderLogSection/Margin/VBox/LogScroll/BuilderLog
+@onready var center_canvas: PanelContainer = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/CenterCanvas
+@onready var right_dock: PanelContainer = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock
+@onready var bottom_dock: PanelContainer = $BuilderRoot/RootVBox/WorkSplit/BottomDock
 @onready var right_panel_vbox: VBoxContainer = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox
-@onready var map_grid = $BuilderRoot/BuilderColumns/CenterPanel/Margin/MapGrid
-@onready var room_editor: Control = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/RoomEditor
-@onready var instance_editor: Control = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/InstanceEditor
+@onready var map_grid = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/CenterCanvas/MapGrid
+@onready var room_editor: Control = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock/VBox/Scroll/InspectorContent/RoomEditor
+@onready var instance_editor: Control = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock/VBox/Scroll/InspectorContent/InstanceEditor
 @onready var template_selector: Control = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/TemplateSelector
-@onready var content_tree: Control = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/ContentTree
+@onready var content_tree: Control = $BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/ContentTree
 @onready var npc_template_workspace: Control = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/NpcTemplateWorkspace
 @onready var item_template_workspace: Control = $BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/ItemTemplateWorkspace
 @onready var delete_room_confirm: ConfirmationDialog = $DeleteRoomConfirm
@@ -116,8 +141,16 @@ func _ready() -> void:
 	item_template_workspace.configure_api(builder_api)
 	npc_template_workspace.template_type = "npc"
 	item_template_workspace.template_type = "item"
+	template_selector.visible = false
+	npc_template_workspace.visible = false
+	item_template_workspace.visible = false
+	delete_room_button.toggle_mode = true
 	mode_toggle.toggled.connect(_on_mode_toggled)
 	zone_dropdown.item_selected.connect(_on_zone_dropdown_selected)
+	select_tool_button.pressed.connect(_on_select_tool_pressed)
+	top_save_button.pressed.connect(_on_save_map_pressed)
+	top_undo_button.pressed.connect(_on_undo_pressed)
+	top_redo_button.pressed.connect(_on_redo_pressed)
 	inspector_tab_button.pressed.connect(_on_workspace_tab_pressed.bind("inspector"))
 	npc_templates_tab_button.pressed.connect(_on_workspace_tab_pressed.bind("npc_templates"))
 	item_templates_tab_button.pressed.connect(_on_workspace_tab_pressed.bind("item_templates"))
@@ -126,9 +159,7 @@ func _ready() -> void:
 	save_map_button.pressed.connect(_on_save_map_pressed)
 	create_room_button.toggled.connect(_on_create_room_toggled)
 	draw_exit_button.toggled.connect(_on_draw_exit_toggled)
-	delete_room_button.pressed.connect(_on_delete_room_pressed)
-	undo_button.pressed.connect(_on_undo_pressed)
-	redo_button.pressed.connect(_on_redo_pressed)
+	delete_room_button.toggled.connect(_on_delete_tool_toggled)
 	add_item_button.pressed.connect(_on_room_editor_add_item_requested)
 	add_npc_button.pressed.connect(_on_room_editor_add_npc_requested)
 	delete_room_confirm.confirmed.connect(_on_delete_room_confirmed)
@@ -165,6 +196,7 @@ func _ready() -> void:
 	_setup_operation_debug_view()
 	_set_builder_visible(false)
 	_set_palette_room_type(selected_palette_room_type)
+	set_active_tool(ToolMode.SELECT)
 	_set_dirty(false)
 	_log_builder("Builder controller ready.")
 	_set_workspace("inspector")
@@ -195,8 +227,16 @@ func apply_launch_context(context: Dictionary) -> void:
 		_activate_builder_from_launch_context()
 
 
+func _has_builder_launch_context() -> bool:
+	return not str(launch_context.get("area_id", "")).strip_edges().is_empty()
+
+
 func update_character_context(data: Dictionary) -> void:
-	var permission_flag := bool(data.get("is_builder", false) or data.get("builder_mode_available", false))
+	var permission_flag := bool(
+		data.get("is_builder", false)
+		or data.get("builder_mode_available", false)
+		or _has_builder_launch_context()
+	)
 	builder_available = permission_flag
 	mode_toggle.visible = builder_available
 	if not builder_available:
@@ -261,11 +301,7 @@ func _set_builder_visible(enabled: bool) -> void:
 		select_object("")
 		room_editor.clear_room()
 		instance_editor.clear_editor()
-		create_room_mode = false
-		create_room_button.button_pressed = false
-		draw_exit_button.button_pressed = false
-		map_grid.set_create_room_mode(false)
-		map_grid.set_draw_exit_mode(false)
+		set_active_tool(ToolMode.SELECT)
 		template_selector.visible = false
 		content_tree.visible = false
 		delete_room_confirm.hide()
@@ -288,7 +324,7 @@ func _setup_operation_debug_view() -> void:
 	operation_debug_panel.visible = true
 	var margin := MarginContainer.new()
 	var vbox := VBoxContainer.new()
-	vbox.theme_override_constants.separation = 6
+	vbox.add_theme_constant_override("separation", 6)
 	var header := Label.new()
 	header.text = "Operations"
 	operation_debug_label = RichTextLabel.new()
@@ -351,31 +387,21 @@ func _update_operation_debug_view() -> void:
 
 
 func _set_workspace(workspace_id: String) -> void:
-	active_workspace = workspace_id.strip_edges().to_lower()
-	if active_workspace.is_empty():
-		active_workspace = "inspector"
-	inspector_scroll.visible = active_workspace == "inspector"
-	npc_template_workspace.visible = active_workspace == "npc_templates"
-	item_template_workspace.visible = active_workspace == "item_templates"
-	inspector_tab_button.set_pressed_no_signal(active_workspace == "inspector")
-	npc_templates_tab_button.set_pressed_no_signal(active_workspace == "npc_templates")
-	item_templates_tab_button.set_pressed_no_signal(active_workspace == "item_templates")
+	# TODO: DBV2 replace with library system
+	active_workspace = "inspector"
+	inspector_scroll.visible = false
+	npc_template_workspace.visible = false
+	item_template_workspace.visible = false
+	inspector_tab_button.set_pressed_no_signal(true)
+	npc_templates_tab_button.set_pressed_no_signal(false)
+	item_templates_tab_button.set_pressed_no_signal(false)
 	_update_inspector_header()
 
 
 func _on_workspace_tab_pressed(workspace_id: String) -> void:
 	if not is_builder:
 		return
-	_request_context_switch("template" if workspace_id != "inspector" else "room", workspace_id, func() -> void:
-		_set_workspace(workspace_id)
-		match workspace_id:
-			"npc_templates":
-				npc_template_workspace.open_workspace()
-			"item_templates":
-				item_template_workspace.open_workspace()
-			_:
-				_show_inspector_context()
-	)
+	_set_status("DBV2 TODO: library system not wired yet.")
 
 
 func _on_resized() -> void:
@@ -419,6 +445,21 @@ func _unhandled_input(event: InputEvent) -> void:
 func _apply_builder_layout() -> void:
 	left_panel.custom_minimum_size.x = BUILDER_LEFT_COLUMN_WIDTH
 	tools_panel.custom_minimum_size.x = BUILDER_RIGHT_COLUMN_WIDTH
+	left_dock.custom_minimum_size.x = DBV2_LEFT_DOCK_WIDTH
+	right_dock.custom_minimum_size.x = DBV2_RIGHT_DOCK_WIDTH
+	bottom_dock.custom_minimum_size.y = DBV2_BOTTOM_DOCK_HEIGHT
+	left_dock.size_flags_horizontal = Control.SIZE_FILL
+	right_dock.size_flags_horizontal = Control.SIZE_FILL
+	center_canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center_canvas.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if outer_split.size.x > 0:
+		outer_split.split_offset = int(DBV2_LEFT_DOCK_WIDTH)
+	if inner_split.size.x > 0:
+		inner_split.split_offset = max(0, int(inner_split.size.x - DBV2_RIGHT_DOCK_WIDTH - 4.0))
+	if right_split.size.y > 0:
+		right_split.split_offset = int(DBV2_RIGHT_TOP_DOCK_HEIGHT)
+	if work_split.size.y > 0:
+		work_split.split_offset = max(0, int(work_split.size.y - DBV2_BOTTOM_DOCK_HEIGHT - 4.0))
 
 
 func _set_shell_visibility(visible: bool) -> void:
@@ -445,13 +486,85 @@ func _set_shell_visibility(visible: bool) -> void:
 
 
 func _update_action_buttons() -> void:
-	delete_room_button.disabled = not is_builder or selected_room_id.is_empty()
-	create_room_button.disabled = not is_builder or current_area_id.is_empty() or selected_room_id.is_empty()
+	select_tool_button.disabled = not is_builder
+	delete_room_button.disabled = not is_builder
+	create_room_button.disabled = not is_builder or current_area_id.is_empty()
+	draw_exit_button.disabled = not is_builder
 	add_item_button.disabled = not is_builder or selected_room_id.is_empty()
 	add_npc_button.disabled = not is_builder or selected_room_id.is_empty()
 	save_map_button.disabled = not is_builder or operation_journal.is_empty()
+	top_save_button.disabled = save_map_button.disabled
 	undo_button.disabled = not is_builder or operation_journal.is_empty()
+	top_undo_button.disabled = undo_button.disabled
 	redo_button.disabled = not is_builder or redo_stack.is_empty()
+	top_redo_button.disabled = redo_button.disabled
+	zone_dropdown.disabled = not is_builder
+	_update_zone_stub_label()
+	_refresh_active_tool_ui()
+
+
+func set_active_tool(mode: int) -> void:
+	var normalized_mode := clampi(mode, ToolMode.SELECT, ToolMode.DELETE)
+	var changed := active_tool != normalized_mode
+	active_tool = normalized_mode
+	if active_tool != ToolMode.DRAW_EXIT:
+		_clear_draw_exit_state()
+	map_grid.set_active_tool(_tool_mode_key(active_tool))
+	_refresh_active_tool_ui()
+	if changed:
+		_log_builder("Tool changed to: %s" % _active_tool_label(active_tool))
+
+
+func _refresh_active_tool_ui() -> void:
+	if active_tool_value_label != null:
+		active_tool_value_label.text = _active_tool_label(active_tool)
+	if select_tool_button != null:
+		select_tool_button.set_pressed_no_signal(active_tool == ToolMode.SELECT)
+	if create_room_button != null:
+		create_room_button.set_pressed_no_signal(active_tool == ToolMode.CREATE_ROOM)
+	if draw_exit_button != null:
+		draw_exit_button.set_pressed_no_signal(active_tool == ToolMode.DRAW_EXIT)
+	if delete_room_button != null:
+		delete_room_button.set_pressed_no_signal(active_tool == ToolMode.DELETE)
+
+
+func _active_tool_label(tool_mode: int) -> String:
+	match tool_mode:
+		ToolMode.CREATE_ROOM:
+			return "Create Room"
+		ToolMode.DRAW_EXIT:
+			return "Draw Exit"
+		ToolMode.DELETE:
+			return "Delete"
+		_:
+			return "Select"
+
+
+func _tool_mode_key(tool_mode: int) -> String:
+	match tool_mode:
+		ToolMode.CREATE_ROOM:
+			return "create_room"
+		ToolMode.DRAW_EXIT:
+			return "draw_exit"
+		ToolMode.DELETE:
+			return "delete"
+		_:
+			return "select"
+
+
+func _clear_draw_exit_state() -> void:
+	exit_start_room_id = ""
+	if map_grid != null:
+		map_grid.set_pending_exit_source("")
+
+
+func _update_zone_stub_label() -> void:
+	if zone_stub_value_label == null:
+		return
+	var zone_id := _selected_zone_id()
+	if zone_id.is_empty():
+		zone_id = current_area_id.strip_edges()
+	zone_stub_value_label.text = "Current Zone: %s" % (zone_id if not zone_id.is_empty() else "none")
 
 
 func _set_status(message: String) -> void:
@@ -537,35 +650,41 @@ func _on_create_room_pressed() -> void:
 
 func _on_create_room_toggled(enabled: bool) -> void:
 	if not is_builder and enabled:
-		create_room_button.button_pressed = false
+		create_room_button.set_pressed_no_signal(false)
 		return
-	create_room_mode = enabled
 	if enabled:
-		draw_exit_button.button_pressed = false
-		map_grid.set_draw_exit_mode(false)
+		set_active_tool(ToolMode.CREATE_ROOM)
 		_set_status("Create room mode enabled. Click the map to place a room.")
 	else:
+		if active_tool == ToolMode.CREATE_ROOM:
+			set_active_tool(ToolMode.SELECT)
 		_set_status("Create room mode disabled.")
-	map_grid.set_create_room_mode(create_room_mode)
 
 
 func _on_draw_exit_toggled(enabled: bool) -> void:
 	if not is_builder:
-		draw_exit_button.button_pressed = false
+		draw_exit_button.set_pressed_no_signal(false)
 		return
-	create_room_mode = false
-	create_room_button.button_pressed = false
-	map_grid.set_create_room_mode(false)
-	map_grid.set_draw_exit_mode(enabled)
+	set_active_tool(ToolMode.DRAW_EXIT if enabled else ToolMode.SELECT)
 	_set_status("Draw exit mode enabled." if enabled else "Draw exit mode disabled.")
 
 
-func _on_room_selected(_room_id: String) -> void:
+func _on_select_tool_pressed() -> void:
 	if not is_builder:
 		return
-	var room_id := str(_room_id).strip_edges()
-	if room_id.is_empty():
+	set_active_tool(ToolMode.SELECT)
+	_set_status("Select tool enabled.")
+
+
+func _on_delete_tool_toggled(enabled: bool) -> void:
+	if not is_builder and enabled:
+		delete_room_button.set_pressed_no_signal(false)
 		return
+	set_active_tool(ToolMode.DELETE if enabled else ToolMode.SELECT)
+	_set_status("Delete tool enabled. Click a room to delete it." if enabled else "Delete tool disabled.")
+
+
+func _handle_select_room(room_id: String) -> void:
 	_request_context_switch("room", room_id, func() -> void:
 		select_room(room_id)
 		var room_data_for_type := _get_room_from_cache(selected_room_id)
@@ -578,6 +697,13 @@ func _on_room_selected(_room_id: String) -> void:
 				return
 		map_grid.clear_conflicts()
 	)
+
+
+func _on_room_selected(_room_id: String) -> void:
+	var room_id := str(_room_id).strip_edges()
+	if room_id.is_empty():
+		return
+	await handle_canvas_click(room_id, {}, Vector2.ZERO)
 
 
 func select_room(room_id: String) -> void:
@@ -623,27 +749,43 @@ func select_object(object_id: String) -> void:
 	_open_instance_editor(selected_object_id)
 
 
-func _on_empty_cell_clicked(cell: Dictionary) -> void:
+func handle_canvas_click(room_id: String, cell: Dictionary, position: Vector2 = Vector2.ZERO, object_id: String = "") -> void:
 	if not is_builder:
+		return
+	match active_tool:
+		ToolMode.SELECT:
+			if not object_id.strip_edges().is_empty():
+				_on_canvas_object_selected(object_id)
+			elif not room_id.strip_edges().is_empty():
+				_handle_select_room(room_id)
+			else:
+				select_room("")
+		ToolMode.CREATE_ROOM:
+			await _handle_create_room_click(cell, room_id, object_id)
+		ToolMode.DRAW_EXIT:
+			await _handle_draw_exit_click(room_id)
+		ToolMode.DELETE:
+			await _handle_delete_click(room_id)
+
+
+func _handle_create_room_click(cell: Dictionary, clicked_room_id: String, object_id: String) -> void:
+	if not clicked_room_id.strip_edges().is_empty() or not object_id.strip_edges().is_empty():
 		return
 	var area_id := _require_area_id()
 	if area_id.is_empty():
 		return
-	if not create_room_mode:
-		select_room("")
-		return
-	var room_id := _generate_room_id()
+	var new_room_id := _generate_room_id()
 	var diff := {
 		"area_id": area_id,
 		"operations": [
 			{
-				"id": "create-%s" % room_id,
+				"id": "create-%s" % new_room_id,
 				"op": "create_room",
 				"room": {
-					"id": room_id,
-					"object_id": room_id,
+					"id": new_room_id,
+					"object_id": new_room_id,
 					"name": "New Room",
-					"description": "",
+					"description": "An unfinished room.",
 					"zone_id": area_id,
 					"room_type": selected_palette_room_type,
 					"map_x": int(cell.get("map_x", 0)),
@@ -657,10 +799,65 @@ func _on_empty_cell_clicked(cell: Dictionary) -> void:
 	}
 	var staged := await _stage_previewable_diff(diff, "Room created.")
 	if staged:
-		create_room_mode = false
-		create_room_button.button_pressed = false
-		map_grid.set_create_room_mode(false)
-		select_room(room_id)
+		select_room(new_room_id)
+
+
+func _handle_draw_exit_click(room_id: String) -> void:
+	var normalized_room_id := room_id.strip_edges()
+	if normalized_room_id.is_empty():
+		return
+	if exit_start_room_id.is_empty():
+		exit_start_room_id = normalized_room_id
+		map_grid.set_pending_exit_source(exit_start_room_id)
+		_handle_select_room(normalized_room_id)
+		_set_status("Draw exit: select destination room.")
+		return
+	if normalized_room_id == exit_start_room_id:
+		_clear_draw_exit_state()
+		_set_status("Draw exit cancelled.")
+		return
+	var direction: String = map_grid.get_direction_between_rooms(exit_start_room_id, normalized_room_id)
+	if direction.is_empty():
+		_set_status("Rooms must be adjacent to draw an exit.")
+		return
+	await _on_exit_requested(exit_start_room_id, direction, normalized_room_id)
+	_clear_draw_exit_state()
+	_handle_select_room(normalized_room_id)
+
+
+func _handle_delete_click(room_id: String) -> void:
+	var normalized_room_id := room_id.strip_edges()
+	if normalized_room_id.is_empty():
+		return
+	await _delete_room_by_id(normalized_room_id)
+
+
+func _delete_room_by_id(room_id: String) -> void:
+	var area_id := _require_area_id()
+	if area_id.is_empty():
+		return
+	var normalized_room_id := room_id.strip_edges()
+	if normalized_room_id.is_empty():
+		return
+	if exit_start_room_id == normalized_room_id:
+		_clear_draw_exit_state()
+	var diff := {
+		"area_id": area_id,
+		"operations": [
+			{
+				"id": "delete-%s" % normalized_room_id,
+				"op": "delete_room",
+				"room_id": normalized_room_id,
+			}
+		]
+	}
+	var staged := await _stage_previewable_diff(diff, "Room deleted.")
+	if staged:
+		_sync_selection_after_map_update()
+
+
+func _on_empty_cell_clicked(cell: Dictionary) -> void:
+	await handle_canvas_click("", cell, Vector2.ZERO)
 
 
 func _on_room_dragged(room_id: String, cell: Dictionary) -> void:
@@ -689,34 +886,12 @@ func _on_room_dragged(room_id: String, cell: Dictionary) -> void:
 	await _stage_previewable_diff(diff, "Room moved.", group_id)
 
 
-func _on_delete_room_pressed() -> void:
-	if not is_builder or selected_room_id.is_empty():
-		return
-	pending_delete_room_id = selected_room_id
-	delete_room_confirm.popup_centered()
-
-
 func _on_delete_room_confirmed() -> void:
 	if not is_builder or pending_delete_room_id.is_empty():
 		return
-	var area_id := _require_area_id()
-	if area_id.is_empty():
-		return
 	var room_id := pending_delete_room_id
 	pending_delete_room_id = ""
-	var diff := {
-		"area_id": area_id,
-		"operations": [
-			{
-				"id": "delete-%s" % room_id,
-				"op": "delete_room",
-				"room_id": room_id,
-			}
-		]
-	}
-	var staged := await _stage_previewable_diff(diff, "Room deleted.")
-	if staged:
-		_sync_selection_after_map_update()
+	await _delete_room_by_id(room_id)
 
 
 func _on_exit_requested(source_id: String, direction: String, target_id: String) -> void:
@@ -978,7 +1153,7 @@ func _reload_zone_registry(preferred_zone_id: String = "") -> void:
 	if bool(response.get("ok", false)):
 		var zones_payload = response.get("result", {}).get("zones", {})
 		if zones_payload is Dictionary:
-			available_zones = (zones_payload as Dictionary).duplicate(true)
+			available_zones = _merge_zone_registry_payload(available_zones, zones_payload as Dictionary)
 	else:
 		var status_code := int(response.get("status", 0))
 		var error_code := str(response.get("error", "")).strip_edges().to_lower()
@@ -990,6 +1165,7 @@ func _reload_zone_registry(preferred_zone_id: String = "") -> void:
 			"rooms": {},
 		}
 	_sync_zone_dropdown(preferred_zone_id)
+	_update_zone_stub_label()
 
 
 func _sync_zone_dropdown(preferred_zone_id: String = "") -> void:
@@ -1017,6 +1193,28 @@ func _sync_zone_dropdown(preferred_zone_id: String = "") -> void:
 		zone_dropdown.select(selected_index)
 	elif zone_dropdown.item_count > 1:
 		zone_dropdown.select(0)
+	_update_zone_stub_label()
+
+
+func _merge_zone_registry_payload(base_zones: Dictionary, incoming_zones: Dictionary) -> Dictionary:
+	var merged := base_zones.duplicate(true)
+	for zone_id_variant in incoming_zones.keys():
+		var zone_id := str(zone_id_variant).strip_edges()
+		if zone_id.is_empty():
+			continue
+		var existing_zone: Dictionary = (merged.get(zone_id, {}) as Dictionary).duplicate(true)
+		var incoming_zone: Dictionary = (incoming_zones.get(zone_id, {}) as Dictionary).duplicate(true)
+		existing_zone["name"] = str(incoming_zone.get("name", existing_zone.get("name", zone_id))).strip_edges()
+		var rooms_payload: Dictionary = (existing_zone.get("rooms", {}) as Dictionary).duplicate(true)
+		var incoming_rooms: Dictionary = (incoming_zone.get("rooms", {}) as Dictionary).duplicate(true)
+		for room_id_variant in incoming_rooms.keys():
+			var room_id := str(room_id_variant).strip_edges()
+			if room_id.is_empty():
+				continue
+			rooms_payload[room_id] = ((incoming_rooms.get(room_id_variant, {}) as Dictionary)).duplicate(true)
+		existing_zone["rooms"] = rooms_payload
+		merged[zone_id] = existing_zone
+	return merged
 
 
 func _merge_zone_snapshot(base_zones: Dictionary, map_data: Dictionary) -> Dictionary:
@@ -1073,7 +1271,7 @@ func _on_create_zone_pressed() -> void:
 
 func _open_create_zone_dialog() -> void:
 	create_zone_dialog.title = "Create Zone"
-	create_zone_dialog.dialog_text = "Create a new builder zone"
+	create_zone_dialog.dialog_text = ""
 	zone_name_input.text = ""
 	zone_id_input.text = ""
 	create_zone_dialog.popup_centered()
@@ -1090,18 +1288,19 @@ func _on_create_zone_confirmed() -> void:
 	var zone_name := zone_name_input.text.strip_edges()
 	var zone_id := zone_id_input.text.strip_edges().to_lower().replace(" ", "_")
 	if zone_name.is_empty() or zone_id.is_empty():
-		create_zone_dialog.dialog_text = "Zone name and zone id are required."
-		create_zone_dialog.popup_centered()
 		_set_status("Zone name and zone id are required.")
+		create_zone_dialog.dialog_text = ""
+		create_zone_dialog.popup_centered()
 		return
 	var response: Dictionary = await builder_api.create_zone(zone_id, zone_name)
 	if not bool(response.get("ok", false)):
-		create_zone_dialog.dialog_text = str(response.get("error", "request_failed"))
+		_set_status("Create zone failed: %s" % str(response.get("error", "request_failed")))
+		create_zone_dialog.dialog_text = ""
 		create_zone_dialog.popup_centered()
 		_handle_api_error(response)
 		return
 	create_zone_dialog.title = "Create Zone"
-	create_zone_dialog.dialog_text = "Create a new builder zone"
+	create_zone_dialog.dialog_text = ""
 	await _reload_zone_registry(zone_id)
 	await _refresh_map(zone_id, true)
 
@@ -1355,11 +1554,9 @@ func _show_template_selector_context(title: String) -> void:
 	room_editor.visible = false
 	instance_editor.visible = false
 	content_tree.visible = false
-	template_selector.visible = true
+	template_selector.visible = false
 	inspector_title_label.text = title
-	inspector_state_label.text = "Choose a template and confirm destination."
-	await get_tree().process_frame
-	inspector_scroll.ensure_control_visible(template_selector)
+	inspector_state_label.text = "DBV2 TODO: replace with library system."
 
 
 func _open_instance_editor(object_id: String) -> void:
@@ -1478,16 +1675,7 @@ func _on_room_editor_add_npc_requested() -> void:
 	if selected_room_id.is_empty():
 		_set_status("Select a room before adding an NPC.")
 		return
-	var room_data := _get_room_from_cache(selected_room_id)
-	if room_data.is_empty():
-		_set_status("Selected room is unavailable.")
-		return
-	_set_workspace("inspector")
-	await _show_template_selector_context("Add NPC")
-	template_selector.open("npc", selected_room_id, str(room_data.get("object_id", room_data.get("id", ""))).strip_edges())
-	template_selector.move_to_front()
-	await get_tree().process_frame
-	inspector_scroll.ensure_control_visible(template_selector)
+	_set_status("DBV2 TODO: NPC library system not wired yet.")
 
 
 func _on_room_editor_add_item_requested() -> void:
@@ -1496,23 +1684,7 @@ func _on_room_editor_add_item_requested() -> void:
 	if selected_room_id.is_empty():
 		_set_status("Select a room before adding an item.")
 		return
-	var room_data := _get_room_from_cache(selected_room_id)
-	if room_data.is_empty():
-		_set_status("Selected room is unavailable.")
-		return
-	var selected_npc := _get_selected_npc_target(room_data)
-	_set_workspace("inspector")
-	await _show_template_selector_context("Add Item")
-	template_selector.open(
-		"item",
-		selected_room_id,
-		str(room_data.get("object_id", room_data.get("id", ""))).strip_edges(),
-		str(selected_npc.get("object_id", "")).strip_edges(),
-		str(selected_npc.get("name", "")).strip_edges()
-	)
-	template_selector.move_to_front()
-	await get_tree().process_frame
-	inspector_scroll.ensure_control_visible(template_selector)
+	_set_status("DBV2 TODO: Item library system not wired yet.")
 
 
 func _on_room_editor_exit_save_requested(room_id: String, exit_id: String, fields: Dictionary) -> void:
@@ -1656,7 +1828,6 @@ func _on_room_editor_exit_delete_requested(room_id: String, exit_id: String) -> 
 
 func _on_template_selector_closed() -> void:
 	template_selector.visible = false
-	inspector_scroll.scroll_vertical = 0
 	_show_inspector_context()
 
 
@@ -1704,8 +1875,12 @@ func _on_content_tree_object_selected(object_id: String, object_data: Dictionary
 
 
 func _on_map_object_selected(object_id: String, _target_id: String, _relation: String) -> void:
-	if not is_builder:
+	if not is_builder or active_tool != ToolMode.SELECT:
 		return
+	await handle_canvas_click("", {}, Vector2.ZERO, object_id)
+
+
+func _on_canvas_object_selected(object_id: String) -> void:
 	var object_data := _find_object_anywhere(object_id)
 	var object_type := str(object_data.get("type", "item")).strip_edges().to_lower()
 	_request_context_switch("npc" if object_type == "npc" else "item", object_id, func() -> void:
@@ -1773,7 +1948,9 @@ func _on_instance_editor_save_requested(object_id: String, updates: Dictionary) 
 
 
 func _on_instance_editor_edit_template_requested(template_id: String, object_type: String) -> void:
-	_open_template_workspace(object_type, template_id)
+	var _unused_template_id := template_id
+	var _unused_object_type := object_type
+	_set_status("DBV2 TODO: template editor replaced by library system.")
 
 
 func _on_instance_editor_delete_requested(object_id: String) -> void:
@@ -1785,17 +1962,10 @@ func _on_instance_editor_back_requested() -> void:
 
 
 func _open_template_workspace(object_type: String, template_id: String = "") -> void:
-	var normalized_type := object_type.strip_edges().to_lower()
-	_request_context_switch("template", template_id if not template_id.strip_edges().is_empty() else normalized_type, func() -> void:
-		_set_active_context("template", template_id if not template_id.strip_edges().is_empty() else normalized_type)
-		match normalized_type:
-			"npc":
-				_set_workspace("npc_templates")
-				npc_template_workspace.open_workspace(template_id)
-			_:
-				_set_workspace("item_templates")
-				item_template_workspace.open_workspace(template_id)
-	)
+	# TODO: DBV2 replace with library system
+	var _unused_object_type := object_type
+	var _unused_template_id := template_id
+	_set_status("DBV2 TODO: template workspaces disabled during shell refactor.")
 
 
 func _on_template_workspace_closed() -> void:

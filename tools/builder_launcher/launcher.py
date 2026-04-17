@@ -165,6 +165,159 @@ def builder_export_map(area_id: str):
     return jsonify({"ok": True, "data": {"map": exported}})
 
 
+def _diff_error_payload(exc) -> tuple[dict, int]:
+    payload = {
+        "ok": False,
+        "error": str(exc),
+        "failed_operation_index": getattr(exc, "failed_operation_index", None),
+        "failed_operation_id": getattr(exc, "failed_operation_id", None),
+        "failed_operation": getattr(exc, "failed_operation", None),
+    }
+    conflicts = getattr(exc, "conflicts", None)
+    if conflicts:
+        payload["conflicts"] = list(conflicts)
+    return payload, 400
+
+
+@app.post("/builder-api/map/diff/")
+def builder_apply_diff():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    diff = payload.get("diff")
+    if diff is None:
+        return jsonify({"ok": False, "error": "diff is required."}), 400
+
+    preview = bool(payload.get("preview", False))
+    session_id = str(payload.get("session_id") or "").strip() or None
+    group_id = str(payload.get("group_id") or "").strip() or None
+
+    try:
+        _refresh_builder_runtime()
+        from world.builder.services import map_diff_service
+
+        result = map_diff_service.apply_diff(
+            diff,
+            preview=preview,
+            session_id=session_id,
+            group_id=group_id,
+            username="builder_launcher",
+        )
+    except ValueError as exc:
+        logger.warning("Local diff apply rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        try:
+            from world.builder.services import map_diff_service
+
+            if isinstance(exc, map_diff_service.DiffApplyError):
+                error_payload, status = _diff_error_payload(exc)
+                return jsonify(error_payload), status
+        except Exception:
+            pass
+        logger.exception("Local diff apply failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    return jsonify({"ok": True, "data": {"result": result}})
+
+
+@app.post("/builder-api/map/save-all/")
+def builder_save_all():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    diff = payload.get("diff")
+    if diff is None:
+        return jsonify({"ok": False, "error": "diff is required."}), 400
+
+    session_id = str(payload.get("session_id") or "").strip() or None
+
+    try:
+        _refresh_builder_runtime()
+        from world.builder.services import map_diff_service
+
+        result = map_diff_service.apply_diff(
+            diff,
+            preview=False,
+            session_id=session_id,
+            username="builder_launcher",
+        )
+    except ValueError as exc:
+        logger.warning("Local save-all rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        try:
+            from world.builder.services import map_diff_service
+
+            if isinstance(exc, map_diff_service.DiffApplyError):
+                error_payload, status = _diff_error_payload(exc)
+                return jsonify(error_payload), status
+        except Exception:
+            pass
+        logger.exception("Local save-all failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    return jsonify({"ok": True, "data": {"result": result}})
+
+
+@app.post("/builder-api/map/undo/")
+def builder_apply_undo():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    undo_diff = payload.get("undo_diff")
+    if undo_diff is None:
+        return jsonify({"ok": False, "error": "undo_diff is required."}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from world.builder.services import map_diff_service, undo_service
+
+        result = undo_service.apply_undo(undo_diff)
+    except ValueError as exc:
+        logger.warning("Local undo rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        if 'map_diff_service' in locals() and isinstance(exc, map_diff_service.DiffApplyError):
+            error_payload, status = _diff_error_payload(exc)
+            return jsonify(error_payload), status
+        logger.exception("Local undo failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    return jsonify({"ok": True, "data": {"result": result}})
+
+
+@app.post("/builder-api/map/redo/")
+def builder_apply_redo():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    diff = payload.get("diff")
+    if diff is None:
+        return jsonify({"ok": False, "error": "diff is required."}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from world.builder.services import map_diff_service, undo_service
+
+        result = undo_service.apply_redo(diff)
+    except ValueError as exc:
+        logger.warning("Local redo rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        if 'map_diff_service' in locals() and isinstance(exc, map_diff_service.DiffApplyError):
+            error_payload, status = _diff_error_payload(exc)
+            return jsonify(error_payload), status
+        logger.exception("Local redo failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    return jsonify({"ok": True, "data": {"result": result}})
+
+
 @app.get("/builder-api/zones/")
 def builder_list_zones():
     try:

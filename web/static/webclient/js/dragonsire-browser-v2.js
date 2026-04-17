@@ -3,6 +3,7 @@
   window.DRAGONSIRE_CLIENT_VERSION = "v2";
 
   const state = {
+    mode: getRequestedInitialMode(),
     map: { rooms: [], edges: [], exits: [], player_room_id: null, zone: null },
     builder: {
       enabled: false,
@@ -30,7 +31,7 @@
     lastEcho: { text: "", time: 0 },
     debugEnabled: false,
     selectedInventoryItem: null,
-    hotbar: ["look", "inventory", "stats"],
+    hotbar: ["look", "inv", "attack"],
     activeView: "world",
     character: null,
     subsystem: null,
@@ -50,9 +51,153 @@
 
   const HOTBAR_STORAGE_KEY = "dragonsire.hotbar";
   const UI_PREFS_STORAGE_KEY = "dragonsire.browser.ui";
+  const ROOM_IMAGE_LIBRARY = {
+    city: "Nightwatch atop the city rooftops.png",
+    market: "Twilight market antics.png",
+    forest: "Ranger in twilight forest aiming at stag.png",
+    lake: "Autumn warriors by the lake (1).png",
+    spring: "Elven guardians of the spring city.png",
+    graveyard: "Elothien defenders in a haunted graveyard.png",
+    forge: "Warrior mage and runesmith in forge.png",
+    tavern: "Healing through music and magic.png",
+    guild: "Warriors of the fiery forge.png",
+    stealth: "The rogue's secret heist.png",
+    village: "Moonlit guardians of the hamlet.png",
+    fallback: "hero.png",
+  };
+
+  function getRequestedInitialMode() {
+    const requested = String(new URLSearchParams(window.location.search).get("mode") || "").trim().toLowerCase();
+    if (["landing", "play", "build"].includes(requested)) {
+      return requested;
+    }
+    return "play";
+  }
 
   function byId(id) {
     return document.getElementById(id);
+  }
+
+  function normalizeSceneToken(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function staticRoomImageUrl(fileName) {
+    return `/static/website/images/${encodeURIComponent(fileName)}`;
+  }
+
+  function resolveRoomImage(currentRoom) {
+    if (!currentRoom) {
+      return {
+        src: staticRoomImageUrl(ROOM_IMAGE_LIBRARY.fallback),
+        caption: "Dragonsire",
+      };
+    }
+
+    if (currentRoom.image_key) {
+      return {
+        src: String(currentRoom.image_key).startsWith("/")
+          ? String(currentRoom.image_key)
+          : staticRoomImageUrl(String(currentRoom.image_key)),
+        caption: currentRoom.name || "Dragonsire",
+      };
+    }
+
+    const zone = normalizeSceneToken(state.map.zone);
+    const roomType = normalizeSceneToken(currentRoom.type);
+    const roomName = normalizeSceneToken(currentRoom.name);
+    const sceneText = [zone, roomType, roomName].filter(Boolean).join(" ");
+
+    const keywordMap = [
+      [["market", "bazaar", "merchant", "square"], ROOM_IMAGE_LIBRARY.market],
+      [["alley", "street", "lane", "midway", "riverfront", "urban", "city", "landing", "reach"], ROOM_IMAGE_LIBRARY.city],
+      [["forest", "wood", "grove", "trail", "path", "ranger"], ROOM_IMAGE_LIBRARY.forest],
+      [["lake", "shore", "waterfront", "river", "dock"], ROOM_IMAGE_LIBRARY.lake],
+      [["spring", "sanctuary", "garden"], ROOM_IMAGE_LIBRARY.spring],
+      [["graveyard", "crypt", "haunted", "cemetery", "undead"], ROOM_IMAGE_LIBRARY.graveyard],
+      [["forge", "smith", "anvil", "fire", "runesmith"], ROOM_IMAGE_LIBRARY.forge],
+      [["tavern", "inn", "music", "hall"], ROOM_IMAGE_LIBRARY.tavern],
+      [["guild", "temple", "cleric", "chapel"], ROOM_IMAGE_LIBRARY.guild],
+      [["rogue", "thief", "stealth", "hideout"], ROOM_IMAGE_LIBRARY.stealth],
+      [["hamlet", "village"], ROOM_IMAGE_LIBRARY.village],
+    ];
+
+    const matched = keywordMap.find(([keywords]) => keywords.some((keyword) => sceneText.includes(keyword)));
+    return {
+      src: staticRoomImageUrl(matched ? matched[1] : ROOM_IMAGE_LIBRARY.fallback),
+      caption: currentRoom.name || String(state.map.zone || "Dragonsire"),
+    };
+  }
+
+  function updateSceneImage(currentRoom) {
+    const sceneImage = byId("scene-image");
+    if (!sceneImage) return;
+    const resolved = resolveRoomImage(currentRoom);
+    sceneImage.style.backgroundImage = `linear-gradient(180deg, rgba(15, 11, 8, 0.08), rgba(15, 11, 8, 0.35)), url("${resolved.src}")`;
+    sceneImage.dataset.caption = resolved.caption || "";
+    sceneImage.setAttribute("aria-label", resolved.caption || "Room illustration");
+    sceneImage.title = resolved.caption || "";
+  }
+
+  function railContainer() {
+    return byId("right-sidebar") || byId("sidebar") || byId("right-rail");
+  }
+
+  function syncModeInUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.set("mode", state.mode);
+    window.history.replaceState({}, "", url.toString());
+  }
+
+  function renderMode() {
+    const landing = byId("mode-landing");
+    const play = byId("mode-play");
+    const build = byId("mode-build");
+    if (landing) {
+      landing.hidden = state.mode !== "landing";
+    }
+    if (play) {
+      play.hidden = state.mode !== "play";
+    }
+    if (build) {
+      build.hidden = state.mode !== "build";
+    }
+    document.body.dataset.mode = state.mode;
+    const legacyBuilderPanel = byId("builder-panel");
+    if (legacyBuilderPanel) {
+      legacyBuilderPanel.hidden = state.mode !== "build" || !state.builder.enabled;
+    }
+  }
+
+  function ensureBuildMode(contextLabel = "Builder action") {
+    if (state.mode === "build") {
+      return true;
+    }
+    toast(`${contextLabel} is only available in build mode.`);
+    return false;
+  }
+
+  function setMode(mode) {
+    const normalized = String(mode || "").trim().toLowerCase();
+    if (!["landing", "play", "build"].includes(normalized)) {
+      return;
+    }
+    state.mode = normalized;
+    console.log("Mode:", state.mode);
+    syncModeInUrl();
+    renderMode();
+    if ((state.mode === "play" || state.mode === "build") && !state.initialRefreshSent) {
+      requestInitialRefresh();
+    }
+    if (state.mode === "play") {
+      const input = byId("inputfield");
+      if (input) {
+        input.focus();
+      }
+    }
   }
 
   function ensureRailBrandPresent() {
@@ -182,14 +327,14 @@
   }
 
   function saveRailOrder() {
-    const rail = byId("right-rail");
+    const rail = railContainer();
     if (!rail) return;
     state.rightRailOrder = Array.from(rail.querySelectorAll(".rail-panel")).map((panel) => panel.dataset.panelKey).filter(Boolean);
     saveUiPrefs();
   }
 
   function applyRailOrder() {
-    const rail = byId("right-rail");
+    const rail = railContainer();
     if (!rail) return;
     state.rightRailOrder.forEach((key) => {
       const panel = rail.querySelector(`.rail-panel[data-panel-key="${key}"]`);
@@ -200,7 +345,7 @@
   }
 
   function bindRailPanels() {
-    const rail = byId("right-rail");
+    const rail = railContainer();
     if (!rail) return;
     let draggedPanel = null;
     rail.querySelectorAll(".rail-panel").forEach((panel) => {
@@ -305,7 +450,7 @@
   }
 
   function primaryFeedId() {
-    return byId("feed-overlay") ? "feed-overlay" : byId("feed-surface") ? "feed-surface" : "messagewindow";
+    return byId("feed-surface") ? "feed-surface" : byId("messagewindow") ? "messagewindow" : "feed-overlay";
   }
 
   function appendDebug(label, payload) {
@@ -313,6 +458,22 @@
     if (!log) return;
     const line = `[${new Date().toLocaleTimeString()}] ${label}\n${JSON.stringify(payload, null, 2)}\n\n`;
     log.textContent = (line + log.textContent).slice(0, 12000);
+  }
+
+  function scrollFeedToBottom(target) {
+    if (!target) return;
+    const containers = [
+      target,
+      target.closest("#feed-text"),
+      target.closest("#feed-world"),
+      target.closest("#feed-chat"),
+    ].filter(Boolean);
+
+    requestAnimationFrame(() => {
+      containers.forEach((node) => {
+        node.scrollTop = node.scrollHeight;
+      });
+    });
   }
 
   function appendRichLine(targetId, html, cssClass) {
@@ -325,7 +486,7 @@
     row.className = `feed-line ${cssClass || "out"}`;
     row.innerHTML = html || "&nbsp;";
     target.appendChild(row);
-    target.scrollTop = target.scrollHeight;
+    scrollFeedToBottom(target);
     const roomContext = byId("room-context");
     if (roomContext && targetId === primaryFeedId()) {
       roomContext.textContent = `Live session • ${target.children.length} lines`;
@@ -466,7 +627,7 @@
     line.className = "cmd-echo";
     line.textContent = `> ${normalized}`;
     msgWindow.appendChild(line);
-    msgWindow.scrollTop = msgWindow.scrollHeight;
+    scrollFeedToBottom(msgWindow);
   }
 
   function updateConnection(open) {
@@ -748,7 +909,7 @@
     const panel = byId("builder-panel");
     const launchButton = byId("builder-launch-godot");
     if (panel) {
-      panel.hidden = !enabled;
+      panel.hidden = state.mode !== "build" || !enabled;
     }
     if (launchButton) {
       launchButton.hidden = !enabled;
@@ -756,6 +917,9 @@
     if (!enabled) {
       setBuilderLastAction("Locked");
       setBuilderStatus("Builder mode unavailable", "idle");
+      if (state.mode === "build") {
+        setMode("play");
+      }
       return;
     }
     syncBuilderAreaFromMap();
@@ -881,6 +1045,9 @@
   }
 
   async function openGodotBuilder() {
+    if (!ensureBuildMode("Builder launch")) {
+      return;
+    }
     if (state.builder.launcherBusy) {
       return;
     }
@@ -911,6 +1078,9 @@
   }
 
   async function exportBuilderMap() {
+    if (!ensureBuildMode("Builder export")) {
+      return;
+    }
     const areaId = getBuilderAreaId();
     if (!areaId) {
       toast("Enter an area id first.");
@@ -939,6 +1109,9 @@
   }
 
   async function loadBuilderHistory() {
+    if (!ensureBuildMode("Builder history")) {
+      return;
+    }
     const areaId = getBuilderAreaId();
     if (!areaId) {
       toast("Enter an area id first.");
@@ -965,6 +1138,9 @@
   }
 
   async function runBuilderDiff(preview) {
+    if (!ensureBuildMode(preview ? "Builder preview" : "Builder apply")) {
+      return;
+    }
     let diff = null;
     try {
       diff = parseBuilderDiffEditor();
@@ -1000,6 +1176,9 @@
   }
 
   async function runBuilderUndo() {
+    if (!ensureBuildMode("Builder undo")) {
+      return;
+    }
     if (!state.builder.lastUndoDiff) {
       toast("No undo diff is cached yet.");
       return;
@@ -1027,6 +1206,9 @@
   }
 
   async function runBuilderRedo() {
+    if (!ensureBuildMode("Builder redo")) {
+      return;
+    }
     if (!state.builder.lastDiff) {
       toast("No applied diff is cached yet.");
       return;
@@ -1477,6 +1659,7 @@
       byId("map-room-name").textContent = currentRoom.name;
       byId("room-context").textContent = currentRoom.name;
     }
+    updateSceneImage(currentRoom);
     byId("map-meta-rooms").textContent = `Rooms ${state.map.rooms.length}`;
     byId("map-meta-exits").textContent = `Exits ${mapEdges().length}`;
     byId("map-meta-zoom").textContent = state.map.zone ? `Zone ${String(state.map.zone).replace(/_/g, " ")}` : "Zone local";
@@ -1539,12 +1722,8 @@
     document.querySelectorAll(".feed-view").forEach((panel) => {
       panel.classList.toggle("active", panel.id === `feed-${viewName}`);
     });
-    if (viewName === "map") {
-      document.getElementById("map-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-    if (viewName === "inventory") {
-      document.getElementById("inventory-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    byId("map-panel")?.classList.toggle("is-highlighted", viewName === "map");
+    byId("inventory-panel")?.classList.toggle("is-highlighted", viewName === "inventory");
     updateInputHint();
     saveUiPrefs();
   }
@@ -1556,7 +1735,7 @@
     row.className = `chat-line ${cssClass}`;
     row.textContent = text;
     chatWindow.appendChild(row);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    scrollFeedToBottom(chatWindow);
   }
 
   function findPath(startId, targetId, edges) {
@@ -1937,6 +2116,7 @@
   function init() {
     loadHotbar();
     loadUiPrefs();
+    renderMode();
     resetLeftRailScroll();
     bootstrapEvennia();
     applyRailOrder();
@@ -1960,8 +2140,17 @@
       });
     }
 
-    document.querySelectorAll("#topbar-tabs .chrome-tab").forEach((button) => {
+    document.querySelectorAll("#topbar-tabs .chrome-tab[data-view]").forEach((button) => {
       button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+    byId("mode-exit-button")?.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+    byId("mode-return-play")?.addEventListener("click", () => {
+      setMode("play");
+    });
+    byId("mode-build-exit")?.addEventListener("click", () => {
+      window.location.href = "/";
     });
     byId("reconnect-button")?.addEventListener("click", () => {
       cancelReconnect();
@@ -2028,7 +2217,10 @@
       void runBuilderRedo();
     });
     byId("builder-launch-godot")?.addEventListener("click", () => {
-      void openGodotBuilder();
+      if (!state.builder.enabled) {
+        return;
+      }
+      setMode("build");
     });
     switchView(state.activeView);
     ensureRailBrandPresent();
@@ -2104,10 +2296,12 @@
     window.setTimeout(() => {
       bootstrapEvennia();
       const input = byId("inputfield");
-      if (input) {
+      if (input && state.mode === "play") {
         input.focus();
       }
-      requestInitialRefresh();
+      if (state.mode !== "landing") {
+        requestInitialRefresh();
+      }
     }, 800);
   }
 

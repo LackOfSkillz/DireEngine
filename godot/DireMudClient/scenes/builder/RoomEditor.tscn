@@ -4,7 +4,7 @@
 
 [node name="RoomEditor" type="PanelContainer"]
 visible = false
-custom_minimum_size = Vector2(0, 320)
+custom_minimum_size = Vector2(0, 280)
 layout_mode = 2
 size_flags_horizontal = 3
 clip_contents = true
@@ -19,12 +19,12 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Header" type="Label" parent="Margin/VBoxContainer"]
 layout_mode = 2
 autowrap_mode = 3
-text = "Selected Room"
+text = "ROOM"
 
 [node name="InfoPanel" type="PanelContainer" parent="Margin/VBoxContainer"]
 layout_mode = 2
@@ -36,8 +36,8 @@ layout_mode = 2
 [node name="InfoGrid" type="GridContainer" parent="Margin/VBoxContainer/InfoPanel/Margin"]
 layout_mode = 2
 columns = 2
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 6
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 4
 
 [node name="RoomIdKey" type="Label" parent="Margin/VBoxContainer/InfoPanel/Margin/InfoGrid"]
 layout_mode = 2
@@ -108,7 +108,7 @@ theme_override_constants/separation = 8
 
 [node name="Header" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
 layout_mode = 2
-text = "Exits"
+text = "EXITS"
 
 [node name="Empty" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
 layout_mode = 2
@@ -116,7 +116,7 @@ autowrap_mode = 3
 text = "No exits on this room"
 
 [node name="ExitList" type="ItemList" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
-custom_minimum_size = Vector2(0, 110)
+custom_minimum_size = Vector2(0, 92)
 layout_mode = 2
 
 [node name="ExitEditor" type="PanelContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox"]
@@ -129,7 +129,7 @@ layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="SelectedExitId" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
 visible = false
@@ -138,7 +138,7 @@ text = "-"
 
 [node name="DirectionRow" type="HBoxContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="DirectionLabel" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/DirectionRow"]
 layout_mode = 2
@@ -218,7 +218,7 @@ layout_mode = 2
 text = "Target Zone"
 
 [node name="TargetZone" type="OptionButton" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
-custom_minimum_size = Vector2(0, 34)
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 
 [node name="TargetLabel" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
@@ -226,7 +226,7 @@ layout_mode = 2
 text = "Target Room"
 
 [node name="TargetRoom" type="OptionButton" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
-custom_minimum_size = Vector2(0, 34)
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 
 [node name="LabelText" type="Label" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
@@ -234,7 +234,7 @@ layout_mode = 2
 text = "Label"
 
 [node name="LabelInput" type="LineEdit" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
-custom_minimum_size = Vector2(0, 34)
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 placeholder_text = "Archway"
 
@@ -243,7 +243,7 @@ layout_mode = 2
 text = "Aliases"
 
 [node name="AliasesInput" type="LineEdit" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
-custom_minimum_size = Vector2(0, 34)
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 placeholder_text = "hidden panel, secret door"
 
@@ -254,9 +254,10 @@ text = "Direction remains system-facing. Target, label, and aliases update the s
 
 [node name="ButtonRow" type="HBoxContainer" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="Save" type="Button" parent="Margin/VBoxContainer/ExitsSection/Margin/VBox/ExitEditor/Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Save Exit"

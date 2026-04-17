@@ -18,11 +18,11 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="Title" type="Label" parent="Margin/VBox"]
 layout_mode = 2
-text = "No object selected"
+text = "CONTENT"
 
 [node name="SubTitle" type="Label" parent="Margin/VBox"]
 layout_mode = 2
@@ -37,11 +37,11 @@ layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="Margin/VBox/IdentitySection/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="Header" type="Label" parent="Margin/VBox/IdentitySection/Margin/VBox"]
 layout_mode = 2
-text = "Identity"
+text = "IDENTITY"
 
 [node name="NameLabel" type="Label" parent="Margin/VBox/IdentitySection/Margin/VBox"]
 layout_mode = 2
@@ -55,7 +55,7 @@ layout_mode = 2
 text = "Description"
 
 [node name="DescriptionInput" type="TextEdit" parent="Margin/VBox/IdentitySection/Margin/VBox"]
-custom_minimum_size = Vector2(0, 110)
+custom_minimum_size = Vector2(0, 84)
 layout_mode = 2
 
 [node name="NpcSection" type="PanelContainer" parent="Margin/VBox"]
@@ -67,11 +67,11 @@ layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="Margin/VBox/NpcSection/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="Header" type="Label" parent="Margin/VBox/NpcSection/Margin/VBox"]
 layout_mode = 2
-text = "Stats"
+text = "STATS"
 
 [node name="StatsGrid" type="GridContainer" parent="Margin/VBox/NpcSection/Margin/VBox"]
 layout_mode = 2
@@ -116,7 +116,7 @@ text = "Behavior"
 
 [node name="FlagsRow" type="HBoxContainer" parent="Margin/VBox/NpcSection/Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="AggressiveToggle" type="CheckButton" parent="Margin/VBox/NpcSection/Margin/VBox/FlagsRow"]
 layout_mode = 2
@@ -137,15 +137,15 @@ layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="Margin/VBox/ItemSection/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="Header" type="Label" parent="Margin/VBox/ItemSection/Margin/VBox"]
 layout_mode = 2
-text = "Properties"
+text = "PROPERTIES"
 
 [node name="TypeRow" type="HBoxContainer" parent="Margin/VBox/ItemSection/Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="TypeLabel" type="Label" parent="Margin/VBox/ItemSection/Margin/VBox/TypeRow"]
 layout_mode = 2
@@ -188,14 +188,14 @@ layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="Margin/VBox/InventorySection/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="Header" type="Label" parent="Margin/VBox/InventorySection/Margin/VBox"]
 layout_mode = 2
-text = "Inventory"
+text = "INVENTORY"
 
 [node name="InventoryList" type="ItemList" parent="Margin/VBox/InventorySection/Margin/VBox"]
-custom_minimum_size = Vector2(0, 110)
+custom_minimum_size = Vector2(0, 92)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -204,17 +204,21 @@ layout_mode = 2
 columns = 2
 
 [node name="SaveButton" type="Button" parent="Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 text = "Save"
 
 [node name="EditTemplateButton" type="Button" parent="Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 text = "Edit Template"
 
 [node name="BackButton" type="Button" parent="Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 text = "Back To Room"
 
 [node name="DeleteButton" type="Button" parent="Margin/VBox/ButtonRow"]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 text = "Delete"

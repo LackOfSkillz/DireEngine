@@ -31,6 +31,7 @@ def _web_proxy_port():
 
 def _external_webclient_redirect(request):
     target_path = reverse("webclient:index")
+    target_path = f"{target_path}?mode=play"
     host = request.get_host().split(":", 1)[0]
     proxy_port = _web_proxy_port()
     if not proxy_port:

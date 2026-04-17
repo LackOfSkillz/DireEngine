@@ -10,225 +10,297 @@
 
 {% block client %}
 
-<div id="dragonsire-shell">
-  <aside id="left-rail" class="panel parchment-panel">
-    <div id="left-rail-body">
-    <div id="character-card">
-      <h2 id="character-name">Adventurer</h2>
-      <div class="character-meta" id="char-profession">Unknown</div>
-      <div class="character-meta" id="char-rank">Rank 1</div>
-      <div class="character-meta" id="character-hp-label">Health 100 / 100</div>
-      <div class="meter"><div id="hp-fill" class="meter-fill hp-fill"></div></div>
-      <div class="character-meta" id="character-stamina-label">Stamina 100 / 100</div>
-      <div class="meter"><div id="stamina-fill" class="meter-fill stamina-fill"></div></div>
-    </div>
-    <div class="subpanel">
-      <div class="subpanel-title">Subsystem</div>
-      <div id="subsystem-bar" class="status-tag">Unknown</div>
-    </div>
-    <div class="subpanel">
-      <div class="subpanel-title">Status</div>
-      <div id="status-list" class="tag-list"></div>
-    </div>
-    <div class="subpanel">
-      <div class="subpanel-title">Hotbar</div>
-      <div id="hotbar" class="hotbar-row">
-        <button class="hotbar-button" data-index="0" data-command="look">Look</button>
-        <button class="hotbar-button" data-index="1" data-command="inventory">Inv</button>
-        <button class="hotbar-button" data-index="2" data-command="stats">Stats</button>
-      </div>
-    </div>
-    <div class="subpanel">
-      <div class="subpanel-title">Abilities</div>
-      <div id="ability-list" class="tag-list"></div>
-    </div>
-    <div class="subpanel">
-      <div class="subpanel-title">Session</div>
-      <div id="session-status" class="status-tag">Ready</div>
-      <div id="recent-characters" class="tag-list compact"></div>
-      <div id="session-actions" class="action-row action-row-2">
-        <button id="reconnect-button" type="button">Reconnect</button>
-        <button id="audio-toggle" type="button">Audio On</button>
-      </div>
-    </div>
-    </div>
-  </aside>
-
-  <main id="center-stage">
-    <div id="topbar" class="panel brass-panel">
-      <div id="title-cluster">
-        <div id="titlebar">Dragons Ire</div>
-        <div id="subtitlebar">Browser Adventurer Client</div>
-      </div>
-      <div id="topbar-tabs">
-        <button class="chrome-tab active" data-view="world">World</button>
-        <button class="chrome-tab" data-view="chat">Chat</button>
-        <button class="chrome-tab" data-view="map">Map</button>
-        <button class="chrome-tab" data-view="inventory">Inventory</button>
-        <button id="builder-launch-godot" class="chrome-tab builder-launch-button" type="button" hidden>Launch Builder</button>
-      </div>
-      <div id="connection-indicator">Connecting</div>
-    </div>
-
-    <section id="console-panel" class="panel obsidian-panel">
-      <div class="panel-title-row console-header">
-        <div class="panel-title">Game Feed</div>
-        <div id="room-context">Live session</div>
-      </div>
-      <div id="feed-overlay"></div>
-      <div id="console-views">
-        <div id="feed-world" class="feed-view active">
-          <div id="feed-surface"></div>
-          <div id="messagewindow"></div>
+<div id="direweb-app">
+  <div id="mode-landing" class="mode-surface" hidden>
+    <div class="mode-shell mode-shell-landing">
+      <section class="panel obsidian-panel mode-panel landing-mode-panel">
+        <div class="panel-title-row">
+          <div class="panel-title">Webclient Stub</div>
+          <div class="panel-subtitle">Landing Lives At /</div>
         </div>
-        <div id="feed-chat" class="feed-view">
-          <div id="chatwindow"></div>
+        <div class="mode-copy">
+          <h2 class="mode-heading">The real landing page stays on the website root.</h2>
+          <p class="mode-text">This webclient is reserved for play mode and build mode. Use the website splash page for landing and character entry.</p>
+        </div>
+        <div class="action-row action-row-2 mode-actions">
+          <a href="/" class="chrome-tab mode-link-button">Website Landing</a>
+          <a href="/play" class="chrome-tab mode-link-button">Open Client</a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="mode-play" class="mode-surface" hidden>
+    <div id="dragonsire-shell">
+      <header id="topbar" class="panel brass-panel">
+        <div id="play-header-main">
+          <div id="title-cluster">
+            <div id="titlebar"><span id="character-name">Adventurer</span></div>
+            <div id="subtitlebar"><span id="char-profession">Unknown</span><span class="identity-separator">•</span><span id="char-rank">Rank 1</span></div>
+          </div>
+          <div id="topbar-tabs">
+            <button class="chrome-tab active" data-view="world">World</button>
+            <button class="chrome-tab" data-view="chat">Chat</button>
+            <button class="chrome-tab" data-view="map">Map</button>
+            <button class="chrome-tab" data-view="inventory">Inventory</button>
+            <button id="builder-launch-godot" class="chrome-tab builder-launch-button" type="button" hidden>Builder</button>
+            <button id="mode-exit-button" class="chrome-tab" type="button">Exit</button>
+          </div>
+        </div>
+        <div id="topbar-utility">
+          <div id="topbar-status-strip">
+            <span id="session-status" class="status-tag">Ready</span>
+            <span id="connection-indicator">Connecting</span>
+            <span id="footer-status">Standing by</span>
+          </div>
+        </div>
+      </header>
+
+      <div id="main-layout">
+        <div id="left-sidebar">
+          <div class="ds-card character-card" id="character-panel">
+            <div class="ds-section-title">Character</div>
+            <div id="character-card">
+              <div class="character-meta" id="character-hp-label">Health 100 / 100</div>
+              <div class="meter"><div id="hp-fill" class="meter-fill hp-fill"></div></div>
+              <div class="character-meta" id="character-stamina-label">Stamina 100 / 100</div>
+              <div class="meter"><div id="stamina-fill" class="meter-fill stamina-fill"></div></div>
+            </div>
+          </div>
+          <div class="ds-card nav-card">
+            <div class="ds-section-title">Navigation</div>
+            <div class="subpanel compact-subpanel">
+              <div class="subpanel-title">Subsystem</div>
+              <div id="subsystem-bar" class="status-tag">Unknown</div>
+            </div>
+            <div class="subpanel compact-subpanel">
+              <div class="subpanel-title">Abilities</div>
+              <div id="ability-list" class="tag-list"></div>
+            </div>
+            <div class="subpanel compact-subpanel">
+              <div class="subpanel-title">Session</div>
+              <div id="recent-characters" class="tag-list compact"></div>
+              <div id="session-actions" class="action-row action-row-2">
+                <button id="reconnect-button" type="button">Reconnect</button>
+                <button id="audio-toggle" type="button">Audio On</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="center-column">
+          <div id="feed-header" class="ds-card">
+            <div class="panel-title-row console-header">
+              <div class="panel-title">Game Feed</div>
+              <div id="room-context">Live session</div>
+            </div>
+          </div>
+          <div id="feed-body">
+            <div id="feed-text" class="ds-card">
+              <div id="console-panel">
+                <div id="feed-overlay"></div>
+                <div id="console-views">
+                  <div id="feed-world" class="feed-view active">
+                    <div id="feed-surface"></div>
+                    <div id="messagewindow"></div>
+                  </div>
+                  <div id="feed-chat" class="feed-view">
+                    <div id="chatwindow"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="feed-side">
+              <div class="ds-card" id="scene-image"></div>
+              <div class="ds-card" id="map-panel">
+                <div class="panel-title-row">
+                  <div class="panel-title">Local Map</div>
+                  <div class="panel-title-actions">
+                    <button id="map-fit-toggle" class="chrome-tab" type="button">Fit</button>
+                    <button id="map-center-toggle" class="chrome-tab" type="button">Center</button>
+                    <button id="map-fullscreen-toggle" class="chrome-tab" type="button">⛶</button>
+                  </div>
+                </div>
+                <div id="map-room-name">Awaiting room data</div>
+                <div id="map-meta-row">
+                  <span id="map-meta-rooms">Rooms 0</span>
+                  <span id="map-meta-exits">Exits 0</span>
+                  <span id="map-meta-zoom">Zoom 1.0x</span>
+                </div>
+                <canvas id="map-canvas" width="320" height="320"></canvas>
+                <div id="map-tooltip"></div>
+                <div id="exit-strip" class="list-panel compact"></div>
+                <div id="compass" class="compass-grid">
+                  <button data-dir="northwest">NW</button>
+                  <button data-dir="north">N</button>
+                  <button data-dir="northeast">NE</button>
+                  <button data-dir="west">W</button>
+                  <button data-dir="look">•</button>
+                  <button data-dir="east">E</button>
+                  <button data-dir="southwest">SW</button>
+                  <button data-dir="south">S</button>
+                  <button data-dir="southeast">SE</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="command-bar">
+            <section id="input-bar" class="panel brass-panel">
+              <section id="input-panel" data-role-input data-update-append>
+                <div id="inputform">
+                  <div id="prompt" class="prompt"></div>
+                  <div id="inputcontrol">
+                    <textarea id="inputfield"></textarea>
+                    <button id="inputsend" type="button">&gt;</button>
+                  </div>
+                </div>
+              </section>
+            </section>
+            <div id="bottom-bar">
+              <div id="macros">
+                <div id="macro-row">
+                  <div id="hotbar" class="hotbar-row">
+                    <button class="hotbar-button macro-button" data-index="0" data-command="look">look</button>
+                    <button class="hotbar-button macro-button" data-index="1" data-command="inv">inv</button>
+                    <button class="hotbar-button macro-button" data-index="2" data-command="attack">attack</button>
+                  </div>
+                </div>
+              </div>
+              <div id="script-controls" class="action-row">
+                <select id="script-select" aria-label="Script selection">
+                  <option value="">Scripts</option>
+                </select>
+                <button id="script-play" type="button">▶</button>
+                <button id="script-pause" type="button">⏸</button>
+                <button id="script-stop" type="button">■</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="right-sidebar">
+          <div class="ds-card character-stats">
+            <div class="ds-section-title">Character Stats</div>
+            <div class="character-meta">Status</div>
+            <div id="footer-status">Standing by</div>
+            <div class="character-meta">Health</div>
+            <div class="meter slim-meter"><div id="hp-fill-footer" class="meter-fill hp-fill"></div></div>
+            <div class="character-meta">Stamina</div>
+            <div class="meter slim-meter"><div id="stamina-fill-footer" class="meter-fill stamina-fill"></div></div>
+          </div>
+          <div class="ds-card inventory-card" id="inventory-panel" data-panel-key="inventory" draggable="true">
+            <div class="ds-section-title">Inventory</div>
+            <div class="panel-title-row">
+              <div class="panel-title">Inventory</div>
+              <div class="panel-subtitle" id="inventory-mode">Click to inspect</div>
+            </div>
+            <div id="inventory-list" class="inventory-grid"></div>
+            <div id="inventory-actions" class="action-row">
+              <button data-action="look">Look</button>
+              <button data-action="get">Get</button>
+              <button data-action="drop">Drop</button>
+            </div>
+          </div>
+          <div class="ds-card equipment-grid" id="equipment-panel" data-panel-key="equipment" draggable="true">
+            <div class="ds-section-title">Equipment</div>
+            <div class="panel-title-row">
+              <div class="panel-title">Equipment</div>
+              <div class="panel-subtitle">Drop item to equip</div>
+            </div>
+            <div id="equipment-list" class="list-panel compact"></div>
+          </div>
+          <div class="ds-card status-card">
+            <div class="ds-section-title">Status</div>
+            <div id="status-list" class="tag-list"></div>
+          </div>
+          <div class="ds-card debug-card collapsed" id="debug-panel" data-panel-key="debug" draggable="true">
+            <div class="ds-section-title">Debug</div>
+            <div class="panel-title-row">
+              <div class="panel-title">Debug</div>
+              <button id="debug-toggle" class="chrome-tab active" type="button">Show</button>
+            </div>
+            <div id="debug-body">
+              <div id="debug-summary">
+                <span id="debug-last-cmd">Last cmd: none</span>
+                <span id="debug-last-room-count">Rooms: 0</span>
+                <span id="debug-last-character">Character: none</span>
+                <span id="debug-last-profession">Profession: Unknown</span>
+                <span id="debug-last-subsystem">Subsystem: Unknown</span>
+              </div>
+              <pre id="debug-log"></pre>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <section id="input-panel" class="panel brass-panel" data-role-input data-update-append>
-      <div id="inputform">
-        <div id="prompt" class="prompt"></div>
-        <div id="inputcontrol">
-          <textarea id="inputfield"></textarea>
-          <button id="inputsend" type="button">&gt;</button>
+  <div id="mode-build" class="mode-surface" hidden>
+    <div class="mode-shell mode-shell-build">
+      <section class="panel obsidian-panel mode-panel build-mode-panel">
+        <div class="panel-title-row">
+          <div class="panel-title">Builder Mode</div>
+          <div class="panel-subtitle">Shell Reserved</div>
         </div>
-      </div>
-    </section>
-
-    <section id="resource-strip" class="panel brass-panel">
-      <div class="resource-block">
-        <span class="resource-label">Health</span>
-        <div class="meter slim-meter"><div id="hp-fill-footer" class="meter-fill hp-fill"></div></div>
-      </div>
-      <div class="resource-block">
-        <span class="resource-label">Stamina</span>
-        <div class="meter slim-meter"><div id="stamina-fill-footer" class="meter-fill stamina-fill"></div></div>
-      </div>
-      <div class="resource-block coin-block">
-        <span class="resource-label">Status</span>
-        <span id="footer-status">Standing by</span>
-      </div>
-    </section>
-  </main>
-
-  <aside id="right-rail">
-    <section id="map-panel" class="panel obsidian-panel rail-panel" data-panel-key="map" draggable="true">
-      <div class="panel-title-row">
-        <div class="panel-title">Local Map</div>
-        <div class="panel-title-actions">
-          <div id="map-room-name">Awaiting room data</div>
-          <button id="map-fit-toggle" class="chrome-tab" type="button">Fit</button>
-          <button id="map-center-toggle" class="chrome-tab" type="button">Center</button>
-          <button id="map-fullscreen-toggle" class="chrome-tab" type="button">⛶</button>
+        <div class="mode-copy">
+          <h2 class="mode-heading">Build mode is being extracted into the browser shell.</h2>
+          <p class="mode-text">This phase keeps the builder rail deprecated and reserves this workspace for the real in-browser editor.</p>
         </div>
-      </div>
-      <div id="map-meta-row">
-        <span id="map-meta-rooms">Rooms 0</span>
-        <span id="map-meta-exits">Exits 0</span>
-        <span id="map-meta-zoom">Zoom 1.0x</span>
-      </div>
-      <canvas id="map-canvas" width="320" height="320"></canvas>
-      <div id="map-tooltip"></div>
-      <div id="exit-strip" class="list-panel compact"></div>
-      <div id="compass" class="compass-grid">
-        <button data-dir="northwest">NW</button>
-        <button data-dir="north">N</button>
-        <button data-dir="northeast">NE</button>
-        <button data-dir="west">W</button>
-        <button data-dir="look">•</button>
-        <button data-dir="east">E</button>
-        <button data-dir="southwest">SW</button>
-        <button data-dir="south">S</button>
-        <button data-dir="southeast">SE</button>
-      </div>
-    </section>
-
-    <section id="builder-panel" class="panel obsidian-panel rail-panel" data-panel-key="builder" draggable="true" hidden>
-      <div class="panel-title-row">
-        <div class="panel-title">Builder</div>
-        <div class="panel-subtitle" id="builder-availability">Locked</div>
-      </div>
-      <div id="builder-status" class="status-tag">Builder mode unavailable</div>
-      <div class="builder-field-row">
-        <label class="builder-field" for="builder-area-id">
-          <span>Area ID</span>
-          <input id="builder-area-id" type="text" placeholder="starter_town" autocomplete="off">
-        </label>
-      </div>
-      <div class="action-row builder-row-3">
-        <button id="builder-use-zone" type="button">Use Zone</button>
-        <button id="builder-export" type="button">Export</button>
-        <button id="builder-history-refresh" type="button">History</button>
-      </div>
-      <div class="subpanel builder-subpanel">
-        <div class="subpanel-title">Diff Editor</div>
-        <textarea id="builder-diff-editor" class="builder-textarea" spellcheck="false" placeholder='{
+        <div class="status-tag" id="build-mode-status">Play mode remains active in the background. Session state is preserved while the builder shell is being staged.</div>
+        <div class="action-row action-row-2 mode-actions">
+          <button id="mode-return-play" class="chrome-tab" type="button">Return to Play</button>
+          <button id="mode-build-exit" class="chrome-tab" type="button">Exit</button>
+        </div>
+        <section id="builder-panel" class="panel obsidian-panel rail-panel" data-panel-key="builder" draggable="true" hidden>
+          <div class="panel-title-row">
+            <div class="panel-title">Builder</div>
+            <div class="panel-subtitle" id="builder-availability">Locked</div>
+          </div>
+          <div id="builder-status" class="status-tag">Builder mode unavailable</div>
+          <div class="builder-field-row">
+            <label class="builder-field" for="builder-area-id">
+              <span>Area ID</span>
+              <input id="builder-area-id" type="text" placeholder="starter_town" autocomplete="off">
+            </label>
+          </div>
+          <div class="action-row builder-row-3">
+            <button id="builder-use-zone" type="button">Use Zone</button>
+            <button id="builder-export" type="button">Export</button>
+            <button id="builder-history-refresh" type="button">History</button>
+          </div>
+          <div class="subpanel builder-subpanel">
+            <div class="subpanel-title">Diff Editor</div>
+            <textarea id="builder-diff-editor" class="builder-textarea" spellcheck="false" placeholder='{
   "area_id": "starter_town",
   "operations": []
 }'></textarea>
-      </div>
-      <div class="action-row builder-row-4">
-        <button id="builder-preview" type="button">Preview</button>
-        <button id="builder-apply" type="button">Apply</button>
-        <button id="builder-undo" type="button">Undo</button>
-        <button id="builder-redo" type="button">Redo</button>
-      </div>
-      <div class="subpanel builder-subpanel">
-        <div class="subpanel-title">Result</div>
-        <pre id="builder-output" class="builder-output">Awaiting Builder action.</pre>
-      </div>
-      <div class="subpanel builder-subpanel">
-        <div class="subpanel-title">Recent History</div>
-        <div id="builder-history" class="list-panel compact"></div>
-      </div>
-    </section>
-
-    <section id="inventory-panel" class="panel obsidian-panel rail-panel" data-panel-key="inventory" draggable="true">
-      <div class="panel-title-row">
-        <div class="panel-title">Inventory</div>
-        <div class="panel-subtitle" id="inventory-mode">Click to inspect</div>
-      </div>
-      <div id="inventory-list" class="list-panel"></div>
-      <div id="inventory-actions" class="action-row">
-        <button data-action="look">Look</button>
-        <button data-action="get">Get</button>
-        <button data-action="drop">Drop</button>
-      </div>
-    </section>
-
-    <section id="equipment-panel" class="panel obsidian-panel rail-panel" data-panel-key="equipment" draggable="true">
-      <div class="panel-title-row">
-        <div class="panel-title">Equipment</div>
-        <div class="panel-subtitle">Drop item to equip</div>
-      </div>
-      <div id="equipment-list" class="list-panel compact"></div>
-    </section>
-
-    <section id="debug-panel" class="panel obsidian-panel collapsed rail-panel" data-panel-key="debug" draggable="true">
-      <div class="panel-title-row">
-        <div class="panel-title">Debug</div>
-        <button id="debug-toggle" class="chrome-tab active" type="button">Show</button>
-      </div>
-      <div id="debug-body">
-        <div id="debug-summary">
-          <span id="debug-last-cmd">Last cmd: none</span>
-          <span id="debug-last-room-count">Rooms: 0</span>
-          <span id="debug-last-character">Character: none</span>
-          <span id="debug-last-profession">Profession: Unknown</span>
-          <span id="debug-last-subsystem">Subsystem: Unknown</span>
-        </div>
-        <pre id="debug-log"></pre>
-      </div>
-    </section>
-  </aside>
+          </div>
+          <div class="action-row builder-row-4">
+            <button id="builder-preview" type="button">Preview</button>
+            <button id="builder-apply" type="button">Apply</button>
+            <button id="builder-undo" type="button">Undo</button>
+            <button id="builder-redo" type="button">Redo</button>
+          </div>
+          <div class="subpanel builder-subpanel">
+            <div class="subpanel-title">Result</div>
+            <pre id="builder-output" class="builder-output">Awaiting Builder action.</pre>
+          </div>
+          <div class="subpanel builder-subpanel">
+            <div class="subpanel-title">Recent History</div>
+            <div id="builder-history" class="list-panel compact"></div>
+          </div>
+        </section>
+      </section>
+    </div>
+  </div>
 </div>
 <div id="toast-stack"></div>
 
+<script>
+console.log("WEBCLIENT TEMPLATE LOADED: V2 SHELL");
+</script>
+
 {% endblock %}
 {% block scripts %}
-<link rel="stylesheet" href="/static/webclient/css/dragonsire-browser.css?v=9">
-<script src="/static/webclient/js/dragonsire-browser-v2.js?v=15"></script>
+<link rel="stylesheet" href="/static/webclient/css/dragonsire-browser.css?v=11">
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=16"></script>
 
 {% endblock %}

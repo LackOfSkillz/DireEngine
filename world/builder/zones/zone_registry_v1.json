@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "zones": {
+    "western_wilds": {
+      "name": "Western Wilds",
+      "rooms": {}
+    }
+  }
+}

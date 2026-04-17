@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/MapPanel.gd" id="2_map"]
@@ -13,6 +13,167 @@
 [ext_resource type="PackedScene" path="res://scenes/builder/ContentTree.tscn" id="11_content_tree"]
 [ext_resource type="PackedScene" path="res://scenes/builder/InstanceEditor.tscn" id="12_instance_editor"]
 [ext_resource type="PackedScene" path="res://scenes/builder/TemplateWorkspace.tscn" id="13_template_workspace"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxDockPanel"]
+bg_color = Color(0.141176, 0.101961, 0.0784314, 0.97)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.831373, 0.701961, 0.486275, 0.25)
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxTopBar"]
+bg_color = Color(0.145098, 0.0980392, 0.0745098, 0.99)
+border_width_bottom = 1
+border_color = Color(0.2, 0.15, 0.1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxCenterPanel"]
+bg_color = Color(0.101961, 0.0784314, 0.0627451, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.388235, 0.243137, 0.129412, 0.3)
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxConsolePanel"]
+bg_color = Color(0.101961, 0.0784314, 0.0627451, 0.99)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.831373, 0.701961, 0.486275, 0.22)
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxTopButtonNormal"]
+bg_color = Color(0.180392, 0.129412, 0.0941176, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.831373, 0.701961, 0.486275, 0.24)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxTopButtonHover"]
+bg_color = Color(0.301961, 0.207843, 0.121569, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.878431, 0.721569, 0.352941, 0.5)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxTopButtonPressed"]
+bg_color = Color(0.47451, 0.301961, 0.145098, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.878431, 0.721569, 0.352941, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxToolButtonNormal"]
+bg_color = Color(0.160784, 0.109804, 0.0823529, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.831373, 0.701961, 0.486275, 0.16)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxToolButtonHover"]
+bg_color = Color(0.239216, 0.164706, 0.113725, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.878431, 0.721569, 0.352941, 0.4)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxToolButtonPressed"]
+bg_color = Color(0.47451, 0.301961, 0.145098, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.878431, 0.721569, 0.352941, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxInsetPanel"]
+bg_color = Color(0.117647, 0.0823529, 0.0627451, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.831373, 0.701961, 0.486275, 0.14)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -37,7 +198,7 @@ visible = false
 layout_mode = 0
 offset_right = 180.0
 offset_bottom = 24.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
 
 [node name="BuilderController" type="Control" parent="."]
 layout_mode = 3
@@ -56,12 +217,269 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+
+[node name="RootVBox" type="VBoxContainer" parent="BuilderController/BuilderRoot"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="TopBar" type="HBoxContainer" parent="BuilderController/BuilderRoot/RootVBox"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+modulate = Color(0.9, 0.9, 0.9, 1)
+theme_override_styles/panel = SubResource("StyleBoxTopBar")
+theme_override_constants/separation = 6
+
+[node name="ZoneLabel" type="Label" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.717647, 0.658824, 0.572549, 1)
+text = "Zone"
+
+[node name="ZoneDropdown" type="OptionButton" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxTopButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxTopButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxTopButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxTopButtonHover")
+
+[node name="SaveButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxTopButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxTopButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxTopButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxTopButtonHover")
+text = "Save"
+
+[node name="UndoButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxTopButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxTopButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxTopButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxTopButtonHover")
+text = "Undo"
+
+[node name="RedoButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxTopButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxTopButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxTopButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxTopButtonHover")
+text = "Redo"
+
+[node name="Spacer" type="Control" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ActiveToolLabel" type="Label" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.717647, 0.658824, 0.572549, 1)
+text = "Active Tool:"
+
+[node name="ActiveToolValue" type="Label" parent="BuilderController/BuilderRoot/RootVBox/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.784314, 0.607843, 0.235294, 1)
+text = "Select"
+
+[node name="WorkSplit" type="VSplitContainer" parent="BuilderController/BuilderRoot/RootVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+split_offset = 560
+
+[node name="OuterSplit" type="HSplitContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+split_offset = 208
+
+[node name="LeftDock" type="PanelContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit"]
+custom_minimum_size = Vector2(176, 0)
+layout_mode = 2
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxDockPanel")
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="ZoneHeader" type="Label" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+text = "Tools (DBV2-02)"
+
+[node name="ZoneStubValue" type="Label" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.717647, 0.658824, 0.572549, 1)
+text = "Current Zone: new_landing"
+
+[node name="ToolsHeader" type="Label" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.717647, 0.658824, 0.572549, 1)
+text = "Mode stubs"
+
+[node name="SelectToolButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+toggle_mode = true
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxToolButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxToolButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxToolButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxToolButtonHover")
+text = "Select"
+
+[node name="CreateRoomToolButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+toggle_mode = true
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxToolButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxToolButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxToolButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxToolButtonHover")
+text = "Create Room"
+
+[node name="DrawExitToolButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+toggle_mode = true
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxToolButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxToolButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxToolButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxToolButtonHover")
+text = "Draw Exit"
+
+[node name="DeleteToolButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/LeftDock/Margin/VBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxToolButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxToolButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxToolButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxToolButtonHover")
+text = "Delete"
+
+[node name="InnerSplit" type="HSplitContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+split_offset = 760
+
+[node name="CenterCanvas" type="PanelContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxCenterPanel")
+
+[node name="RightDock" type="PanelContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxDockPanel")
+
+[node name="RightSplit" type="VSplitContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+split_offset = 218
+
+[node name="InspectorDock" type="PanelContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxDockPanel")
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="Header" type="Label" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+text = "Inspector"
+
+[node name="Scroll" type="ScrollContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="InspectorContent" type="VBoxContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="BottomDock" type="PanelContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit"]
+custom_minimum_size = Vector2(0, 148)
+layout_mode = 2
+clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxConsolePanel")
+
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="ConsoleHeader" type="Label" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.717647, 0.658824, 0.572549, 1)
+text = "Log / Output"
 
 [node name="BuilderColumns" type="HBoxContainer" parent="BuilderController/BuilderRoot"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -253,7 +671,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="MapGrid" parent="BuilderController/BuilderRoot/BuilderColumns/CenterPanel/Margin" instance=ExtResource("8_map_grid")]
+[node name="MapGrid" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/CenterCanvas" instance=ExtResource("8_map_grid")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="RightPanel" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns"]
 visible = false
@@ -329,41 +750,50 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="RoomEditor" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("9_room_editor")]
+[node name="RoomEditor" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock/VBox/Scroll/InspectorContent" instance=ExtResource("9_room_editor")]
+layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="InstanceEditor" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("12_instance_editor")]
+[node name="InstanceEditor" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit/InspectorDock/VBox/Scroll/InspectorContent" instance=ExtResource("12_instance_editor")]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="TemplateSelector" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("10_template_selector")]
 
-[node name="ContentTree" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections" instance=ExtResource("11_content_tree")]
+[node name="ContentTree" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/OuterSplit/InnerSplit/RightDock/RightSplit" instance=ExtResource("11_content_tree")]
+custom_minimum_size = Vector2(0, 218)
 
-[node name="BuilderLogSection" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections"]
+[node name="BuilderLogSection" type="PanelContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxInsetPanel")
 
-[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection"]
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/BuilderLogSection"]
 layout_mode = 2
 
-[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin"]
+[node name="VBox" type="VBoxContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/BuilderLogSection/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Header" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin/VBox"]
+[node name="Header" type="Label" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/BuilderLogSection/Margin/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.717647, 0.658824, 0.572549, 1)
 text = "Log / Output"
 
-[node name="LogScroll" type="ScrollContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin/VBox"]
-custom_minimum_size = Vector2(0, 180)
+[node name="LogScroll" type="ScrollContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/BuilderLogSection/Margin/VBox"]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 clip_contents = true
 size_flags_vertical = 3
 
-[node name="BuilderLog" type="RichTextLabel" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/InspectorScroll/InspectorSections/BuilderLogSection/Margin/VBox/LogScroll"]
-custom_minimum_size = Vector2(0, 180)
+[node name="BuilderLog" type="RichTextLabel" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/BuilderLogSection/Margin/VBox/LogScroll"]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.909804, 0.862745, 0.784314, 1)
 bbcode_enabled = true
 scroll_following = true
 
@@ -375,26 +805,36 @@ layout_mode = 2
 visible = false
 layout_mode = 2
 
-[node name="SaveBar" type="PanelContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox"]
+[node name="SaveBar" type="PanelContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox"]
 layout_mode = 2
 clip_contents = true
+theme_override_styles/panel = SubResource("StyleBoxInsetPanel")
 
-[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar"]
+[node name="Margin" type="MarginContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/SaveBar"]
 layout_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin"]
+[node name="HBox" type="HBoxContainer" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/SaveBar/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SaveMapButton" type="Button" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin/HBox"]
+[node name="SaveMapButton" type="Button" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/SaveBar/Margin/HBox"]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.968627, 0.905882, 1)
+theme_override_styles/normal = SubResource("StyleBoxTopButtonNormal")
+theme_override_styles/hover = SubResource("StyleBoxTopButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxTopButtonPressed")
+theme_override_styles/focus = SubResource("StyleBoxTopButtonHover")
 text = "Save Map"
 
-[node name="DirtyLabel" type="Label" parent="BuilderController/BuilderRoot/BuilderColumns/RightPanel/Margin/VBox/SaveBar/Margin/HBox"]
+[node name="DirtyLabel" type="Label" parent="BuilderController/BuilderRoot/RootVBox/WorkSplit/BottomDock/Margin/VBox/SaveBar/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.909804, 0.862745, 0.784314, 1)
 text = "Saved"
 
 [node name="DeleteRoomConfirm" type="ConfirmationDialog" parent="BuilderController"]

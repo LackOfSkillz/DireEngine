@@ -34,7 +34,7 @@ func apply_diff(diff: Dictionary, preview: bool = false, group_id: String = "", 
 		payload["group_id"] = group_id.strip_edges()
 	if not session_id.strip_edges().is_empty():
 		payload["session_id"] = session_id.strip_edges()
-	return await _request_json("POST", "/map/diff/", payload)
+	return await _request_json_with_fallback("POST", "/map/diff/", payload)
 
 
 func save_all(diff: Dictionary, session_id: String = "") -> Dictionary:
@@ -44,15 +44,15 @@ func save_all(diff: Dictionary, session_id: String = "") -> Dictionary:
 	}
 	if not session_id.strip_edges().is_empty():
 		payload["session_id"] = session_id.strip_edges()
-	return await _request_json("POST", "/map/save-all/", payload)
+	return await _request_json_with_fallback("POST", "/map/save-all/", payload)
 
 
 func apply_undo(undo_diff: Dictionary) -> Dictionary:
-	return await _request_json("POST", "/map/undo/", {"undo_diff": undo_diff})
+	return await _request_json_with_fallback("POST", "/map/undo/", {"undo_diff": undo_diff})
 
 
 func apply_redo(diff: Dictionary) -> Dictionary:
-	return await _request_json("POST", "/map/redo/", {"diff": diff})
+	return await _request_json_with_fallback("POST", "/map/redo/", {"diff": diff})
 
 
 func get_history(area_id: String = "", limit: int = 20) -> Dictionary:
@@ -180,7 +180,7 @@ func _request_json_with_fallback(method: String, path: String, payload: Dictiona
 	if web_result.get("ok", false):
 		return web_result
 	var status_code := int(web_result.get("status", 0))
-	if status_code != 404 and status_code != 0:
+	if status_code != 404 and status_code != 403 and status_code != 0:
 		return web_result
 	print("Web Builder request failed, falling back to launcher:", method, path, web_result)
 	return await _request_json_with_base(method, LAUNCHER_API_BASE_URL, path, payload)
