@@ -883,14 +883,22 @@ body {
   min-width: 0;
 }
 
-#map-panel .panel-title-row {
+#builder-connect-toggle.is-active {
+  background: linear-gradient(180deg, rgba(224, 163, 74, 0.95), rgba(185, 122, 42, 0.95));
+  color: #1b1208;
+  border-color: rgba(255, 215, 160, 0.45);
+}
+
+#map-panel .panel-title-row,
+#builder-map-panel .panel-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
 
-#map-room-name {
+#map-room-name,
+#builder-map-room-name {
   min-width: 0;
   margin: 2px 0 10px;
   overflow: hidden;
@@ -901,32 +909,41 @@ body {
 
 #map-fit-toggle,
 #map-center-toggle,
-#map-fullscreen-toggle {
+#map-fullscreen-toggle,
+#builder-map-fit-toggle,
+#builder-map-center-toggle,
+#builder-map-fullscreen-toggle {
   padding: 6px 10px;
   flex: 0 0 auto;
 }
 
 #map-fit-toggle,
-#map-center-toggle {
+#map-center-toggle,
+#builder-map-fit-toggle,
+#builder-map-center-toggle {
   width: 84px;
 }
 
-#map-fullscreen-toggle {
+#map-fullscreen-toggle,
+#builder-map-fullscreen-toggle {
   width: 48px;
 }
 
 @media (max-width: 1400px) {
-  #map-panel .panel-title-row {
+  #map-panel .panel-title-row,
+  #builder-map-panel .panel-title-row {
     align-items: start;
   }
 
-  #map-room-name {
+  #map-room-name,
+  #builder-map-room-name {
     text-align: left;
   }
 }
 
 @media (max-width: 1100px) {
-  #map-panel .panel-title-row {
+  #map-panel .panel-title-row,
+  #builder-map-panel .panel-title-row {
     flex-direction: column;
     align-items: stretch;
   }
@@ -935,12 +952,14 @@ body {
     justify-content: center;
   }
 
-  #map-room-name {
+  #map-room-name,
+  #builder-map-room-name {
     text-align: center;
   }
 }
 
-#map-meta-row {
+#map-meta-row,
+#builder-map-meta-row {
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -951,7 +970,9 @@ body {
   letter-spacing: 0.08em;
 }
 
-#map-canvas {
+#map-canvas,
+#builder-map-canvas,
+#builder-reactflow-root {
   width: 100%;
   height: min(34vh, 360px);
   min-height: 220px;
@@ -962,16 +983,33 @@ body {
   touch-action: none;
 }
 
-#map-canvas.is-dragging {
+#map-canvas.is-dragging,
+#builder-map-canvas.is-dragging {
   cursor: grabbing;
 }
 
-#map-panel.fullscreen #map-canvas {
+#builder-reactflow-root {
+  display: none;
+  overflow: hidden;
+}
+
+#builder-map-panel.uses-reactflow #builder-reactflow-root {
+  display: block;
+}
+
+#builder-map-panel.uses-reactflow #builder-map-canvas,
+#builder-map-panel.uses-reactflow #builder-map-tooltip {
+  display: none;
+}
+
+#map-panel.fullscreen #map-canvas,
+#builder-map-panel.fullscreen #builder-map-canvas {
   height: 100%;
   min-height: 0;
 }
 
-#map-tooltip {
+#map-tooltip,
+#builder-map-tooltip {
   position: absolute;
   display: none;
   pointer-events: none;
@@ -2491,6 +2529,42 @@ body {
   padding: 12px !important;
 }
 
+#builder-zone-switcher {
+  flex: 0 1 320px;
+  min-width: 220px;
+}
+
+.builder-header-zone-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.builder-header-zone-field .builder-label {
+  color: #c9a56a;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.builder-header-zone-field select {
+  width: 100%;
+  min-height: 38px;
+  margin-bottom: 0;
+  background: rgba(9, 7, 5, 0.82);
+  color: #f1e2c6;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.builder-header-zone-field select:focus {
+  outline: none;
+  border-color: #e0a34a;
+}
+
 #topbar-tabs .chrome-tab {
   display: inline-flex;
   align-items: center;
@@ -2562,6 +2636,19 @@ body {
   min-height: 0;
   overflow-y: auto;
   padding-right: 4px;
+}
+
+.builder-room-empty {
+  padding: 10px;
+  border: 1px dashed rgba(255, 180, 90, 0.18);
+  border-radius: 8px;
+  color: #bea47c;
+  font-size: 12px;
+  text-align: center;
+}
+
+.builder-browser-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .room-item {
@@ -2748,50 +2835,78 @@ body {
   color: #f1e2c6;
 }
 
-#zone-map-panel {
+#builder-map-panel {
   order: 1;
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
   overflow: hidden;
-}
-
-#zone-map-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: #bea47c;
-  font-size: 12px;
-}
-
-#zone-map-title {
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-#zone-map {
   position: relative;
-  flex: 1 1 auto;
-  min-height: 380px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  background:
-    radial-gradient(circle at center, rgba(255, 180, 90, 0.06), transparent 58%),
-    linear-gradient(180deg, rgba(21, 20, 24, 0.92), rgba(14, 13, 18, 0.98));
-  cursor: grab;
 }
 
-#zone-map.is-dragging {
-  cursor: grabbing;
+#builder-map-panel.fullscreen {
+  position: fixed;
+  inset: 24px;
+  z-index: 40;
+  margin: 0;
+  background: linear-gradient(180deg, rgba(22, 17, 15, 0.98), rgba(8, 8, 7, 0.99));
 }
 
-#zone-map-canvas {
-  display: block;
-  width: 100%;
+#builder-map-panel.fullscreen #builder-reactflow-root {
   height: 100%;
+  min-height: 0;
+}
+
+.builder-reactflow-node {
+  position: relative;
+  min-width: 14px;
+  min-height: 14px;
+}
+
+.builder-reactflow-node-core {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #d2a056, #8e5f24);
+  border: 1px solid rgba(31, 18, 8, 0.95);
+  box-shadow: 0 0 0 1px rgba(255, 224, 170, 0.1), 0 4px 10px rgba(0, 0, 0, 0.34);
+}
+
+.builder-reactflow-node.is-selected .builder-reactflow-node-core {
+  background: linear-gradient(180deg, #f2cb84, #c4862c);
+  box-shadow: 0 0 0 2px rgba(253, 230, 179, 0.5), 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.builder-reactflow-node-label {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(14, 10, 7, 0.92);
+  border: 1px solid rgba(214, 176, 97, 0.3);
+  color: #f1e2c6;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.builder-reactflow-root .react-flow__controls {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.builder-reactflow-root .react-flow__controls-button,
+.builder-reactflow-root .react-flow__minimap {
+  background: rgba(19, 13, 9, 0.94);
+  border-color: rgba(214, 176, 97, 0.22);
+  color: #f1e2c6;
+}
+
+.builder-reactflow-root .react-flow__attribution {
+  display: none;
 }
 
 .builder-map-empty {
@@ -2817,6 +2932,46 @@ body {
 #save-room:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
+}
+
+#delete-room {
+  width: 100%;
+  height: 42px;
+  margin-top: 10px;
+  font-weight: 600;
+  background: linear-gradient(180deg, #9e4b39, #6f2319);
+  border: none;
+  border-radius: 6px;
+}
+
+#delete-room:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.builder-dialog {
+  width: min(460px, calc(100vw - 32px));
+  border: 1px solid rgba(214, 176, 97, 0.28);
+  border-radius: 12px;
+  padding: 0;
+  background: linear-gradient(180deg, rgba(22, 17, 15, 0.98), rgba(8, 8, 7, 0.99));
+  color: #f1e2c6;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.builder-dialog::backdrop {
+  background: rgba(6, 4, 3, 0.72);
+}
+
+.builder-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+.builder-dialog-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 #room-name,
@@ -2884,7 +3039,7 @@ body {
     min-height: 620px;
   }
 
-  #zone-map-panel {
+  #builder-map-panel {
     min-height: 380px;
   }
 

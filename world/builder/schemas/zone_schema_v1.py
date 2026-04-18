@@ -38,6 +38,7 @@ def normalize_zone_id(value: object) -> str:
 def validate_zone_entry(zone_id: str, zone: dict) -> None:
     payload = _require_mapping(zone, f"zones['{zone_id}']")
     _require_non_empty_string(payload.get("name"), f"zones['{zone_id}'].name")
+    _require_non_empty_string(payload.get("area") or zone_id, f"zones['{zone_id}'].area")
     rooms = payload.get("rooms")
     _require_type(rooms, dict, f"zones['{zone_id}'].rooms")
     for room_id, room in rooms.items():

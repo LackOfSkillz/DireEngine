@@ -57,10 +57,88 @@
   const HOTBAR_STORAGE_KEY = "dragonsire.hotbar";
   const UI_PREFS_STORAGE_KEY = "dragonsire.browser.ui";
   const BUILDER_LAST_ROOM_STORAGE_KEY = "dragonsire.builder.lastRoomId";
+  const BUILDER_LAST_ZONE_STORAGE_KEY = "dragonsire.builder.lastZoneId";
   const BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY = "dragonsire.builder.roomListScrollTop";
   const BUILDER_ZONE_CAMERA_STORAGE_KEY = "dragonsire.builder.zoneCamera";
   const BUILDER_ZONE_MIN_ZOOM = 0.01;
-  const DIRECTIONS = ["north", "south", "east", "west", "up", "down"];
+  const BUILDER_ZONE_MAX_ZOOM = 2.5;
+  const BUILDER_UNASSIGNED_ZONE_VALUE = "__unassigned__";
+  const USE_REACT_FLOW_BUILDER = false;
+  const DIR_ALIAS = {
+    n: "north",
+    s: "south",
+    e: "east",
+    w: "west",
+    u: "up",
+    d: "down",
+    ne: "northeast",
+    nw: "northwest",
+    se: "southeast",
+    sw: "southwest",
+  };
+  const DIR_VECTOR = {
+    north: { x: 0, y: -1 },
+    south: { x: 0, y: 1 },
+    east: { x: 1, y: 0 },
+    west: { x: -1, y: 0 },
+    northeast: { x: 1, y: -1 },
+    northwest: { x: -1, y: -1 },
+    southeast: { x: 1, y: 1 },
+    southwest: { x: -1, y: 1 },
+    up: { x: 0, y: 0 },
+    down: { x: 0, y: 0 },
+  };
+  const NON_SPATIAL_EXIT_DIRECTIONS = new Set([
+    "gate",
+    "arch",
+    "bridge",
+    "stair",
+    "path",
+    "walk",
+    "guild",
+    "out",
+    "in",
+    "ramp",
+    "pier",
+    "ferry",
+    "dock",
+    "enter",
+    "leave",
+    "entry",
+    "veranda",
+    "yard",
+  ]);
+  const MAP_BEARING_DIRECTIONS = new Set(Object.keys(DIR_VECTOR));
+  const DIRECTIONS = [
+    "north",
+    "south",
+    "east",
+    "west",
+    "up",
+    "down",
+    "northeast",
+    "northwest",
+    "southeast",
+    "southwest",
+    "gate",
+    "arch",
+    "bridge",
+    "stair",
+    "path",
+    "walk",
+    "guild",
+    "out",
+    "in",
+    "ramp",
+    "pier",
+    "ferry",
+    "dock",
+    "enter",
+    "leave",
+    "entry",
+    "veranda",
+    "yard",
+  ];
   const SCENE_IMAGE_ROTATION_MS = 120000;
   const DESKTOP_SHELL_FIT_WIDTH = 1460;
   const DESKTOP_SHELL_FIT_HEIGHT = 940;
@@ -80,16 +158,24 @@
   };
   const builderState = {
     currentRoomId: null,
-    currentZoneId: "",
+    hoveredRoomId: null,
+    currentZoneId: null,
+    zones: [],
     rooms: [],
     currentRoom: null,
     zoneGraph: null,
     zoneSurface: null,
     zoneMapBounds: null,
     zoneMapNeedsFit: true,
+    zoneForceFitOnce: false,
+    zoneZoomInitialized: false,
+    zoneCanvasSize: { width: 0, height: 0 },
     zonePan: { x: 0, y: 0 },
     zoneZoom: 1,
     zoneDrag: null,
+    reactFlowViewportRequest: { type: "fit", token: 0 },
+    connectMode: false,
+    connectFromRoomId: null,
     previewTimer: null,
   };
   let hasInitialized = false;
@@ -186,6 +272,220 @@
     }
   }
 
+  function updateBuilderConnectToggle() {
+    const button = byId("builder-connect-toggle");
+    if (!button) {
+      return;
+    }
+    button.classList.toggle("is-active", Boolean(builderState.connectMode));
+    button.textContent = builderState.connectMode ? "Connecting..." : "Connect Rooms";
+    button.setAttribute("aria-pressed", builderState.connectMode ? "true" : "false");
+  }
+
+  function clearBuilderConnectMode(options = {}) {
+    builderState.connectMode = false;
+    builderState.connectFromRoomId = null;
+    if (options.clearHover) {
+      builderState.hoveredRoomId = null;
+    }
+    updateBuilderConnectToggle();
+    renderZoneMap();
+  }
+
+  function beginBuilderConnectMode() {
+    builderState.connectMode = true;
+    builderState.connectFromRoomId = null;
+    updateBuilderConnectToggle();
+    setBuilderPageStatus("Connect mode: click a source room.");
+    renderZoneMap();
+  }
+
+  function normalizeBuilderZoneId(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    return normalized === BUILDER_UNASSIGNED_ZONE_VALUE ? "" : normalized;
+  }
+
+  function builderZoneSelectValue(zoneId) {
+    return normalizeBuilderZoneId(zoneId) || BUILDER_UNASSIGNED_ZONE_VALUE;
+  }
+
+  function currentBuilderZoneMeta() {
+    const currentZoneId = normalizeBuilderZoneId(builderState.currentZoneId);
+    return builderState.zones.find((zone) => normalizeBuilderZoneId(zone.id) === currentZoneId) || null;
+  }
+
+  function currentBuilderZoneLabel() {
+    const zone = currentBuilderZoneMeta();
+    if (zone) {
+      return zone.name || zone.id || "Unassigned";
+    }
+    return builderState.currentZoneId ? builderState.currentZoneId : "Unassigned";
+  }
+
+  function persistBuilderZoneSelection(zoneId) {
+    window.localStorage.setItem(BUILDER_LAST_ZONE_STORAGE_KEY, builderZoneSelectValue(zoneId));
+  }
+
+  function builderAssignableZones() {
+    return builderState.zones.filter((zone) => normalizeBuilderZoneId(zone.id));
+  }
+
+  function hasActiveBuilderZone() {
+    return Boolean(normalizeBuilderZoneId(builderState.currentZoneId));
+  }
+
+  function requireActiveBuilderZone() {
+    if (hasActiveBuilderZone()) {
+      return true;
+    }
+    toast("No zone selected");
+    return false;
+  }
+
+  function builderVisibleRooms() {
+    const currentZoneId = normalizeBuilderZoneId(builderState.currentZoneId);
+    const graphZoneId = normalizeBuilderZoneId(builderState.zoneGraph?.zone_id || builderState.zoneGraph?.zone || "");
+    if (!builderState.zoneGraph || graphZoneId !== currentZoneId) {
+      return [];
+    }
+    return Array.isArray(builderState.zoneGraph.rooms) ? builderState.zoneGraph.rooms : [];
+  }
+
+  function defaultAssignableZoneId(fallbackZoneId = "") {
+    const normalizedFallback = normalizeBuilderZoneId(fallbackZoneId);
+    if (normalizedFallback) {
+      return normalizedFallback;
+    }
+    return normalizeBuilderZoneId((builderAssignableZones()[0] || {}).id || "");
+  }
+
+  function builderZoneOptions(selectedZoneId) {
+    return builderState.zones.map((zone) => {
+      const zoneId = normalizeBuilderZoneId(zone.id);
+      const selected = zoneId === normalizeBuilderZoneId(selectedZoneId) ? " selected" : "";
+      const roomCount = Array.isArray(zone.rooms) ? zone.rooms.length : 0;
+      const suffix = zoneId ? ` (${roomCount})` : ` (${roomCount} unassigned)`;
+      const label = escapeHtml(`${zone.name || zoneId || "Unassigned"}${suffix}`);
+      return `<option value="${escapeHtml(builderZoneSelectValue(zoneId))}"${selected}>${label}</option>`;
+    }).join("");
+  }
+
+  function syncBuilderZoneMenus() {
+    const currentZoneId = normalizeBuilderZoneId(builderState.currentZoneId);
+      const roomZoneId = builderState.currentRoomId
+        ? normalizeBuilderZoneId(byId("room-zone")?.value || builderState.currentRoom?.zone_id || currentZoneId)
+      : defaultAssignableZoneId(currentZoneId);
+    const dialogZoneId = normalizeBuilderZoneId(byId("builder-room-zone-input")?.value || defaultAssignableZoneId(currentZoneId));
+    const assignableZoneOptions = builderAssignableZones().map((zone) => {
+      const zoneId = normalizeBuilderZoneId(zone.id);
+      const selected = zoneId === normalizeBuilderZoneId(roomZoneId) ? " selected" : "";
+      const roomCount = Array.isArray(zone.rooms) ? zone.rooms.length : 0;
+      const label = escapeHtml(`${zone.name || zoneId} (${roomCount})`);
+      return `<option value="${escapeHtml(builderZoneSelectValue(zoneId))}"${selected}>${label}</option>`;
+    }).join("");
+    const createAssignableZoneOptions = builderAssignableZones().map((zone) => {
+      const zoneId = normalizeBuilderZoneId(zone.id);
+      const selected = zoneId === normalizeBuilderZoneId(dialogZoneId) ? " selected" : "";
+      const roomCount = Array.isArray(zone.rooms) ? zone.rooms.length : 0;
+      const label = escapeHtml(`${zone.name || zoneId} (${roomCount})`);
+      return `<option value="${escapeHtml(builderZoneSelectValue(zoneId))}"${selected}>${label}</option>`;
+    }).join("");
+
+    ["builder-zone-select", "builder-zone-select-top"].forEach((controlId) => {
+      const pageZone = byId(controlId);
+      if (!pageZone) {
+        return;
+      }
+      pageZone.innerHTML = builderZoneOptions(currentZoneId);
+      pageZone.disabled = !builderState.zones.length;
+      if (pageZone.options.length) {
+        pageZone.value = builderZoneSelectValue(currentZoneId);
+      }
+    });
+
+    const roomZone = byId("room-zone");
+    if (roomZone) {
+      roomZone.innerHTML = assignableZoneOptions;
+      roomZone.disabled = !builderAssignableZones().length;
+      if (roomZone.options.length) {
+        roomZone.value = builderZoneSelectValue(defaultAssignableZoneId(roomZoneId));
+      }
+    }
+
+    const createRoomZone = byId("builder-room-zone-input");
+    if (createRoomZone) {
+      createRoomZone.innerHTML = createAssignableZoneOptions;
+      createRoomZone.disabled = !builderAssignableZones().length;
+      if (createRoomZone.options.length) {
+        createRoomZone.value = builderZoneSelectValue(defaultAssignableZoneId(dialogZoneId || currentZoneId));
+      }
+    }
+  }
+
+  function openBuilderDialog(id) {
+    const dialog = byId(id);
+    if (dialog && typeof dialog.showModal === "function") {
+      dialog.showModal();
+    }
+  }
+
+  function closeBuilderDialog(id) {
+    const dialog = byId(id);
+    if (dialog?.open) {
+      dialog.close();
+    }
+  }
+
+  function clearBuilderEditor(statusMessage, previewMessage) {
+    builderState.currentRoomId = null;
+    builderState.currentRoom = null;
+    window.localStorage.removeItem(BUILDER_LAST_ROOM_STORAGE_KEY);
+    if (byId("room-name")) {
+      byId("room-name").value = "";
+    }
+    if (byId("room-short-desc")) {
+      byId("room-short-desc").value = "";
+    }
+    if (byId("room-desc")) {
+      byId("room-desc").value = "";
+    }
+    if (byId("room-environment")) {
+      byId("room-environment").value = "city";
+    }
+    if (byId("room-map-x")) {
+      byId("room-map-x").value = "0";
+    }
+    if (byId("room-map-y")) {
+      byId("room-map-y").value = "0";
+    }
+    if (byId("room-map-layer")) {
+      byId("room-map-layer").value = "0";
+    }
+    syncBuilderZoneMenus();
+    renderBuilderExitList([]);
+    renderBuilderPreview({
+      name: "No room selected",
+      desc: previewMessage || "Choose a room from the list to inspect and edit it.",
+      environment: "city",
+      exits: [],
+    });
+    renderBuilderRoomList();
+    renderZoneMap();
+    setBuilderPageStatus(statusMessage || "Select a room to begin.");
+  }
+
+  function builderCreateRoomPosition() {
+    const canvas = zoneMapCanvas();
+    const zoom = Number(builderState.zoneZoom || 1);
+    if (!canvas || !Number.isFinite(zoom) || zoom <= 0) {
+      return { x: 0, y: 0 };
+    }
+    return {
+      x: Math.round((canvas.width / 2 - builderState.zonePan.x) / zoom),
+      y: Math.round((canvas.height / 2 - builderState.zonePan.y) / zoom),
+    };
+  }
+
   function showSavingState() {
     const saveButton = byId("save-room");
     if (!saveButton) {
@@ -225,16 +525,119 @@
       desc: byId("room-desc")?.value || "",
       environment: byId("room-environment")?.value || "city",
       exits: collectBuilderExits(),
-      zone_id: builderState.currentZoneId || builderState.currentRoom?.zone_id || "",
+      zone_id: normalizeBuilderZoneId(byId("room-zone")?.value || builderState.currentRoom?.zone_id || builderState.currentZoneId || ""),
+      map_x: Number.parseInt(byId("room-map-x")?.value || `${builderState.currentRoom?.map_x ?? builderState.currentRoom?.x ?? 0}`, 10) || 0,
+      map_y: Number.parseInt(byId("room-map-y")?.value || `${builderState.currentRoom?.map_y ?? builderState.currentRoom?.y ?? 0}`, 10) || 0,
+      map_layer: Number.parseInt(byId("room-map-layer")?.value || `${builderState.currentRoom?.map_layer ?? 0}`, 10) || 0,
+    };
+  }
+
+  function normalizeExitDirection(dir) {
+    return String(dir || "").trim().toLowerCase();
+  }
+
+  function canonicalExitDirection(direction) {
+    const value = normalizeExitDirection(direction);
+    if (!value) {
+      return "";
+    }
+    return DIR_ALIAS[value] || value;
+  }
+
+  function reverseDirection(direction) {
+    switch (canonicalExitDirection(direction)) {
+      case "north": return "south";
+      case "south": return "north";
+      case "east": return "west";
+      case "west": return "east";
+      case "northeast": return "southwest";
+      case "northwest": return "southeast";
+      case "southeast": return "northwest";
+      case "southwest": return "northeast";
+      case "up": return "down";
+      case "down": return "up";
+      default: return "";
+    }
+  }
+
+  function builderRoomById(roomId) {
+    return builderState.zoneGraph?.roomLookup?.get(Number(roomId || 0)) || null;
+  }
+
+  function getDirection(fromRoom, toRoom) {
+    const dx = Number(toRoom?.map_x ?? toRoom?.x ?? 0) - Number(fromRoom?.map_x ?? fromRoom?.x ?? 0);
+    const dy = Number(toRoom?.map_y ?? toRoom?.y ?? 0) - Number(fromRoom?.map_y ?? fromRoom?.y ?? 0);
+    if (!dx && !dy) {
+      return "";
+    }
+    if (Math.abs(dx) > Math.abs(dy)) {
+      return dx > 0 ? "east" : "west";
+    }
+    return dy > 0 ? "south" : "north";
+  }
+
+  function mergeBuilderExit(exits, direction, targetId) {
+    const normalizedDirection = canonicalExitDirection(direction);
+    const numericTargetId = Number(targetId || 0);
+    const nextExits = Array.isArray(exits)
+      ? exits.map((exit, index) => normalizeBuilderExit(exit, index))
+      : [];
+    const existingIndex = nextExits.findIndex((exit) => canonicalExitDirection(exit.direction || "") === normalizedDirection);
+    const nextExit = {
+      direction: normalizedDirection,
+      target_id: numericTargetId,
+      target_name: roomNameById(numericTargetId),
+    };
+    if (existingIndex >= 0) {
+      nextExits[existingIndex] = nextExit;
+      return nextExits;
+    }
+    nextExits.push(nextExit);
+    return nextExits;
+  }
+
+  function classifyBuilderExit(exit) {
+    const rawDirection = normalizeExitDirection(exit?.direction || "");
+    const direction = canonicalExitDirection(rawDirection);
+    const targetId = Number(exit?.target_id || exit?.targetId || 0);
+    const hasTarget = targetId > 0;
+    const isSpecial = Boolean(direction) && !MAP_BEARING_DIRECTIONS.has(direction);
+    const isRecognized = Boolean(direction);
+    const isVertical = direction === "up" || direction === "down";
+    const isDiagonal = ["northeast", "northwest", "southeast", "southwest"].includes(direction);
+    const isSpatial = Boolean(direction) && MAP_BEARING_DIRECTIONS.has(direction) && hasTarget;
+    return {
+      rawDirection,
+      direction,
+      target_id: targetId,
+      target_name: exit?.target_name || (targetId ? roomNameById(targetId) : ""),
+      isRecognized,
+      isSpecial,
+      isVertical,
+      isDiagonal,
+      isSpatial,
+      dropped: !isRecognized,
+    };
+  }
+
+  function splitBuilderExits(exits = []) {
+    const normalized = exits.map((exit) => classifyBuilderExit(exit));
+    return {
+      normalized,
+      spatial: normalized.filter((exit) => exit.isSpatial),
+      special: normalized.filter((exit) => exit.isSpecial),
+      vertical: normalized.filter((exit) => exit.isVertical),
+      dropped: normalized.filter((exit) => exit.dropped),
     };
   }
 
   function normalizeBuilderExit(exit, index = 0) {
-    const direction = String(exit?.direction || DIRECTIONS[index % DIRECTIONS.length] || "north").trim().toLowerCase();
+    const fallbackDirection = DIRECTIONS[index % DIRECTIONS.length] || "north";
+    const direction = canonicalExitDirection(exit?.direction || fallbackDirection);
     const targetId = Number(exit?.target_id || exit?.targetId || 0);
     return {
       id: Number(exit?.id || 0),
-      direction: DIRECTIONS.includes(direction) ? direction : DIRECTIONS[index % DIRECTIONS.length],
+      direction: direction || fallbackDirection,
       target_id: targetId,
       target_name: exit?.target_name || (targetId ? roomNameById(targetId) : ""),
     };
@@ -242,19 +645,14 @@
 
   function createExitRow(exit, index) {
     const normalized = normalizeBuilderExit(exit, index);
-    const directionOptions = DIRECTIONS.map((direction) => (
-      `<option value="${direction}"${direction === normalized.direction ? " selected" : ""}>${direction}</option>`
-    )).join("");
     const roomOptions = ['<option value="">Select room</option>']
-      .concat(builderState.rooms.map((room) => (
-        `<option value="${room.id}"${Number(room.id) === Number(normalized.target_id || 0) ? " selected" : ""}>${escapeHtml(room.db_key)}</option>`
+      .concat(builderVisibleRooms().map((room) => (
+        `<option value="${room.id}"${Number(room.id) === Number(normalized.target_id || 0) ? " selected" : ""}>${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</option>`
       )))
       .join("");
     return `
       <div class="builder-exit-row" data-index="${index}">
-        <select class="builder-exit-direction" aria-label="Exit direction">
-          ${directionOptions}
-        </select>
+        <input class="builder-exit-direction" aria-label="Exit direction" list="builder-exit-direction-options" value="${escapeHtml(normalized.direction)}" autocomplete="off">
         <select class="builder-exit-target" aria-label="Exit target room">
           ${roomOptions}
         </select>
@@ -275,24 +673,25 @@
   function collectBuilderExits() {
     return Array.from(document.querySelectorAll("#exit-list .builder-exit-row"))
       .map((row) => ({
-        direction: row.querySelector(".builder-exit-direction")?.value || "",
+        direction: canonicalExitDirection(row.querySelector(".builder-exit-direction")?.value || ""),
         target_id: Number(row.querySelector(".builder-exit-target")?.value || 0),
       }))
       .filter((exit) => exit.direction || exit.target_id);
   }
 
   function validateBuilderExits(exits) {
+    const zoneRooms = builderVisibleRooms();
     const seenDirections = new Set();
     for (const exit of exits) {
-      const direction = String(exit.direction || "").trim().toLowerCase();
+      const direction = canonicalExitDirection(exit.direction || "");
       const targetId = Number(exit.target_id || 0);
-      if (!DIRECTIONS.includes(direction)) {
+      if (!direction) {
         return `Invalid exit direction: ${direction || "blank"}.`;
       }
       if (seenDirections.has(direction)) {
         return `Duplicate exit direction: ${direction}.`;
       }
-      if (!targetId || !builderState.rooms.some((room) => Number(room.id) === targetId)) {
+      if (!targetId || !zoneRooms.some((room) => Number(room.id) === targetId)) {
         return `Exit target for ${direction} must be an existing room.`;
       }
       seenDirections.add(direction);
@@ -354,9 +753,14 @@
     if (!list) {
       return;
     }
-    list.innerHTML = builderState.rooms
+    const rooms = builderVisibleRooms();
+    if (!rooms.length) {
+      list.innerHTML = '<div class="builder-room-empty">No rooms in this zone yet.</div>';
+      return;
+    }
+    list.innerHTML = rooms
       .map(
-        (room) => `<div class="room-item${Number(room.id) === Number(builderState.currentRoomId || 0) ? " active" : ""}" data-id="${room.id}">${escapeHtml(room.db_key)}</div>`
+        (room) => `<div class="room-item${Number(room.id) === Number(builderState.currentRoomId || 0) ? " active" : ""}" data-id="${room.id}">${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</div>`
       )
       .join("");
   }
@@ -369,6 +773,9 @@
     const currentLabel = byId("builder-current-room");
     const shortDesc = deriveBuilderShortDesc(data);
     const exits = Array.isArray(data.exits) ? data.exits.map((exit, index) => normalizeBuilderExit(exit, index)) : [];
+    const exitGroups = splitBuilderExits(exits);
+    const spatialLabels = exitGroups.spatial.map((exit) => exit.direction);
+    const specialLabels = exitGroups.special.map((exit) => exit.direction);
     if (previewName) {
       previewName.textContent = shortDesc || data.name || "Untitled room";
     }
@@ -376,9 +783,15 @@
       previewDesc.innerHTML = escapeHtml(data.desc || "").replace(/\n/g, "<br>");
     }
     if (previewExits) {
-      previewExits.textContent = exits.length
-        ? `Exits: ${exits.map((exit) => exit.direction).join(", ")}`
-        : "Exits: none";
+      const lines = [`Exits: ${spatialLabels.length ? spatialLabels.join(", ") : "none"}`];
+      if (specialLabels.length) {
+        lines.push(`Special: ${specialLabels.join(", ")}`);
+      }
+      if (state.debugEnabled) {
+        lines.push(`Spatial exits: ${spatialLabels.length ? spatialLabels.join(", ") : "none"}`);
+        lines.push(`Special exits: ${specialLabels.length ? specialLabels.join(", ") : "none"}`);
+      }
+      previewExits.innerHTML = lines.map((line) => escapeHtml(line)).join("<br>");
     }
     if (previewContext) {
       previewContext.textContent = `${String(data.environment || "city").toUpperCase()} preview`;
@@ -391,18 +804,261 @@
     }
   }
 
+  function builderMapPanel() {
+    return byId("builder-map-panel");
+  }
+
   function zoneMapCanvas() {
-    return byId("zone-map-canvas");
+    return byId("builder-map-canvas");
+  }
+
+  function builderMapTooltip() {
+    return byId("builder-map-tooltip");
+  }
+
+  function builderReactFlowRoot() {
+    return byId("builder-reactflow-root");
+  }
+
+  function builderUsesReactFlow() {
+    return Boolean(
+      USE_REACT_FLOW_BUILDER
+      && isBuilderPage()
+      && builderReactFlowRoot()
+      && window.DragonsireBuilderReactFlow?.mountBuilderReactFlow
+    );
+  }
+
+  function setBuilderMapRenderMode(useReactFlow) {
+    builderMapPanel()?.classList.toggle("uses-reactflow", Boolean(useReactFlow));
+    builderReactFlowRoot()?.classList.toggle("builder-reactflow-root", Boolean(useReactFlow));
+  }
+
+  function zoneRoomsToNodes(rooms, selectedRoomId) {
+    return (rooms || []).map((room) => ({
+      id: String(room.id),
+      type: "builderRoom",
+      draggable: true,
+      selectable: true,
+      width: 14,
+      height: 14,
+      style: {
+        width: 14,
+        height: 14,
+      },
+      position: {
+        x: Number(room.map_x ?? 0),
+        y: Number(room.map_y ?? 0),
+      },
+      data: {
+        label: room.name || `Room ${room.id}`,
+        roomId: Number(room.id || 0),
+        selected: Number(room.id || 0) === Number(selectedRoomId || 0),
+      },
+    }));
+  }
+
+  function zoneRoomsToEdges(rooms, explicitEdges = null) {
+    const edgeSummary = buildBuilderEdgeSummary(rooms, explicitEdges);
+    return {
+      counters: edgeSummary.counters,
+      edges: edgeSummary.edges.map((edge) => ({
+        id: `builder-edge-${edge.from}-${edge.to}-${edge.dir || "link"}`,
+        source: String(edge.from),
+        target: String(edge.to),
+        label: edge.dir || "",
+        type: "straight",
+        selectable: true,
+        animated: false,
+        style: {
+          stroke: "rgba(195, 164, 104, 0.72)",
+          strokeWidth: 1.5,
+        },
+        labelStyle: {
+          fill: "#e9dcc4",
+          fontSize: 11,
+        },
+      })),
+    };
+  }
+
+  function queueBuilderReactFlowViewport(type) {
+    builderState.reactFlowViewportRequest = {
+      type,
+      token: Number(builderState.reactFlowViewportRequest?.token || 0) + 1,
+    };
+    renderZoneMap();
+  }
+
+  async function saveBuilderRoomPayload(roomId, overrides = {}) {
+    const numericRoomId = Number(roomId || 0);
+    if (!numericRoomId) {
+      throw new Error("Missing room id.");
+    }
+    const baseRoom = Number(builderState.currentRoomId || 0) === numericRoomId && builderState.currentRoom
+      ? builderState.currentRoom
+      : await builderFetchJson(`/builder/api/room/${numericRoomId}/`);
+
+    const response = await builderFetchJson(`/builder/api/room/${numericRoomId}/save/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: overrides.name ?? baseRoom.name ?? `Room ${numericRoomId}`,
+        desc: overrides.desc ?? baseRoom.desc ?? "",
+        environment: overrides.environment ?? baseRoom.environment ?? "city",
+        exits: overrides.exits ?? (Array.isArray(baseRoom.exits) ? baseRoom.exits : []),
+        zone_id: overrides.zone_id ?? baseRoom.zone_id ?? builderState.currentZoneId ?? "",
+        map_x: overrides.map_x ?? Number(baseRoom.map_x ?? baseRoom.x ?? 0),
+        map_y: overrides.map_y ?? Number(baseRoom.map_y ?? baseRoom.y ?? 0),
+        map_layer: overrides.map_layer ?? Number(baseRoom.map_layer ?? 0),
+      }),
+    });
+
+    if (response.room) {
+      syncZoneGraphRoom(response.room);
+      if (numericRoomId === Number(builderState.currentRoomId || 0)) {
+        builderState.currentRoom = {
+          ...(builderState.currentRoom || {}),
+          ...response.room,
+        };
+      }
+    }
+    return response;
+  }
+
+  async function persistBuilderRoomCoordinates(roomId, mapX, mapY) {
+    const numericRoomId = Number(roomId || 0);
+    if (!numericRoomId) {
+      return;
+    }
+    const nextMapX = Number.isFinite(Number(mapX)) ? Math.round(Number(mapX)) : 0;
+    const nextMapY = Number.isFinite(Number(mapY)) ? Math.round(Number(mapY)) : 0;
+    setBuilderRoomCoordinates(numericRoomId, nextMapX, nextMapY);
+    renderZoneMap();
+
+    const response = await saveBuilderRoomPayload(numericRoomId, {
+      map_x: nextMapX,
+      map_y: nextMapY,
+    });
+
+    if (response.room) {
+      syncZoneGraphRoom(response.room);
+      if (numericRoomId === Number(builderState.currentRoomId || 0)) {
+        builderState.currentRoom = {
+          ...(builderState.currentRoom || {}),
+          ...response.room,
+          map_x: nextMapX,
+          map_y: nextMapY,
+          x: nextMapX,
+          y: nextMapY,
+        };
+      }
+    }
+
+    await loadBuilderRoomList();
+    renderBuilderRoomList();
+    renderZoneMap();
+    setBuilderPageStatus(`Moved ${roomNameById(numericRoomId)} to (${nextMapX}, ${nextMapY}).`);
+  }
+
+  async function createExitBetweenRooms(fromId, toId) {
+    const fromRoom = builderRoomById(fromId) || await builderFetchJson(`/builder/api/room/${Number(fromId || 0)}/`);
+    const toRoom = builderRoomById(toId) || await builderFetchJson(`/builder/api/room/${Number(toId || 0)}/`);
+    const direction = getDirection(fromRoom, toRoom);
+    const reverse = reverseDirection(direction);
+    if (!direction || !reverse) {
+      throw new Error("Unable to determine exit direction from room positions.");
+    }
+
+    const nextFromExits = mergeBuilderExit(fromRoom.exits || fromRoom.exitMap || [], direction, toRoom.id);
+    const nextToExits = mergeBuilderExit(toRoom.exits || toRoom.exitMap || [], reverse, fromRoom.id);
+
+    await saveBuilderRoomPayload(fromRoom.id, { exits: nextFromExits });
+    await saveBuilderRoomPayload(toRoom.id, { exits: nextToExits });
+    await loadBuilderZones();
+    await loadBuilderRoomList();
+    renderBuilderRoomList();
+    renderZoneMap();
+    setBuilderPageStatus(`Connected ${roomNameById(fromRoom.id)} ${direction} to ${roomNameById(toRoom.id)}.`);
+  }
+
+  function renderBuilderReactFlowMap(rooms, edgeSummary) {
+    const root = builderReactFlowRoot();
+    if (!root || !window.DragonsireBuilderReactFlow?.mountBuilderReactFlow) {
+      return false;
+    }
+    const currentRoom = rooms.find((room) => Number(room.id) === Number(builderState.currentRoomId || 0));
+    window.DragonsireBuilderReactFlow.mountBuilderReactFlow(root, {
+      nodes: zoneRoomsToNodes(rooms, builderState.currentRoomId),
+      edges: edgeSummary.edges,
+      selectedRoomId: Number(builderState.currentRoomId || 0),
+      viewportRequest: builderState.reactFlowViewportRequest,
+      onSelectRoom: (roomId) => {
+        const numericRoomId = Number(roomId || 0);
+        if (!numericRoomId || numericRoomId === Number(builderState.currentRoomId || 0)) {
+          return;
+        }
+        void loadBuilderRoom(numericRoomId).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to load room.");
+        });
+      },
+      onMoveRoom: (payload) => {
+        void persistBuilderRoomCoordinates(payload.roomId, payload.map_x, payload.map_y).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to save room position.");
+          toast(error.message || "Unable to save room position.");
+          renderZoneMap();
+        });
+      },
+    });
+    updateBuilderMapMeta(rooms, edgeSummary.edges);
+    byId("builder-map-room-name").textContent = currentRoom ? currentRoom.name : "Awaiting room data";
+    return true;
+  }
+
+  function updateBuilderMapMeta(rooms, edges) {
+    const zoneLabel = builderState.zoneGraph?.zone || builderState.currentZoneId || "";
+    byId("builder-map-meta-rooms").textContent = `Rooms ${rooms.length}`;
+    byId("builder-map-meta-exits").textContent = `Exits ${edges.length}`;
+    byId("builder-map-meta-zoom").textContent = zoneLabel
+      ? `Zone ${String(zoneLabel).replace(/_/g, " ")}`
+      : "Zone local";
+  }
+
+  function updateBuilderMapTooltip(panelX, panelY, room) {
+    const tooltip = builderMapTooltip();
+    if (!tooltip) {
+      return;
+    }
+    if (!room) {
+      tooltip.style.display = "none";
+      return;
+    }
+    tooltip.textContent = room.name || `Room ${room.id}`;
+    tooltip.style.display = "block";
+    tooltip.style.left = `${panelX}px`;
+    tooltip.style.top = `${panelY}px`;
   }
 
   function normalizeBuilderZoneRooms(rooms) {
-    return (rooms || []).map((room) => ({
-      ...room,
-      x: Number(room.map_x || 0),
-      y: Number(room.map_y || 0),
-      current: Number(room.id) === Number(builderState.currentRoomId || 0),
-      is_player: Number(room.id) === Number(builderState.currentRoomId || 0),
-    }));
+    return (rooms || []).flatMap((room) => {
+      const mapX = Number(room?.map_x);
+      const mapY = Number(room?.map_y);
+      if (!Number.isFinite(mapX) || !Number.isFinite(mapY)) {
+        console.warn("ROOM MISSING COORDS:", room?.id, room?.name, room?.map_x, room?.map_y);
+        return [];
+      }
+      return [{
+        ...room,
+        x: mapX,
+        y: mapY,
+        current: Number(room.id) === Number(builderState.currentRoomId || 0),
+        is_player: Number(room.id) === Number(builderState.currentRoomId || 0),
+      }];
+    });
   }
 
   function builderZoneWorldPosition(roomId) {
@@ -410,9 +1066,15 @@
     if (!room) {
       return null;
     }
+    const mapX = Number(room.map_x);
+    const mapY = Number(room.map_y);
+    if (!Number.isFinite(mapX) || !Number.isFinite(mapY)) {
+      console.warn("ROOM MISSING COORDS:", room.id, room.name, room.map_x, room.map_y);
+      return null;
+    }
     return {
-      x: Number(room.x || 0),
-      y: Number(room.y || 0),
+      x: mapX,
+      y: mapY,
     };
   }
 
@@ -436,6 +1098,8 @@
     const fitted = fitRoomsToCanvas(canvas, rooms, BUILDER_ZONE_MIN_ZOOM);
     builderState.zoneZoom = fitted.scale;
     builderState.zonePan = fitted.offset;
+    builderState.zoneZoomInitialized = true;
+    builderState.zoneMapNeedsFit = false;
     saveZoneCamera();
   }
 
@@ -444,13 +1108,26 @@
       return false;
     }
     const zoom = Number(camera.zoom || 0);
-    if (!Number.isFinite(zoom) || zoom < BUILDER_ZONE_MIN_ZOOM || zoom > 2.5) {
+    if (!Number.isFinite(zoom) || zoom < BUILDER_ZONE_MIN_ZOOM || zoom > BUILDER_ZONE_MAX_ZOOM) {
       return false;
     }
     const bounds = renderedMapBoundsForRooms(canvas, rooms, zoom, null);
     const maxPanX = Math.max(bounds.width, canvas.width) * 1.25;
     const maxPanY = Math.max(bounds.height, canvas.height) * 1.25;
-    return Math.abs(Number(camera.pan?.x || 0)) <= maxPanX && Math.abs(Number(camera.pan?.y || 0)) <= maxPanY;
+    if (Math.abs(Number(camera.pan?.x || 0)) > maxPanX || Math.abs(Number(camera.pan?.y || 0)) > maxPanY) {
+      return false;
+    }
+
+    const usableWidth = Math.max(40, canvas.width - 48);
+    const usableHeight = Math.max(40, canvas.height - 48);
+    const fitted = fitRoomsToCanvas(canvas, rooms, BUILDER_ZONE_MIN_ZOOM);
+    const minReasonableZoom = Math.max(BUILDER_ZONE_MIN_ZOOM, Number(fitted.scale || BUILDER_ZONE_MIN_ZOOM) * 0.35);
+    const coversTooLittleSpace = bounds.width < usableWidth * 0.35 && bounds.height < usableHeight * 0.35;
+    if (coversTooLittleSpace && zoom < minReasonableZoom) {
+      return false;
+    }
+
+    return true;
   }
 
   function centerZoneMapOnRoom(roomId) {
@@ -463,16 +1140,14 @@
       x: Math.round(canvas.width / 2 - position.x * builderState.zoneZoom),
       y: Math.round(canvas.height / 2 - position.y * builderState.zoneZoom),
     };
+    builderState.zoneZoomInitialized = true;
+    builderState.zoneMapNeedsFit = false;
     saveZoneCamera();
     renderZoneMap();
   }
 
   function ensureZoneMapCanvas(viewport) {
     let canvas = zoneMapCanvas();
-    if (!canvas) {
-      viewport.innerHTML = '<canvas id="zone-map-canvas" aria-label="Zone map graph"></canvas>';
-      canvas = zoneMapCanvas();
-    }
     if (!canvas) {
       return null;
     }
@@ -487,49 +1162,192 @@
     return canvas;
   }
 
+  function summarizeBuilderRoomExits(room) {
+    const rawExits = Array.isArray(room?.exits)
+      ? room.exits
+      : Object.entries(room?.exitMap || {}).map(([direction, target_id]) => ({ direction, target_id }));
+    const exitGroups = splitBuilderExits(rawExits);
+    return {
+      roomId: Number(room?.id || 0),
+      roomName: room?.name || `Room ${room?.id || "?"}`,
+      rawExits: rawExits.map((exit) => ({
+        direction: exit.direction || "",
+        target_id: Number(exit.target_id || 0),
+      })),
+      normalizedExits: exitGroups.normalized.map((exit) => ({
+        rawDirection: exit.rawDirection,
+        direction: exit.direction,
+        target_id: exit.target_id,
+      })),
+      renderableExits: exitGroups.spatial.map((exit) => ({ direction: exit.direction, target_id: exit.target_id })),
+      nonSpatialExits: exitGroups.special.map((exit) => ({ direction: exit.direction, target_id: exit.target_id })),
+    };
+  }
+
   function renderBuilderMapCanvas(canvas, rooms) {
-    const compactMap = rooms.length > 0 && rooms.length <= 16;
-    builderState.zoneRoomPositions = drawCanvasMap(canvas, rooms, mapEdgesFromZoneRooms(rooms), {
+    const compactMap = false;
+    const edgeSummary = buildBuilderEdgeSummary(rooms, builderState.zoneGraph?.edges || []);
+    const edges = edgeSummary.edges;
+    const renderedBounds = renderedMapBoundsForRooms(canvas, rooms, builderState.zoneZoom, builderState.hoveredRoomId);
+    builderState.zoneRoomPositions = drawCanvasMap(canvas, rooms, edges, {
       getPosition: (room) => builderZoneScreenPosition(room.id),
       getColor: (room) => roomColor(room),
-      getRadius: (room) => mapRoomRadiusForHover(room, compactMap, null),
+      getRadius: (room) => mapRoomRadiusForHover(room, compactMap, builderState.hoveredRoomId),
+      hoveredRoomId: builderState.hoveredRoomId,
       selectedRoomId: Number(builderState.currentRoomId || 0),
       showLabels: compactMap,
       edgeColor: () => compactMap ? "rgba(220, 188, 120, 0.82)" : "rgba(195, 164, 104, 0.6)",
       edgeWidth: () => compactMap ? 2.4 : 1.5,
     });
+    if (builderState.connectMode && builderState.connectFromRoomId) {
+      const sourcePosition = builderState.zoneRoomPositions.get(Number(builderState.connectFromRoomId || 0));
+      if (sourcePosition) {
+        const previewTargetId = Number(builderState.hoveredRoomId || 0);
+        const previewTargetPosition = previewTargetId && previewTargetId !== Number(builderState.connectFromRoomId || 0)
+          ? builderState.zoneRoomPositions.get(previewTargetId)
+          : null;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.save();
+          ctx.strokeStyle = "rgba(255, 214, 132, 0.95)";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(sourcePosition.x, sourcePosition.y, 12, 0, Math.PI * 2);
+          ctx.stroke();
+          if (previewTargetPosition) {
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.moveTo(sourcePosition.x, sourcePosition.y);
+            ctx.lineTo(previewTargetPosition.x, previewTargetPosition.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+    }
+    debugMapSnapshot("builder", rooms, edges, {
+      zoom: builderState.zoneZoom,
+      pan: builderState.zonePan,
+      selectedRoomId: Number(builderState.currentRoomId || 0),
+      renderedBounds,
+      canvas: { width: canvas.width, height: canvas.height },
+      edgeCounters: edgeSummary.counters,
+      usesStoredRoomCoordinates: true,
+    }, {
+      positions: builderState.zoneRoomPositions,
+    });
+    console.log("builder edge counters", edgeSummary.counters);
+    updateBuilderMapMeta(rooms, edges);
+    const currentRoom = rooms.find((room) => Number(room.id) === Number(builderState.currentRoomId || 0));
+    byId("builder-map-room-name").textContent = currentRoom ? currentRoom.name : "Awaiting room data";
+    if (currentRoom) {
+      const currentRoomSummary = summarizeBuilderRoomExits(currentRoom);
+      window.__dragonsireMapDebug = window.__dragonsireMapDebug || {};
+      window.__dragonsireMapDebug.builderSelectedRoom = currentRoomSummary;
+      console.log("builder selected room exits", currentRoomSummary);
+    }
   }
 
   function mapEdgesFromZoneRooms(rooms) {
     const edges = [];
     const seen = new Set();
+    const counters = {
+      totalExits: 0,
+      spatialExits: 0,
+      diagonalExits: 0,
+      verticalExits: 0,
+      specialExits: 0,
+      droppedExits: 0,
+    };
     for (const room of rooms || []) {
-      for (const [direction, targetId] of Object.entries(room.exitMap || {})) {
-        const signature = `${room.id}:${targetId}:${direction}`;
+      const rawExits = Array.isArray(room.exits)
+        ? room.exits
+        : Object.entries(room.exitMap || {}).map(([direction, target_id]) => ({ direction, target_id }));
+      const exitGroups = splitBuilderExits(rawExits);
+      counters.totalExits += exitGroups.normalized.length;
+      counters.spatialExits += exitGroups.spatial.length;
+      counters.diagonalExits += exitGroups.normalized.filter((exit) => exit.isDiagonal).length;
+      counters.verticalExits += exitGroups.vertical.length;
+      counters.specialExits += exitGroups.special.length;
+      counters.droppedExits += exitGroups.dropped.length;
+      for (const exit of exitGroups.spatial) {
+        const fromId = Number(room.id || 0);
+        const toId = Number(exit.target_id || 0);
+        const signature = [fromId, toId].sort((left, right) => left - right).join(":");
         if (seen.has(signature)) {
           continue;
         }
         seen.add(signature);
-        edges.push({ from: Number(room.id), to: Number(targetId || 0), dir: direction });
+        edges.push({ from: fromId, to: toId, dir: exit.direction, vector: DIR_VECTOR[exit.direction] || null });
       }
     }
-    return edges;
+    return { edges, counters };
+  }
+
+  function summarizeExplicitBuilderEdges(explicitEdges, roomIds) {
+    const edges = [];
+    const counters = {
+      totalExits: 0,
+      spatialExits: 0,
+      diagonalExits: 0,
+      verticalExits: 0,
+      specialExits: 0,
+      droppedExits: 0,
+    };
+    const seen = new Set();
+    for (const edge of explicitEdges || []) {
+      const classified = classifyBuilderExit({ direction: edge?.dir || edge?.direction || "", target_id: edge?.to || 0 });
+      counters.totalExits += 1;
+      counters.diagonalExits += classified.isDiagonal ? 1 : 0;
+      counters.verticalExits += classified.isVertical ? 1 : 0;
+      counters.specialExits += classified.isSpecial ? 1 : 0;
+      counters.droppedExits += classified.dropped ? 1 : 0;
+      const fromId = Number(edge?.from || 0);
+      const toId = Number(edge?.to || 0);
+      if (!roomIds.has(fromId) || !roomIds.has(toId)) {
+        continue;
+      }
+      if (!classified.isSpatial) {
+        continue;
+      }
+      const signature = [fromId, toId].sort((left, right) => left - right).join(":");
+      if (seen.has(signature)) {
+        continue;
+      }
+      seen.add(signature);
+      counters.spatialExits += 1;
+      edges.push({ from: fromId, to: toId, dir: classified.direction, vector: DIR_VECTOR[classified.direction] || null });
+    }
+    return { edges, counters };
+  }
+
+  function buildBuilderEdgeSummary(rooms, explicitEdges = null) {
+    if (Array.isArray(explicitEdges) && explicitEdges.length) {
+      return summarizeExplicitBuilderEdges(explicitEdges, new Set((rooms || []).map((room) => Number(room.id || 0))));
+    }
+    return mapEdgesFromZoneRooms(rooms);
   }
 
   function renderZoneMap() {
-    const viewport = byId("zone-map");
-    const title = byId("zone-map-title");
+    const viewport = builderMapPanel();
     if (!viewport) {
       return;
     }
+    const useReactFlow = builderUsesReactFlow();
+    setBuilderMapRenderMode(useReactFlow);
     const payload = builderState.zoneGraph;
     if (!payload || !Array.isArray(payload.rooms) || !payload.rooms.length) {
-      viewport.innerHTML = '<div class="builder-map-empty">No zone map available.</div>';
+      if (useReactFlow) {
+        renderBuilderReactFlowMap([], { edges: [], counters: {} });
+      }
+      const canvas = zoneMapCanvas();
+      const ctx = canvas?.getContext("2d");
+      if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      byId("builder-map-room-name").textContent = "Awaiting room data";
+      updateBuilderMapMeta([], []);
       return;
-    }
-
-    if (title) {
-      title.textContent = payload.name || payload.zone_id || "Current zone";
     }
     const canvas = ensureZoneMapCanvas(viewport);
     if (!canvas) {
@@ -540,12 +1358,28 @@
     builderState.zoneGraph.rooms = rooms;
     builderState.zoneGraph.roomLookup = new Map(rooms.map((room) => [Number(room.id), room]));
 
-    const savedCamera = loadZoneCamera(builderState.currentZoneId);
-    if (isZoneCameraValid(savedCamera, rooms, canvas)) {
-      builderState.zonePan = savedCamera.pan;
-      builderState.zoneZoom = savedCamera.zoom;
-    } else {
+    const reactFlowEdgeSummary = zoneRoomsToEdges(rooms, payload.edges || []);
+    if (useReactFlow) {
+      renderBuilderReactFlowMap(rooms, reactFlowEdgeSummary);
+      return;
+    }
+
+    const canvasSizeChanged = builderState.zoneCanvasSize.width !== canvas.width || builderState.zoneCanvasSize.height !== canvas.height;
+    builderState.zoneCanvasSize = { width: canvas.width, height: canvas.height };
+
+    if (builderState.zoneForceFitOnce) {
+      builderState.zoneForceFitOnce = false;
       fitZoneMapToViewport();
+    } else if (!builderState.zoneZoomInitialized || (builderState.zoneMapNeedsFit && canvasSizeChanged)) {
+      const savedCamera = loadZoneCamera(builderState.currentZoneId);
+      if (isZoneCameraValid(savedCamera, rooms, canvas)) {
+        builderState.zonePan = savedCamera.pan;
+        builderState.zoneZoom = savedCamera.zoom;
+        builderState.zoneZoomInitialized = true;
+        builderState.zoneMapNeedsFit = false;
+      } else {
+        fitZoneMapToViewport();
+      }
     }
     renderBuilderMapCanvas(canvas, rooms);
   }
@@ -556,12 +1390,20 @@
     }
     const roomId = Number(roomPayload.id || 0);
     const roomIndex = builderState.zoneGraph.rooms.findIndex((room) => Number(room.id) === roomId);
+    const existingRoom = roomIndex >= 0 ? builderState.zoneGraph.rooms[roomIndex] : builderState.zoneGraph.roomLookup.get(roomId);
     const exitMap = {};
     (roomPayload.exits || []).forEach((exit) => {
-      exitMap[String(exit.direction || "").toLowerCase()] = Number(exit.target_id || 0);
+      const normalizedDirection = canonicalExitDirection(exit.direction || "");
+      if (!normalizedDirection) {
+        return;
+      }
+      exitMap[normalizedDirection] = Number(exit.target_id || 0);
     });
     const nextRoom = {
+      ...(existingRoom || {}),
       ...roomPayload,
+      x: Number(roomPayload.map_x ?? existingRoom?.map_x ?? 0),
+      y: Number(roomPayload.map_y ?? existingRoom?.map_y ?? 0),
       short_desc: roomPayload.short_desc || deriveBuilderShortDesc(roomPayload),
       exitMap,
     };
@@ -572,18 +1414,20 @@
   }
 
   async function loadBuilderZone(zoneId, options = {}) {
-    const normalizedZoneId = String(zoneId || "").trim().toLowerCase();
-    if (!normalizedZoneId) {
+    const requestedZoneId = builderZoneRequestId(zoneId);
+    const normalizedZoneId = normalizeBuilderZoneId(zoneId);
+    if (!options.force && normalizeBuilderZoneId(builderState.currentZoneId) === normalizedZoneId && builderState.zoneGraph) {
       return;
     }
-    if (!options.force && builderState.currentZoneId === normalizedZoneId && builderState.zoneGraph) {
-      return;
-    }
-    const payload = await builderFetchJson(`/builder/api/zone/${encodeURIComponent(normalizedZoneId)}/`);
+    const payload = await builderFetchJson(`/builder/api/zone/${encodeURIComponent(requestedZoneId)}/`);
     const rooms = (payload.rooms || []).map((room) => {
       const exitMap = {};
       (room.exits || []).forEach((exit) => {
-        exitMap[String(exit.direction || "").toLowerCase()] = Number(exit.target_id || 0);
+        const normalizedDirection = canonicalExitDirection(exit.direction || "");
+        if (!normalizedDirection) {
+          return;
+        }
+        exitMap[normalizedDirection] = Number(exit.target_id || 0);
       });
       return {
         ...room,
@@ -591,12 +1435,37 @@
       };
     });
     builderState.currentZoneId = payload.zone_id || normalizedZoneId;
+    builderState.zoneZoomInitialized = false;
+    builderState.zoneMapNeedsFit = true;
     builderState.zoneGraph = {
       ...payload,
       rooms,
       roomLookup: new Map(rooms.map((room) => [Number(room.id), room])),
     };
+    renderBuilderRoomList();
+    highlightSelectedBuilderRoom();
     renderZoneMap();
+  }
+
+  function applyBuilderMapPayload(mapPayload, fallbackZoneId = "") {
+    if (!mapPayload || !Array.isArray(mapPayload.rooms)) {
+      return false;
+    }
+    const rooms = (mapPayload.rooms || []).map((room) => ({
+      ...room,
+      map_x: Number(room.map_x ?? room.x ?? 0),
+      map_y: Number(room.map_y ?? room.y ?? 0),
+      exitMap: room.exitMap || {},
+    }));
+    builderState.zoneZoomInitialized = false;
+    builderState.zoneMapNeedsFit = true;
+    builderState.zoneGraph = {
+      ...mapPayload,
+      zone_id: mapPayload.zone_id || fallbackZoneId || builderState.currentZoneId || "local",
+      rooms,
+      roomLookup: new Map(rooms.map((room) => [Number(room.id), room])),
+    };
+    return true;
   }
 
   async function builderFetchJson(url, options) {
@@ -624,10 +1493,21 @@
     highlightSelectedBuilderRoom();
     setBuilderPageStatus(`Loading room ${roomId}...`);
     const data = await builderFetchJson(`/builder/api/room/${roomId}/`);
+    builderState.currentZoneId = normalizeBuilderZoneId(data.zone_id);
+    persistBuilderZoneSelection(builderState.currentZoneId);
+    syncBuilderZoneMenus();
+    renderBuilderRoomList();
+    highlightSelectedBuilderRoom();
     if (data.zone_id) {
       await loadBuilderZone(data.zone_id);
+    } else {
+      await loadBuilderZone(BUILDER_UNASSIGNED_ZONE_VALUE, { force: true });
     }
     builderState.currentRoom = data;
+    if ((!builderState.zoneGraph || !Array.isArray(builderState.zoneGraph.rooms) || !builderState.zoneGraph.rooms.length)
+      && applyBuilderMapPayload(data.map_payload, data.zone_id || BUILDER_UNASSIGNED_ZONE_VALUE)) {
+      renderZoneMap();
+    }
     syncZoneGraphRoom(data);
     if (byId("room-name")) {
       byId("room-name").value = data.name || "";
@@ -641,6 +1521,18 @@
     if (byId("room-environment")) {
       byId("room-environment").value = data.environment || "city";
     }
+    if (byId("room-zone")) {
+      byId("room-zone").value = builderZoneSelectValue(data.zone_id || "");
+    }
+    if (byId("room-map-x")) {
+      byId("room-map-x").value = String(data.map_x ?? data.x ?? 0);
+    }
+    if (byId("room-map-y")) {
+      byId("room-map-y").value = String(data.map_y ?? data.y ?? 0);
+    }
+    if (byId("room-map-layer")) {
+      byId("room-map-layer").value = String(data.map_layer ?? 0);
+    }
     renderBuilderExitList(data.exits || []);
     renderBuilderPreview(data);
     renderZoneMap();
@@ -649,40 +1541,129 @@
 
   async function loadBuilderRoomList() {
     builderState.rooms = await builderFetchJson("/builder/api/rooms/");
-    renderBuilderRoomList();
     const list = byId("room-list");
     const savedScrollTop = Number(window.localStorage.getItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY) || 0);
     if (list && Number.isFinite(savedScrollTop) && savedScrollTop > 0) {
       list.scrollTop = savedScrollTop;
     }
-    const persistedRoomId = Number(window.localStorage.getItem(BUILDER_LAST_ROOM_STORAGE_KEY) || 0);
-    const nextRoomId = persistedRoomId && builderState.rooms.some((room) => Number(room.id) === persistedRoomId)
-      ? persistedRoomId
-      : Number((builderState.rooms[0] || {}).id || 0);
-    if (nextRoomId) {
-      await loadBuilderRoom(nextRoomId);
-    } else {
-      setBuilderPageStatus("No rooms found.");
+  }
+
+  async function loadBuilderZones() {
+    builderState.zones = await builderFetchJson("/builder/api/zones/");
+    syncBuilderZoneMenus();
+  }
+
+  function setBuilderRoomCoordinates(roomId, mapX, mapY) {
+    const numericRoomId = Number(roomId || 0);
+    if (!numericRoomId) {
+      return;
     }
+    const nextMapX = Number.isFinite(Number(mapX)) ? Math.round(Number(mapX)) : 0;
+    const nextMapY = Number.isFinite(Number(mapY)) ? Math.round(Number(mapY)) : 0;
+
+    if (numericRoomId === Number(builderState.currentRoomId || 0)) {
+      if (byId("room-map-x")) {
+        byId("room-map-x").value = String(nextMapX);
+      }
+      if (byId("room-map-y")) {
+        byId("room-map-y").value = String(nextMapY);
+      }
+      if (builderState.currentRoom) {
+        builderState.currentRoom.map_x = nextMapX;
+        builderState.currentRoom.map_y = nextMapY;
+        builderState.currentRoom.x = nextMapX;
+        builderState.currentRoom.y = nextMapY;
+      }
+    }
+
+    const zoneRoom = builderState.zoneGraph?.roomLookup?.get(numericRoomId);
+    if (zoneRoom) {
+      zoneRoom.map_x = nextMapX;
+      zoneRoom.map_y = nextMapY;
+      zoneRoom.x = nextMapX;
+      zoneRoom.y = nextMapY;
+    }
+  }
+
+  async function switchBuilderZone(zoneId, options = {}) {
+    const normalizedZoneId = normalizeBuilderZoneId(zoneId);
+    const currentRoomStillVisible = builderState.rooms.some((room) => (
+      Number(room.id) === Number(builderState.currentRoomId || 0)
+        && normalizeBuilderZoneId(room.zone_id) === normalizedZoneId
+    ));
+    if (!currentRoomStillVisible) {
+      builderState.currentRoomId = null;
+      builderState.currentRoom = null;
+    }
+    builderState.currentZoneId = normalizedZoneId;
+    persistBuilderZoneSelection(normalizedZoneId);
+    syncBuilderZoneMenus();
+    renderBuilderRoomList();
+
+    await loadBuilderZone(zoneId, { force: true });
+
+    const filteredRooms = builderVisibleRooms();
+    const currentFilteredRoomVisible = filteredRooms.some((room) => Number(room.id) === Number(builderState.currentRoomId || 0));
+    if (currentFilteredRoomVisible && options.preserveSelection !== false) {
+      highlightSelectedBuilderRoom();
+      return;
+    }
+
+    if (filteredRooms.length && options.autoSelectRoom !== false) {
+      await loadBuilderRoom(filteredRooms[0].id);
+      return;
+    }
+
+    clearBuilderEditor(`${currentBuilderZoneLabel()} ready.`, `${currentBuilderZoneLabel()} has no rooms yet.`);
+  }
+
+  async function initializeBuilderData() {
+    setBuilderPageStatus("Loading builder data...");
+    await loadBuilderZones();
+    await loadBuilderRoomList();
+
+    const persistedRoomId = Number(window.localStorage.getItem(BUILDER_LAST_ROOM_STORAGE_KEY) || 0);
+    const persistedZoneId = normalizeBuilderZoneId(window.localStorage.getItem(BUILDER_LAST_ZONE_STORAGE_KEY) || "");
+    const hasTestLandingZone = builderState.zones.some((zone) => normalizeBuilderZoneId(zone.id) === "test_landing");
+    if (persistedRoomId && builderState.rooms.some((room) => Number(room.id) === persistedRoomId)) {
+      await loadBuilderRoom(persistedRoomId);
+      return;
+    }
+
+    if (builderState.zones.length) {
+      const nextZoneId = hasTestLandingZone
+        ? "test_landing"
+        : (builderState.zones.some((zone) => normalizeBuilderZoneId(zone.id) === persistedZoneId)
+          ? persistedZoneId
+          : defaultAssignableZoneId(builderState.zones[0].id) || normalizeBuilderZoneId(builderState.zones[0].id));
+      await switchBuilderZone(nextZoneId);
+      return;
+    }
+
+    clearBuilderEditor("No rooms found.", "Create a zone, then create the first room.");
   }
 
   async function saveBuilderRoom() {
     const draft = currentBuilderDraft();
     if (!draft.id) {
-      window.alert("Select a room first.");
+      toast("Select a room first.");
       return;
     }
     if (!draft.name.trim()) {
-      window.alert("Room name cannot be empty.");
+      toast("Room name cannot be empty.");
       return;
     }
     if (!draft.desc.trim()) {
-      window.alert("Room description cannot be empty.");
+      toast("Room description cannot be empty.");
+      return;
+    }
+    if (!draft.zone_id) {
+      toast("Room must belong to a zone.");
       return;
     }
     const exitValidation = validateBuilderExits(draft.exits);
     if (exitValidation) {
-      window.alert(exitValidation);
+      toast(exitValidation);
       return;
     }
     showSavingState();
@@ -698,26 +1679,22 @@
           desc: draft.desc,
           environment: draft.environment,
           exits: draft.exits,
+          zone_id: draft.zone_id,
+          map_x: draft.map_x,
+          map_y: draft.map_y,
+          map_layer: draft.map_layer,
         }),
       });
-      builderState.rooms = builderState.rooms.map((room) => (
-        Number(room.id) === Number(draft.id)
-          ? { ...room, db_key: draft.name }
-          : room
-      ));
-      const list = byId("room-list");
-      const scrollTop = list ? list.scrollTop : 0;
-      renderBuilderRoomList();
-      if (list) {
-        list.scrollTop = scrollTop;
-        window.localStorage.setItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY, String(scrollTop));
+      await loadBuilderZones();
+      await loadBuilderRoomList();
+      if (response.zone_id !== undefined) {
+        builderState.currentZoneId = normalizeBuilderZoneId(response.zone_id);
+        persistBuilderZoneSelection(builderState.currentZoneId);
       }
-      highlightSelectedBuilderRoom();
-      builderState.currentRoom = response.room || { ...draft, exits: response.exits || draft.exits };
-      syncZoneGraphRoom(builderState.currentRoom);
-      renderZoneMap();
-      renderBuilderExitList(builderState.currentRoom.exits || []);
-      renderBuilderPreview(builderState.currentRoom, { flash: true });
+      syncBuilderZoneMenus();
+      renderBuilderRoomList();
+      await loadBuilderRoom(draft.id);
+      renderBuilderPreview(response.room || builderState.currentRoom || draft, { flash: true });
       setBuilderPageStatus(`Saved ${draft.name}.`);
       showSavedState();
     } catch (error) {
@@ -726,8 +1703,110 @@
     }
   }
 
+  async function createBuilderZone() {
+    const name = String(byId("builder-zone-name-input")?.value || "").trim();
+    const area = String(byId("builder-zone-area-input")?.value || "").trim();
+    if (!name) {
+      toast("Zone name is required.");
+      return;
+    }
+    if (!area) {
+      toast("Area id is required.");
+      return;
+    }
+    setBuilderPageStatus(`Creating zone ${name}...`);
+    const response = await builderFetchJson("/builder/api/zones/create/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, area }),
+    });
+    await loadBuilderZones();
+    closeBuilderDialog("builder-zone-dialog");
+    toast(`Created zone ${response.zone?.name || name}`);
+    await switchBuilderZone(response.zone?.id || area, { autoSelectRoom: false, preserveSelection: false });
+  }
+
+  async function createBuilderRoom() {
+    if (!requireActiveBuilderZone()) {
+      return;
+    }
+    const name = String(byId("builder-room-name-input")?.value || "").trim();
+    const desc = String(byId("builder-room-desc-input")?.value || "").trim();
+    const environment = String(byId("builder-room-environment-input")?.value || "city").trim().toLowerCase();
+    const zoneId = normalizeBuilderZoneId(byId("builder-room-zone-input")?.value || builderState.currentZoneId || "");
+    if (!name) {
+      toast("Room name is required.");
+      return;
+    }
+    if (!desc) {
+      toast("Room description is required.");
+      return;
+    }
+    if (!zoneId) {
+      toast("Room must belong to a zone.");
+      return;
+    }
+    const position = builderCreateRoomPosition();
+    setBuilderPageStatus(`Creating ${name}...`);
+    const response = await builderFetchJson("/builder/api/rooms/create/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        desc,
+        environment,
+        zone_id: zoneId,
+        x: position.x,
+        y: position.y,
+      }),
+    });
+    await loadBuilderZones();
+    await loadBuilderRoomList();
+    closeBuilderDialog("builder-room-dialog");
+    toast(`Created room ${name}`);
+    await loadBuilderRoom(response.id || response.room?.id);
+  }
+
+  async function deleteBuilderRoom() {
+    const roomId = Number(builderState.currentRoomId || 0);
+    const roomName = builderState.currentRoom?.name || byId("room-name")?.value || `room ${roomId}`;
+    if (!roomId) {
+      toast("Select a room first.");
+      return;
+    }
+    if (!window.confirm(`Delete ${roomName}? This also removes exits pointing to it.`)) {
+      return;
+    }
+    setBuilderPageStatus(`Deleting ${roomName}...`);
+    await builderFetchJson(`/builder/api/room/${roomId}/delete/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: roomId }),
+    });
+    await loadBuilderZones();
+    await loadBuilderRoomList();
+    toast(`Deleted ${roomName}`);
+    const remainingRooms = builderVisibleRooms();
+    if (remainingRooms.length) {
+      await loadBuilderRoom(remainingRooms[0].id);
+      return;
+    }
+    if (builderState.currentZoneId) {
+      await loadBuilderZone(builderState.currentZoneId || BUILDER_UNASSIGNED_ZONE_VALUE, { force: true });
+    } else {
+      builderState.zoneGraph = null;
+    }
+    clearBuilderEditor(`${currentBuilderZoneLabel()} is empty.`, `${currentBuilderZoneLabel()} has no rooms yet.`);
+  }
+
   function bindBuilderInputs() {
-    ["room-name", "room-short-desc", "room-desc", "room-environment"].forEach((id) => {
+    ["room-name", "room-short-desc", "room-desc", "room-environment", "room-zone"].forEach((id) => {
       byId(id)?.addEventListener("input", () => {
         scheduleBuilderPreviewUpdate();
       });
@@ -745,7 +1824,72 @@
         console.error(error);
         setBuilderPageStatus(error.message || "Save failed.");
         resetSaveState();
-        window.alert(error.message || "Save failed.");
+        toast(error.message || "Save failed.");
+      });
+    });
+
+    byId("delete-room")?.addEventListener("click", () => {
+      void deleteBuilderRoom().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Delete failed.");
+        toast(error.message || "Delete failed.");
+      });
+    });
+
+    ["builder-zone-select", "builder-zone-select-top"].forEach((controlId) => {
+      byId(controlId)?.addEventListener("change", (event) => {
+        clearBuilderConnectMode();
+        void switchBuilderZone(event.target.value).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to switch zone.");
+          toast(error.message || "Unable to switch zone.");
+        });
+      });
+    });
+
+    byId("builder-new-zone")?.addEventListener("click", () => {
+      if (byId("builder-zone-name-input")) {
+        byId("builder-zone-name-input").value = "";
+      }
+      if (byId("builder-zone-area-input")) {
+        byId("builder-zone-area-input").value = "";
+      }
+      openBuilderDialog("builder-zone-dialog");
+    });
+
+    byId("builder-zone-create-submit")?.addEventListener("click", () => {
+      void createBuilderZone().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Unable to create zone.");
+        toast(error.message || "Unable to create zone.");
+      });
+    });
+
+    byId("builder-create-room")?.addEventListener("click", () => {
+      if (!requireActiveBuilderZone()) {
+        return;
+      }
+      if (byId("builder-room-name-input")) {
+        byId("builder-room-name-input").value = "";
+      }
+      if (byId("builder-room-desc-input")) {
+        byId("builder-room-desc-input").value = "";
+      }
+      if (byId("builder-room-environment-input")) {
+        byId("builder-room-environment-input").value = "city";
+      }
+      syncBuilderZoneMenus();
+      if (byId("builder-room-zone-input")?.options.length) {
+        byId("builder-room-zone-input").value = builderZoneSelectValue(defaultAssignableZoneId(builderState.currentZoneId));
+      }
+      openBuilderDialog("builder-room-dialog");
+    });
+
+    byId("builder-room-create-submit")?.addEventListener("click", () => {
+      void createBuilderRoom().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Unable to create room.");
+        toast(error.message || "Unable to create room.");
       });
     });
 
@@ -794,16 +1938,64 @@
       scheduleBuilderPreviewUpdate();
     });
 
-    const zoneMap = byId("zone-map");
+    const zoneMap = zoneMapCanvas();
+    const mapPanel = builderMapPanel();
+    zoneMap?.addEventListener("mousemove", (event) => {
+      const panelRect = mapPanel?.getBoundingClientRect();
+      const room = builderRoomAtCanvasEvent(event, zoneMap, builderCanvasHitRadius());
+      const nextHoveredRoomId = room ? Number(room.id || 0) : null;
+      zoneMap.style.cursor = room ? "pointer" : (builderState.zoneDrag ? "grabbing" : "grab");
+      if (panelRect) {
+        updateBuilderMapTooltip(event.clientX - panelRect.left, event.clientY - panelRect.top, room);
+      }
+      if (nextHoveredRoomId === builderState.hoveredRoomId) {
+        return;
+      }
+      builderState.hoveredRoomId = nextHoveredRoomId;
+      renderZoneMap();
+    });
+
+    zoneMap?.addEventListener("mouseleave", () => {
+      zoneMap.style.cursor = builderState.zoneDrag ? "grabbing" : "grab";
+      updateBuilderMapTooltip(0, 0, null);
+      if (builderState.hoveredRoomId === null) {
+        return;
+      }
+      builderState.hoveredRoomId = null;
+      renderZoneMap();
+    });
+
     zoneMap?.addEventListener("click", (event) => {
-      const rect = zoneMap.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const clickY = event.clientY - rect.top;
-      const room = roomAtPosition(clickX, clickY, builderState.zoneGraph?.rooms || [], builderState.zoneRoomPositions, 10);
+      const room = builderRoomAtCanvasEvent(event, zoneMap, builderCanvasHitRadius());
       if (!room) {
+        if (builderState.connectMode) {
+          clearBuilderConnectMode({ clearHover: true });
+          setBuilderPageStatus("Connect mode cancelled.");
+        }
         return;
       }
       const roomId = Number(room.id || 0);
+      if (builderState.connectMode) {
+        if (!builderState.connectFromRoomId) {
+          builderState.connectFromRoomId = roomId;
+          setBuilderPageStatus(`Connect mode: source ${room.name || roomNameById(roomId)} selected. Click a target room.`);
+          renderZoneMap();
+          return;
+        }
+        if (roomId === Number(builderState.connectFromRoomId || 0)) {
+          clearBuilderConnectMode();
+          setBuilderPageStatus("Connect mode cancelled.");
+          return;
+        }
+        const fromId = Number(builderState.connectFromRoomId || 0);
+        clearBuilderConnectMode();
+        void createExitBetweenRooms(fromId, roomId).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to connect rooms.");
+          toast(error.message || "Unable to connect rooms.");
+        });
+        return;
+      }
       if (!roomId || roomId === Number(builderState.currentRoomId || 0)) {
         return;
       }
@@ -816,22 +2008,55 @@
     zoneMap?.addEventListener("wheel", (event) => {
       event.preventDefault();
       const nextZoom = event.deltaY < 0 ? builderState.zoneZoom * 1.1 : builderState.zoneZoom / 1.1;
-      builderState.zoneZoom = Math.min(Math.max(nextZoom, BUILDER_ZONE_MIN_ZOOM), 2.5);
+      builderState.zoneZoom = Math.min(Math.max(nextZoom, BUILDER_ZONE_MIN_ZOOM), BUILDER_ZONE_MAX_ZOOM);
+      builderState.zoneZoomInitialized = true;
+      builderState.zoneMapNeedsFit = false;
       saveZoneCamera();
       renderZoneMap();
     }, { passive: false });
 
     zoneMap?.addEventListener("pointerdown", (event) => {
-      if (event.target.closest(".builder-map-node")) {
+      const room = builderRoomAtCanvasEvent(event, zoneMap, builderCanvasHitRadius());
+      const roomId = Number(room?.id || 0);
+      if (roomId && roomId === Number(builderState.currentRoomId || 0)) {
+        const sourceRoom = builderState.zoneGraph?.roomLookup?.get(roomId) || builderState.currentRoom || room;
+        builderState.zoneDrag = {
+          mode: "room",
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          roomId,
+          roomMapX: Number(sourceRoom?.map_x ?? sourceRoom?.x ?? 0),
+          roomMapY: Number(sourceRoom?.map_y ?? sourceRoom?.y ?? 0),
+          moved: false,
+        };
+        try {
+          zoneMap.setPointerCapture?.(event.pointerId);
+        } catch (error) {
+          console.debug("builder room drag pointer capture unavailable", error);
+        }
+        zoneMap.style.cursor = "grabbing";
+        zoneMap.classList.add("is-dragging");
+        event.preventDefault();
+        return;
+      }
+      if (roomId) {
         return;
       }
       builderState.zoneDrag = {
+        mode: "pan",
         pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
         panX: builderState.zonePan.x,
         panY: builderState.zonePan.y,
       };
+      try {
+        zoneMap.setPointerCapture?.(event.pointerId);
+      } catch (error) {
+        console.debug("builder map pan pointer capture unavailable", error);
+      }
+      zoneMap.style.cursor = "grabbing";
       zoneMap.classList.add("is-dragging");
     });
 
@@ -839,29 +2064,107 @@
       if (!builderState.zoneDrag) {
         return;
       }
+      if (builderState.zoneDrag.pointerId !== undefined && event.pointerId !== builderState.zoneDrag.pointerId) {
+        return;
+      }
       const deltaX = event.clientX - builderState.zoneDrag.startX;
       const deltaY = event.clientY - builderState.zoneDrag.startY;
+      if (builderState.zoneDrag.mode === "room") {
+        const nextMapX = Number(builderState.zoneDrag.roomMapX || 0) + (deltaX / Math.max(builderState.zoneZoom || 1, 0.0001));
+        const nextMapY = Number(builderState.zoneDrag.roomMapY || 0) + (deltaY / Math.max(builderState.zoneZoom || 1, 0.0001));
+        const roundedMapX = Math.round(nextMapX);
+        const roundedMapY = Math.round(nextMapY);
+        const currentMapX = Number(byId("room-map-x")?.value || builderState.currentRoom?.map_x || 0);
+        const currentMapY = Number(byId("room-map-y")?.value || builderState.currentRoom?.map_y || 0);
+        if (roundedMapX === currentMapX && roundedMapY === currentMapY) {
+          return;
+        }
+        builderState.zoneDrag.moved = true;
+        setBuilderRoomCoordinates(builderState.zoneDrag.roomId, roundedMapX, roundedMapY);
+        renderZoneMap();
+        return;
+      }
       builderState.zonePan = {
         x: builderState.zoneDrag.panX + deltaX,
         y: builderState.zoneDrag.panY + deltaY,
       };
+      builderState.zoneZoomInitialized = true;
+      builderState.zoneMapNeedsFit = false;
       renderZoneMap();
     });
 
     ["pointerup", "pointerleave", "pointercancel"].forEach((eventName) => {
-      zoneMap?.addEventListener(eventName, () => {
+      zoneMap?.addEventListener(eventName, (event) => {
         if (!builderState.zoneDrag) {
+          return;
+        }
+        const completedDrag = builderState.zoneDrag;
+        if (completedDrag.pointerId !== undefined && event.pointerId !== undefined && event.pointerId !== completedDrag.pointerId) {
           return;
         }
         builderState.zoneDrag = null;
         zoneMap.classList.remove("is-dragging");
+        try {
+          zoneMap.releasePointerCapture?.(completedDrag.pointerId);
+        } catch (error) {
+          console.debug("builder drag pointer release unavailable", error);
+        }
+        if (completedDrag.mode === "room" && completedDrag.moved) {
+          void persistBuilderRoomCoordinates(
+            completedDrag.roomId,
+            Number(byId("room-map-x")?.value || 0),
+            Number(byId("room-map-y")?.value || 0)
+          ).catch((error) => {
+            console.error(error);
+            setBuilderPageStatus(error.message || "Unable to save room position.");
+            toast(error.message || "Unable to save room position.");
+          });
+        }
+        zoneMap.style.cursor = builderState.hoveredRoomId ? "pointer" : "grab";
         saveZoneCamera();
       });
+    });
+
+    byId("builder-map-fit-toggle")?.addEventListener("click", () => {
+      if (builderUsesReactFlow()) {
+        queueBuilderReactFlowViewport("fit");
+        return;
+      }
+      builderState.zoneForceFitOnce = true;
+      builderState.zoneZoomInitialized = false;
+      builderState.zoneMapNeedsFit = true;
+      renderZoneMap();
+    });
+
+    byId("builder-map-center-toggle")?.addEventListener("click", () => {
+      if (builderUsesReactFlow()) {
+        queueBuilderReactFlowViewport("center");
+        return;
+      }
+      if (builderState.currentRoomId) {
+        centerZoneMapOnRoom(builderState.currentRoomId);
+      }
+    });
+
+    byId("builder-connect-toggle")?.addEventListener("click", () => {
+      if (!builderState.connectMode) {
+        beginBuilderConnectMode();
+        return;
+      }
+      clearBuilderConnectMode({ clearHover: true });
+      setBuilderPageStatus("Connect mode cancelled.");
+    });
+
+    byId("builder-map-fullscreen-toggle")?.addEventListener("click", () => {
+      const panel = builderMapPanel();
+      panel?.classList.toggle("fullscreen");
+      renderZoneMap();
     });
   }
 
   function initBuilderPage() {
     bindBuilderInputs();
+    syncBuilderZoneMenus();
     renderBuilderExitList([]);
     renderBuilderPreview({
       name: "No room selected",
@@ -870,10 +2173,68 @@
       exits: [],
     });
     renderZoneMap();
-    loadBuilderRoomList().catch((error) => {
+    initializeBuilderData().catch((error) => {
       console.error(error);
       setBuilderPageStatus(error.message || "Unable to load builder rooms.");
     });
+    window.addEventListener("resize", () => {
+      builderState.zoneMapNeedsFit = true;
+      builderState.zoneZoomInitialized = false;
+      window.requestAnimationFrame(() => renderZoneMap());
+    });
+  }
+
+  function getCanvasPoint(event, canvas) {
+    if (!event || !canvas) {
+      return { x: 0, y: 0 };
+    }
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width || canvas.width || 1;
+    const height = rect.height || canvas.height || 1;
+    return {
+      x: ((event.clientX - rect.left) / width) * canvas.width,
+      y: ((event.clientY - rect.top) / height) * canvas.height,
+    };
+  }
+
+  function builderZoneRequestId(zoneId) {
+    const normalizedZoneId = normalizeBuilderZoneId(zoneId);
+    return normalizedZoneId || BUILDER_UNASSIGNED_ZONE_VALUE;
+  }
+
+  function builderRoomAtCanvasEvent(event, canvas, radius = 12) {
+    return findRenderedRoomAtPoint(
+      getCanvasPoint(event, canvas),
+      builderState.zoneRoomPositions || new Map(),
+      builderState.zoneGraph?.rooms || [],
+      radius
+    );
+  }
+
+  function builderCanvasHitRadius() {
+    return builderState.connectMode ? 24 : 18;
+  }
+
+  function findRenderedRoomAtPoint(point, positions, rooms, radius = 8) {
+    let found = null;
+    let bestDistanceSquared = Infinity;
+    const radiusSquared = radius * radius;
+
+    for (const room of rooms || []) {
+      const pos = positions.get(room.id);
+      if (!pos) {
+        continue;
+      }
+      const dx = point.x - pos.x;
+      const dy = point.y - pos.y;
+      const distanceSquared = dx * dx + dy * dy;
+      if (distanceSquared <= radiusSquared && distanceSquared < bestDistanceSquared) {
+        found = room;
+        bestDistanceSquared = distanceSquared;
+      }
+    }
+
+    return found;
   }
 
   function sceneImageCatalog(preferredFileName) {
@@ -2403,7 +3764,10 @@
     const usableWidth = Math.max(40, canvas.width - padding * 2);
     const usableHeight = Math.max(40, canvas.height - padding * 2);
     const rawBounds = mapBoundsForRooms(rooms);
-    let nextScale = Math.max(minScale, Math.min(usableWidth / rawBounds.width, usableHeight / rawBounds.height));
+    let nextScale = Math.min(
+      BUILDER_ZONE_MAX_ZOOM,
+      Math.max(minScale, Math.min(usableWidth / rawBounds.width, usableHeight / rawBounds.height)),
+    );
 
     for (let attempt = 0; attempt < 4; attempt += 1) {
       const bounds = renderedMapBoundsForRooms(canvas, rooms, nextScale, null);
@@ -2411,7 +3775,7 @@
       if (!Number.isFinite(scaleFactor) || scaleFactor <= 0) {
         break;
       }
-      const adjustedScale = Math.max(minScale, nextScale * scaleFactor);
+      const adjustedScale = Math.min(BUILDER_ZONE_MAX_ZOOM, Math.max(minScale, nextScale * scaleFactor));
       if (Math.abs(adjustedScale - nextScale) < 0.01) {
         nextScale = adjustedScale;
         break;
@@ -2494,6 +3858,38 @@
     };
   }
 
+  function debugMapSnapshot(label, rooms, edges, transform, options = {}) {
+    const snapshot = {
+      roomCount: rooms.length,
+      edgeCount: edges.length,
+      sampleRoomIds: rooms.slice(0, 20).map((room) => room.id),
+      sampleRooms: rooms.slice(0, 20).map((room) => ({
+        id: room.id,
+        x: room.x ?? room.map_x ?? 0,
+        y: room.y ?? room.map_y ?? 0,
+      })),
+      selectedRoomId: transform.selectedRoomId ?? null,
+      renderedBounds: transform.renderedBounds || null,
+      transform,
+    };
+
+    if (options.positions) {
+      snapshot.sampleScreenPositions = rooms.slice(0, 20).map((room) => {
+        const position = options.positions.get(room.id);
+        return {
+          id: room.id,
+          x: position ? Number(position.x.toFixed(2)) : null,
+          y: position ? Number(position.y.toFixed(2)) : null,
+        };
+      });
+    }
+
+    window.__dragonsireMapDebug = window.__dragonsireMapDebug || {};
+    window.__dragonsireMapDebug[label] = snapshot;
+    console.log(label, snapshot);
+    return snapshot;
+  }
+
   function drawCanvasMap(canvas, rooms, edges, options = {}) {
     if (!canvas || !Array.isArray(rooms)) {
       return new Map();
@@ -2565,7 +3961,10 @@
 
   function renderPlayerMapCanvas(canvas) {
     const compactMap = isCompactMap();
-    state.roomPositions = drawCanvasMap(canvas, state.map.rooms || [], mapEdges(), {
+    const rooms = state.map.rooms || [];
+    const edges = mapEdges();
+    const renderedBounds = renderedMapBoundsForRooms(canvas, rooms, state.mapScale, state.hoveredRoomId);
+    state.roomPositions = drawCanvasMap(canvas, rooms, edges, {
       getPosition: (room) => worldPosition(room, canvas),
       getColor: (room) => roomColor(room),
       getRadius: (room) => mapRoomRadius(room, compactMap),
@@ -2574,6 +3973,15 @@
       showLabels: compactMap,
       edgeColor: () => compactMap ? "rgba(220, 188, 120, 0.82)" : "rgba(195, 164, 104, 0.6)",
       edgeWidth: () => compactMap ? 2.4 : 1.5,
+    });
+    debugMapSnapshot("play", rooms, edges, {
+      scale: state.mapScale,
+      offset: state.mapOffset,
+      selectedRoomId: state.map.player_room_id,
+      renderedBounds,
+      canvas: { width: canvas.width, height: canvas.height },
+    }, {
+      positions: state.roomPositions,
     });
   }
 
@@ -2792,16 +4200,7 @@
   }
 
   function roomAtPosition(x, y, rooms, positions, radius = 12) {
-    for (const room of rooms || []) {
-      const pos = positions.get(room.id);
-      if (!pos) continue;
-      const dx = pos.x - x;
-      const dy = pos.y - y;
-      if (Math.sqrt(dx * dx + dy * dy) <= radius) {
-        return room;
-      }
-    }
-    return null;
+    return findRenderedRoomAtPoint({ x, y }, positions, rooms, radius);
   }
 
   function setupMapInteractions() {

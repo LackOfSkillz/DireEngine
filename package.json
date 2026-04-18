@@ -1,0 +1,13 @@
+{
+  "name": "dragonsire",
+  "private": true,
+  "scripts": {
+    "build:builder-reactflow": "esbuild web/static/webclient/react/builderReactFlowEntry.jsx --bundle --format=iife --global-name=DragonsireBuilderReactFlow --outfile=web/static/webclient/js/builder-reactflow.js"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.10.2",
+    "esbuild": "^0.28.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  }
+}

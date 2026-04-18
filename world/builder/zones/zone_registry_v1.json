@@ -1,7 +1,13 @@
 {
   "version": "v1",
   "zones": {
+    "tester": {
+      "area": "tester",
+      "name": "tester",
+      "rooms": {}
+    },
     "western_wilds": {
+      "area": "western_wilds",
       "name": "Western Wilds",
       "rooms": {}
     }

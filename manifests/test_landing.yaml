@@ -1,0 +1,8 @@
+area_id: test_landing
+map_file: maps/CrossingMap (1).png
+profile: dr_city
+generation:
+  synthesize_street_names: true
+  synthesize_room_descriptions: true
+  synthesize_special_exits: true
+

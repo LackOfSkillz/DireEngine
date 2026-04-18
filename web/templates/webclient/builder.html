@@ -15,6 +15,12 @@
       </div>
     </div>
     <div id="topbar-utility">
+      <div id="builder-zone-switcher">
+        <label class="builder-header-zone-field" for="builder-zone-select-top">
+          <span class="builder-label">Working Zone</span>
+          <select id="builder-zone-select-top" aria-label="Working Zone"></select>
+        </label>
+      </div>
       <div id="topbar-status-strip">
         <span class="status-tag">Builder V1</span>
         <span id="builder-status">Select a room to begin.</span>
@@ -24,6 +30,22 @@
 
   <div id="builder-layout">
     <aside id="builder-left" class="panel obsidian-panel">
+      <section class="ds-card section card builder-browser-panel builder-panel">
+        <div class="panel-title-row">
+          <div class="panel-title">Zones</div>
+          <div class="panel-subtitle">World structure</div>
+        </div>
+        <div class="builder-panel-note">Create zones first, then build rooms inside them.</div>
+        <label class="builder-field" for="builder-zone-select">
+          <span class="builder-label">Current Zone</span>
+          <select id="builder-zone-select"></select>
+        </label>
+        <div class="action-row builder-browser-actions">
+          <button id="builder-new-zone" type="button">New Zone</button>
+          <button id="builder-create-room" type="button">Create Room</button>
+        </div>
+      </section>
+
       <section class="ds-card section card builder-browser-panel builder-panel">
         <div class="panel-title-row">
           <div class="panel-title">Rooms</div>
@@ -61,13 +83,59 @@
             <option value="tavern">Tavern</option>
           </select>
         </label>
+        <label class="builder-field" for="room-zone">
+          <span class="builder-label">Zone</span>
+          <select id="room-zone"></select>
+        </label>
+        <div class="action-row builder-browser-actions">
+          <label class="builder-field" for="room-map-x">
+            <span class="builder-label">Map X</span>
+            <input id="room-map-x" type="number" step="1" value="0">
+          </label>
+          <label class="builder-field" for="room-map-y">
+            <span class="builder-label">Map Y</span>
+            <input id="room-map-y" type="number" step="1" value="0">
+          </label>
+        </div>
+        <label class="builder-field" for="room-map-layer">
+          <span class="builder-label">Map Layer</span>
+          <input id="room-map-layer" type="number" step="1" value="0">
+        </label>
         <div id="room-exits" class="builder-field">
           <div class="panel-title">Exits</div>
+          <datalist id="builder-exit-direction-options">
+            <option value="north"></option>
+            <option value="south"></option>
+            <option value="east"></option>
+            <option value="west"></option>
+            <option value="up"></option>
+            <option value="down"></option>
+            <option value="northeast"></option>
+            <option value="northwest"></option>
+            <option value="southeast"></option>
+            <option value="southwest"></option>
+            <option value="gate"></option>
+            <option value="arch"></option>
+            <option value="bridge"></option>
+            <option value="stair"></option>
+            <option value="path"></option>
+            <option value="walk"></option>
+            <option value="ramp"></option>
+            <option value="pier"></option>
+            <option value="ferry"></option>
+            <option value="dock"></option>
+            <option value="enter"></option>
+            <option value="leave"></option>
+            <option value="entry"></option>
+            <option value="veranda"></option>
+            <option value="yard"></option>
+          </datalist>
           <div id="exit-list"></div>
           <button id="add-exit" type="button">Add Exit</button>
         </div>
         <div class="action-row">
           <button id="save-room" type="button">Save</button>
+          <button id="delete-room" type="button">Delete Room</button>
         </div>
       </section>
     </main>
@@ -76,17 +144,30 @@
       <section id="room-preview" class="section card builder-panel">
         <div id="feed-header" class="ds-card">
           <div class="panel-title-row console-header">
-            <div class="panel-title">Zone Map</div>
+            <div class="panel-title">Map Workspace</div>
             <div id="room-context">Builder preview</div>
-            <button id="zone-map-center-selected" type="button">Center Selected</button>
           </div>
         </div>
         <div id="feed-body">
-          <div id="zone-map-panel" class="ds-card">
-            <div id="zone-map-toolbar">
-              <div id="zone-map-title">Current zone</div>
+          <div id="builder-map-panel" class="ds-card">
+            <div class="panel-title-row">
+              <div class="panel-title">Zone Map</div>
+              <div class="panel-title-actions">
+                <button id="builder-map-fit-toggle" class="chrome-tab" type="button">Fit</button>
+                <button id="builder-map-center-toggle" class="chrome-tab" type="button">Center</button>
+                <button id="builder-connect-toggle" class="chrome-tab" type="button">Connect Rooms</button>
+                <button id="builder-map-fullscreen-toggle" class="chrome-tab" type="button">⛶</button>
+              </div>
             </div>
-            <div id="zone-map" aria-label="Zone map graph"></div>
+            <div id="builder-map-room-name">Awaiting room data</div>
+            <div id="builder-map-meta-row">
+              <span id="builder-map-meta-rooms">Rooms 0</span>
+              <span id="builder-map-meta-exits">Exits 0</span>
+              <span id="builder-map-meta-zoom">Zone local</span>
+            </div>
+            <div id="builder-reactflow-root" aria-label="Builder zone map"></div>
+            <canvas id="builder-map-canvas" width="320" height="320" aria-label="Builder zone map"></canvas>
+            <div id="builder-map-tooltip"></div>
           </div>
           <div id="feed-text" class="ds-card">
             <div class="panel-title">Room Preview</div>
@@ -107,9 +188,66 @@
       </section>
     </aside>
   </div>
+
+  <dialog id="builder-zone-dialog" class="builder-dialog">
+    <form method="dialog" class="builder-dialog-form">
+      <div class="panel-title-row">
+        <div class="panel-title">New Zone</div>
+        <div class="panel-subtitle">Foundation first</div>
+      </div>
+      <label class="builder-field" for="builder-zone-name-input">
+        <span class="builder-label">Zone Name</span>
+        <input id="builder-zone-name-input" type="text" autocomplete="off">
+      </label>
+      <label class="builder-field" for="builder-zone-area-input">
+        <span class="builder-label">Area Id</span>
+        <input id="builder-zone-area-input" type="text" autocomplete="off" placeholder="new_landing">
+      </label>
+      <div class="action-row builder-dialog-actions">
+        <button id="builder-zone-cancel" type="submit" value="cancel">Cancel</button>
+        <button id="builder-zone-create-submit" type="button">Create Zone</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="builder-room-dialog" class="builder-dialog">
+    <form method="dialog" class="builder-dialog-form">
+      <div class="panel-title-row">
+        <div class="panel-title">Create Room</div>
+        <div class="panel-subtitle">Current builder zone</div>
+      </div>
+      <label class="builder-field" for="builder-room-name-input">
+        <span class="builder-label">Name</span>
+        <input id="builder-room-name-input" type="text" autocomplete="off">
+      </label>
+      <label class="builder-field" for="builder-room-desc-input">
+        <span class="builder-label">Description</span>
+        <textarea id="builder-room-desc-input"></textarea>
+      </label>
+      <label class="builder-field" for="builder-room-environment-input">
+        <span class="builder-label">Environment</span>
+        <select id="builder-room-environment-input">
+          <option value="city">City</option>
+          <option value="forest">Forest</option>
+          <option value="swamp">Swamp</option>
+          <option value="tavern">Tavern</option>
+        </select>
+      </label>
+      <label class="builder-field" for="builder-room-zone-input">
+        <span class="builder-label">Zone</span>
+        <select id="builder-room-zone-input"></select>
+      </label>
+      <div class="action-row builder-dialog-actions">
+        <button id="builder-room-cancel" type="submit" value="cancel">Cancel</button>
+        <button id="builder-room-create-submit" type="button">Create Room</button>
+      </div>
+    </form>
+  </dialog>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/webclient/js/dragonsire-browser-v2.js?v=23"></script>
+<link rel="stylesheet" href="/static/webclient/js/builder-reactflow.css?v=1">
+<script src="/static/webclient/js/builder-reactflow.js?v=1"></script>
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=51"></script>
 {% endblock %}
