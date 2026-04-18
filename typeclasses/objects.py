@@ -11,6 +11,7 @@ with a location in the game world (like Characters, Rooms, Exits).
 import logging
 import re
 
+from django.utils.text import slugify
 from evennia.objects.objects import DefaultObject
 
 from systems.chargen.mirror import MIRROR_KEY, is_chargen_active, render_mirror
@@ -111,6 +112,8 @@ class Object(ObjectParent, DefaultObject):
 
     def at_object_creation(self):
         super().at_object_creation()
+        if not self.db.world_id:
+            self.db.world_id = slugify(self.key)
         self.db.stealable = True
         self.db.burglary_enabled = False
         self.db.lock_difficulty = 0

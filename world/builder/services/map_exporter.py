@@ -221,7 +221,10 @@ def _room_occupants_by_id(rooms: list) -> dict[int, list]:
 
 def _rooms_for_zone(zone_id: str) -> list:
     rooms_by_zone_id = []
-    for candidate in ObjectDB.objects.filter(db_location__isnull=True, db_typeclass_path="typeclasses.rooms.Room").order_by("id"):
+    for candidate in ObjectDB.objects.filter(db_location__isnull=True).order_by("id"):
+        typeclass_path = str(getattr(candidate, "db_typeclass_path", "") or "")
+        if not typeclass_path.startswith("typeclasses.rooms"):
+            continue
         if str(_room_zone_id(candidate, fallback="") or "").strip() != zone_id:
             continue
         if not str(getattr(getattr(candidate, "db", None), "builder_id", "") or "").strip():
@@ -237,7 +240,9 @@ def _rooms_for_zone(zone_id: str) -> list:
     zone_rooms = [
         obj
         for obj in tagged_objects
-        if getattr(obj, "destination", None) is None and getattr(obj, "id", None) is not None and getattr(obj, "db_typeclass_path", "") == "typeclasses.rooms.Room"
+        if getattr(obj, "destination", None) is None
+        and getattr(obj, "id", None) is not None
+        and str(getattr(obj, "db_typeclass_path", "") or "").startswith("typeclasses.rooms")
     ]
     ordered_rooms = sorted(zone_rooms, key=lambda room: getattr(room, "id", 0))
     return _prefetch_room_tags(ordered_rooms)

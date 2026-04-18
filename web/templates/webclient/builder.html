@@ -6,11 +6,11 @@
     <div id="play-header-main">
       <div id="title-cluster">
         <div id="titlebar"><span>Dragonsire Builder</span></div>
-        <div id="subtitlebar"><span>Builder V1</span><span class="identity-separator">•</span><span>Zone Graph + Room Inspector</span></div>
+        <div id="subtitlebar"><span>Builder V2</span><span class="identity-separator">•</span><span>YAML Editor + Runtime Reload</span></div>
       </div>
       <div id="topbar-tabs">
         <a href="/play" class="chrome-tab">PLAY</a>
-        <a href="/builder/" class="chrome-tab active">BUILDER</a>
+        <a href="http://localhost:4001/builder/" class="chrome-tab active">BUILDER</a>
         <a href="/" class="chrome-tab">EXIT</a>
       </div>
     </div>
@@ -22,8 +22,12 @@
         </label>
       </div>
       <div id="topbar-status-strip">
-        <span class="status-tag">Builder V1</span>
+        <span class="status-tag">Builder V2</span>
         <span id="builder-status">Select a room to begin.</span>
+      </div>
+      <div class="action-row builder-browser-actions">
+        <button id="save-zone" type="button">Save Zone</button>
+        <button id="reload-zone" type="button">Reload Zone</button>
       </div>
     </div>
   </header>
@@ -74,6 +78,56 @@
           <span class="builder-label">Full Description</span>
           <textarea id="room-desc"></textarea>
         </label>
+        <section class="builder-subsection builder-field" id="room-stateful-descs">
+          <div class="panel-title-row">
+            <div class="panel-title">Stateful Descriptions</div>
+            <div class="panel-subtitle">Seasonal and custom overrides</div>
+          </div>
+          <label class="builder-field" for="room-desc-spring">
+            <span class="builder-label">Spring</span>
+            <textarea id="room-desc-spring" class="builder-compact-textarea"></textarea>
+          </label>
+          <label class="builder-field" for="room-desc-summer">
+            <span class="builder-label">Summer</span>
+            <textarea id="room-desc-summer" class="builder-compact-textarea"></textarea>
+          </label>
+          <label class="builder-field" for="room-desc-autumn">
+            <span class="builder-label">Autumn</span>
+            <textarea id="room-desc-autumn" class="builder-compact-textarea"></textarea>
+          </label>
+          <label class="builder-field" for="room-desc-winter">
+            <span class="builder-label">Winter</span>
+            <textarea id="room-desc-winter" class="builder-compact-textarea"></textarea>
+          </label>
+          <div id="builder-custom-stateful-desc-list" class="builder-kv-list"></div>
+          <button id="builder-add-custom-stateful-desc" type="button">Add Custom State</button>
+        </section>
+        <label class="builder-field" for="room-active-states">
+          <span class="builder-label">Active Room States</span>
+          <input id="room-active-states" type="text" autocomplete="off" placeholder="burning, foggy, flooded">
+        </label>
+        <section class="builder-subsection builder-field" id="room-details-section">
+          <div class="panel-title-row">
+            <div class="panel-title">Details</div>
+            <div class="panel-subtitle">Look targets without objects</div>
+          </div>
+          <div id="builder-detail-list" class="builder-kv-list"></div>
+          <button id="builder-add-detail" type="button">Add Detail</button>
+        </section>
+        <section class="builder-subsection builder-field" id="room-ambient-section">
+          <div class="panel-title-row">
+            <div class="panel-title">Ambient Messages</div>
+            <div class="panel-subtitle">One message per line</div>
+          </div>
+          <label class="builder-field" for="room-ambient-rate">
+            <span class="builder-label">Message Rate</span>
+            <input id="room-ambient-rate" type="number" min="0" step="1" value="0">
+          </label>
+          <label class="builder-field" for="room-ambient-messages">
+            <span class="builder-label">Messages</span>
+            <textarea id="room-ambient-messages" class="builder-compact-textarea"></textarea>
+          </label>
+        </section>
         <label class="builder-field" for="room-environment">
           <span class="builder-label">Environment</span>
           <select id="room-environment">
@@ -134,7 +188,7 @@
           <button id="add-exit" type="button">Add Exit</button>
         </div>
         <div class="action-row">
-          <button id="save-room" type="button">Save</button>
+          <button id="save-room" type="button">Apply Room</button>
           <button id="delete-room" type="button">Delete Room</button>
         </div>
       </section>
@@ -177,7 +231,16 @@
                 <div id="feed-world" class="feed-view active">
                   <div id="feed-surface" class="preview-content">
                     <h3 id="builder-preview-room-name" class="preview-title">No room selected</h3>
+                    <label class="builder-field" for="builder-preview-state">
+                      <span class="builder-label">Preview State</span>
+                      <select id="builder-preview-state">
+                        <option value="">Auto</option>
+                        <option value="default">Default</option>
+                      </select>
+                    </label>
                     <div id="builder-preview-room-desc" class="preview-description">Choose a room from the list to inspect and edit it.</div>
+                    <div id="builder-preview-room-state" class="preview-meta">State source: default</div>
+                    <div id="builder-preview-room-details" class="preview-meta">Details: none</div>
                     <div id="builder-preview-room-exits" class="preview-meta">Exits: none</div>
                   </div>
                 </div>
@@ -249,5 +312,5 @@
 {% block scripts %}
 <link rel="stylesheet" href="/static/webclient/js/builder-reactflow.css?v=1">
 <script src="/static/webclient/js/builder-reactflow.js?v=1"></script>
-<script src="/static/webclient/js/dragonsire-browser-v2.js?v=51"></script>
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=53"></script>
 {% endblock %}

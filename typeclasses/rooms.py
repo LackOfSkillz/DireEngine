@@ -6,9 +6,11 @@ Rooms are simple containers that has no location of their own.
 """
 
 import time
+import logging
 from collections.abc import Mapping
 
 from django.utils.translation import gettext as _
+from django.utils.text import slugify
 from evennia.objects.objects import DefaultRoom
 from evennia.utils.search import search_object
 from evennia.utils.utils import iter_to_str
@@ -23,6 +25,9 @@ from world.systems.ranger import (
 )
 
 from .objects import ObjectParent
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def is_fishable(room):
@@ -44,6 +49,8 @@ class Room(ObjectParent, DefaultRoom):
 
     def at_object_creation(self):
         super().at_object_creation()
+        if not self.db.world_id:
+            self.db.world_id = slugify(self.key)
         self.db.guild_tag = None
         self.db.environment_type = infer_environment_type(self.key, getattr(self.db, "desc", "") or "")
         self.db.terrain_type = infer_terrain_type(
@@ -85,6 +92,8 @@ class Room(ObjectParent, DefaultRoom):
         self.db.npc_boundary = False
         self.db.fishable = False
         self.db.fish_group = "River 1"
+        if self.db.zone_id is None:
+            LOGGER.warning("Room %s created without zone_id; defaulting to default_region.", self.key)
 
     def is_bank_room(self):
         if bool(getattr(self.db, "is_bank", False)):

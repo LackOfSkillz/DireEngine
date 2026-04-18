@@ -1,7 +1,9 @@
 import json
 import re
+from pathlib import Path
 from types import SimpleNamespace
 
+import yaml
 from django.db import transaction
 from django.http import Http404, JsonResponse
 from django.shortcuts import render
@@ -13,9 +15,12 @@ from evennia.utils.create import create_object
 from web.character_helpers import parse_request_data
 from world.area_forge import map_api
 from world.builder.services import exit_service, zone_service
+from world.worlddata.services.import_zone_service import DEFAULT_ROOM_TYPECLASS, load_zone
 
 
-ROOM_TYPECLASS = "typeclasses.rooms.Room"
+ROOM_TYPECLASS = DEFAULT_ROOM_TYPECLASS
+EXIT_TYPECLASS = "typeclasses.exits.Exit"
+SLOW_EXIT_TYPECLASS = "typeclasses.exits_slow.SlowDireExit"
 BUILDER_UNASSIGNED_ZONE_SENTINEL = "__unassigned__"
 BUILDER_ENVIRONMENT_OPTIONS = {"city", "forest", "swamp", "tavern"}
 BUILDER_DIRECTION_ALIASES = {
@@ -62,6 +67,166 @@ BUILDER_DIRECTIONS = (
 )
 
 
+def _worlddata_zones_dir() -> Path:
+    return Path(__file__).resolve().parents[1] / "worlddata" / "zones"
+
+
+def _worlddata_zone_path(zone_id):
+    normalized_zone_id = _normalize_zone_id(zone_id)
+    if not normalized_zone_id:
+        raise ValueError("zone_id is required")
+    return _worlddata_zones_dir() / f"{normalized_zone_id}.yaml"
+
+
+def _builder_room_sort_key(room_data):
+    room_map = dict(room_data.get("map") or {})
+    return (
+        int(room_map.get("layer", 0) or 0),
+        int(room_map.get("y", 0) or 0),
+        int(room_map.get("x", 0) or 0),
+        str(room_data.get("name") or room_data.get("id") or "").lower(),
+    )
+
+
+def _normalize_builder_yaml_room(room_data, fallback_index=0):
+    room_data = dict(room_data or {})
+    room_map = dict(room_data.get("map") or {})
+    normalized_room_id = str(room_data.get("id") or f"room_{fallback_index + 1}").strip()
+    stateful_descs = room_data.get("stateful_descs") if isinstance(room_data.get("stateful_descs"), dict) else {}
+    details = room_data.get("details") if isinstance(room_data.get("details"), dict) else {}
+    room_states = room_data.get("room_states") if isinstance(room_data.get("room_states"), list) else []
+    ambient = dict(room_data.get("ambient") or {}) if isinstance(room_data.get("ambient"), dict) else {}
+    raw_exits = dict(room_data.get("exits") or {})
+    return {
+        "id": normalized_room_id,
+        "name": str(room_data.get("name") or normalized_room_id),
+        "typeclass": str(room_data.get("typeclass") or DEFAULT_ROOM_TYPECLASS).strip() or DEFAULT_ROOM_TYPECLASS,
+        "short_desc": room_data.get("short_desc"),
+        "desc": str(room_data.get("desc") or ""),
+        "stateful_descs": {
+            str(key or "").strip().lower(): str(value or "")
+            for key, value in stateful_descs.items()
+            if str(key or "").strip()
+        },
+        "details": {
+            str(key or "").strip().lower(): str(value or "")
+            for key, value in details.items()
+            if str(key or "").strip()
+        },
+        "room_states": [
+            str(state or "").strip().lower()
+            for state in room_states
+            if str(state or "").strip()
+        ],
+        "ambient": {
+            "rate": max(0, _coerce_map_coordinate(ambient.get("rate"), 0)),
+            "messages": [
+                str(message or "")
+                for message in list(ambient.get("messages") or [])
+                if str(message or "")
+            ],
+        },
+        "environment": str(room_data.get("environment") or "city").strip().lower() or "city",
+        "zone_id": "",
+        "map": {
+            "x": _coerce_optional_map_coordinate(room_map.get("x", room_data.get("map_x", room_data.get("x")))),
+            "y": _coerce_optional_map_coordinate(room_map.get("y", room_data.get("map_y", room_data.get("y")))),
+            "layer": _coerce_map_coordinate(room_map.get("layer"), 0),
+        },
+        "exits": {
+            str(direction or "").strip().lower(): (
+                {
+                    "target": str((spec or {}).get("target") or (spec or {}).get("room_id") or (spec or {}).get("target_id") or "").strip(),
+                    "typeclass": str((spec or {}).get("typeclass") or EXIT_TYPECLASS).strip() or EXIT_TYPECLASS,
+                    "speed": str((spec or {}).get("speed") or "").strip().lower(),
+                    "travel_time": max(0, _coerce_map_coordinate((spec or {}).get("travel_time"), 0)),
+                }
+                if isinstance(spec, dict)
+                else {
+                    "target": str(spec or "").strip(),
+                    "typeclass": EXIT_TYPECLASS,
+                    "speed": "",
+                    "travel_time": 0,
+                }
+            )
+            for direction, spec in raw_exits.items()
+            if str(direction or "").strip()
+            and (
+                str((spec or {}).get("target") or (spec or {}).get("room_id") or (spec or {}).get("target_id") or "").strip()
+                if isinstance(spec, dict)
+                else str(spec or "").strip()
+            )
+        },
+    }
+
+
+def _normalize_builder_zone_payload(data, fallback_zone_id=""):
+    if not isinstance(data, dict):
+        raise ValueError("Zone payload must be an object.")
+    zone_id = _normalize_zone_id(data.get("zone_id") or fallback_zone_id)
+    if not zone_id:
+        raise ValueError("zone_id is required")
+    placements = dict(data.get("placements") or {})
+    rooms = [
+        _normalize_builder_yaml_room(room_data, fallback_index=index)
+        for index, room_data in enumerate(list(data.get("rooms") or []))
+    ]
+    rooms.sort(key=_builder_room_sort_key)
+    for room_data in rooms:
+        room_data["zone_id"] = zone_id
+    return {
+        "schema_version": str(data.get("schema_version") or "v1"),
+        "zone_id": zone_id,
+        "name": str(data.get("name") or _titleize_zone_id(zone_id)),
+        "rooms": rooms,
+        "placements": {
+            "npcs": list(placements.get("npcs") or []),
+            "items": list(placements.get("items") or []),
+        },
+    }
+
+
+def _load_builder_zone_yaml(zone_id):
+    file_path = _worlddata_zone_path(zone_id)
+    if not file_path.exists():
+        raise Http404("Zone not found")
+    with file_path.open(encoding="utf-8") as file_handle:
+        data = yaml.safe_load(file_handle) or {}
+    payload = _normalize_builder_zone_payload(data, fallback_zone_id=zone_id)
+    payload["area"] = payload["zone_id"]
+    return payload
+
+
+def _write_builder_zone_yaml(zone_id, payload):
+    normalized_payload = _normalize_builder_zone_payload(payload, fallback_zone_id=zone_id)
+    file_path = _worlddata_zone_path(normalized_payload["zone_id"])
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    with file_path.open("w", encoding="utf-8") as file_handle:
+        yaml.safe_dump(normalized_payload, file_handle, sort_keys=False)
+    normalized_payload["area"] = normalized_payload["zone_id"]
+    return normalized_payload
+
+
+def _serialize_yaml_builder_zones():
+    zones = []
+    for file_path in sorted(_worlddata_zones_dir().glob("*.yaml")):
+        with file_path.open(encoding="utf-8") as file_handle:
+            data = yaml.safe_load(file_handle) or {}
+        payload = _normalize_builder_zone_payload(data, fallback_zone_id=file_path.stem)
+        zones.append(
+            {
+                "id": payload["zone_id"],
+                "name": payload["name"],
+                "area": payload["zone_id"],
+                "rooms": [
+                    {"id": room_data["id"], "name": room_data["name"]}
+                    for room_data in payload["rooms"]
+                ],
+            }
+        )
+    return zones
+
+
 def _normalize_builder_direction(direction):
     text = str(direction or "").strip().lower()
     if not text:
@@ -74,10 +239,12 @@ def builder_view(request):
 
 
 def _room_queryset():
-    return ObjectDB.objects.filter(
-        db_typeclass_path=ROOM_TYPECLASS,
-        db_location__isnull=True,
-    ).order_by("db_key", "id")
+    room_ids = [
+        int(getattr(room, "id", 0) or 0)
+        for room in ObjectDB.objects.filter(db_location__isnull=True).order_by("db_key", "id")
+        if str(getattr(room, "db_typeclass_path", "") or "").startswith("typeclasses.rooms")
+    ]
+    return ObjectDB.objects.filter(id__in=room_ids).order_by("db_key", "id")
 
 
 def _get_room(room_id):
@@ -257,6 +424,13 @@ def _coerce_map_coordinate(value, fallback=0):
         return int(fallback)
 
 
+def _coerce_optional_map_coordinate(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def _serialize_room_exit(exit_obj):
     direction = _normalize_builder_direction(getattr(exit_obj, "key", "") or "")
     if not direction:
@@ -293,6 +467,15 @@ def _derive_builder_short_desc(room):
     return first_sentence or str(room.db_key or "").strip()
 
 
+def _serialize_builder_stateful_descs(room):
+    stateful_descs = {}
+    for attr in list(room.db_attributes.filter(db_key__startswith="desc_").order_by("db_key")):
+        state = str(getattr(attr, "key", "") or "")[5:].strip().lower()
+        if state:
+            stateful_descs[state] = str(getattr(attr, "value", "") or "")
+    return stateful_descs
+
+
 def _serialize_builder_room(room, fallback_index=0):
     zone_id = _get_room_zone_id(room)
     map_x = getattr(getattr(room, "db", None), "map_x", None)
@@ -301,8 +484,28 @@ def _serialize_builder_room(room, fallback_index=0):
     return {
         "id": room.id,
         "name": room.db_key,
+        "typeclass": getattr(room, "db_typeclass_path", ROOM_TYPECLASS),
         "short_desc": _derive_builder_short_desc(room),
         "desc": str(getattr(room.db, "desc", "") or ""),
+        "stateful_descs": _serialize_builder_stateful_descs(room),
+        "details": {
+            str(key or "").strip().lower(): str(value or "")
+            for key, value in dict(getattr(room.db, "details", {}) or {}).items()
+            if str(key or "").strip()
+        },
+        "room_states": sorted({
+            str(state or "").strip().lower()
+            for state in (room.tags.get(category="room_state", return_list=True) or [])
+            if str(state or "").strip()
+        }),
+        "ambient": {
+            "rate": _coerce_map_coordinate(getattr(room.db, "room_message_rate", 0), 0),
+            "messages": [
+                str(message or "")
+                for message in list(getattr(room.db, "room_messages", []) or [])
+                if str(message or "")
+            ],
+        },
         "environment": _derive_builder_environment(room),
         "zone_id": zone_id,
         "map_x": _coerce_map_coordinate(map_x, fallback_index % 12),
@@ -424,14 +627,51 @@ def builder_room_list(request):
 
 
 def builder_zone_list(request):
-    return JsonResponse(_serialize_builder_zones(), safe=False)
+    return JsonResponse(_serialize_yaml_builder_zones(), safe=False)
 
 
 def builder_zone_detail(request, zone_id):
-    payload = _serialize_zone_payload(zone_id)
-    if not payload["rooms"] and _get_builder_zone_meta(zone_id) is None:
-        raise Http404("Zone not found")
+    payload = _load_builder_zone_yaml(zone_id)
     return JsonResponse(payload)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def builder_zone_save(request):
+    data = parse_request_data(request)
+    if not isinstance(data, dict):
+        try:
+            data = json.loads(request.body.decode("utf-8") or "{}")
+        except (TypeError, ValueError, UnicodeDecodeError):
+            data = {}
+
+    try:
+        payload = _write_builder_zone_yaml(data.get("zone_id") or "", data)
+    except ValueError as error:
+        return JsonResponse({"status": "error", "error": str(error)}, status=400)
+
+    return JsonResponse({"status": "ok", "zone": payload})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def builder_zone_reload(request):
+    data = parse_request_data(request)
+    if not isinstance(data, dict):
+        try:
+            data = json.loads(request.body.decode("utf-8") or "{}")
+        except (TypeError, ValueError, UnicodeDecodeError):
+            data = {}
+
+    zone_id = _normalize_zone_id(data.get("zone_id") or "")
+    if not zone_id:
+        return JsonResponse({"status": "error", "error": "zone_id is required"}, status=400)
+
+    try:
+        result = load_zone(zone_id, dry_run=False)
+    except Exception as error:
+        return JsonResponse({"status": "error", "error": str(error)}, status=400)
+    return JsonResponse({"status": "ok", "result": result})
 
 
 def builder_room_detail(request, room_id):
@@ -460,10 +700,20 @@ def builder_zone_create(request):
     if not area:
         return JsonResponse({"status": "error", "error": "area is required"}, status=400)
 
-    try:
-        zone = zone_service.create_zone(area, name, area=area)
-    except ValueError as error:
-        return JsonResponse({"status": "error", "error": str(error)}, status=400)
+    file_path = _worlddata_zone_path(area)
+    if file_path.exists():
+        return JsonResponse({"status": "error", "error": "zone already exists"}, status=400)
+
+    zone = _write_builder_zone_yaml(
+        area,
+        {
+            "schema_version": "v1",
+            "zone_id": area,
+            "name": name,
+            "rooms": [],
+            "placements": {"npcs": [], "items": []},
+        },
+    )
 
     return JsonResponse(
         {
@@ -492,7 +742,31 @@ def builder_room_create(request):
     name = str(data.get("name") or "").strip()
     desc = str(data.get("desc") or "").strip()
     environment = str(data.get("environment") or "city").strip().lower()
+    typeclass = str(data.get("typeclass") or ROOM_TYPECLASS).strip() or ROOM_TYPECLASS
     zone_id = _normalize_zone_id(data.get("zone_id") or "")
+    stateful_descs = {
+        str(key or "").strip().lower(): str(value or "")
+        for key, value in dict(data.get("stateful_descs") or {}).items()
+        if str(key or "").strip()
+    }
+    details = {
+        str(key or "").strip().lower(): str(value or "")
+        for key, value in dict(data.get("details") or {}).items()
+        if str(key or "").strip()
+    }
+    room_states = sorted({
+        str(state or "").strip().lower()
+        for state in list(data.get("room_states") or [])
+        if str(state or "").strip()
+    })
+    ambient = dict(data.get("ambient") or {}) if isinstance(data.get("ambient"), dict) else {}
+    ambient_messages = [
+        str(message or "")
+        for message in list(ambient.get("messages") or [])
+        if str(message or "")
+    ]
+    ambient_rate = max(0, _coerce_map_coordinate(ambient.get("rate"), 0))
+
     map_x = _coerce_map_coordinate(data.get("map_x", data.get("x")), 0)
     map_y = _coerce_map_coordinate(data.get("map_y", data.get("y")), 0)
     map_layer = _coerce_map_coordinate(data.get("map_layer"), 0)
@@ -512,9 +786,19 @@ def builder_room_create(request):
         return JsonResponse({"status": "error", "error": str(error)}, status=400)
 
     with transaction.atomic():
-        room = create_object(ROOM_TYPECLASS, key=name, nohome=True)
+        room = create_object(typeclass, key=name, nohome=True)
         room.home = room
         room.db.desc = desc
+        room.db.details = details
+        room.db.room_messages = ambient_messages
+        room.db.room_message_rate = ambient_rate
+        room.tags.clear(category="room_state")
+        for state in room_states:
+            room.tags.add(state, category="room_state")
+        for state, text in stateful_descs.items():
+            room.attributes.add(f"desc_{state}", text)
+        if ambient_rate > 0 and ambient_messages and hasattr(room, "start_repeat_broadcast_messages"):
+            room.start_repeat_broadcast_messages()
         room.db.map_x = map_x
         room.db.map_y = map_y
         room.db.map_layer = map_layer
@@ -569,8 +853,32 @@ def builder_room_save(request, room_id):
     name = str(data.get("name") or "").strip()
     desc = str(data.get("desc") or "").strip()
     environment = str(data.get("environment") or "city").strip().lower()
+    typeclass = str(data.get("typeclass") or getattr(room, "db_typeclass_path", ROOM_TYPECLASS)).strip() or ROOM_TYPECLASS
     raw_zone_id = data["zone_id"] if "zone_id" in data else (_get_room_zone_id(room) or "")
     zone_id = _normalize_zone_id(raw_zone_id)
+    stateful_descs = {
+        str(key or "").strip().lower(): str(value or "")
+        for key, value in dict(data.get("stateful_descs") or {}).items()
+        if str(key or "").strip()
+    }
+    details = {
+        str(key or "").strip().lower(): str(value or "")
+        for key, value in dict(data.get("details") or {}).items()
+        if str(key or "").strip()
+    }
+    room_states = sorted({
+        str(state or "").strip().lower()
+        for state in list(data.get("room_states") or [])
+        if str(state or "").strip()
+    })
+    ambient = dict(data.get("ambient") or {}) if isinstance(data.get("ambient"), dict) else {}
+    ambient_messages = [
+        str(message or "")
+        for message in list(ambient.get("messages") or [])
+        if str(message or "")
+    ]
+    ambient_rate = max(0, _coerce_map_coordinate(ambient.get("rate"), 0))
+
     map_x = _coerce_map_coordinate(data.get("map_x"), getattr(getattr(room, "db", None), "map_x", 0) or 0)
     map_y = _coerce_map_coordinate(data.get("map_y"), getattr(getattr(room, "db", None), "map_y", 0) or 0)
     map_layer = _coerce_map_coordinate(data.get("map_layer"), getattr(getattr(room, "db", None), "map_layer", 0) or 0)
@@ -594,8 +902,22 @@ def builder_room_save(request, room_id):
         return JsonResponse({"status": "error", "error": str(error)}, status=400)
 
     with transaction.atomic():
+        if getattr(room, "db_typeclass_path", "") != typeclass:
+            room.swap_typeclass(typeclass, clean_attributes=False, run_start_hooks=True)
         room.db_key = name
         room.db.desc = desc
+        room.db.details = details
+        room.db.room_messages = ambient_messages
+        room.db.room_message_rate = ambient_rate
+        for attr in list(room.db_attributes.filter(db_key__startswith="desc_")):
+            room.attributes.remove(attr.key)
+        for state, text in stateful_descs.items():
+            room.attributes.add(f"desc_{state}", text)
+        room.tags.clear(category="room_state")
+        for state in room_states:
+            room.tags.add(state, category="room_state")
+        if ambient_rate > 0 and ambient_messages and hasattr(room, "start_repeat_broadcast_messages"):
+            room.start_repeat_broadcast_messages()
         room.db.map_x = map_x
         room.db.map_y = map_y
         room.db.map_layer = map_layer

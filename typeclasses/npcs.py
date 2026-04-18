@@ -4,6 +4,8 @@ from collections.abc import Mapping
 import importlib.util
 from pathlib import Path
 
+from django.utils.text import slugify
+
 from typeclasses.characters import Character
 
 
@@ -13,6 +15,8 @@ class NPC(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
+        if not self.db.world_id:
+            self.db.world_id = slugify(self.key)
         self.db.is_npc = True
         self.db.is_trainer = False
         self.db.trains_profession = None

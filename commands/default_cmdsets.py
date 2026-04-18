@@ -15,6 +15,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
+from evennia.contrib.grid.slow_exit import slow_exit
 
 from commands.cmd_analyze import CmdAnalyze
 from commands.cmd_admin_identity import CmdCheckIdentityIntegrity, CmdHealIdentityIntegrity
@@ -220,6 +221,7 @@ from commands.cmd_wear import CmdWear
 from commands.cmd_weigh import CmdWeigh
 from commands.cmd_wield import CmdWield
 from commands.cmd_xp import CmdXP
+from commands.cmd_zone import CmdZone
 from commands.cmd_ambush import CmdAmbush
 from commands.cmd_balance import CmdBalance
 from commands.cmd_deposit import CmdDeposit
@@ -248,7 +250,9 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         Populates the cmdset
         """
         super().at_cmdset_creation()
+        self.add(slow_exit.SlowExitCmdSet())
         self.add(CmdAnalyze())
+        self.add(CmdZone())
         self.add(CmdCheckIdentityIntegrity())
         self.add(CmdHealIdentityIntegrity())
         self.add(CmdAppraise())

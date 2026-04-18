@@ -2529,6 +2529,36 @@ body {
   padding: 12px !important;
 }
 
+#builder-topbar #topbar-utility {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+#builder-topbar #topbar-status-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+#builder-topbar #builder-status {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#builder-topbar .builder-browser-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+}
+
 #builder-zone-switcher {
   flex: 0 1 320px;
   min-width: 220px;
@@ -2573,9 +2603,9 @@ body {
 }
 
 #builder-layout {
-  display: grid;
-  grid-template-columns: 220px 420px minmax(0, 1fr);
-  height: 100vh;
+  display: flex;
+  align-items: stretch;
+  height: 100%;
   min-height: 0;
   gap: 12px;
   overflow: hidden;
@@ -2587,6 +2617,25 @@ body {
   min-height: 0;
   overflow: hidden;
   padding: 12px !important;
+}
+
+#builder-left {
+  flex: 0 0 280px;
+  width: 280px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+#builder-center {
+  flex: 0 0 420px;
+  width: 420px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+#builder-right {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 #builder-left,
@@ -2601,6 +2650,16 @@ body {
 .builder-browser-panel,
 .builder-inspector-panel {
   min-height: 0;
+}
+
+.builder-browser-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+}
+
+#builder-left .builder-browser-panel:last-child {
+  flex: 1 1 auto;
 }
 
 .builder-panel {
@@ -2630,6 +2689,7 @@ body {
 }
 
 #room-list {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -2716,6 +2776,53 @@ body {
   resize: vertical;
 }
 
+.builder-subsection {
+  padding: 12px;
+  border: 1px solid rgba(255, 180, 90, 0.12);
+  border-radius: 8px;
+  background: rgba(18, 10, 5, 0.4);
+}
+
+.builder-compact-textarea {
+  min-height: 96px !important;
+  height: 96px !important;
+}
+
+.builder-kv-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.builder-kv-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.6fr) minmax(0, 1.4fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.builder-kv-row input,
+.builder-kv-row textarea,
+.builder-kv-row button {
+  margin-bottom: 0;
+}
+
+.builder-kv-remove,
+#builder-add-custom-stateful-desc,
+#builder-add-detail {
+  min-height: 36px;
+  border: 1px solid rgba(255, 180, 90, 0.2);
+  border-radius: 6px;
+  background: rgba(36, 22, 12, 0.9);
+  color: #f1e2c6;
+}
+
+.builder-state-row .builder-custom-state-text,
+.builder-detail-row .builder-detail-text {
+  min-height: 72px !important;
+  height: 72px !important;
+}
+
 #room-preview {
   height: 100%;
   min-height: 0;
@@ -2782,6 +2889,10 @@ body {
   letter-spacing: 0.04em;
 }
 
+#builder-preview-state {
+  margin-bottom: 4px;
+}
+
 #builder-right .preview-content {
   padding: 16px;
   height: 100%;
@@ -2812,7 +2923,7 @@ body {
 
 .builder-exit-row {
   display: grid;
-  grid-template-columns: minmax(120px, 0.8fr) minmax(0, 1.4fr) auto;
+  grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1.1fr) minmax(110px, 0.8fr) minmax(120px, 0.8fr) minmax(96px, 0.6fr) minmax(150px, 1fr) auto;
   gap: 8px;
   align-items: center;
 }
@@ -2820,6 +2931,12 @@ body {
 .builder-exit-row select,
 .builder-exit-row button {
   margin-bottom: 0;
+}
+
+.builder-exit-preview {
+  color: #bea47c;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .builder-exit-row button,
@@ -2835,14 +2952,34 @@ body {
   color: #f1e2c6;
 }
 
+@media (max-width: 900px) {
+  .builder-kv-row {
+    grid-template-columns: 1fr;
+  }
+
+  .builder-exit-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
 #builder-map-panel {
   order: 1;
   flex: 1 1 auto;
+  min-height: 360px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   overflow: hidden;
   position: relative;
+}
+
+#builder-map-canvas,
+#builder-reactflow-root {
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 #builder-map-panel.fullscreen {
@@ -3008,7 +3145,17 @@ body {
 
 @media (max-width: 1380px) {
   #builder-layout {
-    grid-template-columns: 220px 360px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  #builder-left {
+    flex-basis: 240px;
+    width: 240px;
+  }
+
+  #builder-center {
+    flex-basis: 360px;
+    width: 360px;
   }
 
   #zone-map {
@@ -3028,6 +3175,17 @@ body {
   #builder-center,
   #builder-right {
     flex: 0 0 auto;
+  }
+
+  #builder-left {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  #builder-left .builder-browser-panel,
+  #builder-left .builder-browser-panel:last-child {
+    flex: 0 0 auto;
+    min-height: auto;
   }
 
   #builder-left,
@@ -3053,6 +3211,7 @@ body {
   }
 
   #room-list {
+    flex: 0 0 auto;
     max-height: 280px;
   }
 

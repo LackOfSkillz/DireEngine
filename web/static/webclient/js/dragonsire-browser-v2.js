@@ -139,6 +139,11 @@
     "veranda",
     "yard",
   ];
+  const BUILDER_SEASON_STATES = ["spring", "summer", "autumn", "winter"];
+  const DEFAULT_EXIT_TYPECLASS = "typeclasses.exits.Exit";
+  const DEFAULT_SLOW_EXIT_TYPECLASS = "typeclasses.exits_slow.SlowDireExit";
+  const SLOW_EXIT_TYPECLASS = "evennia.contrib.grid.slow_exit.slow_exit.SlowExit";
+  const SLOW_EXIT_SPEEDS = ["stroll", "walk", "run", "sprint"];
   const SCENE_IMAGE_ROTATION_MS = 120000;
   const DESKTOP_SHELL_FIT_WIDTH = 1460;
   const DESKTOP_SHELL_FIT_HEIGHT = 940;
@@ -158,11 +163,15 @@
   };
   const builderState = {
     currentRoomId: null,
+    selectedRoom: null,
     hoveredRoomId: null,
     currentZoneId: null,
     zones: [],
     rooms: [],
     currentRoom: null,
+    zone: null,
+    roomMap: {},
+    roomLookup: new Map(),
     zoneGraph: null,
     zoneSurface: null,
     zoneMapBounds: null,
@@ -174,7 +183,9 @@
     zoneZoom: 1,
     zoneDrag: null,
     reactFlowViewportRequest: { type: "fit", token: 0 },
+    isDirty: false,
     connectMode: false,
+    connectFrom: null,
     connectFromRoomId: null,
     previewTimer: null,
   };
@@ -194,6 +205,303 @@
 
   function byId(id) {
     return document.getElementById(id);
+  }
+
+  function builderRoomKey(value) {
+    return String(value ?? "").trim();
+  }
+
+  function normalizeBuilderYamlExits(exits) {
+    if (Array.isArray(exits)) {
+      return exits.reduce((accumulator, exit, index) => {
+        const normalized = normalizeBuilderExit(exit, index);
+        if (normalized.direction && normalized.target_id) {
+          accumulator[normalized.direction] = {
+            target: builderRoomKey(normalized.target_id),
+            typeclass: normalized.typeclass,
+            speed: normalized.speed,
+            travel_time: normalized.travel_time,
+          };
+        }
+        return accumulator;
+      }, {});
+    }
+    return Object.entries(exits || {}).reduce((accumulator, [direction, targetValue]) => {
+      const normalized = normalizeBuilderExit({ direction, ...(typeof targetValue === "object" && targetValue !== null ? targetValue : { target: targetValue }) });
+      if (normalized.direction && normalized.target_id) {
+        accumulator[normalized.direction] = {
+          target: normalized.target_id,
+          typeclass: normalized.typeclass,
+          speed: normalized.speed,
+          travel_time: normalized.travel_time,
+        };
+      }
+      return accumulator;
+    }, {});
+  }
+
+  function builderRoomExitsArray(room) {
+    return Object.entries(room?.exits || room?.exitMap || {}).map(([direction, spec], index) => (
+      normalizeBuilderExit({ direction, ...(typeof spec === "object" && spec !== null ? spec : { target: spec }) }, index)
+    ));
+  }
+
+  function isSlowExitTypeclass(typeclass) {
+    const normalized = String(typeclass || "").trim();
+    return normalized === DEFAULT_SLOW_EXIT_TYPECLASS || normalized === SLOW_EXIT_TYPECLASS;
+  }
+
+  function normalizeExitTypeclass(typeclass) {
+    const normalized = String(typeclass || "").trim();
+    if (isSlowExitTypeclass(normalized)) {
+      return DEFAULT_SLOW_EXIT_TYPECLASS;
+    }
+    return normalized || DEFAULT_EXIT_TYPECLASS;
+  }
+
+  function exitTravelPreview(exit) {
+    const normalized = normalizeBuilderExit(exit || {});
+    if (!isSlowExitTypeclass(normalized.typeclass)) {
+      return "Instant travel";
+    }
+    if (normalized.travel_time > 0) {
+      return `Travel time: ~${normalized.travel_time} seconds`;
+    }
+    const speed = normalized.speed || "walk";
+    const bySpeed = { stroll: 6, walk: 4, run: 2, sprint: 1 };
+    return `Travel time: ~${bySpeed[speed] || 4} seconds (${speed})`;
+  }
+
+  function normalizeBuilderStringMap(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return {};
+    }
+    return Object.entries(value).reduce((accumulator, [key, text]) => {
+      const normalizedKey = String(key || "").trim().toLowerCase();
+      if (normalizedKey) {
+        accumulator[normalizedKey] = String(text || "");
+      }
+      return accumulator;
+    }, {});
+  }
+
+  function normalizeBuilderStringList(value) {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value
+      .map((item) => String(item || "").trim().toLowerCase())
+      .filter(Boolean)
+      .filter((item, index, array) => array.indexOf(item) === index);
+  }
+
+  function normalizeBuilderAmbient(value) {
+    const raw = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const rate = Number.parseInt(raw.rate ?? 0, 10);
+    const messages = Array.isArray(raw.messages)
+      ? raw.messages.map((message) => String(message || "")).filter((message) => message.trim())
+      : [];
+    return {
+      rate: Number.isFinite(rate) && rate > 0 ? rate : 0,
+      messages,
+    };
+  }
+
+  function builderStateLabel(state) {
+    return String(state || "")
+      .split(/[_\s-]+/)
+      .filter(Boolean)
+      .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+      .join(" ");
+  }
+
+  function splitBuilderStatefulDescs(statefulDescs = {}) {
+    const normalized = normalizeBuilderStringMap(statefulDescs);
+    const seasonal = {};
+    const custom = [];
+    BUILDER_SEASON_STATES.forEach((state) => {
+      seasonal[state] = normalized[state] || "";
+    });
+    Object.entries(normalized).forEach(([state, text]) => {
+      if (!BUILDER_SEASON_STATES.includes(state)) {
+        custom.push({ state, text: String(text || "") });
+      }
+    });
+    custom.sort((left, right) => left.state.localeCompare(right.state));
+    return { seasonal, custom };
+  }
+
+  function normalizeBuilderMapCoordinate(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : null;
+  }
+
+  function normalizeBuilderYamlRoom(room, index = 0, zoneId = "") {
+    const roomId = builderRoomKey(room?.id || `room_${index + 1}`);
+    const map = {
+      x: normalizeBuilderMapCoordinate(room?.map?.x ?? room?.map_x ?? room?.x),
+      y: normalizeBuilderMapCoordinate(room?.map?.y ?? room?.map_y ?? room?.y),
+      layer: Number(room?.map?.layer ?? room?.map_layer ?? 0) || 0,
+    };
+    const statefulDescs = normalizeBuilderStringMap(room?.stateful_descs);
+    const details = normalizeBuilderStringMap(room?.details);
+    const roomStates = normalizeBuilderStringList(room?.room_states);
+    const ambient = normalizeBuilderAmbient(room?.ambient);
+    const exits = normalizeBuilderYamlExits(room?.exits || room?.exitMap || {});
+    const exitMap = Object.entries(exits).reduce((accumulator, [direction, spec]) => {
+      const target = builderRoomKey(spec?.target || spec?.target_id || "");
+      if (target) {
+        accumulator[direction] = target;
+      }
+      return accumulator;
+    }, {});
+    return {
+      ...room,
+      id: roomId,
+      name: room?.name || roomId,
+      typeclass: String(room?.typeclass || "typeclasses.rooms_extended.ExtendedDireRoom").trim() || "typeclasses.rooms_extended.ExtendedDireRoom",
+      desc: room?.desc || "",
+      short_desc: room?.short_desc ?? room?.shortDesc ?? null,
+      stateful_descs: statefulDescs,
+      details,
+      room_states: roomStates,
+      ambient,
+      zone_id: builderRoomKey(room?.zone_id || zoneId),
+      map,
+      map_x: map.x,
+      map_y: map.y,
+      map_layer: map.layer,
+      exits,
+      exitMap,
+      environment: String(room?.environment || "city").trim().toLowerCase() || "city",
+    };
+  }
+
+  function normalizeBuilderZonePayload(payload, fallbackZoneId = "") {
+    const zoneId = normalizeBuilderZoneId(payload?.zone_id || fallbackZoneId);
+    const rooms = (payload?.rooms || []).map((room, index) => normalizeBuilderYamlRoom(room, index, zoneId));
+    return {
+      schema_version: payload?.schema_version || "v1",
+      zone_id: zoneId,
+      name: payload?.name || zoneId || "Untitled Zone",
+      placements: payload?.placements || { npcs: [], items: [] },
+      rooms,
+    };
+  }
+
+  function rebuildBuilderRoomIndexes() {
+    const roomMap = {};
+    const roomLookup = new Map();
+    const rooms = Array.isArray(builderState.zone?.rooms) ? builderState.zone.rooms : [];
+    rooms.forEach((room, index) => {
+      const normalizedRoom = normalizeBuilderYamlRoom(room, index, builderState.currentZoneId || builderState.zone?.zone_id || "");
+      rooms[index] = normalizedRoom;
+      roomMap[normalizedRoom.id] = normalizedRoom;
+      roomLookup.set(normalizedRoom.id, normalizedRoom);
+    });
+    builderState.roomMap = roomMap;
+    builderState.roomLookup = roomLookup;
+    builderState.rooms = rooms;
+    if (builderState.zone) {
+      builderState.zone.rooms = rooms;
+    }
+    builderState.zoneGraph = builderState.zone;
+  }
+
+  function setBuilderDirty(isDirty = true) {
+    builderState.isDirty = Boolean(isDirty);
+    const saveButton = byId("save-zone");
+    if (saveButton) {
+      saveButton.textContent = builderState.isDirty ? "Save Zone*" : "Save Zone";
+    }
+  }
+
+  function replaceBuilderZone(payload, options = {}) {
+    const normalized = normalizeBuilderZonePayload(payload, options.fallbackZoneId || builderState.currentZoneId || "");
+    builderState.currentZoneId = normalized.zone_id;
+    builderState.zone = normalized;
+    rebuildBuilderRoomIndexes();
+    builderState.zoneZoomInitialized = false;
+    builderState.zoneMapNeedsFit = true;
+  }
+
+  function updateBuilderZoneRoom(roomId, overrides = {}) {
+    const normalizedRoomId = builderRoomKey(roomId);
+    const room = builderState.roomMap[normalizedRoomId];
+    if (!room || !builderState.zone) {
+      throw new Error("Room not found.");
+    }
+    const exitMap = Object.prototype.hasOwnProperty.call(overrides, "exits") || Object.prototype.hasOwnProperty.call(overrides, "exitMap")
+      ? normalizeBuilderYamlExits(overrides.exits ?? overrides.exitMap ?? room.exitMap)
+      : room.exitMap;
+    const map = {
+      x: Number(overrides.map?.x ?? overrides.map_x ?? room.map?.x ?? room.map_x ?? 0) || 0,
+      y: Number(overrides.map?.y ?? overrides.map_y ?? room.map?.y ?? room.map_y ?? 0) || 0,
+      layer: Number(overrides.map?.layer ?? overrides.map_layer ?? room.map?.layer ?? room.map_layer ?? 0) || 0,
+    };
+    const nextRoom = normalizeBuilderYamlRoom(
+      {
+        ...room,
+        ...overrides,
+        id: normalizedRoomId,
+        exits: exitMap,
+        exitMap,
+        map,
+      },
+      0,
+      builderState.currentZoneId || builderState.zone?.zone_id || ""
+    );
+    builderState.zone.rooms = builderState.zone.rooms.map((candidate) => (
+      builderRoomKey(candidate.id) === normalizedRoomId ? nextRoom : candidate
+    ));
+    rebuildBuilderRoomIndexes();
+    if (builderRoomKey(builderState.currentRoomId) === normalizedRoomId) {
+      builderState.currentRoom = nextRoom;
+      builderState.selectedRoom = nextRoom.id;
+    }
+    setBuilderDirty(true);
+    return nextRoom;
+  }
+
+  function applyBuilderDraftToState(options = {}) {
+    if (!builderState.currentRoomId) {
+      return null;
+    }
+    const draft = currentBuilderDraft();
+    const updatedRoom = updateBuilderZoneRoom(draft.id, {
+      name: draft.name,
+      short_desc: draft.shortDesc || null,
+      desc: draft.desc,
+      stateful_descs: draft.stateful_descs,
+      details: draft.details,
+      room_states: draft.room_states,
+      ambient: draft.ambient,
+      environment: draft.environment,
+      zone_id: draft.zone_id,
+      exits: draft.exits,
+      map_x: draft.map_x,
+      map_y: draft.map_y,
+      map_layer: draft.map_layer,
+    });
+    renderBuilderRoomList();
+    renderBuilderPreview(updatedRoom, { flash: Boolean(options.flash) });
+    renderZoneMap();
+    return updatedRoom;
+  }
+
+  function uniqueBuilderRoomId(baseName) {
+    const normalizedBase = String(baseName || "room")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "room";
+    let candidate = normalizedBase;
+    let suffix = 2;
+    while (builderState.roomMap[candidate]) {
+      candidate = `${normalizedBase}-${suffix}`;
+      suffix += 1;
+    }
+    return candidate;
   }
 
   function normalizeSceneToken(value) {
@@ -217,13 +525,13 @@
   }
 
   function roomNameById(roomId) {
-    const numericId = Number(roomId || 0);
-    const zoneRoom = builderState.zoneGraph?.roomLookup?.get(numericId);
+    const normalizedRoomId = builderRoomKey(roomId);
+    const zoneRoom = builderState.roomMap[normalizedRoomId];
     if (zoneRoom) {
-      return zoneRoom.name || `Room ${numericId}`;
+      return zoneRoom.name || `Room ${normalizedRoomId}`;
     }
-    const match = builderState.rooms.find((room) => Number(room.id) === numericId);
-    return match ? (match.db_key || `Room ${numericId}`) : `Room ${numericId}`;
+    const match = builderState.rooms.find((room) => builderRoomKey(room.id) === normalizedRoomId);
+    return match ? (match.name || match.db_key || `Room ${normalizedRoomId}`) : `Room ${normalizedRoomId}`;
   }
 
   function zoneCameraStorageKey(zoneId) {
@@ -284,6 +592,7 @@
 
   function clearBuilderConnectMode(options = {}) {
     builderState.connectMode = false;
+    builderState.connectFrom = null;
     builderState.connectFromRoomId = null;
     if (options.clearHover) {
       builderState.hoveredRoomId = null;
@@ -294,6 +603,7 @@
 
   function beginBuilderConnectMode() {
     builderState.connectMode = true;
+    builderState.connectFrom = null;
     builderState.connectFromRoomId = null;
     updateBuilderConnectToggle();
     setBuilderPageStatus("Connect mode: click a source room.");
@@ -344,11 +654,11 @@
 
   function builderVisibleRooms() {
     const currentZoneId = normalizeBuilderZoneId(builderState.currentZoneId);
-    const graphZoneId = normalizeBuilderZoneId(builderState.zoneGraph?.zone_id || builderState.zoneGraph?.zone || "");
-    if (!builderState.zoneGraph || graphZoneId !== currentZoneId) {
+    const graphZoneId = normalizeBuilderZoneId(builderState.zone?.zone_id || "");
+    if (!builderState.zone || graphZoneId !== currentZoneId) {
       return [];
     }
-    return Array.isArray(builderState.zoneGraph.rooms) ? builderState.zoneGraph.rooms : [];
+    return Array.isArray(builderState.zone.rooms) ? builderState.zone.rooms : [];
   }
 
   function defaultAssignableZoneId(fallbackZoneId = "") {
@@ -449,6 +759,21 @@
     if (byId("room-desc")) {
       byId("room-desc").value = "";
     }
+    BUILDER_SEASON_STATES.forEach((state) => {
+      const field = byId(`room-desc-${state}`);
+      if (field) {
+        field.value = "";
+      }
+    });
+    if (byId("room-active-states")) {
+      byId("room-active-states").value = "";
+    }
+    if (byId("room-ambient-rate")) {
+      byId("room-ambient-rate").value = "0";
+    }
+    if (byId("room-ambient-messages")) {
+      byId("room-ambient-messages").value = "";
+    }
     if (byId("room-environment")) {
       byId("room-environment").value = "city";
     }
@@ -463,9 +788,16 @@
     }
     syncBuilderZoneMenus();
     renderBuilderExitList([]);
+    renderBuilderStatefulDescList({});
+    renderBuilderDetailList({});
+    syncBuilderPreviewStateOptions({ stateful_descs: {}, room_states: [] }, "");
     renderBuilderPreview({
       name: "No room selected",
       desc: previewMessage || "Choose a room from the list to inspect and edit it.",
+      stateful_descs: {},
+      details: {},
+      room_states: [],
+      ambient: { rate: 0, messages: [] },
       environment: "city",
       exits: [],
     });
@@ -523,13 +855,143 @@
       name: byId("room-name")?.value || "",
       shortDesc: shortDescValue,
       desc: byId("room-desc")?.value || "",
+      stateful_descs: collectBuilderStatefulDescs(),
+      details: collectBuilderDetails(),
+      room_states: collectBuilderRoomStates(),
+      ambient: {
+        rate: Number.parseInt(byId("room-ambient-rate")?.value || "0", 10) || 0,
+        messages: collectBuilderAmbientMessages(),
+      },
       environment: byId("room-environment")?.value || "city",
       exits: collectBuilderExits(),
       zone_id: normalizeBuilderZoneId(byId("room-zone")?.value || builderState.currentRoom?.zone_id || builderState.currentZoneId || ""),
-      map_x: Number.parseInt(byId("room-map-x")?.value || `${builderState.currentRoom?.map_x ?? builderState.currentRoom?.x ?? 0}`, 10) || 0,
-      map_y: Number.parseInt(byId("room-map-y")?.value || `${builderState.currentRoom?.map_y ?? builderState.currentRoom?.y ?? 0}`, 10) || 0,
-      map_layer: Number.parseInt(byId("room-map-layer")?.value || `${builderState.currentRoom?.map_layer ?? 0}`, 10) || 0,
+      map_x: Number.parseInt(byId("room-map-x")?.value || `${builderState.currentRoom?.map?.x ?? builderState.currentRoom?.map_x ?? builderState.currentRoom?.x ?? 0}`, 10) || 0,
+      map_y: Number.parseInt(byId("room-map-y")?.value || `${builderState.currentRoom?.map?.y ?? builderState.currentRoom?.map_y ?? builderState.currentRoom?.y ?? 0}`, 10) || 0,
+      map_layer: Number.parseInt(byId("room-map-layer")?.value || `${builderState.currentRoom?.map?.layer ?? builderState.currentRoom?.map_layer ?? 0}`, 10) || 0,
     };
+  }
+
+  function renderBuilderStatefulDescList(statefulDescs = {}) {
+    const split = splitBuilderStatefulDescs(statefulDescs);
+    BUILDER_SEASON_STATES.forEach((state) => {
+      const field = byId(`room-desc-${state}`);
+      if (field) {
+        field.value = split.seasonal[state] || "";
+      }
+    });
+    const list = byId("builder-custom-stateful-desc-list");
+    if (!list) {
+      return;
+    }
+    list.innerHTML = split.custom.map(({ state, text }, index) => `
+      <div class="builder-kv-row builder-state-row" data-index="${index}">
+        <input class="builder-custom-state-key" type="text" value="${escapeHtml(state)}" placeholder="State name" autocomplete="off">
+        <textarea class="builder-custom-state-text builder-compact-textarea" placeholder="Description">${escapeHtml(text)}</textarea>
+        <button type="button" class="builder-kv-remove">Delete</button>
+      </div>
+    `).join("");
+  }
+
+  function renderBuilderDetailList(details = {}) {
+    const list = byId("builder-detail-list");
+    if (!list) {
+      return;
+    }
+    const entries = Object.entries(normalizeBuilderStringMap(details)).sort(([left], [right]) => left.localeCompare(right));
+    list.innerHTML = entries.map(([key, text], index) => `
+      <div class="builder-kv-row builder-detail-row" data-index="${index}">
+        <input class="builder-detail-key" type="text" value="${escapeHtml(key)}" placeholder="detail key" autocomplete="off">
+        <textarea class="builder-detail-text builder-compact-textarea" placeholder="Detail description">${escapeHtml(text)}</textarea>
+        <button type="button" class="builder-kv-remove">Delete</button>
+      </div>
+    `).join("");
+  }
+
+  function collectBuilderStatefulDescs() {
+    const statefulDescs = {};
+    BUILDER_SEASON_STATES.forEach((state) => {
+      const value = String(byId(`room-desc-${state}`)?.value || "");
+      if (value.trim()) {
+        statefulDescs[state] = value;
+      }
+    });
+    document.querySelectorAll("#builder-custom-stateful-desc-list .builder-state-row").forEach((row) => {
+      const key = String(row.querySelector(".builder-custom-state-key")?.value || "").trim().toLowerCase();
+      const text = String(row.querySelector(".builder-custom-state-text")?.value || "");
+      if (key) {
+        statefulDescs[key] = text;
+      }
+    });
+    return statefulDescs;
+  }
+
+  function collectBuilderDetails() {
+    const details = {};
+    document.querySelectorAll("#builder-detail-list .builder-detail-row").forEach((row) => {
+      const key = String(row.querySelector(".builder-detail-key")?.value || "").trim().toLowerCase();
+      const text = String(row.querySelector(".builder-detail-text")?.value || "");
+      if (key) {
+        details[key] = text;
+      }
+    });
+    return details;
+  }
+
+  function collectBuilderRoomStates() {
+    return String(byId("room-active-states")?.value || "")
+      .split(/[\n,]/)
+      .map((state) => state.trim().toLowerCase())
+      .filter(Boolean)
+      .filter((state, index, array) => array.indexOf(state) === index);
+  }
+
+  function collectBuilderAmbientMessages() {
+    return String(byId("room-ambient-messages")?.value || "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  function syncBuilderPreviewStateOptions(room, preferredState = "") {
+    const select = byId("builder-preview-state");
+    if (!select) {
+      return;
+    }
+    const normalizedRoom = normalizeBuilderYamlRoom(room || {}, 0, builderState.currentZoneId || "");
+    const optionStates = Array.from(new Set([
+      ...Object.keys(normalizedRoom.stateful_descs || {}),
+      ...(normalizedRoom.room_states || []),
+    ])).sort((left, right) => left.localeCompare(right));
+    const preferred = String(preferredState || select.value || "").trim().toLowerCase();
+    select.innerHTML = ['<option value="">Auto</option>', '<option value="default">Default</option>']
+      .concat(optionStates.map((state) => `<option value="${escapeHtml(state)}">${escapeHtml(builderStateLabel(state))}</option>`))
+      .join("");
+    select.value = optionStates.includes(preferred) || preferred === "default" ? preferred : "";
+  }
+
+  function resolveBuilderPreviewDescription(room, selectedState = "") {
+    const normalizedRoom = normalizeBuilderYamlRoom(room || {}, 0, builderState.currentZoneId || "");
+    const statefulDescs = normalizedRoom.stateful_descs || {};
+    const requestedState = String(selectedState || "").trim().toLowerCase();
+    if (requestedState === "default") {
+      return { state: "default", source: "default", desc: normalizedRoom.desc || "" };
+    }
+    if (requestedState && statefulDescs[requestedState]) {
+      return { state: requestedState, source: requestedState, desc: statefulDescs[requestedState] };
+    }
+    const roomStates = normalizeBuilderStringList(normalizedRoom.room_states || []);
+    const customStates = roomStates.filter((state) => !BUILDER_SEASON_STATES.includes(state)).sort((left, right) => left.localeCompare(right));
+    for (const state of customStates) {
+      if (statefulDescs[state]) {
+        return { state, source: state, desc: statefulDescs[state] };
+      }
+    }
+    for (const state of roomStates) {
+      if (BUILDER_SEASON_STATES.includes(state) && statefulDescs[state]) {
+        return { state, source: state, desc: statefulDescs[state] };
+      }
+    }
+    return { state: "default", source: "default", desc: normalizedRoom.desc || "" };
   }
 
   function normalizeExitDirection(dir) {
@@ -561,7 +1023,7 @@
   }
 
   function builderRoomById(roomId) {
-    return builderState.zoneGraph?.roomLookup?.get(Number(roomId || 0)) || null;
+    return builderState.roomMap[builderRoomKey(roomId)] || null;
   }
 
   function getDirection(fromRoom, toRoom) {
@@ -578,15 +1040,18 @@
 
   function mergeBuilderExit(exits, direction, targetId) {
     const normalizedDirection = canonicalExitDirection(direction);
-    const numericTargetId = Number(targetId || 0);
+    const normalizedTargetId = builderRoomKey(targetId);
     const nextExits = Array.isArray(exits)
       ? exits.map((exit, index) => normalizeBuilderExit(exit, index))
       : [];
     const existingIndex = nextExits.findIndex((exit) => canonicalExitDirection(exit.direction || "") === normalizedDirection);
     const nextExit = {
       direction: normalizedDirection,
-      target_id: numericTargetId,
-      target_name: roomNameById(numericTargetId),
+      target_id: normalizedTargetId,
+      target_name: roomNameById(normalizedTargetId),
+      typeclass: existingIndex >= 0 ? nextExits[existingIndex].typeclass : DEFAULT_EXIT_TYPECLASS,
+      speed: existingIndex >= 0 ? nextExits[existingIndex].speed : "",
+      travel_time: existingIndex >= 0 ? nextExits[existingIndex].travel_time : 0,
     };
     if (existingIndex >= 0) {
       nextExits[existingIndex] = nextExit;
@@ -599,8 +1064,8 @@
   function classifyBuilderExit(exit) {
     const rawDirection = normalizeExitDirection(exit?.direction || "");
     const direction = canonicalExitDirection(rawDirection);
-    const targetId = Number(exit?.target_id || exit?.targetId || 0);
-    const hasTarget = targetId > 0;
+    const targetId = builderRoomKey(exit?.target_id || exit?.targetId || "");
+    const hasTarget = Boolean(targetId);
     const isSpecial = Boolean(direction) && !MAP_BEARING_DIRECTIONS.has(direction);
     const isRecognized = Boolean(direction);
     const isVertical = direction === "up" || direction === "down";
@@ -611,6 +1076,9 @@
       direction,
       target_id: targetId,
       target_name: exit?.target_name || (targetId ? roomNameById(targetId) : ""),
+      typeclass: normalizeExitTypeclass(exit?.typeclass),
+      speed: String(exit?.speed || "").trim().toLowerCase(),
+      travel_time: Math.max(0, Number.parseInt(exit?.travel_time ?? 0, 10) || 0),
       isRecognized,
       isSpecial,
       isVertical,
@@ -634,21 +1102,28 @@
   function normalizeBuilderExit(exit, index = 0) {
     const fallbackDirection = DIRECTIONS[index % DIRECTIONS.length] || "north";
     const direction = canonicalExitDirection(exit?.direction || fallbackDirection);
-    const targetId = Number(exit?.target_id || exit?.targetId || 0);
+    const targetId = builderRoomKey(exit?.target_id || exit?.targetId || exit?.target || "");
     return {
-      id: Number(exit?.id || 0),
+      id: builderRoomKey(exit?.id || ""),
       direction: direction || fallbackDirection,
       target_id: targetId,
       target_name: exit?.target_name || (targetId ? roomNameById(targetId) : ""),
+      typeclass: normalizeExitTypeclass(exit?.typeclass),
+      speed: String(exit?.speed || "").trim().toLowerCase(),
+      travel_time: Math.max(0, Number.parseInt(exit?.travel_time ?? 0, 10) || 0),
     };
   }
 
   function createExitRow(exit, index) {
     const normalized = normalizeBuilderExit(exit, index);
+    const exitTypeValue = isSlowExitTypeclass(normalized.typeclass) ? "slow" : "normal";
     const roomOptions = ['<option value="">Select room</option>']
       .concat(builderVisibleRooms().map((room) => (
-        `<option value="${room.id}"${Number(room.id) === Number(normalized.target_id || 0) ? " selected" : ""}>${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</option>`
+        `<option value="${escapeHtml(room.id)}"${builderRoomKey(room.id) === builderRoomKey(normalized.target_id || "") ? " selected" : ""}>${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</option>`
       )))
+      .join("");
+    const speedOptions = ['<option value="">Default speed</option>']
+      .concat(SLOW_EXIT_SPEEDS.map((speed) => `<option value="${speed}"${normalized.speed === speed ? " selected" : ""}>${escapeHtml(builderStateLabel(speed))}</option>`))
       .join("");
     return `
       <div class="builder-exit-row" data-index="${index}">
@@ -656,6 +1131,15 @@
         <select class="builder-exit-target" aria-label="Exit target room">
           ${roomOptions}
         </select>
+        <select class="builder-exit-type" aria-label="Exit type">
+          <option value="normal"${exitTypeValue === "normal" ? " selected" : ""}>Normal</option>
+          <option value="slow"${exitTypeValue === "slow" ? " selected" : ""}>Slow Exit</option>
+        </select>
+        <select class="builder-exit-speed" aria-label="Exit movement speed">
+          ${speedOptions}
+        </select>
+        <input class="builder-exit-travel-time" aria-label="Exit travel time" type="number" min="0" step="1" value="${escapeHtml(String(normalized.travel_time || 0))}">
+        <div class="builder-exit-preview">${escapeHtml(exitTravelPreview(normalized))}</div>
         <button type="button" class="builder-exit-remove">Delete</button>
       </div>
     `;
@@ -674,7 +1158,10 @@
     return Array.from(document.querySelectorAll("#exit-list .builder-exit-row"))
       .map((row) => ({
         direction: canonicalExitDirection(row.querySelector(".builder-exit-direction")?.value || ""),
-        target_id: Number(row.querySelector(".builder-exit-target")?.value || 0),
+        target_id: builderRoomKey(row.querySelector(".builder-exit-target")?.value || ""),
+        typeclass: row.querySelector(".builder-exit-type")?.value === "slow" ? DEFAULT_SLOW_EXIT_TYPECLASS : DEFAULT_EXIT_TYPECLASS,
+        speed: String(row.querySelector(".builder-exit-speed")?.value || "").trim().toLowerCase(),
+        travel_time: Math.max(0, Number.parseInt(row.querySelector(".builder-exit-travel-time")?.value || "0", 10) || 0),
       }))
       .filter((exit) => exit.direction || exit.target_id);
   }
@@ -684,15 +1171,18 @@
     const seenDirections = new Set();
     for (const exit of exits) {
       const direction = canonicalExitDirection(exit.direction || "");
-      const targetId = Number(exit.target_id || 0);
+      const targetId = builderRoomKey(exit.target_id || "");
       if (!direction) {
         return `Invalid exit direction: ${direction || "blank"}.`;
       }
       if (seenDirections.has(direction)) {
         return `Duplicate exit direction: ${direction}.`;
       }
-      if (!targetId || !zoneRooms.some((room) => Number(room.id) === targetId)) {
+      if (!targetId || !zoneRooms.some((room) => builderRoomKey(room.id) === targetId)) {
         return `Exit target for ${direction} must be an existing room.`;
+      }
+      if (Number.parseInt(String(exit.travel_time ?? 0), 10) < 0) {
+        return `Exit travel time for ${direction} cannot be negative.`;
       }
       seenDirections.add(direction);
     }
@@ -736,14 +1226,15 @@
     }
     builderState.previewTimer = window.setTimeout(() => {
       builderState.previewTimer = null;
-      renderBuilderPreview(currentBuilderDraft(), { flash: true });
+      const updatedRoom = applyBuilderDraftToState({ flash: true });
+      renderBuilderPreview(updatedRoom || currentBuilderDraft(), { flash: true });
     }, 150);
   }
 
   function highlightSelectedBuilderRoom() {
     document.querySelectorAll("#room-list .room-item").forEach((node) => {
-      const roomId = Number(node.dataset.id || 0);
-      node.classList.toggle("active", roomId === Number(builderState.currentRoomId || 0));
+      const roomId = builderRoomKey(node.dataset.id || "");
+      node.classList.toggle("active", roomId === builderRoomKey(builderState.currentRoomId));
     });
     scrollSelectedBuilderRoomIntoView();
   }
@@ -760,32 +1251,55 @@
     }
     list.innerHTML = rooms
       .map(
-        (room) => `<div class="room-item${Number(room.id) === Number(builderState.currentRoomId || 0) ? " active" : ""}" data-id="${room.id}">${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</div>`
+        (room) => `<div class="room-item${builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId) ? " active" : ""}" data-id="${escapeHtml(room.id)}">${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</div>`
       )
       .join("");
   }
 
   function renderBuilderPreview(data, options = {}) {
+    const normalized = normalizeBuilderYamlRoom(data || {}, 0, builderState.currentZoneId || "");
     const previewName = byId("builder-preview-room-name");
     const previewDesc = byId("builder-preview-room-desc");
+    const previewState = byId("builder-preview-room-state");
+    const previewDetails = byId("builder-preview-room-details");
     const previewExits = byId("builder-preview-room-exits");
     const previewContext = byId("room-context");
     const currentLabel = byId("builder-current-room");
-    const shortDesc = deriveBuilderShortDesc(data);
-    const exits = Array.isArray(data.exits) ? data.exits.map((exit, index) => normalizeBuilderExit(exit, index)) : [];
+    syncBuilderPreviewStateOptions(normalized, options.previewState);
+    const selectedPreviewState = String(byId("builder-preview-state")?.value || "").trim().toLowerCase();
+    const preview = resolveBuilderPreviewDescription(normalized, selectedPreviewState);
+    const shortDesc = deriveBuilderShortDesc(normalized);
+    const exits = builderRoomExitsArray(normalized);
     const exitGroups = splitBuilderExits(exits);
     const spatialLabels = exitGroups.spatial.map((exit) => exit.direction);
     const specialLabels = exitGroups.special.map((exit) => exit.direction);
+    const slowExitLabels = exits.filter((exit) => isSlowExitTypeclass(exit.typeclass)).map((exit) => `${exit.direction}: ${exitTravelPreview(exit).replace('Travel time: ', '')}`);
+    const detailKeys = Object.keys(normalized.details || {}).sort((left, right) => left.localeCompare(right));
+    const ambientMessages = normalized.ambient?.messages || [];
     if (previewName) {
-      previewName.textContent = shortDesc || data.name || "Untitled room";
+      previewName.textContent = shortDesc || normalized.name || "Untitled room";
     }
     if (previewDesc) {
-      previewDesc.innerHTML = escapeHtml(data.desc || "").replace(/\n/g, "<br>");
+      previewDesc.innerHTML = escapeHtml(preview.desc || "").replace(/\n/g, "<br>");
+    }
+    if (previewState) {
+      const roomStates = normalized.room_states?.length ? normalized.room_states.join(", ") : "none";
+      previewState.textContent = `State source: ${builderStateLabel(preview.source)} • Active: ${roomStates}`;
+    }
+    if (previewDetails) {
+      const detailSummary = detailKeys.length ? detailKeys.join(", ") : "none";
+      const ambientSummary = ambientMessages.length
+        ? `${ambientMessages.length} messages @ ${normalized.ambient?.rate || 0}s`
+        : "no ambient loop";
+      previewDetails.textContent = `Details: ${detailSummary} • Ambient: ${ambientSummary}`;
     }
     if (previewExits) {
       const lines = [`Exits: ${spatialLabels.length ? spatialLabels.join(", ") : "none"}`];
       if (specialLabels.length) {
         lines.push(`Special: ${specialLabels.join(", ")}`);
+      }
+      if (slowExitLabels.length) {
+        lines.push(`Slow: ${slowExitLabels.join("; ")}`);
       }
       if (state.debugEnabled) {
         lines.push(`Spatial exits: ${spatialLabels.length ? spatialLabels.join(", ") : "none"}`);
@@ -794,10 +1308,10 @@
       previewExits.innerHTML = lines.map((line) => escapeHtml(line)).join("<br>");
     }
     if (previewContext) {
-      previewContext.textContent = `${String(data.environment || "city").toUpperCase()} preview`;
+      previewContext.textContent = `${String(normalized.environment || "city").toUpperCase()} preview`;
     }
     if (currentLabel) {
-      currentLabel.textContent = data.name || "Untitled room";
+      currentLabel.textContent = normalized.name || "Untitled room";
     }
     if (options.flash) {
       triggerBuilderPreviewFlash();
@@ -835,27 +1349,34 @@
   }
 
   function zoneRoomsToNodes(rooms, selectedRoomId) {
-    return (rooms || []).map((room) => ({
-      id: String(room.id),
-      type: "builderRoom",
-      draggable: true,
-      selectable: true,
-      width: 14,
-      height: 14,
-      style: {
+    return (rooms || []).flatMap((room) => {
+      const mapX = normalizeBuilderMapCoordinate(room?.map_x ?? room?.map?.x ?? room?.x);
+      const mapY = normalizeBuilderMapCoordinate(room?.map_y ?? room?.map?.y ?? room?.y);
+      if (!Number.isFinite(mapX) || !Number.isFinite(mapY)) {
+        return [];
+      }
+      return [{
+        id: String(room.id),
+        type: "builderRoom",
+        draggable: true,
+        selectable: true,
         width: 14,
         height: 14,
-      },
-      position: {
-        x: Number(room.map_x ?? 0),
-        y: Number(room.map_y ?? 0),
-      },
-      data: {
-        label: room.name || `Room ${room.id}`,
-        roomId: Number(room.id || 0),
-        selected: Number(room.id || 0) === Number(selectedRoomId || 0),
-      },
-    }));
+        style: {
+          width: 14,
+          height: 14,
+        },
+        position: {
+          x: mapX,
+          y: mapY,
+        },
+        data: {
+          label: room.name || `Room ${room.id}`,
+          roomId: builderRoomKey(room.id),
+          selected: builderRoomKey(room.id) === builderRoomKey(selectedRoomId),
+        },
+      }];
+    });
   }
 
   function zoneRoomsToEdges(rooms, explicitEdges = null) {
@@ -891,81 +1412,62 @@
   }
 
   async function saveBuilderRoomPayload(roomId, overrides = {}) {
-    const numericRoomId = Number(roomId || 0);
-    if (!numericRoomId) {
+    const normalizedRoomId = builderRoomKey(roomId);
+    if (!normalizedRoomId) {
       throw new Error("Missing room id.");
     }
-    const baseRoom = Number(builderState.currentRoomId || 0) === numericRoomId && builderState.currentRoom
-      ? builderState.currentRoom
-      : await builderFetchJson(`/builder/api/room/${numericRoomId}/`);
-
-    const response = await builderFetchJson(`/builder/api/room/${numericRoomId}/save/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: overrides.name ?? baseRoom.name ?? `Room ${numericRoomId}`,
-        desc: overrides.desc ?? baseRoom.desc ?? "",
-        environment: overrides.environment ?? baseRoom.environment ?? "city",
-        exits: overrides.exits ?? (Array.isArray(baseRoom.exits) ? baseRoom.exits : []),
-        zone_id: overrides.zone_id ?? baseRoom.zone_id ?? builderState.currentZoneId ?? "",
-        map_x: overrides.map_x ?? Number(baseRoom.map_x ?? baseRoom.x ?? 0),
-        map_y: overrides.map_y ?? Number(baseRoom.map_y ?? baseRoom.y ?? 0),
-        map_layer: overrides.map_layer ?? Number(baseRoom.map_layer ?? 0),
-      }),
-    });
-
-    if (response.room) {
-      syncZoneGraphRoom(response.room);
-      if (numericRoomId === Number(builderState.currentRoomId || 0)) {
-        builderState.currentRoom = {
-          ...(builderState.currentRoom || {}),
-          ...response.room,
-        };
-      }
+    const baseRoom = builderRoomById(normalizedRoomId);
+    if (!baseRoom) {
+      throw new Error("Room not found.");
     }
-    return response;
+    const room = updateBuilderZoneRoom(normalizedRoomId, {
+      name: overrides.name ?? baseRoom.name ?? `Room ${normalizedRoomId}`,
+      desc: overrides.desc ?? baseRoom.desc ?? "",
+      short_desc: overrides.short_desc ?? overrides.shortDesc ?? baseRoom.short_desc ?? null,
+      stateful_descs: overrides.stateful_descs ?? baseRoom.stateful_descs ?? {},
+      details: overrides.details ?? baseRoom.details ?? {},
+      room_states: overrides.room_states ?? baseRoom.room_states ?? [],
+      ambient: overrides.ambient ?? baseRoom.ambient ?? { rate: 0, messages: [] },
+      environment: overrides.environment ?? baseRoom.environment ?? "city",
+      exits: overrides.exits ?? overrides.exitMap ?? baseRoom.exitMap ?? {},
+      zone_id: overrides.zone_id ?? baseRoom.zone_id ?? builderState.currentZoneId ?? "",
+      map_x: overrides.map_x ?? Number(baseRoom.map?.x ?? baseRoom.map_x ?? baseRoom.x ?? 0),
+      map_y: overrides.map_y ?? Number(baseRoom.map?.y ?? baseRoom.map_y ?? baseRoom.y ?? 0),
+      map_layer: overrides.map_layer ?? Number(baseRoom.map?.layer ?? baseRoom.map_layer ?? 0),
+    });
+    return { room, zone_id: room.zone_id, exits: builderRoomExitsArray(room) };
   }
 
   async function persistBuilderRoomCoordinates(roomId, mapX, mapY) {
-    const numericRoomId = Number(roomId || 0);
-    if (!numericRoomId) {
+    const normalizedRoomId = builderRoomKey(roomId);
+    if (!normalizedRoomId) {
       return;
     }
     const nextMapX = Number.isFinite(Number(mapX)) ? Math.round(Number(mapX)) : 0;
     const nextMapY = Number.isFinite(Number(mapY)) ? Math.round(Number(mapY)) : 0;
-    setBuilderRoomCoordinates(numericRoomId, nextMapX, nextMapY);
+    setBuilderRoomCoordinates(normalizedRoomId, nextMapX, nextMapY);
     renderZoneMap();
 
-    const response = await saveBuilderRoomPayload(numericRoomId, {
+    const response = await saveBuilderRoomPayload(normalizedRoomId, {
       map_x: nextMapX,
       map_y: nextMapY,
     });
 
     if (response.room) {
-      syncZoneGraphRoom(response.room);
-      if (numericRoomId === Number(builderState.currentRoomId || 0)) {
-        builderState.currentRoom = {
-          ...(builderState.currentRoom || {}),
-          ...response.room,
-          map_x: nextMapX,
-          map_y: nextMapY,
-          x: nextMapX,
-          y: nextMapY,
-        };
-      }
+      builderState.currentRoom = response.room;
     }
 
-    await loadBuilderRoomList();
     renderBuilderRoomList();
     renderZoneMap();
-    setBuilderPageStatus(`Moved ${roomNameById(numericRoomId)} to (${nextMapX}, ${nextMapY}).`);
+    setBuilderPageStatus(`Moved ${roomNameById(normalizedRoomId)} to (${nextMapX}, ${nextMapY}). Save zone to persist.`);
   }
 
   async function createExitBetweenRooms(fromId, toId) {
-    const fromRoom = builderRoomById(fromId) || await builderFetchJson(`/builder/api/room/${Number(fromId || 0)}/`);
-    const toRoom = builderRoomById(toId) || await builderFetchJson(`/builder/api/room/${Number(toId || 0)}/`);
+    const fromRoom = builderRoomById(fromId);
+    const toRoom = builderRoomById(toId);
+    if (!fromRoom || !toRoom) {
+      throw new Error("Both rooms must exist in the loaded zone.");
+    }
     const direction = getDirection(fromRoom, toRoom);
     const reverse = reverseDirection(direction);
     if (!direction || !reverse) {
@@ -977,11 +1479,9 @@
 
     await saveBuilderRoomPayload(fromRoom.id, { exits: nextFromExits });
     await saveBuilderRoomPayload(toRoom.id, { exits: nextToExits });
-    await loadBuilderZones();
-    await loadBuilderRoomList();
     renderBuilderRoomList();
     renderZoneMap();
-    setBuilderPageStatus(`Connected ${roomNameById(fromRoom.id)} ${direction} to ${roomNameById(toRoom.id)}.`);
+    setBuilderPageStatus(`Connected ${roomNameById(fromRoom.id)} ${direction} to ${roomNameById(toRoom.id)}. Save zone to persist.`);
   }
 
   function renderBuilderReactFlowMap(rooms, edgeSummary) {
@@ -989,18 +1489,18 @@
     if (!root || !window.DragonsireBuilderReactFlow?.mountBuilderReactFlow) {
       return false;
     }
-    const currentRoom = rooms.find((room) => Number(room.id) === Number(builderState.currentRoomId || 0));
+    const currentRoom = rooms.find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
     window.DragonsireBuilderReactFlow.mountBuilderReactFlow(root, {
       nodes: zoneRoomsToNodes(rooms, builderState.currentRoomId),
       edges: edgeSummary.edges,
-      selectedRoomId: Number(builderState.currentRoomId || 0),
+      selectedRoomId: builderRoomKey(builderState.currentRoomId),
       viewportRequest: builderState.reactFlowViewportRequest,
       onSelectRoom: (roomId) => {
-        const numericRoomId = Number(roomId || 0);
-        if (!numericRoomId || numericRoomId === Number(builderState.currentRoomId || 0)) {
+        const normalizedRoomId = builderRoomKey(roomId);
+        if (!normalizedRoomId || normalizedRoomId === builderRoomKey(builderState.currentRoomId)) {
           return;
         }
-        void loadBuilderRoom(numericRoomId).catch((error) => {
+        void loadBuilderRoom(normalizedRoomId).catch((error) => {
           console.error(error);
           setBuilderPageStatus(error.message || "Unable to load room.");
         });
@@ -1020,7 +1520,7 @@
   }
 
   function updateBuilderMapMeta(rooms, edges) {
-    const zoneLabel = builderState.zoneGraph?.zone || builderState.currentZoneId || "";
+    const zoneLabel = builderState.zone?.zone_id || builderState.currentZoneId || "";
     byId("builder-map-meta-rooms").textContent = `Rooms ${rooms.length}`;
     byId("builder-map-meta-exits").textContent = `Exits ${edges.length}`;
     byId("builder-map-meta-zoom").textContent = zoneLabel
@@ -1045,24 +1545,30 @@
 
   function normalizeBuilderZoneRooms(rooms) {
     return (rooms || []).flatMap((room) => {
-      const mapX = Number(room?.map_x);
-      const mapY = Number(room?.map_y);
+      const mapX = normalizeBuilderMapCoordinate(room?.map?.x ?? room?.map_x ?? room?.x);
+      const mapY = normalizeBuilderMapCoordinate(room?.map?.y ?? room?.map_y ?? room?.y);
       if (!Number.isFinite(mapX) || !Number.isFinite(mapY)) {
-        console.warn("ROOM MISSING COORDS:", room?.id, room?.name, room?.map_x, room?.map_y);
         return [];
       }
       return [{
         ...room,
+        map_x: mapX,
+        map_y: mapY,
         x: mapX,
         y: mapY,
-        current: Number(room.id) === Number(builderState.currentRoomId || 0),
-        is_player: Number(room.id) === Number(builderState.currentRoomId || 0),
+        map: {
+          ...(room?.map || {}),
+          x: mapX,
+          y: mapY,
+        },
+        current: builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId),
+        is_player: builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId),
       }];
     });
   }
 
   function builderZoneWorldPosition(roomId) {
-    const room = builderState.zoneGraph?.roomLookup?.get(Number(roomId || 0));
+    const room = builderRoomById(roomId);
     if (!room) {
       return null;
     }
@@ -1091,7 +1597,7 @@
 
   function fitZoneMapToViewport() {
     const canvas = zoneMapCanvas();
-    const rooms = builderState.zoneGraph?.rooms || [];
+    const rooms = builderState.zone?.rooms || [];
     if (!canvas || !rooms.length) {
       return;
     }
@@ -1184,61 +1690,44 @@
     };
   }
 
-  function renderBuilderMapCanvas(canvas, rooms) {
-    const compactMap = false;
-    const edgeSummary = buildBuilderEdgeSummary(rooms, builderState.zoneGraph?.edges || []);
-    const edges = edgeSummary.edges;
-    const renderedBounds = renderedMapBoundsForRooms(canvas, rooms, builderState.zoneZoom, builderState.hoveredRoomId);
-    builderState.zoneRoomPositions = drawCanvasMap(canvas, rooms, edges, {
-      getPosition: (room) => builderZoneScreenPosition(room.id),
-      getColor: (room) => roomColor(room),
-      getRadius: (room) => mapRoomRadiusForHover(room, compactMap, builderState.hoveredRoomId),
-      hoveredRoomId: builderState.hoveredRoomId,
-      selectedRoomId: Number(builderState.currentRoomId || 0),
-      showLabels: compactMap,
-      edgeColor: () => compactMap ? "rgba(220, 188, 120, 0.82)" : "rgba(195, 164, 104, 0.6)",
-      edgeWidth: () => compactMap ? 2.4 : 1.5,
-    });
-    if (builderState.connectMode && builderState.connectFromRoomId) {
-      const sourcePosition = builderState.zoneRoomPositions.get(Number(builderState.connectFromRoomId || 0));
-      if (sourcePosition) {
-        const previewTargetId = Number(builderState.hoveredRoomId || 0);
-        const previewTargetPosition = previewTargetId && previewTargetId !== Number(builderState.connectFromRoomId || 0)
-          ? builderState.zoneRoomPositions.get(previewTargetId)
-          : null;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.save();
-          ctx.strokeStyle = "rgba(255, 214, 132, 0.95)";
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.arc(sourcePosition.x, sourcePosition.y, 12, 0, Math.PI * 2);
-          ctx.stroke();
-          if (previewTargetPosition) {
-            ctx.setLineDash([8, 6]);
-            ctx.beginPath();
-            ctx.moveTo(sourcePosition.x, sourcePosition.y);
-            ctx.lineTo(previewTargetPosition.x, previewTargetPosition.y);
-            ctx.stroke();
-          }
-          ctx.restore();
-        }
-      }
+  function renderBuilderConnectOverlay(canvas) {
+    if (!builderState.connectMode || !builderState.connectFrom) {
+      return;
     }
-    debugMapSnapshot("builder", rooms, edges, {
-      zoom: builderState.zoneZoom,
-      pan: builderState.zonePan,
-      selectedRoomId: Number(builderState.currentRoomId || 0),
-      renderedBounds,
-      canvas: { width: canvas.width, height: canvas.height },
-      edgeCounters: edgeSummary.counters,
-      usesStoredRoomCoordinates: true,
-    }, {
-      positions: builderState.zoneRoomPositions,
-    });
+    const sourcePosition = builderState.zoneRoomPositions.get(builderRoomKey(builderState.connectFrom));
+    if (!sourcePosition) {
+      return;
+    }
+    const previewTargetId = builderRoomKey(builderState.hoveredRoomId || "");
+    const previewTargetPosition = previewTargetId && previewTargetId !== builderRoomKey(builderState.connectFrom)
+      ? builderState.zoneRoomPositions.get(previewTargetId)
+      : null;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 214, 132, 0.95)";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(sourcePosition.x, sourcePosition.y, 12, 0, Math.PI * 2);
+    ctx.stroke();
+    if (previewTargetPosition) {
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(sourcePosition.x, sourcePosition.y);
+      ctx.lineTo(previewTargetPosition.x, previewTargetPosition.y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function updateBuilderMapPresentation(rooms, edges, edgeSummary) {
+    console.log("BUILDER ROOMS:", rooms.length);
+    console.log("BUILDER SAMPLE:", rooms[0] || null);
     console.log("builder edge counters", edgeSummary.counters);
     updateBuilderMapMeta(rooms, edges);
-    const currentRoom = rooms.find((room) => Number(room.id) === Number(builderState.currentRoomId || 0));
+    const currentRoom = rooms.find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
     byId("builder-map-room-name").textContent = currentRoom ? currentRoom.name : "Awaiting room data";
     if (currentRoom) {
       const currentRoomSummary = summarizeBuilderRoomExits(currentRoom);
@@ -1271,9 +1760,9 @@
       counters.specialExits += exitGroups.special.length;
       counters.droppedExits += exitGroups.dropped.length;
       for (const exit of exitGroups.spatial) {
-        const fromId = Number(room.id || 0);
-        const toId = Number(exit.target_id || 0);
-        const signature = [fromId, toId].sort((left, right) => left - right).join(":");
+        const fromId = builderRoomKey(room.id);
+        const toId = builderRoomKey(exit.target_id);
+        const signature = [fromId, toId].sort().join(":");
         if (seen.has(signature)) {
           continue;
         }
@@ -1302,15 +1791,15 @@
       counters.verticalExits += classified.isVertical ? 1 : 0;
       counters.specialExits += classified.isSpecial ? 1 : 0;
       counters.droppedExits += classified.dropped ? 1 : 0;
-      const fromId = Number(edge?.from || 0);
-      const toId = Number(edge?.to || 0);
+      const fromId = builderRoomKey(edge?.from || "");
+      const toId = builderRoomKey(edge?.to || "");
       if (!roomIds.has(fromId) || !roomIds.has(toId)) {
         continue;
       }
       if (!classified.isSpatial) {
         continue;
       }
-      const signature = [fromId, toId].sort((left, right) => left - right).join(":");
+      const signature = [fromId, toId].sort().join(":");
       if (seen.has(signature)) {
         continue;
       }
@@ -1323,7 +1812,7 @@
 
   function buildBuilderEdgeSummary(rooms, explicitEdges = null) {
     if (Array.isArray(explicitEdges) && explicitEdges.length) {
-      return summarizeExplicitBuilderEdges(explicitEdges, new Set((rooms || []).map((room) => Number(room.id || 0))));
+      return summarizeExplicitBuilderEdges(explicitEdges, new Set((rooms || []).map((room) => builderRoomKey(room.id))));
     }
     return mapEdgesFromZoneRooms(rooms);
   }
@@ -1335,7 +1824,7 @@
     }
     const useReactFlow = builderUsesReactFlow();
     setBuilderMapRenderMode(useReactFlow);
-    const payload = builderState.zoneGraph;
+    const payload = builderState.zone;
     if (!payload || !Array.isArray(payload.rooms) || !payload.rooms.length) {
       if (useReactFlow) {
         renderBuilderReactFlowMap([], { edges: [], counters: {} });
@@ -1355,8 +1844,6 @@
     }
 
     const rooms = normalizeBuilderZoneRooms(payload.rooms);
-    builderState.zoneGraph.rooms = rooms;
-    builderState.zoneGraph.roomLookup = new Map(rooms.map((room) => [Number(room.id), room]));
 
     const reactFlowEdgeSummary = zoneRoomsToEdges(rooms, payload.edges || []);
     if (useReactFlow) {
@@ -1381,67 +1868,56 @@
         fitZoneMapToViewport();
       }
     }
-    renderBuilderMapCanvas(canvas, rooms);
+    const edgeSummary = buildBuilderEdgeSummary(rooms, payload.edges || []);
+    const edges = edgeSummary.edges;
+    const rendered = renderZoneCanvasMap({
+      canvas,
+      rooms,
+      edges,
+      mode: "builder",
+      scale: builderState.zoneZoom,
+      getPosition: (room) => builderZoneScreenPosition(room.id),
+      getColor: (room) => roomColor(room),
+      getRadius: (room) => mapRoomRadiusForHover(room, false, builderState.hoveredRoomId),
+      hoveredRoomId: builderState.hoveredRoomId,
+      selectedRoomId: builderRoomKey(builderState.currentRoomId),
+      showLabels: false,
+      edgeColor: () => "rgba(195, 164, 104, 0.6)",
+      edgeWidth: () => 1.5,
+      debugTransform: {
+        zoom: builderState.zoneZoom,
+        pan: builderState.zonePan,
+        edgeCounters: edgeSummary.counters,
+        usesStoredRoomCoordinates: true,
+      },
+    });
+    builderState.zoneRoomPositions = rendered.positions;
+    renderBuilderConnectOverlay(canvas);
+    updateBuilderMapPresentation(rooms, edges, edgeSummary);
   }
 
   function syncZoneGraphRoom(roomPayload) {
-    if (!builderState.zoneGraph || !roomPayload) {
+    if (!builderState.zone || !roomPayload) {
       return;
     }
-    const roomId = Number(roomPayload.id || 0);
-    const roomIndex = builderState.zoneGraph.rooms.findIndex((room) => Number(room.id) === roomId);
-    const existingRoom = roomIndex >= 0 ? builderState.zoneGraph.rooms[roomIndex] : builderState.zoneGraph.roomLookup.get(roomId);
-    const exitMap = {};
-    (roomPayload.exits || []).forEach((exit) => {
-      const normalizedDirection = canonicalExitDirection(exit.direction || "");
-      if (!normalizedDirection) {
-        return;
-      }
-      exitMap[normalizedDirection] = Number(exit.target_id || 0);
-    });
-    const nextRoom = {
-      ...(existingRoom || {}),
-      ...roomPayload,
-      x: Number(roomPayload.map_x ?? existingRoom?.map_x ?? 0),
-      y: Number(roomPayload.map_y ?? existingRoom?.map_y ?? 0),
-      short_desc: roomPayload.short_desc || deriveBuilderShortDesc(roomPayload),
-      exitMap,
-    };
-    if (roomIndex >= 0) {
-      builderState.zoneGraph.rooms[roomIndex] = nextRoom;
-    }
-    builderState.zoneGraph.roomLookup.set(roomId, nextRoom);
+    updateBuilderZoneRoom(roomPayload.id, roomPayload);
   }
 
   async function loadBuilderZone(zoneId, options = {}) {
     const requestedZoneId = builderZoneRequestId(zoneId);
     const normalizedZoneId = normalizeBuilderZoneId(zoneId);
-    if (!options.force && normalizeBuilderZoneId(builderState.currentZoneId) === normalizedZoneId && builderState.zoneGraph) {
+    const graphZoneId = normalizeBuilderZoneId(builderState.zone?.zone_id || "");
+    if (!options.force
+      && normalizeBuilderZoneId(builderState.currentZoneId) === normalizedZoneId
+      && builderState.zone
+      && graphZoneId === normalizedZoneId
+      && Array.isArray(builderState.zone.rooms)
+      && builderState.zone.rooms.length) {
       return;
     }
     const payload = await builderFetchJson(`/builder/api/zone/${encodeURIComponent(requestedZoneId)}/`);
-    const rooms = (payload.rooms || []).map((room) => {
-      const exitMap = {};
-      (room.exits || []).forEach((exit) => {
-        const normalizedDirection = canonicalExitDirection(exit.direction || "");
-        if (!normalizedDirection) {
-          return;
-        }
-        exitMap[normalizedDirection] = Number(exit.target_id || 0);
-      });
-      return {
-        ...room,
-        exitMap,
-      };
-    });
-    builderState.currentZoneId = payload.zone_id || normalizedZoneId;
-    builderState.zoneZoomInitialized = false;
-    builderState.zoneMapNeedsFit = true;
-    builderState.zoneGraph = {
-      ...payload,
-      rooms,
-      roomLookup: new Map(rooms.map((room) => [Number(room.id), room])),
-    };
+    replaceBuilderZone(payload, { fallbackZoneId: normalizedZoneId });
+    persistBuilderZoneSelection(builderState.currentZoneId);
     renderBuilderRoomList();
     highlightSelectedBuilderRoom();
     renderZoneMap();
@@ -1451,20 +1927,7 @@
     if (!mapPayload || !Array.isArray(mapPayload.rooms)) {
       return false;
     }
-    const rooms = (mapPayload.rooms || []).map((room) => ({
-      ...room,
-      map_x: Number(room.map_x ?? room.x ?? 0),
-      map_y: Number(room.map_y ?? room.y ?? 0),
-      exitMap: room.exitMap || {},
-    }));
-    builderState.zoneZoomInitialized = false;
-    builderState.zoneMapNeedsFit = true;
-    builderState.zoneGraph = {
-      ...mapPayload,
-      zone_id: mapPayload.zone_id || fallbackZoneId || builderState.currentZoneId || "local",
-      rooms,
-      roomLookup: new Map(rooms.map((room) => [Number(room.id), room])),
-    };
+    replaceBuilderZone(mapPayload, { fallbackZoneId });
     return true;
   }
 
@@ -1487,28 +1950,22 @@
     if (!id) {
       return;
     }
-    const roomId = Number(id);
+    const roomId = builderRoomKey(id);
+    const data = builderRoomById(roomId);
+    if (!data) {
+      throw new Error(`Unable to find room ${roomId}.`);
+    }
     builderState.currentRoomId = roomId;
+    builderState.selectedRoom = roomId;
     window.localStorage.setItem(BUILDER_LAST_ROOM_STORAGE_KEY, String(roomId));
     highlightSelectedBuilderRoom();
-    setBuilderPageStatus(`Loading room ${roomId}...`);
-    const data = await builderFetchJson(`/builder/api/room/${roomId}/`);
-    builderState.currentZoneId = normalizeBuilderZoneId(data.zone_id);
-    persistBuilderZoneSelection(builderState.currentZoneId);
+    setBuilderPageStatus(`Editing ${data.name || `room ${roomId}`}`);
+    builderState.currentZoneId = normalizeBuilderZoneId(data.zone_id || builderState.currentZoneId);
+    persistBuilderZoneSelection(builderState.currentZoneId || builderState.zone?.zone_id || "");
     syncBuilderZoneMenus();
     renderBuilderRoomList();
     highlightSelectedBuilderRoom();
-    if (data.zone_id) {
-      await loadBuilderZone(data.zone_id);
-    } else {
-      await loadBuilderZone(BUILDER_UNASSIGNED_ZONE_VALUE, { force: true });
-    }
     builderState.currentRoom = data;
-    if ((!builderState.zoneGraph || !Array.isArray(builderState.zoneGraph.rooms) || !builderState.zoneGraph.rooms.length)
-      && applyBuilderMapPayload(data.map_payload, data.zone_id || BUILDER_UNASSIGNED_ZONE_VALUE)) {
-      renderZoneMap();
-    }
-    syncZoneGraphRoom(data);
     if (byId("room-name")) {
       byId("room-name").value = data.name || "";
     }
@@ -1518,6 +1975,17 @@
     if (byId("room-desc")) {
       byId("room-desc").value = data.desc || "";
     }
+    renderBuilderStatefulDescList(data.stateful_descs || {});
+    renderBuilderDetailList(data.details || {});
+    if (byId("room-active-states")) {
+      byId("room-active-states").value = (data.room_states || []).join(", ");
+    }
+    if (byId("room-ambient-rate")) {
+      byId("room-ambient-rate").value = String(data.ambient?.rate || 0);
+    }
+    if (byId("room-ambient-messages")) {
+      byId("room-ambient-messages").value = (data.ambient?.messages || []).join("\n");
+    }
     if (byId("room-environment")) {
       byId("room-environment").value = data.environment || "city";
     }
@@ -1525,22 +1993,21 @@
       byId("room-zone").value = builderZoneSelectValue(data.zone_id || "");
     }
     if (byId("room-map-x")) {
-      byId("room-map-x").value = String(data.map_x ?? data.x ?? 0);
+      byId("room-map-x").value = String(data.map?.x ?? data.map_x ?? data.x ?? 0);
     }
     if (byId("room-map-y")) {
-      byId("room-map-y").value = String(data.map_y ?? data.y ?? 0);
+      byId("room-map-y").value = String(data.map?.y ?? data.map_y ?? data.y ?? 0);
     }
     if (byId("room-map-layer")) {
-      byId("room-map-layer").value = String(data.map_layer ?? 0);
+      byId("room-map-layer").value = String(data.map?.layer ?? data.map_layer ?? 0);
     }
-    renderBuilderExitList(data.exits || []);
+    renderBuilderExitList(builderRoomExitsArray(data));
     renderBuilderPreview(data);
     renderZoneMap();
-    setBuilderPageStatus(`Editing ${data.name || `room ${roomId}`}`);
   }
 
   async function loadBuilderRoomList() {
-    builderState.rooms = await builderFetchJson("/builder/api/rooms/");
+    builderState.rooms = builderVisibleRooms();
     const list = byId("room-list");
     const savedScrollTop = Number(window.localStorage.getItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY) || 0);
     if (list && Number.isFinite(savedScrollTop) && savedScrollTop > 0) {
@@ -1553,15 +2020,27 @@
     syncBuilderZoneMenus();
   }
 
+  async function refreshBuilderZoneFromYaml(options = {}) {
+    const zoneId = normalizeBuilderZoneId(options.zoneId || builderState.currentZoneId || builderState.zone?.zone_id || "");
+    if (!zoneId) {
+      return;
+    }
+    const preservedRoomId = builderRoomKey(options.preserveRoomId ?? builderState.currentRoomId ?? "");
+    await loadBuilderZone(zoneId, { force: true });
+    if (preservedRoomId && builderRoomById(preservedRoomId)) {
+      await loadBuilderRoom(preservedRoomId);
+    }
+  }
+
   function setBuilderRoomCoordinates(roomId, mapX, mapY) {
-    const numericRoomId = Number(roomId || 0);
-    if (!numericRoomId) {
+    const normalizedRoomId = builderRoomKey(roomId);
+    if (!normalizedRoomId) {
       return;
     }
     const nextMapX = Number.isFinite(Number(mapX)) ? Math.round(Number(mapX)) : 0;
     const nextMapY = Number.isFinite(Number(mapY)) ? Math.round(Number(mapY)) : 0;
 
-    if (numericRoomId === Number(builderState.currentRoomId || 0)) {
+    if (normalizedRoomId === builderRoomKey(builderState.currentRoomId)) {
       if (byId("room-map-x")) {
         byId("room-map-x").value = String(nextMapX);
       }
@@ -1569,6 +2048,7 @@
         byId("room-map-y").value = String(nextMapY);
       }
       if (builderState.currentRoom) {
+        builderState.currentRoom.map = { ...(builderState.currentRoom.map || {}), x: nextMapX, y: nextMapY };
         builderState.currentRoom.map_x = nextMapX;
         builderState.currentRoom.map_y = nextMapY;
         builderState.currentRoom.x = nextMapX;
@@ -1576,8 +2056,9 @@
       }
     }
 
-    const zoneRoom = builderState.zoneGraph?.roomLookup?.get(numericRoomId);
+    const zoneRoom = builderRoomById(normalizedRoomId);
     if (zoneRoom) {
+      zoneRoom.map = { ...(zoneRoom.map || {}), x: nextMapX, y: nextMapY };
       zoneRoom.map_x = nextMapX;
       zoneRoom.map_y = nextMapY;
       zoneRoom.x = nextMapX;
@@ -1587,12 +2068,13 @@
 
   async function switchBuilderZone(zoneId, options = {}) {
     const normalizedZoneId = normalizeBuilderZoneId(zoneId);
-    const currentRoomStillVisible = builderState.rooms.some((room) => (
-      Number(room.id) === Number(builderState.currentRoomId || 0)
+    const currentRoomStillVisible = builderVisibleRooms().some((room) => (
+      builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId)
         && normalizeBuilderZoneId(room.zone_id) === normalizedZoneId
     ));
     if (!currentRoomStillVisible) {
       builderState.currentRoomId = null;
+      builderState.selectedRoom = null;
       builderState.currentRoom = null;
     }
     builderState.currentZoneId = normalizedZoneId;
@@ -1603,7 +2085,7 @@
     await loadBuilderZone(zoneId, { force: true });
 
     const filteredRooms = builderVisibleRooms();
-    const currentFilteredRoomVisible = filteredRooms.some((room) => Number(room.id) === Number(builderState.currentRoomId || 0));
+    const currentFilteredRoomVisible = filteredRooms.some((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
     if (currentFilteredRoomVisible && options.preserveSelection !== false) {
       highlightSelectedBuilderRoom();
       return;
@@ -1620,23 +2102,17 @@
   async function initializeBuilderData() {
     setBuilderPageStatus("Loading builder data...");
     await loadBuilderZones();
-    await loadBuilderRoomList();
 
-    const persistedRoomId = Number(window.localStorage.getItem(BUILDER_LAST_ROOM_STORAGE_KEY) || 0);
+    const persistedRoomId = builderRoomKey(window.localStorage.getItem(BUILDER_LAST_ROOM_STORAGE_KEY) || "");
     const persistedZoneId = normalizeBuilderZoneId(window.localStorage.getItem(BUILDER_LAST_ZONE_STORAGE_KEY) || "");
-    const hasTestLandingZone = builderState.zones.some((zone) => normalizeBuilderZoneId(zone.id) === "test_landing");
-    if (persistedRoomId && builderState.rooms.some((room) => Number(room.id) === persistedRoomId)) {
-      await loadBuilderRoom(persistedRoomId);
-      return;
-    }
-
     if (builderState.zones.length) {
-      const nextZoneId = hasTestLandingZone
-        ? "test_landing"
-        : (builderState.zones.some((zone) => normalizeBuilderZoneId(zone.id) === persistedZoneId)
-          ? persistedZoneId
-          : defaultAssignableZoneId(builderState.zones[0].id) || normalizeBuilderZoneId(builderState.zones[0].id));
+      const nextZoneId = builderState.zones.some((zone) => normalizeBuilderZoneId(zone.id) === persistedZoneId)
+        ? persistedZoneId
+        : defaultAssignableZoneId(builderState.zones[0].id) || normalizeBuilderZoneId(builderState.zones[0].id);
       await switchBuilderZone(nextZoneId);
+      if (persistedRoomId && builderRoomById(persistedRoomId)) {
+        await loadBuilderRoom(persistedRoomId);
+      }
       return;
     }
 
@@ -1667,35 +2143,28 @@
       return;
     }
     showSavingState();
-    setBuilderPageStatus(`Saving ${draft.name}...`);
+    setBuilderPageStatus(`Updating ${draft.name} in YAML...`);
     try {
-      const response = await builderFetchJson(`/builder/api/room/${draft.id}/save/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: draft.name,
-          desc: draft.desc,
-          environment: draft.environment,
-          exits: draft.exits,
-          zone_id: draft.zone_id,
-          map_x: draft.map_x,
-          map_y: draft.map_y,
-          map_layer: draft.map_layer,
-        }),
+      const response = await saveBuilderRoomPayload(draft.id, {
+        name: draft.name,
+        desc: draft.desc,
+        short_desc: draft.shortDesc || null,
+        stateful_descs: draft.stateful_descs,
+        details: draft.details,
+        room_states: draft.room_states,
+        ambient: draft.ambient,
+        environment: draft.environment,
+        exits: draft.exits,
+        zone_id: draft.zone_id,
+        map_x: draft.map_x,
+        map_y: draft.map_y,
+        map_layer: draft.map_layer,
       });
-      await loadBuilderZones();
-      await loadBuilderRoomList();
-      if (response.zone_id !== undefined) {
-        builderState.currentZoneId = normalizeBuilderZoneId(response.zone_id);
-        persistBuilderZoneSelection(builderState.currentZoneId);
-      }
       syncBuilderZoneMenus();
       renderBuilderRoomList();
       await loadBuilderRoom(draft.id);
       renderBuilderPreview(response.room || builderState.currentRoom || draft, { flash: true });
-      setBuilderPageStatus(`Saved ${draft.name}.`);
+      setBuilderPageStatus(`Updated ${draft.name} in YAML. Save zone to persist.`);
       showSavedState();
     } catch (error) {
       resetSaveState();
@@ -1749,30 +2218,35 @@
       return;
     }
     const position = builderCreateRoomPosition();
-    setBuilderPageStatus(`Creating ${name}...`);
-    const response = await builderFetchJson("/builder/api/rooms/create/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const roomId = uniqueBuilderRoomId(name);
+    const room = normalizeBuilderYamlRoom(
+      {
+        id: roomId,
         name,
         desc,
+        typeclass: "typeclasses.rooms_extended.ExtendedDireRoom",
+        stateful_descs: {},
+        details: {},
+        room_states: [],
+        ambient: { rate: 0, messages: [] },
         environment,
         zone_id: zoneId,
-        x: position.x,
-        y: position.y,
-      }),
-    });
-    await loadBuilderZones();
-    await loadBuilderRoomList();
+        map: { x: position.x, y: position.y, layer: 0 },
+        exits: {},
+      },
+      builderVisibleRooms().length,
+      zoneId
+    );
+    builderState.zone.rooms.push(room);
+    rebuildBuilderRoomIndexes();
+    setBuilderDirty(true);
     closeBuilderDialog("builder-room-dialog");
     toast(`Created room ${name}`);
-    await loadBuilderRoom(response.id || response.room?.id);
+    await loadBuilderRoom(room.id);
   }
 
   async function deleteBuilderRoom() {
-    const roomId = Number(builderState.currentRoomId || 0);
+    const roomId = builderRoomKey(builderState.currentRoomId || "");
     const roomName = builderState.currentRoom?.name || byId("room-name")?.value || `room ${roomId}`;
     if (!roomId) {
       toast("Select a room first.");
@@ -1782,37 +2256,168 @@
       return;
     }
     setBuilderPageStatus(`Deleting ${roomName}...`);
-    await builderFetchJson(`/builder/api/room/${roomId}/delete/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id: roomId }),
-    });
-    await loadBuilderZones();
-    await loadBuilderRoomList();
+    builderState.zone.rooms = builderState.zone.rooms
+      .filter((room) => builderRoomKey(room.id) !== roomId)
+      .map((room) => normalizeBuilderYamlRoom(
+        {
+          ...room,
+          exits: Object.fromEntries(
+            Object.entries(room.exitMap || room.exits || {}).filter(([, targetId]) => builderRoomKey(targetId) !== roomId)
+          ),
+        },
+        0,
+        builderState.currentZoneId || builderState.zone?.zone_id || ""
+      ));
+    rebuildBuilderRoomIndexes();
+    setBuilderDirty(true);
     toast(`Deleted ${roomName}`);
     const remainingRooms = builderVisibleRooms();
     if (remainingRooms.length) {
       await loadBuilderRoom(remainingRooms[0].id);
       return;
     }
-    if (builderState.currentZoneId) {
-      await loadBuilderZone(builderState.currentZoneId || BUILDER_UNASSIGNED_ZONE_VALUE, { force: true });
-    } else {
-      builderState.zoneGraph = null;
-    }
     clearBuilderEditor(`${currentBuilderZoneLabel()} is empty.`, `${currentBuilderZoneLabel()} has no rooms yet.`);
   }
 
+  async function saveBuilderZone() {
+    if (!builderState.zone || !builderState.currentZoneId) {
+      throw new Error("No zone loaded.");
+    }
+    const payload = builderState.zone;
+    console.log("Saving zone payload:", payload);
+    setBuilderPageStatus(`Saving ${builderState.currentZoneId}...`);
+    const response = await builderFetchJson("/builder/api/save-zone/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    console.log("Save response:", response);
+    await loadBuilderZones();
+    await refreshBuilderZoneFromYaml();
+    setBuilderDirty(false);
+    setBuilderPageStatus(response.status === "ok" ? `Saved successfully: ${builderState.currentZoneId}` : `Save failed: ${builderState.currentZoneId}`);
+    toast("Saved successfully");
+  }
+
+  function formatBuilderReloadResult(result) {
+    if (!result) {
+      return "Zone loaded successfully";
+    }
+    return [
+      "Zone loaded successfully",
+      `${result.rooms || 0} rooms`,
+      `${result.exits || 0} exits`,
+      `${result.npcs || 0} NPCs`,
+      `${result.items || 0} items`,
+    ].join("\n");
+  }
+
+  async function reloadBuilderZone() {
+    if (!builderState.currentZoneId) {
+      throw new Error("No zone selected.");
+    }
+    setBuilderPageStatus(`Reloading ${builderState.currentZoneId}...`);
+    const response = await builderFetchJson("/builder/api/reload-zone/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ zone_id: builderState.currentZoneId }),
+    });
+    console.log("Reload response:", response);
+    await refreshBuilderZoneFromYaml();
+    setBuilderDirty(false);
+    setBuilderPageStatus(formatBuilderReloadResult(response.result));
+    toast("Zone loaded successfully");
+  }
+
   function bindBuilderInputs() {
-    ["room-name", "room-short-desc", "room-desc", "room-environment", "room-zone"].forEach((id) => {
+    [
+      "room-name",
+      "room-short-desc",
+      "room-desc",
+      "room-desc-spring",
+      "room-desc-summer",
+      "room-desc-autumn",
+      "room-desc-winter",
+      "room-active-states",
+      "room-ambient-rate",
+      "room-ambient-messages",
+      "room-environment",
+      "room-zone",
+      "room-map-x",
+      "room-map-y",
+      "room-map-layer",
+    ].forEach((id) => {
       byId(id)?.addEventListener("input", () => {
         scheduleBuilderPreviewUpdate();
       });
       byId(id)?.addEventListener("change", () => {
         scheduleBuilderPreviewUpdate();
       });
+    });
+
+    byId("builder-preview-state")?.addEventListener("change", () => {
+      renderBuilderPreview(builderState.currentRoom || currentBuilderDraft(), { flash: true });
+    });
+
+    byId("builder-add-custom-stateful-desc")?.addEventListener("click", () => {
+      const list = byId("builder-custom-stateful-desc-list");
+      if (!list) {
+        return;
+      }
+      list.insertAdjacentHTML("beforeend", `
+        <div class="builder-kv-row builder-state-row">
+          <input class="builder-custom-state-key" type="text" value="" placeholder="State name" autocomplete="off">
+          <textarea class="builder-custom-state-text builder-compact-textarea" placeholder="Description"></textarea>
+          <button type="button" class="builder-kv-remove">Delete</button>
+        </div>
+      `);
+    });
+
+    byId("builder-add-detail")?.addEventListener("click", () => {
+      const list = byId("builder-detail-list");
+      if (!list) {
+        return;
+      }
+      list.insertAdjacentHTML("beforeend", `
+        <div class="builder-kv-row builder-detail-row">
+          <input class="builder-detail-key" type="text" value="" placeholder="detail key" autocomplete="off">
+          <textarea class="builder-detail-text builder-compact-textarea" placeholder="Detail description"></textarea>
+          <button type="button" class="builder-kv-remove">Delete</button>
+        </div>
+      `);
+    });
+
+    byId("room-editor")?.addEventListener("click", (event) => {
+      const button = event.target.closest(".builder-kv-remove");
+      if (!button) {
+        return;
+      }
+      event.preventDefault();
+      button.closest(".builder-kv-row")?.remove();
+      scheduleBuilderPreviewUpdate();
+    });
+
+    byId("room-editor")?.addEventListener("input", (event) => {
+      if (event.target.closest(".builder-kv-row")) {
+        scheduleBuilderPreviewUpdate();
+      }
+      const exitRow = event.target.closest(".builder-exit-row");
+      if (exitRow) {
+        const preview = exitRow.querySelector(".builder-exit-preview");
+        if (preview) {
+          preview.textContent = exitTravelPreview({
+            direction: exitRow.querySelector(".builder-exit-direction")?.value || "",
+            target_id: exitRow.querySelector(".builder-exit-target")?.value || "",
+            typeclass: exitRow.querySelector(".builder-exit-type")?.value === "slow" ? DEFAULT_SLOW_EXIT_TYPECLASS : DEFAULT_EXIT_TYPECLASS,
+            speed: exitRow.querySelector(".builder-exit-speed")?.value || "",
+            travel_time: exitRow.querySelector(".builder-exit-travel-time")?.value || 0,
+          });
+        }
+      }
     });
 
     byId("room-list")?.addEventListener("scroll", (event) => {
@@ -1822,9 +2427,25 @@
     byId("save-room")?.addEventListener("click", () => {
       void saveBuilderRoom().catch((error) => {
         console.error(error);
-        setBuilderPageStatus(error.message || "Save failed.");
+        setBuilderPageStatus(error.message || "Room update failed.");
         resetSaveState();
-        toast(error.message || "Save failed.");
+        toast(error.message || "Room update failed.");
+      });
+    });
+
+    byId("save-zone")?.addEventListener("click", () => {
+      void saveBuilderZone().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Zone save failed.");
+        toast(error.message || "Zone save failed.");
+      });
+    });
+
+    byId("reload-zone")?.addEventListener("click", () => {
+      void reloadBuilderZone().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Zone reload failed.");
+        toast(error.message || "Zone reload failed.");
       });
     });
 
@@ -1943,7 +2564,7 @@
     zoneMap?.addEventListener("mousemove", (event) => {
       const panelRect = mapPanel?.getBoundingClientRect();
       const room = builderRoomAtCanvasEvent(event, zoneMap, builderCanvasHitRadius());
-      const nextHoveredRoomId = room ? Number(room.id || 0) : null;
+      const nextHoveredRoomId = room ? builderRoomKey(room.id || "") : null;
       zoneMap.style.cursor = room ? "pointer" : (builderState.zoneDrag ? "grabbing" : "grab");
       if (panelRect) {
         updateBuilderMapTooltip(event.clientX - panelRect.left, event.clientY - panelRect.top, room);
@@ -1974,20 +2595,21 @@
         }
         return;
       }
-      const roomId = Number(room.id || 0);
+      const roomId = builderRoomKey(room.id || "");
       if (builderState.connectMode) {
-        if (!builderState.connectFromRoomId) {
+        if (!builderState.connectFrom) {
+          builderState.connectFrom = roomId;
           builderState.connectFromRoomId = roomId;
           setBuilderPageStatus(`Connect mode: source ${room.name || roomNameById(roomId)} selected. Click a target room.`);
           renderZoneMap();
           return;
         }
-        if (roomId === Number(builderState.connectFromRoomId || 0)) {
+        if (roomId === builderRoomKey(builderState.connectFrom)) {
           clearBuilderConnectMode();
           setBuilderPageStatus("Connect mode cancelled.");
           return;
         }
-        const fromId = Number(builderState.connectFromRoomId || 0);
+        const fromId = builderRoomKey(builderState.connectFrom);
         clearBuilderConnectMode();
         void createExitBetweenRooms(fromId, roomId).catch((error) => {
           console.error(error);
@@ -1996,7 +2618,7 @@
         });
         return;
       }
-      if (!roomId || roomId === Number(builderState.currentRoomId || 0)) {
+      if (!roomId || roomId === builderRoomKey(builderState.currentRoomId)) {
         return;
       }
       void loadBuilderRoom(roomId).catch((error) => {
@@ -2017,9 +2639,9 @@
 
     zoneMap?.addEventListener("pointerdown", (event) => {
       const room = builderRoomAtCanvasEvent(event, zoneMap, builderCanvasHitRadius());
-      const roomId = Number(room?.id || 0);
-      if (roomId && roomId === Number(builderState.currentRoomId || 0)) {
-        const sourceRoom = builderState.zoneGraph?.roomLookup?.get(roomId) || builderState.currentRoom || room;
+      const roomId = builderRoomKey(room?.id || "");
+      if (roomId && roomId === builderRoomKey(builderState.currentRoomId)) {
+        const sourceRoom = builderRoomById(roomId) || builderState.currentRoom || room;
         builderState.zoneDrag = {
           mode: "room",
           pointerId: event.pointerId,
@@ -2206,7 +2828,7 @@
     return findRenderedRoomAtPoint(
       getCanvasPoint(event, canvas),
       builderState.zoneRoomPositions || new Map(),
-      builderState.zoneGraph?.rooms || [],
+      builderState.zone?.rooms || [],
       radius
     );
   }
@@ -3959,12 +4581,80 @@
     return positions;
   }
 
+  function assertSpatialRooms(mode, rooms) {
+    if (mode === "builder") {
+      console.log("BUILDER ROOMS:", rooms.length);
+      console.log("BUILDER SAMPLE:", rooms[0] || null);
+    }
+    for (const room of rooms || []) {
+      const roomX = Number(room.x ?? room.map_x);
+      const roomY = Number(room.y ?? room.map_y);
+      if (!Number.isFinite(roomX) || !Number.isFinite(roomY)) {
+        console.error("Missing coords", { mode, room });
+      }
+    }
+  }
+
+  function renderZoneCanvasMap({
+    canvas,
+    rooms,
+    edges,
+    mode = "play",
+    scale = 1,
+    getPosition,
+    getColor,
+    getRadius,
+    hoveredRoomId = null,
+    selectedRoomId = null,
+    showLabels = false,
+    edgeColor,
+    edgeWidth,
+    linkedRoomIds,
+    drawEdge,
+    debugTransform = {},
+  } = {}) {
+    assertSpatialRooms(mode, rooms);
+    const renderedBounds = renderedMapBoundsForRooms(
+      canvas,
+      rooms,
+      Number(scale || 1),
+      hoveredRoomId ?? null
+    );
+    const positions = drawCanvasMap(canvas, rooms, edges, {
+      getPosition,
+      getColor,
+      getRadius,
+      hoveredRoomId,
+      selectedRoomId,
+      showLabels,
+      edgeColor,
+      edgeWidth,
+      linkedRoomIds,
+      drawEdge,
+    });
+    debugMapSnapshot(mode, rooms, edges, {
+      ...debugTransform,
+      selectedRoomId,
+      renderedBounds,
+      canvas: { width: canvas.width, height: canvas.height },
+    }, {
+      positions,
+    });
+    return { positions, renderedBounds };
+  }
+
+  window.renderZoneCanvasMap = renderZoneCanvasMap;
+
   function renderPlayerMapCanvas(canvas) {
     const compactMap = isCompactMap();
     const rooms = state.map.rooms || [];
     const edges = mapEdges();
-    const renderedBounds = renderedMapBoundsForRooms(canvas, rooms, state.mapScale, state.hoveredRoomId);
-    state.roomPositions = drawCanvasMap(canvas, rooms, edges, {
+    const rendered = renderZoneCanvasMap({
+      canvas,
+      rooms,
+      edges,
+      mode: "play",
+      scale: state.mapScale,
       getPosition: (room) => worldPosition(room, canvas),
       getColor: (room) => roomColor(room),
       getRadius: (room) => mapRoomRadius(room, compactMap),
@@ -3973,16 +4663,12 @@
       showLabels: compactMap,
       edgeColor: () => compactMap ? "rgba(220, 188, 120, 0.82)" : "rgba(195, 164, 104, 0.6)",
       edgeWidth: () => compactMap ? 2.4 : 1.5,
+      debugTransform: {
+        scale: state.mapScale,
+        offset: state.mapOffset,
+      },
     });
-    debugMapSnapshot("play", rooms, edges, {
-      scale: state.mapScale,
-      offset: state.mapOffset,
-      selectedRoomId: state.map.player_room_id,
-      renderedBounds,
-      canvas: { width: canvas.width, height: canvas.height },
-    }, {
-      positions: state.roomPositions,
-    });
+    state.roomPositions = rendered.positions;
   }
 
   function renderMap() {
