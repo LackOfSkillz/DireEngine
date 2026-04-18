@@ -14,6 +14,18 @@ from world.builder.services.map_exporter import _rooms_for_zone
 SCHEMA_VERSION = "v1"
 ROOM_STATE_TAG_CATEGORY = "room_state"
 DEFAULT_EXIT_TYPECLASS = "typeclasses.exits.Exit"
+ALLOWED_DIRECTIONS = {
+    "north",
+    "south",
+    "east",
+    "west",
+    "northeast",
+    "northwest",
+    "southeast",
+    "southwest",
+    "up",
+    "down",
+}
 
 
 def _normalize_stateful_descs(value) -> dict[str, str]:
@@ -145,6 +157,7 @@ def _extract_room_data(room) -> dict:
             "is_shop": bool(getattr(getattr(room, "db", None), "is_shop", False)),
         },
         "exits": {},
+        "special_exits": {},
     }
 
 
@@ -221,13 +234,17 @@ def export_zone(zone_id: str) -> dict:
         room_data = _extract_room_data(room)
         room_data["id"] = room_world_id
 
-        for obj in list(getattr(room, "contents", []) or []):
+        for obj in sorted(
+            list(getattr(room, "contents", []) or []),
+            key=lambda entry: (int(getattr(entry, "id", 0) or 0), str(getattr(entry, "key", "") or "")),
+        ):
             if _is_exit(obj):
                 direction = str(getattr(obj, "key", "") or "").strip().lower()
                 target = getattr(obj, "destination", None)
                 target_id = room_world_ids.get(int(getattr(target, "id", 0) or 0)) if target else None
                 if direction and target_id:
-                    room_data["exits"][direction] = _extract_exit_data(obj, target_id)
+                    target_bucket = "exits" if direction in ALLOWED_DIRECTIONS else "special_exits"
+                    room_data[target_bucket][direction] = _extract_exit_data(obj, target_id)
                 continue
 
             if _is_npc(obj):
@@ -242,6 +259,8 @@ def export_zone(zone_id: str) -> dict:
             walk_items(obj, room_world_id)
 
         rooms_data.append(room_data)
+    room_data["exits"] = dict(sorted(room_data["exits"].items()))
+    room_data["special_exits"] = dict(sorted(room_data["special_exits"].items()))
 
     zone_name = str(getattr(getattr(rooms[0], "db", None), "zone_name", "") or getattr(getattr(rooms[0], "db", None), "zone", "") or _titleize_zone_id(normalized_zone_id))
     return {

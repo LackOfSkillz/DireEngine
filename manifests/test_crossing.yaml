@@ -1,0 +1,7 @@
+area_id: test_crossing
+map_file: maps/CrossingMap (1).png
+profile: yaml_graph
+generation:
+  synthesize_street_names: false
+  synthesize_room_descriptions: false
+  synthesize_special_exits: false

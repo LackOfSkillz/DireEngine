@@ -44,6 +44,10 @@ rooms:
         typeclass: typeclasses.exits_slow.SlowDireExit
         speed: walk
         travel_time: 5
+    special_exits:
+      gate:
+        target: guild_foyer
+        typeclass: typeclasses.exits.Exit
 ```
 
 ## Evennia Mapping
@@ -59,6 +63,7 @@ rooms:
 - `exits.<direction>.typeclass` controls the exit typeclass created by `@zone load`
 - `exits.<direction>.speed` maps to `exit.db.move_speed`
 - `exits.<direction>.travel_time` maps to `exit.db.travel_time`
+- `special_exits.<direction>.*` round-trips like `exits`, but is reserved for non-spatial connectors such as `gate`, `arch`, or `bridge`
 
 ## Import Rules
 
@@ -67,6 +72,7 @@ rooms:
 - Import clears `room_state` tags before writing current `room_states`.
 - Authored rooms default to `typeclasses.rooms_extended.ExtendedDireRoom` when `typeclass` is omitted.
 - Authored exits default to `typeclasses.exits.Exit` when `typeclass` is omitted.
+- Only `map.x`, `map.y`, and `map.layer` determine room layout. Exits and `special_exits` do not determine geometry.
 - Builder slow exits use `typeclasses.exits_slow.SlowDireExit`, a project wrapper around Evennia's slow-exit behavior.
 
 ## Export Rules
@@ -74,6 +80,7 @@ rooms:
 - `@zone export <zone_id>` writes `desc`, `stateful_descs`, `details`, `room_states`, `ambient`, and `typeclass` back into YAML.
 - Export only writes `desc_*` attributes into `stateful_descs`.
 - Export writes exit target, typeclass, speed, and travel_time back into YAML when present.
+- Export writes non-spatial exit keys into `special_exits` and preserves their target, typeclass, speed, and travel_time.
 
 ## Cmdset Decision
 

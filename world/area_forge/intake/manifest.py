@@ -3,15 +3,15 @@ from pathlib import Path
 import yaml
 
 
-def create_manifest(map_path, area_id, profile="dr_city"):
+def create_manifest(map_path, area_id, profile="yaml_graph"):
     manifest = {
         "area_id": area_id,
         "map_file": str(map_path),
         "profile": profile,
         "generation": {
-            "synthesize_street_names": True,
-            "synthesize_room_descriptions": True,
-            "synthesize_special_exits": True,
+            "synthesize_street_names": profile == "dr_city",
+            "synthesize_room_descriptions": profile == "dr_city",
+            "synthesize_special_exits": profile == "dr_city",
         },
     }
 

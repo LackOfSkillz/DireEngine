@@ -2620,22 +2620,22 @@ body {
 }
 
 #builder-left {
-  flex: 0 0 280px;
-  width: 280px;
-  flex-shrink: 0;
+  flex: 0 1 240px;
+  width: 240px;
+  min-width: 220px;
   overflow: hidden;
 }
 
 #builder-center {
-  flex: 0 0 420px;
-  width: 420px;
-  flex-shrink: 0;
+  flex: 0 1 360px;
+  width: 360px;
+  min-width: 300px;
   overflow-y: auto;
 }
 
 #builder-right {
-  flex: 1 1 auto;
-  min-width: 0;
+  flex: 2 1 520px;
+  min-width: 420px;
 }
 
 #builder-left,
@@ -2839,7 +2839,7 @@ body {
 #builder-right #feed-body {
   display: flex !important;
   flex-direction: column;
-  gap: 12px !important;
+  gap: 0 !important;
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -2966,7 +2966,7 @@ body {
 #builder-map-panel {
   order: 1;
   flex: 1 1 auto;
-  min-height: 360px;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -2995,24 +2995,57 @@ body {
   min-height: 0;
 }
 
+@media (max-width: 1200px) {
+  #builder-layout {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  #builder-right {
+    order: 1;
+    width: auto;
+    min-width: 0;
+    min-height: 62vh;
+  }
+
+  #builder-left {
+    order: 2;
+    width: auto;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  #builder-center {
+    order: 3;
+    width: auto;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  #builder-map-panel,
+  #builder-right #feed-body {
+    min-height: 62vh;
+  }
+}
+
 .builder-reactflow-node {
   position: relative;
-  min-width: 14px;
-  min-height: 14px;
+  min-width: 10px;
+  min-height: 10px;
 }
 
 .builder-reactflow-node-core {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #d2a056, #8e5f24);
-  border: 1px solid rgba(31, 18, 8, 0.95);
-  box-shadow: 0 0 0 1px rgba(255, 224, 170, 0.1), 0 4px 10px rgba(0, 0, 0, 0.34);
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 18, 8, 0.35);
+  box-shadow: 0 0 0 1px rgba(255, 224, 170, 0.06);
 }
 
 .builder-reactflow-node.is-selected .builder-reactflow-node-core {
-  background: linear-gradient(180deg, #f2cb84, #c4862c);
-  box-shadow: 0 0 0 2px rgba(253, 230, 179, 0.5), 0 6px 16px rgba(0, 0, 0, 0.45);
+  width: 12px;
+  height: 12px;
+  box-shadow: 0 0 0 3px rgba(253, 230, 179, 0.7);
 }
 
 .builder-reactflow-node-label {
@@ -3201,11 +3234,6 @@ body {
     min-height: 380px;
   }
 
-  #builder-right #feed-text {
-    flex: 0 0 auto;
-    min-height: 180px;
-  }
-
   #builder-page {
     overflow-y: auto;
   }
@@ -3217,5 +3245,41 @@ body {
 
   .builder-exit-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  #builder-page {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  #builder-topbar {
+    padding: 8px !important;
+  }
+
+  #builder-layout {
+    gap: 8px;
+  }
+
+  #builder-right {
+    order: 1;
+    padding: 0 !important;
+    min-height: 70vh;
+  }
+
+  #builder-left,
+  #builder-center {
+    padding: 8px !important;
+  }
+
+  #builder-map-panel {
+    padding: 8px;
+    min-height: 70vh;
+    border-radius: 10px;
+  }
+
+  #builder-right #feed-body {
+    min-height: 70vh;
   }
 }

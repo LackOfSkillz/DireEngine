@@ -66,6 +66,44 @@
           <div class="panel-title">Room Editor</div>
           <div class="panel-subtitle" id="builder-current-room">No room selected</div>
         </div>
+        <section id="review-editor" class="builder-subsection builder-field" hidden>
+          <div class="panel-title-row">
+            <div class="panel-title">Review Editor</div>
+            <div class="panel-subtitle" id="review-current-selection">No node selected</div>
+          </div>
+          <label class="builder-field" for="review-node-name">
+            <span class="builder-label">Node Name</span>
+            <input id="review-node-name" type="text" autocomplete="off">
+          </label>
+          <div class="builder-field">
+            <span class="builder-label">Raw Pixel Coordinates</span>
+            <div id="review-node-coords">x: 0, y: 0</div>
+          </div>
+          <div class="action-row builder-browser-actions">
+            <button id="review-node-save" type="button">Save Node</button>
+          </div>
+          <section id="review-edge-editor" class="builder-subsection builder-field">
+            <div class="panel-title-row">
+              <div class="panel-title">Selected Edge</div>
+              <div class="panel-subtitle" id="review-edge-selection">No edge selected</div>
+            </div>
+            <label class="builder-field" for="review-edge-type">
+              <span class="builder-label">Edge Type</span>
+              <select id="review-edge-type">
+                <option value="spatial">Spatial</option>
+                <option value="special">Special</option>
+              </select>
+            </label>
+            <label class="builder-field" for="review-edge-label">
+              <span class="builder-label">Special Label</span>
+              <input id="review-edge-label" type="text" autocomplete="off" placeholder="gate">
+            </label>
+            <div class="action-row builder-browser-actions">
+              <button id="review-edge-apply" type="button">Apply Edge</button>
+              <button id="review-edge-delete" type="button">Delete Edge</button>
+            </div>
+          </section>
+        </section>
         <label class="builder-field" for="room-name">
           <span class="builder-label">Name</span>
           <input id="room-name" type="text" autocomplete="off">
@@ -223,30 +261,6 @@
             <canvas id="builder-map-canvas" width="320" height="320" aria-label="Builder zone map"></canvas>
             <div id="builder-map-tooltip"></div>
           </div>
-          <div id="feed-text" class="ds-card">
-            <div class="panel-title">Room Preview</div>
-            <div id="console-panel">
-              <div id="feed-overlay"></div>
-              <div id="console-views">
-                <div id="feed-world" class="feed-view active">
-                  <div id="feed-surface" class="preview-content">
-                    <h3 id="builder-preview-room-name" class="preview-title">No room selected</h3>
-                    <label class="builder-field" for="builder-preview-state">
-                      <span class="builder-label">Preview State</span>
-                      <select id="builder-preview-state">
-                        <option value="">Auto</option>
-                        <option value="default">Default</option>
-                      </select>
-                    </label>
-                    <div id="builder-preview-room-desc" class="preview-description">Choose a room from the list to inspect and edit it.</div>
-                    <div id="builder-preview-room-state" class="preview-meta">State source: default</div>
-                    <div id="builder-preview-room-details" class="preview-meta">Details: none</div>
-                    <div id="builder-preview-room-exits" class="preview-meta">Exits: none</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
     </aside>
@@ -311,6 +325,6 @@
 
 {% block scripts %}
 <link rel="stylesheet" href="/static/webclient/js/builder-reactflow.css?v=1">
-<script src="/static/webclient/js/builder-reactflow.js?v=2"></script>
-<script src="/static/webclient/js/dragonsire-browser-v2.js?v=54"></script>
+<script src="/static/webclient/js/builder-reactflow.js?v=3"></script>
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=55"></script>
 {% endblock %}

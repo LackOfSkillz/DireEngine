@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import yaml
 from django.db import transaction
-from django.http import Http404, JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -14,6 +14,8 @@ from evennia.utils.create import create_object
 
 from web.character_helpers import parse_request_data
 from world.area_forge import map_api
+from world.area_forge.paths import artifact_paths
+from world.area_forge.serializer import load_review_graph, save_review_graph
 from world.builder.services import exit_service, zone_service
 from world.worlddata.services.import_zone_service import DEFAULT_ROOM_TYPECLASS, load_zone
 
@@ -76,6 +78,121 @@ def _worlddata_zone_path(zone_id):
     if not normalized_zone_id:
         raise ValueError("zone_id is required")
     return _worlddata_zones_dir() / f"{normalized_zone_id}.yaml"
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def _review_graph_path(zone_id) -> Path:
+    normalized_zone_id = _normalize_zone_id(zone_id)
+    if not normalized_zone_id:
+        raise ValueError("zone_id is required")
+    return _repo_root() / artifact_paths(normalized_zone_id)["review_graph"]
+
+
+def _normalize_review_graph_payload(data, fallback_zone_id=""):
+    if not isinstance(data, dict):
+        raise ValueError("Review graph payload must be an object.")
+    zone_id = _normalize_zone_id(data.get("zone_id") or fallback_zone_id)
+    if not zone_id:
+        raise ValueError("zone_id is required")
+
+    normalized_nodes = []
+    seen_node_ids = set()
+    for index, node in enumerate(list(data.get("nodes") or []), start=1):
+        payload = dict(node or {})
+        node_id = str(payload.get("id") or f"node-{index:03d}").strip()
+        if not node_id or node_id in seen_node_ids:
+            raise ValueError(f"Duplicate or missing node id: {node_id or '<blank>'}")
+        seen_node_ids.add(node_id)
+        normalized_nodes.append({
+            "id": node_id,
+            "x": int(payload.get("x") or 0),
+            "y": int(payload.get("y") or 0),
+            "name": str(payload.get("name") or ""),
+        })
+
+    def normalize_edge(edge, fallback_prefix, index):
+        payload = dict(edge or {})
+        return {
+            "id": str(payload.get("id") or f"{fallback_prefix}-{index:03d}").strip(),
+            "source": str(payload.get("source") or "").strip(),
+            "target": str(payload.get("target") or "").strip(),
+            "type": str(payload.get("type") or fallback_prefix).strip().lower(),
+            "label": str(payload.get("label") or "").strip().lower(),
+        }
+
+    normalized_edges = [normalize_edge(edge, "spatial", index) for index, edge in enumerate(list(data.get("edges") or []), start=1)]
+    normalized_special_edges = [normalize_edge(edge, "special", index) for index, edge in enumerate(list(data.get("special_edges") or []), start=1)]
+
+    node_id_set = {node["id"] for node in normalized_nodes}
+    for edge in normalized_edges + normalized_special_edges:
+        if edge["source"] not in node_id_set or edge["target"] not in node_id_set:
+            raise ValueError(f"Edge '{edge['id']}' points to missing node(s).")
+
+    payload = {
+        "zone_id": zone_id,
+        "source_image": str(data.get("source_image") or "").replace("\\", "/"),
+        "nodes": sorted(normalized_nodes, key=lambda node: str(node["id"])),
+        "edges": sorted([
+            {
+                "id": edge["id"],
+                "source": edge["source"],
+                "target": edge["target"],
+                "type": "spatial",
+            }
+            for edge in normalized_edges
+        ], key=lambda edge: str(edge["id"])),
+        "special_edges": sorted([
+            {
+                "id": edge["id"],
+                "source": edge["source"],
+                "target": edge["target"],
+                "label": edge["label"],
+            }
+            for edge in normalized_special_edges
+        ], key=lambda edge: str(edge["id"])),
+    }
+    payload["source_image_url"] = f"/builder/api/review-graph/{zone_id}/image/" if payload["source_image"] else ""
+    return payload
+
+
+def _load_review_graph_artifact(zone_id):
+    file_path = _review_graph_path(zone_id)
+    payload = load_review_graph(file_path)
+    if not payload:
+        raise Http404("Review graph not found")
+    return _normalize_review_graph_payload(payload, fallback_zone_id=zone_id)
+
+
+def _write_review_graph_artifact(zone_id, payload):
+    normalized = _normalize_review_graph_payload(payload, fallback_zone_id=zone_id)
+    file_path = _review_graph_path(normalized["zone_id"])
+    save_review_graph(file_path, normalized)
+    return normalized
+
+
+def _serialize_review_graphs():
+    build_root = _repo_root() / "build"
+    review_graphs = []
+    for file_path in sorted(build_root.glob("*/review_graph.json")):
+        payload = load_review_graph(file_path)
+        if not payload:
+            continue
+        normalized = _normalize_review_graph_payload(payload, fallback_zone_id=file_path.parent.name)
+        review_graphs.append(
+            {
+                "id": normalized["zone_id"],
+                "name": str(normalized["zone_id"]).replace("_", " ").title(),
+                "area": normalized["zone_id"],
+                "rooms": [
+                    {"id": node["id"], "name": node["name"] or node["id"]}
+                    for node in normalized["nodes"]
+                ],
+            }
+        )
+    return review_graphs
 
 
 def _builder_room_sort_key(room_data):
@@ -630,9 +747,29 @@ def builder_zone_list(request):
     return JsonResponse(_serialize_yaml_builder_zones(), safe=False)
 
 
+def builder_review_graph_list(request):
+    return JsonResponse(_serialize_review_graphs(), safe=False)
+
+
 def builder_zone_detail(request, zone_id):
     payload = _load_builder_zone_yaml(zone_id)
     return JsonResponse(payload)
+
+
+def builder_review_graph_detail(request, zone_id):
+    payload = _load_review_graph_artifact(zone_id)
+    return JsonResponse(payload)
+
+
+def builder_review_graph_image(request, zone_id):
+    payload = _load_review_graph_artifact(zone_id)
+    source_image = str(payload.get("source_image") or "").strip()
+    if not source_image:
+        raise Http404("Review graph source image not found")
+    image_path = (_repo_root() / source_image).resolve()
+    if not image_path.exists() or _repo_root() not in image_path.parents:
+        raise Http404("Review graph source image not found")
+    return FileResponse(image_path.open("rb"))
 
 
 @csrf_exempt
@@ -651,6 +788,24 @@ def builder_zone_save(request):
         return JsonResponse({"status": "error", "error": str(error)}, status=400)
 
     return JsonResponse({"status": "ok", "zone": payload})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def builder_review_graph_save(request):
+    data = parse_request_data(request)
+    if not isinstance(data, dict):
+        try:
+            data = json.loads(request.body.decode("utf-8") or "{}")
+        except (TypeError, ValueError, UnicodeDecodeError):
+            data = {}
+
+    try:
+        payload = _write_review_graph_artifact(data.get("zone_id") or "", data)
+    except ValueError as error:
+        return JsonResponse({"status": "error", "error": str(error)}, status=400)
+
+    return JsonResponse({"status": "ok", "review_graph": payload})
 
 
 @csrf_exempt

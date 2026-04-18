@@ -21808,9 +21808,9 @@ var DragonsireBuilderReactFlow = (() => {
           return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
         }
         "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-        var React3 = require_react(), shim = require_shim(), objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef2 = React3.useRef, useEffect3 = React3.useEffect, useMemo3 = React3.useMemo, useDebugValue2 = React3.useDebugValue;
+        var React3 = require_react(), shim = require_shim(), objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef3 = React3.useRef, useEffect3 = React3.useEffect, useMemo3 = React3.useMemo, useDebugValue2 = React3.useDebugValue;
         exports.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
-          var instRef = useRef2(null);
+          var instRef = useRef3(null);
           if (null === instRef.current) {
             var inst = { hasValue: false, value: null };
             instRef.current = inst;
@@ -25242,12 +25242,12 @@ var DragonsireBuilderReactFlow = (() => {
       y: snapGrid[1] * Math.round(position.y / snapGrid[1])
     };
   };
-  var pointToRendererPoint = ({ x, y }, [tx, ty, tScale], snapToGrid2 = false, snapGrid = [1, 1]) => {
+  var pointToRendererPoint = ({ x, y }, [tx, ty, tScale], snapToGrid = false, snapGrid = [1, 1]) => {
     const position = {
       x: (x - tx) / tScale,
       y: (y - ty) / tScale
     };
-    return snapToGrid2 ? snapPosition(position, snapGrid) : position;
+    return snapToGrid ? snapPosition(position, snapGrid) : position;
   };
   var rendererPointToPoint = ({ x, y }, [tx, ty, tScale]) => {
     return {
@@ -25377,10 +25377,10 @@ var DragonsireBuilderReactFlow = (() => {
   function mergeAriaLabelConfig(partial) {
     return { ...defaultAriaLabelConfig, ...partial || {} };
   }
-  function getPointerPosition(event, { snapGrid = [0, 0], snapToGrid: snapToGrid2 = false, transform: transform2, containerBounds }) {
+  function getPointerPosition(event, { snapGrid = [0, 0], snapToGrid = false, transform: transform2, containerBounds }) {
     const { x, y } = getEventPosition(event);
     const pointerPos = pointToRendererPoint({ x: x - (containerBounds?.left ?? 0), y: y - (containerBounds?.top ?? 0) }, transform2);
-    const { x: xSnapped, y: ySnapped } = snapToGrid2 ? snapPosition(pointerPos, snapGrid) : pointerPos;
+    const { x: xSnapped, y: ySnapped } = snapToGrid ? snapPosition(pointerPos, snapGrid) : pointerPos;
     return {
       xSnapped,
       ySnapped,
@@ -26269,12 +26269,12 @@ var DragonsireBuilderReactFlow = (() => {
     function update({ noDragClassName, handleSelector, domNode, isSelectable, nodeId, nodeClickDistance = 0 }) {
       d3Selection = select_default2(domNode);
       function updateNodes({ x, y }) {
-        const { nodeLookup, nodeExtent, snapGrid, snapToGrid: snapToGrid2, nodeOrigin, onNodeDrag, onSelectionDrag, onError, updateNodePositions } = getStoreItems();
+        const { nodeLookup, nodeExtent, snapGrid, snapToGrid, nodeOrigin, onNodeDrag, onSelectionDrag, onError, updateNodePositions } = getStoreItems();
         lastPos = { x, y };
         let hasChange = false;
         const isMultiDrag = dragItems.size > 1;
         const nodesBox = isMultiDrag && nodeExtent ? rectToBox(getInternalNodesBounds(dragItems)) : null;
-        const multiDragSnapOffset = isMultiDrag && snapToGrid2 ? calculateSnapOffset({
+        const multiDragSnapOffset = isMultiDrag && snapToGrid ? calculateSnapOffset({
           dragItems,
           snapGrid,
           x,
@@ -26285,7 +26285,7 @@ var DragonsireBuilderReactFlow = (() => {
             continue;
           }
           let nextPosition = { x: x - dragItem.distance.x, y: y - dragItem.distance.y };
-          if (snapToGrid2) {
+          if (snapToGrid) {
             nextPosition = multiDragSnapOffset ? {
               x: Math.round(nextPosition.x + multiDragSnapOffset.x),
               y: Math.round(nextPosition.y + multiDragSnapOffset.y)
@@ -26354,7 +26354,7 @@ var DragonsireBuilderReactFlow = (() => {
         autoPanId = requestAnimationFrame(autoPan);
       }
       function startDrag(event) {
-        const { nodeLookup, multiSelectionActive, nodesDraggable, transform: transform2, snapGrid, snapToGrid: snapToGrid2, selectNodesOnDrag, onNodeDragStart, onSelectionDragStart, unselectNodesAndEdges } = getStoreItems();
+        const { nodeLookup, multiSelectionActive, nodesDraggable, transform: transform2, snapGrid, snapToGrid, selectNodesOnDrag, onNodeDragStart, onSelectionDragStart, unselectNodesAndEdges } = getStoreItems();
         dragStarted = true;
         if ((!selectNodesOnDrag || !isSelectable) && !multiSelectionActive && nodeId) {
           if (!nodeLookup.get(nodeId)?.selected) {
@@ -26364,7 +26364,7 @@ var DragonsireBuilderReactFlow = (() => {
         if (isSelectable && selectNodesOnDrag && nodeId) {
           onNodeMouseDown?.(nodeId);
         }
-        const pointerPos = getPointerPosition(event.sourceEvent, { transform: transform2, snapGrid, snapToGrid: snapToGrid2, containerBounds });
+        const pointerPos = getPointerPosition(event.sourceEvent, { transform: transform2, snapGrid, snapToGrid, containerBounds });
         lastPos = pointerPos;
         dragItems = getDragItems(nodeLookup, nodesDraggable, pointerPos, nodeId);
         if (dragItems.size > 0 && (onDragStart || onNodeDragStart || !nodeId && onSelectionDragStart)) {
@@ -26381,7 +26381,7 @@ var DragonsireBuilderReactFlow = (() => {
         }
       }
       const d3DragInstance = drag_default().clickDistance(nodeClickDistance).on("start", (event) => {
-        const { domNode: domNode2, nodeDragThreshold, transform: transform2, snapGrid, snapToGrid: snapToGrid2 } = getStoreItems();
+        const { domNode: domNode2, nodeDragThreshold, transform: transform2, snapGrid, snapToGrid } = getStoreItems();
         containerBounds = domNode2?.getBoundingClientRect() || null;
         abortDrag = false;
         nodePositionsChanged = false;
@@ -26389,12 +26389,12 @@ var DragonsireBuilderReactFlow = (() => {
         if (nodeDragThreshold === 0) {
           startDrag(event);
         }
-        const pointerPos = getPointerPosition(event.sourceEvent, { transform: transform2, snapGrid, snapToGrid: snapToGrid2, containerBounds });
+        const pointerPos = getPointerPosition(event.sourceEvent, { transform: transform2, snapGrid, snapToGrid, containerBounds });
         lastPos = pointerPos;
         mousePosition = getEventPosition(event.sourceEvent, containerBounds);
       }).on("drag", (event) => {
-        const { autoPanOnNodeDrag, transform: transform2, snapGrid, snapToGrid: snapToGrid2, nodeDragThreshold, nodeLookup } = getStoreItems();
-        const pointerPos = getPointerPosition(event.sourceEvent, { transform: transform2, snapGrid, snapToGrid: snapToGrid2, containerBounds });
+        const { autoPanOnNodeDrag, transform: transform2, snapGrid, snapToGrid, nodeDragThreshold, nodeLookup } = getStoreItems();
+        const pointerPos = getPointerPosition(event.sourceEvent, { transform: transform2, snapGrid, snapToGrid, containerBounds });
         dragEvent = event.sourceEvent;
         if (event.sourceEvent.type === "touchmove" && event.sourceEvent.touches.length > 1 || // if user deletes a node while dragging, we need to abort the drag to prevent errors
         nodeId && !nodeLookup.has(nodeId)) {
@@ -27345,7 +27345,7 @@ var DragonsireBuilderReactFlow = (() => {
       let childExtent = void 0;
       let resizeDetected = false;
       const dragHandler = drag_default().on("start", (event) => {
-        const { nodeLookup, transform: transform2, snapGrid, snapToGrid: snapToGrid2, nodeOrigin, paneDomNode } = getStoreItems();
+        const { nodeLookup, transform: transform2, snapGrid, snapToGrid, nodeOrigin, paneDomNode } = getStoreItems();
         node = nodeLookup.get(nodeId);
         if (!node) {
           return;
@@ -27354,7 +27354,7 @@ var DragonsireBuilderReactFlow = (() => {
         const { xSnapped, ySnapped } = getPointerPosition(event.sourceEvent, {
           transform: transform2,
           snapGrid,
-          snapToGrid: snapToGrid2,
+          snapToGrid,
           containerBounds
         });
         prevValues = {
@@ -27398,11 +27398,11 @@ var DragonsireBuilderReactFlow = (() => {
         }
         onResizeStart?.(event, { ...prevValues });
       }).on("drag", (event) => {
-        const { transform: transform2, snapGrid, snapToGrid: snapToGrid2, nodeOrigin: storeNodeOrigin } = getStoreItems();
+        const { transform: transform2, snapGrid, snapToGrid, nodeOrigin: storeNodeOrigin } = getStoreItems();
         const pointerPosition = getPointerPosition(event.sourceEvent, {
           transform: transform2,
           snapGrid,
-          snapToGrid: snapToGrid2,
+          snapToGrid,
           containerBounds
         });
         const childChanges = [];
@@ -27965,7 +27965,7 @@ var DragonsireBuilderReactFlow = (() => {
           return Promise.resolve(true);
         },
         screenToFlowPosition: (clientPosition, options = {}) => {
-          const { transform: transform2, snapGrid, snapToGrid: snapToGrid2, domNode } = store.getState();
+          const { transform: transform2, snapGrid, snapToGrid, domNode } = store.getState();
           if (!domNode) {
             return clientPosition;
           }
@@ -27975,7 +27975,7 @@ var DragonsireBuilderReactFlow = (() => {
             y: clientPosition.y - domY
           };
           const _snapGrid = options.snapGrid ?? snapGrid;
-          const _snapToGrid = options.snapToGrid ?? snapToGrid2;
+          const _snapToGrid = options.snapToGrid ?? snapToGrid;
           return pointToRendererPoint(correctedPosition, transform2, _snapToGrid, _snapGrid);
         },
         flowToScreenPosition: (flowPosition) => {
@@ -28765,11 +28765,11 @@ var DragonsireBuilderReactFlow = (() => {
   function useMoveSelectedNodes() {
     const store = useStoreApi();
     const moveSelectedNodes = (0, import_react2.useCallback)((params) => {
-      const { nodeExtent, snapToGrid: snapToGrid2, snapGrid, nodesDraggable, onError, updateNodePositions, nodeLookup, nodeOrigin } = store.getState();
+      const { nodeExtent, snapToGrid, snapGrid, nodesDraggable, onError, updateNodePositions, nodeLookup, nodeOrigin } = store.getState();
       const nodeUpdates = /* @__PURE__ */ new Map();
       const isSelected = selectedAndDraggable(nodesDraggable);
-      const xVelo = snapToGrid2 ? snapGrid[0] : 5;
-      const yVelo = snapToGrid2 ? snapGrid[1] : 5;
+      const xVelo = snapToGrid ? snapGrid[0] : 5;
+      const yVelo = snapToGrid ? snapGrid[1] : 5;
       const xDiff = params.direction.x * xVelo * params.factor;
       const yDiff = params.direction.y * yVelo * params.factor;
       for (const [, node] of nodeLookup) {
@@ -28780,7 +28780,7 @@ var DragonsireBuilderReactFlow = (() => {
           x: node.internals.positionAbsolute.x + xDiff,
           y: node.internals.positionAbsolute.y + yDiff
         };
-        if (snapToGrid2) {
+        if (snapToGrid) {
           nextPosition = snapPosition(nextPosition, snapGrid);
         }
         const { position, positionAbsolute } = calculateNodePosition({
@@ -30269,14 +30269,14 @@ var DragonsireBuilderReactFlow = (() => {
     position: "relative",
     zIndex: 0
   };
-  function ReactFlow({ nodes, edges, defaultNodes, defaultEdges, className, nodeTypes, edgeTypes, onNodeClick, onEdgeClick, onInit, onMove, onMoveStart, onMoveEnd, onConnect, onConnectStart, onConnectEnd, onClickConnectStart, onClickConnectEnd, onNodeMouseEnter, onNodeMouseMove, onNodeMouseLeave, onNodeContextMenu, onNodeDoubleClick, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onEdgesDelete, onDelete, onSelectionChange, onSelectionDragStart, onSelectionDrag, onSelectionDragStop, onSelectionContextMenu, onSelectionStart, onSelectionEnd, onBeforeDelete, connectionMode, connectionLineType = ConnectionLineType.Bezier, connectionLineStyle, connectionLineComponent, connectionLineContainerStyle, deleteKeyCode = "Backspace", selectionKeyCode = "Shift", selectionOnDrag = false, selectionMode = SelectionMode.Full, panActivationKeyCode = "Space", multiSelectionKeyCode = isMacOs() ? "Meta" : "Control", zoomActivationKeyCode = isMacOs() ? "Meta" : "Control", snapToGrid: snapToGrid2, snapGrid, onlyRenderVisibleElements = false, selectNodesOnDrag, nodesDraggable, autoPanOnNodeFocus, nodesConnectable, nodesFocusable, nodeOrigin = defaultNodeOrigin, edgesFocusable, edgesReconnectable, elementsSelectable = true, defaultViewport: defaultViewport$1 = defaultViewport, minZoom = 0.5, maxZoom = 2, translateExtent = infiniteExtent, preventScrolling = true, nodeExtent, defaultMarkerColor = "#b1b1b7", zoomOnScroll = true, zoomOnPinch = true, panOnScroll = false, panOnScrollSpeed = 0.5, panOnScrollMode = PanOnScrollMode.Free, zoomOnDoubleClick = true, panOnDrag = true, onPaneClick, onPaneMouseEnter, onPaneMouseMove, onPaneMouseLeave, onPaneScroll, onPaneContextMenu, paneClickDistance = 1, nodeClickDistance = 0, children: children2, onReconnect, onReconnectStart, onReconnectEnd, onEdgeContextMenu, onEdgeDoubleClick, onEdgeMouseEnter, onEdgeMouseMove, onEdgeMouseLeave, reconnectRadius = 10, onNodesChange, onEdgesChange, noDragClassName = "nodrag", noWheelClassName = "nowheel", noPanClassName = "nopan", fitView, fitViewOptions, connectOnClick, attributionPosition, proOptions, defaultEdgeOptions, elevateNodesOnSelect = true, elevateEdgesOnSelect = false, disableKeyboardA11y = false, autoPanOnConnect, autoPanOnNodeDrag, autoPanSpeed, connectionRadius, isValidConnection, onError, style: style2, id: id2, nodeDragThreshold, connectionDragThreshold, viewport, onViewportChange, width, height, colorMode = "light", debug, onScroll, ariaLabelConfig, zIndexMode = "basic", ...rest }, ref) {
+  function ReactFlow({ nodes, edges, defaultNodes, defaultEdges, className, nodeTypes, edgeTypes, onNodeClick, onEdgeClick, onInit, onMove, onMoveStart, onMoveEnd, onConnect, onConnectStart, onConnectEnd, onClickConnectStart, onClickConnectEnd, onNodeMouseEnter, onNodeMouseMove, onNodeMouseLeave, onNodeContextMenu, onNodeDoubleClick, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onEdgesDelete, onDelete, onSelectionChange, onSelectionDragStart, onSelectionDrag, onSelectionDragStop, onSelectionContextMenu, onSelectionStart, onSelectionEnd, onBeforeDelete, connectionMode, connectionLineType = ConnectionLineType.Bezier, connectionLineStyle, connectionLineComponent, connectionLineContainerStyle, deleteKeyCode = "Backspace", selectionKeyCode = "Shift", selectionOnDrag = false, selectionMode = SelectionMode.Full, panActivationKeyCode = "Space", multiSelectionKeyCode = isMacOs() ? "Meta" : "Control", zoomActivationKeyCode = isMacOs() ? "Meta" : "Control", snapToGrid, snapGrid, onlyRenderVisibleElements = false, selectNodesOnDrag, nodesDraggable, autoPanOnNodeFocus, nodesConnectable, nodesFocusable, nodeOrigin = defaultNodeOrigin, edgesFocusable, edgesReconnectable, elementsSelectable = true, defaultViewport: defaultViewport$1 = defaultViewport, minZoom = 0.5, maxZoom = 2, translateExtent = infiniteExtent, preventScrolling = true, nodeExtent, defaultMarkerColor = "#b1b1b7", zoomOnScroll = true, zoomOnPinch = true, panOnScroll = false, panOnScrollSpeed = 0.5, panOnScrollMode = PanOnScrollMode.Free, zoomOnDoubleClick = true, panOnDrag = true, onPaneClick, onPaneMouseEnter, onPaneMouseMove, onPaneMouseLeave, onPaneScroll, onPaneContextMenu, paneClickDistance = 1, nodeClickDistance = 0, children: children2, onReconnect, onReconnectStart, onReconnectEnd, onEdgeContextMenu, onEdgeDoubleClick, onEdgeMouseEnter, onEdgeMouseMove, onEdgeMouseLeave, reconnectRadius = 10, onNodesChange, onEdgesChange, noDragClassName = "nodrag", noWheelClassName = "nowheel", noPanClassName = "nopan", fitView, fitViewOptions, connectOnClick, attributionPosition, proOptions, defaultEdgeOptions, elevateNodesOnSelect = true, elevateEdgesOnSelect = false, disableKeyboardA11y = false, autoPanOnConnect, autoPanOnNodeDrag, autoPanSpeed, connectionRadius, isValidConnection, onError, style: style2, id: id2, nodeDragThreshold, connectionDragThreshold, viewport, onViewportChange, width, height, colorMode = "light", debug, onScroll, ariaLabelConfig, zIndexMode = "basic", ...rest }, ref) {
     const rfId = id2 || "1";
     const colorModeClassName = useColorModeClass(colorMode);
     const wrapperOnScroll = (0, import_react2.useCallback)((e) => {
       e.currentTarget.scrollTo({ top: 0, left: 0, behavior: "instant" });
       onScroll?.(e);
     }, [onScroll]);
-    return (0, import_jsx_runtime.jsx)("div", { "data-testid": "rf__wrapper", ...rest, onScroll: wrapperOnScroll, style: { ...style2, ...wrapperStyle }, ref, className: cc(["react-flow", className, colorModeClassName]), id: id2, role: "application", children: (0, import_jsx_runtime.jsxs)(Wrapper, { nodes, edges, width, height, fitView, fitViewOptions, minZoom, maxZoom, nodeOrigin, nodeExtent, zIndexMode, children: [(0, import_jsx_runtime.jsx)(StoreUpdater, { nodes, edges, defaultNodes, defaultEdges, onConnect, onConnectStart, onConnectEnd, onClickConnectStart, onClickConnectEnd, nodesDraggable, autoPanOnNodeFocus, nodesConnectable, nodesFocusable, edgesFocusable, edgesReconnectable, elementsSelectable, elevateNodesOnSelect, elevateEdgesOnSelect, minZoom, maxZoom, nodeExtent, onNodesChange, onEdgesChange, snapToGrid: snapToGrid2, snapGrid, connectionMode, translateExtent, connectOnClick, defaultEdgeOptions, fitView, fitViewOptions, onNodesDelete, onEdgesDelete, onDelete, onNodeDragStart, onNodeDrag, onNodeDragStop, onSelectionDrag, onSelectionDragStart, onSelectionDragStop, onMove, onMoveStart, onMoveEnd, noPanClassName, nodeOrigin, rfId, autoPanOnConnect, autoPanOnNodeDrag, autoPanSpeed, onError, connectionRadius, isValidConnection, selectNodesOnDrag, nodeDragThreshold, connectionDragThreshold, onBeforeDelete, debug, ariaLabelConfig, zIndexMode }), (0, import_jsx_runtime.jsx)(GraphView, { onInit, onNodeClick, onEdgeClick, onNodeMouseEnter, onNodeMouseMove, onNodeMouseLeave, onNodeContextMenu, onNodeDoubleClick, nodeTypes, edgeTypes, connectionLineType, connectionLineStyle, connectionLineComponent, connectionLineContainerStyle, selectionKeyCode, selectionOnDrag, selectionMode, deleteKeyCode, multiSelectionKeyCode, panActivationKeyCode, zoomActivationKeyCode, onlyRenderVisibleElements, defaultViewport: defaultViewport$1, translateExtent, minZoom, maxZoom, preventScrolling, zoomOnScroll, zoomOnPinch, zoomOnDoubleClick, panOnScroll, panOnScrollSpeed, panOnScrollMode, panOnDrag, onPaneClick, onPaneMouseEnter, onPaneMouseMove, onPaneMouseLeave, onPaneScroll, onPaneContextMenu, paneClickDistance, nodeClickDistance, onSelectionContextMenu, onSelectionStart, onSelectionEnd, onReconnect, onReconnectStart, onReconnectEnd, onEdgeContextMenu, onEdgeDoubleClick, onEdgeMouseEnter, onEdgeMouseMove, onEdgeMouseLeave, reconnectRadius, defaultMarkerColor, noDragClassName, noWheelClassName, noPanClassName, rfId, disableKeyboardA11y, nodeExtent, viewport, onViewportChange }), (0, import_jsx_runtime.jsx)(SelectionListener, { onSelectionChange }), children2, (0, import_jsx_runtime.jsx)(Attribution, { proOptions, position: attributionPosition }), (0, import_jsx_runtime.jsx)(A11yDescriptions, { rfId, disableKeyboardA11y })] }) });
+    return (0, import_jsx_runtime.jsx)("div", { "data-testid": "rf__wrapper", ...rest, onScroll: wrapperOnScroll, style: { ...style2, ...wrapperStyle }, ref, className: cc(["react-flow", className, colorModeClassName]), id: id2, role: "application", children: (0, import_jsx_runtime.jsxs)(Wrapper, { nodes, edges, width, height, fitView, fitViewOptions, minZoom, maxZoom, nodeOrigin, nodeExtent, zIndexMode, children: [(0, import_jsx_runtime.jsx)(StoreUpdater, { nodes, edges, defaultNodes, defaultEdges, onConnect, onConnectStart, onConnectEnd, onClickConnectStart, onClickConnectEnd, nodesDraggable, autoPanOnNodeFocus, nodesConnectable, nodesFocusable, edgesFocusable, edgesReconnectable, elementsSelectable, elevateNodesOnSelect, elevateEdgesOnSelect, minZoom, maxZoom, nodeExtent, onNodesChange, onEdgesChange, snapToGrid, snapGrid, connectionMode, translateExtent, connectOnClick, defaultEdgeOptions, fitView, fitViewOptions, onNodesDelete, onEdgesDelete, onDelete, onNodeDragStart, onNodeDrag, onNodeDragStop, onSelectionDrag, onSelectionDragStart, onSelectionDragStop, onMove, onMoveStart, onMoveEnd, noPanClassName, nodeOrigin, rfId, autoPanOnConnect, autoPanOnNodeDrag, autoPanSpeed, onError, connectionRadius, isValidConnection, selectNodesOnDrag, nodeDragThreshold, connectionDragThreshold, onBeforeDelete, debug, ariaLabelConfig, zIndexMode }), (0, import_jsx_runtime.jsx)(GraphView, { onInit, onNodeClick, onEdgeClick, onNodeMouseEnter, onNodeMouseMove, onNodeMouseLeave, onNodeContextMenu, onNodeDoubleClick, nodeTypes, edgeTypes, connectionLineType, connectionLineStyle, connectionLineComponent, connectionLineContainerStyle, selectionKeyCode, selectionOnDrag, selectionMode, deleteKeyCode, multiSelectionKeyCode, panActivationKeyCode, zoomActivationKeyCode, onlyRenderVisibleElements, defaultViewport: defaultViewport$1, translateExtent, minZoom, maxZoom, preventScrolling, zoomOnScroll, zoomOnPinch, zoomOnDoubleClick, panOnScroll, panOnScrollSpeed, panOnScrollMode, panOnDrag, onPaneClick, onPaneMouseEnter, onPaneMouseMove, onPaneMouseLeave, onPaneScroll, onPaneContextMenu, paneClickDistance, nodeClickDistance, onSelectionContextMenu, onSelectionStart, onSelectionEnd, onReconnect, onReconnectStart, onReconnectEnd, onEdgeContextMenu, onEdgeDoubleClick, onEdgeMouseEnter, onEdgeMouseMove, onEdgeMouseLeave, reconnectRadius, defaultMarkerColor, noDragClassName, noWheelClassName, noPanClassName, rfId, disableKeyboardA11y, nodeExtent, viewport, onViewportChange }), (0, import_jsx_runtime.jsx)(SelectionListener, { onSelectionChange }), children2, (0, import_jsx_runtime.jsx)(Attribution, { proOptions, position: attributionPosition }), (0, import_jsx_runtime.jsx)(A11yDescriptions, { rfId, disableKeyboardA11y })] }) });
   }
   var index = fixedForwardRef(ReactFlow);
   var error014 = errorMessages["error014"]();
@@ -30593,12 +30593,12 @@ var DragonsireBuilderReactFlow = (() => {
           domNode: resizeControlRef.current,
           nodeId: id2,
           getStoreItems: () => {
-            const { nodeLookup, transform: transform2, snapGrid, snapToGrid: snapToGrid2, nodeOrigin, domNode } = store.getState();
+            const { nodeLookup, transform: transform2, snapGrid, snapToGrid, nodeOrigin, domNode } = store.getState();
             return {
               nodeLookup,
               transform: transform2,
               snapGrid,
-              snapToGrid: snapToGrid2,
+              snapToGrid,
               nodeOrigin,
               paneDomNode: domNode
             };
@@ -30714,84 +30714,86 @@ var DragonsireBuilderReactFlow = (() => {
   var NodeResizeControl = (0, import_react2.memo)(ResizeControl);
 
   // web/static/webclient/react/BuilderMap.jsx
-  var GRID_SIZE = 80;
+  var BACKGROUND_GRID_SIZE = 60;
+  var DEFAULT_VIEWPORT = { x: 0, y: 0, zoom: 0.8 };
+  var VIEWPORT_PADDING = 48;
+  var MIN_ZOOM = 0.05;
+  var MAX_ZOOM = 4;
   function RoomNode({ data, selected: selected2 }) {
     const showLabel = Boolean(selected2 || data?.selected);
-    return /* @__PURE__ */ import_react3.default.createElement("div", { className: `builder-reactflow-node${showLabel ? " is-selected" : ""}` }, /* @__PURE__ */ import_react3.default.createElement(Handle, { type: "target", position: Position.Top, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { type: "source", position: Position.Bottom, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-core" }), showLabel ? /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-label" }, data?.label || "Room") : null);
+    return /* @__PURE__ */ import_react3.default.createElement("div", { className: `builder-reactflow-node${showLabel ? " is-selected" : ""}` }, /* @__PURE__ */ import_react3.default.createElement(Handle, { type: "target", position: Position.Top, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { type: "source", position: Position.Bottom, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-core", style: { background: data?.color || "#5f8f57" } }), showLabel ? /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-label" }, data?.label || "Room") : null);
   }
-  function snapToGrid(value) {
-    return Math.round(Number(value || 0) / GRID_SIZE) * GRID_SIZE;
+  function fitViewportForNodes(nodes, width, height) {
+    if (!Array.isArray(nodes) || !nodes.length || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+      return DEFAULT_VIEWPORT;
+    }
+    const xs = nodes.map((node) => Number(node?.position?.x || 0));
+    const ys = nodes.map((node) => Number(node?.position?.y || 0));
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const boundsWidth = Math.max(120, maxX - minX + 14);
+    const boundsHeight = Math.max(120, maxY - minY + 14);
+    const usableWidth = Math.max(80, width - VIEWPORT_PADDING * 2);
+    const usableHeight = Math.max(80, height - VIEWPORT_PADDING * 2);
+    const zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.min(usableWidth / boundsWidth, usableHeight / boundsHeight)));
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    return {
+      x: width / 2 - centerX * zoom,
+      y: height / 2 - centerY * zoom,
+      zoom
+    };
   }
   function BuilderMapSurface({
     nodes = [],
     edges = [],
     selectedRoomId,
     viewportRequest,
-    onSelectRoom,
-    onMoveRoom,
-    onConnectRooms,
-    onDeleteEdges
+    onSelectRoom
   }) {
     const reactFlow = useReactFlow();
+    const wrapperRef = (0, import_react3.useRef)(null);
     (0, import_react3.useEffect)(() => {
       if (!viewportRequest?.token) {
         return;
       }
       if (viewportRequest.type === "fit") {
-        reactFlow.fitView({ duration: 180, padding: 0.24 });
+        const bounds = wrapperRef.current?.getBoundingClientRect();
+        const viewport = fitViewportForNodes(nodes, bounds?.width || 0, bounds?.height || 0);
+        reactFlow.setViewport(viewport, { duration: 180 });
         return;
       }
       if (viewportRequest.type === "center" && selectedRoomId) {
         const selectedNode = (nodes || []).find((node) => String(node.id) === String(selectedRoomId));
         if (selectedNode) {
-          reactFlow.setCenter(selectedNode.position.x, selectedNode.position.y, { duration: 180, zoom: Math.max(reactFlow.getZoom(), 1.4) });
+          reactFlow.setCenter(selectedNode.position.x, selectedNode.position.y, { duration: 180, zoom: Math.max(reactFlow.getZoom(), DEFAULT_VIEWPORT.zoom) });
         }
       }
     }, [nodes, reactFlow, selectedRoomId, viewportRequest]);
     const nodeTypes = (0, import_react3.useMemo)(() => ({ builderRoom: RoomNode }), []);
-    return /* @__PURE__ */ import_react3.default.createElement(
+    return /* @__PURE__ */ import_react3.default.createElement("div", { ref: wrapperRef, style: { width: "100%", height: "100%" } }, /* @__PURE__ */ import_react3.default.createElement(
       index,
       {
         className: "builder-reactflow-root",
         nodes,
         edges,
         nodeTypes,
-        fitView: true,
-        snapToGrid: true,
-        snapGrid: [GRID_SIZE, GRID_SIZE],
-        minZoom: 0.1,
-        maxZoom: 2.5,
-        nodesDraggable: true,
-        nodesConnectable: true,
+        defaultViewport: DEFAULT_VIEWPORT,
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+        nodesDraggable: false,
+        nodesConnectable: false,
         elementsSelectable: true,
         panOnDrag: true,
         zoomOnScroll: true,
         onNodeClick: (_, node) => onSelectRoom?.(String(node.id)),
-        onConnect: ({ source, target }) => {
-          if (!source || !target) {
-            return;
-          }
-          onConnectRooms?.({
-            source: String(source),
-            target: String(target)
-          });
-        },
-        onEdgesDelete: (deletedEdges) => onDeleteEdges?.(deletedEdges || []),
-        onNodeDragStop: (_, node) => {
-          const snappedX = snapToGrid(node.position.x);
-          const snappedY = snapToGrid(node.position.y);
-          onMoveRoom?.({
-            roomId: String(node.id),
-            map_x: snappedX,
-            map_y: snappedY
-          });
-        },
-        deleteKeyCode: ["Backspace", "Delete"],
         proOptions: { hideAttribution: true }
       },
-      /* @__PURE__ */ import_react3.default.createElement(Background, { gap: GRID_SIZE, size: 1, color: "rgba(214, 176, 97, 0.14)" }),
+      /* @__PURE__ */ import_react3.default.createElement(Background, { gap: BACKGROUND_GRID_SIZE, size: 1, color: "rgba(214, 176, 97, 0.14)" }),
       /* @__PURE__ */ import_react3.default.createElement(Controls, { showInteractive: false })
-    );
+    ));
   }
   function BuilderMap(props) {
     return /* @__PURE__ */ import_react3.default.createElement("div", { style: { width: "100%", height: "100%" } }, /* @__PURE__ */ import_react3.default.createElement(ReactFlowProvider, null, /* @__PURE__ */ import_react3.default.createElement(BuilderMapSurface, { ...props })));

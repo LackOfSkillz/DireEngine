@@ -18,7 +18,9 @@ def artifact_paths(area_id):
         "manifest": f"manifests/{area_slug}.yaml",
         "areaspec": str(base / "areaspec.json"),
         "review": str(base / "review.txt"),
+        "review_graph": str(base / "review_graph.json"),
         "snapshot": str(Path("build") / "snapshots" / f"{area_slug}.json"),
+        "zone_yaml": str(Path("worlddata") / "zones" / f"{area_slug}.yaml"),
     }
 
 

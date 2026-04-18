@@ -86,6 +86,25 @@ def _normalize_exit_spec(raw_value: object) -> dict:
     }
 
 
+def _normalize_special_exit_specs(raw_value: object, room_id: str) -> dict[str, dict]:
+    normalized: dict[str, dict] = {}
+    for raw_direction, raw_target in dict(raw_value or {}).items():
+        direction = str(raw_direction or "").strip().lower()
+        if not direction:
+            continue
+        exit_spec = _normalize_exit_spec(raw_target)
+        target_id = exit_spec["target"]
+        if not target_id:
+            raise ValueError(f"Room '{room_id}' special exit '{direction}' is missing a target.")
+        normalized[direction] = {
+            "target": target_id,
+            "typeclass": exit_spec["typeclass"],
+            "speed": exit_spec["speed"],
+            "travel_time": exit_spec["travel_time"],
+        }
+    return normalized
+
+
 def _normalize_ambient(value: object) -> dict:
     if not isinstance(value, dict):
         return {"rate": 0, "messages": []}
@@ -199,6 +218,7 @@ def _normalize_room_specs(zone_id: str, rooms_data: list[dict], warnings: list[s
             },
             "flags": dict(room_data.get("flags") or {}),
             "exits": {},
+            "special_exits": _normalize_special_exit_specs(room_data.get("special_exits") or {}, room_id),
         }
         normalized_rooms.append(normalized_room)
         rooms_by_id[room_id] = normalized_room
@@ -227,6 +247,11 @@ def _normalize_room_specs(zone_id: str, rooms_data: list[dict], warnings: list[s
                 "speed": exit_spec["speed"],
                 "travel_time": exit_spec["travel_time"],
             }
+
+        for direction, exit_spec in dict(room_spec.get("special_exits") or {}).items():
+            target_id = str(exit_spec.get("target") or "").strip()
+            if target_id not in rooms_by_id:
+                raise ValueError(f"Room '{room_id}' special exit '{direction}' points to missing target '{target_id}'.")
 
     if invalid_directions:
         warnings.append("Skipped invalid directions: " + ", ".join(invalid_directions))
@@ -364,6 +389,7 @@ def _build_import_plan(zone_id: str, data: dict) -> dict:
         placement["resolved_typeclass"] = typeclass
 
     exit_count = sum(len(room_spec["exits"]) for room_spec in normalized_rooms)
+    special_exit_count = sum(len(room_spec["special_exits"]) for room_spec in normalized_rooms)
     container_links = sum(1 for placement in placements["items"] if str(placement.get("parent") or "").strip())
     return {
         "zone_id": zone_id,
@@ -375,6 +401,7 @@ def _build_import_plan(zone_id: str, data: dict) -> dict:
         "summary": {
             "rooms": len(normalized_rooms),
             "exits": exit_count,
+            "special_exits": special_exit_count,
             "npcs": len(placements["npcs"]),
             "items": len(placements["items"]),
             "containers_linked": container_links,
@@ -469,6 +496,29 @@ def load_zone(zone_id: str, dry_run: bool = False) -> dict:
             _tag_syncable(exit_obj, normalized_zone_id)
             created_exit_pairs.add(exit_key)
 
+        for direction, exit_spec in dict(room_data.get("special_exits") or {}).items():
+            direction = str(direction or "").strip().lower()
+            if not direction:
+                continue
+            exit_key = (room_data["id"], direction)
+            if exit_key in created_exit_pairs:
+                continue
+            target_id = exit_spec["target"]
+            exit_typeclass = str(exit_spec.get("typeclass") or DEFAULT_EXIT_TYPECLASS).strip() or DEFAULT_EXIT_TYPECLASS
+            exit_obj = create_object(
+                exit_typeclass,
+                key=direction,
+                location=room,
+                destination=room_lookup[target_id],
+                home=room,
+            )
+            if exit_spec.get("speed"):
+                exit_obj.db.move_speed = exit_spec["speed"]
+            if int(exit_spec.get("travel_time", 0) or 0) > 0:
+                exit_obj.db.travel_time = int(exit_spec["travel_time"])
+            _tag_syncable(exit_obj, normalized_zone_id)
+            created_exit_pairs.add(exit_key)
+
     for placement in plan["placements"]["npcs"]:
         npc = _create_spawned_object(placement)
         npc.location = room_lookup[placement["room"]]
@@ -515,7 +565,8 @@ def load_zone(zone_id: str, dry_run: bool = False) -> dict:
         "dry_run": False,
         "warnings": plan["warnings"],
         "rooms": len(room_lookup),
-        "exits": len(created_exit_pairs),
+        "exits": plan["summary"]["exits"],
+        "special_exits": plan["summary"]["special_exits"],
         "npcs": len(plan["placements"]["npcs"]),
         "items": len(item_lookup),
         "containers_linked": plan["summary"]["containers_linked"],
