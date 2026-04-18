@@ -63,7 +63,7 @@
   const BUILDER_ZONE_MIN_ZOOM = 0.01;
   const BUILDER_ZONE_MAX_ZOOM = 2.5;
   const BUILDER_UNASSIGNED_ZONE_VALUE = "__unassigned__";
-  const USE_REACT_FLOW_BUILDER = false;
+  const USE_REACT_FLOW_BUILDER = true;
   const DIR_ALIAS = {
     n: "north",
     s: "south",
@@ -1348,15 +1348,25 @@
     builderReactFlowRoot()?.classList.toggle("builder-reactflow-root", Boolean(useReactFlow));
   }
 
-  function zoneRoomsToNodes(rooms, selectedRoomId) {
-    return (rooms || []).flatMap((room) => {
+  const REACT_FLOW_SCALE = 80;
+  const REACT_FLOW_GRID_SIZE = 80;
+
+  function snapToBuilderGrid(value) {
+    return Math.round(Number(value || 0) / REACT_FLOW_GRID_SIZE) * REACT_FLOW_GRID_SIZE;
+  }
+
+  function buildFlowGraph(zone, selectedRoomId) {
+    const nodes = [];
+    const edges = [];
+    for (const room of zone?.rooms || []) {
+      const roomId = builderRoomKey(room?.id || "");
       const mapX = normalizeBuilderMapCoordinate(room?.map_x ?? room?.map?.x ?? room?.x);
       const mapY = normalizeBuilderMapCoordinate(room?.map_y ?? room?.map?.y ?? room?.y);
-      if (!Number.isFinite(mapX) || !Number.isFinite(mapY)) {
-        return [];
+      if (!roomId || !Number.isFinite(mapX) || !Number.isFinite(mapY)) {
+        continue;
       }
-      return [{
-        id: String(room.id),
+      nodes.push({
+        id: roomId,
         type: "builderRoom",
         draggable: true,
         selectable: true,
@@ -1367,40 +1377,47 @@
           height: 14,
         },
         position: {
-          x: mapX,
-          y: mapY,
+          x: mapX * REACT_FLOW_SCALE,
+          y: -mapY * REACT_FLOW_SCALE,
         },
         data: {
-          label: room.name || `Room ${room.id}`,
-          roomId: builderRoomKey(room.id),
-          selected: builderRoomKey(room.id) === builderRoomKey(selectedRoomId),
+          label: room.name || `Room ${roomId}`,
+          roomId,
+          selected: roomId === builderRoomKey(selectedRoomId),
         },
-      }];
-    });
-  }
+      });
 
-  function zoneRoomsToEdges(rooms, explicitEdges = null) {
-    const edgeSummary = buildBuilderEdgeSummary(rooms, explicitEdges);
-    return {
-      counters: edgeSummary.counters,
-      edges: edgeSummary.edges.map((edge) => ({
-        id: `builder-edge-${edge.from}-${edge.to}-${edge.dir || "link"}`,
-        source: String(edge.from),
-        target: String(edge.to),
-        label: edge.dir || "",
-        type: "straight",
-        selectable: true,
-        animated: false,
-        style: {
-          stroke: "rgba(195, 164, 104, 0.72)",
-          strokeWidth: 1.5,
-        },
-        labelStyle: {
-          fill: "#e9dcc4",
-          fontSize: 11,
-        },
-      })),
-    };
+      for (const [direction, spec] of Object.entries(room?.exits || {})) {
+        const targetId = builderRoomKey(spec?.target || spec?.target_id || "");
+        const normalizedDirection = canonicalExitDirection(direction);
+        if (!targetId || !normalizedDirection) {
+          continue;
+        }
+        edges.push({
+          id: `${roomId}-${normalizedDirection}`,
+          source: roomId,
+          target: targetId,
+          label: normalizedDirection,
+          type: "straight",
+          selectable: true,
+          animated: false,
+          data: {
+            direction: normalizedDirection,
+            roomId,
+          },
+          style: {
+            stroke: "rgba(195, 164, 104, 0.72)",
+            strokeWidth: 1.5,
+          },
+          labelStyle: {
+            fill: "#e9dcc4",
+            fontSize: 11,
+          },
+        });
+      }
+    }
+
+    return { nodes, edges };
   }
 
   function queueBuilderReactFlowViewport(type) {
@@ -1462,6 +1479,57 @@
     setBuilderPageStatus(`Moved ${roomNameById(normalizedRoomId)} to (${nextMapX}, ${nextMapY}). Save zone to persist.`);
   }
 
+  async function connectBuilderReactFlowRooms(sourceId, targetId) {
+    const fromRoom = builderRoomById(sourceId);
+    const toRoom = builderRoomById(targetId);
+    if (!fromRoom || !toRoom) {
+      throw new Error("Both rooms must exist in the loaded zone.");
+    }
+
+    const requestedDirection = window.prompt("Enter exit direction (north, south, etc):", getDirection(fromRoom, toRoom) || "");
+    const direction = canonicalExitDirection(requestedDirection || "");
+    if (!direction) {
+      return;
+    }
+
+    const nextExits = builderRoomExitsArray(fromRoom).filter((exit) => canonicalExitDirection(exit.direction || "") !== direction);
+    nextExits.push({
+      direction,
+      target_id: builderRoomKey(targetId),
+      typeclass: DEFAULT_SLOW_EXIT_TYPECLASS,
+      speed: "walk",
+      travel_time: 5,
+    });
+
+    await saveBuilderRoomPayload(fromRoom.id, { exits: nextExits });
+    renderBuilderRoomList();
+    renderZoneMap();
+    setBuilderPageStatus(`Connected ${roomNameById(fromRoom.id)} ${direction} to ${roomNameById(toRoom.id)}. Save zone to persist.`);
+  }
+
+  async function deleteBuilderReactFlowEdges(edges = []) {
+    let deletedCount = 0;
+    for (const edge of edges) {
+      const roomId = builderRoomKey(edge?.data?.roomId || edge?.source || "");
+      const direction = canonicalExitDirection(edge?.data?.direction || edge?.label || "");
+      const room = builderRoomById(roomId);
+      if (!room || !direction) {
+        continue;
+      }
+      const nextExits = builderRoomExitsArray(room).filter((exit) => canonicalExitDirection(exit.direction || "") !== direction);
+      if (nextExits.length === builderRoomExitsArray(room).length) {
+        continue;
+      }
+      await saveBuilderRoomPayload(roomId, { exits: nextExits });
+      deletedCount += 1;
+    }
+    if (deletedCount) {
+      renderBuilderRoomList();
+      renderZoneMap();
+      setBuilderPageStatus(`Deleted ${deletedCount} exit${deletedCount === 1 ? "" : "s"}. Save zone to persist.`);
+    }
+  }
+
   async function createExitBetweenRooms(fromId, toId) {
     const fromRoom = builderRoomById(fromId);
     const toRoom = builderRoomById(toId);
@@ -1484,15 +1552,16 @@
     setBuilderPageStatus(`Connected ${roomNameById(fromRoom.id)} ${direction} to ${roomNameById(toRoom.id)}. Save zone to persist.`);
   }
 
-  function renderBuilderReactFlowMap(rooms, edgeSummary) {
+  function renderBuilderReactFlowMap(zone) {
     const root = builderReactFlowRoot();
     if (!root || !window.DragonsireBuilderReactFlow?.mountBuilderReactFlow) {
       return false;
     }
-    const currentRoom = rooms.find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
+    const { nodes, edges } = buildFlowGraph(zone, builderState.currentRoomId);
+    const currentRoom = (zone?.rooms || []).find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
     window.DragonsireBuilderReactFlow.mountBuilderReactFlow(root, {
-      nodes: zoneRoomsToNodes(rooms, builderState.currentRoomId),
-      edges: edgeSummary.edges,
+      nodes,
+      edges,
       selectedRoomId: builderRoomKey(builderState.currentRoomId),
       viewportRequest: builderState.reactFlowViewportRequest,
       onSelectRoom: (roomId) => {
@@ -1506,15 +1575,37 @@
         });
       },
       onMoveRoom: (payload) => {
-        void persistBuilderRoomCoordinates(payload.roomId, payload.map_x, payload.map_y).catch((error) => {
+        const snappedX = snapToBuilderGrid(payload.map_x);
+        const snappedY = snapToBuilderGrid(payload.map_y);
+        void persistBuilderRoomCoordinates(
+          payload.roomId,
+          Math.round(snappedX / REACT_FLOW_SCALE),
+          Math.round(-snappedY / REACT_FLOW_SCALE)
+        ).catch((error) => {
           console.error(error);
           setBuilderPageStatus(error.message || "Unable to save room position.");
           toast(error.message || "Unable to save room position.");
           renderZoneMap();
         });
       },
+      onConnectRooms: ({ source, target }) => {
+        void connectBuilderReactFlowRooms(source, target).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to connect rooms.");
+          toast(error.message || "Unable to connect rooms.");
+          renderZoneMap();
+        });
+      },
+      onDeleteEdges: (edgesToDelete) => {
+        void deleteBuilderReactFlowEdges(edgesToDelete).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to delete exit.");
+          toast(error.message || "Unable to delete exit.");
+          renderZoneMap();
+        });
+      },
     });
-    updateBuilderMapMeta(rooms, edgeSummary.edges);
+    updateBuilderMapMeta(nodes, edges);
     byId("builder-map-room-name").textContent = currentRoom ? currentRoom.name : "Awaiting room data";
     return true;
   }
@@ -1827,7 +1918,7 @@
     const payload = builderState.zone;
     if (!payload || !Array.isArray(payload.rooms) || !payload.rooms.length) {
       if (useReactFlow) {
-        renderBuilderReactFlowMap([], { edges: [], counters: {} });
+        renderBuilderReactFlowMap({ rooms: [] });
       }
       const canvas = zoneMapCanvas();
       const ctx = canvas?.getContext("2d");
@@ -1838,18 +1929,17 @@
       updateBuilderMapMeta([], []);
       return;
     }
+    if (useReactFlow) {
+      renderBuilderReactFlowMap(payload);
+      return;
+    }
+
     const canvas = ensureZoneMapCanvas(viewport);
     if (!canvas) {
       return;
     }
 
     const rooms = normalizeBuilderZoneRooms(payload.rooms);
-
-    const reactFlowEdgeSummary = zoneRoomsToEdges(rooms, payload.edges || []);
-    if (useReactFlow) {
-      renderBuilderReactFlowMap(rooms, reactFlowEdgeSummary);
-      return;
-    }
 
     const canvasSizeChanged = builderState.zoneCanvasSize.width !== canvas.width || builderState.zoneCanvasSize.height !== canvas.height;
     builderState.zoneCanvasSize = { width: canvas.width, height: canvas.height };

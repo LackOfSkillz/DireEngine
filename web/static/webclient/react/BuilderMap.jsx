@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Background,
   Controls,
@@ -6,11 +6,11 @@ import {
   Position,
   ReactFlow,
   ReactFlowProvider,
-  applyEdgeChanges,
-  applyNodeChanges,
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+
+const GRID_SIZE = 80;
 
 function RoomNode({ data, selected }) {
   const showLabel = Boolean(selected || data?.selected);
@@ -24,18 +24,21 @@ function RoomNode({ data, selected }) {
   );
 }
 
-function BuilderMapSurface({ nodes: nextNodes, edges: nextEdges, selectedRoomId, viewportRequest, onSelectRoom, onMoveRoom }) {
-  const [nodes, setNodes] = useState(nextNodes || []);
-  const [edges, setEdges] = useState(nextEdges || []);
+function snapToGrid(value) {
+  return Math.round(Number(value || 0) / GRID_SIZE) * GRID_SIZE;
+}
+
+function BuilderMapSurface({
+  nodes = [],
+  edges = [],
+  selectedRoomId,
+  viewportRequest,
+  onSelectRoom,
+  onMoveRoom,
+  onConnectRooms,
+  onDeleteEdges,
+}) {
   const reactFlow = useReactFlow();
-
-  useEffect(() => {
-    setNodes(nextNodes || []);
-  }, [nextNodes]);
-
-  useEffect(() => {
-    setEdges(nextEdges || []);
-  }, [nextEdges]);
 
   useEffect(() => {
     if (!viewportRequest?.token) {
@@ -46,12 +49,12 @@ function BuilderMapSurface({ nodes: nextNodes, edges: nextEdges, selectedRoomId,
       return;
     }
     if (viewportRequest.type === 'center' && selectedRoomId) {
-      const selectedNode = (nextNodes || []).find((node) => Number(node.id) === Number(selectedRoomId));
+      const selectedNode = (nodes || []).find((node) => String(node.id) === String(selectedRoomId));
       if (selectedNode) {
         reactFlow.setCenter(selectedNode.position.x, selectedNode.position.y, { duration: 180, zoom: Math.max(reactFlow.getZoom(), 1.4) });
       }
     }
-  }, [nextNodes, reactFlow, selectedRoomId, viewportRequest]);
+  }, [nodes, reactFlow, selectedRoomId, viewportRequest]);
 
   const nodeTypes = useMemo(() => ({ builderRoom: RoomNode }), []);
 
@@ -62,21 +65,39 @@ function BuilderMapSurface({ nodes: nextNodes, edges: nextEdges, selectedRoomId,
       edges={edges}
       nodeTypes={nodeTypes}
       fitView
+      snapToGrid
+      snapGrid={[GRID_SIZE, GRID_SIZE]}
       minZoom={0.1}
       maxZoom={2.5}
-      onNodeClick={(_, node) => onSelectRoom?.(Number(node.id))}
-      onNodesChange={(changes) => setNodes((current) => applyNodeChanges(changes, current))}
-      onEdgesChange={(changes) => setEdges((current) => applyEdgeChanges(changes, current))}
-      onNodeDragStop={(_, node) => {
-        onMoveRoom?.({
-          roomId: Number(node.id),
-          map_x: Math.round(node.position.x),
-          map_y: Math.round(node.position.y),
+      nodesDraggable
+      nodesConnectable
+      elementsSelectable
+      panOnDrag
+      zoomOnScroll
+      onNodeClick={(_, node) => onSelectRoom?.(String(node.id))}
+      onConnect={({ source, target }) => {
+        if (!source || !target) {
+          return;
+        }
+        onConnectRooms?.({
+          source: String(source),
+          target: String(target),
         });
       }}
+      onEdgesDelete={(deletedEdges) => onDeleteEdges?.(deletedEdges || [])}
+      onNodeDragStop={(_, node) => {
+        const snappedX = snapToGrid(node.position.x);
+        const snappedY = snapToGrid(node.position.y);
+        onMoveRoom?.({
+          roomId: String(node.id),
+          map_x: snappedX,
+          map_y: snappedY,
+        });
+      }}
+      deleteKeyCode={['Backspace', 'Delete']}
       proOptions={{ hideAttribution: true }}
     >
-      <Background gap={24} size={1} color="rgba(214, 176, 97, 0.14)" />
+      <Background gap={GRID_SIZE} size={1} color="rgba(214, 176, 97, 0.14)" />
       <Controls showInteractive={false} />
     </ReactFlow>
   );
