@@ -1334,7 +1334,7 @@ var DragonsireBuilderReactFlow = (() => {
           return dispatcher;
         }
         "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-        var React3 = require_react(), Internals = {
+        var React8 = require_react(), Internals = {
           d: {
             f: noop2,
             r: function() {
@@ -1352,7 +1352,7 @@ var DragonsireBuilderReactFlow = (() => {
           },
           p: 0,
           findDOMNode: null
-        }, REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), ReactSharedInternals = React3.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+        }, REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), ReactSharedInternals = React8.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
         "function" === typeof Map && null != Map.prototype && "function" === typeof Map.prototype.forEach && "function" === typeof Set && null != Set.prototype && "function" === typeof Set.prototype.clear && "function" === typeof Set.prototype.forEach || console.error(
           "React depends on Map and Set built-in types. Make sure that you load a polyfill in older browsers. https://reactjs.org/link/react-polyfills"
         );
@@ -2887,7 +2887,7 @@ var DragonsireBuilderReactFlow = (() => {
           "number" === type && getActiveElement(node.ownerDocument) === node || node.defaultValue === "" + value || (node.defaultValue = "" + value);
         }
         function validateOptionProps(element, props) {
-          null == props.value && ("object" === typeof props.children && null !== props.children ? React3.Children.forEach(props.children, function(child) {
+          null == props.value && ("object" === typeof props.children && null !== props.children ? React8.Children.forEach(props.children, function(child) {
             null == child || "string" === typeof child || "number" === typeof child || "bigint" === typeof child || didWarnInvalidChild || (didWarnInvalidChild = true, console.error(
               "Cannot infer the option value of complex children. Pass a `value` prop or use a plain string as children to <option>."
             ));
@@ -18519,14 +18519,14 @@ var DragonsireBuilderReactFlow = (() => {
           ));
         }
         "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-        var Scheduler = require_scheduler(), React3 = require_react(), ReactDOM = require_react_dom(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+        var Scheduler = require_scheduler(), React8 = require_react(), ReactDOM = require_react_dom(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
         /* @__PURE__ */ Symbol.for("react.scope");
         var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
         /* @__PURE__ */ Symbol.for("react.legacy_hidden");
         /* @__PURE__ */ Symbol.for("react.tracing_marker");
         var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
         /* @__PURE__ */ Symbol.for("react.view_transition");
-        var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React3.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, ReactDOMSharedInternals = ReactDOM.__DOM_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, NotPending = Object.freeze({
+        var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React8.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, ReactDOMSharedInternals = ReactDOM.__DOM_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, NotPending = Object.freeze({
           pending: false,
           data: null,
           method: null,
@@ -21314,7 +21314,7 @@ var DragonsireBuilderReactFlow = (() => {
           }
         };
         (function() {
-          var isomorphicReactPackageVersion = React3.version;
+          var isomorphicReactPackageVersion = React8.version;
           if ("19.2.5" !== isomorphicReactPackageVersion)
             throw Error(
               'Incompatible React versions: The "react" and "react-dom" packages must have the exact same version. Instead got:\n  - react:      ' + (isomorphicReactPackageVersion + "\n  - react-dom:  19.2.5\nLearn more: https://react.dev/warnings/version-mismatch")
@@ -21668,18 +21668,18 @@ var DragonsireBuilderReactFlow = (() => {
         function isValidElement(object) {
           return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
         }
-        var React3 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React3.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
+        var React8 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React8.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
           return null;
         };
-        React3 = {
+        React8 = {
           react_stack_bottom_frame: function(callStackForError) {
             return callStackForError();
           }
         };
         var specialPropKeyWarningShown;
         var didWarnAboutElementRef = {};
-        var unknownOwnerDebugStack = React3.react_stack_bottom_frame.bind(
-          React3,
+        var unknownOwnerDebugStack = React8.react_stack_bottom_frame.bind(
+          React8,
           UnknownOwner
         )();
         var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
@@ -21732,7 +21732,7 @@ var DragonsireBuilderReactFlow = (() => {
           return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
         }
         function useSyncExternalStore$2(subscribe, getSnapshot) {
-          didWarnOld18Alpha || void 0 === React3.startTransition || (didWarnOld18Alpha = true, console.error(
+          didWarnOld18Alpha || void 0 === React8.startTransition || (didWarnOld18Alpha = true, console.error(
             "You are using an outdated, pre-release alpha of React 18 that does not support useSyncExternalStore. The use-sync-external-store shim will not work correctly. Upgrade to a newer pre-release."
           ));
           var value = getSnapshot();
@@ -21742,7 +21742,7 @@ var DragonsireBuilderReactFlow = (() => {
               "The result of getSnapshot should be cached to avoid an infinite loop"
             ), didWarnUncachedGetSnapshot = true);
           }
-          cachedValue = useState2({
+          cachedValue = useState5({
             inst: { value, getSnapshot }
           });
           var inst = cachedValue[0].inst, forceUpdate = cachedValue[1];
@@ -21754,7 +21754,7 @@ var DragonsireBuilderReactFlow = (() => {
             },
             [subscribe, value, getSnapshot]
           );
-          useEffect3(
+          useEffect5(
             function() {
               checkIfSnapshotChanged(inst) && forceUpdate({ inst });
               return subscribe(function() {
@@ -21780,8 +21780,8 @@ var DragonsireBuilderReactFlow = (() => {
           return getSnapshot();
         }
         "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-        var React3 = require_react(), objectIs = "function" === typeof Object.is ? Object.is : is, useState2 = React3.useState, useEffect3 = React3.useEffect, useLayoutEffect2 = React3.useLayoutEffect, useDebugValue2 = React3.useDebugValue, didWarnOld18Alpha = false, didWarnUncachedGetSnapshot = false, shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
-        exports.useSyncExternalStore = void 0 !== React3.useSyncExternalStore ? React3.useSyncExternalStore : shim;
+        var React8 = require_react(), objectIs = "function" === typeof Object.is ? Object.is : is, useState5 = React8.useState, useEffect5 = React8.useEffect, useLayoutEffect2 = React8.useLayoutEffect, useDebugValue2 = React8.useDebugValue, didWarnOld18Alpha = false, didWarnUncachedGetSnapshot = false, shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
+        exports.useSyncExternalStore = void 0 !== React8.useSyncExternalStore ? React8.useSyncExternalStore : shim;
         "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(Error());
       })();
     }
@@ -21808,14 +21808,14 @@ var DragonsireBuilderReactFlow = (() => {
           return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
         }
         "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-        var React3 = require_react(), shim = require_shim(), objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef3 = React3.useRef, useEffect3 = React3.useEffect, useMemo3 = React3.useMemo, useDebugValue2 = React3.useDebugValue;
+        var React8 = require_react(), shim = require_shim(), objectIs = "function" === typeof Object.is ? Object.is : is, useSyncExternalStore = shim.useSyncExternalStore, useRef4 = React8.useRef, useEffect5 = React8.useEffect, useMemo6 = React8.useMemo, useDebugValue2 = React8.useDebugValue;
         exports.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
-          var instRef = useRef3(null);
+          var instRef = useRef4(null);
           if (null === instRef.current) {
             var inst = { hasValue: false, value: null };
             instRef.current = inst;
           } else inst = instRef.current;
-          instRef = useMemo3(
+          instRef = useMemo6(
             function() {
               function memoizedSelector(nextSnapshot) {
                 if (!hasMemo) {
@@ -21851,7 +21851,7 @@ var DragonsireBuilderReactFlow = (() => {
             [getSnapshot, getServerSnapshot, selector, isEqual]
           );
           var value = useSyncExternalStore(subscribe, instRef[0], instRef[1]);
-          useEffect3(
+          useEffect5(
             function() {
               inst.hasValue = true;
               inst.value = value;
@@ -21881,14 +21881,20 @@ var DragonsireBuilderReactFlow = (() => {
   // web/static/webclient/react/builderReactFlowEntry.jsx
   var builderReactFlowEntry_exports = {};
   __export(builderReactFlowEntry_exports, {
+    deleteBuilderReactFlowSelectedEdge: () => deleteBuilderReactFlowSelectedEdge,
     mountBuilderReactFlow: () => mountBuilderReactFlow,
-    unmountBuilderReactFlow: () => unmountBuilderReactFlow
+    setBuilderReactFlowSelectedRoomColor: () => setBuilderReactFlowSelectedRoomColor,
+    unmountBuilderReactFlow: () => unmountBuilderReactFlow,
+    updateBuilderReactFlowSelectedEdge: () => updateBuilderReactFlowSelectedEdge
   });
-  var import_react5 = __toESM(require_react());
+  var import_react11 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // web/static/webclient/react/BuilderMap.jsx
-  var import_react3 = __toESM(require_react());
+  var import_react10 = __toESM(require_react());
+
+  // web/static/webclient/react/builder/BuilderCanvas.tsx
+  var import_react7 = __toESM(require_react());
 
   // node_modules/@xyflow/react/dist/esm/index.js
   var import_jsx_runtime = __toESM(require_jsx_runtime());
@@ -25182,9 +25188,9 @@ var DragonsireBuilderReactFlow = (() => {
     }
     return 0;
   };
-  var calcAutoPan = (pos, bounds, speed = 15, distance2 = 40) => {
-    const xMovement = calcAutoPanVelocity(pos.x, distance2, bounds.width - distance2) * speed;
-    const yMovement = calcAutoPanVelocity(pos.y, distance2, bounds.height - distance2) * speed;
+  var calcAutoPan = (pos, bounds, speed = 15, distance3 = 40) => {
+    const xMovement = calcAutoPanVelocity(pos.x, distance3, bounds.width - distance3) * speed;
+    const yMovement = calcAutoPanVelocity(pos.y, distance3, bounds.height - distance3) * speed;
     return [xMovement, yMovement];
   };
   var getBoundsOfBoxes = (box1, box2) => ({
@@ -25435,11 +25441,11 @@ var DragonsireBuilderReactFlow = (() => {
     const offsetY = Math.abs(centerY - sourceY);
     return [centerX, centerY, offsetX, offsetY];
   }
-  function calculateControlOffset(distance2, curvature) {
-    if (distance2 >= 0) {
-      return 0.5 * distance2;
+  function calculateControlOffset(distance3, curvature) {
+    if (distance3 >= 0) {
+      return 0.5 * distance3;
     }
-    return curvature * 25 * Math.sqrt(-distance2);
+    return curvature * 25 * Math.sqrt(-distance3);
   }
   function getControlWithCurvature({ pos, x1, y1, x2, y2, c }) {
     switch (pos) {
@@ -26411,8 +26417,8 @@ var DragonsireBuilderReactFlow = (() => {
           const currentMousePosition = getEventPosition(event.sourceEvent, containerBounds);
           const x = currentMousePosition.x - mousePosition.x;
           const y = currentMousePosition.y - mousePosition.y;
-          const distance2 = Math.sqrt(x * x + y * y);
-          if (distance2 > nodeDragThreshold) {
+          const distance3 = Math.sqrt(x * x + y * y);
+          if (distance3 > nodeDragThreshold) {
             startDrag(event);
           }
         }
@@ -26462,13 +26468,13 @@ var DragonsireBuilderReactFlow = (() => {
       destroy
     };
   }
-  function getNodesWithinDistance(position, nodeLookup, distance2) {
+  function getNodesWithinDistance(position, nodeLookup, distance3) {
     const nodes = [];
     const rect = {
-      x: position.x - distance2,
-      y: position.y - distance2,
-      width: distance2 * 2,
-      height: distance2 * 2
+      x: position.x - distance3,
+      y: position.y - distance3,
+      width: distance3 * 2,
+      height: distance3 * 2
     };
     for (const node of nodeLookup.values()) {
       if (getOverlappingArea(rect, nodeToRect(node)) > 0) {
@@ -26489,14 +26495,14 @@ var DragonsireBuilderReactFlow = (() => {
           continue;
         }
         const { x, y } = getHandlePosition(node, handle, handle.position, true);
-        const distance2 = Math.sqrt(Math.pow(x - position.x, 2) + Math.pow(y - position.y, 2));
-        if (distance2 > connectionRadius) {
+        const distance3 = Math.sqrt(Math.pow(x - position.x, 2) + Math.pow(y - position.y, 2));
+        if (distance3 > connectionRadius) {
           continue;
         }
-        if (distance2 < minDistance) {
+        if (distance3 < minDistance) {
           closestHandles = [{ ...handle, x, y }];
-          minDistance = distance2;
-        } else if (distance2 === minDistance) {
+          minDistance = distance3;
+        } else if (distance3 === minDistance) {
           closestHandles.push({ ...handle, x, y });
         }
       }
@@ -27110,8 +27116,8 @@ var DragonsireBuilderReactFlow = (() => {
     function setTranslateExtent(translateExtent2) {
       d3ZoomInstance?.translateExtent(translateExtent2);
     }
-    function setClickDistance(distance2) {
-      const validDistance = !isNumeric(distance2) || distance2 < 0 ? 0 : distance2;
+    function setClickDistance(distance3) {
+      const validDistance = !isNumeric(distance3) || distance3 < 0 ? 0 : distance3;
       d3ZoomInstance?.clickDistance(validDistance);
     }
     return {
@@ -28638,8 +28644,8 @@ var DragonsireBuilderReactFlow = (() => {
       const { startX, startY } = userSelectionRect;
       if (!selectionInProgress.current) {
         const requiredDistance = selectionKeyPressed ? 0 : paneClickDistance;
-        const distance2 = Math.hypot(mouseX - startX, mouseY - startY);
-        if (distance2 <= requiredDistance) {
+        const distance3 = Math.hypot(mouseX - startX, mouseY - startY);
+        if (distance3 <= requiredDistance) {
           return;
         }
         resetSelectedElements();
@@ -30279,6 +30285,26 @@ var DragonsireBuilderReactFlow = (() => {
     return (0, import_jsx_runtime.jsx)("div", { "data-testid": "rf__wrapper", ...rest, onScroll: wrapperOnScroll, style: { ...style2, ...wrapperStyle }, ref, className: cc(["react-flow", className, colorModeClassName]), id: id2, role: "application", children: (0, import_jsx_runtime.jsxs)(Wrapper, { nodes, edges, width, height, fitView, fitViewOptions, minZoom, maxZoom, nodeOrigin, nodeExtent, zIndexMode, children: [(0, import_jsx_runtime.jsx)(StoreUpdater, { nodes, edges, defaultNodes, defaultEdges, onConnect, onConnectStart, onConnectEnd, onClickConnectStart, onClickConnectEnd, nodesDraggable, autoPanOnNodeFocus, nodesConnectable, nodesFocusable, edgesFocusable, edgesReconnectable, elementsSelectable, elevateNodesOnSelect, elevateEdgesOnSelect, minZoom, maxZoom, nodeExtent, onNodesChange, onEdgesChange, snapToGrid, snapGrid, connectionMode, translateExtent, connectOnClick, defaultEdgeOptions, fitView, fitViewOptions, onNodesDelete, onEdgesDelete, onDelete, onNodeDragStart, onNodeDrag, onNodeDragStop, onSelectionDrag, onSelectionDragStart, onSelectionDragStop, onMove, onMoveStart, onMoveEnd, noPanClassName, nodeOrigin, rfId, autoPanOnConnect, autoPanOnNodeDrag, autoPanSpeed, onError, connectionRadius, isValidConnection, selectNodesOnDrag, nodeDragThreshold, connectionDragThreshold, onBeforeDelete, debug, ariaLabelConfig, zIndexMode }), (0, import_jsx_runtime.jsx)(GraphView, { onInit, onNodeClick, onEdgeClick, onNodeMouseEnter, onNodeMouseMove, onNodeMouseLeave, onNodeContextMenu, onNodeDoubleClick, nodeTypes, edgeTypes, connectionLineType, connectionLineStyle, connectionLineComponent, connectionLineContainerStyle, selectionKeyCode, selectionOnDrag, selectionMode, deleteKeyCode, multiSelectionKeyCode, panActivationKeyCode, zoomActivationKeyCode, onlyRenderVisibleElements, defaultViewport: defaultViewport$1, translateExtent, minZoom, maxZoom, preventScrolling, zoomOnScroll, zoomOnPinch, zoomOnDoubleClick, panOnScroll, panOnScrollSpeed, panOnScrollMode, panOnDrag, onPaneClick, onPaneMouseEnter, onPaneMouseMove, onPaneMouseLeave, onPaneScroll, onPaneContextMenu, paneClickDistance, nodeClickDistance, onSelectionContextMenu, onSelectionStart, onSelectionEnd, onReconnect, onReconnectStart, onReconnectEnd, onEdgeContextMenu, onEdgeDoubleClick, onEdgeMouseEnter, onEdgeMouseMove, onEdgeMouseLeave, reconnectRadius, defaultMarkerColor, noDragClassName, noWheelClassName, noPanClassName, rfId, disableKeyboardA11y, nodeExtent, viewport, onViewportChange }), (0, import_jsx_runtime.jsx)(SelectionListener, { onSelectionChange }), children2, (0, import_jsx_runtime.jsx)(Attribution, { proOptions, position: attributionPosition }), (0, import_jsx_runtime.jsx)(A11yDescriptions, { rfId, disableKeyboardA11y })] }) });
   }
   var index = fixedForwardRef(ReactFlow);
+  var selector$4 = (options) => (s) => {
+    if (!options.includeHiddenNodes) {
+      return s.nodesInitialized;
+    }
+    if (s.nodeLookup.size === 0) {
+      return false;
+    }
+    for (const [, { internals }] of s.nodeLookup) {
+      if (internals.handleBounds === void 0 || !nodeHasDimensions(internals.userNode)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  function useNodesInitialized(options = {
+    includeHiddenNodes: false
+  }) {
+    const initialized = useStore(selector$4(options));
+    return initialized;
+  }
   var error014 = errorMessages["error014"]();
   function LinePattern({ dimensions, lineWidth, variant, className }) {
     return (0, import_jsx_runtime.jsx)("path", { strokeWidth: lineWidth, d: `M${dimensions[0] / 2} 0 V${dimensions[1]} M0 ${dimensions[1] / 2} H${dimensions[0]}`, className: cc(["react-flow__background-pattern", variant, className]) });
@@ -30713,63 +30739,1600 @@ var DragonsireBuilderReactFlow = (() => {
   }
   var NodeResizeControl = (0, import_react2.memo)(ResizeControl);
 
-  // web/static/webclient/react/BuilderMap.jsx
-  var BACKGROUND_GRID_SIZE = 60;
-  var DEFAULT_VIEWPORT = { x: 0, y: 0, zoom: 0.8 };
-  var VIEWPORT_PADDING = 48;
-  var MIN_ZOOM = 0.05;
-  var MAX_ZOOM = 4;
-  function RoomNode({ data, selected: selected2 }) {
-    const showLabel = Boolean(selected2 || data?.selected);
-    return /* @__PURE__ */ import_react3.default.createElement("div", { className: `builder-reactflow-node${showLabel ? " is-selected" : ""}` }, /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-top", type: "target", position: Position.Top, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-right", type: "target", position: Position.Right, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-bottom", type: "target", position: Position.Bottom, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-left", type: "target", position: Position.Left, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-top", type: "source", position: Position.Top, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-right", type: "source", position: Position.Right, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-bottom", type: "source", position: Position.Bottom, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-left", type: "source", position: Position.Left, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-core", style: { background: data?.color || "#5f8f57" } }), showLabel ? /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-label" }, data?.label || "Room") : null);
+  // web/static/webclient/react/builder/BuilderStore.ts
+  var import_react3 = __toESM(require_react());
+
+  // web/static/webclient/react/builder/BuilderUtils.ts
+  var BUILDER_DIRECTIONS = [
+    "north",
+    "east",
+    "south",
+    "west",
+    "northeast",
+    "northwest",
+    "southeast",
+    "southwest",
+    "up",
+    "down"
+  ];
+  var LOGICAL_CELL_SIZE = 96;
+  var GRID_SIZE = 50;
+  var ROOM_NODE_SIZE = 72;
+  var ROOM_BODY_SIZE = 40;
+  var ROOM_BODY_OFFSET = (ROOM_NODE_SIZE - ROOM_BODY_SIZE) / 2;
+  var NODE_SPACING_MULTIPLIER = 1.2;
+  var RENDER_GRID_SCALE = LOGICAL_CELL_SIZE / GRID_SIZE * NODE_SPACING_MULTIPLIER;
+  var ROOM_COLORS = {
+    standard: "#888888",
+    poi: "#00FF00",
+    shop: "#FF0000",
+    training: "#FFFF00",
+    portal: "#FF00FF",
+    home: "#00FFFF",
+    water: "#0000FF",
+    underwater: "#000088"
+  };
+  var CORRIDOR_SPACING = 60;
+  var HUB_RADIUS = 80;
+  var CLUSTER_RADIUS = 80;
+  var CLUSTER_THRESHOLD = 6;
+  var MAX_LAYOUT_MOVE = 100;
+  var CORRIDOR_ENDPOINT_LIMIT = 25;
+  var CROSSING_PASSES = 10;
+  var FINAL_SOFT_PUSH_DISTANCE = 44;
+  var OPPOSITE = {
+    north: "south",
+    south: "north",
+    east: "west",
+    west: "east",
+    northeast: "southwest",
+    southwest: "northeast",
+    northwest: "southeast",
+    southeast: "northwest",
+    up: "down",
+    down: "up"
+  };
+  var DIRECTION_TO_HANDLE_ID = {
+    north: "n",
+    east: "e",
+    south: "s",
+    west: "w",
+    northeast: "ne",
+    northwest: "nw",
+    southeast: "se",
+    southwest: "sw",
+    up: "u",
+    down: "d"
+  };
+  var HANDLE_ID_TO_DIRECTION = {
+    n: "north",
+    e: "east",
+    s: "south",
+    w: "west",
+    ne: "northeast",
+    nw: "northwest",
+    se: "southeast",
+    sw: "southwest",
+    u: "up",
+    d: "down"
+  };
+  function coordKey(x, y) {
+    return `${x},${y}`;
   }
-  function builderDirectionalPath({ sourceX, sourceY, targetX, targetY, direction }) {
-    const normalizedDirection = String(direction || "").toLowerCase();
-    if (["northeast", "northwest", "southeast", "southwest"].includes(normalizedDirection)) {
-      return `M ${sourceX},${sourceY} L ${targetX},${targetY}`;
-    }
-    if (["east", "west"].includes(normalizedDirection)) {
-      if (sourceY === targetY) {
-        return `M ${sourceX},${sourceY} L ${targetX},${targetY}`;
-      }
-      const midX = sourceX + (targetX - sourceX) / 2;
-      return `M ${sourceX},${sourceY} H ${midX} V ${targetY} H ${targetX}`;
-    }
-    if (["north", "south"].includes(normalizedDirection)) {
-      if (sourceX === targetX) {
-        return `M ${sourceX},${sourceY} L ${targetX},${targetY}`;
-      }
-      const midY = sourceY + (targetY - sourceY) / 2;
-      return `M ${sourceX},${sourceY} V ${midY} H ${targetX} V ${targetY}`;
-    }
-    return `M ${sourceX},${sourceY} L ${targetX},${targetY}`;
+  function buildRoomId(zonePrefix, x, y) {
+    void zonePrefix;
+    return `CRO_${x}_${y}`;
   }
-  function BuilderDirectionalEdge({ id: id2, sourceX, sourceY, targetX, targetY, data, style: style2, markerEnd, markerStart, interactionWidth }) {
-    const path = builderDirectionalPath({
-      sourceX,
-      sourceY,
-      targetX,
-      targetY,
-      direction: data?.direction
+  function oppositeDirection(direction) {
+    return OPPOSITE[direction] || null;
+  }
+  function directionToHandleId(direction) {
+    return DIRECTION_TO_HANDLE_ID[direction];
+  }
+  function handleIdToDirection(handleId) {
+    return HANDLE_ID_TO_DIRECTION[handleId] || null;
+  }
+  function normalizeDirectionLike(value) {
+    if (isBuilderDirection(value)) {
+      return value;
+    }
+    return handleIdToDirection(value);
+  }
+  function isValidPair(a, b) {
+    const left = normalizeDirectionLike(a);
+    const right = normalizeDirectionLike(b);
+    if (!left || !right) {
+      return false;
+    }
+    return oppositeDirection(left) === right;
+  }
+  function edgeKey(fromRoomId, direction) {
+    return `${fromRoomId}:${direction}`;
+  }
+  function isBuilderDirection(value) {
+    return BUILDER_DIRECTIONS.includes(value);
+  }
+  function isRoomColor(value) {
+    return Object.prototype.hasOwnProperty.call(ROOM_COLORS, String(value || ""));
+  }
+  function canvasToLogical(x, y) {
+    return {
+      x: Math.round(x / GRID_SIZE) * GRID_SIZE,
+      y: Math.round(y / GRID_SIZE) * GRID_SIZE
+    };
+  }
+  function buildGraphRenderTransform(rooms, canvasWidth, canvasHeight, options = {}) {
+    void canvasWidth;
+    void canvasHeight;
+    if (!rooms.length) {
+      return {
+        centerX: 0,
+        centerY: 0,
+        scale: 1,
+        minX: 0,
+        maxX: 0,
+        minY: 0,
+        maxY: 0,
+        width: 1,
+        height: 1,
+        positionsByRoomId: {},
+        metaByRoomId: {}
+      };
+    }
+    const minX = Math.min(...rooms.map((room) => room.x));
+    const maxX = Math.max(...rooms.map((room) => room.x));
+    const minY = Math.min(...rooms.map((room) => room.y));
+    const maxY = Math.max(...rooms.map((room) => room.y));
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const width = Math.max(maxX - minX, GRID_SIZE);
+    const height = Math.max(maxY - minY, GRID_SIZE);
+    const scale = RENDER_GRID_SCALE;
+    const positionsByRoomId = rooms.reduce((accumulator, room) => {
+      accumulator[room.id] = {
+        x: (room.x - centerX) * scale,
+        y: (room.y - centerY) * scale
+      };
+      return accumulator;
+    }, {});
+    const metaByRoomId = rooms.reduce((accumulator, room) => {
+      accumulator[room.id] = {
+        isCorridor: false,
+        isHub: false,
+        locked: Boolean(room.meta?.locked)
+      };
+      return accumulator;
+    }, {});
+    if (options.tidy) {
+      applyTidyLayout(rooms, positionsByRoomId, metaByRoomId);
+    }
+    return {
+      centerX,
+      centerY,
+      scale,
+      minX,
+      maxX,
+      minY,
+      maxY,
+      width,
+      height,
+      positionsByRoomId,
+      metaByRoomId
+    };
+  }
+  function applyTidyLayout(rooms, positionsByRoomId, metaByRoomId) {
+    const roomsById = rooms.reduce((accumulator, room) => {
+      accumulator[room.id] = room;
+      return accumulator;
+    }, {});
+    const originalPositions = clonePositions(positionsByRoomId);
+    const corridorIds = detectCorridorNodes(rooms, roomsById, metaByRoomId);
+    const chains = groupCorridorChains(corridorIds, roomsById, metaByRoomId);
+    for (const chain of chains) {
+      straightenCorridorChain(chain, positionsByRoomId, originalPositions, metaByRoomId);
+      distributeCorridorChain(chain, positionsByRoomId, originalPositions, metaByRoomId);
+    }
+    const hubIds = detectHubNodes(rooms, roomsById, metaByRoomId);
+    spreadHubNeighbors(hubIds, roomsById, positionsByRoomId, originalPositions, metaByRoomId);
+    expandDenseClusters(rooms, positionsByRoomId, metaByRoomId);
+    snapAlignedLines(positionsByRoomId, metaByRoomId, "horizontal");
+    snapAlignedLines(positionsByRoomId, metaByRoomId, "vertical");
+    reduceEdgeCrossings(roomsById, positionsByRoomId, originalPositions, metaByRoomId);
+    applyFinalSoftPush(positionsByRoomId, metaByRoomId);
+    clampMovement(positionsByRoomId, originalPositions, MAX_LAYOUT_MOVE);
+  }
+  function clonePositions(positionsByRoomId) {
+    return Object.entries(positionsByRoomId).reduce((accumulator, [roomId, point]) => {
+      accumulator[roomId] = { x: point.x, y: point.y };
+      return accumulator;
+    }, {});
+  }
+  function getConnectedDirections(room, roomsById) {
+    return Object.entries(room.exits || {}).filter(([direction, targetRoomId]) => isBuilderDirection(direction) && Boolean(targetRoomId) && Boolean(roomsById[String(targetRoomId || "")])).map(([direction]) => direction);
+  }
+  function directionAxis(direction) {
+    if (direction === "east" || direction === "west") {
+      return "horizontal";
+    }
+    if (direction === "north" || direction === "south") {
+      return "vertical";
+    }
+    if (direction === "northeast" || direction === "northwest" || direction === "southeast" || direction === "southwest") {
+      return "diagonal";
+    }
+    return null;
+  }
+  function isCorridorPair(first, second) {
+    return first === "north" && second === "south" || first === "south" && second === "north" || first === "east" && second === "west" || first === "west" && second === "east" || first === "northeast" && second === "southwest" || first === "southwest" && second === "northeast" || first === "northwest" && second === "southeast" || first === "southeast" && second === "northwest";
+  }
+  function detectCorridorNodes(rooms, roomsById, metaByRoomId) {
+    const corridorIds = /* @__PURE__ */ new Set();
+    for (const room of rooms) {
+      const exits = getConnectedDirections(room, roomsById);
+      if (exits.length === 2 && isCorridorPair(exits[0], exits[1])) {
+        corridorIds.add(room.id);
+        metaByRoomId[room.id].isCorridor = true;
+      }
+    }
+    return corridorIds;
+  }
+  function groupCorridorChains(corridorIds, roomsById, metaByRoomId) {
+    const visited = /* @__PURE__ */ new Set();
+    const chains = [];
+    for (const roomId of corridorIds) {
+      if (visited.has(roomId)) {
+        continue;
+      }
+      const queue = [roomId];
+      const chainRoomIds = [];
+      visited.add(roomId);
+      while (queue.length) {
+        const currentRoomId = queue.shift() || "";
+        const room = roomsById[currentRoomId];
+        if (!room) {
+          continue;
+        }
+        chainRoomIds.push(currentRoomId);
+        for (const targetRoomId of Object.values(room.exits || {})) {
+          const normalizedTargetRoomId = String(targetRoomId || "");
+          if (!corridorIds.has(normalizedTargetRoomId) || visited.has(normalizedTargetRoomId)) {
+            continue;
+          }
+          visited.add(normalizedTargetRoomId);
+          queue.push(normalizedTargetRoomId);
+        }
+      }
+      if (chainRoomIds.length) {
+        chains.push({
+          roomIds: chainRoomIds,
+          orientation: detectCorridorOrientation(chainRoomIds, roomsById)
+        });
+      }
+    }
+    return chains;
+  }
+  function detectCorridorOrientation(roomIds, roomsById) {
+    let horizontal = 0;
+    let vertical = 0;
+    let diagonal = 0;
+    for (const roomId of roomIds) {
+      const room = roomsById[roomId];
+      if (!room) {
+        continue;
+      }
+      for (const direction of getConnectedDirections(room, roomsById)) {
+        const axis = directionAxis(direction);
+        if (axis === "horizontal") {
+          horizontal += 1;
+        } else if (axis === "vertical") {
+          vertical += 1;
+        } else if (axis === "diagonal") {
+          diagonal += 1;
+        }
+      }
+    }
+    if (horizontal >= vertical && horizontal >= diagonal) {
+      return "horizontal";
+    }
+    if (vertical >= horizontal && vertical >= diagonal) {
+      return "vertical";
+    }
+    return "diagonal";
+  }
+  function straightenCorridorChain(chain, positionsByRoomId, originalPositions, metaByRoomId) {
+    if (chain.roomIds.length < 2) {
+      return;
+    }
+    const orderedIds = orderChainAlongAxis(chain, positionsByRoomId);
+    const movableIds = orderedIds.filter((roomId) => !metaByRoomId[roomId]?.locked);
+    if (!movableIds.length) {
+      return;
+    }
+    if (chain.orientation === "horizontal") {
+      const averageY = average(movableIds.map((roomId) => positionsByRoomId[roomId].y));
+      orderedIds.forEach((roomId, index2) => {
+        if (metaByRoomId[roomId]?.locked) {
+          return;
+        }
+        const limit = index2 === 0 || index2 === orderedIds.length - 1 ? CORRIDOR_ENDPOINT_LIMIT : MAX_LAYOUT_MOVE;
+        positionsByRoomId[roomId].y = clampWithinLimit(originalPositions[roomId].y, averageY, limit);
+      });
+      return;
+    }
+    if (chain.orientation === "vertical") {
+      const averageX = average(movableIds.map((roomId) => positionsByRoomId[roomId].x));
+      orderedIds.forEach((roomId, index2) => {
+        if (metaByRoomId[roomId]?.locked) {
+          return;
+        }
+        const limit = index2 === 0 || index2 === orderedIds.length - 1 ? CORRIDOR_ENDPOINT_LIMIT : MAX_LAYOUT_MOVE;
+        positionsByRoomId[roomId].x = clampWithinLimit(originalPositions[roomId].x, averageX, limit);
+      });
+      return;
+    }
+    const slope = diagonalSlope(orderedIds, originalPositions);
+    const intercept = average(movableIds.map((roomId) => positionsByRoomId[roomId].y - slope * positionsByRoomId[roomId].x));
+    orderedIds.forEach((roomId, index2) => {
+      if (metaByRoomId[roomId]?.locked) {
+        return;
+      }
+      const targetY = slope * positionsByRoomId[roomId].x + intercept;
+      const limit = index2 === 0 || index2 === orderedIds.length - 1 ? CORRIDOR_ENDPOINT_LIMIT : MAX_LAYOUT_MOVE;
+      positionsByRoomId[roomId].y = clampWithinLimit(originalPositions[roomId].y, targetY, limit);
     });
-    return /* @__PURE__ */ import_react3.default.createElement(BaseEdge, { id: id2, path, style: style2, markerEnd, markerStart, interactionWidth });
   }
-  function BuilderMapSurface({
-    nodes = [],
-    edges = [],
-    selectedRoomId,
-    viewportRequest,
-    gridSize = BACKGROUND_GRID_SIZE,
-    coordinateMode = "legacy",
-    onSelectRoom,
-    onMoveRoom
+  function distributeCorridorChain(chain, positionsByRoomId, originalPositions, metaByRoomId) {
+    if (chain.roomIds.length < 3) {
+      return;
+    }
+    const orderedIds = orderChainAlongAxis(chain, positionsByRoomId);
+    if (!orderedIds.length) {
+      return;
+    }
+    if (chain.orientation === "horizontal") {
+      distributeAlongAxis(orderedIds, positionsByRoomId, originalPositions, metaByRoomId, "x", CORRIDOR_SPACING);
+      return;
+    }
+    if (chain.orientation === "vertical") {
+      distributeAlongAxis(orderedIds, positionsByRoomId, originalPositions, metaByRoomId, "y", CORRIDOR_SPACING);
+      return;
+    }
+    const centerX = average(orderedIds.map((roomId) => positionsByRoomId[roomId].x));
+    const startX = centerX - (orderedIds.length - 1) * (CORRIDOR_SPACING / Math.sqrt(2)) / 2;
+    const slope = diagonalSlope(orderedIds, originalPositions);
+    const intercept = average(orderedIds.map((roomId) => positionsByRoomId[roomId].y - slope * positionsByRoomId[roomId].x));
+    orderedIds.forEach((roomId, index2) => {
+      if (metaByRoomId[roomId]?.locked) {
+        return;
+      }
+      const targetX = startX + index2 * (CORRIDOR_SPACING / Math.sqrt(2));
+      const targetY = slope * targetX + intercept;
+      const limit = index2 === 0 || index2 === orderedIds.length - 1 ? CORRIDOR_ENDPOINT_LIMIT : MAX_LAYOUT_MOVE;
+      positionsByRoomId[roomId].x = clampWithinLimit(originalPositions[roomId].x, targetX, limit);
+      positionsByRoomId[roomId].y = clampWithinLimit(originalPositions[roomId].y, targetY, limit);
+    });
+  }
+  function orderChainAlongAxis(chain, positionsByRoomId) {
+    return [...chain.roomIds].sort((left, right) => {
+      const leftPoint = positionsByRoomId[left] || { x: 0, y: 0 };
+      const rightPoint = positionsByRoomId[right] || { x: 0, y: 0 };
+      if (chain.orientation === "vertical") {
+        return leftPoint.y - rightPoint.y;
+      }
+      return leftPoint.x - rightPoint.x;
+    });
+  }
+  function distributeAlongAxis(orderedIds, positionsByRoomId, originalPositions, metaByRoomId, axis, spacing) {
+    const center = average(orderedIds.map((roomId) => positionsByRoomId[roomId][axis]));
+    const start2 = center - (orderedIds.length - 1) * spacing / 2;
+    orderedIds.forEach((roomId, index2) => {
+      if (metaByRoomId[roomId]?.locked) {
+        return;
+      }
+      const limit = index2 === 0 || index2 === orderedIds.length - 1 ? CORRIDOR_ENDPOINT_LIMIT : MAX_LAYOUT_MOVE;
+      positionsByRoomId[roomId][axis] = clampWithinLimit(originalPositions[roomId][axis], start2 + index2 * spacing, limit);
+    });
+  }
+  function detectHubNodes(rooms, roomsById, metaByRoomId) {
+    const hubIds = [];
+    for (const room of rooms) {
+      if (getConnectedDirections(room, roomsById).length >= 3) {
+        metaByRoomId[room.id].isHub = true;
+        hubIds.push(room.id);
+      }
+    }
+    return hubIds;
+  }
+  function spreadHubNeighbors(hubIds, roomsById, positionsByRoomId, originalPositions, metaByRoomId) {
+    for (const hubId of hubIds) {
+      const hub = roomsById[hubId];
+      const hubPoint = positionsByRoomId[hubId];
+      if (!hub || !hubPoint) {
+        continue;
+      }
+      const neighbors = Object.entries(hub.exits || {}).filter(([direction, targetRoomId]) => isBuilderDirection(direction) && Boolean(targetRoomId) && Boolean(positionsByRoomId[String(targetRoomId || "")])).map(([direction, targetRoomId]) => ({ direction, roomId: String(targetRoomId || "") }));
+      const fallbackStep = neighbors.length ? Math.PI * 2 / neighbors.length : 0;
+      neighbors.forEach(({ direction, roomId }, index2) => {
+        if (metaByRoomId[roomId]?.locked) {
+          return;
+        }
+        const angle = directionAngle(direction) ?? index2 * fallbackStep;
+        const targetX = hubPoint.x + Math.cos(angle) * HUB_RADIUS;
+        const targetY = hubPoint.y + Math.sin(angle) * HUB_RADIUS;
+        const adjusted = enforceDirectionalIntent(direction, hubPoint, { x: targetX, y: targetY });
+        positionsByRoomId[roomId].x = clampWithinLimit(originalPositions[roomId].x, adjusted.x, MAX_LAYOUT_MOVE);
+        positionsByRoomId[roomId].y = clampWithinLimit(originalPositions[roomId].y, adjusted.y, MAX_LAYOUT_MOVE);
+      });
+    }
+  }
+  function expandDenseClusters(rooms, positionsByRoomId, metaByRoomId) {
+    for (const room of rooms) {
+      const centerPoint = positionsByRoomId[room.id];
+      if (!centerPoint) {
+        continue;
+      }
+      const clusterIds = rooms.filter((candidate) => distance2(centerPoint, positionsByRoomId[candidate.id]) <= CLUSTER_RADIUS).map((candidate) => candidate.id);
+      if (clusterIds.length <= CLUSTER_THRESHOLD) {
+        continue;
+      }
+      const clusterCenter = {
+        x: average(clusterIds.map((roomId) => positionsByRoomId[roomId].x)),
+        y: average(clusterIds.map((roomId) => positionsByRoomId[roomId].y))
+      };
+      for (const roomId of clusterIds) {
+        if (metaByRoomId[roomId]?.locked) {
+          continue;
+        }
+        const point = positionsByRoomId[roomId];
+        point.x += (point.x - clusterCenter.x) * 0.2;
+        point.y += (point.y - clusterCenter.y) * 0.2;
+      }
+    }
+  }
+  function snapAlignedLines(positionsByRoomId, metaByRoomId, axis) {
+    const groups = /* @__PURE__ */ new Map();
+    const bucketAxis = axis === "horizontal" ? "y" : "x";
+    for (const [roomId, point] of Object.entries(positionsByRoomId)) {
+      const key = Math.round(point[bucketAxis] / 10);
+      const current = groups.get(key) || [];
+      current.push(roomId);
+      groups.set(key, current);
+    }
+    for (const roomIds of groups.values()) {
+      if (roomIds.length < 3) {
+        continue;
+      }
+      const values = roomIds.map((roomId) => positionsByRoomId[roomId][bucketAxis]);
+      if (variance(values) >= 10) {
+        continue;
+      }
+      const target = average(values);
+      for (const roomId of roomIds) {
+        if (metaByRoomId[roomId]?.locked) {
+          continue;
+        }
+        positionsByRoomId[roomId][bucketAxis] = target;
+      }
+    }
+  }
+  function reduceEdgeCrossings(roomsById, positionsByRoomId, originalPositions, metaByRoomId) {
+    for (let iteration = 0; iteration < CROSSING_PASSES; iteration += 1) {
+      const edges = collectLayoutEdges(roomsById, positionsByRoomId);
+      let moved = false;
+      for (let edgeIndex = 0; edgeIndex < edges.length; edgeIndex += 1) {
+        for (let compareIndex = edgeIndex + 1; compareIndex < edges.length; compareIndex += 1) {
+          const left = edges[edgeIndex];
+          const right = edges[compareIndex];
+          if (sharesEndpoint(left.roomIds, right.roomIds)) {
+            continue;
+          }
+          if (!linesIntersect(left.start, left.end, right.start, right.end)) {
+            continue;
+          }
+          const candidateRoomId = pickMovableIntersectionNode([...left.roomIds, ...right.roomIds], metaByRoomId);
+          if (!candidateRoomId) {
+            continue;
+          }
+          const offset = deterministicOffset(candidateRoomId, iteration);
+          positionsByRoomId[candidateRoomId].x = clampWithinLimit(
+            originalPositions[candidateRoomId].x,
+            positionsByRoomId[candidateRoomId].x + offset.x,
+            MAX_LAYOUT_MOVE
+          );
+          positionsByRoomId[candidateRoomId].y = clampWithinLimit(
+            originalPositions[candidateRoomId].y,
+            positionsByRoomId[candidateRoomId].y + offset.y,
+            MAX_LAYOUT_MOVE
+          );
+          moved = true;
+        }
+      }
+      if (!moved) {
+        break;
+      }
+    }
+  }
+  function applyFinalSoftPush(positionsByRoomId, metaByRoomId) {
+    const roomIds = Object.keys(positionsByRoomId);
+    for (let leftIndex = 0; leftIndex < roomIds.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < roomIds.length; rightIndex += 1) {
+        const leftRoomId = roomIds[leftIndex];
+        const rightRoomId = roomIds[rightIndex];
+        const left = positionsByRoomId[leftRoomId];
+        const right = positionsByRoomId[rightRoomId];
+        const currentDistance = distance2(left, right);
+        if (currentDistance >= FINAL_SOFT_PUSH_DISTANCE || currentDistance === 0) {
+          continue;
+        }
+        const push = (FINAL_SOFT_PUSH_DISTANCE - currentDistance) / 2;
+        const dx = (right.x - left.x) / currentDistance;
+        const dy = (right.y - left.y) / currentDistance;
+        if (!metaByRoomId[leftRoomId]?.locked) {
+          left.x -= dx * push;
+          left.y -= dy * push;
+        }
+        if (!metaByRoomId[rightRoomId]?.locked) {
+          right.x += dx * push;
+          right.y += dy * push;
+        }
+      }
+    }
+  }
+  function clampMovement(positionsByRoomId, originalPositions, limit) {
+    for (const [roomId, point] of Object.entries(positionsByRoomId)) {
+      const original = originalPositions[roomId];
+      if (!original) {
+        continue;
+      }
+      const deltaX = point.x - original.x;
+      const deltaY = point.y - original.y;
+      const movement = Math.hypot(deltaX, deltaY);
+      if (movement <= limit || movement === 0) {
+        continue;
+      }
+      const ratio = limit / movement;
+      point.x = original.x + deltaX * ratio;
+      point.y = original.y + deltaY * ratio;
+    }
+  }
+  function diagonalSlope(roomIds, positionsByRoomId) {
+    if (roomIds.length < 2) {
+      return 1;
+    }
+    const first = positionsByRoomId[roomIds[0]];
+    const last = positionsByRoomId[roomIds[roomIds.length - 1]];
+    return last.y >= first.y ? 1 : -1;
+  }
+  function average(values) {
+    if (!values.length) {
+      return 0;
+    }
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  }
+  function variance(values) {
+    if (!values.length) {
+      return 0;
+    }
+    const mean = average(values);
+    return Math.max(...values.map((value) => Math.abs(value - mean)));
+  }
+  function clampWithinLimit(original, target, limit) {
+    return Math.max(original - limit, Math.min(original + limit, target));
+  }
+  function directionAngle(direction) {
+    switch (direction) {
+      case "east":
+        return 0;
+      case "northeast":
+        return -Math.PI / 4;
+      case "north":
+      case "up":
+        return -Math.PI / 2;
+      case "northwest":
+        return -3 * Math.PI / 4;
+      case "west":
+        return Math.PI;
+      case "southwest":
+        return 3 * Math.PI / 4;
+      case "south":
+      case "down":
+        return Math.PI / 2;
+      case "southeast":
+        return Math.PI / 4;
+      default:
+        return null;
+    }
+  }
+  function enforceDirectionalIntent(direction, hub, point) {
+    return {
+      x: direction.includes("east") ? Math.max(point.x, hub.x + 24) : direction.includes("west") ? Math.min(point.x, hub.x - 24) : point.x,
+      y: direction.includes("north") || direction === "up" ? Math.min(point.y, hub.y - 24) : direction.includes("south") || direction === "down" ? Math.max(point.y, hub.y + 24) : point.y
+    };
+  }
+  function distance2(left, right) {
+    if (!right) {
+      return Number.POSITIVE_INFINITY;
+    }
+    return Math.hypot(left.x - right.x, left.y - right.y);
+  }
+  function collectLayoutEdges(roomsById, positionsByRoomId) {
+    const dedupe = /* @__PURE__ */ new Set();
+    const edges = [];
+    for (const room of Object.values(roomsById)) {
+      for (const targetRoomId of Object.values(room.exits || {})) {
+        const normalizedTargetRoomId = String(targetRoomId || "");
+        if (!roomsById[normalizedTargetRoomId]) {
+          continue;
+        }
+        const key = [room.id, normalizedTargetRoomId].sort().join("|");
+        if (dedupe.has(key)) {
+          continue;
+        }
+        dedupe.add(key);
+        edges.push({
+          roomIds: [room.id, normalizedTargetRoomId],
+          start: positionsByRoomId[room.id],
+          end: positionsByRoomId[normalizedTargetRoomId]
+        });
+      }
+    }
+    return edges;
+  }
+  function sharesEndpoint(left, right) {
+    return left.some((roomId) => right.includes(roomId));
+  }
+  function pickMovableIntersectionNode(roomIds, metaByRoomId) {
+    const ranked = [...new Set(roomIds)].filter((roomId) => !metaByRoomId[roomId]?.locked).sort((left, right) => layoutPriority(metaByRoomId[left]) - layoutPriority(metaByRoomId[right]) || left.localeCompare(right));
+    return ranked[0] || null;
+  }
+  function layoutPriority(meta) {
+    if (meta?.isCorridor) {
+      return 1;
+    }
+    if (meta?.isHub) {
+      return 3;
+    }
+    return 2;
+  }
+  function deterministicOffset(roomId, iteration) {
+    let seed = iteration + 1;
+    for (const character of roomId) {
+      seed = (seed * 31 + character.charCodeAt(0)) % 9973;
+    }
+    return {
+      x: seed % 41 - 20,
+      y: Math.floor(seed / 41) % 41 - 20
+    };
+  }
+  function linesIntersect(a1, a2, b1, b2) {
+    const denominator = (b2.y - b1.y) * (a2.x - a1.x) - (b2.x - b1.x) * (a2.y - a1.y);
+    if (denominator === 0) {
+      return false;
+    }
+    const ua = ((b2.x - b1.x) * (a1.y - b1.y) - (b2.y - b1.y) * (a1.x - b1.x)) / denominator;
+    const ub = ((a2.x - a1.x) * (a1.y - b1.y) - (a2.y - a1.y) * (a1.x - b1.x)) / denominator;
+    return ua > 0 && ua < 1 && ub > 0 && ub < 1;
+  }
+  function renderToRawPoint(x, y, transform2) {
+    const safeScale = Math.max(transform2.scale, 1e-4);
+    return {
+      x: x / safeScale + transform2.centerX,
+      y: y / safeScale + transform2.centerY
+    };
+  }
+  function handleAnchor(direction) {
+    switch (direction) {
+      case "north":
+        return { x: ROOM_NODE_SIZE / 2, y: 12 };
+      case "east":
+        return { x: ROOM_NODE_SIZE - 12, y: ROOM_NODE_SIZE / 2 };
+      case "south":
+        return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE - 12 };
+      case "west":
+        return { x: 12, y: ROOM_NODE_SIZE / 2 };
+      case "northeast":
+        return { x: ROOM_NODE_SIZE - 12, y: 12 };
+      case "northwest":
+        return { x: 12, y: 12 };
+      case "southeast":
+        return { x: ROOM_NODE_SIZE - 12, y: ROOM_NODE_SIZE - 12 };
+      case "southwest":
+        return { x: 12, y: ROOM_NODE_SIZE - 12 };
+      case "up":
+        return { x: ROOM_NODE_SIZE / 2, y: 2 };
+      case "down":
+        return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE - 2 };
+      default:
+        return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE / 2 };
+    }
+  }
+  function renderedRoomHandleAnchor(position, direction) {
+    const anchor = handleAnchor(direction);
+    return {
+      x: position.x + anchor.x,
+      y: position.y + anchor.y
+    };
+  }
+  function buildDirectionalPath2(start2, end, direction) {
+    switch (direction) {
+      case "east":
+      case "west": {
+        const midX = start2.x + (end.x - start2.x) / 2;
+        return `M ${start2.x},${start2.y} H ${midX} V ${end.y} H ${end.x}`;
+      }
+      case "north":
+      case "south": {
+        const midY = start2.y + (end.y - start2.y) / 2;
+        return `M ${start2.x},${start2.y} V ${midY} H ${end.x} V ${end.y}`;
+      }
+      case "up":
+      case "down": {
+        const midY = start2.y + (end.y - start2.y) / 2;
+        return `M ${start2.x},${start2.y} V ${midY} H ${end.x} V ${end.y}`;
+      }
+      case "northeast":
+      case "northwest":
+      case "southeast":
+      case "southwest":
+      default:
+        return `M ${start2.x},${start2.y} L ${end.x},${end.y}`;
+    }
+  }
+  function normalizedConnectionKey(fromRoomId, direction, targetRoomId) {
+    const reverse = oppositeDirection(direction) || direction;
+    const rooms = [fromRoomId, targetRoomId].sort();
+    const directions = [direction, reverse].sort();
+    return `${rooms[0]}|${rooms[1]}|${directions[0]}|${directions[1]}`;
+  }
+
+  // web/static/webclient/react/builder/BuilderStore.ts
+  var BuilderStoreContext = (0, import_react3.createContext)(null);
+  var EMPTY_CONNECTION = {
+    active: false,
+    fromRoomId: null,
+    fromDirection: null
+  };
+  function normalizeExitSpec(spec) {
+    if (typeof spec === "string") {
+      return { targetId: String(spec || ""), type: "spatial", label: "" };
+    }
+    return {
+      targetId: String(spec?.targetId || spec?.target || ""),
+      type: String(spec?.type || "spatial") === "special" ? "special" : "spatial",
+      label: String(spec?.label || "")
+    };
+  }
+  function createInitialBuilderState(zonePrefix, rooms = [], selectedRoomId = null) {
+    const roomsById = {};
+    const roomIdByCoord = {};
+    for (const room of rooms) {
+      const normalizedRoom = {
+        id: String(room.id),
+        x: Math.round(Number(room.x) || 0),
+        y: Math.round(Number(room.y) || 0),
+        exits: Object.entries(room.exits || {}).reduce((accumulator, [direction, spec]) => {
+          if (isBuilderDirection(direction)) {
+            const normalized = normalizeExitSpec(spec);
+            if (normalized.targetId) {
+              accumulator[direction] = normalized;
+            }
+          }
+          return accumulator;
+        }, {}),
+        color: isRoomColor(String(room.color || "")) ? room.color : "standard",
+        meta: { ...room.meta || {} }
+      };
+      roomsById[normalizedRoom.id] = normalizedRoom;
+      roomIdByCoord[coordKey(normalizedRoom.x, normalizedRoom.y)] = normalizedRoom.id;
+    }
+    return {
+      mode: "select",
+      selectedRoomId: selectedRoomId && roomsById[selectedRoomId] ? selectedRoomId : null,
+      selectedEdgeId: null,
+      connection: EMPTY_CONNECTION,
+      zonePrefix,
+      roomsById,
+      roomIdByCoord
+    };
+  }
+  function BuilderStoreProvider({
+    children: children2,
+    zonePrefix,
+    initialRooms,
+    initialSelectedRoomId = null,
+    resetKey,
+    onStateChange
   }) {
-    const reactFlow = useReactFlow();
-    const wrapperRef = (0, import_react3.useRef)(null);
-    const lastViewportTokenRef = (0, import_react3.useRef)(null);
-    const fitRequestToken = viewportRequest?.type === "fit" ? viewportRequest.token : 0;
-    const flowKey = fitRequestToken ? `fit-${fitRequestToken}` : "builder-reactflow";
+    const suppressNextStateChangeRef = (0, import_react3.useRef)(true);
+    const onStateChangeRef = (0, import_react3.useRef)(onStateChange);
+    const [layoutMode, setLayoutMode] = (0, import_react3.useState)("none");
+    const [statusMessage, setStatusMessage] = (0, import_react3.useState)(null);
+    const [state, setState] = (0, import_react3.useState)(() => createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId));
     (0, import_react3.useEffect)(() => {
+      onStateChangeRef.current = onStateChange;
+    }, [onStateChange]);
+    (0, import_react3.useEffect)(() => {
+      suppressNextStateChangeRef.current = true;
+      setLayoutMode("none");
+      setStatusMessage(null);
+      setState(createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId));
+    }, [initialRooms, initialSelectedRoomId, resetKey, zonePrefix]);
+    (0, import_react3.useEffect)(() => {
+      if (suppressNextStateChangeRef.current) {
+        suppressNextStateChangeRef.current = false;
+        return;
+      }
+      onStateChangeRef.current?.(state);
+    }, [state]);
+    const setMode = (0, import_react3.useCallback)((mode) => {
+      setStatusMessage(null);
+      setState((previous) => ({
+        ...previous,
+        mode,
+        connection: EMPTY_CONNECTION
+      }));
+    }, []);
+    const previewLayout = (0, import_react3.useCallback)(() => {
+      setLayoutMode((previous) => previous === "preview" ? "none" : "preview");
+    }, []);
+    const applyLayout = (0, import_react3.useCallback)(() => {
+      setLayoutMode("applied");
+    }, []);
+    const clearLayout = (0, import_react3.useCallback)(() => {
+      setLayoutMode("none");
+    }, []);
+    const toggleSelectedRoomLock = (0, import_react3.useCallback)(() => {
+      setState((previous) => {
+        const roomId = previous.selectedRoomId;
+        if (!roomId) {
+          return previous;
+        }
+        const room = previous.roomsById[roomId];
+        if (!room) {
+          return previous;
+        }
+        return {
+          ...previous,
+          roomsById: {
+            ...previous.roomsById,
+            [roomId]: {
+              ...room,
+              meta: {
+                ...room.meta || {},
+                locked: !room.meta?.locked
+              }
+            }
+          }
+        };
+      });
+    }, []);
+    const setSelectedRoom = (0, import_react3.useCallback)((roomId) => {
+      setStatusMessage(null);
+      setState((previous) => ({
+        ...previous,
+        selectedRoomId: roomId,
+        selectedEdgeId: null
+      }));
+    }, []);
+    const setSelectedEdge = (0, import_react3.useCallback)((edgeId) => {
+      setStatusMessage(null);
+      setState((previous) => ({
+        ...previous,
+        selectedRoomId: null,
+        selectedEdgeId: edgeId
+      }));
+    }, []);
+    const createRoomAt = (0, import_react3.useCallback)((x, y) => {
+      let roomId = null;
+      setState((previous) => {
+        const nextX = Math.round(Number(x) || 0);
+        const nextY = Math.round(Number(y) || 0);
+        const key = coordKey(nextX, nextY);
+        const existingRoomId = previous.roomIdByCoord[key] || null;
+        if (existingRoomId) {
+          roomId = existingRoomId;
+          return {
+            ...previous,
+            mode: "select",
+            selectedRoomId: existingRoomId,
+            selectedEdgeId: null
+          };
+        }
+        roomId = buildRoomId(previous.zonePrefix, nextX, nextY);
+        return {
+          ...previous,
+          mode: "select",
+          selectedRoomId: roomId,
+          selectedEdgeId: null,
+          roomsById: {
+            ...previous.roomsById,
+            [roomId]: {
+              id: roomId,
+              x: nextX,
+              y: nextY,
+              exits: {},
+              color: "standard",
+              meta: {}
+            }
+          },
+          roomIdByCoord: {
+            ...previous.roomIdByCoord,
+            [key]: roomId
+          }
+        };
+      });
+      return roomId;
+    }, []);
+    const tryConnect = (0, import_react3.useCallback)((startRoomId, startDirection, targetRoomId, targetDirection) => {
+      let didConnect = false;
+      setState((previous) => {
+        const startRoom = previous.roomsById[startRoomId] || null;
+        const targetRoom = previous.roomsById[targetRoomId] || null;
+        if (!startRoom || !targetRoom) {
+          return previous;
+        }
+        if (!isBuilderDirection(startDirection)) {
+          return previous;
+        }
+        if (!isBuilderDirection(targetDirection)) {
+          return previous;
+        }
+        if (!isValidPair(startDirection, targetDirection)) {
+          setStatusMessage("Invalid direction pairing.");
+          return previous;
+        }
+        if (startRoomId === targetRoomId) {
+          return previous;
+        }
+        if (startRoom.exits[startDirection]?.targetId) {
+          setStatusMessage("That source handle is already connected.");
+          return previous;
+        }
+        if (targetRoom.exits[targetDirection]?.targetId) {
+          setStatusMessage("That target handle is already connected.");
+          return previous;
+        }
+        didConnect = true;
+        return {
+          ...previous,
+          selectedRoomId: targetRoomId,
+          selectedEdgeId: `${startRoomId}:${startDirection}`,
+          connection: EMPTY_CONNECTION,
+          roomsById: {
+            ...previous.roomsById,
+            [startRoomId]: {
+              ...startRoom,
+              exits: {
+                ...startRoom.exits,
+                [startDirection]: {
+                  targetId: targetRoomId,
+                  type: "spatial",
+                  label: ""
+                }
+              }
+            },
+            [targetRoomId]: {
+              ...targetRoom,
+              exits: {
+                ...targetRoom.exits,
+                [targetDirection]: {
+                  targetId: startRoomId,
+                  type: "spatial",
+                  label: ""
+                }
+              }
+            }
+          }
+        };
+      });
+      return didConnect;
+    }, []);
+    const deleteRoom = (0, import_react3.useCallback)((roomId) => {
+      let didDelete = false;
+      setStatusMessage(null);
+      setState((previous) => {
+        if (previous.mode !== "delete") {
+          return previous;
+        }
+        const room = previous.roomsById[roomId];
+        if (!room) {
+          return previous;
+        }
+        const nextRoomsById = Object.entries(previous.roomsById).reduce((accumulator, [candidateRoomId, candidateRoom]) => {
+          if (candidateRoomId === roomId) {
+            return accumulator;
+          }
+          accumulator[candidateRoomId] = {
+            ...candidateRoom,
+            exits: Object.entries(candidateRoom.exits || {}).reduce((exitAccumulator, [direction, spec]) => {
+              if (spec?.targetId !== roomId) {
+                exitAccumulator[direction] = spec;
+              }
+              return exitAccumulator;
+            }, {})
+          };
+          return accumulator;
+        }, {});
+        const nextRoomIdByCoord = Object.entries(previous.roomIdByCoord).reduce((accumulator, [key, value2]) => {
+          if (value2 !== roomId) {
+            accumulator[key] = value2;
+          }
+          return accumulator;
+        }, {});
+        didDelete = true;
+        return {
+          ...previous,
+          mode: "select",
+          selectedRoomId: previous.selectedRoomId === roomId ? null : previous.selectedRoomId,
+          selectedEdgeId: previous.selectedEdgeId?.startsWith(`${roomId}:`) ? null : previous.selectedEdgeId,
+          connection: previous.connection.fromRoomId === roomId ? EMPTY_CONNECTION : previous.connection,
+          roomsById: nextRoomsById,
+          roomIdByCoord: nextRoomIdByCoord
+        };
+      });
+      if (didDelete) {
+        setStatusMessage(`Deleted ${roomId}.`);
+      }
+      return didDelete;
+    }, []);
+    const updateRoomPosition = (0, import_react3.useCallback)((roomId, x, y) => {
+      let didMove = false;
+      setStatusMessage(null);
+      setState((previous) => {
+        if (previous.mode !== "select") {
+          return previous;
+        }
+        const room = previous.roomsById[roomId];
+        if (!room) {
+          return previous;
+        }
+        const snapped = canvasToLogical(x, y);
+        const nextX = Math.round(snapped.x / GRID_SIZE) * GRID_SIZE;
+        const nextY = Math.round(snapped.y / GRID_SIZE) * GRID_SIZE;
+        const nextKey = coordKey(nextX, nextY);
+        const currentKey = coordKey(room.x, room.y);
+        const occupyingRoomId = previous.roomIdByCoord[nextKey] || null;
+        if (occupyingRoomId && occupyingRoomId !== roomId) {
+          setStatusMessage("Target grid cell is occupied.");
+          return previous;
+        }
+        if (nextKey === currentKey) {
+          return previous;
+        }
+        const nextRoomIdByCoord = { ...previous.roomIdByCoord };
+        delete nextRoomIdByCoord[currentKey];
+        nextRoomIdByCoord[nextKey] = roomId;
+        didMove = true;
+        return {
+          ...previous,
+          roomsById: {
+            ...previous.roomsById,
+            [roomId]: {
+              ...room,
+              x: nextX,
+              y: nextY
+            }
+          },
+          roomIdByCoord: nextRoomIdByCoord
+        };
+      });
+      return didMove;
+    }, []);
+    const updateSelectedRoomColor = (0, import_react3.useCallback)((color2) => {
+      setStatusMessage(null);
+      setState((previous) => {
+        const roomId = previous.selectedRoomId;
+        if (!roomId || !previous.roomsById[roomId]) {
+          return previous;
+        }
+        return {
+          ...previous,
+          roomsById: {
+            ...previous.roomsById,
+            [roomId]: {
+              ...previous.roomsById[roomId],
+              color: color2
+            }
+          }
+        };
+      });
+    }, []);
+    const updateSelectedEdge = (0, import_react3.useCallback)((updates) => {
+      let didUpdate = false;
+      setStatusMessage(null);
+      setState((previous) => {
+        const selectedEdgeId = previous.selectedEdgeId;
+        if (!selectedEdgeId) {
+          return previous;
+        }
+        const [roomId, rawDirection] = selectedEdgeId.split(":");
+        const direction = rawDirection;
+        const room = previous.roomsById[roomId];
+        const exit = room?.exits?.[direction];
+        if (!room || !exit?.targetId) {
+          return previous;
+        }
+        const reverseDirection = oppositeDirection(direction);
+        if (!reverseDirection) {
+          return previous;
+        }
+        const targetRoom = previous.roomsById[exit.targetId];
+        if (!targetRoom) {
+          return previous;
+        }
+        const nextType = updates.type === "special" ? "special" : "spatial";
+        const nextLabel = String(updates.label || "").trim();
+        didUpdate = true;
+        return {
+          ...previous,
+          roomsById: {
+            ...previous.roomsById,
+            [roomId]: {
+              ...room,
+              exits: {
+                ...room.exits,
+                [direction]: {
+                  ...exit,
+                  type: nextType,
+                  label: nextLabel
+                }
+              }
+            },
+            [targetRoom.id]: {
+              ...targetRoom,
+              exits: {
+                ...targetRoom.exits,
+                [reverseDirection]: {
+                  ...targetRoom.exits[reverseDirection] || { targetId: roomId },
+                  targetId: roomId,
+                  type: nextType,
+                  label: nextLabel
+                }
+              }
+            }
+          }
+        };
+      });
+      return didUpdate;
+    }, []);
+    const deleteSelectedEdge = (0, import_react3.useCallback)(() => {
+      let didDelete = false;
+      setStatusMessage(null);
+      setState((previous) => {
+        const selectedEdgeId = previous.selectedEdgeId;
+        if (!selectedEdgeId) {
+          return previous;
+        }
+        const [roomId, rawDirection] = selectedEdgeId.split(":");
+        const direction = rawDirection;
+        const room = previous.roomsById[roomId];
+        const exit = room?.exits?.[direction];
+        const reverseDirection = oppositeDirection(direction);
+        const targetRoom = previous.roomsById[exit?.targetId || ""];
+        if (!room || !exit?.targetId || !reverseDirection || !targetRoom) {
+          return previous;
+        }
+        const nextRoomExits = { ...room.exits };
+        delete nextRoomExits[direction];
+        const nextTargetExits = { ...targetRoom.exits };
+        delete nextTargetExits[reverseDirection];
+        didDelete = true;
+        return {
+          ...previous,
+          selectedEdgeId: null,
+          roomsById: {
+            ...previous.roomsById,
+            [roomId]: {
+              ...room,
+              exits: nextRoomExits
+            },
+            [targetRoom.id]: {
+              ...targetRoom,
+              exits: nextTargetExits
+            }
+          }
+        };
+      });
+      return didDelete;
+    }, []);
+    const value = (0, import_react3.useMemo)(() => ({
+      ...state,
+      layoutMode,
+      isSelectedRoomLocked: Boolean(state.selectedRoomId && state.roomsById[state.selectedRoomId]?.meta?.locked),
+      statusMessage,
+      setMode,
+      previewLayout,
+      applyLayout,
+      clearLayout,
+      toggleSelectedRoomLock,
+      setSelectedRoom,
+      setSelectedEdge,
+      deleteRoom,
+      updateRoomPosition,
+      updateSelectedRoomColor,
+      updateSelectedEdge,
+      deleteSelectedEdge,
+      createRoomAt,
+      tryConnect
+    }), [
+      applyLayout,
+      clearLayout,
+      createRoomAt,
+      deleteRoom,
+      deleteSelectedEdge,
+      layoutMode,
+      previewLayout,
+      setMode,
+      setSelectedEdge,
+      setSelectedRoom,
+      state,
+      statusMessage,
+      toggleSelectedRoomLock,
+      tryConnect,
+      updateRoomPosition,
+      updateSelectedEdge,
+      updateSelectedRoomColor
+    ]);
+    return import_react3.default.createElement(BuilderStoreContext.Provider, { value }, children2);
+  }
+  function useBuilderStore() {
+    const context = (0, import_react3.useContext)(BuilderStoreContext);
+    if (!context) {
+      throw new Error("BuilderStoreProvider is required.");
+    }
+    return context;
+  }
+
+  // web/static/webclient/react/builder/BuilderEdges.tsx
+  var import_react4 = __toESM(require_react());
+  function BuilderDirectionalEdge({
+    id: id2,
+    data,
+    style: style2
+  }) {
+    const { selectedEdgeId } = useBuilderStore();
+    const [isHovered, setIsHovered] = (0, import_react4.useState)(false);
+    const direction = data?.direction || "east";
+    const path = (0, import_react4.useMemo)(
+      () => buildDirectionalPath2(data?.start || { x: 0, y: 0 }, data?.end || { x: 0, y: 0 }, direction),
+      [data?.end, data?.start, direction]
+    );
+    const isSelected = selectedEdgeId === id2;
+    const nextStyle = {
+      ...style2 || {},
+      stroke: isSelected ? "rgba(255, 232, 179, 1)" : isHovered ? "rgba(243, 205, 143, 0.96)" : style2?.stroke || "rgba(214, 184, 122, 0.84)",
+      strokeWidth: isSelected ? 4 : isHovered ? 3.25 : style2?.strokeWidth || 2.5,
+      strokeDasharray: direction === "up" || direction === "down" ? "6 4" : style2?.strokeDasharray,
+      filter: isSelected || isHovered ? "drop-shadow(0 0 6px rgba(255, 227, 173, 0.55))" : void 0,
+      pointerEvents: "auto"
+    };
+    const midpoint = data ? {
+      x: ((data.start?.x || 0) + (data.end?.x || 0)) / 2,
+      y: ((data.start?.y || 0) + (data.end?.y || 0)) / 2
+    } : null;
+    return import_react4.default.createElement(
+      "g",
+      null,
+      import_react4.default.createElement("path", {
+        d: path,
+        fill: "none",
+        style: nextStyle
+      }),
+      import_react4.default.createElement("path", {
+        d: path,
+        fill: "none",
+        stroke: "transparent",
+        strokeWidth: 18,
+        style: { cursor: "pointer", pointerEvents: "stroke" },
+        onMouseEnter: () => setIsHovered(true),
+        onMouseLeave: () => setIsHovered(false)
+      }),
+      data?.label ? import_react4.default.createElement("text", {
+        x: midpoint?.x || 0,
+        y: (midpoint?.y || 0) - 6,
+        textAnchor: "middle",
+        fill: "rgba(245, 232, 206, 0.92)",
+        fontSize: 10,
+        style: { pointerEvents: "none" },
+        children: data.label
+      }) : null
+    );
+  }
+  function buildRenderedBuilderEdges(state, positionsByRoomId = {}) {
+    const renderedEdges = [];
+    const dedupe = /* @__PURE__ */ new Set();
+    const roomIds = Object.keys(state.roomsById).sort();
+    for (const roomId of roomIds) {
+      const room = state.roomsById[roomId];
+      const exits = room?.exits || {};
+      for (const [rawDirection, targetRoomId] of Object.entries(exits)) {
+        const direction = rawDirection;
+        const exit = typeof targetRoomId === "string" ? { targetId: String(targetRoomId || ""), type: "spatial", label: "" } : targetRoomId;
+        const normalizedTargetRoomId = String(exit?.targetId || "");
+        const targetRoom = state.roomsById[normalizedTargetRoomId] || null;
+        const targetDirection = oppositeDirection(direction);
+        if (!targetRoom || !targetDirection) {
+          continue;
+        }
+        const normalizedKey = normalizedConnectionKey(roomId, direction, normalizedTargetRoomId);
+        if (dedupe.has(normalizedKey)) {
+          continue;
+        }
+        dedupe.add(normalizedKey);
+        renderedEdges.push({
+          id: edgeKey(roomId, direction),
+          source: roomId,
+          target: normalizedTargetRoomId,
+          sourceHandle: directionToHandleId(direction),
+          targetHandle: directionToHandleId(targetDirection),
+          type: "builderDirectional",
+          selectable: true,
+          focusable: true,
+          data: {
+            id: edgeKey(roomId, direction),
+            source: roomId,
+            target: normalizedTargetRoomId,
+            direction,
+            dirFrom: directionToHandleId(direction),
+            dirTo: directionToHandleId(targetDirection),
+            type: exit?.type || "spatial",
+            label: exit?.label || "",
+            start: renderedRoomHandleAnchor(
+              positionsByRoomId[roomId] || { x: room.x, y: room.y },
+              direction
+            ),
+            end: renderedRoomHandleAnchor(
+              positionsByRoomId[normalizedTargetRoomId] || { x: targetRoom.x, y: targetRoom.y },
+              targetDirection
+            )
+          },
+          style: {
+            stroke: "rgba(214, 184, 122, 0.6)",
+            strokeWidth: 2.5
+          },
+          interactionWidth: 18
+        });
+      }
+    }
+    return renderedEdges;
+  }
+
+  // web/static/webclient/react/builder/RoomNode.tsx
+  var import_react5 = __toESM(require_react());
+  var HANDLE_LAYOUT = {
+    north: { position: Position.Top, style: { top: 12, left: "50%", transform: "translate(-50%, -50%)" } },
+    east: { position: Position.Right, style: { top: "50%", right: 12, transform: "translate(50%, -50%)" } },
+    south: { position: Position.Bottom, style: { bottom: 12, left: "50%", transform: "translate(-50%, 50%)" } },
+    west: { position: Position.Left, style: { top: "50%", left: 12, transform: "translate(-50%, -50%)" } },
+    northeast: { position: Position.Top, style: { top: 12, right: 12, transform: "translate(50%, -50%)" } },
+    northwest: { position: Position.Top, style: { top: 12, left: 12, transform: "translate(-50%, -50%)" } },
+    southeast: { position: Position.Bottom, style: { bottom: 12, right: 12, transform: "translate(50%, 50%)" } },
+    southwest: { position: Position.Bottom, style: { bottom: 12, left: 12, transform: "translate(-50%, 50%)" } },
+    up: { position: Position.Top, style: { top: 2, left: "50%", transform: "translate(-50%, -50%)" } },
+    down: { position: Position.Bottom, style: { bottom: 2, left: "50%", transform: "translate(-50%, 50%)" } }
+  };
+  var HANDLE_TITLES = {
+    north: "North",
+    east: "East",
+    south: "South",
+    west: "West",
+    northeast: "Northeast",
+    northwest: "Northwest",
+    southeast: "Southeast",
+    southwest: "Southwest",
+    up: "Up",
+    down: "Down"
+  };
+  var OPPOSITE_HANDLE_ID = {
+    n: "s",
+    s: "n",
+    e: "w",
+    w: "e",
+    ne: "sw",
+    sw: "ne",
+    nw: "se",
+    se: "nw",
+    u: "d",
+    d: "u"
+  };
+  function RoomNode({ data }) {
+    const {
+      roomsById,
+      selectedRoomId
+    } = useBuilderStore();
+    const roomId = String(data?.roomId || "");
+    const room = roomsById[roomId];
+    const showLabel = Boolean(data?.showLabel);
+    const isSelected = roomId === selectedRoomId;
+    const isLocked = Boolean(data?.isLocked);
+    const isCorridor = Boolean(data?.isCorridor);
+    const isHub = Boolean(data?.isHub);
+    const roomColor = ROOM_COLORS[data?.color || "standard"] || ROOM_COLORS.standard;
+    const activeSourceHandleId = String(data?.activeSourceHandleId || "").trim() || null;
+    const validTargetHandleId = activeSourceHandleId ? OPPOSITE_HANDLE_ID[activeSourceHandleId] || null : null;
+    return /* @__PURE__ */ import_react5.default.createElement("div", { className: [
+      "builder-phase1-node",
+      isSelected ? "is-selected" : "",
+      isLocked ? "is-locked" : "",
+      isCorridor ? "is-corridor" : "",
+      isHub ? "is-hub" : ""
+    ].filter(Boolean).join(" ") }, BUILDER_DIRECTIONS.map((direction) => {
+      const handleId = directionToHandleId(direction);
+      const handleLayout = HANDLE_LAYOUT[direction];
+      const isSource = Boolean(activeSourceHandleId && activeSourceHandleId === handleId);
+      const isValidTarget = Boolean(validTargetHandleId && validTargetHandleId === handleId);
+      const isDimmed = Boolean(activeSourceHandleId && !isSource && !isValidTarget);
+      return /* @__PURE__ */ import_react5.default.createElement(
+        Handle,
+        {
+          key: direction,
+          id: handleId,
+          type: "source",
+          position: handleLayout.position,
+          className: [
+            "builder-phase1-handle",
+            `is-${direction}`,
+            isSource ? "is-source" : "",
+            isValidTarget ? "is-valid-target" : "",
+            isDimmed ? "is-dimmed" : ""
+          ].filter(Boolean).join(" "),
+          style: handleLayout.style,
+          "data-direction": direction,
+          "data-handle-id": handleId,
+          title: `${HANDLE_TITLES[direction]} (${handleId})`,
+          "aria-label": `${HANDLE_TITLES[direction]} handle`,
+          isConnectable: true
+        }
+      );
+    }), /* @__PURE__ */ import_react5.default.createElement(
+      "div",
+      {
+        className: "builder-phase1-room-body",
+        style: {
+          left: ROOM_BODY_OFFSET,
+          top: ROOM_BODY_OFFSET,
+          width: ROOM_BODY_SIZE,
+          height: ROOM_BODY_SIZE,
+          backgroundColor: roomColor,
+          pointerEvents: "none"
+        },
+        title: room?.id || roomId
+      },
+      /* @__PURE__ */ import_react5.default.createElement("span", { className: `builder-phase1-room-label${showLabel ? "" : " is-hidden-by-zoom"}` }, room?.id || roomId)
+    ));
+  }
+
+  // web/static/webclient/react/builder/BuilderCanvas.tsx
+  var MIN_ZOOM = 0.2;
+  var MAX_ZOOM = 2.5;
+  var LABEL_VISIBILITY_ZOOM = 0.6;
+  function scheduleFitView(reactFlow, duration) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        reactFlow.fitView({ padding: 0.2, includeHiddenNodes: true, duration });
+      });
+    });
+  }
+  function BuilderCanvasSurface({ viewportRequest = null }) {
+    const {
+      applyLayout,
+      clearLayout,
+      createRoomAt,
+      deleteRoom,
+      layoutMode,
+      mode,
+      roomsById,
+      selectedEdgeId,
+      selectedRoomId,
+      setSelectedEdge,
+      setSelectedRoom,
+      updateRoomPosition,
+      tryConnect
+    } = useBuilderStore();
+    const reactFlow = useReactFlow();
+    const nodesInitialized = useNodesInitialized();
+    const lastViewportTokenRef = (0, import_react7.useRef)(null);
+    const lastAutoFitSignatureRef = (0, import_react7.useRef)(null);
+    const shellRef = (0, import_react7.useRef)(null);
+    const [viewportState, setViewportState] = (0, import_react7.useState)({ x: 0, y: 0, zoom: 1 });
+    const [shellSize, setShellSize] = (0, import_react7.useState)({ width: 0, height: 0 });
+    const [zoomLevel, setZoomLevel] = (0, import_react7.useState)(1);
+    const [activeSourceHandleId, setActiveSourceHandleId] = (0, import_react7.useState)(null);
+    (0, import_react7.useEffect)(() => {
+      if (!shellRef.current || typeof ResizeObserver === "undefined") {
+        return void 0;
+      }
+      const observer = new ResizeObserver((entries) => {
+        const nextEntry = entries[0];
+        if (!nextEntry) {
+          return;
+        }
+        setShellSize({
+          width: Math.max(0, Math.round(nextEntry.contentRect.width)),
+          height: Math.max(0, Math.round(nextEntry.contentRect.height))
+        });
+      });
+      observer.observe(shellRef.current);
+      return () => observer.disconnect();
+    }, []);
+    const roomList = (0, import_react7.useMemo)(() => Object.values(roomsById).sort((left, right) => left.id.localeCompare(right.id)), [roomsById]);
+    const baseTransform = (0, import_react7.useMemo)(
+      () => buildGraphRenderTransform(roomList, shellSize.width, shellSize.height),
+      [roomList, shellSize.height, shellSize.width]
+    );
+    const tidyTransform = (0, import_react7.useMemo)(
+      () => buildGraphRenderTransform(roomList, shellSize.width, shellSize.height, { tidy: true }),
+      [roomList, shellSize.height, shellSize.width]
+    );
+    const renderTransform = layoutMode === "applied" ? tidyTransform : baseTransform;
+    const baseNodes = (0, import_react7.useMemo)(() => roomList.map((room) => {
+      const position = renderTransform.positionsByRoomId[room.id] || { x: room.x, y: room.y };
+      const meta = renderTransform.metaByRoomId[room.id];
+      return {
+        id: room.id,
+        type: "builderRoom",
+        draggable: true,
+        dragHandle: ".builder-phase1-node",
+        selectable: true,
+        position,
+        width: ROOM_NODE_SIZE,
+        height: ROOM_NODE_SIZE,
+        data: {
+          roomId: room.id,
+          showLabel: zoomLevel >= LABEL_VISIBILITY_ZOOM,
+          isLocked: Boolean(meta?.locked),
+          isCorridor: Boolean(meta?.isCorridor),
+          isHub: Boolean(meta?.isHub),
+          isPreviewGhost: false,
+          color: room.color || "standard",
+          activeSourceHandleId
+        }
+      };
+    }), [activeSourceHandleId, renderTransform.positionsByRoomId, roomList, zoomLevel]);
+    const [canvasNodes, setCanvasNodes] = (0, import_react7.useState)(baseNodes);
+    (0, import_react7.useEffect)(() => {
+      setCanvasNodes(baseNodes);
+    }, [baseNodes]);
+    const edges = (0, import_react7.useMemo)(() => buildRenderedBuilderEdges({
+      mode,
+      selectedRoomId,
+      selectedEdgeId,
+      connection: { active: false, fromRoomId: null, fromDirection: null },
+      zonePrefix: "",
+      roomsById,
+      roomIdByCoord: {}
+    }, renderTransform.positionsByRoomId), [mode, renderTransform.positionsByRoomId, roomsById, selectedEdgeId, selectedRoomId]);
+    const nodeTypes = (0, import_react7.useMemo)(() => ({ builderRoom: RoomNode }), []);
+    const edgeTypes = (0, import_react7.useMemo)(() => ({ builderDirectional: BuilderDirectionalEdge }), []);
+    (0, import_react7.useEffect)(() => {
+      const onKeyDown = (event) => {
+        if (event.key !== "Escape") {
+          return;
+        }
+        setSelectedEdge(null);
+      };
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
+    }, [setSelectedEdge]);
+    (0, import_react7.useEffect)(() => {
+      if (!canvasNodes.length || !nodesInitialized || !shellSize.width || !shellSize.height) {
+        return;
+      }
+      const signature = `${canvasNodes.length}:${shellSize.width}:${shellSize.height}:${canvasNodes.map((node) => `${node.id}:${Math.round(node.position.x)}:${Math.round(node.position.y)}`).join("|")}`;
+      if (lastAutoFitSignatureRef.current === signature) {
+        return;
+      }
+      lastAutoFitSignatureRef.current = signature;
+      scheduleFitView(reactFlow, 400);
+    }, [canvasNodes, nodesInitialized, reactFlow, shellSize.height, shellSize.width]);
+    (0, import_react7.useEffect)(() => {
+      if (!nodesInitialized) {
+        return;
+      }
+      setZoomLevel(reactFlow.getZoom());
+      setViewportState(reactFlow.getViewport());
+    }, [nodesInitialized, reactFlow]);
+    (0, import_react7.useEffect)(() => {
       if (!viewportRequest?.token) {
         return;
       }
@@ -30777,54 +32340,417 @@ var DragonsireBuilderReactFlow = (() => {
         return;
       }
       lastViewportTokenRef.current = viewportRequest.token;
-      if (viewportRequest.type === "center" && selectedRoomId) {
-        const selectedNode = (nodes || []).find((node) => String(node.id) === String(selectedRoomId));
-        if (selectedNode) {
-          reactFlow.setCenter(selectedNode.position.x, selectedNode.position.y, { duration: 180, zoom: Math.max(reactFlow.getZoom(), DEFAULT_VIEWPORT.zoom) });
-        }
+      if (viewportRequest.type === "fit") {
+        scheduleFitView(reactFlow, 180);
+        return;
       }
-    }, [nodes, reactFlow, selectedRoomId, viewportRequest]);
-    const nodeTypes = (0, import_react3.useMemo)(() => ({ builderRoom: RoomNode }), []);
-    const edgeTypes = (0, import_react3.useMemo)(() => ({ builderDirectional: BuilderDirectionalEdge }), []);
-    return /* @__PURE__ */ import_react3.default.createElement("div", { ref: wrapperRef, style: { width: "100%", height: "100%" } }, /* @__PURE__ */ import_react3.default.createElement(
-      index,
+      if (viewportRequest.type === "center" && selectedRoomId) {
+        const node = canvasNodes.find((candidate) => candidate.id === selectedRoomId);
+        if (!node) {
+          return;
+        }
+        reactFlow.fitView({ nodes: [node], padding: 0.4, duration: 180 });
+        return;
+      }
+      if (viewportRequest.type === "center") {
+        reactFlow.setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 180 });
+      }
+    }, [canvasNodes, reactFlow, selectedRoomId, viewportRequest]);
+    const onPaneClick = (event) => {
+      const flowPosition = reactFlow.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY
+      });
+      const rawPoint = renderToRawPoint(flowPosition.x, flowPosition.y, baseTransform);
+      const logical = canvasToLogical(rawPoint.x, rawPoint.y);
+      if (mode === "room") {
+        createRoomAt(logical.x, logical.y);
+        return;
+      }
+      setSelectedRoom(null);
+      setSelectedEdge(null);
+    };
+    const onNodesChange = (0, import_react7.useMemo)(() => (changes) => {
+      setCanvasNodes((previous) => applyNodeChanges(changes, previous));
+    }, []);
+    const onNodeDragStop = (0, import_react7.useMemo)(() => (_event, node) => {
+      if (mode !== "select") {
+        return;
+      }
+      const rawPoint = renderToRawPoint(node.position.x, node.position.y, renderTransform);
+      const didMove = updateRoomPosition(node.id, rawPoint.x, rawPoint.y);
+      if (didMove && layoutMode !== "none") {
+        clearLayout();
+      }
+    }, [clearLayout, layoutMode, mode, renderTransform, updateRoomPosition]);
+    const onConnect = (0, import_react7.useMemo)(() => (connectionAttempt) => {
+      console.log("CONNECT FIRED:", connectionAttempt);
+      const sourceRoomId = String(connectionAttempt.source || "");
+      const targetRoomId = String(connectionAttempt.target || "");
+      const sourceDirection = handleIdToDirection(String(connectionAttempt.sourceHandle || ""));
+      const targetDirection = handleIdToDirection(String(connectionAttempt.targetHandle || ""));
+      if (!sourceRoomId || !targetRoomId || !sourceDirection || !targetDirection) {
+        return;
+      }
+      tryConnect(sourceRoomId, sourceDirection, targetRoomId, targetDirection);
+    }, [tryConnect]);
+    const previewOverlay = (0, import_react7.useMemo)(() => {
+      if (layoutMode !== "preview" || !shellRef.current) {
+        return null;
+      }
+      const shellBounds = shellRef.current.getBoundingClientRect();
+      const screenPositions = Object.entries(tidyTransform.positionsByRoomId).reduce((accumulator, [roomId, point]) => {
+        const screenPoint = reactFlow.flowToScreenPosition(point);
+        accumulator[roomId] = {
+          x: screenPoint.x - shellBounds.left,
+          y: screenPoint.y - shellBounds.top
+        };
+        return accumulator;
+      }, {});
+      const previewEdges = buildRenderedBuilderEdges({
+        mode,
+        selectedRoomId,
+        selectedEdgeId,
+        connection: { active: false, fromRoomId: null, fromDirection: null },
+        zonePrefix: "",
+        roomsById,
+        roomIdByCoord: {}
+      }, tidyTransform.positionsByRoomId);
+      return { previewEdges, screenPositions };
+    }, [layoutMode, mode, reactFlow, roomsById, selectedEdgeId, selectedRoomId, tidyTransform.positionsByRoomId, viewportState.x, viewportState.y, viewportState.zoom]);
+    return /* @__PURE__ */ import_react7.default.createElement(
+      "div",
       {
-        key: flowKey,
-        className: "builder-reactflow-root",
-        nodes,
-        edges,
-        nodeTypes,
-        edgeTypes,
-        defaultViewport: DEFAULT_VIEWPORT,
-        fitView: Boolean(fitRequestToken),
-        fitViewOptions: { padding: 0.3, includeHiddenNodes: true },
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
-        snapToGrid: true,
-        snapGrid: [gridSize, gridSize],
-        nodesDraggable: true,
-        nodesConnectable: false,
-        elementsSelectable: true,
-        panOnDrag: true,
-        zoomOnScroll: true,
-        onNodeClick: (_, node) => onSelectRoom?.(String(node.id)),
-        onNodeDragStop: (_, node) => {
-          const snappedX = snapToGrid(node?.position?.x, gridSize);
-          const snappedY = snapToGrid(node?.position?.y, gridSize);
-          onMoveRoom?.({
-            roomId: String(node.id),
-            map_x: coordinateMode === "absolute" ? Math.round(snappedX) : Math.round(snappedX / gridSize),
-            map_y: coordinateMode === "absolute" ? Math.round(snappedY) : Math.round(snappedY / gridSize)
-          });
-        },
-        proOptions: { hideAttribution: true }
+        ref: shellRef,
+        className: "builder-phase1-canvas-shell"
       },
-      /* @__PURE__ */ import_react3.default.createElement(Background, { gap: gridSize, size: 1, color: "rgba(214, 176, 97, 0.14)" }),
-      /* @__PURE__ */ import_react3.default.createElement(Controls, { showInteractive: false })
-    ));
+      /* @__PURE__ */ import_react7.default.createElement(
+        index,
+        {
+          className: "builder-reactflow-root builder-phase1-flow",
+          nodes: canvasNodes,
+          edges,
+          nodeTypes,
+          edgeTypes,
+          minZoom: MIN_ZOOM,
+          maxZoom: MAX_ZOOM,
+          fitView: true,
+          fitViewOptions: { padding: 0.2, includeHiddenNodes: true },
+          nodesDraggable: true,
+          nodesConnectable: true,
+          elementsSelectable: true,
+          panOnDrag: false,
+          panOnScroll: false,
+          selectionOnDrag: false,
+          zoomOnScroll: true,
+          zoomOnPinch: true,
+          zoomOnDoubleClick: false,
+          connectionMode: ConnectionMode.Loose,
+          proOptions: { hideAttribution: true },
+          onConnectStart: (_event, params) => {
+            console.log("CONNECT START", params);
+            setActiveSourceHandleId(String(params?.handleId || "") || null);
+          },
+          onConnectEnd: () => {
+            console.log("CONNECT END");
+            setActiveSourceHandleId(null);
+          },
+          onMove: (_event, viewport) => {
+            setZoomLevel(viewport.zoom);
+            setViewportState(viewport);
+          },
+          onNodeClick: (event, node) => {
+            const eventTarget = event.target;
+            if (eventTarget?.closest(".builder-phase1-handle")) {
+              return;
+            }
+            if (mode === "delete") {
+              if (!window.confirm("Delete this room?")) {
+                return;
+              }
+              deleteRoom(node.id);
+              return;
+            }
+            if (mode !== "select") {
+              return;
+            }
+            setSelectedEdge(null);
+            setSelectedRoom(node.id);
+          },
+          onPaneClick,
+          onEdgeClick: (_event, edge) => {
+            setSelectedRoom(null);
+            setSelectedEdge(edge.id);
+          },
+          onConnect,
+          onNodesChange,
+          onNodeDragStart: () => {
+            console.log("DRAG START");
+          },
+          onNodeDrag: () => {
+            console.log("DRAGGING");
+          },
+          onNodeDragStop
+        },
+        /* @__PURE__ */ import_react7.default.createElement(Background, { gap: GRID_SIZE, size: 1, color: "rgba(214, 176, 97, 0.14)" }),
+        /* @__PURE__ */ import_react7.default.createElement(Controls, { showInteractive: false }),
+        /* @__PURE__ */ import_react7.default.createElement(
+          MiniMap,
+          {
+            pannable: true,
+            zoomable: true,
+            position: "bottom-right",
+            style: {
+              background: "rgba(19, 13, 9, 0.94)",
+              border: "1px solid rgba(214, 176, 97, 0.22)"
+            },
+            nodeColor: () => "rgba(214, 176, 97, 0.72)",
+            maskColor: "rgba(8, 8, 7, 0.62)"
+          }
+        )
+      ),
+      previewOverlay ? /* @__PURE__ */ import_react7.default.createElement("div", { className: "builder-phase1-layout-preview", "aria-hidden": "true" }, /* @__PURE__ */ import_react7.default.createElement("svg", { className: "builder-phase1-preview-layer" }, previewOverlay.previewEdges.map((edge) => {
+        const start2 = previewOverlay.screenPositions[edge.source];
+        const end = previewOverlay.screenPositions[edge.target];
+        if (!start2 || !end) {
+          return null;
+        }
+        return /* @__PURE__ */ import_react7.default.createElement(
+          "path",
+          {
+            key: `preview-${edge.id}`,
+            d: buildDirectionalPath(start2, end, edge.data?.direction || "east"),
+            className: "builder-phase1-preview-line is-layout-preview"
+          }
+        );
+      })), roomList.map((room) => {
+        const point = previewOverlay.screenPositions[room.id];
+        const meta = tidyTransform.metaByRoomId[room.id];
+        if (!point) {
+          return null;
+        }
+        return /* @__PURE__ */ import_react7.default.createElement(
+          "div",
+          {
+            key: `ghost-${room.id}`,
+            className: `builder-phase1-ghost-node${meta?.locked ? " is-locked" : ""}${meta?.isHub ? " is-hub" : ""}${meta?.isCorridor ? " is-corridor" : ""}`,
+            style: {
+              left: point.x - ROOM_NODE_SIZE / 2,
+              top: point.y - ROOM_NODE_SIZE / 2,
+              width: ROOM_NODE_SIZE,
+              height: ROOM_NODE_SIZE
+            }
+          }
+        );
+      })) : null
+    );
   }
-  function BuilderMap(props) {
-    return /* @__PURE__ */ import_react3.default.createElement("div", { style: { width: "100%", height: "100%" } }, /* @__PURE__ */ import_react3.default.createElement(ReactFlowProvider, null, /* @__PURE__ */ import_react3.default.createElement(BuilderMapSurface, { ...props })));
+  function BuilderCanvas(props) {
+    return /* @__PURE__ */ import_react7.default.createElement(ReactFlowProvider, null, /* @__PURE__ */ import_react7.default.createElement(BuilderCanvasSurface, { ...props }));
+  }
+
+  // web/static/webclient/react/builder/BuilderToolbar.tsx
+  var import_react9 = __toESM(require_react());
+  var MODES = [
+    { mode: "select", label: "\u2316" },
+    { mode: "room", label: "+" },
+    { mode: "delete", label: "D" }
+  ];
+  var MODE_TITLES = {
+    select: "Select",
+    room: "Room",
+    connect: "Connect",
+    delete: "Delete"
+  };
+  function BuilderToolbar() {
+    const {
+      applyLayout,
+      clearLayout,
+      isSelectedRoomLocked,
+      layoutMode,
+      mode,
+      previewLayout,
+      selectedRoomId,
+      setMode,
+      statusMessage,
+      toggleSelectedRoomLock
+    } = useBuilderStore();
+    let statusText = `MODE: ${String(mode || "select").toUpperCase()}`;
+    if (statusMessage) {
+      statusText = statusMessage;
+    }
+    if (layoutMode === "preview") {
+      statusText = "Previewing tidy layout ghost positions.";
+    } else if (layoutMode === "applied") {
+      statusText = "Tidy layout applied in the canvas view.";
+    }
+    if (selectedRoomId && isSelectedRoomLocked) {
+      statusText = `${selectedRoomId} is locked from tidy movement.`;
+    }
+    return /* @__PURE__ */ import_react9.default.createElement("div", { className: "builder-phase1-toolbar" }, /* @__PURE__ */ import_react9.default.createElement("div", { className: "builder-phase1-toolbar-buttons" }, MODES.map(({ mode: nextMode, label }) => /* @__PURE__ */ import_react9.default.createElement(
+      "button",
+      {
+        key: nextMode,
+        type: "button",
+        className: `builder-phase1-mode-button${mode === nextMode ? " is-active" : ""}`,
+        onClick: () => setMode(nextMode),
+        title: MODE_TITLES[nextMode],
+        "aria-label": MODE_TITLES[nextMode]
+      },
+      label
+    )), /* @__PURE__ */ import_react9.default.createElement(
+      "button",
+      {
+        type: "button",
+        className: `builder-phase1-tool-button${layoutMode === "preview" ? " is-active" : ""}`,
+        onClick: previewLayout,
+        title: "Preview Tidy",
+        "aria-label": "Preview Tidy"
+      },
+      "Preview"
+    ), /* @__PURE__ */ import_react9.default.createElement(
+      "button",
+      {
+        type: "button",
+        className: `builder-phase1-tool-button${layoutMode === "applied" ? " is-active" : ""}`,
+        onClick: applyLayout,
+        title: "Tidy",
+        "aria-label": "Tidy"
+      },
+      "Tidy"
+    ), /* @__PURE__ */ import_react9.default.createElement(
+      "button",
+      {
+        type: "button",
+        className: "builder-phase1-tool-button",
+        onClick: clearLayout,
+        title: "Reset Layout",
+        "aria-label": "Reset Layout"
+      },
+      "Reset"
+    ), /* @__PURE__ */ import_react9.default.createElement(
+      "button",
+      {
+        type: "button",
+        className: `builder-phase1-tool-button${isSelectedRoomLocked ? " is-active" : ""}`,
+        onClick: toggleSelectedRoomLock,
+        title: "Lock Selected",
+        "aria-label": "Lock Selected",
+        disabled: !selectedRoomId
+      },
+      "Lock"
+    )), /* @__PURE__ */ import_react9.default.createElement("div", { className: "builder-phase1-status", "aria-live": "polite" }, statusText));
+  }
+
+  // web/static/webclient/react/BuilderMap.jsx
+  function BuilderBridge({ bridgeApi = null }) {
+    const {
+      deleteSelectedEdge,
+      updateSelectedEdge,
+      updateSelectedRoomColor
+    } = useBuilderStore();
+    (0, import_react10.useEffect)(() => {
+      if (!bridgeApi) {
+        return void 0;
+      }
+      bridgeApi.setSelectedRoomColor = (color2) => {
+        updateSelectedRoomColor(String(color2 || "standard"));
+      };
+      bridgeApi.updateSelectedEdge = (updates) => {
+        updateSelectedEdge(updates || {});
+      };
+      bridgeApi.deleteSelectedEdge = () => {
+        deleteSelectedEdge();
+      };
+      return () => {
+        delete bridgeApi.setSelectedRoomColor;
+        delete bridgeApi.updateSelectedEdge;
+        delete bridgeApi.deleteSelectedEdge;
+      };
+    }, [bridgeApi, deleteSelectedEdge, updateSelectedEdge, updateSelectedRoomColor]);
+    return null;
+  }
+  function normalizeInitialRooms(zonePrefix, rooms = []) {
+    return (Array.isArray(rooms) ? rooms : []).map((room, index2) => {
+      const roomId = String(room?.id || `${zonePrefix}_${index2}_0`);
+      return {
+        id: roomId,
+        x: Math.round(Number(room?.map?.x ?? room?.map_x ?? room?.x ?? 0) || 0),
+        y: Math.round(Number(room?.map?.y ?? room?.map_y ?? room?.y ?? 0) || 0),
+        exits: Object.entries(room?.exitMap || room?.exits || {}).reduce((accumulator, [direction, spec]) => {
+          const targetId = typeof spec === "string" ? String(spec || "") : String(spec?.target_id || spec?.target || "");
+          if (targetId) {
+            accumulator[String(direction || "").toLowerCase()] = {
+              targetId,
+              type: String(spec?.label || "").trim() ? "special" : "spatial",
+              label: String(spec?.label || "")
+            };
+          }
+          return accumulator;
+        }, {}),
+        color: String(room?.color || "standard")
+      };
+    });
+  }
+  function BuilderMap({
+    zone = null,
+    zonePrefix = "ZONE",
+    selectedRoomId = null,
+    viewportRequest = null,
+    onBuilderStateChange,
+    bridgeApi = null
+  }) {
+    const initialRooms = (0, import_react10.useMemo)(() => normalizeInitialRooms(zonePrefix, zone?.rooms || []), [zone?.rooms, zonePrefix]);
+    const resetKey = String(zone?.zone_id || zonePrefix || "builder-phase1");
+    const handleBuilderStateChange = (0, import_react10.useCallback)((state) => {
+      const renderedEdges = buildRenderedBuilderEdges(state);
+      const selectedEdge = renderedEdges.find((edge) => edge.id === state.selectedEdgeId) || null;
+      const rooms = Object.values(state.roomsById).sort((left, right) => left.id.localeCompare(right.id)).map((room) => ({
+        id: room.id,
+        x: room.x,
+        y: room.y,
+        exits: Object.entries(room.exits || {}).reduce((accumulator, [direction, spec]) => {
+          accumulator[direction] = {
+            targetId: spec?.targetId || "",
+            type: spec?.type || "spatial",
+            label: spec?.label || ""
+          };
+          return accumulator;
+        }, {}),
+        color: room.color || "standard",
+        meta: { ...room.meta || {} }
+      }));
+      onBuilderStateChange?.({
+        state,
+        rooms,
+        selectedRoomId: state.selectedRoomId,
+        edgeCount: renderedEdges.length,
+        selectedEdge: selectedEdge ? {
+          id: selectedEdge.id,
+          source: selectedEdge.source,
+          target: selectedEdge.target,
+          direction: selectedEdge.data?.direction || null,
+          dirFrom: selectedEdge.data?.dirFrom || null,
+          dirTo: selectedEdge.data?.dirTo || null,
+          type: selectedEdge.data?.type || "spatial",
+          label: selectedEdge.data?.label || ""
+        } : null
+      });
+    }, [onBuilderStateChange]);
+    return /* @__PURE__ */ import_react10.default.createElement("div", { className: "builder-phase1-root" }, /* @__PURE__ */ import_react10.default.createElement(
+      BuilderStoreProvider,
+      {
+        key: resetKey,
+        zonePrefix,
+        initialRooms,
+        initialSelectedRoomId: selectedRoomId,
+        resetKey,
+        onStateChange: handleBuilderStateChange
+      },
+      /* @__PURE__ */ import_react10.default.createElement(BuilderBridge, { bridgeApi }),
+      /* @__PURE__ */ import_react10.default.createElement(BuilderToolbar, null),
+      /* @__PURE__ */ import_react10.default.createElement(BuilderCanvas, { viewportRequest })
+    ));
   }
 
   // web/static/webclient/react/builderReactFlowEntry.jsx
@@ -30835,11 +32761,23 @@ var DragonsireBuilderReactFlow = (() => {
     }
     let record = roots.get(container);
     if (!record) {
-      record = { root: (0, import_client.createRoot)(container) };
+      record = { root: (0, import_client.createRoot)(container), bridgeApi: {} };
       roots.set(container, record);
     }
-    record.root.render(/* @__PURE__ */ import_react5.default.createElement(BuilderMap, { ...props }));
+    record.root.render(/* @__PURE__ */ import_react11.default.createElement(BuilderMap, { ...props, bridgeApi: record.bridgeApi }));
     return record;
+  }
+  function setBuilderReactFlowSelectedRoomColor(container, color2) {
+    const record = container ? roots.get(container) : null;
+    record?.bridgeApi?.setSelectedRoomColor?.(color2);
+  }
+  function updateBuilderReactFlowSelectedEdge(container, updates) {
+    const record = container ? roots.get(container) : null;
+    record?.bridgeApi?.updateSelectedEdge?.(updates || {});
+  }
+  function deleteBuilderReactFlowSelectedEdge(container) {
+    const record = container ? roots.get(container) : null;
+    record?.bridgeApi?.deleteSelectedEdge?.();
   }
   function unmountBuilderReactFlow(container) {
     const record = container ? roots.get(container) : null;

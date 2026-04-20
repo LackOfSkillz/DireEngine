@@ -2082,7 +2082,7 @@ body {
 
 #main-layout {
   display: grid !important;
-  grid-template-columns: 260px minmax(0, 1fr) 320px !important;
+  grid-template-columns: 220px minmax(0, 1fr) 280px !important;
   gap: 16px !important;
   width: 100%;
   flex: 1 1 auto !important;
@@ -2117,7 +2117,7 @@ body {
 
 #feed-body {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 340px !important;
+  grid-template-columns: minmax(0, 1fr) 280px !important;
   gap: 16px !important;
   height: 100%;
   min-height: 0 !important;
@@ -2402,12 +2402,12 @@ body {
 }
 
 #mode-play[data-shell-fit="scaled"] #main-layout {
-  grid-template-columns: 260px minmax(0, 1fr) 320px !important;
+  grid-template-columns: 220px minmax(0, 1fr) 280px !important;
   height: auto !important;
 }
 
 #mode-play[data-shell-fit="scaled"] #feed-body {
-  grid-template-columns: minmax(0, 1fr) 340px !important;
+  grid-template-columns: minmax(0, 1fr) 280px !important;
 }
 
 #mode-play[data-shell-fit="scaled"] #left-sidebar,
@@ -2966,7 +2966,7 @@ body {
 #builder-map-panel {
   order: 1;
   flex: 1 1 auto;
-  min-height: 100%;
+  min-height: clamp(520px, 72vh, 940px);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -3086,6 +3086,283 @@ body {
   height: 100%;
   color: #bea47c;
   font-size: 12px;
+}
+
+.builder-phase1-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.builder-phase1-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(214, 176, 97, 0.16);
+  background: linear-gradient(180deg, rgba(23, 16, 11, 0.94), rgba(14, 10, 7, 0.9));
+}
+
+.builder-phase1-toolbar-buttons {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.builder-phase1-mode-button {
+  min-width: 40px;
+  width: 40px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(214, 176, 97, 0.22);
+  background: rgba(27, 18, 12, 0.9);
+  color: #d7c3a0;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.builder-phase1-tool-button {
+  min-width: 58px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(214, 176, 97, 0.22);
+  background: rgba(27, 18, 12, 0.9);
+  color: #d7c3a0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.builder-phase1-tool-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.builder-phase1-mode-button.is-active {
+  background: rgba(102, 69, 24, 0.95);
+  border-color: rgba(244, 210, 156, 0.58);
+  color: #fff1d5;
+  box-shadow: 0 0 0 1px rgba(255, 230, 187, 0.12), inset 0 1px 0 rgba(255, 240, 216, 0.08);
+}
+
+.builder-phase1-tool-button.is-active {
+  background: rgba(102, 69, 24, 0.95);
+  border-color: rgba(244, 210, 156, 0.58);
+  color: #fff1d5;
+  box-shadow: 0 0 0 1px rgba(255, 230, 187, 0.12), inset 0 1px 0 rgba(255, 240, 216, 0.08);
+}
+
+.builder-phase1-status {
+  color: #e0cfb1;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: right;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.builder-phase1-canvas-shell {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.builder-phase1-flow {
+  width: 100%;
+  height: 100%;
+}
+
+.builder-phase1-node {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  cursor: grab;
+}
+
+.builder-reactflow-root .react-flow__node {
+  transition: none;
+}
+
+.builder-reactflow-root .react-flow__node.dragging .builder-phase1-node {
+  cursor: grabbing;
+}
+
+.builder-phase1-room-body {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(53, 33, 14, 0.95);
+  background: linear-gradient(180deg, rgba(96, 143, 87, 0.94), rgba(72, 110, 64, 0.94));
+  box-shadow: 0 0 0 1px rgba(255, 224, 170, 0.08), 0 6px 16px rgba(0, 0, 0, 0.34);
+  color: #fff3dd;
+  cursor: pointer;
+}
+
+.builder-phase1-node.is-selected .builder-phase1-room-body {
+  box-shadow: 0 0 0 2px rgba(253, 230, 179, 0.5), 0 8px 18px rgba(0, 0, 0, 0.42);
+}
+
+.builder-phase1-node.is-corridor .builder-phase1-room-body {
+  background: linear-gradient(180deg, rgba(88, 132, 79, 0.94), rgba(60, 92, 54, 0.94));
+}
+
+.builder-phase1-node.is-hub .builder-phase1-room-body {
+  background: linear-gradient(180deg, rgba(123, 112, 67, 0.96), rgba(86, 76, 40, 0.96));
+}
+
+.builder-phase1-node.is-locked .builder-phase1-room-body {
+  border-color: rgba(245, 217, 161, 0.9);
+  box-shadow: 0 0 0 2px rgba(255, 230, 187, 0.16), 0 6px 18px rgba(0, 0, 0, 0.34);
+}
+
+.builder-phase1-room-label {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(14, 10, 7, 0.92);
+  border: 1px solid rgba(214, 176, 97, 0.3);
+  color: #f1e2c6;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.builder-phase1-room-label.is-hidden-by-zoom {
+  opacity: 0;
+}
+
+.builder-phase1-node:hover .builder-phase1-room-label.is-hidden-by-zoom {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.builder-phase1-handle {
+  position: absolute;
+  z-index: 3;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 231, 195, 0.55);
+  background: rgba(112, 82, 34, 0.96);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease, box-shadow 120ms ease;
+}
+
+.builder-phase1-handle:hover {
+  transform: scale(1.2);
+  filter: brightness(1.16);
+}
+
+.builder-phase1-handle:active {
+  animation: builder-phase1-handle-pulse 160ms ease-out;
+}
+
+.builder-phase1-handle.is-source {
+  background: rgba(214, 176, 97, 1);
+  border-color: rgba(255, 244, 222, 0.92);
+  box-shadow: 0 0 0 2px rgba(255, 228, 179, 0.22), 0 0 14px rgba(214, 176, 97, 0.46);
+}
+
+.builder-phase1-handle.is-valid-target {
+  background: rgba(183, 139, 62, 1);
+  border-color: rgba(255, 241, 217, 0.88);
+  box-shadow: 0 0 0 2px rgba(255, 228, 179, 0.2), 0 0 14px rgba(214, 176, 97, 0.42);
+  transform: scale(1.3);
+}
+
+.builder-phase1-handle.is-dimmed {
+  opacity: 0.12;
+  filter: grayscale(0.35);
+}
+
+.builder-phase1-preview-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.builder-phase1-preview-line {
+  fill: none;
+  stroke: rgba(255, 227, 173, 0.92);
+  stroke-width: 3;
+  stroke-dasharray: 8 6;
+  filter: drop-shadow(0 0 6px rgba(255, 227, 173, 0.34));
+}
+
+.builder-phase1-preview-line.is-layout-preview {
+  stroke: rgba(132, 187, 255, 0.62);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+
+.builder-phase1-layout-preview {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.builder-phase1-ghost-node {
+  position: absolute;
+  border-radius: 10px;
+  border: 1px dashed rgba(132, 187, 255, 0.62);
+  background: rgba(51, 77, 111, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(180, 214, 255, 0.12);
+}
+
+.builder-phase1-ghost-node.is-corridor {
+  border-color: rgba(159, 219, 173, 0.56);
+}
+
+.builder-phase1-ghost-node.is-hub {
+  border-color: rgba(248, 214, 145, 0.7);
+}
+
+.builder-phase1-ghost-node.is-locked {
+  border-style: solid;
+  border-color: rgba(255, 240, 206, 0.72);
+}
+
+.builder-reactflow-root .react-flow__minimap {
+  opacity: 0.92;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+@keyframes builder-phase1-handle-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 #save-room {

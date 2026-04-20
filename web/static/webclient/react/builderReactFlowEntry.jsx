@@ -10,11 +10,26 @@ export function mountBuilderReactFlow(container, props) {
   }
   let record = roots.get(container);
   if (!record) {
-    record = { root: createRoot(container) };
+    record = { root: createRoot(container), bridgeApi: {} };
     roots.set(container, record);
   }
-  record.root.render(<BuilderMap {...props} />);
+  record.root.render(<BuilderMap {...props} bridgeApi={record.bridgeApi} />);
   return record;
+}
+
+export function setBuilderReactFlowSelectedRoomColor(container, color) {
+  const record = container ? roots.get(container) : null;
+  record?.bridgeApi?.setSelectedRoomColor?.(color);
+}
+
+export function updateBuilderReactFlowSelectedEdge(container, updates) {
+  const record = container ? roots.get(container) : null;
+  record?.bridgeApi?.updateSelectedEdge?.(updates || {});
+}
+
+export function deleteBuilderReactFlowSelectedEdge(container) {
+  const record = container ? roots.get(container) : null;
+  record?.bridgeApi?.deleteSelectedEdge?.();
 }
 
 export function unmountBuilderReactFlow(container) {

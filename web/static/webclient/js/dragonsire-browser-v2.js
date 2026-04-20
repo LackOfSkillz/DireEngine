@@ -192,6 +192,7 @@
     reviewGraph: null,
     reviewEdgePositions: [],
     reviewSelectedEdgeId: null,
+    builderSelectedEdge: null,
     reviewImageUrl: "",
     reviewImage: null,
     reviewImageLoaded: false,
@@ -506,6 +507,7 @@
       exits,
       exitMap,
       environment: String(room?.environment || "city").trim().toLowerCase() || "city",
+      color: String(room?.color || "standard").trim().toLowerCase() || "standard",
     };
   }
 
@@ -909,6 +911,9 @@
     if (byId("room-environment")) {
       byId("room-environment").value = "city";
     }
+    if (byId("room-color")) {
+      byId("room-color").value = "standard";
+    }
     if (byId("room-map-x")) {
       byId("room-map-x").value = "0";
     }
@@ -995,12 +1000,38 @@
         messages: collectBuilderAmbientMessages(),
       },
       environment: byId("room-environment")?.value || "city",
+      color: String(byId("room-color")?.value || builderState.currentRoom?.color || "standard").trim().toLowerCase() || "standard",
       exits: collectBuilderExits(),
       zone_id: normalizeBuilderZoneId(byId("room-zone")?.value || builderState.currentRoom?.zone_id || builderState.currentZoneId || ""),
       map_x: Number.parseInt(byId("room-map-x")?.value || `${builderState.currentRoom?.map?.x ?? builderState.currentRoom?.map_x ?? builderState.currentRoom?.x ?? 0}`, 10) || 0,
       map_y: Number.parseInt(byId("room-map-y")?.value || `${builderState.currentRoom?.map?.y ?? builderState.currentRoom?.map_y ?? builderState.currentRoom?.y ?? 0}`, 10) || 0,
       map_layer: Number.parseInt(byId("room-map-layer")?.value || `${builderState.currentRoom?.map?.layer ?? builderState.currentRoom?.map_layer ?? 0}`, 10) || 0,
     };
+  }
+
+  function ensureBuilderRoomColorField() {
+    if (byId("room-color")) {
+      return;
+    }
+    const environmentField = byId("room-environment")?.closest(".builder-field");
+    if (!environmentField) {
+      return;
+    }
+    environmentField.insertAdjacentHTML("afterend", `
+      <label class="builder-field" for="room-color">
+        <span class="builder-label">Room Color</span>
+        <select id="room-color">
+          <option value="standard">standard</option>
+          <option value="poi">poi</option>
+          <option value="shop">shop</option>
+          <option value="training">training</option>
+          <option value="portal">portal</option>
+          <option value="home">home</option>
+          <option value="water">water</option>
+          <option value="underwater">underwater</option>
+        </select>
+      </label>
+    `);
   }
 
   function renderBuilderStatefulDescList(statefulDescs = {}) {
@@ -1240,6 +1271,8 @@
       direction: direction || fallbackDirection,
       target_id: targetId,
       target_name: exit?.target_name || (targetId ? roomNameById(targetId) : ""),
+      type: String(exit?.type || (exit?.label ? "special" : "spatial")).trim().toLowerCase() === "special" ? "special" : "spatial",
+      label: String(exit?.label || "").trim(),
       typeclass: normalizeExitTypeclass(exit?.typeclass),
       speed: String(exit?.speed || "").trim().toLowerCase(),
       travel_time: Math.max(0, Number.parseInt(exit?.travel_time ?? 0, 10) || 0),
@@ -1732,6 +1765,7 @@
       room_states: overrides.room_states ?? baseRoom.room_states ?? [],
       ambient: overrides.ambient ?? baseRoom.ambient ?? { rate: 0, messages: [] },
       environment: overrides.environment ?? baseRoom.environment ?? "city",
+      color: overrides.color ?? baseRoom.color ?? "standard",
       exits: overrides.exits ?? overrides.exitMap ?? baseRoom.exitMap ?? {},
       zone_id: overrides.zone_id ?? baseRoom.zone_id ?? builderState.currentZoneId ?? "",
       map_x: coerceBuilderCoordinate(overrides.map_x ?? baseRoom.map?.x ?? baseRoom.map_x ?? baseRoom.x ?? 0),
@@ -1838,42 +1872,239 @@
     setBuilderPageStatus(`Connected ${roomNameById(fromRoom.id)} ${direction} to ${roomNameById(toRoom.id)}. Save zone to persist.`);
   }
 
+  function deriveBuilderZonePrefix(zoneId) {
+    const cleaned = String(zoneId || "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "");
+    return cleaned.slice(0, 3) || "ZONE";
+  }
+
+  function builderPhaseOneRoomSignature(rooms = []) {
+    return (Array.isArray(rooms) ? rooms : [])
+      .map((room) => {
+        const roomId = builderRoomKey(room?.id || "");
+        const mapX = Number(room?.x ?? room?.map?.x ?? room?.map_x ?? 0) || 0;
+        const mapY = Number(room?.y ?? room?.map?.y ?? room?.map_y ?? 0) || 0;
+        const color = String(room?.color || "standard").trim().toLowerCase() || "standard";
+        const exits = Object.entries(room?.exits || room?.exitMap || {})
+          .map(([direction, targetId]) => {
+            const normalizedTargetId = typeof targetId === "string"
+              ? builderRoomKey(targetId)
+              : builderRoomKey(targetId?.target_id || targetId?.target || "");
+            const type = typeof targetId === "string" ? "spatial" : String(targetId?.type || (targetId?.label ? "special" : "spatial")).trim().toLowerCase();
+            const label = typeof targetId === "string" ? "" : String(targetId?.label || "").trim();
+            return `${canonicalExitDirection(direction || "")}:${normalizedTargetId}:${type}:${label}`;
+          })
+          .filter((entry) => entry && !entry.startsWith(":"))
+          .sort()
+          .join(",");
+        return `${roomId}@${mapX},${mapY}:${color}[${exits}]`;
+      })
+      .sort()
+      .join("|");
+  }
+
+  function clearBuilderRoomSelection() {
+    builderState.currentRoomId = null;
+    builderState.selectedRoom = null;
+    builderState.currentRoom = null;
+    builderState.builderSelectedEdge = null;
+    window.localStorage.removeItem(BUILDER_LAST_ROOM_STORAGE_KEY);
+    highlightSelectedBuilderRoom();
+    renderBuilderRoomList();
+    if (byId("room-name")) {
+      byId("room-name").value = "";
+    }
+    if (byId("room-short-desc")) {
+      byId("room-short-desc").value = "";
+    }
+    if (byId("room-desc")) {
+      byId("room-desc").value = "";
+    }
+    if (byId("room-active-states")) {
+      byId("room-active-states").value = "";
+    }
+    if (byId("room-ambient-rate")) {
+      byId("room-ambient-rate").value = "0";
+    }
+    if (byId("room-ambient-messages")) {
+      byId("room-ambient-messages").value = "";
+    }
+    if (byId("room-color")) {
+      byId("room-color").value = "standard";
+    }
+    renderBuilderStatefulDescList({});
+    renderBuilderDetailList({});
+    renderBuilderExitList([]);
+    if (byId("review-edge-selection")) {
+      byId("review-edge-selection").textContent = "No edge selected";
+    }
+    if (byId("review-edge-label")) {
+      byId("review-edge-label").value = "";
+      byId("review-edge-label").disabled = true;
+    }
+    if (byId("review-edge-type")) {
+      byId("review-edge-type").value = "spatial";
+      byId("review-edge-type").disabled = true;
+    }
+    if (byId("review-edge-apply")) {
+      byId("review-edge-apply").disabled = true;
+    }
+    if (byId("review-edge-delete")) {
+      byId("review-edge-delete").disabled = true;
+    }
+    renderBuilderPreview(null);
+    if (byId("builder-map-room-name")) {
+      byId("builder-map-room-name").textContent = "Awaiting room data";
+    }
+    setBuilderPageStatus("Selection cleared.");
+    renderZoneMap();
+  }
+
+  function syncBuilderPhaseOneEdgeInspector(selectedEdge = null) {
+    builderState.builderSelectedEdge = selectedEdge ? { ...selectedEdge } : null;
+    window.builderSelectedEdge = selectedEdge ? selectedEdge.id : null;
+    if (byId("review-edge-selection")) {
+      byId("review-edge-selection").textContent = selectedEdge
+        ? `${selectedEdge.source} -> ${selectedEdge.target} (${selectedEdge.direction || "unknown"})`
+        : "No edge selected";
+    }
+    if (byId("review-edge-type")) {
+      byId("review-edge-type").value = selectedEdge?.type || "spatial";
+      byId("review-edge-type").disabled = !selectedEdge;
+    }
+    if (byId("review-edge-label")) {
+      byId("review-edge-label").value = selectedEdge?.label || "";
+      byId("review-edge-label").disabled = !selectedEdge || selectedEdge?.type !== "special";
+    }
+    if (byId("review-edge-apply")) {
+      byId("review-edge-apply").disabled = !selectedEdge;
+    }
+    if (byId("review-edge-delete")) {
+      byId("review-edge-delete").disabled = !selectedEdge;
+    }
+  }
+
+  function syncBuilderPhaseOneRooms(roomDrafts = []) {
+    if (!builderState.zone) {
+      return false;
+    }
+
+    const existingSignature = builderPhaseOneRoomSignature(builderState.zone.rooms || []);
+    const nextSignature = builderPhaseOneRoomSignature(roomDrafts);
+    if (existingSignature === nextSignature) {
+      return false;
+    }
+
+    const zoneId = normalizeBuilderZoneId(builderState.currentZoneId || builderState.zone?.zone_id || "");
+    const nextRooms = (Array.isArray(roomDrafts) ? roomDrafts : [])
+      .slice()
+      .sort((left, right) => builderRoomKey(left.id).localeCompare(builderRoomKey(right.id)))
+      .map((roomDraft, index) => {
+        const existingRoom = builderState.roomMap[builderRoomKey(roomDraft.id)] || {};
+        const exits = Object.entries(roomDraft.exits || {}).map(([direction, targetId]) => ({
+          direction: canonicalExitDirection(direction || "") || direction,
+          target_id: builderRoomKey(typeof targetId === "string" ? targetId : targetId?.targetId || ""),
+          type: typeof targetId === "string" ? "spatial" : String(targetId?.type || "spatial").trim().toLowerCase(),
+          label: typeof targetId === "string" ? "" : String(targetId?.label || "").trim(),
+          typeclass: DEFAULT_SLOW_EXIT_TYPECLASS,
+          speed: "walk",
+          travel_time: 5,
+        }));
+
+        return normalizeBuilderYamlRoom({
+          ...existingRoom,
+          id: builderRoomKey(roomDraft.id),
+          name: existingRoom.name || builderRoomKey(roomDraft.id),
+          zone_id: zoneId,
+          color: String(roomDraft.color || existingRoom.color || "standard"),
+          map_x: Math.round(Number(roomDraft.x) || 0),
+          map_y: Math.round(Number(roomDraft.y) || 0),
+          map: {
+            x: Math.round(Number(roomDraft.x) || 0),
+            y: Math.round(Number(roomDraft.y) || 0),
+            layer: Number(existingRoom.map?.layer ?? existingRoom.map_layer ?? 0) || 0,
+          },
+          exits,
+        }, index, zoneId);
+      });
+
+    builderState.zone.rooms = nextRooms;
+    rebuildBuilderRoomIndexes();
+    setBuilderDirty(true);
+    return true;
+  }
+
   function renderBuilderReactFlowMap(zone) {
     const root = builderReactFlowRoot();
     if (!root || !window.DragonsireBuilderReactFlow?.mountBuilderReactFlow) {
       return false;
     }
-    const { nodes, edges, coordinateConfig } = buildFlowGraph(zone, builderState.currentRoomId);
-    logBuilderReactFlowBounds(zone?.zone_id || builderState.currentZoneId || "", nodes, coordinateConfig);
     const currentRoom = (zone?.rooms || []).find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
     window.DragonsireBuilderReactFlow.mountBuilderReactFlow(root, {
-      nodes,
-      edges,
+      zone,
+      zonePrefix: deriveBuilderZonePrefix(zone?.zone_id || builderState.currentZoneId || ""),
       selectedRoomId: builderRoomKey(builderState.currentRoomId),
       viewportRequest: builderState.reactFlowViewportRequest,
-      gridSize: coordinateConfig.gridSize,
-      coordinateMode: coordinateConfig.mode,
-      onSelectRoom: (roomId) => {
-        const normalizedRoomId = builderRoomKey(roomId);
-        if (!normalizedRoomId || normalizedRoomId === builderRoomKey(builderState.currentRoomId)) {
+      onBuilderStateChange: ({ rooms, selectedRoomId, edgeCount, selectedEdge }) => {
+        const roomsChanged = syncBuilderPhaseOneRooms(rooms);
+        if (selectedRoomId && builderRoomKey(selectedRoomId) !== builderRoomKey(builderState.currentRoomId)) {
+          void loadBuilderRoom(selectedRoomId).catch((error) => {
+            console.error(error);
+            setBuilderPageStatus(error.message || "Unable to load room.");
+          });
+        } else if (!selectedRoomId && builderState.currentRoomId && !selectedEdge) {
+          clearBuilderRoomSelection();
           return;
+        } else if (!selectedRoomId && builderState.currentRoomId && selectedEdge) {
+          builderState.currentRoomId = null;
+          builderState.selectedRoom = null;
+          builderState.currentRoom = null;
+          window.localStorage.removeItem(BUILDER_LAST_ROOM_STORAGE_KEY);
+          highlightSelectedBuilderRoom();
+          renderBuilderRoomList();
+        } else if (roomsChanged) {
+          renderBuilderRoomList();
         }
-        void loadBuilderRoom(normalizedRoomId).catch((error) => {
-          console.error(error);
-          setBuilderPageStatus(error.message || "Unable to load room.");
-        });
-      },
-      onMoveRoom: ({ roomId, map_x, map_y }) => {
-        void persistBuilderRoomCoordinates(roomId, map_x, map_y).catch((error) => {
-          console.error(error);
-          setBuilderPageStatus(error.message || "Unable to move room.");
-          renderZoneMap();
-        });
+
+        syncBuilderPhaseOneEdgeInspector(selectedEdge || null);
+        updateBuilderMapMeta(rooms, Array.from({ length: Number(edgeCount) || 0 }));
+        if (byId("builder-map-room-name")) {
+          const selectedRoom = selectedRoomId ? builderRoomById(selectedRoomId) : currentRoom;
+          byId("builder-map-room-name").textContent = selectedRoom ? selectedRoom.name : "Awaiting room data";
+        }
       },
     });
-    updateBuilderMapMeta(nodes, edges);
+    const initialRooms = normalizeBuilderZoneRooms(zone?.rooms || []);
+    const initialEdgeSummary = buildBuilderEdgeSummary(initialRooms, zone?.edges || []);
+    syncBuilderPhaseOneEdgeInspector(null);
+    updateBuilderMapMeta(initialRooms, initialEdgeSummary.edges || []);
     byId("builder-map-room-name").textContent = currentRoom ? currentRoom.name : "Awaiting room data";
     return true;
+  }
+
+  function setBuilderReactFlowSelectedRoomColor(color) {
+    const root = builderReactFlowRoot();
+    if (!root) {
+      return;
+    }
+    window.DragonsireBuilderReactFlow?.setBuilderReactFlowSelectedRoomColor?.(root, color);
+  }
+
+  function updateBuilderReactFlowSelectedEdge(updates) {
+    const root = builderReactFlowRoot();
+    if (!root) {
+      return;
+    }
+    window.DragonsireBuilderReactFlow?.updateBuilderReactFlowSelectedEdge?.(root, updates || {});
+  }
+
+  function deleteBuilderReactFlowSelectedEdge() {
+    const root = builderReactFlowRoot();
+    if (!root) {
+      return;
+    }
+    window.DragonsireBuilderReactFlow?.deleteBuilderReactFlowSelectedEdge?.(root);
   }
 
   function updateBuilderMapMeta(rooms, edges) {
@@ -2519,6 +2750,9 @@
     if (byId("room-environment")) {
       byId("room-environment").value = data.environment || "city";
     }
+    if (byId("room-color")) {
+      byId("room-color").value = data.color || "standard";
+    }
     if (byId("room-zone")) {
       byId("room-zone").value = builderZoneSelectValue(data.zone_id || "");
     }
@@ -2548,6 +2782,75 @@
   async function loadBuilderZones() {
     builderState.zones = await builderFetchJson("/builder/api/zones/");
     syncBuilderZoneMenus();
+  }
+
+  function updateBuilderExitSpec(room, direction, updates = {}) {
+    const normalizedDirection = canonicalExitDirection(direction || "");
+    if (!room || !normalizedDirection) {
+      return builderRoomExitsArray(room);
+    }
+    return builderRoomExitsArray(room).map((exit) => (
+      canonicalExitDirection(exit.direction || "") === normalizedDirection
+        ? {
+            ...exit,
+            type: updates.type ?? exit.type ?? "spatial",
+            label: updates.label ?? exit.label ?? "",
+          }
+        : exit
+    ));
+  }
+
+  async function applySelectedBuilderPhaseOneEdge() {
+    const selectedEdge = builderState.builderSelectedEdge;
+    if (!selectedEdge) {
+      toast("Select an edge first.");
+      return;
+    }
+    const nextType = String(byId("review-edge-type")?.value || "spatial").trim().toLowerCase() || "spatial";
+    const nextLabel = String(byId("review-edge-label")?.value || "").trim();
+    const sourceRoom = builderRoomById(selectedEdge.source);
+    const targetRoom = builderRoomById(selectedEdge.target);
+    const opposite = reverseDirection(selectedEdge.direction || "");
+    if (!sourceRoom || !targetRoom || !opposite) {
+      throw new Error("Unable to resolve selected builder edge.");
+    }
+    await saveBuilderRoomPayload(sourceRoom.id, {
+      exits: updateBuilderExitSpec(sourceRoom, selectedEdge.direction, { type: nextType, label: nextLabel }),
+    });
+    await saveBuilderRoomPayload(targetRoom.id, {
+      exits: updateBuilderExitSpec(targetRoom, opposite, { type: nextType, label: nextLabel }),
+    });
+    updateBuilderReactFlowSelectedEdge({ type: nextType, label: nextLabel });
+    renderBuilderRoomList();
+    renderZoneMap();
+    syncBuilderPhaseOneEdgeInspector({ ...selectedEdge, type: nextType, label: nextLabel });
+    setBuilderPageStatus(`Updated edge ${selectedEdge.source} -> ${selectedEdge.target}. Save zone to persist.`);
+  }
+
+  async function deleteSelectedBuilderPhaseOneEdge() {
+    const selectedEdge = builderState.builderSelectedEdge;
+    if (!selectedEdge) {
+      toast("Select an edge first.");
+      return;
+    }
+    const sourceRoom = builderRoomById(selectedEdge.source);
+    const targetRoom = builderRoomById(selectedEdge.target);
+    const opposite = reverseDirection(selectedEdge.direction || "");
+    if (!sourceRoom || !targetRoom || !opposite) {
+      throw new Error("Unable to resolve selected builder edge.");
+    }
+    await saveBuilderRoomPayload(sourceRoom.id, {
+      exits: builderRoomExitsArray(sourceRoom).filter((exit) => canonicalExitDirection(exit.direction || "") !== canonicalExitDirection(selectedEdge.direction || "")),
+    });
+    await saveBuilderRoomPayload(targetRoom.id, {
+      exits: builderRoomExitsArray(targetRoom).filter((exit) => canonicalExitDirection(exit.direction || "") !== opposite),
+    });
+    deleteBuilderReactFlowSelectedEdge();
+    builderState.builderSelectedEdge = null;
+    syncBuilderPhaseOneEdgeInspector(null);
+    renderBuilderRoomList();
+    renderZoneMap();
+    setBuilderPageStatus(`Deleted edge ${selectedEdge.source} -> ${selectedEdge.target}. Save zone to persist.`);
   }
 
   async function refreshBuilderZoneFromYaml(options = {}) {
@@ -2982,12 +3285,14 @@
         room_states: draft.room_states,
         ambient: draft.ambient,
         environment: draft.environment,
+        color: draft.color,
         exits: draft.exits,
         zone_id: draft.zone_id,
         map_x: draft.map_x,
         map_y: draft.map_y,
         map_layer: draft.map_layer,
       });
+      setBuilderReactFlowSelectedRoomColor(draft.color);
       syncBuilderZoneMenus();
       renderBuilderRoomList();
       await loadBuilderRoom(draft.id);
@@ -3162,6 +3467,7 @@
   }
 
   function bindBuilderInputs() {
+    ensureBuilderRoomColorField();
     [
       "room-name",
       "room-short-desc",
@@ -3174,15 +3480,22 @@
       "room-ambient-rate",
       "room-ambient-messages",
       "room-environment",
+      "room-color",
       "room-zone",
       "room-map-x",
       "room-map-y",
       "room-map-layer",
     ].forEach((id) => {
       byId(id)?.addEventListener("input", () => {
+        if (id === "room-color") {
+          setBuilderReactFlowSelectedRoomColor(byId("room-color")?.value || "standard");
+        }
         scheduleBuilderPreviewUpdate();
       });
       byId(id)?.addEventListener("change", () => {
+        if (id === "room-color") {
+          setBuilderReactFlowSelectedRoomColor(byId("room-color")?.value || "standard");
+        }
         scheduleBuilderPreviewUpdate();
       });
     });
@@ -3285,6 +3598,38 @@
       });
     });
 
+    byId("review-edge-type")?.addEventListener("change", () => {
+      if (!builderUsesReactFlow()) {
+        return;
+      }
+      const isSpecial = String(byId("review-edge-type")?.value || "spatial") === "special";
+      if (byId("review-edge-label")) {
+        byId("review-edge-label").disabled = !builderState.builderSelectedEdge || !isSpecial;
+      }
+    });
+
+    byId("review-edge-apply")?.addEventListener("click", () => {
+      if (!builderUsesReactFlow()) {
+        return;
+      }
+      void applySelectedBuilderPhaseOneEdge().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Edge update failed.");
+        toast(error.message || "Edge update failed.");
+      });
+    });
+
+    byId("review-edge-delete")?.addEventListener("click", () => {
+      if (!builderUsesReactFlow()) {
+        return;
+      }
+      void deleteSelectedBuilderPhaseOneEdge().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Edge delete failed.");
+        toast(error.message || "Edge delete failed.");
+      });
+    });
+
     ["builder-zone-select", "builder-zone-select-top"].forEach((controlId) => {
       byId(controlId)?.addEventListener("change", (event) => {
         clearBuilderConnectMode();
@@ -3314,25 +3659,10 @@
       });
     });
 
-    byId("builder-create-room")?.addEventListener("click", () => {
-      if (!requireActiveBuilderZone()) {
-        return;
-      }
-      if (byId("builder-room-name-input")) {
-        byId("builder-room-name-input").value = "";
-      }
-      if (byId("builder-room-desc-input")) {
-        byId("builder-room-desc-input").value = "";
-      }
-      if (byId("builder-room-environment-input")) {
-        byId("builder-room-environment-input").value = "city";
-      }
-      syncBuilderZoneMenus();
-      if (byId("builder-room-zone-input")?.options.length) {
-        byId("builder-room-zone-input").value = builderZoneSelectValue(defaultAssignableZoneId(builderState.currentZoneId));
-      }
-      openBuilderDialog("builder-room-dialog");
-    });
+    if (byId("builder-create-room")) {
+      byId("builder-create-room").disabled = true;
+      byId("builder-create-room").title = "Use Room mode in the map toolbar to place rooms.";
+    }
 
     byId("builder-room-create-submit")?.addEventListener("click", () => {
       void createBuilderRoom().catch((error) => {
