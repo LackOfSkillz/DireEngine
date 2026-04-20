@@ -823,7 +823,7 @@ def builder_zone_reload(request):
         return JsonResponse({"status": "error", "error": "zone_id is required"}, status=400)
 
     try:
-        result = load_zone(zone_id, dry_run=False)
+        result = load_zone(zone_id, dry_run=False, preserve_existing=True)
     except Exception as error:
         return JsonResponse({"status": "error", "error": str(error)}, status=400)
     return JsonResponse({"status": "ok", "result": result})

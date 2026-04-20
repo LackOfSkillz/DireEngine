@@ -18,6 +18,11 @@ export const GRID_SIZE = 50;
 export const ROOM_NODE_SIZE = 72;
 export const ROOM_BODY_SIZE = 40;
 export const ROOM_BODY_OFFSET = (ROOM_NODE_SIZE - ROOM_BODY_SIZE) / 2;
+const ROOM_BODY_MIN = ROOM_BODY_OFFSET;
+const ROOM_BODY_MAX = ROOM_BODY_OFFSET + ROOM_BODY_SIZE;
+const ROOM_BODY_CENTER = ROOM_BODY_OFFSET + (ROOM_BODY_SIZE / 2);
+const HANDLE_OUTSIDE_OFFSET = 6;
+const VERTICAL_HANDLE_OFFSET = 12;
 export const NODE_SPACING_MULTIPLIER = 1.2;
 export const RENDER_GRID_SCALE = (LOGICAL_CELL_SIZE / GRID_SIZE) * NODE_SPACING_MULTIPLIER;
 export const ROOM_COLORS: Record<RoomColor, string> = {
@@ -910,25 +915,25 @@ export function renderToRawPoint(x: number, y: number, transform: GraphRenderTra
 export function handleAnchor(direction: BuilderDirection): CanvasPoint {
   switch (direction) {
     case "north":
-      return { x: ROOM_NODE_SIZE / 2, y: 12 };
+      return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET };
     case "east":
-      return { x: ROOM_NODE_SIZE - 12, y: ROOM_NODE_SIZE / 2 };
+      return { x: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_CENTER };
     case "south":
-      return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE - 12 };
+      return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET };
     case "west":
-      return { x: 12, y: ROOM_NODE_SIZE / 2 };
+      return { x: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_CENTER };
     case "northeast":
-      return { x: ROOM_NODE_SIZE - 12, y: 12 };
+      return { x: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET };
     case "northwest":
-      return { x: 12, y: 12 };
+      return { x: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET };
     case "southeast":
-      return { x: ROOM_NODE_SIZE - 12, y: ROOM_NODE_SIZE - 12 };
+      return { x: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET };
     case "southwest":
-      return { x: 12, y: ROOM_NODE_SIZE - 12 };
+      return { x: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET };
     case "up":
-      return { x: ROOM_NODE_SIZE / 2, y: 2 };
+      return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET - VERTICAL_HANDLE_OFFSET };
     case "down":
-      return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE - 2 };
+      return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET + VERTICAL_HANDLE_OFFSET };
     default:
       return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE / 2 };
   }

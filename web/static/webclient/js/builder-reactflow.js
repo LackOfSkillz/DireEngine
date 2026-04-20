@@ -30760,6 +30760,11 @@ var DragonsireBuilderReactFlow = (() => {
   var ROOM_NODE_SIZE = 72;
   var ROOM_BODY_SIZE = 40;
   var ROOM_BODY_OFFSET = (ROOM_NODE_SIZE - ROOM_BODY_SIZE) / 2;
+  var ROOM_BODY_MIN = ROOM_BODY_OFFSET;
+  var ROOM_BODY_MAX = ROOM_BODY_OFFSET + ROOM_BODY_SIZE;
+  var ROOM_BODY_CENTER = ROOM_BODY_OFFSET + ROOM_BODY_SIZE / 2;
+  var HANDLE_OUTSIDE_OFFSET = 6;
+  var VERTICAL_HANDLE_OFFSET = 12;
   var NODE_SPACING_MULTIPLIER = 1.2;
   var RENDER_GRID_SCALE = LOGICAL_CELL_SIZE / GRID_SIZE * NODE_SPACING_MULTIPLIER;
   var ROOM_COLORS = {
@@ -31423,25 +31428,25 @@ var DragonsireBuilderReactFlow = (() => {
   function handleAnchor(direction) {
     switch (direction) {
       case "north":
-        return { x: ROOM_NODE_SIZE / 2, y: 12 };
+        return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET };
       case "east":
-        return { x: ROOM_NODE_SIZE - 12, y: ROOM_NODE_SIZE / 2 };
+        return { x: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_CENTER };
       case "south":
-        return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE - 12 };
+        return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET };
       case "west":
-        return { x: 12, y: ROOM_NODE_SIZE / 2 };
+        return { x: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_CENTER };
       case "northeast":
-        return { x: ROOM_NODE_SIZE - 12, y: 12 };
+        return { x: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET };
       case "northwest":
-        return { x: 12, y: 12 };
+        return { x: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET };
       case "southeast":
-        return { x: ROOM_NODE_SIZE - 12, y: ROOM_NODE_SIZE - 12 };
+        return { x: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET };
       case "southwest":
-        return { x: 12, y: ROOM_NODE_SIZE - 12 };
+        return { x: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET };
       case "up":
-        return { x: ROOM_NODE_SIZE / 2, y: 2 };
+        return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MIN - HANDLE_OUTSIDE_OFFSET - VERTICAL_HANDLE_OFFSET };
       case "down":
-        return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE - 2 };
+        return { x: ROOM_BODY_CENTER, y: ROOM_BODY_MAX + HANDLE_OUTSIDE_OFFSET + VERTICAL_HANDLE_OFFSET };
       default:
         return { x: ROOM_NODE_SIZE / 2, y: ROOM_NODE_SIZE / 2 };
     }
@@ -32099,17 +32104,22 @@ var DragonsireBuilderReactFlow = (() => {
 
   // web/static/webclient/react/builder/RoomNode.tsx
   var import_react5 = __toESM(require_react());
+  var ROOM_BODY_MIN2 = ROOM_BODY_OFFSET;
+  var ROOM_BODY_MAX2 = ROOM_BODY_OFFSET + ROOM_BODY_SIZE;
+  var ROOM_BODY_CENTER2 = ROOM_BODY_OFFSET + ROOM_BODY_SIZE / 2;
+  var HANDLE_OUTSIDE_OFFSET2 = 6;
+  var VERTICAL_HANDLE_OFFSET2 = 12;
   var HANDLE_LAYOUT = {
-    north: { position: Position.Top, style: { top: 12, left: "50%", transform: "translate(-50%, -50%)" } },
-    east: { position: Position.Right, style: { top: "50%", right: 12, transform: "translate(50%, -50%)" } },
-    south: { position: Position.Bottom, style: { bottom: 12, left: "50%", transform: "translate(-50%, 50%)" } },
-    west: { position: Position.Left, style: { top: "50%", left: 12, transform: "translate(-50%, -50%)" } },
-    northeast: { position: Position.Top, style: { top: 12, right: 12, transform: "translate(50%, -50%)" } },
-    northwest: { position: Position.Top, style: { top: 12, left: 12, transform: "translate(-50%, -50%)" } },
-    southeast: { position: Position.Bottom, style: { bottom: 12, right: 12, transform: "translate(50%, 50%)" } },
-    southwest: { position: Position.Bottom, style: { bottom: 12, left: 12, transform: "translate(-50%, 50%)" } },
-    up: { position: Position.Top, style: { top: 2, left: "50%", transform: "translate(-50%, -50%)" } },
-    down: { position: Position.Bottom, style: { bottom: 2, left: "50%", transform: "translate(-50%, 50%)" } }
+    north: { position: Position.Top, style: { top: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2, left: ROOM_BODY_CENTER2, transform: "translate(-50%, -50%)" } },
+    east: { position: Position.Right, style: { top: ROOM_BODY_CENTER2, left: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2, transform: "translate(-50%, -50%)" } },
+    south: { position: Position.Bottom, style: { top: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2, left: ROOM_BODY_CENTER2, transform: "translate(-50%, -50%)" } },
+    west: { position: Position.Left, style: { top: ROOM_BODY_CENTER2, left: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2, transform: "translate(-50%, -50%)" } },
+    northeast: { position: Position.Top, style: { top: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2, left: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2, transform: "translate(-50%, -50%)" } },
+    northwest: { position: Position.Top, style: { top: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2, left: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2, transform: "translate(-50%, -50%)" } },
+    southeast: { position: Position.Bottom, style: { top: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2, left: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2, transform: "translate(-50%, -50%)" } },
+    southwest: { position: Position.Bottom, style: { top: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2, left: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2, transform: "translate(-50%, -50%)" } },
+    up: { position: Position.Top, style: { top: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2 - VERTICAL_HANDLE_OFFSET2, left: ROOM_BODY_CENTER2, transform: "translate(-50%, -50%)" } },
+    down: { position: Position.Bottom, style: { top: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2 + VERTICAL_HANDLE_OFFSET2, left: ROOM_BODY_CENTER2, transform: "translate(-50%, -50%)" } }
   };
   var HANDLE_TITLES = {
     north: "North",
@@ -32150,6 +32160,7 @@ var DragonsireBuilderReactFlow = (() => {
     const roomColor = ROOM_COLORS[data?.color || "standard"] || ROOM_COLORS.standard;
     const activeSourceHandleId = String(data?.activeSourceHandleId || "").trim() || null;
     const validTargetHandleId = activeSourceHandleId ? OPPOSITE_HANDLE_ID[activeSourceHandleId] || null : null;
+    const roomLabel = room?.id || roomId;
     return /* @__PURE__ */ import_react5.default.createElement("div", { className: [
       "builder-phase1-node",
       isSelected ? "is-selected" : "",
@@ -32162,10 +32173,13 @@ var DragonsireBuilderReactFlow = (() => {
       const isSource = Boolean(activeSourceHandleId && activeSourceHandleId === handleId);
       const isValidTarget = Boolean(validTargetHandleId && validTargetHandleId === handleId);
       const isDimmed = Boolean(activeSourceHandleId && !isSource && !isValidTarget);
-      return /* @__PURE__ */ import_react5.default.createElement(
+      const glyphStyle = direction === "down" ? {
+        ...handleLayout.style,
+        transform: `${String(handleLayout.style.transform || "")} translateY(-2px)`.trim()
+      } : handleLayout.style;
+      return /* @__PURE__ */ import_react5.default.createElement(import_react5.default.Fragment, { key: direction }, /* @__PURE__ */ import_react5.default.createElement(
         Handle,
         {
-          key: direction,
           id: handleId,
           type: "source",
           position: handleLayout.position,
@@ -32183,7 +32197,15 @@ var DragonsireBuilderReactFlow = (() => {
           "aria-label": `${HANDLE_TITLES[direction]} handle`,
           isConnectable: true
         }
-      );
+      ), direction === "up" || direction === "down" ? /* @__PURE__ */ import_react5.default.createElement(
+        "span",
+        {
+          className: `builder-phase1-handle-glyph is-${direction}`,
+          style: glyphStyle,
+          "aria-hidden": "true"
+        },
+        direction === "up" ? "\u2191" : "\u2193"
+      ) : null);
     }), /* @__PURE__ */ import_react5.default.createElement(
       "div",
       {
@@ -32196,9 +32218,9 @@ var DragonsireBuilderReactFlow = (() => {
           backgroundColor: roomColor,
           pointerEvents: "none"
         },
-        title: room?.id || roomId
+        title: roomLabel
       },
-      /* @__PURE__ */ import_react5.default.createElement("span", { className: `builder-phase1-room-label${showLabel ? "" : " is-hidden-by-zoom"}` }, room?.id || roomId)
+      /* @__PURE__ */ import_react5.default.createElement("span", { className: `builder-phase1-room-label${showLabel ? "" : " is-hidden-by-zoom"}` }, roomLabel)
     ));
   }
 
@@ -32231,6 +32253,7 @@ var DragonsireBuilderReactFlow = (() => {
     } = useBuilderStore();
     const reactFlow = useReactFlow();
     const nodesInitialized = useNodesInitialized();
+    const isDraggingRef = (0, import_react7.useRef)(false);
     const lastViewportTokenRef = (0, import_react7.useRef)(null);
     const lastAutoFitSignatureRef = (0, import_react7.useRef)(null);
     const shellRef = (0, import_react7.useRef)(null);
@@ -32291,8 +32314,15 @@ var DragonsireBuilderReactFlow = (() => {
     }), [activeSourceHandleId, renderTransform.positionsByRoomId, roomList, zoomLevel]);
     const [canvasNodes, setCanvasNodes] = (0, import_react7.useState)(baseNodes);
     (0, import_react7.useEffect)(() => {
+      if (isDraggingRef.current) {
+        return;
+      }
       setCanvasNodes(baseNodes);
     }, [baseNodes]);
+    const canvasNodePositionsByRoomId = (0, import_react7.useMemo)(() => canvasNodes.reduce((accumulator, node) => {
+      accumulator[node.id] = node.position;
+      return accumulator;
+    }, {}), [canvasNodes]);
     const edges = (0, import_react7.useMemo)(() => buildRenderedBuilderEdges({
       mode,
       selectedRoomId,
@@ -32301,7 +32331,7 @@ var DragonsireBuilderReactFlow = (() => {
       zonePrefix: "",
       roomsById,
       roomIdByCoord: {}
-    }, renderTransform.positionsByRoomId), [mode, renderTransform.positionsByRoomId, roomsById, selectedEdgeId, selectedRoomId]);
+    }, canvasNodePositionsByRoomId), [canvasNodePositionsByRoomId, mode, roomsById, selectedEdgeId, selectedRoomId]);
     const nodeTypes = (0, import_react7.useMemo)(() => ({ builderRoom: RoomNode }), []);
     const edgeTypes = (0, import_react7.useMemo)(() => ({ builderDirectional: BuilderDirectionalEdge }), []);
     (0, import_react7.useEffect)(() => {
@@ -32315,16 +32345,22 @@ var DragonsireBuilderReactFlow = (() => {
       return () => window.removeEventListener("keydown", onKeyDown);
     }, [setSelectedEdge]);
     (0, import_react7.useEffect)(() => {
-      if (!canvasNodes.length || !nodesInitialized || !shellSize.width || !shellSize.height) {
+      if (!roomList.length || !nodesInitialized || !shellSize.width || !shellSize.height) {
         return;
       }
-      const signature = `${canvasNodes.length}:${shellSize.width}:${shellSize.height}:${canvasNodes.map((node) => `${node.id}:${Math.round(node.position.x)}:${Math.round(node.position.y)}`).join("|")}`;
+      if (isDraggingRef.current) {
+        return;
+      }
+      const signature = `${roomList.length}:${layoutMode}:${shellSize.width}:${shellSize.height}:${roomList.map((room) => {
+        const position = renderTransform.positionsByRoomId[room.id] || { x: room.x, y: room.y };
+        return `${room.id}:${Math.round(position.x)}:${Math.round(position.y)}`;
+      }).join("|")}`;
       if (lastAutoFitSignatureRef.current === signature) {
         return;
       }
       lastAutoFitSignatureRef.current = signature;
       scheduleFitView(reactFlow, 400);
-    }, [canvasNodes, nodesInitialized, reactFlow, shellSize.height, shellSize.width]);
+    }, [layoutMode, nodesInitialized, reactFlow, renderTransform.positionsByRoomId, roomList, shellSize.height, shellSize.width]);
     (0, import_react7.useEffect)(() => {
       if (!nodesInitialized) {
         return;
@@ -32374,6 +32410,7 @@ var DragonsireBuilderReactFlow = (() => {
       setCanvasNodes((previous) => applyNodeChanges(changes, previous));
     }, []);
     const onNodeDragStop = (0, import_react7.useMemo)(() => (_event, node) => {
+      isDraggingRef.current = false;
       if (mode !== "select") {
         return;
       }
@@ -32439,7 +32476,7 @@ var DragonsireBuilderReactFlow = (() => {
           nodesDraggable: true,
           nodesConnectable: true,
           elementsSelectable: true,
-          panOnDrag: false,
+          panOnDrag: true,
           panOnScroll: false,
           selectionOnDrag: false,
           zoomOnScroll: true,
@@ -32485,6 +32522,7 @@ var DragonsireBuilderReactFlow = (() => {
           onConnect,
           onNodesChange,
           onNodeDragStart: () => {
+            isDraggingRef.current = true;
             console.log("DRAG START");
           },
           onNodeDrag: () => {

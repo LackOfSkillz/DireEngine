@@ -23,6 +23,7 @@
     mapAutoFit: true,
     mapRefitRequestId: 0,
     isDragging: false,
+    activeMapPointerId: null,
     suppressMapClick: false,
     lastMouse: { x: 0, y: 0 },
     isWalking: false,
@@ -143,7 +144,6 @@
   const DEFAULT_EXIT_TYPECLASS = "typeclasses.exits.Exit";
   const DEFAULT_SLOW_EXIT_TYPECLASS = "typeclasses.exits_slow.SlowDireExit";
   const SLOW_EXIT_TYPECLASS = "evennia.contrib.grid.slow_exit.slow_exit.SlowExit";
-  const SLOW_EXIT_SPEEDS = ["stroll", "walk", "run", "sprint"];
   const SCENE_IMAGE_ROTATION_MS = 120000;
   const DESKTOP_SHELL_FIT_WIDTH = 1460;
   const DESKTOP_SHELL_FIT_HEIGHT = 940;
@@ -397,12 +397,16 @@
     if (!isSlowExitTypeclass(normalized.typeclass)) {
       return "Instant travel";
     }
+    return `Travel time: ~${resolveSlowExitTravelTime(normalized)} seconds`;
+  }
+
+  function resolveSlowExitTravelTime(exit) {
+    const normalized = normalizeBuilderExit(exit || {});
     if (normalized.travel_time > 0) {
-      return `Travel time: ~${normalized.travel_time} seconds`;
+      return normalized.travel_time;
     }
-    const speed = normalized.speed || "walk";
     const bySpeed = { stroll: 6, walk: 4, run: 2, sprint: 1 };
-    return `Travel time: ~${bySpeed[speed] || 4} seconds (${speed})`;
+    return bySpeed[normalized.speed || ""] || 5;
   }
 
   function normalizeBuilderStringMap(value) {
@@ -548,6 +552,37 @@
     if (saveButton) {
       saveButton.textContent = builderState.isDirty ? "Save Zone*" : "Save Zone";
     }
+  }
+
+  async function saveActiveBuilderDocument() {
+    if (builderState.reviewMode) {
+      await saveBuilderReviewGraph();
+      return;
+    }
+    await saveBuilderZone();
+  }
+
+  function handleBuilderBeforeUnload(event) {
+    if (!builderState.isDirty) {
+      return;
+    }
+    event.preventDefault();
+    event.returnValue = "";
+  }
+
+  function handleBuilderWindowKeydown(event) {
+    if (!(event.ctrlKey || event.metaKey) || String(event.key || "").toLowerCase() !== "s") {
+      return;
+    }
+    if (!isBuilderPage()) {
+      return;
+    }
+    event.preventDefault();
+    void saveActiveBuilderDocument().catch((error) => {
+      console.error(error);
+      setBuilderPageStatus(error.message || "Save failed.");
+      toast(error.message || "Save failed.");
+    });
   }
 
   function replaceBuilderZone(payload, options = {}) {
@@ -1279,19 +1314,53 @@
     };
   }
 
+  function syncBuilderExitRowState(exitRow, { initializeSlow = false } = {}) {
+    if (!exitRow) {
+      return;
+    }
+    const typeSelect = exitRow.querySelector(".builder-exit-type");
+    const travelTimeGroup = exitRow.querySelector(".builder-exit-travel-time-group");
+    const travelTimeInput = exitRow.querySelector(".builder-exit-travel-time");
+    const preview = exitRow.querySelector(".builder-exit-preview");
+    const isSlow = typeSelect?.value === "slow";
+
+    exitRow.classList.toggle("is-slow-exit", Boolean(isSlow));
+    if (travelTimeGroup) {
+      travelTimeGroup.classList.toggle("is-hidden", !isSlow);
+    }
+    if (travelTimeInput) {
+      if (isSlow) {
+        const currentValue = Number.parseInt(String(travelTimeInput.value || "0"), 10) || 0;
+        if (initializeSlow && currentValue <= 0) {
+          travelTimeInput.value = String(resolveSlowExitTravelTime({ travel_time: 0, speed: "" }));
+        }
+        travelTimeInput.disabled = false;
+      } else {
+        travelTimeInput.disabled = true;
+      }
+    }
+    if (preview) {
+      preview.textContent = exitTravelPreview({
+        direction: exitRow.querySelector(".builder-exit-direction")?.value || "",
+        target_id: exitRow.querySelector(".builder-exit-target")?.value || "",
+        typeclass: isSlow ? DEFAULT_SLOW_EXIT_TYPECLASS : DEFAULT_EXIT_TYPECLASS,
+        speed: "",
+        travel_time: isSlow ? (travelTimeInput?.value || 0) : 0,
+      });
+    }
+  }
+
   function createExitRow(exit, index) {
     const normalized = normalizeBuilderExit(exit, index);
     const exitTypeValue = isSlowExitTypeclass(normalized.typeclass) ? "slow" : "normal";
+    const slowTravelTime = resolveSlowExitTravelTime(normalized);
     const roomOptions = ['<option value="">Select room</option>']
       .concat(builderVisibleRooms().map((room) => (
         `<option value="${escapeHtml(room.id)}"${builderRoomKey(room.id) === builderRoomKey(normalized.target_id || "") ? " selected" : ""}>${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</option>`
       )))
       .join("");
-    const speedOptions = ['<option value="">Default speed</option>']
-      .concat(SLOW_EXIT_SPEEDS.map((speed) => `<option value="${speed}"${normalized.speed === speed ? " selected" : ""}>${escapeHtml(builderStateLabel(speed))}</option>`))
-      .join("");
     return `
-      <div class="builder-exit-row" data-index="${index}">
+      <div class="builder-exit-row${exitTypeValue === "slow" ? " is-slow-exit" : ""}" data-index="${index}">
         <input class="builder-exit-direction" aria-label="Exit direction" list="builder-exit-direction-options" value="${escapeHtml(normalized.direction)}" autocomplete="off">
         <select class="builder-exit-target" aria-label="Exit target room">
           ${roomOptions}
@@ -1300,10 +1369,10 @@
           <option value="normal"${exitTypeValue === "normal" ? " selected" : ""}>Normal</option>
           <option value="slow"${exitTypeValue === "slow" ? " selected" : ""}>Slow Exit</option>
         </select>
-        <select class="builder-exit-speed" aria-label="Exit movement speed">
-          ${speedOptions}
-        </select>
-        <input class="builder-exit-travel-time" aria-label="Exit travel time" type="number" min="0" step="1" value="${escapeHtml(String(normalized.travel_time || 0))}">
+        <div class="builder-exit-travel-time-group${exitTypeValue === "slow" ? "" : " is-hidden"}">
+          <input class="builder-exit-travel-time" aria-label="Exit travel time in seconds" type="number" min="1" step="1" value="${escapeHtml(String(exitTypeValue === "slow" ? slowTravelTime : 5))}"${exitTypeValue === "slow" ? "" : " disabled"}>
+          <span class="builder-exit-travel-time-unit">sec</span>
+        </div>
         <div class="builder-exit-preview">${escapeHtml(exitTravelPreview(normalized))}</div>
         <button type="button" class="builder-exit-remove">Delete</button>
       </div>
@@ -1317,17 +1386,23 @@
     }
     const rows = (Array.isArray(exits) && exits.length ? exits : []).map((exit, index) => createExitRow(exit, index));
     list.innerHTML = rows.join("");
+    list.querySelectorAll(".builder-exit-row").forEach((row) => syncBuilderExitRowState(row));
   }
 
   function collectBuilderExits() {
     return Array.from(document.querySelectorAll("#exit-list .builder-exit-row"))
-      .map((row) => ({
-        direction: canonicalExitDirection(row.querySelector(".builder-exit-direction")?.value || ""),
-        target_id: builderRoomKey(row.querySelector(".builder-exit-target")?.value || ""),
-        typeclass: row.querySelector(".builder-exit-type")?.value === "slow" ? DEFAULT_SLOW_EXIT_TYPECLASS : DEFAULT_EXIT_TYPECLASS,
-        speed: String(row.querySelector(".builder-exit-speed")?.value || "").trim().toLowerCase(),
-        travel_time: Math.max(0, Number.parseInt(row.querySelector(".builder-exit-travel-time")?.value || "0", 10) || 0),
-      }))
+      .map((row) => {
+        const isSlow = row.querySelector(".builder-exit-type")?.value === "slow";
+        const travelTimeInput = row.querySelector(".builder-exit-travel-time");
+        const parsedTravelTime = Math.max(0, Number.parseInt(travelTimeInput?.value || "0", 10) || 0);
+        return {
+          direction: canonicalExitDirection(row.querySelector(".builder-exit-direction")?.value || ""),
+          target_id: builderRoomKey(row.querySelector(".builder-exit-target")?.value || ""),
+          typeclass: isSlow ? DEFAULT_SLOW_EXIT_TYPECLASS : DEFAULT_EXIT_TYPECLASS,
+          speed: "",
+          travel_time: isSlow ? (parsedTravelTime || 5) : 0,
+        };
+      })
       .filter((exit) => exit.direction || exit.target_id);
   }
 
@@ -1816,9 +1891,9 @@
     nextExits.push({
       direction,
       target_id: builderRoomKey(targetId),
-      typeclass: DEFAULT_SLOW_EXIT_TYPECLASS,
-      speed: "walk",
-      travel_time: 5,
+      typeclass: DEFAULT_EXIT_TYPECLASS,
+      speed: "",
+      travel_time: 0,
     });
 
     await saveBuilderRoomPayload(fromRoom.id, { exits: nextExits });
@@ -2007,9 +2082,9 @@
           target_id: builderRoomKey(typeof targetId === "string" ? targetId : targetId?.targetId || ""),
           type: typeof targetId === "string" ? "spatial" : String(targetId?.type || "spatial").trim().toLowerCase(),
           label: typeof targetId === "string" ? "" : String(targetId?.label || "").trim(),
-          typeclass: DEFAULT_SLOW_EXIT_TYPECLASS,
-          speed: "walk",
-          travel_time: 5,
+          typeclass: DEFAULT_EXIT_TYPECLASS,
+          speed: "",
+          travel_time: 0,
         }));
 
         return normalizeBuilderYamlRoom({
@@ -3468,6 +3543,9 @@
 
   function bindBuilderInputs() {
     ensureBuilderRoomColorField();
+    window.addEventListener("beforeunload", handleBuilderBeforeUnload);
+    window.addEventListener("keydown", handleBuilderWindowKeydown);
+
     [
       "room-name",
       "room-short-desc",
@@ -3548,16 +3626,7 @@
       }
       const exitRow = event.target.closest(".builder-exit-row");
       if (exitRow) {
-        const preview = exitRow.querySelector(".builder-exit-preview");
-        if (preview) {
-          preview.textContent = exitTravelPreview({
-            direction: exitRow.querySelector(".builder-exit-direction")?.value || "",
-            target_id: exitRow.querySelector(".builder-exit-target")?.value || "",
-            typeclass: exitRow.querySelector(".builder-exit-type")?.value === "slow" ? DEFAULT_SLOW_EXIT_TYPECLASS : DEFAULT_EXIT_TYPECLASS,
-            speed: exitRow.querySelector(".builder-exit-speed")?.value || "",
-            travel_time: exitRow.querySelector(".builder-exit-travel-time")?.value || 0,
-          });
-        }
+        syncBuilderExitRowState(exitRow);
       }
     });
 
@@ -3575,7 +3644,7 @@
     });
 
     byId("save-zone")?.addEventListener("click", () => {
-      void saveBuilderZone().catch((error) => {
+      void saveActiveBuilderDocument().catch((error) => {
         console.error(error);
         setBuilderPageStatus(error.message || "Zone save failed.");
         toast(error.message || "Zone save failed.");
@@ -3675,7 +3744,7 @@
     byId("add-exit")?.addEventListener("click", () => {
       const exits = collectBuilderExits();
       const nextDirection = DIRECTIONS.find((direction) => !exits.some((exit) => exit.direction === direction)) || DIRECTIONS[0];
-      renderBuilderExitList(exits.concat([{ direction: nextDirection, target_id: 0 }]));
+      renderBuilderExitList(exits.concat([{ direction: nextDirection, target_id: 0, typeclass: DEFAULT_EXIT_TYPECLASS, speed: "", travel_time: 0 }]));
       scheduleBuilderPreviewUpdate();
     });
 
@@ -3713,6 +3782,10 @@
     document.addEventListener("change", (event) => {
       if (!event.target.closest("#exit-list")) {
         return;
+      }
+      const exitRow = event.target.closest(".builder-exit-row");
+      if (exitRow) {
+        syncBuilderExitRowState(exitRow, { initializeSlow: event.target.matches(".builder-exit-type") });
       }
       scheduleBuilderPreviewUpdate();
     });
@@ -5895,9 +5968,11 @@
   }
 
   function fitRoomsToCanvas(canvas, rooms, minScale = 0.12) {
-    const padding = 24;
-    const usableWidth = Math.max(40, canvas.width - padding * 2);
-    const usableHeight = Math.max(40, canvas.height - padding * 2);
+    const horizontalPadding = 28;
+    const verticalPadding = 36;
+    const fitSafetyScale = 0.94;
+    const usableWidth = Math.max(40, canvas.width - horizontalPadding * 2);
+    const usableHeight = Math.max(40, canvas.height - verticalPadding * 2);
     const rawBounds = mapBoundsForRooms(rooms);
     let nextScale = Math.min(
       BUILDER_ZONE_MAX_ZOOM,
@@ -5918,12 +5993,14 @@
       nextScale = adjustedScale;
     }
 
+    nextScale = Math.max(minScale, Math.min(BUILDER_ZONE_MAX_ZOOM, nextScale * fitSafetyScale));
+
     const bounds = renderedMapBoundsForRooms(canvas, rooms, nextScale, null);
     return {
       scale: nextScale,
       offset: {
-        x: padding + (usableWidth - bounds.width) / 2 - bounds.minX,
-        y: padding + (usableHeight - bounds.height) / 2 - bounds.minY,
+        x: horizontalPadding + (usableWidth - bounds.width) / 2 - bounds.minX,
+        y: verticalPadding + (usableHeight - bounds.height) / 2 - bounds.minY,
       },
     };
   }
@@ -6189,8 +6266,10 @@
   function renderMap() {
     const canvas = byId("map-canvas");
     if (!canvas) return;
-    resizeMapCanvas();
-    fitMapToCanvas();
+    const canvasResized = resizeMapCanvas();
+    if (canvasResized && state.mapAutoFit) {
+      fitMapToCanvas();
+    }
 
     if (!state.map || !Array.isArray(state.map.rooms)) {
       const ctx = canvas.getContext("2d");
@@ -6408,33 +6487,80 @@
     const canvas = byId("map-canvas");
     if (!canvas) return;
 
-    canvas.addEventListener("mousedown", (event) => {
-      state.suppressMapClick = false;
-    });
-
-    window.addEventListener("mousemove", (event) => {
-      void event;
-    });
-
-    window.addEventListener("mouseup", () => {
+    const endMapDrag = () => {
       state.isDragging = false;
+      state.activeMapPointerId = null;
       canvas.classList.remove("is-dragging");
+      canvas.style.cursor = "grab";
+    };
+
+    canvas.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) {
+        return;
+      }
+      state.suppressMapClick = false;
+      state.isDragging = true;
+      state.activeMapPointerId = event.pointerId;
+      state.lastMouse = { x: event.clientX, y: event.clientY };
+      canvas.classList.add("is-dragging");
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch (error) {
+        console.debug("map pan pointer capture unavailable", error);
+      }
     });
 
-    canvas.addEventListener("mousemove", (event) => {
+    canvas.addEventListener("pointermove", (event) => {
+      if (state.isDragging && state.activeMapPointerId === event.pointerId) {
+        const deltaX = event.clientX - state.lastMouse.x;
+        const deltaY = event.clientY - state.lastMouse.y;
+        if (deltaX || deltaY) {
+          state.mapAutoFit = false;
+          state.mapOffset.x += deltaX;
+          state.mapOffset.y += deltaY;
+          state.lastMouse = { x: event.clientX, y: event.clientY };
+          if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+            state.suppressMapClick = true;
+          }
+          canvas.style.cursor = "grabbing";
+          updateTooltip(0, 0, null);
+          renderMap();
+        }
+        return;
+      }
+
       const rect = canvas.getBoundingClientRect();
       const room = roomAtCanvasPosition(
         ((event.clientX - rect.left) / rect.width) * canvas.width,
         ((event.clientY - rect.top) / rect.height) * canvas.height
       );
-      canvas.style.cursor = room ? "pointer" : "default";
+      canvas.style.cursor = room ? "pointer" : "grab";
       updateTooltip(event.clientX, event.clientY, room);
     });
 
     canvas.addEventListener("mouseleave", () => {
-      canvas.style.cursor = "default";
+      if (state.isDragging) {
+        return;
+      }
+      canvas.style.cursor = "grab";
       updateTooltip(0, 0, null);
     });
+
+    canvas.addEventListener("pointerup", (event) => {
+      if (state.activeMapPointerId !== event.pointerId) {
+        return;
+      }
+      endMapDrag();
+    });
+
+    canvas.addEventListener("pointercancel", (event) => {
+      if (state.activeMapPointerId !== event.pointerId) {
+        return;
+      }
+      endMapDrag();
+    });
+
+    canvas.addEventListener("lostpointercapture", endMapDrag);
 
     canvas.addEventListener("click", (event) => {
       if (state.suppressMapClick) {
@@ -6452,7 +6578,11 @@
 
     window.addEventListener("resize", () => {
       updateWindowFitShell();
-      scheduleMapRefit(false);
+      if (state.mapAutoFit) {
+        scheduleMapRefit(false);
+        return;
+      }
+      renderMap();
     });
   }
 
@@ -6725,9 +6855,9 @@
       toast("Map fit to viewport.");
     });
     byId("map-center-toggle")?.addEventListener("click", () => {
-      state.mapAutoFit = true;
-      scheduleMapRefit(false);
-      toast("Map kept fit to the full viewport.");
+      state.mapAutoFit = false;
+      scheduleMapRefit(true);
+      toast("Map centered on your room.");
     });
     byId("map-fullscreen-toggle")?.addEventListener("click", () => {
       const panel = byId("map-panel");

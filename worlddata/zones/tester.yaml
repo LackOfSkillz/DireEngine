@@ -2,6 +2,62 @@ schema_version: v1
 zone_id: tester
 name: tester
 rooms:
+- id: CRO_200_100
+  name: CRO_200_100
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: tester
+  map:
+    x: 200
+    y: 100
+    layer: 0
+  exits:
+    down:
+      target: test-room
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_250_100
+  name: CRO_250_100
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: tester
+  map:
+    x: 250
+    y: 100
+    layer: 0
+  exits:
+    southwest:
+      target: test-room
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southeast:
+      target: CRO_300_150
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: test-room-east
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
 - id: test-room
   name: test room
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
@@ -16,10 +72,30 @@ rooms:
   environment: city
   zone_id: tester
   map:
-    x: 191
-    y: 140
+    x: 200
+    y: 150
     layer: 0
-  exits: {}
+  exits:
+    east:
+      target: test-room-east
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    up:
+      target: CRO_200_100
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northeast:
+      target: CRO_250_100
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southeast:
+      target: CRO_250_200
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
 - id: test-room-east
   name: test room east
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
@@ -34,10 +110,124 @@ rooms:
   environment: city
   zone_id: tester
   map:
-    x: 330
-    y: 152
+    x: 250
+    y: 150
     layer: 0
-  exits: {}
+  exits:
+    west:
+      target: test-room
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: CRO_300_150
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: CRO_250_100
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: CRO_250_200
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_300_150
+  name: CRO_300_150
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: tester
+  map:
+    x: 300
+    y: 150
+    layer: 0
+  exits:
+    west:
+      target: test-room-east
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    down:
+      target: CRO_300_200
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northwest:
+      target: CRO_250_100
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southwest:
+      target: CRO_250_200
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_250_200
+  name: CRO_250_200
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: tester
+  map:
+    x: 250
+    y: 200
+    layer: 0
+  exits:
+    north:
+      target: test-room-east
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northeast:
+      target: CRO_300_150
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northwest:
+      target: test-room
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_300_200
+  name: CRO_300_200
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: tester
+  map:
+    x: 300
+    y: 200
+    layer: 0
+  exits:
+    up:
+      target: CRO_300_150
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
 placements:
   npcs: []
   items: []

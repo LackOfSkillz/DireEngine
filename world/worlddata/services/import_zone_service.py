@@ -420,6 +420,122 @@ def _delete_existing_zone(zone_id: str) -> None:
         obj.delete()
 
 
+def _apply_room_data(room, room_data: dict, zone_id: str) -> None:
+    room.key = room_data["name"]
+    room.db.world_id = room_data["id"]
+    room.db.zone_id = zone_id
+    room.db.zone = zone_id
+    room.db.area_id = zone_id
+    room.db.map_x = room_data["map"]["x"]
+    room.db.map_y = room_data["map"]["y"]
+    room.db.map_layer = room_data["map"].get("layer", 0)
+    room.db.short_desc = room_data.get("short_desc")
+    _apply_extended_room_fields(room, room_data)
+    flags = room_data.get("flags") or {}
+    room.db.safe_zone = bool(flags.get("safe_zone", False))
+    room.db.is_shop = bool(flags.get("is_shop", False))
+    _tag_syncable(room, zone_id)
+    _tag_room_for_builder(room, zone_id)
+
+
+def _iter_zone_objects(zone_id: str) -> list[object]:
+    queryset = ObjectDB.objects.filter(db_tags__db_key="world_sync").distinct()
+    return [obj for obj in queryset if _has_tag(obj, f"zone:{zone_id}")]
+
+
+def _existing_zone_rooms(zone_id: str) -> dict[str, object]:
+    existing: dict[str, object] = {}
+    for obj in _iter_zone_objects(zone_id):
+        if getattr(obj, "location", None) is not None or getattr(obj, "destination", None) is not None:
+            continue
+        world_id = str(obj.db.world_id or "").strip()
+        if world_id:
+            existing[world_id] = obj
+    return existing
+
+
+def _clear_exit_runtime_fields(exit_obj) -> None:
+    exit_obj.attributes.remove("move_speed")
+    exit_obj.attributes.remove("travel_time")
+
+
+def _warm_load_zone(zone_id: str, plan: dict) -> dict:
+    room_lookup = _existing_zone_rooms(zone_id)
+    target_room_ids = {room_data["id"] for room_data in plan["rooms"]}
+    stale_room_ids = sorted(set(room_lookup.keys()) - target_room_ids)
+
+    for room_data in plan["rooms"]:
+        room = room_lookup.get(room_data["id"])
+        if room is None:
+            room = create_object(room_data.get("typeclass") or DEFAULT_ROOM_TYPECLASS, key=room_data["name"])
+            room_lookup[room_data["id"]] = room
+        _apply_room_data(room, room_data, zone_id)
+
+    for room_data in plan["rooms"]:
+        room = room_lookup[room_data["id"]]
+        desired_exits = {}
+        desired_exits.update(dict(room_data.get("exits") or {}))
+        desired_exits.update(dict(room_data.get("special_exits") or {}))
+
+        existing_exits = {
+            str(exit_obj.key or "").strip().lower(): exit_obj
+            for exit_obj in list(room.contents)
+            if getattr(exit_obj, "destination", None) is not None and _has_tag(exit_obj, f"zone:{zone_id}")
+        }
+
+        for direction, exit_spec in desired_exits.items():
+            direction = str(direction or "").strip().lower()
+            if not direction:
+                continue
+            exit_obj = existing_exits.pop(direction, None)
+            if exit_obj is None:
+                exit_typeclass = str(exit_spec.get("typeclass") or DEFAULT_EXIT_TYPECLASS).strip() or DEFAULT_EXIT_TYPECLASS
+                exit_obj = create_object(
+                    exit_typeclass,
+                    key=direction,
+                    location=room,
+                    destination=room_lookup[exit_spec["target"]],
+                    home=room,
+                )
+            else:
+                exit_obj.key = direction
+                exit_obj.location = room
+                exit_obj.destination = room_lookup[exit_spec["target"]]
+                exit_obj.home = room
+            _tag_syncable(exit_obj, zone_id)
+            _clear_exit_runtime_fields(exit_obj)
+            if exit_spec.get("speed"):
+                exit_obj.db.move_speed = exit_spec["speed"]
+            if int(exit_spec.get("travel_time", 0) or 0) > 0:
+                exit_obj.db.travel_time = int(exit_spec["travel_time"])
+
+        for stale_exit in existing_exits.values():
+            stale_exit.delete()
+
+    resolver_rooms = list(_rooms_for_zone(zone_id))
+    if len(resolver_rooms) < len(target_room_ids):
+        raise RuntimeError(
+            f"Builder resolver mismatch for zone {zone_id}: expected at least {len(target_room_ids)} rooms, got {len(resolver_rooms)}."
+        )
+
+    warnings = list(plan["warnings"])
+    if stale_room_ids:
+        warnings.append("Warm load preserved rooms no longer present in YAML: " + ", ".join(stale_room_ids))
+
+    return {
+        "zone_id": zone_id,
+        "dry_run": False,
+        "warnings": warnings,
+        "rooms": len(target_room_ids),
+        "exits": plan["summary"]["exits"],
+        "special_exits": plan["summary"]["special_exits"],
+        "npcs": 0,
+        "items": 0,
+        "containers_linked": 0,
+        "auto_reverse_exits": plan["summary"]["auto_reverse_exits"],
+    }
+
+
 def _create_spawned_object(placement: dict):
     prototype = placement.get("resolved_prototype")
     if prototype:
@@ -431,7 +547,7 @@ def _create_spawned_object(placement: dict):
     return create_object(typeclass, key=str(key))
 
 
-def load_zone(zone_id: str, dry_run: bool = False) -> dict:
+def load_zone(zone_id: str, dry_run: bool = False, preserve_existing: bool = False) -> dict:
     normalized_zone_id = str(zone_id or "").strip()
     if not normalized_zone_id:
         raise ValueError("zone_id is required.")
@@ -447,6 +563,9 @@ def load_zone(zone_id: str, dry_run: bool = False) -> dict:
             **plan["summary"],
         }
 
+    if preserve_existing:
+        return _warm_load_zone(normalized_zone_id, plan)
+
     _delete_existing_zone(normalized_zone_id)
 
     room_lookup = {}
@@ -455,20 +574,7 @@ def load_zone(zone_id: str, dry_run: bool = False) -> dict:
 
     for room_data in plan["rooms"]:
         room = create_object(room_data.get("typeclass") or DEFAULT_ROOM_TYPECLASS, key=room_data["name"])
-        room.db.world_id = room_data["id"]
-        room.db.zone_id = normalized_zone_id
-        room.db.zone = normalized_zone_id
-        room.db.area_id = normalized_zone_id
-        room.db.map_x = room_data["map"]["x"]
-        room.db.map_y = room_data["map"]["y"]
-        room.db.map_layer = room_data["map"].get("layer", 0)
-        room.db.short_desc = room_data.get("short_desc")
-        _apply_extended_room_fields(room, room_data)
-        flags = room_data.get("flags") or {}
-        room.db.safe_zone = bool(flags.get("safe_zone", False))
-        room.db.is_shop = bool(flags.get("is_shop", False))
-        _tag_syncable(room, normalized_zone_id)
-        _tag_room_for_builder(room, normalized_zone_id)
+        _apply_room_data(room, room_data, normalized_zone_id)
         room_lookup[room_data["id"]] = room
 
     for room_data in plan["rooms"]:
