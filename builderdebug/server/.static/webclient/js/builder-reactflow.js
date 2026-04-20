@@ -30719,6 +30719,10 @@ var DragonsireBuilderReactFlow = (() => {
   var VIEWPORT_PADDING = 48;
   var MIN_ZOOM = 0.05;
   var MAX_ZOOM = 4;
+  function snapToGrid(value, gridSize) {
+    const normalizedGridSize = Math.max(1, Number(gridSize) || BACKGROUND_GRID_SIZE);
+    return Math.round(Number(value || 0) / normalizedGridSize) * normalizedGridSize;
+  }
   function RoomNode({ data, selected: selected2 }) {
     const showLabel = Boolean(selected2 || data?.selected);
     return /* @__PURE__ */ import_react3.default.createElement("div", { className: `builder-reactflow-node${showLabel ? " is-selected" : ""}` }, /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-top", type: "target", position: Position.Top, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-right", type: "target", position: Position.Right, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-bottom", type: "target", position: Position.Bottom, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "target-left", type: "target", position: Position.Left, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-top", type: "source", position: Position.Top, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-right", type: "source", position: Position.Right, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-bottom", type: "source", position: Position.Bottom, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement(Handle, { id: "source-left", type: "source", position: Position.Left, style: { opacity: 0 } }), /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-core", style: { background: data?.color || "#5f8f57" } }), showLabel ? /* @__PURE__ */ import_react3.default.createElement("div", { className: "builder-reactflow-node-label" }, data?.label || "Room") : null);
@@ -30814,7 +30818,7 @@ var DragonsireBuilderReactFlow = (() => {
           onMoveRoom?.({
             roomId: String(node.id),
             map_x: coordinateMode === "absolute" ? Math.round(snappedX) : Math.round(snappedX / gridSize),
-            map_y: coordinateMode === "absolute" ? Math.round(snappedY) : Math.round(snappedY / gridSize)
+            map_y: coordinateMode === "absolute" ? Math.round(snappedY) : Math.round(snappedY / gridSize),
           });
         },
         proOptions: { hideAttribution: true }

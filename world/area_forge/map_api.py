@@ -104,17 +104,48 @@ def _room_map_flags(room):
     }
 
 
-def _get_cached_zone_template(area_tag, build_if_missing=True):
-    cached = _ZONE_MAP_TEMPLATE_CACHE.get(area_tag)
-    if cached:
-        return cached["template"]
-    if not build_if_missing:
-        return None
+def _zone_template_signature(zone_rooms):
+    room_signatures = []
+    edge_signatures = []
+    room_ids = {getattr(room, "id", None) for room in zone_rooms}
 
+    for room in sorted(zone_rooms, key=lambda candidate: getattr(candidate, "id", 0) or 0):
+        room_id = getattr(room, "id", None)
+        room_signatures.append(
+            (
+                room_id,
+                getattr(getattr(room, "db", None), "map_x", None),
+                getattr(getattr(room, "db", None), "map_y", None),
+                getattr(getattr(room, "db", None), "map_layer", None),
+            )
+        )
+        for exit_obj in getattr(room, "exits", []):
+            destination = getattr(exit_obj, "destination", None)
+            destination_id = getattr(destination, "id", None)
+            if destination_id not in room_ids:
+                continue
+            edge_signatures.append((room_id, destination_id, str(getattr(exit_obj, "key", "") or "")))
+
+    return (
+        tuple(room_signatures),
+        tuple(sorted(edge_signatures)),
+    )
+
+
+def _get_cached_zone_template(area_tag, build_if_missing=True):
     tagged_objects = list(search_tag(area_tag, category="build"))
     zone_rooms = [obj for obj in tagged_objects if getattr(obj, "destination", None) is None and getattr(obj, "id", None) is not None]
     if not zone_rooms:
         _ZONE_MAP_TEMPLATE_CACHE.pop(area_tag, None)
+        return None
+
+    current_signature = _zone_template_signature(zone_rooms)
+    cached = _ZONE_MAP_TEMPLATE_CACHE.get(area_tag)
+    if cached and cached.get("signature") == current_signature:
+        return cached["template"]
+    if cached and cached.get("signature") != current_signature:
+        _ZONE_MAP_TEMPLATE_CACHE.pop(area_tag, None)
+    if not build_if_missing:
         return None
 
     x_values = [getattr(room.db, "map_x", None) for room in zone_rooms if getattr(room.db, "map_x", None) is not None]
@@ -149,6 +180,7 @@ def _get_cached_zone_template(area_tag, build_if_missing=True):
         "zone": area_tag,
     }
     _ZONE_MAP_TEMPLATE_CACHE[area_tag] = {
+        "signature": current_signature,
         "template": template,
     }
     return template

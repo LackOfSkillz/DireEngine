@@ -1,0 +1,3564 @@
+schema_version: v1
+zone_id: crossing_txt_experiment
+name: crossing_txt_experiment
+rooms:
+- id: crossingtxt_001
+  name: North Gate Approach NW
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_002
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_006
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_002
+  name: North Gate Approach N1
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: -320
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_001
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_003
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_003
+  name: North Gate Approach N2
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -120
+    y: -320
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_002
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_004
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_004
+  name: North Gate Approach N3
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: -320
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_003
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_005
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_005
+  name: North Gate Approach NE
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: -320
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_004
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_007
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_006
+  name: North Gate Approach W
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: -280
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_001
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_008
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_007
+  name: North Gate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: -280
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_005
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_008
+  name: Goldenstone Square Approach
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: -240
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_006
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_009
+  name: NE Corridor A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 280
+    y: -280
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_010
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_010
+  name: NE Corridor B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: -280
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_009
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_011
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_011
+  name: Northeast Gate Upper
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: -240
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_010
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    go stair:
+      target: crossingtxt_012
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_012
+  name: Northeast Gate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 320
+    y: -200
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_013
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_013
+  name: NE Corridor Red
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: -200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_012
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_014
+  name: Gate Row - Yellow
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: yellow
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: -200
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_015
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_015
+  name: Gate Row - Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -160
+    y: -200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_014
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_016
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_029
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_016
+  name: Gate Row - Red A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: -200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_015
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_017
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_017
+  name: The Bottom Line
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: -200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_016
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_018
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_018
+  name: Gate Row - Red B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: -200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_017
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_019
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_019
+  name: Willow Walk Gate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 200
+    y: -200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_018
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_020
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_020
+  name: NE Mid Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 280
+    y: -200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_019
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_021
+  name: West Gate Stair
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -440
+    y: -160
+    layer: 0
+  exits: {}
+  special_exits:
+    go stair:
+      target: crossingtxt_022
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_022
+  name: West Gate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -400
+    y: -160
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_023
+  name: Bridge Approach W
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: -160
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_035
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    go bridge:
+      target: crossingtxt_024
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_024
+  name: Bridge Room
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -160
+    y: -160
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_025
+  name: E-Marker Room
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: blue
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -120
+    y: -120
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_026
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_026
+  name: Asemath Academy Entrance
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: -120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_025
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingtxt_027
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_027
+  name: Academy Bridge
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: -160
+    layer: 0
+  exits:
+    south:
+      target: crossingtxt_026
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    go bridge:
+      target: crossingtxt_028
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_028
+  name: Academy Bridge East
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 80
+    y: -160
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_029
+  name: Arch Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: -160
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_015
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    go arch:
+      target: crossingtxt_030
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_030
+  name: Arch Corridor
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: -120
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_031
+  name: West Corridor 5A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -360
+    y: -120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_022
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_032
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_032
+  name: West Corridor 5B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: -120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_033
+  name: West Corridor 5C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: -120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_032
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_034
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_034
+  name: West Corridor 5D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: -120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_035
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_035
+  name: West Corridor 5E - Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: -120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_034
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_023
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_040
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_036
+  name: Mid Corridor - Yellow
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: yellow
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: -160
+    layer: 0
+  exits:
+    south:
+      target: crossingtxt_037
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_037
+  name: Mid Corridor - Red A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: -80
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_036
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_038
+  name: Mid Corridor - Gray A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: -120
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_039
+  name: Mid Corridor - Gray B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 80
+    y: -120
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_040
+  name: Row6 - Yellow
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: yellow
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: -80
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_035
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_041
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_041
+  name: Row6 - Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -160
+    y: -80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_040
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_042
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_042
+  name: Row6 - Red
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -120
+    y: -80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_041
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_043
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_043
+  name: Row6 - Gray A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: -80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_042
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_044
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_044
+  name: Row6 - Gray B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 0
+    y: -80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_043
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_045
+  name: Row6 - Gray C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: -80
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_046
+  name: Row6 - Gray D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 280
+    y: -80
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_047
+  name: Row6 - Gray E
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 320
+    y: -80
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_048
+  name: Row7 - Gray A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -360
+    y: -40
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_049
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_049
+  name: Row7 - Gray B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: -40
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_048
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_050
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_050
+  name: Row7 - Gray C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: -40
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_049
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_051
+  name: Row7 - Yellow
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: yellow
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: -40
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_052
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_052
+  name: Row7 - Red
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: -40
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_051
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_053
+  name: Row7 - Gray D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: -40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_054
+  name: Row7 - Gray E
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 280
+    y: -40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_055
+  name: Row7 - Gray F
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 320
+    y: -40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_056
+  name: Bazaar
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 200
+    y: -40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_057
+  name: Coliseum Gate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: 0
+    layer: 0
+  exits: {}
+  special_exits:
+    out:
+      target: crossingtxt_058
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_058
+  name: Tent
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_059
+  name: Ramp East Upper
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: -40
+    layer: 0
+  exits: {}
+  special_exits:
+    go ramp:
+      target: crossingtxt_060
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_060
+  name: Ramp East Lower
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: 0
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_061
+  name: Row8 - Gray A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -360
+    y: 0
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_062
+  name: Row8 - Red
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: 0
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_063
+  name: Row8 - Gray B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: 0
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_064
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_064
+  name: Row8 - Red B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -160
+    y: 0
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_063
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    go path:
+      target: crossingtxt_065
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_065
+  name: Row8 - Gray C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -120
+    y: 0
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_066
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_066
+  name: Row8 - Gray D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: 0
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_065
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_067
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_067
+  name: Row8 - Gray E
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: 0
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_066
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_068
+  name: Row8 - Red C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 200
+    y: 0
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_069
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_069
+  name: Row8 - Gray F
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: 0
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_068
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_070
+  name: Row9 - Gray A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -360
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_071
+  name: Row9 - Red A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_072
+  name: Row9 - Gray B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_073
+  name: Row9 - Red B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_074
+  name: Row9 - Gray C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_075
+  name: Row9 - Gray D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -160
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_076
+  name: Row9 - Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -120
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_077
+  name: Row9 - Gray E
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_078
+  name: Row9 - Red C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 160
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_079
+  name: Row9 - Gray F
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 200
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_080
+  name: Path Node South
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: 80
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_081
+  name: Path Connector
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: 40
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_082
+  name: East Gate Ramp
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 400
+    y: 80
+    layer: 0
+  exits: {}
+  special_exits:
+    go ramp:
+      target: crossingtxt_083
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_083
+  name: East Gate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 400
+    y: 120
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_084
+  name: Riverpine Circle
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: 120
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_085
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northeast:
+      target: crossingtxt_086
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_087
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southeast:
+      target: crossingtxt_088
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_089
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southwest:
+      target: crossingtxt_090
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northwest:
+      target: crossingtxt_091
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_085
+  name: Riverpine Spoke N
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: 80
+    layer: 0
+  exits:
+    south:
+      target: crossingtxt_084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_086
+  name: Riverpine Spoke NE
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 400
+    y: 80
+    layer: 0
+  exits:
+    southwest:
+      target: crossingtxt_084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_087
+  name: Riverpine Spoke E
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 440
+    y: 120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_088
+  name: Riverpine Spoke SE
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 400
+    y: 160
+    layer: 0
+  exits:
+    northwest:
+      target: crossingtxt_084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_089
+  name: Riverpine Spoke S
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 360
+    y: 160
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_090
+  name: Riverpine Spoke SW
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 320
+    y: 160
+    layer: 0
+  exits:
+    northeast:
+      target: crossingtxt_084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_091
+  name: Riverpine Spoke NW
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 320
+    y: 80
+    layer: 0
+  exits:
+    southeast:
+      target: crossingtxt_084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_092
+  name: Stair Upper U
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: 120
+    layer: 0
+  exits: {}
+  special_exits:
+    climb stair / down:
+      target: crossingtxt_093
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_093
+  name: Stair Lower D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: 160
+    layer: 0
+  exits: {}
+  special_exits:
+    climb stair / up:
+      target: crossingtxt_092
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    climb stair / down:
+      target: crossingtxt_094
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_094
+  name: Dock N
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: blue
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 240
+    y: 200
+    layer: 0
+  exits: {}
+  special_exits:
+    climb stair / up:
+      target: crossingtxt_093
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_095
+  name: South Belt Cyan A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -440
+    y: 80
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_096
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_101
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_096
+  name: South Belt Cyan B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -400
+    y: 80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_097
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_097
+  name: South Belt Cyan C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -360
+    y: 80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_096
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_098
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_098
+  name: South Belt Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: 80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_097
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_099
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_099
+  name: South Belt Gray
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: 80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_098
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_100
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_100
+  name: South Belt Red
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: 80
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_099
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_101
+  name: South Belt Cyan D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -440
+    y: 120
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_108
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_102
+  name: South Belt Cyan E
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -400
+    y: 120
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_096
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingtxt_101
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_109
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_103
+  name: South Belt Cyan F
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -360
+    y: 120
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_097
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingtxt_102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_104
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingtxt_110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_104
+  name: South Belt Red B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: 120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_105
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_105
+  name: South Belt Gray B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: 120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_104
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_106
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_106
+  name: South Belt Red C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: 120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_105
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_107
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_107
+  name: South Belt Gray C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: 120
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_106
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_108
+  name: South Belt Cyan G
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -440
+    y: 160
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_101
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_109
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_109
+  name: South Belt Green B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -400
+    y: 160
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingtxt_108
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_110
+  name: South Belt Cyan H
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -360
+    y: 160
+    layer: 0
+  exits:
+    north:
+      target: crossingtxt_103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingtxt_109
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_111
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_111
+  name: South Belt Cyan I
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: 160
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_112
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_112
+  name: South Belt Gray D
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: 160
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_111
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_113
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_113
+  name: South Belt Gray E
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: 160
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_112
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_114
+  name: South Green Spur
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -320
+    y: 200
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_115
+  name: Pier Approach - Red
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: 200
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_116
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_116
+  name: Pier Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: 200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_115
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_117
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_117
+  name: Pier Cyan
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: cyan
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: 200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_116
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_118
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_118
+  name: Pier Gray A
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -160
+    y: 200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_117
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_119
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_119
+  name: Pier Red B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -120
+    y: 200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_118
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_120
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_120
+  name: Pier Gray B
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -80
+    y: 200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_119
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_121
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_121
+  name: Pier Gray C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -40
+    y: 200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_120
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_122
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_122
+  name: Pier Red C
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 0
+    y: 200
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_121
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_123
+  name: Amusement Pier Gate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -120
+    y: 160
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_124
+  name: Pier Square
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: blue
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -240
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_125
+  name: Ferry to Hyspar
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -280
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_126
+  name: Ship to Ratha
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -200
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_127
+  name: Ship to Paradise
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -160
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingtxt_128
+  name: Communal Center Approach
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 40
+    y: 240
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_129
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_129
+  name: Communal Center Veranda
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 80
+    y: 240
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_128
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_130
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_130
+  name: Communal Center Red
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: red
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 120
+    y: 240
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_129
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_131
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_131
+  name: Communal Center Green
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: green
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 160
+    y: 240
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_130
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: crossingtxt_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_132
+  name: Communal Center Blue
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: blue
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: 200
+    y: 240
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_131
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_133
+  name: Doc Approach
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -440
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits:
+    go doc:
+      target: crossingtxt_134
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingtxt_134
+  name: Barge Landing
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -440
+    y: 280
+    layer: 0
+  exits:
+    east:
+      target: crossingtxt_135
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingtxt_135
+  name: Barge Dock Gray
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details:
+    source_color: gray
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossing_txt_experiment
+  map:
+    x: -400
+    y: 280
+    layer: 0
+  exits:
+    west:
+      target: crossingtxt_134
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}

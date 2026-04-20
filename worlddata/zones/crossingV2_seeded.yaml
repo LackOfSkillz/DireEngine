@@ -1,9 +1,9 @@
 schema_version: v1
-zone_id: test_crossing
-name: test_crossing
+zone_id: crossingv2_seeded
+name: crossingV2_seeded
 rooms:
-- id: test_crossing_628_178
-  name: test_crossing_628_178
+- id: crossingV2_628_178
+  name: crossingV2_628_178
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -14,20 +14,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 400
-    y: -1400
+    x: 200
+    y: 240
     layer: 0
   exits:
     east:
-      target: test_crossing_628_208
+      target: crossingV2_628_208
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_628_184
-  name: test_crossing_628_184
+- id: crossingV2_628_184
+  name: crossingV2_628_184
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -38,20 +38,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 400
-    y: -1400
+    x: 160
+    y: 240
     layer: 0
   exits:
     east:
-      target: test_crossing_628_208
+      target: crossingV2_628_208
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_628_208
-  name: test_crossing_628_208
+- id: crossingV2_628_208
+  name: crossingV2_628_208
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -62,20 +62,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: -1400
+    x: 240
+    y: 200
     layer: 0
   exits:
     west:
-      target: test_crossing_628_184
+      target: crossingV2_628_184
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_352_238
-  name: test_crossing_352_238
+- id: crossingV2_352_238
+  name: crossingV2_352_238
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -86,20 +86,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -320
-    y: -1280
+    x: -40
+    y: 200
     layer: 0
   exits: {}
   special_exits:
-    to_test_crossing_348_266:
-      target: test_crossing_348_266
+    to_crossingV2_348_266:
+      target: crossingV2_348_266
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_382_238
-  name: test_crossing_382_238
+- id: crossingV2_382_238
+  name: crossingV2_382_238
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -110,20 +110,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -160
-    y: -1280
+    x: 0
+    y: 200
     layer: 0
   exits:
     east:
-      target: test_crossing_432_238
+      target: crossingV2_432_238
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_432_238
-  name: test_crossing_432_238
+- id: crossingV2_432_238
+  name: crossingV2_432_238
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -134,20 +134,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -80
-    y: -1280
+    x: 80
+    y: 240
     layer: 0
   exits:
     south:
-      target: test_crossing_424_266
+      target: crossingV2_424_266
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_348_266
-  name: test_crossing_348_266
+- id: crossingV2_348_266
+  name: crossingV2_348_266
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -158,20 +158,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -240
-    y: -1240
+    x: -80
+    y: 200
     layer: 0
   exits: {}
   special_exits:
-    to_test_crossing_352_238:
-      target: test_crossing_352_238
+    to_crossingV2_352_238:
+      target: crossingV2_352_238
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_352_326
-  name: test_crossing_352_326
+- id: crossingV2_352_326
+  name: crossingV2_352_326
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -182,35 +182,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -240
-    y: -1160
+    y: 71
     layer: 0
   exits:
     east:
-      target: test_crossing_404_300
+      target: crossingV2_404_300
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_348_266
+      target: crossingV2_348_266
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_322_298
+      target: crossingV2_322_298
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_350_362:
-      target: test_crossing_350_362
+    to_crossingV2_350_362:
+      target: crossingV2_350_362
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_404_300
-  name: test_crossing_404_300
+- id: crossingV2_404_300
+  name: crossingV2_404_300
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -221,35 +221,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -80
-    y: -1160
+    x: 90
+    y: 277
     layer: 0
   exits:
     south:
-      target: test_crossing_414_362
+      target: crossingV2_414_362
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_352_326
+      target: crossingV2_352_326
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_424_266:
-      target: test_crossing_424_266
+    to_crossingV2_424_266:
+      target: crossingV2_424_266
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_432_328:
-      target: test_crossing_432_328
+    to_crossingV2_432_328:
+      target: crossingV2_432_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_424_266
-  name: test_crossing_424_266
+- id: crossingV2_424_266
+  name: crossingV2_424_266
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -260,30 +260,30 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -80
-    y: -1160
+    x: 120
+    y: 240
     layer: 0
   exits:
     north:
-      target: test_crossing_432_238
+      target: crossingV2_432_238
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_352_326
+      target: crossingV2_352_326
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_404_300:
-      target: test_crossing_404_300
+    to_crossingV2_404_300:
+      target: crossingV2_404_300
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_596_328
-  name: test_crossing_596_328
+- id: crossingV2_596_328
+  name: crossingV2_596_328
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -294,19 +294,19 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 320
-    y: -1160
+    x: 240
+    y: 160
     layer: 0
   exits:
     south:
-      target: test_crossing_552_328
+      target: crossingV2_552_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_686_294
+- id: crossingV2_686_294
   name: im H
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -318,34 +318,34 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: -1160
+    x: 400
+    y: 160
     layer: 0
   exits:
     east:
-      target: test_crossing_750_328
+      target: crossingV2_750_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_628_208
+      target: crossingV2_628_208
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_652_396
+      target: crossingV2_652_396
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_596_328
+      target: crossingV2_596_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_686_300
+- id: crossingV2_686_300
   name: im H
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -357,35 +357,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: -1160
+    x: 360
+    y: 120
     layer: 0
   exits:
     east:
-      target: test_crossing_750_328
+      target: crossingV2_750_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_628_208
+      target: crossingV2_628_208
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_652_396
+      target: crossingV2_652_396
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_596_328
+      target: crossingV2_596_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_750_328
-  name: test_crossing_750_328
+- id: crossingV2_750_328
+  name: crossingV2_750_328
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -396,25 +396,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: -1160
+    x: 380
+    y: 60
     layer: 0
   exits:
     west:
-      target: test_crossing_686_300
+      target: crossingV2_686_300
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_778_264:
-      target: test_crossing_778_264
+    to_crossingV2_778_264:
+      target: crossingV2_778_264
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_778_264
-  name: test_crossing_778_264
+- id: crossingV2_778_264
+  name: crossingV2_778_264
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -425,25 +425,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: -1160
+    x: 360
+    y: 160
     layer: 0
   exits:
     west:
-      target: test_crossing_686_294
+      target: crossingV2_686_294
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_750_328:
-      target: test_crossing_750_328
+    to_crossingV2_750_328:
+      target: crossingV2_750_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_432_328
-  name: test_crossing_432_328
+- id: crossingV2_432_328
+  name: crossingV2_432_328
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -454,30 +454,30 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -80
-    y: -1120
+    x: -284
+    y: 5
     layer: 0
   exits:
     north:
-      target: test_crossing_404_300
+      target: crossingV2_404_300
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_414_362
+      target: crossingV2_414_362
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_424_266:
-      target: test_crossing_424_266
+    to_crossingV2_424_266:
+      target: crossingV2_424_266
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_260_360
-  name: test_crossing_260_360
+- id: crossingV2_260_360
+  name: crossingV2_260_360
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -488,25 +488,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -480
-    y: -1080
+    x: -280
+    y: 120
     layer: 0
   exits:
     south:
-      target: test_crossing_246_360
+      target: crossingV2_246_360
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_315_354:
-      target: test_crossing_315_354
+    to_crossingV2_315_354:
+      target: crossingV2_315_354
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_322_298
-  name: test_crossing_322_298
+- id: crossingV2_322_298
+  name: crossingV2_322_298
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -517,35 +517,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -240
-    y: -1080
+    x: -109
+    y: 234
     layer: 0
   exits:
     north:
-      target: test_crossing_348_266
+      target: crossingV2_348_266
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_260_360
+      target: crossingV2_260_360
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_352_326:
-      target: test_crossing_352_326
+    to_crossingV2_352_326:
+      target: crossingV2_352_326
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_352_332:
-      target: test_crossing_352_332
+    to_crossingV2_352_332:
+      target: crossingV2_352_332
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_352_332
-  name: test_crossing_352_332
+- id: crossingV2_352_332
+  name: crossingV2_352_332
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -556,20 +556,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -240
-    y: -1080
+    y: 80
     layer: 0
   exits:
     south:
-      target: test_crossing_350_362
+      target: crossingV2_350_362
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_552_328
-  name: test_crossing_552_328
+- id: crossingV2_552_328
+  name: crossingV2_552_328
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -580,20 +580,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: 320
-    y: -1080
+    y: 160
     layer: 0
   exits:
     north:
-      target: test_crossing_596_328
+      target: crossingV2_596_328
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_315_354
-  name: test_crossing_315_354
+- id: crossingV2_315_354
+  name: crossingV2_315_354
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -604,25 +604,397 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
+  map:
+    x: -200
+    y: 120
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_315_390
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_260_360:
+      target: crossingV2_260_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_64_362
+  name: crossingV2_64_362
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -440
+    y: 120
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_92_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_92_360
+  name: crossingV2_92_360
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -400
+    y: 120
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_120_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_64_362
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_120_360
+  name: crossingV2_120_360
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -360
+    y: 80
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_92_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_148_360:
+      target: crossingV2_148_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_148_360
+  name: crossingV2_148_360
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -360
+    y: 160
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_204_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_120_360:
+      target: crossingV2_120_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_204_360
+  name: crossingV2_204_360
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -400
+    y: 80
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_246_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_200_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_148_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_246_360
+  name: crossingV2_246_360
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -240
+    y: 120
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_260_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_204_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_414_362
+  name: crossingV2_414_362
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -308
+    y: 40
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_413_390
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_592_366
+  name: crossingV2_592_366
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 360
+    y: 80
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_596_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_598_362
+  name: crossingV2_598_362
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 240
+    y: 120
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_596_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_318_362
+  name: crossingV2_318_362
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -280
+    y: 40
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_350_362
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_315_390
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_350_362
+  name: crossingV2_350_362
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -243
+    y: 109
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_406_363
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_352_332
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_318_362
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_406_363
+  name: crossingV2_406_363
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
   map:
     x: -320
-    y: -1040
+    y: 40
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_350_362
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_414_426
+  name: crossingV2_414_426
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 40
+    y: 89
     layer: 0
   exits:
     south:
-      target: test_crossing_315_390
+      target: crossingV2_413_418
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_350_362
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_260_360:
-      target: test_crossing_260_360
+    to_crossingV2_444_442:
+      target: crossingV2_444_442
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_64_362
-  name: test_crossing_64_362
+    to_crossingV2_472_512:
+      target: crossingV2_472_512
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_200_396
+  name: crossingV2_200_396
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -633,305 +1005,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: -1000
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_92_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_92_360
-  name: test_crossing_92_360
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -880
-    y: -1000
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_120_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_64_362
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_120_360
-  name: test_crossing_120_360
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -800
-    y: -1000
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_92_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_148_360:
-      target: test_crossing_148_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_148_360
-  name: test_crossing_148_360
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -800
-    y: -1000
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_204_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_120_360:
-      target: test_crossing_120_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_204_360
-  name: test_crossing_204_360
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -640
-    y: -1000
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_246_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_200_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_148_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_246_360
-  name: test_crossing_246_360
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -480
-    y: -1000
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_260_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_204_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_414_362
-  name: test_crossing_414_362
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -80
-    y: -1000
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_413_390
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_592_366
-  name: test_crossing_592_366
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 320
-    y: -1000
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_596_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_598_362
-  name: test_crossing_598_362
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 320
-    y: -1000
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_596_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_318_362
-  name: test_crossing_318_362
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -320
-    y: -960
+    y: 160
     layer: 0
   exits:
-    east:
-      target: test_crossing_350_362
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_315_390
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_350_362
-  name: test_crossing_350_362
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -240
-    y: -960
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_406_363
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
     north:
-      target: test_crossing_352_332
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_318_362
+      target: crossingV2_204_360
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_406_363
-  name: test_crossing_406_363
+- id: crossingV2_315_390
+  name: crossingV2_315_390
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -942,20 +1029,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -160
-    y: -960
+    y: 40
     layer: 0
   exits:
-    west:
-      target: test_crossing_350_362
+    north:
+      target: crossingV2_318_362
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_315_418
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_414_426
-  name: test_crossing_414_426
+- id: crossingV2_413_390
+  name: crossingV2_413_390
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -966,35 +1058,54 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -80
-    y: -960
+    x: 40
+    y: 51
     layer: 0
   exits:
-    south:
-      target: test_crossing_413_418
+    north:
+      target: crossingV2_414_362
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    west:
-      target: test_crossing_350_362
+    south:
+      target: crossingV2_413_418
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_456_388
+  name: crossingV2_456_388
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 40
+    y: -7
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_456_402
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_444_442:
-      target: test_crossing_444_442
+    to_crossingV2_470_388:
+      target: crossingV2_470_388
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_472_512:
-      target: test_crossing_472_512
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_200_396
-  name: test_crossing_200_396
+- id: crossingV2_470_388
+  name: crossingV2_470_388
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1005,141 +1116,30 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -640
-    y: -920
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_204_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_315_390
-  name: test_crossing_315_390
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -320
-    y: -920
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_318_362
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_315_418
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_413_390
-  name: test_crossing_413_390
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -80
-    y: -920
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_414_362
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_413_418
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_456_388
-  name: test_crossing_456_388
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -920
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_456_402
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_470_388:
-      target: test_crossing_470_388
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_470_388
-  name: test_crossing_470_388
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -920
+    x: 55
+    y: -7
     layer: 0
   exits:
     east:
-      target: test_crossing_484_388
+      target: crossingV2_484_388
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_470_416
+      target: crossingV2_470_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_456_388:
-      target: test_crossing_456_388
+    to_crossingV2_456_388:
+      target: crossingV2_456_388
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_484_388
-  name: test_crossing_484_388
+- id: crossingV2_484_388
+  name: crossingV2_484_388
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1150,25 +1150,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: -920
+    x: 76
+    y: -7
     layer: 0
   exits:
     south:
-      target: test_crossing_484_402
+      target: crossingV2_484_402
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_470_388
+      target: crossingV2_470_388
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_570_386
-  name: test_crossing_570_386
+- id: crossingV2_570_386
+  name: crossingV2_570_386
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1179,98 +1179,122 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
+  map:
+    x: 340
+    y: 100
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_484_388
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_592_360:
+      target: crossingV2_592_360
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_crossingV2_596_396:
+      target: crossingV2_596_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_592_360
+  name: crossingV2_592_360
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 360
+    y: 71
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_652_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_552_328
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_570_386:
+      target: crossingV2_570_386
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_crossingV2_596_328:
+      target: crossingV2_596_328
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_596_396
+  name: crossingV2_596_396
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 200
+    y: 40
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_652_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_592_366
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_652_396
+  name: crossingV2_652_396
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
   map:
     x: 320
-    y: -920
+    y: 80
     layer: 0
   exits:
     west:
-      target: test_crossing_484_388
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_592_360:
-      target: test_crossing_592_360
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    to_test_crossing_596_396:
-      target: test_crossing_596_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_592_360
-  name: test_crossing_592_360
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 320
-    y: -920
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_652_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_552_328
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_570_386:
-      target: test_crossing_570_386
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    to_test_crossing_596_328:
-      target: test_crossing_596_328
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_596_396
-  name: test_crossing_596_396
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 320
-    y: -920
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_652_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_592_366
+      target: crossingV2_596_396
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_652_396
-  name: test_crossing_652_396
+- id: crossingV2_666_432
+  name: crossingV2_666_432
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1281,58 +1305,34 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: -920
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_596_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_666_432
-  name: test_crossing_666_432
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 560
-    y: -920
+    x: 338
+    y: 121
     layer: 0
   exits:
     south:
-      target: test_crossing_696_468
+      target: crossingV2_696_468
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_596_396
+      target: crossingV2_596_396
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_652_396:
-      target: test_crossing_652_396
+    to_crossingV2_652_396:
+      target: crossingV2_652_396
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_726_478:
-      target: test_crossing_726_478
+    to_crossingV2_726_478:
+      target: crossingV2_726_478
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_456_402
+- id: crossingV2_456_402
   name: at Ta LN
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -1344,29 +1344,29 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -880
+    x: 40
+    y: 8
     layer: 0
   exits:
     east:
-      target: test_crossing_484_402
+      target: crossingV2_484_402
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_456_388
+      target: crossingV2_456_388
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_456_416:
-      target: test_crossing_456_416
+    to_crossingV2_456_416:
+      target: crossingV2_456_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_456_416
+- id: crossingV2_456_416
   name: at Ta LN
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -1378,29 +1378,29 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -880
+    x: 40
+    y: 22
     layer: 0
   exits:
     south:
-      target: test_crossing_456_430
+      target: crossingV2_456_430
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_456_402:
-      target: test_crossing_456_402
+    to_crossingV2_456_402:
+      target: crossingV2_456_402
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_470_416:
-      target: test_crossing_470_416
+    to_crossingV2_470_416:
+      target: crossingV2_470_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_470_416
+- id: crossingV2_470_416
   name: at Ta LN
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -1412,29 +1412,29 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -880
+    x: 55
+    y: 22
     layer: 0
   exits:
     east:
-      target: test_crossing_484_416
+      target: crossingV2_484_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_470_388
+      target: crossingV2_470_388
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_456_416:
-      target: test_crossing_456_416
+    to_crossingV2_456_416:
+      target: crossingV2_456_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_484_402
+- id: crossingV2_484_402
   name: at Ta LN
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -1446,29 +1446,29 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: -880
+    x: 76
+    y: 8
     layer: 0
   exits:
     north:
-      target: test_crossing_484_388
+      target: crossingV2_484_388
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_456_402
+      target: crossingV2_456_402
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_484_416:
-      target: test_crossing_484_416
+    to_crossingV2_484_416:
+      target: crossingV2_484_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_484_416
+- id: crossingV2_484_416
   name: at Ta LN
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -1480,25 +1480,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: -880
+    x: 76
+    y: 22
     layer: 0
   exits:
     west:
-      target: test_crossing_470_416
+      target: crossingV2_470_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_484_402:
-      target: test_crossing_484_402
+    to_crossingV2_484_402:
+      target: crossingV2_484_402
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_315_418
-  name: test_crossing_315_418
+- id: crossingV2_315_418
+  name: crossingV2_315_418
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1509,25 +1509,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -320
-    y: -840
+    x: -120
+    y: 40
     layer: 0
   exits:
     north:
-      target: test_crossing_315_390
+      target: crossingV2_315_390
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_315_432:
-      target: test_crossing_315_432
+    to_crossingV2_315_432:
+      target: crossingV2_315_432
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_315_432
-  name: test_crossing_315_432
+- id: crossingV2_315_432
+  name: crossingV2_315_432
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1538,20 +1538,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -320
-    y: -840
+    x: -120
+    y: 0
     layer: 0
   exits: {}
   special_exits:
-    to_test_crossing_315_418:
-      target: test_crossing_315_418
+    to_crossingV2_315_418:
+      target: crossingV2_315_418
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_413_418
-  name: test_crossing_413_418
+- id: crossingV2_413_418
+  name: crossingV2_413_418
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1562,19 +1562,19 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -80
-    y: -840
+    x: 40
+    y: 80
     layer: 0
   exits:
     north:
-      target: test_crossing_413_390
+      target: crossingV2_413_390
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_456_430
+- id: crossingV2_456_430
   name: at Ta LN
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -1586,19 +1586,19 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -840
+    x: 40
+    y: 40
     layer: 0
   exits:
     north:
-      target: test_crossing_456_416
+      target: crossingV2_456_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_444_442
+- id: crossingV2_444_442
   name: at Ta LN
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -1610,35 +1610,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -800
+    x: 25
+    y: 52
     layer: 0
   exits:
     north:
-      target: test_crossing_456_416
+      target: crossingV2_456_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_472_512
+      target: crossingV2_472_512
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_414_426:
-      target: test_crossing_414_426
+    to_crossingV2_414_426:
+      target: crossingV2_414_426
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_456_430:
-      target: test_crossing_456_430
+    to_crossingV2_456_430:
+      target: crossingV2_456_430
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_696_468
-  name: test_crossing_696_468
+- id: crossingV2_696_468
+  name: crossingV2_696_468
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1649,30 +1649,30 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 560
-    y: -720
+    x: 408
+    y: 111
     layer: 0
   exits:
     north:
-      target: test_crossing_666_432
+      target: crossingV2_666_432
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_684_530
+      target: crossingV2_684_530
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_726_478:
-      target: test_crossing_726_478
+    to_crossingV2_726_478:
+      target: crossingV2_726_478
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_726_478
-  name: test_crossing_726_478
+- id: crossingV2_726_478
+  name: crossingV2_726_478
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1683,25 +1683,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 560
-    y: -720
+    x: 440
+    y: 120
     layer: 0
   exits:
     east:
-      target: test_crossing_740_478
+      target: crossingV2_740_478
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_726_494
+      target: crossingV2_726_494
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_740_478
-  name: test_crossing_740_478
+- id: crossingV2_740_478
+  name: crossingV2_740_478
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1712,25 +1712,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: -720
+    x: 400
+    y: 80
     layer: 0
   exits:
     south:
-      target: test_crossing_740_494
+      target: crossingV2_740_494
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_726_478
+      target: crossingV2_726_478
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_472_512
-  name: test_crossing_472_512
+- id: crossingV2_472_512
+  name: crossingV2_472_512
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1741,35 +1741,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -640
+    x: 58
+    y: 130
     layer: 0
   exits:
     north:
-      target: test_crossing_444_442
+      target: crossingV2_444_442
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_416_564
+      target: crossingV2_416_564
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_488_532:
-      target: test_crossing_488_532
+    to_crossingV2_488_532:
+      target: crossingV2_488_532
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_520_516:
-      target: test_crossing_520_516
+    to_crossingV2_520_516:
+      target: crossingV2_520_516
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_684_530
-  name: test_crossing_684_530
+- id: crossingV2_684_530
+  name: crossingV2_684_530
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1780,35 +1780,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 560
-    y: -640
+    x: 312
+    y: -58
     layer: 0
   exits:
     north:
-      target: test_crossing_696_468
+      target: crossingV2_696_468
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_650_576
+      target: crossingV2_650_576
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_656_546:
-      target: test_crossing_656_546
+    to_crossingV2_656_546:
+      target: crossingV2_656_546
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_726_494:
-      target: test_crossing_726_494
+    to_crossingV2_726_494:
+      target: crossingV2_726_494
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_726_494
-  name: test_crossing_726_494
+- id: crossingV2_726_494
+  name: crossingV2_726_494
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1819,25 +1819,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 560
-    y: -640
+    x: 360
+    y: 0
     layer: 0
   exits:
     east:
-      target: test_crossing_740_494
+      target: crossingV2_740_494
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_726_478
+      target: crossingV2_726_478
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_740_494
-  name: test_crossing_740_494
+- id: crossingV2_740_494
+  name: crossingV2_740_494
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1848,25 +1848,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: -640
+    x: 400
+    y: 120
     layer: 0
   exits:
     north:
-      target: test_crossing_740_478
+      target: crossingV2_740_478
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_726_494
+      target: crossingV2_726_494
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_472_518
-  name: test_crossing_472_518
+- id: crossingV2_472_518
+  name: crossingV2_472_518
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1877,35 +1877,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -600
+    x: 58
+    y: 139
     layer: 0
   exits:
     north:
-      target: test_crossing_444_442
+      target: crossingV2_444_442
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_416_564
+      target: crossingV2_416_564
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_472_564:
-      target: test_crossing_472_564
+    to_crossingV2_472_564:
+      target: crossingV2_472_564
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_488_532:
-      target: test_crossing_488_532
+    to_crossingV2_488_532:
+      target: crossingV2_488_532
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_488_532
-  name: test_crossing_488_532
+- id: crossingV2_488_532
+  name: crossingV2_488_532
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1916,35 +1916,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: -600
+    x: 77
+    y: 8
     layer: 0
   exits:
     north:
-      target: test_crossing_472_512
+      target: crossingV2_472_512
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_472_564
+      target: crossingV2_472_564
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_472_518:
-      target: test_crossing_472_518
+    to_crossingV2_472_518:
+      target: crossingV2_472_518
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_520_516:
-      target: test_crossing_520_516
+    to_crossingV2_520_516:
+      target: crossingV2_520_516
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_640_532
-  name: test_crossing_640_532
+- id: crossingV2_640_532
+  name: crossingV2_640_532
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1955,20 +1955,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: -600
+    x: 240
+    y: 0
     layer: 0
   exits:
     south:
-      target: test_crossing_640_546
+      target: crossingV2_640_546
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_520_516
-  name: test_crossing_520_516
+- id: crossingV2_520_516
+  name: crossingV2_520_516
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -1979,34 +1979,34 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: -560
+    x: 111
+    y: -12
     layer: 0
   exits:
     north:
-      target: test_crossing_484_416
+      target: crossingV2_484_416
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_514_566
+      target: crossingV2_514_566
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_488_532:
-      target: test_crossing_488_532
+    to_crossingV2_488_532:
+      target: crossingV2_488_532
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    to_test_crossing_568_564:
-      target: test_crossing_568_564
+    to_crossingV2_568_564:
+      target: crossingV2_568_564
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_318_564
+- id: crossingV2_318_564
   name: Society tn
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -2018,363 +2018,875 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
+  map:
+    x: -40
+    y: 0
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_346_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_346_566
+  name: crossingV2_346_566
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -80
+    y: 0
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_416_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_318_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_444_566
+  name: crossingV2_444_566
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 23
+    y: -163
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_416_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_472_564:
+      target: crossingV2_472_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_416_564
+  name: crossingV2_416_564
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 2
+    y: -3
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_346_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_444_566:
+      target: crossingV2_444_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_472_564
+  name: crossingV2_472_564
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 56
+    y: -200
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_514_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_444_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_514_566
+  name: crossingV2_514_566
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 105
+    y: 43
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_528_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_472_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_528_566
+  name: crossingV2_528_566
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 120
+    y: 43
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_568_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_514_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_568_564
+  name: crossingV2_568_564
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 160
+    y: 40
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_528_566
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_606_546
+  name: crossingV2_606_546
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 200
+    y: 0
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_626_546:
+      target: crossingV2_626_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_626_546
+  name: crossingV2_626_546
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 240
+    y: -40
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_640_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_606_546:
+      target: crossingV2_606_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_640_546
+  name: crossingV2_640_546
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 240
+    y: -14
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_656_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_640_532
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_626_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_640_562:
+      target: crossingV2_640_562
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_640_562
+  name: crossingV2_640_562
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 220
+    y: -20
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_640_546:
+      target: crossingV2_640_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_656_546
+  name: crossingV2_656_546
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 280
+    y: -40
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_650_576
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_640_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_650_576
+  name: crossingV2_650_576
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 360
+    y: -40
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_656_546
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_290_590
+  name: crossingV2_290_590
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -40
+    y: -40
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_293_618
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_293_618
+  name: crossingV2_293_618
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -160
+    y: -80
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_290_590
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_298_618
+  name: crossingV2_298_618
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -120
+    y: -80
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_290_590
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_290_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_520_616
+  name: crossingV2_520_616
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 114
+    y: -146
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_556_616
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_520_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_556_616
+  name: crossingV2_556_616
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 146
+    y: 94
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_620_616
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_552_672
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_520_616
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_592_642
+  name: crossingV2_592_642
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 164
+    y: -14
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_620_616
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_568_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_556_616
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_620_616
+  name: crossingV2_620_616
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 200
+    y: -40
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_556_616
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_290_642
+  name: crossingV2_290_642
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -80
+    y: -40
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_346_648
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_346_648
+  name: crossingV2_346_648
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -40
+    y: -120
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_382_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_290_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_382_642
+  name: crossingV2_382_642
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -40
+    y: -80
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_410_645
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_346_648
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_410_645
+  name: crossingV2_410_645
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -80
+    y: -120
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_424_645
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_382_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_424_645
+  name: crossingV2_424_645
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 0
+    y: -80
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_410_645
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_456_668
+  name: crossingV2_456_668
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 40
+    y: -129
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_488_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_462_700
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_424_645
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_488_634:
+      target: crossingV2_488_634
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_488_634
+  name: crossingV2_488_634
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 80
+    y: -129
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_488_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_472_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_424_645
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_520_642:
+      target: crossingV2_520_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_488_642
+  name: crossingV2_488_642
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 80
+    y: -120
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_520_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_520_642
+  name: crossingV2_520_642
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 114
+    y: -120
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_520_616
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_488_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_150_670
+  name: crossingV2_150_670
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
   map:
     x: -320
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_346_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_346_566
-  name: test_crossing_346_566
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -240
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_416_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_318_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_444_566
-  name: test_crossing_444_566
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -80
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_416_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_472_564:
-      target: test_crossing_472_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_416_564
-  name: test_crossing_416_564
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -520
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_346_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_444_566:
-      target: test_crossing_444_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_472_564
-  name: test_crossing_472_564
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_514_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_444_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_514_566
-  name: test_crossing_514_566
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 80
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_528_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_472_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_528_566
-  name: test_crossing_528_566
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 160
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_568_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_514_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_568_564
-  name: test_crossing_568_564
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 320
-    y: -520
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_528_566
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_606_546
-  name: test_crossing_606_546
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 400
-    y: -520
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_626_546:
-      target: test_crossing_626_546
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_626_546
-  name: test_crossing_626_546
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 400
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_640_546
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_606_546:
-      target: test_crossing_606_546
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_640_546
-  name: test_crossing_640_546
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 480
-    y: -520
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_656_546
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_640_532
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_626_546
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_640_562:
-      target: test_crossing_640_562
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_640_562
-  name: test_crossing_640_562
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 480
-    y: -520
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_640_546:
-      target: test_crossing_640_546
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_656_546
-  name: test_crossing_656_546
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 560
-    y: -520
+    y: 0
     layer: 0
   exits:
     south:
-      target: test_crossing_650_576
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_640_546
+      target: crossingV2_150_700
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_650_576
-  name: test_crossing_650_576
+- id: crossingV2_200_674
+  name: crossingV2_200_674
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -2385,300 +2897,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
-  map:
-    x: 560
-    y: -480
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_656_546
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_290_590
-  name: test_crossing_290_590
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -400
-    y: -440
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_293_618
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_293_618
-  name: test_crossing_293_618
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -400
-    y: -360
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_290_590
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_298_618
-  name: test_crossing_298_618
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -400
-    y: -360
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_290_590
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_290_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_520_616
-  name: test_crossing_520_616
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 160
-    y: -360
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_556_616
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_520_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_556_616
-  name: test_crossing_556_616
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 240
-    y: -360
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_620_616
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_552_672
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_520_616
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_592_642
-  name: test_crossing_592_642
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 320
-    y: -360
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_620_616
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_568_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_556_616
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_620_616
-  name: test_crossing_620_616
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 400
-    y: -360
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_556_616
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_290_642
-  name: test_crossing_290_642
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -400
-    y: -320
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_346_648
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_346_648
-  name: test_crossing_346_648
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -240
-    y: -320
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_382_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_290_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_382_642
-  name: test_crossing_382_642
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -160
-    y: -320
+    y: -160
     layer: 0
   exits:
     south:
-      target: test_crossing_410_645
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_346_648
+      target: crossingV2_200_704
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_410_645
-  name: test_crossing_410_645
+- id: crossingV2_226_670
+  name: crossingV2_226_670
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -2689,88 +2921,78 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -160
-    y: -280
+    x: -120
+    y: -120
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_228_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_456_674
+  name: crossingV2_456_674
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 40
+    y: -120
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_462_700
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_520_704
+  name: crossingV2_520_704
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 211
+    y: -48
     layer: 0
   exits:
     east:
-      target: test_crossing_424_645
+      target: crossingV2_552_672
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_382_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_424_645
-  name: test_crossing_424_645
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -80
-    y: -280
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_410_645
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_456_668
-  name: test_crossing_456_668
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -280
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_488_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_462_700
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_424_645
+      target: crossingV2_520_642
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_488_634:
-      target: test_crossing_488_634
+    to_crossingV2_456_668:
+      target: crossingV2_456_668
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_488_634
-  name: test_crossing_488_634
+- id: crossingV2_552_672
+  name: crossingV2_552_672
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -2781,241 +3003,19 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -280
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_488_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_472_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_424_645
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_520_642:
-      target: test_crossing_520_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_488_642
-  name: test_crossing_488_642
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 80
-    y: -280
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_520_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_520_642
-  name: test_crossing_520_642
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 160
-    y: -280
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_520_616
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_488_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_150_670
-  name: test_crossing_150_670
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -800
-    y: -240
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_150_700
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_200_674
-  name: test_crossing_200_674
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -640
-    y: -240
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_200_704
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_226_670
-  name: test_crossing_226_670
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -560
-    y: -240
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_228_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_456_674
-  name: test_crossing_456_674
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -240
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_462_700
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_520_704
-  name: test_crossing_520_704
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 160
-    y: -240
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_552_672
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_520_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_456_668:
-      target: test_crossing_456_668
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_552_672
-  name: test_crossing_552_672
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: 240
-    y: -240
+    y: -80
     layer: 0
   exits:
     north:
-      target: test_crossing_556_616
+      target: crossingV2_556_616
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_120_702
+- id: crossingV2_120_702
   name: He Shrine Riverpine
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -3027,20 +3027,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -800
-    y: -160
+    x: -360
+    y: 0
     layer: 0
   exits: {}
   special_exits:
-    to_test_crossing_150_700:
-      target: test_crossing_150_700
+    to_crossingV2_150_700:
+      target: crossingV2_150_700
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_150_700
-  name: test_crossing_150_700
+- id: crossingV2_150_700
+  name: crossingV2_150_700
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -3051,798 +3051,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
-  map:
-    x: -800
-    y: -160
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_150_670
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_120_702:
-      target: test_crossing_120_702
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_150_706
-  name: test_crossing_150_706
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -800
-    y: -160
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_192_703
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_120_702:
-      target: test_crossing_120_702
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_192_703
-  name: test_crossing_192_703
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -640
-    y: -160
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_150_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_192_706
-  name: test_crossing_192_706
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -640
-    y: -160
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_200_674
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_150_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_200_704:
-      target: test_crossing_200_704
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_200_704
-  name: test_crossing_200_704
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -640
-    y: -160
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_228_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_200_674
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_228_706
-  name: test_crossing_228_706
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -560
-    y: -160
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_256_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_226_670
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_200_704
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_256_706
-  name: test_crossing_256_706
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -480
-    y: -160
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_284_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_228_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_284_706
-  name: test_crossing_284_706
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -400
-    y: -160
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_256_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_312_706:
-      target: test_crossing_312_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_312_706
-  name: test_crossing_312_706
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -400
-    y: -160
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_340_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_284_706:
-      target: test_crossing_284_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_340_706
-  name: test_crossing_340_706
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -320
-    y: -160
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_312_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_348_704
-  name: test_crossing_348_704
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -160
-    y: -160
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_382_642
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_340_706
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_410_645:
-      target: test_crossing_410_645
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_462_700
-  name: test_crossing_462_700
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -160
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_456_674
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_462_714
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_448_714
-  name: test_crossing_448_714
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -120
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_462_714:
-      target: test_crossing_462_714
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_462_714
-  name: test_crossing_462_714
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -120
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_462_700
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_462_728
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_448_714:
-      target: test_crossing_448_714
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    to_test_crossing_476_714:
-      target: test_crossing_476_714
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_476_714
-  name: test_crossing_476_714
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -120
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_476_728
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_462_714:
-      target: test_crossing_462_714
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_462_728
-  name: test_crossing_462_728
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -80
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_462_714
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_476_728:
-      target: test_crossing_476_728
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_476_728
-  name: test_crossing_476_728
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 0
-    y: -80
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_476_714
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_462_728:
-      target: test_crossing_462_728
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_120_396
-  name: test_crossing_120_396
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 120
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_150_396:
-      target: test_crossing_150_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_150_396
-  name: test_crossing_150_396
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 120
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_150_424
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_120_396:
-      target: test_crossing_120_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_89_888
-  name: test_crossing_89_888
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -480
-    y: 120
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_120_894
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_89_902
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_120_894
-  name: test_crossing_120_894
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -400
-    y: 120
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_142_894
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_89_888
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_142_894
-  name: test_crossing_142_894
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -320
-    y: 120
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_120_894
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_142_900
-  name: test_crossing_142_900
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -320
-    y: 120
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_168_896:
-      target: test_crossing_168_896
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_150_854
-  name: test_crossing_150_854
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -320
-    y: 120
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_194_898
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_89_888
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_142_894:
-      target: test_crossing_142_894
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_168_896
-  name: test_crossing_168_896
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -320
-    y: 120
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_194_898
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits:
-    to_test_crossing_142_900:
-      target: test_crossing_142_900
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_194_898
-  name: test_crossing_194_898
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -240
-    y: 120
+    y: -120
     layer: 0
   exits:
-    west:
-      target: test_crossing_168_896
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_38_670
-  name: test_crossing_38_670
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 80
-    y: 120
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_66_670:
-      target: test_crossing_66_670
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_66_670
-  name: test_crossing_66_670
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 80
-    y: 120
-    layer: 0
-  exits:
-    south:
-      target: test_crossing_64_698
+    north:
+      target: crossingV2_150_670
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_38_670:
-      target: test_crossing_38_670
+    to_crossingV2_120_702:
+      target: crossingV2_120_702
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_150_662
-  name: test_crossing_150_662
+- id: crossingV2_150_706
+  name: crossingV2_150_706
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -3853,20 +3080,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 400
-    y: 120
+    x: -280
+    y: -120
     layer: 0
   exits:
     east:
-      target: test_crossing_200_668
+      target: crossingV2_192_703
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-  special_exits: {}
-- id: test_crossing_200_668
-  name: test_crossing_200_668
+  special_exits:
+    to_crossingV2_120_702:
+      target: crossingV2_120_702
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_192_703
+  name: crossingV2_192_703
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -3877,20 +3109,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: 120
+    x: -240
+    y: -200
     layer: 0
   exits:
     west:
-      target: test_crossing_150_662
+      target: crossingV2_150_706
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_178_132
-  name: test_crossing_178_132
+- id: crossingV2_192_706
+  name: crossingV2_192_706
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -3901,25 +3133,359 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: 120
+    x: -160
+    y: -200
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_200_674
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_150_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_200_704:
+      target: crossingV2_200_704
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_200_704
+  name: crossingV2_200_704
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -200
+    y: -160
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_228_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_200_674
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_228_706
+  name: crossingV2_228_706
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -200
+    y: -120
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_256_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_226_670
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_200_704
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_256_706
+  name: crossingV2_256_706
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -80
+    y: -200
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_284_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_228_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_284_706
+  name: crossingV2_284_706
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -80
+    y: -160
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_256_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_312_706:
+      target: crossingV2_312_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_312_706
+  name: crossingV2_312_706
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -40
+    y: -200
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_340_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_284_706:
+      target: crossingV2_284_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_340_706
+  name: crossingV2_340_706
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -80
+    y: -80
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_312_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_348_704
+  name: crossingV2_348_704
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -71
+    y: -86
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_382_642
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_340_706
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_410_645:
+      target: crossingV2_410_645
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_462_700
+  name: crossingV2_462_700
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 46
+    y: -97
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_456_674
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_462_714
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_448_714
+  name: crossingV2_448_714
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -40
+    y: -160
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_462_714:
+      target: crossingV2_462_714
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_462_714
+  name: crossingV2_462_714
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -25
+    y: -160
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_462_700
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_462_728
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_448_714:
+      target: crossingV2_448_714
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_crossingV2_476_714:
+      target: crossingV2_476_714
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_476_714
+  name: crossingV2_476_714
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 80
+    y: -160
     layer: 0
   exits:
     south:
-      target: test_crossing_177_146
+      target: crossingV2_476_728
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_192_132:
-      target: test_crossing_192_132
+    to_crossingV2_462_714:
+      target: crossingV2_462_714
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_192_132
-  name: test_crossing_192_132
+- id: crossingV2_462_728
+  name: crossingV2_462_728
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -3930,20 +3496,78 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
+    x: 40
+    y: -160
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_462_714
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_476_728:
+      target: crossingV2_476_728
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_476_728
+  name: crossingV2_476_728
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 40
+    y: -200
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_476_714
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_462_728:
+      target: crossingV2_462_728
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_120_396
+  name: crossingV2_120_396
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -320
     y: 120
     layer: 0
   exits: {}
   special_exits:
-    to_test_crossing_178_132:
-      target: test_crossing_178_132
+    to_crossingV2_150_396:
+      target: crossingV2_150_396
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_200_132
-  name: test_crossing_200_132
+- id: crossingV2_150_396
+  name: crossingV2_150_396
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -3954,68 +3578,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
-  map:
-    x: 960
-    y: 120
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_214_132:
-      target: test_crossing_214_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_214_132
-  name: test_crossing_214_132
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 960
-    y: 120
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_200_132:
-      target: test_crossing_200_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_134_897
-  name: test_crossing_134_897
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -400
     y: 160
     layer: 0
   exits:
     south:
-      target: test_crossing_120_900
+      target: crossingV2_150_424
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-  special_exits: {}
-- id: test_crossing_177_146
-  name: test_crossing_177_146
+  special_exits:
+    to_crossingV2_120_396:
+      target: crossingV2_120_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_89_888
+  name: crossingV2_89_888
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4026,111 +3607,530 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: 160
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_178_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_177_168
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_178_154
-  name: test_crossing_178_154
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 720
-    y: 160
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_178_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_177_168
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_150_424
-  name: test_crossing_150_424
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 200
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_150_396
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_152_452
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_89_902
-  name: test_crossing_89_902
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -480
-    y: 200
+    x: -312
+    y: -298
     layer: 0
   exits:
     east:
-      target: test_crossing_120_900
+      target: crossingV2_120_894
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-    north:
-      target: test_crossing_89_888
+    south:
+      target: crossingV2_89_902
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_96_918
+- id: crossingV2_120_894
+  name: crossingV2_120_894
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -280
+    y: -292
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_142_894
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_89_888
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_142_894
+  name: crossingV2_142_894
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -280
+    y: -240
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_120_894
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_142_900
+  name: crossingV2_142_900
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -280
+    y: -228
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_168_896:
+      target: crossingV2_168_896
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_150_854
+  name: crossingV2_150_854
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -271
+    y: -274
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_194_898
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_89_888
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_142_894:
+      target: crossingV2_142_894
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_168_896
+  name: crossingV2_168_896
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -200
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_194_898
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_142_900:
+      target: crossingV2_142_900
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_194_898
+  name: crossingV2_194_898
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -174
+    y: -320
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_168_896
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_38_670
+  name: crossingV2_38_670
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -440
+    y: -160
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_66_670:
+      target: crossingV2_66_670
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_66_670
+  name: crossingV2_66_670
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -320
+    y: -120
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_64_698
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_38_670:
+      target: crossingV2_38_670
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_150_662
+  name: crossingV2_150_662
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -360
+    y: -40
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_200_668
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_200_668
+  name: crossingV2_200_668
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -240
+    y: 40
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_150_662
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_178_132
+  name: crossingV2_178_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -240
+    y: 200
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_177_146
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_crossingV2_192_132:
+      target: crossingV2_192_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_192_132
+  name: crossingV2_192_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -400
+    y: 280
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_178_132:
+      target: crossingV2_178_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_200_132
+  name: crossingV2_200_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -440
+    y: 280
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_214_132:
+      target: crossingV2_214_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_214_132
+  name: crossingV2_214_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -240
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_200_132:
+      target: crossingV2_200_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_134_897
+  name: crossingV2_134_897
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -289
+    y: -234
+    layer: 0
+  exits:
+    south:
+      target: crossingV2_120_900
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_177_146
+  name: crossingV2_177_146
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -280
+    y: 160
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_178_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_177_168
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_178_154
+  name: crossingV2_178_154
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -200
+    y: 200
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_178_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_177_168
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_150_424
+  name: crossingV2_150_424
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -280
+    y: 80
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_150_396
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_152_452
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_89_902
+  name: crossingV2_89_902
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -292
+    y: -340
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_120_900
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: crossingV2_89_888
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_96_918
   name: Te" ravern
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -4142,24 +4142,24 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -480
-    y: 200
+    x: -280
+    y: -326
     layer: 0
   exits:
     east:
-      target: test_crossing_120_900
+      target: crossingV2_120_900
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_89_902:
-      target: test_crossing_89_902
+    to_crossingV2_89_902:
+      target: crossingV2_89_902
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_96_924
+- id: crossingV2_96_924
   name: Te" ravern
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -4171,25 +4171,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -480
-    y: 200
+    x: -280
+    y: -320
     layer: 0
   exits:
     east:
-      target: test_crossing_120_900
+      target: crossingV2_120_900
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_89_902:
-      target: test_crossing_89_902
+    to_crossingV2_89_902:
+      target: crossingV2_89_902
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_120_900
-  name: test_crossing_120_900
+- id: crossingV2_120_900
+  name: crossingV2_120_900
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4200,25 +4200,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -400
-    y: 200
+    x: -280
+    y: -280
     layer: 0
   exits:
     north:
-      target: test_crossing_134_897
+      target: crossingV2_134_897
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_89_902
+      target: crossingV2_89_902
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_14_702
-  name: test_crossing_14_702
+- id: crossingV2_14_702
+  name: crossingV2_14_702
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4229,25 +4229,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: 200
+    x: -360
+    y: 40
     layer: 0
   exits:
     east:
-      target: test_crossing_64_698
+      target: crossingV2_64_698
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_14_734
+      target: crossingV2_14_734
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_64_698
-  name: test_crossing_64_698
+- id: crossingV2_64_698
+  name: crossingV2_64_698
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4258,30 +4258,30 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: 200
+    x: -323
+    y: -94
     layer: 0
   exits:
     north:
-      target: test_crossing_66_670
+      target: crossingV2_66_670
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_64_726
+      target: crossingV2_64_726
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_14_702
+      target: crossingV2_14_702
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_177_168
-  name: test_crossing_177_168
+- id: crossingV2_177_168
+  name: crossingV2_177_168
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4292,44 +4292,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: 200
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_178_154
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_178_176
-  name: test_crossing_178_176
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: 720
+    x: -440
     y: 240
     layer: 0
   exits:
     north:
-      target: test_crossing_178_154
+      target: crossingV2_178_154
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_122_450
-  name: test_crossing_122_450
+- id: crossingV2_178_176
+  name: crossingV2_178_176
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4340,20 +4316,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -960
-    y: 280
+    x: -280
+    y: 200
     layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_152_452:
-      target: test_crossing_152_452
+  exits:
+    north:
+      target: crossingV2_178_154
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_122_456
-  name: test_crossing_122_456
+  special_exits: {}
+- id: crossingV2_122_450
+  name: crossingV2_122_450
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4364,20 +4340,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -960
-    y: 280
+    x: -440
+    y: 80
     layer: 0
   exits: {}
   special_exits:
-    to_test_crossing_152_452:
-      target: test_crossing_152_452
+    to_crossingV2_152_452:
+      target: crossingV2_152_452
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_152_452
-  name: test_crossing_152_452
+- id: crossingV2_122_456
+  name: crossingV2_122_456
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4388,35 +4364,59 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -960
-    y: 280
+    x: -440
+    y: 160
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_152_452:
+      target: crossingV2_152_452
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_152_452
+  name: crossingV2_152_452
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -360
+    y: 120
     layer: 0
   exits:
     east:
-      target: test_crossing_194_450
+      target: crossingV2_194_450
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_150_424
+      target: crossingV2_150_424
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_150_480
+      target: crossingV2_150_480
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_122_450:
-      target: test_crossing_122_450
+    to_crossingV2_122_450:
+      target: crossingV2_122_450
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_194_450
-  name: test_crossing_194_450
+- id: crossingV2_194_450
+  name: crossingV2_194_450
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4427,25 +4427,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -800
-    y: 280
+    x: -320
+    y: 80
     layer: 0
   exits:
     west:
-      target: test_crossing_152_452
+      target: crossingV2_152_452
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_208_450:
-      target: test_crossing_208_450
+    to_crossingV2_208_450:
+      target: crossingV2_208_450
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_208_450
-  name: test_crossing_208_450
+- id: crossingV2_208_450
+  name: crossingV2_208_450
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4456,25 +4456,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -800
-    y: 280
+    x: -160
+    y: 0
     layer: 0
   exits:
     east:
-      target: test_crossing_252_452
+      target: crossingV2_252_452
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_194_450:
-      target: test_crossing_194_450
+    to_crossingV2_194_450:
+      target: crossingV2_194_450
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_252_452
-  name: test_crossing_252_452
+- id: crossingV2_252_452
+  name: crossingV2_252_452
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4485,20 +4485,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -640
-    y: 280
+    x: -200
+    y: 0
     layer: 0
   exits:
     west:
-      target: test_crossing_208_450
+      target: crossingV2_208_450
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_14_734
-  name: test_crossing_14_734
+- id: crossingV2_14_734
+  name: crossingV2_14_734
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4509,25 +4509,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: 280
+    x: -360
+    y: 81
     layer: 0
   exits:
     east:
-      target: test_crossing_38_732
+      target: crossingV2_38_732
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     north:
-      target: test_crossing_14_702
+      target: crossingV2_14_702
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_38_732
-  name: test_crossing_38_732
+- id: crossingV2_38_732
+  name: crossingV2_38_732
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4538,25 +4538,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: 280
+    x: -388
+    y: -111
     layer: 0
   exits:
     west:
-      target: test_crossing_14_734
+      target: crossingV2_14_734
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_64_726:
-      target: test_crossing_64_726
+    to_crossingV2_64_726:
+      target: crossingV2_64_726
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_38_738
-  name: test_crossing_38_738
+- id: crossingV2_38_738
+  name: crossingV2_38_738
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4567,24 +4567,24 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: 280
+    x: -388
+    y: -102
     layer: 0
   exits:
     west:
-      target: test_crossing_14_734
+      target: crossingV2_14_734
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_66_734:
-      target: test_crossing_66_734
+    to_crossingV2_66_734:
+      target: crossingV2_66_734
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_64_726
+- id: crossingV2_64_726
   name: 3) Way
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -4596,24 +4596,24 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: 280
+    x: -360
+    y: -120
     layer: 0
   exits:
     north:
-      target: test_crossing_64_698
+      target: crossingV2_64_698
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits:
-    to_test_crossing_38_732:
-      target: test_crossing_38_732
+    to_crossingV2_38_732:
+      target: crossingV2_38_732
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_66_734
+- id: crossingV2_66_734
   name: 3) Way
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -4625,24 +4625,24 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 80
-    y: 280
+    x: -357
+    y: -108
     layer: 0
   exits:
     east:
-      target: test_crossing_92_734
+      target: crossingV2_92_734
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_14_734
+      target: crossingV2_14_734
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_92_734
+- id: crossingV2_92_734
   name: 3) Way
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -4654,245 +4654,245 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
-  map:
-    x: 160
-    y: 280
-    layer: 0
-  exits:
-    west:
-      target: test_crossing_66_734
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_150_480
-  name: test_crossing_150_480
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 320
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_152_452
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_150_536
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_150_536
-  name: test_crossing_150_536
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 480
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_150_480
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_150_564
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_150_564
-  name: test_crossing_150_564
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 520
-    layer: 0
-  exits:
-    north:
-      target: test_crossing_150_536
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_222_132
-  name: test_crossing_222_132
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 720
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_236_132:
-      target: test_crossing_236_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_236_132
-  name: test_crossing_236_132
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -960
-    y: 720
-    layer: 0
-  exits: {}
-  special_exits:
-    to_test_crossing_222_132:
-      target: test_crossing_222_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-- id: test_crossing_236_256
-  name: test_crossing_236_256
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -720
-    y: 720
-    layer: 0
-  exits: {}
-  special_exits: {}
-- id: test_crossing_244_132
-  name: test_crossing_244_132
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -560
-    y: 720
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_268_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_268_132
-  name: test_crossing_268_132
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -480
-    y: 720
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_282_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_244_132
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_282_132
-  name: test_crossing_282_132
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
     x: -400
-    y: 720
+    y: -160
     layer: 0
   exits:
     west:
-      target: test_crossing_268_132
+      target: crossingV2_66_734
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_252_536
+- id: crossingV2_150_480
+  name: crossingV2_150_480
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -320
+    y: -40
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_152_452
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_150_536
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_150_536
+  name: crossingV2_150_536
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -240
+    y: -80
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_150_480
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_150_564
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_150_564
+  name: crossingV2_150_564
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -240
+    y: -40
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_150_536
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_222_132
+  name: crossingV2_222_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -320
+    y: 200
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_236_132:
+      target: crossingV2_236_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_236_132
+  name: crossingV2_236_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -200
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits:
+    to_crossingV2_222_132:
+      target: crossingV2_222_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: crossingV2_236_256
+  name: crossingV2_236_256
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -240
+    y: 160
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: crossingV2_244_132
+  name: crossingV2_244_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -280
+    y: 240
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_268_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_268_132
+  name: crossingV2_268_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -183
+    y: 186
+    layer: 0
+  exits:
+    east:
+      target: crossingV2_282_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_244_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_282_132
+  name: crossingV2_282_132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: -169
+    y: 186
+    layer: 0
+  exits:
+    west:
+      target: crossingV2_268_132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: crossingV2_252_536
   name: Cottage mor al
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -4904,15 +4904,15 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -240
-    y: 720
+    x: -80
+    y: 40
     layer: 0
   exits: {}
   special_exits: {}
-- id: test_crossing_260_236
-  name: test_crossing_260_236
+- id: crossingV2_260_236
+  name: crossingV2_260_236
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4923,15 +4923,15 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 0
-    y: 720
+    x: -200
+    y: 40
     layer: 0
   exits: {}
   special_exits: {}
-- id: test_crossing_290_132
-  name: test_crossing_290_132
+- id: crossingV2_290_132
+  name: crossingV2_290_132
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4942,20 +4942,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 160
-    y: 720
+    x: -160
+    y: 186
     layer: 0
   exits:
     south:
-      target: test_crossing_289_146
+      target: crossingV2_289_146
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_372_898
-  name: test_crossing_372_898
+- id: crossingV2_372_898
+  name: crossingV2_372_898
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4966,20 +4966,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 400
-    y: 720
+    x: -117
+    y: -363
     layer: 0
   exits:
     south:
-      target: test_crossing_370_940
+      target: crossingV2_370_940
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_480_264
-  name: test_crossing_480_264
+- id: crossingV2_480_264
+  name: crossingV2_480_264
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -4990,14 +4990,14 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 720
-    y: 720
+    x: 40
+    y: 240
     layer: 0
   exits: {}
   special_exits: {}
-- id: test_crossing_552_238
+- id: crossingV2_552_238
   name: '''wale'
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -5009,15 +5009,15 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 880
-    y: 720
+    x: 240
+    y: 40
     layer: 0
   exits: {}
   special_exits: {}
-- id: test_crossing_289_146
-  name: test_crossing_289_146
+- id: crossingV2_289_146
+  name: crossingV2_289_146
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5028,25 +5028,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 160
-    y: 760
+    x: -160
+    y: 200
     layer: 0
   exits:
     north:
-      target: test_crossing_290_132
+      target: crossingV2_290_132
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_289_168
+      target: crossingV2_289_168
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_290_154
-  name: test_crossing_290_154
+- id: crossingV2_290_154
+  name: crossingV2_290_154
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5057,25 +5057,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 160
-    y: 760
+    x: -120
+    y: 200
     layer: 0
   exits:
     north:
-      target: test_crossing_290_132
+      target: crossingV2_290_132
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_289_168
+      target: crossingV2_289_168
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_289_168
-  name: test_crossing_289_168
+- id: crossingV2_289_168
+  name: crossingV2_289_168
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5086,20 +5086,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 160
-    y: 800
+    x: -160
+    y: 240
     layer: 0
   exits:
     north:
-      target: test_crossing_290_154
+      target: crossingV2_290_154
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_290_176
-  name: test_crossing_290_176
+- id: crossingV2_290_176
+  name: crossingV2_290_176
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5110,20 +5110,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 160
-    y: 840
+    x: -120
+    y: 160
     layer: 0
   exits:
     north:
-      target: test_crossing_290_154
+      target: crossingV2_290_154
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_370_940
-  name: test_crossing_370_940
+- id: crossingV2_370_940
+  name: crossingV2_370_940
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5134,20 +5134,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 400
-    y: 840
+    x: -120
+    y: -320
     layer: 0
   exits:
     north:
-      target: test_crossing_372_898
+      target: crossingV2_372_898
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_372_948
-  name: test_crossing_372_948
+- id: crossingV2_372_948
+  name: crossingV2_372_948
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5158,20 +5158,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 400
-    y: 840
+    x: -40
+    y: -320
     layer: 0
   exits: {}
   special_exits:
-    to_test_crossing_370_940:
-      target: test_crossing_370_940
+    to_crossingV2_370_940:
+      target: crossingV2_370_940
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
-- id: test_crossing_422_946
-  name: test_crossing_422_946
+- id: crossingV2_422_946
+  name: crossingV2_422_946
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5182,20 +5182,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: 840
+    x: 40
+    y: -280
     layer: 0
   exits:
     west:
-      target: test_crossing_372_948
+      target: crossingV2_372_948
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_422_952
-  name: test_crossing_422_952
+- id: crossingV2_422_952
+  name: crossingV2_422_952
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5206,19 +5206,19 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: 480
-    y: 840
+    x: 40
+    y: -320
     layer: 0
   exits:
     west:
-      target: test_crossing_372_948
+      target: crossingV2_372_948
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_684_642
+- id: crossingV2_684_642
   name: East wt
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
@@ -5230,25 +5230,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -800
-    y: 1040
+    x: 320
+    y: -40
     layer: 0
   exits:
     east:
-      target: test_crossing_724_674
+      target: crossingV2_724_674
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_664_674
+      target: crossingV2_664_674
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_724_674
-  name: test_crossing_724_674
+- id: crossingV2_724_674
+  name: crossingV2_724_674
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5259,25 +5259,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -640
-    y: 1040
+    x: 361
+    y: 1
     layer: 0
   exits:
     south:
-      target: test_crossing_750_732
+      target: crossingV2_750_732
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_684_642
+      target: crossingV2_684_642
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_618_702
-  name: test_crossing_618_702
+- id: crossingV2_618_702
+  name: crossingV2_618_702
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5288,20 +5288,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -480
-    y: 1040
+    x: 197
+    y: -171
     layer: 0
   exits:
     south:
-      target: test_crossing_620_728
+      target: crossingV2_620_728
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_784_732
-  name: test_crossing_784_732
+- id: crossingV2_784_732
+  name: crossingV2_784_732
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5312,15 +5312,15 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -240
-    y: 1040
+    x: 320
+    y: -80
     layer: 0
   exits: {}
   special_exits: {}
-- id: test_crossing_784_800
-  name: test_crossing_784_800
+- id: crossingV2_784_800
+  name: crossingV2_784_800
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5331,15 +5331,15 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -80
-    y: 1040
+    x: 320
+    y: -15
     layer: 0
   exits: {}
   special_exits: {}
-- id: test_crossing_620_674
-  name: test_crossing_620_674
+- id: crossingV2_620_674
+  name: crossingV2_620_674
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5350,25 +5350,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -960
-    y: 1080
+    x: 200
+    y: -200
     layer: 0
   exits:
     east:
-      target: test_crossing_664_674
+      target: crossingV2_664_674
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_614_702
+      target: crossingV2_614_702
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_664_674
-  name: test_crossing_664_674
+- id: crossingV2_664_674
+  name: crossingV2_664_674
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5379,20 +5379,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -800
-    y: 1080
+    x: 280
+    y: -80
     layer: 0
   exits:
     west:
-      target: test_crossing_620_674
+      target: crossingV2_620_674
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_620_728
-  name: test_crossing_620_728
+- id: crossingV2_620_728
+  name: crossingV2_620_728
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5403,20 +5403,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -480
-    y: 1120
+    x: 280
+    y: -289
     layer: 0
   exits:
     north:
-      target: test_crossing_618_702
+      target: crossingV2_618_702
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_620_734
-  name: test_crossing_620_734
+- id: crossingV2_620_734
+  name: crossingV2_620_734
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5427,20 +5427,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -480
-    y: 1120
+    x: 280
+    y: -280
     layer: 0
   exits:
     north:
-      target: test_crossing_618_702
+      target: crossingV2_618_702
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_614_702
-  name: test_crossing_614_702
+- id: crossingV2_614_702
+  name: crossingV2_614_702
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5451,20 +5451,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -960
-    y: 1160
+    x: 191
+    y: -171
     layer: 0
   exits:
     north:
-      target: test_crossing_620_674
+      target: crossingV2_620_674
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_716_732
-  name: test_crossing_716_732
+- id: crossingV2_716_732
+  name: crossingV2_716_732
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5475,20 +5475,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -720
-    y: 1240
+    x: 320
+    y: -200
     layer: 0
   exits:
     south:
-      target: test_crossing_716_766
+      target: crossingV2_716_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_750_732
-  name: test_crossing_750_732
+- id: crossingV2_750_732
+  name: crossingV2_750_732
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5499,20 +5499,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -640
-    y: 1240
+    x: 360
+    y: -200
     layer: 0
   exits:
     south:
-      target: test_crossing_750_766
+      target: crossingV2_750_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_650_766
-  name: test_crossing_650_766
+- id: crossingV2_650_766
+  name: crossingV2_650_766
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5523,20 +5523,20 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -880
-    y: 1320
+    x: 280
+    y: -200
     layer: 0
   exits:
     east:
-      target: test_crossing_684_766
+      target: crossingV2_684_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_684_766
-  name: test_crossing_684_766
+- id: crossingV2_684_766
+  name: crossingV2_684_766
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5547,64 +5547,25 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -800
-    y: 1320
+    x: 360
+    y: -240
     layer: 0
   exits:
     east:
-      target: test_crossing_716_766
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    west:
-      target: test_crossing_650_766
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-  special_exits: {}
-- id: test_crossing_716_766
-  name: test_crossing_716_766
-  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
-  desc: ''
-  stateful_descs: {}
-  details: {}
-  room_states: []
-  ambient:
-    rate: 0
-    messages: []
-  environment: city
-  zone_id: test_crossing
-  map:
-    x: -720
-    y: 1320
-    layer: 0
-  exits:
-    east:
-      target: test_crossing_750_766
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    north:
-      target: test_crossing_716_732
-      typeclass: typeclasses.exits.Exit
-      speed: ''
-      travel_time: 0
-    south:
-      target: test_crossing_716_800
+      target: crossingV2_716_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_684_766
+      target: crossingV2_650_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_750_766
-  name: test_crossing_750_766
+- id: crossingV2_716_766
+  name: crossingV2_716_766
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5615,30 +5576,35 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -640
-    y: 1320
+    x: 360
+    y: -308
     layer: 0
   exits:
+    east:
+      target: crossingV2_750_766
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
     north:
-      target: test_crossing_750_732
+      target: crossingV2_716_732
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     south:
-      target: test_crossing_752_800
+      target: crossingV2_716_800
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
     west:
-      target: test_crossing_716_766
+      target: crossingV2_684_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_716_800
-  name: test_crossing_716_800
+- id: crossingV2_750_766
+  name: crossingV2_750_766
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5649,20 +5615,30 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -720
-    y: 1400
+    x: 360
+    y: -163
     layer: 0
   exits:
     north:
-      target: test_crossing_716_766
+      target: crossingV2_750_732
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: crossingV2_752_800
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: crossingV2_716_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-- id: test_crossing_752_800
-  name: test_crossing_752_800
+- id: crossingV2_716_800
+  name: crossingV2_716_800
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: null
   desc: ''
@@ -5673,18 +5649,39 @@ rooms:
     rate: 0
     messages: []
   environment: city
-  zone_id: test_crossing
+  zone_id: crossingv2_seeded
   map:
-    x: -640
-    y: 1400
+    x: 360
+    y: -280
     layer: 0
   exits:
     north:
-      target: test_crossing_750_766
+      target: crossingV2_716_766
       typeclass: typeclasses.exits.Exit
       speed: ''
       travel_time: 0
   special_exits: {}
-placements:
-  npcs: []
-  items: []
+- id: crossingV2_752_800
+  name: crossingV2_752_800
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: crossingv2_seeded
+  map:
+    x: 398
+    y: -280
+    layer: 0
+  exits:
+    north:
+      target: crossingV2_750_766
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}

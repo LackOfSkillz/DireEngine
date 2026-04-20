@@ -1513,57 +1513,6 @@
       && numeric % REACT_FLOW_NORMALIZED_GRID_SIZE === 0;
   }
 
-  function builderRoomCoordinateSource(room) {
-    return {
-      rawX: room?.map?.x ?? room?.map_x ?? room?.x,
-      rawY: room?.map?.y ?? room?.map_y ?? room?.y,
-    };
-  }
-
-  function readBuilderRoomCoordinates(room, options = {}) {
-    const { context = "builder", clamp = false, requireFinite = false } = options;
-    const { rawX, rawY } = builderRoomCoordinateSource(room);
-    const numericX = clamp ? coerceBuilderCoordinate(rawX) : Number(rawX);
-    const numericY = clamp ? coerceBuilderCoordinate(rawY) : Number(rawY);
-    if (requireFinite && (!Number.isFinite(numericX) || !Number.isFinite(numericY))) {
-      const roomId = builderRoomKey(room?.id || "unknown");
-      throw new Error(`Missing map coords for ${roomId} in ${context}`);
-    }
-    return {
-      rawX,
-      rawY,
-      x: numericX,
-      y: numericY,
-    };
-  }
-
-  function logBuilderReactFlowBounds(zoneId, nodes, coordinateConfig) {
-    if (!Array.isArray(nodes) || !nodes.length) {
-      return;
-    }
-    const xs = nodes.map((node) => Number(node?.position?.x)).filter((value) => Number.isFinite(value));
-    const ys = nodes.map((node) => Number(node?.position?.y)).filter((value) => Number.isFinite(value));
-    if (!xs.length || !ys.length) {
-      return;
-    }
-    console.log("BUILDER REACT FLOW BOUNDS:", {
-      zoneId,
-      mode: coordinateConfig?.mode || "unknown",
-      minX: Math.min(...xs),
-      maxX: Math.max(...xs),
-      minY: Math.min(...ys),
-      maxY: Math.max(...ys),
-      width: Math.max(...xs) - Math.min(...xs),
-      height: Math.max(...ys) - Math.min(...ys),
-      nodeCount: nodes.length,
-      sample: nodes.slice(0, 5).map((node) => ({
-        id: node.id,
-        x: node.position?.x,
-        y: node.position?.y,
-      })),
-    });
-  }
-
   function getBuilderCoordinateConfig(zone) {
     const rooms = zone?.rooms || [];
     const hasExplicitMapCoordinates = rooms.some((room) => {
@@ -1572,8 +1521,9 @@
       return Number.isFinite(mapX) && Number.isFinite(mapY);
     });
     const coordinateValues = normalizeBuilderZoneRooms(zone?.rooms || []).flatMap((room) => {
-      const { rawX, rawY } = readBuilderRoomCoordinates(room);
-      return [rawX, rawY]
+      const rawMapX = room?.map_x ?? room?.map?.x ?? room?.x;
+      const rawMapY = room?.map_y ?? room?.map?.y ?? room?.y;
+      return [rawMapX, rawMapY]
         .map((value) => Number(value))
         .filter((value) => Number.isFinite(value));
     });
@@ -1613,29 +1563,6 @@
     }
   }
 
-  function builderEdgeRenderConfig(direction) {
-    switch (canonicalExitDirection(direction || "")) {
-      case "northeast":
-      case "northwest":
-      case "southeast":
-      case "southwest":
-        return { type: "straight" };
-      case "east":
-      case "west":
-      case "north":
-      case "south":
-        return {
-          type: "smoothstep",
-          pathOptions: {
-            borderRadius: 0,
-            offset: 20,
-          },
-        };
-      default:
-        return { type: "straight" };
-    }
-  }
-
   function buildFlowGraph(zone, selectedRoomId) {
     const coordinateConfig = getBuilderCoordinateConfig(zone);
     const normalizedRooms = normalizeBuilderZoneRooms(zone?.rooms || []).map((room) => ({
@@ -1651,12 +1578,13 @@
       if (!roomId) {
         continue;
       }
-      const { rawX, rawY, x: mapX, y: mapY } = readBuilderRoomCoordinates(room, {
-        context: "buildFlowGraph",
-        clamp: true,
-        requireFinite: true,
-      });
-      console.debug("BUILDER NODE:", roomId, { x: rawX, y: rawY, map: room?.map || null });
+      const rawMapX = room?.map_x ?? room?.map?.x ?? room?.x;
+      const rawMapY = room?.map_y ?? room?.map?.y ?? room?.y;
+      const mapX = coerceBuilderCoordinate(rawMapX);
+      const mapY = coerceBuilderCoordinate(rawMapY);
+      if (!Number.isFinite(Number(rawMapX)) || !Number.isFinite(Number(rawMapY))) {
+        console.warn("ROOM MISSING COORDS:", roomId, room?.name, rawMapX, rawMapY);
+      }
       nodes.push({
         id: roomId,
         type: "builderRoom",
@@ -1844,7 +1772,6 @@
       return false;
     }
     const { nodes, edges, coordinateConfig } = buildFlowGraph(zone, builderState.currentRoomId);
-    logBuilderReactFlowBounds(zone?.zone_id || builderState.currentZoneId || "", nodes, coordinateConfig);
     const currentRoom = (zone?.rooms || []).find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
     window.DragonsireBuilderReactFlow.mountBuilderReactFlow(root, {
       nodes,
@@ -1902,9 +1829,8 @@
 
   function normalizeBuilderZoneRooms(rooms) {
     return (rooms || []).flatMap((room) => {
-      const { rawX, rawY } = readBuilderRoomCoordinates(room);
-      const mapX = normalizeBuilderMapCoordinate(rawX);
-      const mapY = normalizeBuilderMapCoordinate(rawY);
+      const mapX = normalizeBuilderMapCoordinate(room?.map?.x ?? room?.map_x ?? room?.x);
+      const mapY = normalizeBuilderMapCoordinate(room?.map?.y ?? room?.map_y ?? room?.y);
       if (!Number.isFinite(mapX) || !Number.isFinite(mapY)) {
         return [];
       }
@@ -5474,8 +5400,8 @@
     if (!rooms.length) {
       return { minX: 0, maxX: 0, minY: 0, maxY: 0, width: 1, height: 1 };
     }
-    const xs = rooms.map((room) => readBuilderRoomCoordinates(room).x).filter((value) => Number.isFinite(value));
-    const ys = rooms.map((room) => readBuilderRoomCoordinates(room).y).filter((value) => Number.isFinite(value));
+    const xs = rooms.map((room) => Number(room.x) || 0);
+    const ys = rooms.map((room) => Number(room.y) || 0);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
@@ -5521,9 +5447,8 @@
     let maxY = -Infinity;
 
     for (const room of rooms) {
-      const coordinates = readBuilderRoomCoordinates(room);
-      const roomX = (Number(coordinates.x) || 0) * scale;
-      const roomY = (Number(coordinates.y) || 0) * scale;
+      const roomX = (Number(room.x) || 0) * scale;
+      const roomY = (Number(room.y) || 0) * scale;
       const radius = mapRoomRadiusForHover(room, compactMap, hoveredRoomId);
       const outline = isPlayerRoom(room) ? 4 : 0;
 
@@ -5668,14 +5593,11 @@
       roomCount: rooms.length,
       edgeCount: edges.length,
       sampleRoomIds: rooms.slice(0, 20).map((room) => room.id),
-      sampleRooms: rooms.slice(0, 20).map((room) => {
-        const coordinates = readBuilderRoomCoordinates(room);
-        return {
-          id: room.id,
-          x: coordinates.x,
-          y: coordinates.y,
-        };
-      }),
+      sampleRooms: rooms.slice(0, 20).map((room) => ({
+        id: room.id,
+        x: room.x ?? room.map_x ?? 0,
+        y: room.y ?? room.map_y ?? 0,
+      })),
       selectedRoomId: transform.selectedRoomId ?? null,
       renderedBounds: transform.renderedBounds || null,
       transform,
@@ -5773,7 +5695,8 @@
       console.log("BUILDER SAMPLE:", rooms[0] || null);
     }
     for (const room of rooms || []) {
-      const { x: roomX, y: roomY } = readBuilderRoomCoordinates(room);
+      const roomX = Number(room.x ?? room.map_x);
+      const roomY = Number(room.y ?? room.map_y);
       if (!Number.isFinite(roomX) || !Number.isFinite(roomY)) {
         console.error("Missing coords", { mode, room });
       }

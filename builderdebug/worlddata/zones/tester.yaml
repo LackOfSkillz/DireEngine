@@ -1,0 +1,43 @@
+schema_version: v1
+zone_id: tester
+name: tester
+rooms:
+- id: test-room
+  name: test room
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: this is a tester room
+  desc: this is a tester room
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: tester
+  map:
+    x: 191
+    y: 140
+    layer: 0
+  exits: {}
+- id: test-room-east
+  name: test room east
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: east room for connect validation
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: tester
+  map:
+    x: 330
+    y: 152
+    layer: 0
+  exits: {}
+placements:
+  npcs: []
+  items: []
