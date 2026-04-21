@@ -1094,7 +1094,8 @@ body {
   justify-content: center;
 }
 
-#footer-status {
+#topbar-footer-status,
+#sidebar-footer-status {
   color: #f4e7ca;
 }
 
@@ -1481,7 +1482,8 @@ body {
   }
 
   .resource-label,
-  #footer-status {
+  #topbar-footer-status,
+  #sidebar-footer-status {
     font-size: 10px;
   }
 
@@ -1567,7 +1569,7 @@ body {
   width: 112px;
 }
 
-#footer-status {
+#topbar-footer-status {
   width: 152px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1757,7 +1759,8 @@ body {
 #mode-play .character-meta,
 #mode-play .status-tag,
 #mode-play .resource-label,
-#mode-play #footer-status {
+#mode-play #topbar-footer-status,
+#mode-play #sidebar-footer-status {
   font-size: 11px;
 }
 
@@ -1994,7 +1997,8 @@ body {
 }
 
 #map-panel {
-  height: 220px;
+  min-height: 220px;
+  height: min(45vh, 500px);
 }
 
 .character-card,
@@ -2009,7 +2013,7 @@ body {
 
 .inventory-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
   gap: 6px;
 }
 
@@ -2395,10 +2399,16 @@ body {
   height: calc(100dvh * var(--window-shell-unscale));
   min-height: calc(100dvh * var(--window-shell-unscale));
   max-height: calc(100dvh * var(--window-shell-unscale));
+  align-items: stretch;
   transform: scale(var(--window-shell-scale));
   transform-origin: top center;
   transition: transform 160ms ease-out;
   will-change: transform;
+}
+
+#mode-play[data-shell-fit="scaled"] #topbar,
+#mode-play[data-shell-fit="scaled"] #main-layout {
+  width: 100% !important;
 }
 
 #mode-play[data-shell-fit="scaled"] #main-layout {
@@ -2437,6 +2447,9 @@ body {
   #center-column {
     grid-area: center !important;
     min-width: 0 !important;
+    align-self: stretch !important;
+    height: 100% !important;
+    overflow: hidden !important;
   }
 
   #left-sidebar {
@@ -2477,16 +2490,22 @@ body {
   }
 
   #feed-text {
-    min-height: 300px;
+    min-height: min(30vh, 220px) !important;
   }
 
-  #scene-image,
-  #map-panel {
-    min-height: 240px;
+  #scene-image {
+    height: min(20vh, 180px) !important;
+    min-height: 120px !important;
   }
 
   #map-panel {
-    height: auto;
+    min-height: min(18vh, 160px) !important;
+    height: auto !important;
+  }
+
+  #map-canvas {
+    height: min(22vh, 160px) !important;
+    min-height: 110px !important;
   }
 
   #topbar {
@@ -3601,4 +3620,172 @@ body {
   #builder-right #feed-body {
     min-height: 70vh;
   }
+}
+
+@media (max-width: 1400px) {
+  #feed-body {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* === RESPONSIVE: 1101-1400px (HALF-SCREEN FIX) === */
+@media (max-width: 1400px) and (min-width: 1101px) {
+  #feed-side {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    flex: 0 0 auto !important;
+  }
+
+  #scene-image {
+    height: min(22vh, 190px) !important;
+    flex-shrink: 0 !important;
+  }
+
+  #map-panel {
+    min-height: min(22vh, 190px) !important;
+    height: auto !important;
+  }
+
+  #map-canvas {
+    height: min(26vh, 200px) !important;
+    min-height: 130px !important;
+  }
+
+  #feed-text {
+    min-height: min(30vh, 240px) !important;
+  }
+}
+
+/* === SCALED SHELL: suppress media query grid-area rearrangement ===
+   The 1100px breakpoint assigns grid-area: left/center/right to children
+   and grid-template-areas to main-layout. Use explicit grid-column + grid-row
+   with higher specificity to override that named placement. */
+
+#mode-play[data-shell-fit="scaled"] #main-layout {
+  grid-template-rows: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+#mode-play[data-shell-fit="scaled"] #left-sidebar {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  height: 100% !important;
+}
+
+#mode-play[data-shell-fit="scaled"] #center-column {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  height: 100% !important;
+  align-self: stretch !important;
+}
+
+#mode-play[data-shell-fit="scaled"] #right-sidebar {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+#mode-play[data-shell-fit="scaled"] #feed-body {
+  height: 100% !important;
+}
+
+#mode-play[data-shell-fit="scaled"] #feed-side {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* === REAL ESTATE: let the scaled grid fill the remaining shell height === */
+
+#mode-play[data-shell-fit="scaled"] #main-layout {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+#mode-play[data-shell-fit="scaled"] #feed-body,
+#mode-play[data-shell-fit="scaled"] #feed-text {
+  min-height: 0 !important;
+}
+
+/* === SMALL-SCREEN FALLBACK (<760px) === */
+
+@media (max-width: 760px) {
+  #main-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  #left-sidebar {
+    order: 1;
+  }
+
+  #center-column {
+    order: 2;
+  }
+
+  #right-sidebar {
+    order: 3;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  #feed-body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  #feed-side {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  #scene-image,
+  #map-panel {
+    height: auto !important;
+    min-height: 140px !important;
+  }
+}
+
+#center-column {
+  display: flex;
+  flex-direction: column;
+}
+
+#feed-body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* === FIX: overflow:hidden + flex-shrink both clip before transform ===
+   Two problems combined to create the "postcard" effect:
+   1. overflow:hidden on #mode-play clips the shell's 1411px layout box to 960px
+      BEFORE transform runs → scale(0.68) shrinks an already-960px shell to 653px.
+   2. flex-shrink:1 (default) also collapses the shell from 1411px → 960px before transform.
+   3. height:100vh !important from the override block beats the unscaled height → 68vh after scale.
+   Fix: fixed positioning (exact viewport box), overflow:visible + flex-shrink:0 (no pre-clipping),
+   clip-path:inset(0) (clips post-transform at viewport edge), !important heights. */
+
+#mode-play[data-shell-fit="scaled"] {
+  position: fixed !important;
+  inset: 0 !important;
+  overflow: visible !important;
+  clip-path: inset(0) !important;
+  justify-content: flex-start !important;
+}
+
+#mode-play[data-shell-fit="scaled"] #dragonsire-shell {
+  flex-shrink: 0 !important;
+  height: calc(100dvh * var(--window-shell-unscale)) !important;
+  min-height: calc(100dvh * var(--window-shell-unscale)) !important;
+  max-height: calc(100dvh * var(--window-shell-unscale)) !important;
+  transform-origin: top left !important;
 }

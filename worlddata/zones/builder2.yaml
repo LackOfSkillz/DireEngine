@@ -1,0 +1,205 @@
+schema_version: v1
+zone_id: builder2
+name: builder2
+rooms:
+- id: CRO_450_300
+  name: CRO_450_300
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: builder2
+  map:
+    x: 450
+    y: 300
+    layer: 0
+  exits:
+    down:
+      target: CRO_450_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_500_300
+  name: CRO_500_300
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: builder2
+  map:
+    x: 500
+    y: 300
+    layer: 0
+  exits:
+    south:
+      target: CRO_500_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southeast:
+      target: CRO_550_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southwest:
+      target: CRO_450_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_450_350
+  name: CRO_450_350
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: builder2
+  map:
+    x: 450
+    y: 350
+    layer: 0
+  exits:
+    east:
+      target: CRO_500_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northeast:
+      target: CRO_500_300
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southeast:
+      target: CRO_500_400
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    up:
+      target: CRO_450_300
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_500_350
+  name: CRO_500_350
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: builder2
+  map:
+    x: 500
+    y: 350
+    layer: 0
+  exits:
+    down:
+      target: CRO_500_400
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: CRO_450_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: CRO_500_300
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: CRO_550_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_550_350
+  name: CRO_550_350
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: builder2
+  map:
+    x: 550
+    y: 350
+    layer: 0
+  exits:
+    west:
+      target: CRO_500_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northwest:
+      target: CRO_500_300
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    southwest:
+      target: CRO_500_400
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: CRO_500_400
+  name: CRO_500_400
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: builder2
+  map:
+    x: 500
+    y: 400
+    layer: 0
+  exits:
+    up:
+      target: CRO_500_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northwest:
+      target: CRO_450_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    northeast:
+      target: CRO_550_350
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+placements:
+  npcs: []
+  items: []

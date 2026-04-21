@@ -227,6 +227,15 @@
     return document.getElementById(id);
   }
 
+  function setFooterStatus(text) {
+    ["topbar-footer-status", "sidebar-footer-status"].forEach((id) => {
+      const element = byId(id);
+      if (element) {
+        element.textContent = String(text ?? "");
+      }
+    });
+  }
+
   function builderRoomKey(value) {
     return String(value ?? "").trim();
   }
@@ -4566,7 +4575,7 @@
     const availableWidth = Math.max(window.innerWidth - 24, 0);
     const availableHeight = Math.max(window.innerHeight - 24, 0);
 
-    if (availableWidth < 1100) {
+    if (availableWidth < 760) {
       modePlay.removeAttribute("data-shell-fit");
       modePlay.style.setProperty("--window-shell-scale", "1");
       modePlay.style.setProperty("--window-shell-unscale", "1");
@@ -4997,7 +5006,7 @@
       appendChatLine(plainText, cls);
       playTone("chat");
     }
-    byId("footer-status").textContent = "Received text";
+    setFooterStatus("Received text");
     appendDebug("TEXT", { args, kwargs });
     return true;
   }
@@ -5010,7 +5019,7 @@
     const parsed = parser.parseFromString(`<body>${html}</body>`, "text/html");
     prompt.className = `prompt ${kwargs && kwargs.cls ? kwargs.cls : "out"}`;
     prompt.textContent = (parsed.body.textContent || html || "").trim();
-    byId("footer-status").textContent = "Received prompt";
+    setFooterStatus("Received prompt");
     appendDebug("PROMPT", { args, kwargs });
     return true;
   }
@@ -5051,7 +5060,7 @@
     const normalized = (command || "").trim();
     if (!normalized) return;
     echoCommand(normalized);
-    byId("footer-status").textContent = `Sent ${normalized}`;
+    setFooterStatus(`Sent ${normalized}`);
     if (window.Evennia && typeof Evennia.msg === "function") {
       Evennia.msg("text", [normalized], {});
     } else if (window.plugin_handler && typeof window.plugin_handler.onSend === "function") {
@@ -5827,9 +5836,9 @@
       statusList.appendChild(row);
     }
 
-    byId("footer-status").textContent = payload.in_combat
+    setFooterStatus(payload.in_combat
       ? `Target ${payload.target || "unknown"}`
-      : (payload.status && payload.status[0]) || "Standing by";
+      : (payload.status && payload.status[0]) || "Standing by");
 
     renderAbilities(payload);
     renderHotbar();
@@ -6010,7 +6019,7 @@
     if (!canvas) return false;
     const rect = canvas.getBoundingClientRect();
     const nextWidth = Math.max(320, Math.round(rect.width || 320));
-    const nextHeight = Math.max(320, Math.round(rect.height || 360));
+    const nextHeight = Math.max(160, Math.round(rect.height || 280));
     let resized = false;
     if (canvas.width !== nextWidth) {
       canvas.width = nextWidth;
@@ -6718,7 +6727,7 @@
     Evennia.emitter.on("logged_in", () => {
       cancelReconnect();
       updateConnection(true);
-      byId("footer-status").textContent = "Logged in";
+      setFooterStatus("Logged in");
       setSessionStatus("Connected");
       playTone("ready");
       requestInitialRefresh();
@@ -6726,13 +6735,13 @@
     Evennia.emitter.on("connection_open", () => {
       cancelReconnect();
       updateConnection(true);
-      byId("footer-status").textContent = "Connection open";
+      setFooterStatus("Connection open");
       setSessionStatus("Connected");
       requestInitialRefresh();
     });
     Evennia.emitter.on("connection_close", () => {
       updateConnection(false);
-      byId("footer-status").textContent = "Connection closed";
+      setFooterStatus("Connection closed");
       setSessionStatus("Disconnected");
       toast("Connection closed. Reconnect scheduled.");
       scheduleReconnect();
@@ -6753,7 +6762,7 @@
     row.textContent = line;
     msgWindow.appendChild(row);
     msgWindow.scrollTop = msgWindow.scrollHeight;
-    byId("footer-status").textContent = `Combat: ${payload.target || "target"}`;
+    setFooterStatus(`Combat: ${payload.target || "target"}`);
     byId("character-card").classList.remove("combat-flash");
     void byId("character-card").offsetWidth;
     byId("character-card").classList.add("combat-flash");
@@ -6966,11 +6975,11 @@
       button.addEventListener("click", () => {
         const entry = selectedInventoryEntry();
         if (!entry) {
-          byId("footer-status").textContent = "Select an inventory item first";
+          setFooterStatus("Select an inventory item first");
           return;
         }
         const action = button.dataset.action;
-        byId("footer-status").textContent = `${action} ${entry.name}`;
+        setFooterStatus(`${action} ${entry.name}`);
         sendCommand(`${action} ${entry.name}`);
         toast(`${action} ${entry.name}`);
       });
