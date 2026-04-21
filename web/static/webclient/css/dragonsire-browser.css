@@ -18,6 +18,43 @@ body {
   overflow: hidden;
 }
 
+/* === GLOBAL SCROLLBAR THEME === */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a0f08;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c9a86a, #8b6b3f);
+  border-radius: 6px;
+  border: 1px solid #3a2415;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #e0c48a, #a07c4d);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8b6b3f #1a0f08;
+}
+
+.dark-panel::-webkit-scrollbar-track {
+  background: #120904;
+}
+
+.builder-panel::-webkit-scrollbar,
+.builder-phase1-canvas-shell::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
 #direweb-app,
 .mode-surface {
   width: 100%;
@@ -3212,6 +3249,16 @@ body {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
+}
+
+.builder-phase1-canvas-shell.is-mode-room .react-flow__pane,
+.builder-phase1-canvas-shell.is-mode-room .builder-phase1-flow {
+  cursor: copy;
+}
+
+.builder-phase1-canvas-shell.is-mode-delete .react-flow__pane,
+.builder-phase1-canvas-shell.is-mode-delete .builder-phase1-flow {
+  cursor: not-allowed;
 }
 
 .builder-phase1-flow {

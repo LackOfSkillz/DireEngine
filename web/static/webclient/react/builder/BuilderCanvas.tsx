@@ -39,6 +39,7 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
     roomsById,
     selectedEdgeId,
     selectedRoomId,
+    setMode,
     setSelectedEdge,
     setSelectedRoom,
     updateRoomPosition,
@@ -151,11 +152,13 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
       if (event.key !== "Escape") {
         return;
       }
+      setMode("select");
+      setSelectedRoom(null);
       setSelectedEdge(null);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [setSelectedEdge]);
+  }, [setMode, setSelectedEdge, setSelectedRoom]);
 
   useEffect(() => {
     if (!roomList.length || !nodesInitialized || !shellSize.width || !shellSize.height) {
@@ -293,7 +296,7 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
   return (
     <div
       ref={shellRef}
-      className="builder-phase1-canvas-shell"
+      className={`builder-phase1-canvas-shell${mode === "room" ? " is-mode-room" : mode === "delete" ? " is-mode-delete" : ""}`}
     >
       <ReactFlow
         className="builder-reactflow-root builder-phase1-flow"

@@ -37,6 +37,7 @@ type BuilderStoreProviderProps = {
 };
 
 const BuilderStoreContext = createContext<BuilderStoreValue | null>(null);
+const persistedModeByResetKey = new Map<string, EditorMode>();
 
 const EMPTY_CONNECTION: ConnectionState = {
   active: false,
@@ -60,6 +61,7 @@ function createInitialBuilderState(
   zonePrefix: string,
   rooms: RoomNode[] = [],
   selectedRoomId: string | null = null,
+  initialMode: EditorMode = "select",
 ): BuilderState {
   const roomsById: Record<string, RoomNode> = {};
   const roomIdByCoord: Record<string, string> = {};
@@ -86,7 +88,7 @@ function createInitialBuilderState(
   }
 
   return {
-    mode: "select",
+    mode: initialMode,
     selectedRoomId: selectedRoomId && roomsById[selectedRoomId] ? selectedRoomId : null,
     selectedEdgeId: null,
     connection: EMPTY_CONNECTION,
@@ -108,8 +110,9 @@ export function BuilderStoreProvider({
   const onStateChangeRef = useRef(onStateChange);
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("none");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const resolvedInitialMode = persistedModeByResetKey.get(resetKey) || "select";
   const [state, setState] = useState<BuilderState>(() => (
-    createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId)
+    createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId, resolvedInitialMode)
   ));
 
   useEffect(() => {
@@ -120,8 +123,35 @@ export function BuilderStoreProvider({
     suppressNextStateChangeRef.current = true;
     setLayoutMode("none");
     setStatusMessage(null);
-    setState(createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId));
-  }, [initialRooms, initialSelectedRoomId, resetKey, zonePrefix]);
+    setState(createInitialBuilderState(
+      zonePrefix,
+      initialRooms,
+      initialSelectedRoomId,
+      persistedModeByResetKey.get(resetKey) || "select",
+    ));
+  }, [resetKey, zonePrefix]);
+
+  useEffect(() => {
+    if (initialSelectedRoomId === undefined) {
+      return;
+    }
+
+    setState((previous) => {
+      const nextSelectedRoomId = initialSelectedRoomId && previous.roomsById[initialSelectedRoomId]
+        ? initialSelectedRoomId
+        : null;
+
+      if (previous.selectedRoomId === nextSelectedRoomId) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        selectedRoomId: nextSelectedRoomId,
+        selectedEdgeId: null,
+      };
+    });
+  }, [initialSelectedRoomId]);
 
   useEffect(() => {
     if (suppressNextStateChangeRef.current) {
@@ -132,13 +162,14 @@ export function BuilderStoreProvider({
   }, [state]);
 
   const setMode = useCallback((mode: EditorMode) => {
+    persistedModeByResetKey.set(resetKey, mode);
     setStatusMessage(null);
     setState((previous) => ({
       ...previous,
       mode,
       connection: EMPTY_CONNECTION,
     }));
-  }, []);
+  }, [resetKey]);
 
   const previewLayout = useCallback(() => {
     setLayoutMode((previous) => (previous === "preview" ? "none" : "preview"));
@@ -210,7 +241,6 @@ export function BuilderStoreProvider({
         roomId = existingRoomId;
         return {
           ...previous,
-          mode: "select",
           selectedRoomId: existingRoomId,
           selectedEdgeId: null,
         };
@@ -219,7 +249,6 @@ export function BuilderStoreProvider({
       roomId = buildRoomId(previous.zonePrefix, nextX, nextY);
       return {
         ...previous,
-        mode: "select",
         selectedRoomId: roomId,
         selectedEdgeId: null,
         roomsById: {

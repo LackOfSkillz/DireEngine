@@ -31492,6 +31492,7 @@ var DragonsireBuilderReactFlow = (() => {
 
   // web/static/webclient/react/builder/BuilderStore.ts
   var BuilderStoreContext = (0, import_react3.createContext)(null);
+  var persistedModeByResetKey = /* @__PURE__ */ new Map();
   var EMPTY_CONNECTION = {
     active: false,
     fromRoomId: null,
@@ -31507,7 +31508,7 @@ var DragonsireBuilderReactFlow = (() => {
       label: String(spec?.label || "")
     };
   }
-  function createInitialBuilderState(zonePrefix, rooms = [], selectedRoomId = null) {
+  function createInitialBuilderState(zonePrefix, rooms = [], selectedRoomId = null, initialMode = "select") {
     const roomsById = {};
     const roomIdByCoord = {};
     for (const room of rooms) {
@@ -31531,7 +31532,7 @@ var DragonsireBuilderReactFlow = (() => {
       roomIdByCoord[coordKey(normalizedRoom.x, normalizedRoom.y)] = normalizedRoom.id;
     }
     return {
-      mode: "select",
+      mode: initialMode,
       selectedRoomId: selectedRoomId && roomsById[selectedRoomId] ? selectedRoomId : null,
       selectedEdgeId: null,
       connection: EMPTY_CONNECTION,
@@ -31552,7 +31553,8 @@ var DragonsireBuilderReactFlow = (() => {
     const onStateChangeRef = (0, import_react3.useRef)(onStateChange);
     const [layoutMode, setLayoutMode] = (0, import_react3.useState)("none");
     const [statusMessage, setStatusMessage] = (0, import_react3.useState)(null);
-    const [state, setState] = (0, import_react3.useState)(() => createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId));
+    const resolvedInitialMode = persistedModeByResetKey.get(resetKey) || "select";
+    const [state, setState] = (0, import_react3.useState)(() => createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId, resolvedInitialMode));
     (0, import_react3.useEffect)(() => {
       onStateChangeRef.current = onStateChange;
     }, [onStateChange]);
@@ -31560,8 +31562,29 @@ var DragonsireBuilderReactFlow = (() => {
       suppressNextStateChangeRef.current = true;
       setLayoutMode("none");
       setStatusMessage(null);
-      setState(createInitialBuilderState(zonePrefix, initialRooms, initialSelectedRoomId));
-    }, [initialRooms, initialSelectedRoomId, resetKey, zonePrefix]);
+      setState(createInitialBuilderState(
+        zonePrefix,
+        initialRooms,
+        initialSelectedRoomId,
+        persistedModeByResetKey.get(resetKey) || "select"
+      ));
+    }, [resetKey, zonePrefix]);
+    (0, import_react3.useEffect)(() => {
+      if (initialSelectedRoomId === void 0) {
+        return;
+      }
+      setState((previous) => {
+        const nextSelectedRoomId = initialSelectedRoomId && previous.roomsById[initialSelectedRoomId] ? initialSelectedRoomId : null;
+        if (previous.selectedRoomId === nextSelectedRoomId) {
+          return previous;
+        }
+        return {
+          ...previous,
+          selectedRoomId: nextSelectedRoomId,
+          selectedEdgeId: null
+        };
+      });
+    }, [initialSelectedRoomId]);
     (0, import_react3.useEffect)(() => {
       if (suppressNextStateChangeRef.current) {
         suppressNextStateChangeRef.current = false;
@@ -31570,13 +31593,14 @@ var DragonsireBuilderReactFlow = (() => {
       onStateChangeRef.current?.(state);
     }, [state]);
     const setMode = (0, import_react3.useCallback)((mode) => {
+      persistedModeByResetKey.set(resetKey, mode);
       setStatusMessage(null);
       setState((previous) => ({
         ...previous,
         mode,
         connection: EMPTY_CONNECTION
       }));
-    }, []);
+    }, [resetKey]);
     const previewLayout = (0, import_react3.useCallback)(() => {
       setLayoutMode((previous) => previous === "preview" ? "none" : "preview");
     }, []);
@@ -31638,7 +31662,6 @@ var DragonsireBuilderReactFlow = (() => {
           roomId = existingRoomId;
           return {
             ...previous,
-            mode: "select",
             selectedRoomId: existingRoomId,
             selectedEdgeId: null
           };
@@ -31646,7 +31669,6 @@ var DragonsireBuilderReactFlow = (() => {
         roomId = buildRoomId(previous.zonePrefix, nextX, nextY);
         return {
           ...previous,
-          mode: "select",
           selectedRoomId: roomId,
           selectedEdgeId: null,
           roomsById: {
@@ -32246,6 +32268,7 @@ var DragonsireBuilderReactFlow = (() => {
       roomsById,
       selectedEdgeId,
       selectedRoomId,
+      setMode,
       setSelectedEdge,
       setSelectedRoom,
       updateRoomPosition,
@@ -32339,11 +32362,13 @@ var DragonsireBuilderReactFlow = (() => {
         if (event.key !== "Escape") {
           return;
         }
+        setMode("select");
+        setSelectedRoom(null);
         setSelectedEdge(null);
       };
       window.addEventListener("keydown", onKeyDown);
       return () => window.removeEventListener("keydown", onKeyDown);
-    }, [setSelectedEdge]);
+    }, [setMode, setSelectedEdge, setSelectedRoom]);
     (0, import_react7.useEffect)(() => {
       if (!roomList.length || !nodesInitialized || !shellSize.width || !shellSize.height) {
         return;
@@ -32459,7 +32484,7 @@ var DragonsireBuilderReactFlow = (() => {
       "div",
       {
         ref: shellRef,
-        className: "builder-phase1-canvas-shell"
+        className: `builder-phase1-canvas-shell${mode === "room" ? " is-mode-room" : mode === "delete" ? " is-mode-delete" : ""}`
       },
       /* @__PURE__ */ import_react7.default.createElement(
         index,
