@@ -49,7 +49,7 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
   const nodesInitialized = useNodesInitialized();
   const isDraggingRef = useRef(false);
   const lastViewportTokenRef = useRef<number | null>(null);
-  const lastAutoFitSignatureRef = useRef<string | null>(null);
+  const didInitialAutoFitRef = useRef(false);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [viewportState, setViewportState] = useState({ x: 0, y: 0, zoom: 1 });
   const [shellSize, setShellSize] = useState({ width: 0, height: 0 });
@@ -169,17 +169,13 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
       return;
     }
 
-    const signature = `${roomList.length}:${layoutMode}:${shellSize.width}:${shellSize.height}:${roomList.map((room) => {
-      const position = renderTransform.positionsByRoomId[room.id] || { x: room.x, y: room.y };
-      return `${room.id}:${Math.round(position.x)}:${Math.round(position.y)}`;
-    }).join("|")}`;
-    if (lastAutoFitSignatureRef.current === signature) {
+    if (didInitialAutoFitRef.current) {
       return;
     }
-    lastAutoFitSignatureRef.current = signature;
+    didInitialAutoFitRef.current = true;
 
     scheduleFitView(reactFlow, 400);
-  }, [layoutMode, nodesInitialized, reactFlow, renderTransform.positionsByRoomId, roomList, shellSize.height, shellSize.width]);
+  }, [nodesInitialized, reactFlow, roomList.length, shellSize.height, shellSize.width]);
   useEffect(() => {
     if (!nodesInitialized) {
       return;
@@ -306,8 +302,6 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
         edgeTypes={edgeTypes}
         minZoom={MIN_ZOOM}
         maxZoom={MAX_ZOOM}
-        fitView
-        fitViewOptions={{ padding: 0.2, includeHiddenNodes: true }}
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable
