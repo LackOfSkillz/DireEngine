@@ -1,0 +1,149 @@
+iron:
+  category: metal
+  tier: common
+  tags: [heavy, durable]
+
+steel:
+  category: metal
+  tier: common
+  tags: [balanced, refined]
+
+bronze:
+  category: metal
+  tier: common
+  tags: [soft, reliable]
+
+pig_iron:
+  category: metal
+  tier: common
+  tags: [crude, brittle]
+
+wrought_iron:
+  category: metal
+  tier: common
+  tags: [worked, sturdy]
+
+carbon_steel:
+  category: metal
+  tier: common
+  tags: [tempered, sharp]
+
+cold_iron:
+  category: metal
+  tier: uncommon
+  tags: [dense, anti_magic]
+
+black_steel:
+  category: metal
+  tier: uncommon
+  tags: [dark, intimidating]
+
+blued_steel:
+  category: metal
+  tier: uncommon
+  tags: [treated, resilient]
+
+greensteel:
+  category: metal
+  tier: uncommon
+  tags: [corrosion-resistant, rare]
+
+stormsteel:
+  category: metal
+  tier: uncommon
+  tags: [charged, volatile]
+
+red_steel:
+  category: metal
+  tier: uncommon
+  tags: [warm, hardened]
+
+silversheen_steel:
+  category: metal
+  tier: uncommon
+  tags: [bright, polished]
+
+grave_iron:
+  category: metal
+  tier: uncommon
+  tags: [somber, pitted]
+
+sunsteel:
+  category: metal
+  tier: rare
+  tags: [radiant, warm]
+
+moon_silver:
+  category: metal
+  tier: rare
+  tags: [pale, reflective]
+
+star_metal:
+  category: metal
+  tier: rare
+  tags: [cosmic, flawless]
+
+blood_iron:
+  category: metal
+  tier: rare
+  tags: [dark, cursed]
+
+void_metal:
+  category: metal
+  tier: rare
+  tags: [light-absorbing, unnatural]
+
+dusk_alloy:
+  category: metal
+  tier: rare
+  tags: [shadowy, tempered]
+
+aurichalcum:
+  category: metal
+  tier: rare
+  tags: [ancient, valuable]
+
+wyrmforged_steel:
+  category: metal
+  tier: rare
+  tags: [scaled, heat-treated]
+
+aetherium:
+  category: metal
+  tier: exotic
+  tags: [weightless, luminous]
+
+gravitic_iron:
+  category: metal
+  tier: exotic
+  tags: [heavy, gravity-warped]
+
+soulsteel:
+  category: metal
+  tier: exotic
+  tags: [alive, reactive]
+
+embersteel:
+  category: metal
+  tier: exotic
+  tags: [hot, glowing]
+
+frost_steel:
+  category: metal
+  tier: exotic
+  tags: [cold, brittle]
+
+runic_alloy:
+  category: metal
+  tier: exotic
+  tags: [engraved, magical]
+
+nightglass_steel:
+  category: metal
+  tier: exotic
+  tags: [mirror-dark, keen]
+
+zenith_iron:
+  category: metal
+  tier: exotic
+  tags: [solar, unyielding]

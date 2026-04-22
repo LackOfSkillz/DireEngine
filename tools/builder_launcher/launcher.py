@@ -386,6 +386,345 @@ def builder_list_items():
     return jsonify({"ok": True, "data": {"templates": templates}})
 
 
+@app.get("/builder-api/npcs/yaml/")
+def builder_list_yaml_npcs():
+    try:
+        _refresh_builder_runtime()
+        from server.systems.npc_loader import load_all_npcs
+
+        return jsonify(load_all_npcs())
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local YAML NPC list failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+@app.post("/builder-api/npcs/yaml/save/")
+def builder_save_yaml_npc():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems.npc_loader import save_npc_payload
+
+        npc = save_npc_payload(payload)
+    except ValueError as exc:
+        logger.warning("Local YAML NPC save rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local YAML NPC save failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "npc": npc})
+
+
+@app.post("/builder-api/npcs/yaml/delete/")
+def builder_delete_yaml_npc():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    npc_id = str(payload.get("id") or "").strip()
+    if not npc_id:
+        return jsonify({"ok": False, "error": "id is required"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems.npc_loader import delete_npc_payload
+
+        deleted_id = delete_npc_payload(npc_id)
+    except ValueError as exc:
+        status = 404 if str(exc) == "not_found" else 400
+        logger.warning("Local YAML NPC delete rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), status
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local YAML NPC delete failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "deleted_id": deleted_id})
+
+
+@app.get("/builder-api/items/yaml/")
+def builder_list_yaml_items():
+    try:
+        _refresh_builder_runtime()
+        from server.systems.item_loader import load_all_items
+
+        return jsonify(load_all_items())
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local YAML item list failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+@app.post("/builder-api/items/yaml/save/")
+def builder_save_yaml_item():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems.item_loader import save_item_payload
+
+        item = save_item_payload(payload)
+    except ValueError as exc:
+        logger.warning("Local YAML item save rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 400
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local YAML item save failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "item": item})
+
+
+@app.post("/builder-api/items/yaml/delete/")
+def builder_delete_yaml_item():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    item_id = str(payload.get("id") or "").strip()
+    if not item_id:
+        return jsonify({"ok": False, "error": "id is required"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems.item_loader import delete_item_payload
+
+        deleted_id = delete_item_payload(item_id)
+    except ValueError as exc:
+        status = 404 if str(exc) == "not_found" else 400
+        logger.warning("Local YAML item delete rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), status
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local YAML item delete failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "deleted_id": deleted_id})
+
+
+def _load_builder_room_context(payload: dict):
+    room_id = str(payload.get("room_id") or "").strip()
+    zone_id = str(payload.get("zone_id") or "").strip()
+    if not room_id:
+        raise ValueError("room_id is required")
+    return room_id, zone_id
+
+
+@app.post("/builder-api/room/assign-npc/")
+def builder_assign_room_npc():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    npc_id = str(payload.get("npc_id") or "").strip()
+    if not npc_id:
+        return jsonify({"ok": False, "error": "npc_id is required"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems import npc_loader, zone_room_npc_assignments
+
+        room_id, zone_id = _load_builder_room_context(payload)
+        npc_records = npc_loader.load_all_npcs()
+        if npc_id not in npc_records:
+            return jsonify({"ok": False, "error": "invalid npc_id"}), 404
+        zone_payload, room_payload = zone_room_npc_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_npc_ids = list(room_payload.get("npcs") or [])
+        if npc_id not in next_npc_ids:
+            next_npc_ids.append(npc_id)
+        updated_zone, updated_room = zone_room_npc_assignments.update_room_npcs(
+            room_id,
+            next_npc_ids,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        logger.warning("Local room NPC assign rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local room NPC assign failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "data": {"zone": updated_zone, "room": updated_room, "npc": npc_records.get(npc_id)}})
+
+
+@app.post("/builder-api/room/remove-npc/")
+def builder_remove_room_npc():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    npc_id = str(payload.get("npc_id") or "").strip()
+    if not npc_id:
+        return jsonify({"ok": False, "error": "npc_id is required"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems import zone_room_npc_assignments
+
+        room_id, zone_id = _load_builder_room_context(payload)
+        zone_payload, room_payload = zone_room_npc_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_npc_ids = [candidate for candidate in list(room_payload.get("npcs") or []) if candidate != npc_id]
+        updated_zone, updated_room = zone_room_npc_assignments.update_room_npcs(
+            room_id,
+            next_npc_ids,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        logger.warning("Local room NPC remove rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local room NPC remove failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "data": {"zone": updated_zone, "room": updated_room, "removed_npc_id": npc_id}})
+
+
+@app.post("/builder-api/room/assign-item/")
+def builder_assign_room_item():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    item_id = str(payload.get("item_id") or "").strip()
+    count = int(payload.get("count") or 0)
+    if not item_id:
+        return jsonify({"ok": False, "error": "item_id is required"}), 400
+    if count <= 0:
+        return jsonify({"ok": False, "error": "count must be greater than 0"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems import item_loader, zone_room_item_assignments
+
+        room_id, zone_id = _load_builder_room_context(payload)
+        item_records = item_loader.load_all_items()
+        item_record = item_records.get(item_id)
+        if item_record is None:
+            return jsonify({"ok": False, "error": "invalid item_id"}), 404
+        zone_payload, room_payload = zone_room_item_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_items = list(room_payload.get("items") or [])
+        merged = False
+        for entry in next_items:
+            if str((entry or {}).get("id") or "").strip() != item_id:
+                continue
+            entry["count"] = max(0, int(entry.get("count") or 0)) + count
+            merged = True
+            break
+        if not merged:
+            next_entry = {"id": item_id, "count": count}
+            if str(item_record.get("category") or "").strip().lower() == "container":
+                next_entry["items"] = []
+            next_items.append(next_entry)
+        updated_zone, updated_room = zone_room_item_assignments.update_room_items(
+            room_id,
+            next_items,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        logger.warning("Local room item assign rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local room item assign failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "data": {"zone": updated_zone, "room": updated_room, "item": item_record}})
+
+
+@app.post("/builder-api/room/remove-item/")
+def builder_remove_room_item():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    item_id = str(payload.get("item_id") or "").strip()
+    count = int(payload.get("count") or 1)
+    if not item_id:
+        return jsonify({"ok": False, "error": "item_id is required"}), 400
+    if count <= 0:
+        return jsonify({"ok": False, "error": "count must be greater than 0"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems import zone_room_item_assignments
+
+        room_id, zone_id = _load_builder_room_context(payload)
+        zone_payload, room_payload = zone_room_item_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_items = []
+        found_item = False
+        for entry in list(room_payload.get("items") or []):
+            normalized_entry = dict(entry or {})
+            if str(normalized_entry.get("id") or "").strip() != item_id:
+                next_items.append(normalized_entry)
+                continue
+            found_item = True
+            next_count = max(0, int(normalized_entry.get("count") or 0) - count)
+            if next_count > 0:
+                normalized_entry["count"] = next_count
+                next_items.append(normalized_entry)
+        if not found_item:
+            return jsonify({"ok": False, "error": "item not assigned to room"}), 404
+        updated_zone, updated_room = zone_room_item_assignments.update_room_items(
+            room_id,
+            next_items,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        logger.warning("Local room item remove rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local room item remove failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "data": {"zone": updated_zone, "room": updated_room, "removed_item_id": item_id, "count": count}})
+
+
+@app.post("/builder-api/room/update-item-count/")
+def builder_update_room_item_count():
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict):
+        return jsonify({"ok": False, "error": "invalid_json"}), 400
+
+    item_id = str(payload.get("item_id") or "").strip()
+    count = int(payload.get("count") or 0)
+    if not item_id:
+        return jsonify({"ok": False, "error": "item_id is required"}), 400
+    if count < 0:
+        return jsonify({"ok": False, "error": "count cannot be negative"}), 400
+
+    try:
+        _refresh_builder_runtime()
+        from server.systems import item_loader, zone_room_item_assignments
+
+        room_id, zone_id = _load_builder_room_context(payload)
+        item_records = item_loader.load_all_items()
+        item_record = item_records.get(item_id)
+        if item_record is None:
+            return jsonify({"ok": False, "error": "invalid item_id"}), 404
+        zone_payload, room_payload = zone_room_item_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_items = []
+        found_item = False
+        for entry in list(room_payload.get("items") or []):
+            normalized_entry = dict(entry or {})
+            if str(normalized_entry.get("id") or "").strip() != item_id:
+                next_items.append(normalized_entry)
+                continue
+            found_item = True
+            if count > 0:
+                normalized_entry["count"] = count
+                next_items.append(normalized_entry)
+        if not found_item and count > 0:
+            next_entry = {"id": item_id, "count": count}
+            if str(item_record.get("category") or "").strip().lower() == "container":
+                next_entry["items"] = []
+            next_items.append(next_entry)
+        updated_zone, updated_room = zone_room_item_assignments.update_room_items(
+            room_id,
+            next_items,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        logger.warning("Local room item count update rejected: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 404
+    except Exception as exc:  # pragma: no cover - local runtime guard
+        logger.exception("Local room item count update failed")
+        return jsonify({"ok": False, "error": str(exc)}), 500
+    return jsonify({"ok": True, "data": {"zone": updated_zone, "room": updated_room, "item": item_record, "count": count}})
+
+
 @app.post("/launch-builder")
 def launch_builder():
     logger.info("Launch request received from %s", _remote_address())

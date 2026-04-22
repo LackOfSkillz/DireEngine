@@ -1,0 +1,29 @@
+id: black_leather_armor_reinforced_with_slender_iron_banding
+name: Black leather armor reinforced with slender iron banding
+category: armor
+armor_class: leather_armor
+armor_slot: chest
+tier: fine
+tags: []
+level_band:
+  min: 6
+  max: 12
+value: 750
+weight: 55.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: chest
+  attack: 0
+  defense: 83
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a black leather armor reinforced with slender iron banding
+  long: A black leather armor reinforced with slender iron banding lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-21'

@@ -1,0 +1,33 @@
+id: waxed_fishing_line
+name: Waxed Fishing Line
+category: misc
+tier: average
+utility_category: fishing
+functional_type: fishing_line
+tool_type: fishing
+durability: 10
+tags:
+  - fishing
+  - utility
+level_band:
+  min: 1
+  max: 12
+value: 3
+weight: 0.1
+stackable: false
+max_stack: 1
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: waxed fishing line
+  long: A coiled starter line, already waxed and ready to tie off.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

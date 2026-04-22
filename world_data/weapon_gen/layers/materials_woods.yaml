@@ -1,0 +1,134 @@
+oak:
+  category: wood
+  tier: common
+  tags: [strong, reliable]
+
+ash:
+  category: wood
+  tier: common
+  tags: [flexible, resilient]
+
+birch:
+  category: wood
+  tier: common
+  tags: [light, smooth]
+
+pine:
+  category: wood
+  tier: common
+  tags: [soft, lightweight]
+
+hickory:
+  category: wood
+  tier: common
+  tags: [tough, springy]
+
+elm:
+  category: wood
+  tier: common
+  tags: [fibrous, sturdy]
+
+yew:
+  category: wood
+  tier: uncommon
+  tags: [elastic, ideal_for_bows]
+
+redwood:
+  category: wood
+  tier: uncommon
+  tags: [durable, massive]
+
+darkwood:
+  category: wood
+  tier: uncommon
+  tags: [shadowy, smooth]
+
+ironwood:
+  category: wood
+  tier: uncommon
+  tags: [dense, heavy]
+
+thornwood:
+  category: wood
+  tier: uncommon
+  tags: [spiked, rough]
+
+cedar:
+  category: wood
+  tier: uncommon
+  tags: [aromatic, light]
+
+bog_oak:
+  category: wood
+  tier: uncommon
+  tags: [dark, ancient]
+
+white_maple:
+  category: wood
+  tier: uncommon
+  tags: [clean, pale]
+
+ghostwood:
+  category: wood
+  tier: rare
+  tags: [pale, translucent]
+
+emberwood:
+  category: wood
+  tier: rare
+  tags: [warm, glowing]
+
+frostwood:
+  category: wood
+  tier: rare
+  tags: [cold, brittle]
+
+spirewood:
+  category: wood
+  tier: rare
+  tags: [lightweight, rigid]
+
+silverwood:
+  category: wood
+  tier: rare
+  tags: [smooth, reflective]
+
+whisperwood:
+  category: wood
+  tier: rare
+  tags: [quiet, fine-grained]
+
+stormpine:
+  category: wood
+  tier: rare
+  tags: [flexible, wind-scored]
+
+dreamwood:
+  category: wood
+  tier: exotic
+  tags: [shifting, surreal]
+
+voidwood:
+  category: wood
+  tier: exotic
+  tags: [dark, absorbing]
+
+starbark:
+  category: wood
+  tier: exotic
+  tags: [cosmic, luminous]
+
+mycelial_core:
+  category: wood
+  tier: exotic
+  tags: [organic, alive]
+
+sungrove_heartwood:
+  category: wood
+  tier: exotic
+  tags: [radiant, resonant]
+
+glassvine_timber:
+  category: wood
+  tier: exotic
+  tags: [clear, resilient]

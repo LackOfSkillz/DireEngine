@@ -1,0 +1,33 @@
+id: fish_string
+name: Fish String
+category: misc
+tier: average
+utility_category: fishing
+functional_type: fish_string
+tool_type: fishing
+durability: 14
+tags:
+  - fishing
+  - utility
+level_band:
+  min: 1
+  max: 12
+value: 4
+weight: 0.2
+stackable: false
+max_stack: 1
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a fish string
+  long: A sturdy cord meant to hold several catches without becoming a mess.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

@@ -1,0 +1,24 @@
+id: ranger_weapon_vendor
+category: weapon
+level_band:
+  min: 1
+  max: 10
+stock_count: 3
+allowed_weapon_classes:
+  - short_bow
+  - long_bow
+  - thrown
+preferred_weapon_classes:
+  short_bow: 0.45
+  long_bow: 0.35
+  thrown: 0.20
+excluded_weapon_classes: []
+ammo_types:
+  - arrow
+ammo_classes:
+  - short_bow
+  - long_bow
+ammo_stock_count: 4
+required_tags:
+  - ranger
+allow_duplicates: false

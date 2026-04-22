@@ -1,5 +1,7 @@
 from django.urls import include, path
 
+from web.api.item_api import delete_item, get_all_items, save_item
+from web.api.npc_api import delete_npc, get_all_npcs, save_npc
 from web.api.views import (
     AccountMeApiView,
     AccountLogoutApiView,
@@ -26,6 +28,12 @@ urlpatterns = [
     path("characters/delete", CharacterDeleteApiView.as_view(), name="api-character-delete"),
     path("characters/select", CharacterSelectApiView.as_view(), name="api-character-select"),
     path("debug/session", DebugSessionApiView.as_view(), name="api-debug-session"),
+    path("npcs/", get_all_npcs, name="api-npcs"),
+    path("npcs/save/", save_npc, name="api-npcs-save"),
+    path("npcs/delete/", delete_npc, name="api-npcs-delete"),
+    path("items/", get_all_items, name="api-items"),
+    path("items/save/", save_item, name="api-items-save"),
+    path("items/delete/", delete_item, name="api-items-delete"),
 ]
 
 if builder_ready and builder_ready():

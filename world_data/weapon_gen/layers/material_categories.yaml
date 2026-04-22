@@ -1,0 +1,10 @@
+blade:
+  - metal
+  - stone
+  - alloy
+grip:
+  - wood
+  - organic
+shaft:
+  - wood
+  - organic

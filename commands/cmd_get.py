@@ -11,7 +11,7 @@ class CmdGet(Command):
     """
 
     key = "get"
-    aliases = ["grab"]
+    aliases = ["grab", "pickup"]
     help_category = "General"
 
     def func(self):
@@ -45,6 +45,12 @@ class CmdGet(Command):
             default_first=True,
         )
         if not obj:
+            if hasattr(caller, "pickup_room_ammo"):
+                handled, message = caller.pickup_room_ammo(self.args)
+                if handled:
+                    caller.msg(message)
+                    room.msg_contents(f"$You() $conj(pick) up {message.removeprefix('You pick up ').rstrip('.')}.", from_obj=caller)
+                    return
             if matches and index is not None:
                 caller.msg_numbered_matches(base_query, matches)
             else:

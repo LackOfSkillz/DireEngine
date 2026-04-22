@@ -1,0 +1,29 @@
+id: chain_greaves
+name: Chain greaves
+category: armor
+armor_class: chain_armor
+armor_slot: legs
+tier: average
+tags: []
+level_band:
+  min: 1
+  max: 10
+value: 37
+weight: 3.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: legs
+  attack: 0
+  defense: 5
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: some chain greaves
+  long: Some chain greaves lie here.
+meta:
+  source: direlore
+  imported_at: '2026-04-21'

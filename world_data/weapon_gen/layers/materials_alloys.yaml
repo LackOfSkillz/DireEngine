@@ -1,0 +1,79 @@
+steel_bronze_blend:
+  category: alloy
+  tier: uncommon
+  tags: [balanced]
+
+tempersteel:
+  category: alloy
+  tier: uncommon
+  tags: [refined, sturdy]
+
+huntsman_laminate:
+  category: alloy
+  tier: uncommon
+  tags: [flexible, field-tested]
+
+mercury_steel:
+  category: alloy
+  tier: uncommon
+  tags: [slick, quick]
+
+sunsteel_alloy:
+  category: alloy
+  tier: rare
+  tags: [radiant, refined]
+
+shadowsteel:
+  category: alloy
+  tier: rare
+  tags: [dark, stealthy]
+
+storm_alloy:
+  category: alloy
+  tier: rare
+  tags: [charged]
+
+grave_silver:
+  category: alloy
+  tier: rare
+  tags: [somber, pale]
+
+dawnfold:
+  category: alloy
+  tier: rare
+  tags: [bright, layered]
+
+moonlace_alloy:
+  category: alloy
+  tier: rare
+  tags: [fine, reflective]
+
+arcane_composite:
+  category: alloy
+  tier: exotic
+  tags: [magical, unstable]
+
+bloodbound_alloy:
+  category: alloy
+  tier: exotic
+  tags: [reactive, cursed]
+
+wyrmglass_laminate:
+  category: alloy
+  tier: exotic
+  tags: [scaled, radiant]
+
+voidforged_composite:
+  category: alloy
+  tier: exotic
+  tags: [dark, impossible]
+
+astral_fold:
+  category: alloy
+  tier: exotic
+  tags: [cosmic, weightless]
+
+runebound_matrix:
+  category: alloy
+  tier: exotic
+  tags: [engraved, responsive]

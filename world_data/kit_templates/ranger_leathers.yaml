@@ -1,0 +1,17 @@
+id: ranger_leathers
+armor_class: leather_armor
+theme_tags:
+  - ranger
+  - scout
+required_slots:
+  - chest
+  - legs
+  - hands
+  - feet
+optional_slots:
+  - head
+  - cloak
+tier_bias:
+  average: 0.6
+  above_average: 0.3
+  exquisite: 0.1

@@ -38,6 +38,7 @@ from engine.services.spell_effect_service import SpellEffectService
 from engine.services.result import ActionResult
 from engine.services.spell_access_service import SpellAccessService
 from engine.services.spellbook_service import SpellbookService
+from server.systems.ammo_runtime import find_matching_ammo_stack, format_ammo_label, merge_ammo_stacks, normalize_ammo_stack, split_ammo_stack
 from typeclasses.abilities import get_ability
 from typeclasses.box import Box
 from typeclasses.corpse import get_corpse_wounds as get_corpse_wounds_payload, is_near_stable as is_near_stable_corpse_wounds, is_stable as is_stable_corpse_wounds, normalize_corpse_wounds
@@ -474,6 +475,25 @@ VENDOR_PAYOUTS = {
     "fish_buyer": {"default": None, "gems": None},
 }
 
+ARMOR_CLASS_ORDER = [
+    "light_armor",
+    "leather_armor",
+    "chain_armor",
+    "plate_armor",
+]
+
+ARMOR_SLOT_ORDER = [
+    "head",
+    "chest",
+    "arms",
+    "hands",
+    "waist",
+    "legs",
+    "feet",
+    "cloak",
+    "shield",
+]
+
 STRICT_BOX_LOCK_DIFFICULTY = 35
 
 SKILLSET_ALIASES = {
@@ -615,17 +635,19 @@ DEFAULT_WEAPON_PROFILE = {
 }
 
 DEFAULT_EQUIPMENT = {
-    "head": None,
-    "face": None,
-    "neck": None,
-    "shoulders": None,
-    "torso": None,
-    "back": None,
-    "arms": None,
-    "hands": None,
-    "waist": None,
-    "legs": None,
-    "feet": None,
+    "head": [],
+    "face": [],
+    "neck": [],
+    "shoulders": [],
+    "chest": [],
+    "back": [],
+    "arms": [],
+    "hands": [],
+    "waist": [],
+    "legs": [],
+    "feet": [],
+    "shield": [],
+    "cloak": [],
     "fingers": [],
     "belt_attach": [],
     "back_attach": [],
@@ -966,15 +988,26 @@ APPEARANCE_SLOT_ORDER = [
     "face",
     "neck",
     "shoulders",
-    "torso",
+    "chest",
     "back",
     "arms",
     "hands",
     "waist",
     "legs",
     "feet",
+    "shield",
+    "cloak",
     "fingers",
 ]
+
+EQUIPMENT_LAYER_ORDER = {
+    "under": 0,
+    "base": 1,
+    "outer": 2,
+    "shield": 3,
+    "accessory": 4,
+    "attachment": 5,
+}
 
 ARMOR_SKILLS = {
     "light": "light_armor",
@@ -1026,6 +1059,15 @@ def _copy_default_equipment():
         slot: value.copy() if isinstance(value, list) else value
         for slot, value in DEFAULT_EQUIPMENT.items()
     }
+
+
+def is_quiver(item):
+    item_data = dict(item) if isinstance(item, Mapping) else {}
+    db_holder = getattr(item, "db", None) if item is not None and not isinstance(item, Mapping) else None
+    item_type = str(item_data.get("type") or getattr(db_holder, "type", None) or "").strip().lower()
+    functional_type = str(item_data.get("functional_type") or getattr(db_holder, "functional_type", None) or "").strip().lower()
+    ammo_container = bool(item_data.get("ammo_container", False) or getattr(db_holder, "ammo_container", False))
+    return item_type == "ammo_container" or functional_type == "quiver" or ammo_container
 
 
 def _copy_default_empath_wounds():
@@ -1237,6 +1279,9 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.equipped_weapon = None
         self.db.preferred_sheath = None
         self.db.equipment = _copy_default_equipment()
+        self.db.loaded_ammo = None
+        self.db.ammo_inventory = []
+        self.db.embedded_ammo = []
         self.db.in_combat = False
         self.db.target = None
         self.db.combat_range = {}
@@ -2236,20 +2281,27 @@ class Character(ObjectParent, DefaultCharacter):
             if slot not in equipment:
                 continue
             value = equipment.get(slot)
-            if isinstance(default, list):
-                if value is None:
-                    normalized[slot] = []
-                else:
-                    try:
-                        normalized[slot] = list(value)
-                    except TypeError:
-                        normalized[slot] = []
+            if value is None:
+                normalized[slot] = []
+            elif isinstance(value, list):
+                normalized[slot] = list(value)
+            elif isinstance(value, tuple):
+                normalized[slot] = list(value)
             else:
-                normalized[slot] = value
+                normalized[slot] = [value]
 
         legacy_belt_item = equipment.get("belt")
-        if normalized["waist"] is None and legacy_belt_item is not None:
-            normalized["waist"] = legacy_belt_item
+        if not normalized["waist"] and legacy_belt_item is not None:
+            normalized["waist"] = [legacy_belt_item]
+
+        legacy_torso_items = equipment.get("torso")
+        if not normalized["chest"] and legacy_torso_items is not None:
+            if isinstance(legacy_torso_items, list):
+                normalized["chest"] = list(legacy_torso_items)
+            elif isinstance(legacy_torso_items, tuple):
+                normalized["chest"] = list(legacy_torso_items)
+            else:
+                normalized["chest"] = [legacy_torso_items]
 
         if not isinstance(current_equipment, Mapping) or dict(current_equipment) != normalized:
             self.db.equipment = normalized
@@ -2346,6 +2398,14 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_starter_skills()
         self.ensure_skill_defaults()
         self._seed_template_exp_skills()
+        if hasattr(self.db, "quiver") and getattr(self.db, "quiver", None) is not None and not isinstance(getattr(self.db, "quiver", None), Mapping):
+            self.db.quiver = None
+        if getattr(self.db, "loaded_ammo", None) is not None and not isinstance(getattr(self.db, "loaded_ammo", None), Mapping):
+            self.db.loaded_ammo = None
+        if not isinstance(getattr(self.db, "ammo_inventory", None), list):
+            self.db.ammo_inventory = []
+        if not isinstance(getattr(self.db, "embedded_ammo", None), list):
+            self.db.embedded_ammo = []
         if getattr(self.db, "stealthed", None) is None:
             self.db.stealthed = False
         if getattr(self.db, "stealth_value", None) is None:
@@ -4639,6 +4699,14 @@ class Character(ObjectParent, DefaultCharacter):
                 continue
             if item.move_to(corpse, quiet=True):
                 moved.append(item)
+        ammo_payload = [*self.get_ammo_inventory()]
+        loaded = self.get_loaded_ammo()
+        if loaded:
+            ammo_payload.append(loaded)
+        if ammo_payload and hasattr(corpse, "add_ammo_stacks"):
+            corpse.add_ammo_stacks(ammo_payload)
+        self.db.ammo_inventory = []
+        self.set_loaded_ammo(None)
         return moved
 
     def clear_death_corpse_link(self):
@@ -10414,10 +10482,13 @@ class Character(ObjectParent, DefaultCharacter):
         return [item for item in list(getattr(target, "contents", []) or []) if bool(getattr(item.db, "is_box", False))]
 
     def is_loot_target_empty(self, target):
+        corpse = target.get_death_corpse() if hasattr(target, "get_death_corpse") else None
+        corpse_ammo = list(getattr(getattr(corpse, "db", None), "ammo_inventory", None) or []) if corpse else []
         return (
             not bool(getattr(target.db, "has_coins", False))
             and not bool(getattr(target.db, "has_gems", False))
             and not bool(getattr(target.db, "has_box", False))
+            and not bool(corpse_ammo)
         )
 
     def search_loot_target(self, target):
@@ -10435,6 +10506,8 @@ class Character(ObjectParent, DefaultCharacter):
 
         target.db.searched = True
         lines = ["You search the corpse carefully."]
+        corpse = target.get_death_corpse() if hasattr(target, "get_death_corpse") else None
+        corpse_ammo = list(getattr(getattr(corpse, "db", None), "ammo_inventory", None) or []) if corpse else []
         if bool(getattr(target.db, "has_coins", False)):
             lines.append("You find:")
             lines.append("- some coins")
@@ -10443,6 +10516,8 @@ class Character(ObjectParent, DefaultCharacter):
                 lines.append("- a gemstone" if gem_count == 1 else "- gemstones")
             if bool(getattr(target.db, "has_box", False)):
                 lines.append("- a small box")
+            if corpse_ammo:
+                lines.append("- recoverable ammunition")
         else:
             found_any = False
             if bool(getattr(target.db, "has_gems", False)):
@@ -10454,6 +10529,11 @@ class Character(ObjectParent, DefaultCharacter):
                 if not found_any:
                     lines.append("You find:")
                 lines.append("- a small box")
+                found_any = True
+            if corpse_ammo:
+                if not found_any:
+                    lines.append("You find:")
+                lines.append("- recoverable ammunition")
                 found_any = True
             if not found_any:
                 lines.append("You find nothing of value.")
@@ -10558,6 +10638,14 @@ class Character(ObjectParent, DefaultCharacter):
             target.db.has_box = False
         if box_names:
             lines.append(f"You gather {', '.join(box_names)}.")
+
+        corpse = target.get_death_corpse() if hasattr(target, "get_death_corpse") else None
+        corpse_ammo = list(getattr(getattr(corpse, "db", None), "ammo_inventory", None) or []) if corpse else []
+        if corpse and corpse_ammo:
+            recovered = self.receive_ammo_stacks(corpse_ammo, prefer_quiver=True)
+            corpse.db.ammo_inventory = []
+            if recovered:
+                lines.append(f"You recover {', '.join(format_ammo_label(stack) for stack in recovered)}.")
 
         if not lines:
             self.msg("There is nothing else of value here.")
@@ -10693,25 +10781,43 @@ class Character(ObjectParent, DefaultCharacter):
         self.award_skill_experience("appraisal", 10)
         self.set_roundtime(5)
 
-    def compare_items(self, first_item, second_item):
-        if self.is_in_roundtime():
+    def compare_items(self, first_item, second_item, *, emit_messages=True, apply_roundtime=True):
+        if apply_roundtime and self.is_in_roundtime():
             self.msg_roundtime_block()
-            return
+            return {}
 
-        self.msg(f"You compare {first_item.key} with {second_item.key}.")
+        first_stats = self.get_item_stats(first_item)
+        second_stats = self.get_item_stats(second_item) if second_item is not None else {"armor": 0.0, "weight": 0.0, "tier": 0, "tier_name": "none"}
+        comparison = {
+            "armor": float(first_stats.get("armor", 0) or 0) - float(second_stats.get("armor", 0) or 0),
+            "weight": float(first_stats.get("weight", 0) or 0) - float(second_stats.get("weight", 0) or 0),
+            "tier": int(first_stats.get("tier", 0) or 0) - int(second_stats.get("tier", 0) or 0),
+            "new": first_stats,
+            "equipped": second_stats,
+        }
 
-        first_value = self.get_item_value(first_item)
-        second_value = self.get_item_value(second_item)
+        if emit_messages:
+            first_label = getattr(first_item, "key", None) or str((first_item or {}).get("display_name") or "that")
+            second_label = getattr(second_item, "key", None) or str((second_item or {}).get("display_name") or "your current gear")
+            self.msg(f"You compare {first_label} with {second_label}.")
+            if any(abs(float(comparison.get(metric, 0) or 0)) > 0.001 for metric in ("armor", "weight", "tier")):
+                self.msg(f"Armor: {self._format_comparison_delta(comparison['armor'])}")
+                self.msg(f"Weight: {self._format_comparison_delta(comparison['weight'], inverse=True)}")
+                self.msg(f"Tier: {self._format_comparison_delta(comparison['tier'])}")
+            else:
+                first_value = self.get_item_value(first_item)
+                second_value = self.get_item_value(second_item) if second_item is not None else 0
+                if first_value > second_value:
+                    self.msg(f"{first_label} appears more valuable.")
+                elif second_value > first_value:
+                    self.msg(f"{second_label} appears more valuable.")
+                else:
+                    self.msg("They seem roughly equal in value.")
+            self.award_skill_experience("appraisal", 10)
+            if apply_roundtime:
+                self.set_roundtime(5)
 
-        if first_value > second_value:
-            self.msg(f"{first_item.key} appears more valuable.")
-        elif second_value > first_value:
-            self.msg(f"{second_item.key} appears more valuable.")
-        else:
-            self.msg("They seem roughly equal in value.")
-
-        self.award_skill_experience("appraisal", 10)
-        self.set_roundtime(5)
+        return comparison
 
     def is_vendor_target(self, obj):
         return bool(obj and getattr(obj.db, "is_vendor", False))
@@ -10792,9 +10898,66 @@ class Character(ObjectParent, DefaultCharacter):
         payout_profile = VENDOR_PAYOUTS.get(vendor_type, VENDOR_PAYOUTS["general"])
         return payout_profile["gems"] if is_gem else payout_profile["default"]
 
+    def _match_interaction_target(self, target_name, *, preferred_type=None):
+        if not self.location:
+            return None
+        raw_query = str(target_name or "").strip().lower()
+        if not raw_query:
+            return None
+
+        candidates = []
+        for obj in list(getattr(self.location, "contents", []) or []):
+            interaction_type = str(getattr(getattr(obj, "db", None), "interaction_type", "") or "").strip().lower()
+            if not interaction_type:
+                continue
+            if preferred_type and interaction_type != str(preferred_type).strip().lower():
+                continue
+            names = {str(getattr(obj, "key", "") or "").strip().lower()}
+            aliases = getattr(obj, "aliases", None)
+            if aliases:
+                for alias in list(aliases.all() or []):
+                    alias_text = str(alias or "").strip().lower()
+                    if alias_text:
+                        names.add(alias_text)
+            if raw_query in names:
+                return obj
+            if any(name.startswith(raw_query) for name in names if name):
+                candidates.append(obj)
+        return candidates[0] if len(candidates) == 1 else None
+
+    def open_vendor_ui(self, vendor):
+        if not vendor or not self.is_vendor_target(vendor):
+            self.msg("They are not offering wares.")
+            return False
+        self.reset_vendor_state(vendor)
+        state = self.get_vendor_state(vendor)
+        state["vendor_id"] = int(getattr(vendor, "id", 0) or 0)
+        self.db.vendor_state = state
+        self.clear_pending_purchase()
+        return self.list_vendor_inventory("")
+
+    def open_interaction_with(self, target_name, *, preferred_type=None, silent=False):
+        target = self._match_interaction_target(target_name, preferred_type=preferred_type)
+        if not target:
+            if not silent:
+                self.msg("You do not see anyone here by that name.")
+            return False
+        if hasattr(target, "handle_interaction"):
+            return bool(target.handle_interaction(self))
+        if not silent:
+            self.msg(f"{target.key} does not respond.")
+        return False
+
     def get_nearby_vendor(self, item=None):
         if not self.location:
             return None
+        if item is None:
+            state = self.get_vendor_state()
+            active_vendor_id = int(state.get("vendor_id", 0) or 0)
+            if active_vendor_id > 0:
+                for obj in self.location.contents:
+                    if self.is_vendor_target(obj) and int(getattr(obj, "id", 0) or 0) == active_vendor_id:
+                        return obj
         fallback = None
         for obj in self.location.contents:
             if self.is_vendor_target(obj):
@@ -10804,11 +10967,923 @@ class Character(ObjectParent, DefaultCharacter):
                     fallback = obj
         return fallback
 
-    def get_vendor_inventory_entries(self, vendor):
-        inventory = getattr(getattr(vendor, "db", None), "inventory", []) or []
-        return [str(entry).strip() for entry in inventory if str(entry or "").strip()]
+    def _default_vendor_state(self, vendor=None):
+        state = {"level": "root", "filters": {}, "mode": "root", "compare_enabled": True}
+        vendor_id = int(getattr(vendor, "id", 0) or 0)
+        if vendor_id:
+            state["vendor_id"] = vendor_id
+        return state
 
-    def get_vendor_price(self, vendor, item_name):
+    def get_vendor_state(self, vendor=None):
+        raw_state = getattr(getattr(self, "db", None), "vendor_state", None)
+        state = dict(raw_state) if isinstance(raw_state, Mapping) else {}
+        filters = dict(state.get("filters") or {}) if isinstance(state.get("filters"), Mapping) else {}
+        normalized = {
+            "level": str(state.get("level") or "root").strip().lower(),
+            "filters": {},
+            "mode": str(state.get("mode") or "root").strip().lower(),
+            "compare_enabled": bool(state.get("compare_enabled", True)),
+        }
+        if normalized["level"] not in {"root", "armor_class", "armor_slot", "item_list", "kit_list", "kit_items"}:
+            normalized["level"] = "root"
+        if normalized["mode"] not in {"root", "inventory", "kits"}:
+            normalized["mode"] = "root"
+        armor_class = str(filters.get("armor_class") or "").strip().lower()
+        armor_slot = str(filters.get("armor_slot") or "").strip().lower()
+        kit_id = str(filters.get("kit_id") or "").strip().lower()
+        utility_category = str(filters.get("utility_category") or "").strip().lower()
+        if armor_class:
+            normalized["filters"]["armor_class"] = armor_class
+        if armor_slot:
+            normalized["filters"]["armor_slot"] = armor_slot
+        if kit_id:
+            normalized["filters"]["kit_id"] = kit_id
+        if utility_category:
+            normalized["filters"]["utility_category"] = utility_category
+        current_vendor_id = int(getattr(vendor, "id", 0) or 0)
+        stored_vendor_id = int(state.get("vendor_id", 0) or 0)
+        if current_vendor_id and stored_vendor_id and stored_vendor_id != current_vendor_id:
+            normalized = self._default_vendor_state(vendor)
+        elif current_vendor_id:
+            normalized["vendor_id"] = current_vendor_id
+        elif stored_vendor_id:
+            normalized["vendor_id"] = stored_vendor_id
+        self.db.vendor_state = normalized
+        return normalized
+
+    def reset_vendor_state(self, vendor=None):
+        state = self._default_vendor_state(vendor)
+        self.db.vendor_state = state
+        return state
+
+    def _label_vendor_armor_class(self, armor_class):
+        return str(armor_class or "armor").replace("_", " ").title()
+
+    def _label_vendor_armor_slot(self, armor_slot):
+        return str(armor_slot or "items").replace("_", " ").title()
+
+    def _label_vendor_kit(self, kit_name, kit_id):
+        label = str(kit_name or "").strip()
+        if label:
+            return label
+        return f"{str(kit_id or 'kit').replace('_', ' ').title()} Set"
+
+    def _armor_class_sort_key(self, armor_class):
+        normalized = str(armor_class or "").strip().lower()
+        try:
+            return (ARMOR_CLASS_ORDER.index(normalized), normalized)
+        except ValueError:
+            return (len(ARMOR_CLASS_ORDER), normalized)
+
+    def _armor_slot_sort_key(self, armor_slot):
+        normalized = str(armor_slot or "").strip().lower()
+        try:
+            return (ARMOR_SLOT_ORDER.index(normalized), normalized)
+        except ValueError:
+            return (len(ARMOR_SLOT_ORDER), normalized)
+
+    def format_vendor_click(self, command, label):
+        normalized_command = str(command or "").strip()
+        normalized_label = str(label or "").strip()
+        if not normalized_command or not normalized_label:
+            return normalized_label
+        return f"|lc{normalized_command}|lt{normalized_label}|le"
+
+    def parse_coin_amount(self, text):
+        raw_text = str(text or "").strip().lower().replace(",", " ")
+        if not raw_text:
+            raise ValueError("Offer how much?")
+        if raw_text.isdigit():
+            return max(0, int(raw_text))
+
+        parts = raw_text.split()
+        if len(parts) % 2 != 0:
+            raise ValueError("Use amounts like '4 silver 25 copper'.")
+        value_by_name = {name: amount for name, amount in COIN_DENOMINATIONS}
+        aliases = {
+            "cp": "copper",
+            "copper": "copper",
+            "coppers": "copper",
+            "sp": "silver",
+            "silver": "silver",
+            "silvers": "silver",
+            "gp": "gold",
+            "gold": "gold",
+            "golds": "gold",
+        }
+        total = 0
+        for index in range(0, len(parts), 2):
+            try:
+                count = int(parts[index])
+            except (TypeError, ValueError) as exc:
+                raise ValueError("Coin amounts must start with a number.") from exc
+            coin_name = aliases.get(parts[index + 1])
+            if coin_name not in value_by_name:
+                raise ValueError("Use copper, silver, or gold denominations.")
+            total += max(0, count) * int(value_by_name[coin_name])
+        return max(0, total)
+
+    def get_pending_purchase(self):
+        pending = getattr(getattr(self, "db", None), "pending_purchase", None)
+        return dict(pending) if isinstance(pending, Mapping) else None
+
+    def get_active_transaction(self, vendor=None, include_message=False):
+        pending = self.get_pending_purchase()
+        if not pending:
+            return (None, "") if include_message else None
+        resolved_vendor = vendor or self._resolve_pending_vendor(pending)
+        valid_pending, message = self._validate_pending_purchase(resolved_vendor, pending)
+        if not valid_pending:
+            self.clear_pending_purchase()
+            return (None, message) if include_message else None
+        return (pending, "") if include_message else pending
+
+    def clear_pending_purchase(self):
+        self.db.pending_purchase = None
+        return None
+
+    def _store_pending_purchase(self, payload):
+        stored = dict(payload or {})
+        self.db.pending_purchase = stored
+        return stored
+
+    def _resolve_pending_vendor(self, pending):
+        vendor_id = int((pending or {}).get("vendor_id", 0) or 0)
+        if vendor_id <= 0 or not self.location:
+            return None
+        for obj in list(getattr(self.location, "contents", []) or []):
+            if int(getattr(obj, "id", 0) or 0) == vendor_id:
+                return obj
+        return None
+
+    def _get_vendor_reputation_key(self, vendor_or_vendor_id):
+        vendor_id = int(getattr(vendor_or_vendor_id, "id", vendor_or_vendor_id) or 0)
+        return str(vendor_id)
+
+    def _get_vendor_reputation_store(self):
+        raw_store = getattr(getattr(self, "db", None), "vendor_reputation", None)
+        store = dict(raw_store) if isinstance(raw_store, Mapping) else {}
+        self.db.vendor_reputation = store
+        return store
+
+    def get_reputation(self, vendor_or_vendor_id):
+        key = self._get_vendor_reputation_key(vendor_or_vendor_id)
+        if not key or key == "0":
+            return 0.0
+        store = self._get_vendor_reputation_store()
+        try:
+            return max(-1.0, min(1.0, float(store.get(key, 0.0) or 0.0)))
+        except (TypeError, ValueError):
+            return 0.0
+
+    def adjust_reputation(self, vendor_or_vendor_id, delta):
+        key = self._get_vendor_reputation_key(vendor_or_vendor_id)
+        if not key or key == "0":
+            return 0.0
+        store = self._get_vendor_reputation_store()
+        current = self.get_reputation(key)
+        updated = max(-1.0, min(1.0, current + float(delta or 0.0)))
+        store[key] = updated
+        self.db.vendor_reputation = store
+        return updated
+
+    def _get_vendor_offer_streak_store(self):
+        raw_store = getattr(getattr(self, "db", None), "vendor_offer_streaks", None)
+        store = dict(raw_store) if isinstance(raw_store, Mapping) else {}
+        self.db.vendor_offer_streaks = store
+        return store
+
+    def get_vendor_offer_streak(self, vendor_or_vendor_id):
+        key = self._get_vendor_reputation_key(vendor_or_vendor_id)
+        store = self._get_vendor_offer_streak_store()
+        try:
+            return max(0, int(store.get(key, 0) or 0))
+        except (TypeError, ValueError):
+            return 0
+
+    def set_vendor_offer_streak(self, vendor_or_vendor_id, value):
+        key = self._get_vendor_reputation_key(vendor_or_vendor_id)
+        store = self._get_vendor_offer_streak_store()
+        store[key] = max(0, int(value or 0))
+        self.db.vendor_offer_streaks = store
+        return store[key]
+
+    def _get_vendor_memory_store(self):
+        raw_store = getattr(getattr(self, "db", None), "vendor_memory", None)
+        store = dict(raw_store) if isinstance(raw_store, Mapping) else {}
+        self.db.vendor_memory = store
+        return store
+
+    def get_vendor_memory(self, vendor_or_vendor_id):
+        key = self._get_vendor_reputation_key(vendor_or_vendor_id)
+        store = self._get_vendor_memory_store()
+        raw_memory = dict(store.get(key) or {}) if isinstance(store.get(key), Mapping) else {}
+        normalized = {
+            "visits": max(0, int(raw_memory.get("visits", 0) or 0)),
+            "last_visit": max(0, int(raw_memory.get("last_visit", 0) or 0)),
+            "last_purchase_type": str(raw_memory.get("last_purchase_type") or "").strip().lower() or None,
+            "last_offer_ratio": float(raw_memory.get("last_offer_ratio", 0.0) or 0.0),
+            "lowball_streak": max(0, int(raw_memory.get("lowball_streak", 0) or 0)),
+            "fair_deal_streak": max(0, int(raw_memory.get("fair_deal_streak", 0) or 0)),
+        }
+        if normalized["last_purchase_type"] not in {"item", "kit"}:
+            normalized["last_purchase_type"] = None
+        store[key] = normalized
+        self.db.vendor_memory = store
+        return dict(normalized)
+
+    def update_vendor_memory(self, vendor_or_vendor_id, updates=None, *, touch=False):
+        key = self._get_vendor_reputation_key(vendor_or_vendor_id)
+        store = self._get_vendor_memory_store()
+        memory = self.get_vendor_memory(vendor_or_vendor_id)
+        updates = dict(updates or {}) if isinstance(updates, Mapping) else {}
+
+        if "visits" in updates:
+            memory["visits"] = max(0, int(updates.get("visits", memory["visits"]) or 0))
+        if "last_visit" in updates:
+            memory["last_visit"] = max(0, int(updates.get("last_visit", memory["last_visit"]) or 0))
+        elif touch:
+            memory["last_visit"] = int(time.time())
+        if "last_purchase_type" in updates:
+            purchase_type = str(updates.get("last_purchase_type") or "").strip().lower() or None
+            memory["last_purchase_type"] = purchase_type if purchase_type in {"item", "kit"} else None
+        if "last_offer_ratio" in updates:
+            try:
+                memory["last_offer_ratio"] = max(0.0, float(updates.get("last_offer_ratio", memory["last_offer_ratio"]) or 0.0))
+            except (TypeError, ValueError):
+                memory["last_offer_ratio"] = 0.0
+        if "lowball_streak" in updates:
+            memory["lowball_streak"] = max(0, int(updates.get("lowball_streak", memory["lowball_streak"]) or 0))
+        if "fair_deal_streak" in updates:
+            memory["fair_deal_streak"] = max(0, int(updates.get("fair_deal_streak", memory["fair_deal_streak"]) or 0))
+
+        store[key] = memory
+        self.db.vendor_memory = store
+        return dict(memory)
+
+    def record_vendor_visit(self, vendor):
+        memory = self.get_vendor_memory(vendor)
+        return self.update_vendor_memory(
+            vendor,
+            {"visits": memory.get("visits", 0) + 1},
+            touch=True,
+        )
+
+    def record_vendor_offer(self, vendor, quoted_total, offer_amount):
+        quoted_value = max(0, int(quoted_total or 0))
+        offered_value = max(0, int(offer_amount or 0))
+        ratio = (float(offered_value) / float(quoted_value)) if quoted_value > 0 else 0.0
+        memory = self.get_vendor_memory(vendor)
+        updates = {"last_offer_ratio": ratio}
+        if ratio < 0.8:
+            updates["lowball_streak"] = memory.get("lowball_streak", 0) + 1
+            updates["fair_deal_streak"] = 0
+        elif ratio >= 0.95:
+            updates["fair_deal_streak"] = memory.get("fair_deal_streak", 0) + 1
+            updates["lowball_streak"] = 0
+        return self.update_vendor_memory(vendor, updates)
+
+    def record_vendor_purchase(self, vendor, purchase_type):
+        normalized_type = str(purchase_type or "").strip().lower()
+        if normalized_type not in {"item", "kit"}:
+            normalized_type = "item"
+        return self.update_vendor_memory(vendor, {"last_purchase_type": normalized_type}, touch=True)
+
+    def get_effective_vendor_reputation(self, vendor):
+        raw_reputation = self.get_reputation(vendor)
+        snobbishness = float(getattr(getattr(vendor, "db", None), "snobbishness", 0.0) or 0.0)
+        return raw_reputation - (snobbishness * 0.2)
+
+    def get_vendor_reputation_modifier(self, vendor):
+        effective_rep = self.get_effective_vendor_reputation(vendor)
+        return -(effective_rep * 0.1)
+
+    def get_vendor_memory_modifier(self, vendor):
+        memory = self.get_vendor_memory(vendor)
+        if int(memory.get("fair_deal_streak", 0) or 0) >= 3:
+            return -0.02
+        if int(memory.get("lowball_streak", 0) or 0) >= 3:
+            return 0.03
+        return 0.0
+
+    def get_vendor_kit_modifier(self, vendor, pending=None):
+        purchase = dict(pending or {})
+        snobbishness = float(getattr(getattr(vendor, "db", None), "snobbishness", 0.0) or 0.0)
+        discount = 0.05 - (snobbishness * 0.02)
+        discount = max(0.02, min(discount, 0.07))
+        return -discount if purchase or vendor else 0.0
+
+    def apply_discount_pipeline(self, base_price, modifiers=None, *, max_discount=0.20, max_penalty=0.25, rounding="round"):
+        starting_price = max(0, int(base_price or 0))
+        if starting_price <= 0:
+            return 0
+        total_modifier = 0.0
+        for modifier in list(modifiers or []):
+            try:
+                total_modifier += float(modifier or 0.0)
+            except (TypeError, ValueError):
+                continue
+        total_modifier = max(-float(max_discount), min(total_modifier, float(max_penalty)))
+        raw_total = starting_price * (1.0 + total_modifier)
+        if str(rounding or "round").strip().lower() == "floor":
+            return max(1, int(raw_total))
+        return max(1, int(round(raw_total)))
+
+    def is_full_kit_purchase(self, pending=None):
+        purchase = dict(pending or self.get_pending_purchase() or {})
+        return bool(purchase.get("is_kit", False))
+
+    def calculate_kit_price(self, pending, vendor):
+        purchase = dict(pending or {})
+        base_total = max(0, int(purchase.get("base_total", purchase.get("listed_price", 0)) or 0))
+        return self.apply_discount_pipeline(
+            base_total,
+            modifiers=[
+                self.get_vendor_kit_modifier(vendor, purchase),
+            ],
+            rounding="floor",
+        )
+
+    def _build_pending_purchase(self, vendor, *, label, item_id, price, source="item", line_items=None, quoted_total=None, base_total=None, kit_id=""):
+        normalized_source = str(source or "item").strip().lower() or "item"
+        pending_line_items = []
+        for raw_item in list(line_items or []):
+            if not isinstance(raw_item, Mapping):
+                continue
+            normalized_label = str(raw_item.get("display_name") or raw_item.get("label") or raw_item.get("item_id") or "").strip()
+            if not normalized_label:
+                continue
+            pending_line_items.append(
+                {
+                    "display_name": normalized_label,
+                    "entry_key": str(raw_item.get("entry_key") or normalized_label).strip().lower(),
+                    "item_id": str(raw_item.get("item_id") or "").strip(),
+                    "price": max(0, int(raw_item.get("price", 0) or 0)),
+                    "armor_slot": str(raw_item.get("armor_slot") or "").strip().lower(),
+                    "tier": str(raw_item.get("tier") or "average").strip().lower(),
+                }
+            )
+        total_price = max(0, int(price or 0))
+        normalized_base_total = max(0, int(base_total if base_total is not None else total_price))
+        normalized_quoted_total = max(0, int(quoted_total if quoted_total is not None else total_price))
+        quantity = max(1, len(pending_line_items) or 1)
+        return self._store_pending_purchase(
+            {
+                "vendor_id": int(getattr(vendor, "id", 0) or 0),
+                "item_id": str(item_id or "").strip(),
+                "label": str(label or "").strip(),
+                "source": normalized_source,
+                "kind": normalized_source,
+                "is_kit": normalized_source == "kit",
+                "kit_id": str(kit_id or "").strip().lower(),
+                "quantity": quantity,
+                "item_count": quantity,
+                "price": normalized_quoted_total,
+                "quoted_total": normalized_quoted_total,
+                "base_total": normalized_base_total,
+                "listed_price": normalized_base_total,
+                "total_price": normalized_quoted_total,
+                "price_label": self.format_coins(normalized_quoted_total),
+                "line_items": pending_line_items,
+                "entry_names": [item["display_name"] for item in pending_line_items],
+                "entry_keys": [item["entry_key"] for item in pending_line_items],
+                "timestamp": int(time.time()),
+            }
+        )
+
+    def _validate_pending_purchase(self, vendor, pending):
+        if not vendor or not isinstance(pending, Mapping):
+            return False, "The vendor frowns. That offer is no longer valid."
+
+        pending_vendor_id = int(pending.get("vendor_id", 0) or 0)
+        if pending_vendor_id <= 0 or pending_vendor_id != int(getattr(vendor, "id", 0) or 0):
+            return False, "The vendor frowns. That offer belongs to a different vendor."
+
+        state = self.get_vendor_state(vendor)
+        state_vendor_id = int(state.get("vendor_id", 0) or 0)
+        if state_vendor_id and state_vendor_id != pending_vendor_id:
+            return False, "The vendor frowns. That offer belongs to a different vendor."
+
+        try:
+            timestamp = int(pending.get("timestamp", 0) or 0)
+        except (TypeError, ValueError):
+            timestamp = 0
+        if timestamp <= 0 or (int(time.time()) - timestamp) > 120:
+            return False, "The vendor frowns. That offer is no longer valid. Ask for a fresh quote."
+
+        source = str(pending.get("source") or "item").strip().lower()
+        if source not in {"item", "kit"}:
+            return False, "The vendor frowns. That offer is no longer valid."
+
+        line_items = [dict(item) for item in list(pending.get("line_items") or []) if isinstance(item, Mapping)]
+        quantity = max(0, int(pending.get("quantity", 0) or 0))
+        if not line_items or quantity != len(line_items):
+            return False, "The vendor frowns. That offer is no longer valid."
+
+        expected_total = sum(max(0, int(item.get("price", 0) or 0)) for item in line_items)
+        listed_total = max(0, int(pending.get("listed_price", pending.get("price", 0)) or 0))
+        quoted_total = max(0, int(pending.get("quoted_total", pending.get("price", listed_total)) or listed_total))
+        if expected_total != listed_total:
+            return False, "The vendor frowns. That quote no longer adds up. Ask for a fresh quote."
+        if quoted_total <= 0:
+            return False, "The vendor frowns. That quote no longer adds up. Ask for a fresh quote."
+
+        inventory_entry_map = getattr(getattr(vendor, "db", None), "inventory_entry_map", None)
+        if not isinstance(inventory_entry_map, Mapping):
+            inventory_entry_map = {}
+
+        live_catalog = self.get_vendor_inventory_catalog(vendor)
+        live_entry_map = {
+            str(entry.get("display_name") or "").strip().lower(): dict(entry)
+            for entry in list(live_catalog or [])
+            if str(entry.get("display_name") or "").strip()
+        }
+        current_listed_total = 0
+        for line_item in line_items:
+            entry_key = str(line_item.get("entry_key") or "").strip().lower()
+            if entry_key not in inventory_entry_map:
+                return False, "The vendor frowns. That quote has gone stale. Browse again and place a new order."
+            live_entry = dict(live_entry_map.get(entry_key) or {})
+            if not live_entry:
+                return False, "The vendor frowns. That quote has gone stale. Browse again and place a new order."
+
+            pending_item_id = str(line_item.get("item_id") or "").strip()
+            current_item_id = str(live_entry.get("item_id") or "").strip()
+            pending_tier = str(line_item.get("tier") or "average").strip().lower()
+            current_tier = str(live_entry.get("tier") or "average").strip().lower()
+            pending_price = max(0, int(line_item.get("price", 0) or 0))
+            current_price = max(0, int(live_entry.get("price", 0) or 0))
+
+            if pending_item_id != current_item_id or pending_tier != current_tier:
+                return False, "The vendor frowns. That offer is no longer valid. The stock has changed."
+            if pending_price != current_price:
+                return False, "The vendor frowns. That offer is no longer valid. The price has changed."
+
+            current_listed_total += current_price
+
+        if current_listed_total != listed_total:
+            return False, "The vendor frowns. That offer is no longer valid. The price has changed."
+
+        return True, ""
+
+    def _get_visible_vendor_entries_for_purchase(self, vendor):
+        browse_menu = self.get_vendor_browse_menu(vendor)
+        if browse_menu.get("view") in {"items", "kit_items"}:
+            return [entry["display_name"] for entry in (browse_menu.get("entries") or [])]
+        return None
+
+    def _get_selected_kit_entries(self, vendor):
+        browse_menu = self.get_vendor_browse_menu(vendor)
+        if browse_menu.get("view") != "kit_items":
+            return []
+        return [dict(entry) for entry in list(browse_menu.get("entries") or [])]
+
+    def _find_vendor_catalog_entry(self, vendor, entry_name, entries=None):
+        normalized_name = str(entry_name or "").strip().lower()
+        candidate_entries = list(entries or self.get_vendor_inventory_catalog(vendor))
+        for entry in candidate_entries:
+            if str(entry.get("display_name") or "").strip().lower() == normalized_name:
+                return dict(entry)
+        return None
+
+    def get_equipped_items_by_slot(self):
+        equipment = self.get_equipment()
+        grouped = {}
+        for slot, stack in dict(equipment or {}).items():
+            slot_name = str(slot or "").strip().lower()
+            grouped[slot_name] = sorted(list(stack or []), key=self.get_equipment_layer_priority)
+        return grouped
+
+    def get_top_layer_item(self, slot):
+        normalized_slot = str(slot or "").strip().lower()
+        stack = list(self.get_equipped_items_by_slot().get(normalized_slot) or [])
+        return stack[-1] if stack else None
+
+    def _normalize_armor_compare_class(self, armor_class):
+        normalized = str(armor_class or "").strip().lower()
+        alias_map = {
+            "leather_armor": "light_armor",
+            "light_armor": "light_armor",
+            "chain_armor": "chain_armor",
+            "brigandine": "brigandine",
+            "plate_armor": "plate_armor",
+        }
+        return alias_map.get(normalized, normalized)
+
+    def _get_tier_rank(self, tier_name):
+        tier_order = {
+            "below_average": 0,
+            "average": 1,
+            "above_average": 2,
+            "exquisite": 3,
+            "epic": 4,
+            "legendary": 5,
+        }
+        normalized = str(tier_name or "average").strip().lower()
+        return int(tier_order.get(normalized, 1))
+
+    def get_item_stats(self, item):
+        from server.systems import item_loader
+        from typeclasses.armor import ARMOR_PRESETS
+
+        item_data = dict(item) if isinstance(item, Mapping) else {}
+        db_holder = getattr(item, "db", None) if item is not None and not isinstance(item, Mapping) else None
+        item_record = {}
+        item_id = str(item_data.get("item_id") or getattr(db_holder, "item_id", None) or "").strip()
+        if item_id:
+            try:
+                item_record = item_loader.get_item_record(item_id)
+            except Exception:
+                item_record = {}
+
+        armor_class = str(
+            item_data.get("armor_class")
+            or getattr(db_holder, "armor_class", None)
+            or getattr(db_holder, "armor_type", None)
+            or item_record.get("armor_class")
+            or ""
+        ).strip().lower()
+        normalized_armor_class = self._normalize_armor_compare_class(armor_class)
+        preset = dict(ARMOR_PRESETS.get(normalized_armor_class, {}))
+        protection = float(
+            item_data.get("protection")
+            or getattr(db_holder, "protection", None)
+            or item_record.get("protection")
+            or preset.get("protection", 0)
+            or 0
+        )
+        weight = float(
+            item_data.get("weight")
+            or getattr(db_holder, "weight", None)
+            or item_record.get("weight")
+            or preset.get("weight", 0)
+            or 0
+        )
+        tier_name = str(item_data.get("tier") or getattr(db_holder, "tier", None) or item_record.get("tier") or "average").strip().lower()
+        armor_slot = str(item_data.get("armor_slot") or getattr(db_holder, "armor_slot", None) or getattr(db_holder, "slot", None) or item_record.get("armor_slot") or "").strip().lower()
+        return {
+            "armor": protection,
+            "weight": weight,
+            "tier": self._get_tier_rank(tier_name),
+            "tier_name": tier_name,
+            "armor_slot": armor_slot,
+            "armor_class": normalized_armor_class,
+        }
+
+    def compare_kit(self, entries):
+        summary = {"armor": 0.0, "weight": 0.0, "tier": 0, "items": 0}
+        for entry in list(entries or []):
+            slot = str((entry or {}).get("armor_slot") or "").strip().lower()
+            comparison = self.compare_items(entry, self.get_top_layer_item(slot) if slot else None, emit_messages=False, apply_roundtime=False)
+            summary["armor"] += float(comparison.get("armor", 0) or 0)
+            summary["weight"] += float(comparison.get("weight", 0) or 0)
+            summary["tier"] += int(comparison.get("tier", 0) or 0)
+            summary["items"] += 1
+        return summary
+
+    def _format_comparison_delta(self, delta, *, inverse=False):
+        numeric_delta = float(delta or 0)
+        if abs(numeric_delta) < 0.001:
+            return "|w(+0)|n"
+        positive_is_good = not inverse
+        is_good = numeric_delta > 0 if positive_is_good else numeric_delta < 0
+        color = "|g" if is_good else "|r"
+        rounded = int(numeric_delta) if float(numeric_delta).is_integer() else round(numeric_delta, 1)
+        sign = "+" if rounded > 0 else ""
+        return f"{color}({sign}{rounded})|n"
+
+    def _get_vendor_entry_comparison_lines(self, entry):
+        armor_slot = str((entry or {}).get("armor_slot") or "").strip().lower()
+        if not armor_slot:
+            return []
+        equipped_item = self.get_top_layer_item(armor_slot)
+        comparison = self.compare_items(entry, equipped_item, emit_messages=False, apply_roundtime=False)
+        if not comparison:
+            return []
+        header_target = f"your worn {self._label_vendor_armor_slot(armor_slot).lower()} armor" if equipped_item else f"your empty {self._label_vendor_armor_slot(armor_slot).lower()} slot"
+        new_stats = dict(comparison.get("new") or {})
+        armor_value = int(new_stats.get("armor", 0) or 0)
+        weight_value = new_stats.get("weight", 0) or 0
+        tier_value = str(new_stats.get("tier_name") or "average").replace("_", " ")
+        return [
+            f"    Compared to {header_target}:",
+            f"    Armor: {armor_value} {self._format_comparison_delta(comparison.get('armor', 0))}",
+            f"    Weight: {weight_value:g} {self._format_comparison_delta(comparison.get('weight', 0), inverse=True)}",
+            f"    Tier: {tier_value} {self._format_comparison_delta(comparison.get('tier', 0))}",
+        ]
+
+    def _get_vendor_kit_comparison_lines(self, entries):
+        comparison = self.compare_kit(entries)
+        return [
+            "    Full Set Comparison:",
+            f"    Armor: {self._format_comparison_delta(comparison.get('armor', 0))}",
+            f"    Weight: {self._format_comparison_delta(comparison.get('weight', 0), inverse=True)}",
+            f"    Tier: {self._format_comparison_delta(comparison.get('tier', 0))}",
+        ]
+
+    def get_vendor_inventory_catalog(self, vendor):
+        from server.systems import item_loader
+
+        if hasattr(vendor, "generate_stock") and getattr(getattr(vendor, "db", None), "vendor_profile_id", None):
+            vendor.generate_stock()
+        inventory = getattr(getattr(vendor, "db", None), "inventory", []) or []
+        inventory_entry_map = getattr(getattr(vendor, "db", None), "inventory_entry_map", None)
+        inventory_entry_map = inventory_entry_map if isinstance(inventory_entry_map, Mapping) else {}
+        catalog = []
+        for raw_entry in inventory:
+            if isinstance(raw_entry, Mapping):
+                entry_data = dict(raw_entry)
+            else:
+                display_name = str(raw_entry or "").strip()
+                if not display_name:
+                    continue
+                mapped_entry = inventory_entry_map.get(display_name.lower())
+                if isinstance(mapped_entry, Mapping):
+                    entry_data = dict(mapped_entry)
+                else:
+                    entry_data = {"item_id": str(mapped_entry or "").strip()}
+                entry_data["display_name"] = str(entry_data.get("display_name") or display_name).strip()
+            display_name = str(entry_data.get("display_name") or entry_data.get("item_id") or "").strip()
+            if not display_name:
+                continue
+            mapped_entry = inventory_entry_map.get(display_name.lower())
+            if isinstance(mapped_entry, Mapping):
+                merged_entry = dict(entry_data)
+                merged_entry.update(dict(mapped_entry))
+                entry_data = merged_entry
+            item_id = str(entry_data.get("item_id") or "").strip()
+            item_record = {}
+            if item_id:
+                try:
+                    item_record = item_loader.get_item_record(item_id)
+                except Exception:
+                    item_record = {}
+            catalog.append(
+                {
+                    "display_name": display_name,
+                    "normalized_label": display_name.lower(),
+                    "item_id": item_id,
+                    "price": self.get_vendor_price(vendor, display_name),
+                    "tier": str(entry_data.get("tier") or item_record.get("tier") or "average").strip().lower(),
+                    "category": str(entry_data.get("category") or item_record.get("category") or "").strip().lower(),
+                    "utility_category": str(entry_data.get("utility_category") or item_record.get("utility_category") or "").strip().lower(),
+                    "functional_type": str(entry_data.get("functional_type") or item_record.get("functional_type") or "").strip().lower(),
+                    "tool_type": str(entry_data.get("tool_type") or item_record.get("tool_type") or "").strip().lower(),
+                    "durability": int(entry_data.get("durability") or item_record.get("durability") or 0),
+                    "armor_class": str(entry_data.get("armor_class") or item_record.get("armor_class") or "").strip().lower(),
+                    "armor_slot": str(entry_data.get("armor_slot") or item_record.get("armor_slot") or "").strip().lower(),
+                    "kit_id": str(entry_data.get("kit_id") or "").strip().lower(),
+                    "kit_name": str(entry_data.get("kit_name") or "").strip(),
+                }
+            )
+        return catalog
+
+    def get_vendor_inventory_entries(self, vendor):
+        return [entry["display_name"] for entry in self.get_vendor_inventory_catalog(vendor) if str(entry.get("display_name") or "").strip()]
+
+    def _resolve_vendor_menu_option(self, query, options):
+        raw_query = str(query or "").strip()
+        if not raw_query:
+            return None, []
+        if raw_query.isdigit():
+            index = int(raw_query)
+            if 1 <= index <= len(options):
+                return options[index - 1], options
+            return None, options
+
+        normalized = raw_query.lower()
+        exact = [option for option in options if normalized in {str(option.get("value") or "").lower(), str(option.get("label") or "").lower()}]
+        prefix = [option for option in options if str(option.get("label") or "").lower().startswith(normalized)]
+        contains = [option for option in options if normalized in str(option.get("label") or "").lower()]
+        matches = exact or prefix or contains
+        if len(matches) == 1:
+            return matches[0], matches
+        return None, matches
+
+    def _derive_vendor_utility_category(self, entry):
+        utility_category = str((entry or {}).get("utility_category") or "").strip().lower()
+        if utility_category:
+            return utility_category
+        functional_type = str((entry or {}).get("functional_type") or "").strip().lower()
+        category = str((entry or {}).get("category") or "").strip().lower()
+        if functional_type in {"fishing_pole", "fishing_hook", "fishing_line", "bait", "fish_string"}:
+            return "fishing"
+        if functional_type in {"mining_tool"}:
+            return "mining"
+        if functional_type in {"crafting_tool"}:
+            return "crafting_tools"
+        if category == "container":
+            return "containers"
+        if functional_type in {"rope", "light_source"}:
+            return "survival_gear"
+        if category == "consumable":
+            return "provisions"
+        if category == "misc":
+            return "tools"
+        return ""
+
+    def _label_vendor_utility_category(self, category_name):
+        labels = {
+            "containers": "Containers",
+            "tools": "Tools",
+            "survival_gear": "Survival Gear",
+            "fishing": "Fishing",
+            "mining": "Mining",
+            "crafting_tools": "Crafting Tools",
+            "provisions": "Provisions",
+        }
+        normalized = str(category_name or "").strip().lower()
+        return labels.get(normalized, normalized.replace("_", " ").title() or "General Goods")
+
+    def _vendor_utility_category_sort_key(self, category_name):
+        order = {
+            "containers": 0,
+            "tools": 1,
+            "survival_gear": 2,
+            "fishing": 3,
+            "mining": 4,
+            "crafting_tools": 5,
+            "provisions": 6,
+        }
+        normalized = str(category_name or "").strip().lower()
+        return (order.get(normalized, 99), normalized)
+
+    def get_vendor_browse_menu(self, vendor):
+        catalog = list(self.get_vendor_inventory_catalog(vendor))
+        state = self.get_vendor_state(vendor)
+        if not catalog:
+            return {"view": "flat", "state": self.reset_vendor_state(vendor), "entries": [], "options": [], "breadcrumb": "All Stock"}
+
+        utility_catalog = []
+        for entry in catalog:
+            utility_category = self._derive_vendor_utility_category(entry)
+            if not utility_category:
+                continue
+            enriched_entry = dict(entry)
+            enriched_entry["utility_category"] = utility_category
+            utility_catalog.append(enriched_entry)
+
+        if utility_catalog and not any(entry.get("category") == "armor" for entry in catalog):
+            filters = dict(state.get("filters") or {})
+            selected_category = str(filters.get("utility_category") or "").strip().lower()
+            available_categories = []
+            seen_categories = set()
+            for entry in sorted(utility_catalog, key=lambda record: self._vendor_utility_category_sort_key(record.get("utility_category"))):
+                utility_category = str(entry.get("utility_category") or "").strip().lower()
+                if not utility_category or utility_category in seen_categories:
+                    continue
+                seen_categories.add(utility_category)
+                available_categories.append(utility_category)
+
+            if selected_category and selected_category not in seen_categories:
+                state = self.reset_vendor_state(vendor)
+                filters = {}
+                selected_category = ""
+
+            if not selected_category:
+                state["level"] = "root"
+                state["filters"] = {}
+                self.db.vendor_state = state
+                options = []
+                for category_name in available_categories:
+                    count = sum(1 for entry in utility_catalog if entry.get("utility_category") == category_name)
+                    options.append({"value": category_name, "label": self._label_vendor_utility_category(category_name), "count": count})
+                return {"view": "utility_categories", "state": state, "entries": utility_catalog, "options": options, "breadcrumb": "General Goods"}
+
+            category_entries = [entry for entry in utility_catalog if entry.get("utility_category") == selected_category]
+            category_entries.sort(key=lambda entry: (str(entry.get("functional_type") or ""), str(entry.get("display_name") or "")))
+            state["level"] = "item_list"
+            state["filters"] = {"utility_category": selected_category}
+            self.db.vendor_state = state
+            return {
+                "view": "utility_items",
+                "state": state,
+                "entries": category_entries,
+                "options": [],
+                "breadcrumb": f"General Goods / {self._label_vendor_utility_category(selected_category)}",
+            }
+
+        catalog = [entry for entry in catalog if entry.get("category") == "armor"]
+        if not catalog:
+            return {"view": "flat", "state": self.reset_vendor_state(vendor), "entries": [], "options": [], "breadcrumb": "All Stock"}
+
+        kit_entries = [entry for entry in catalog if str(entry.get("kit_id") or "").strip()]
+        has_kit_groups = bool(kit_entries)
+        filters = dict(state.get("filters") or {})
+        mode = str(state.get("mode") or "root").strip().lower()
+        if mode == "root" and not has_kit_groups:
+            mode = "inventory"
+            state["mode"] = "inventory"
+            self.db.vendor_state = state
+
+        if has_kit_groups and state.get("level") == "root" and not filters and mode == "root":
+            return {
+                "view": "root_options",
+                "state": state,
+                "entries": catalog,
+                "options": [
+                    {"value": "inventory", "label": "Browse Inventory"},
+                    {"value": "kits", "label": "Browse Kits"},
+                ],
+                "breadcrumb": "Armor",
+            }
+
+        if mode == "kits":
+            grouped = {}
+            for entry in kit_entries:
+                grouped.setdefault(str(entry.get("kit_id") or "").strip().lower(), []).append(entry)
+            selected_kit_id = str(filters.get("kit_id") or "").strip().lower()
+            if not selected_kit_id:
+                options = []
+                for kit_id, group_entries in sorted(grouped.items(), key=lambda item: self._armor_class_sort_key((item[1][0] or {}).get("armor_class"))):
+                    label = self._label_vendor_kit(group_entries[0].get("kit_name"), kit_id)
+                    options.append({"value": kit_id, "label": label, "count": len(group_entries)})
+                return {
+                    "view": "kit_groups",
+                    "state": state,
+                    "entries": kit_entries,
+                    "options": options,
+                    "breadcrumb": "Armor / Kits",
+                }
+            selected_entries = list(grouped.get(selected_kit_id) or [])
+            if not selected_entries:
+                state = self.reset_vendor_state(vendor)
+                return self.get_vendor_browse_menu(vendor)
+            selected_entries.sort(key=lambda entry: self._armor_slot_sort_key(entry.get("armor_slot")))
+            return {
+                "view": "kit_items",
+                "state": state,
+                "entries": selected_entries,
+                "options": [],
+                "breadcrumb": f"Armor / Kits / {self._label_vendor_kit(selected_entries[0].get('kit_name'), selected_kit_id)}",
+            }
+
+        available_classes = []
+        seen_classes = set()
+        for entry in sorted(catalog, key=lambda record: self._armor_class_sort_key(record.get("armor_class"))):
+            armor_class = str(entry.get("armor_class") or "").strip().lower()
+            if not armor_class or armor_class in seen_classes:
+                continue
+            seen_classes.add(armor_class)
+            available_classes.append(armor_class)
+
+        armor_class = str(filters.get("armor_class") or "").strip().lower()
+        if armor_class and armor_class not in seen_classes:
+            state = self.reset_vendor_state(vendor)
+            filters = {}
+            armor_class = ""
+
+        if not armor_class:
+            state["level"] = "root"
+            self.db.vendor_state = state
+            options = []
+            for class_name in available_classes:
+                count = sum(1 for entry in catalog if entry.get("armor_class") == class_name)
+                options.append({"value": class_name, "label": self._label_vendor_armor_class(class_name), "count": count})
+            return {"view": "classes", "state": state, "entries": catalog, "options": options, "breadcrumb": "Armor"}
+
+        class_entries = [entry for entry in catalog if entry.get("armor_class") == armor_class]
+        slot_options = []
+        seen_slots = set()
+        for entry in sorted(class_entries, key=lambda record: self._armor_slot_sort_key(record.get("armor_slot"))):
+            armor_slot = str(entry.get("armor_slot") or "").strip().lower()
+            if not armor_slot or armor_slot in seen_slots:
+                continue
+            seen_slots.add(armor_slot)
+            count = sum(1 for candidate in class_entries if candidate.get("armor_slot") == armor_slot)
+            slot_options.append({"value": armor_slot, "label": self._label_vendor_armor_slot(armor_slot), "count": count})
+
+        armor_slot = str(filters.get("armor_slot") or "").strip().lower()
+        if armor_slot and armor_slot not in seen_slots:
+            filters.pop("armor_slot", None)
+            state["filters"] = filters
+            armor_slot = ""
+
+        if not armor_slot:
+            state["level"] = "armor_class"
+            state["filters"] = {"armor_class": armor_class}
+            self.db.vendor_state = state
+            return {
+                "view": "slots",
+                "state": state,
+                "entries": class_entries,
+                "options": slot_options,
+                "breadcrumb": f"Armor / {self._label_vendor_armor_class(armor_class)}",
+            }
+
+        slot_entries = [entry for entry in class_entries if entry.get("armor_slot") == armor_slot]
+        state["level"] = "item_list"
+        state["filters"] = {"armor_class": armor_class, "armor_slot": armor_slot}
+        self.db.vendor_state = state
+        return {
+            "view": "items",
+            "state": state,
+            "entries": slot_entries,
+            "options": [],
+            "breadcrumb": f"Armor / {self._label_vendor_armor_class(armor_class)} / {self._label_vendor_armor_slot(armor_slot)}",
+        }
+
+    def get_vendor_base_price(self, vendor, item_name):
         normalized = str(item_name or "").strip().lower()
         custom_prices = getattr(getattr(vendor, "db", None), "price_map", None)
         if isinstance(custom_prices, Mapping) and normalized in custom_prices:
@@ -10825,8 +11900,24 @@ class Character(ObjectParent, DefaultCharacter):
         }
         return max(1, int(price_map.get(normalized, 20)))
 
-    def resolve_vendor_inventory_entry(self, vendor, item_name):
-        entries = self.get_vendor_inventory_entries(vendor)
+    def get_vendor_price(self, vendor, item_name):
+        base_price = self.get_vendor_base_price(vendor, item_name)
+        return self.apply_discount_pipeline(
+            base_price,
+            modifiers=[
+                self.get_vendor_reputation_modifier(vendor),
+                self.get_vendor_memory_modifier(vendor),
+            ],
+        )
+
+    def resolve_vendor_inventory_entry(self, vendor, item_name, entries=None):
+        entries = list(entries or self.get_vendor_inventory_entries(vendor))
+        stripped_query = str(item_name or "").strip()
+        if stripped_query.isdigit():
+            index = int(stripped_query)
+            if 1 <= index <= len(entries):
+                return entries[index - 1], entries, stripped_query, index
+            return None, entries, stripped_query, index
         base_query, index = self.split_numbered_query(item_name)
         normalized = base_query.strip().lower()
         if not normalized:
@@ -10859,7 +11950,7 @@ class Character(ObjectParent, DefaultCharacter):
             lines.append(f" {index}. {match}")
         self.msg("\n".join(lines))
 
-    def list_vendor_inventory(self):
+    def list_vendor_inventory(self, selection=""):
         vendor = self.get_nearby_vendor()
         if not vendor:
             self.msg("There is no vendor here.")
@@ -10869,6 +11960,181 @@ class Character(ObjectParent, DefaultCharacter):
         if not ok:
             self.msg(trade_message)
             return False
+
+        selection_text = str(selection or "").strip()
+        lowered_selection = selection_text.lower()
+        browse_menu = self.get_vendor_browse_menu(vendor)
+        if browse_menu.get("view") != "flat":
+            state = browse_menu.get("state") or self.get_vendor_state(vendor)
+            filters = dict(state.get("filters") or {})
+            compare_supported = browse_menu.get("view") not in {"utility_categories", "utility_items"}
+            if compare_supported and lowered_selection in {"compare", "compare on", "compare off"}:
+                if lowered_selection == "compare off":
+                    state["compare_enabled"] = False
+                elif lowered_selection == "compare on":
+                    state["compare_enabled"] = True
+                else:
+                    state["compare_enabled"] = not bool(state.get("compare_enabled", True))
+                self.db.vendor_state = state
+            elif lowered_selection == "reset":
+                state = self.reset_vendor_state(vendor)
+            elif lowered_selection == "back":
+                if filters.get("kit_id"):
+                    state["level"] = "kit_list"
+                    state["filters"] = {}
+                    state["mode"] = "kits"
+                    state["compare_enabled"] = bool(state.get("compare_enabled", True))
+                    self.db.vendor_state = state
+                elif filters.get("utility_category"):
+                    state = self.reset_vendor_state(vendor)
+                elif state.get("mode") == "kits":
+                    state = self.reset_vendor_state(vendor)
+                elif filters.get("armor_slot"):
+                    filters.pop("armor_slot", None)
+                    state["level"] = "armor_class"
+                    state["filters"] = filters
+                    state["compare_enabled"] = bool(state.get("compare_enabled", True))
+                    self.db.vendor_state = state
+                elif filters.get("armor_class"):
+                    state = self.reset_vendor_state(vendor)
+                else:
+                    state = self.reset_vendor_state(vendor)
+            elif selection_text:
+                if browse_menu.get("view") == "utility_categories":
+                    chosen_option, matches = self._resolve_vendor_menu_option(selection_text, browse_menu.get("options") or [])
+                    if not chosen_option:
+                        if matches:
+                            self.msg_vendor_matches(selection_text, [option.get("label") for option in matches])
+                            return False
+                        self.msg("That section is not on offer. Try 'shop' to browse the menu.")
+                        return False
+                    state["level"] = "item_list"
+                    state["filters"] = {"utility_category": str(chosen_option.get("value") or "").strip().lower()}
+                    self.db.vendor_state = state
+                elif browse_menu.get("view") == "root_options":
+                    chosen_option, matches = self._resolve_vendor_menu_option(selection_text, browse_menu.get("options") or [])
+                    if not chosen_option:
+                        if matches:
+                            self.msg_vendor_matches(selection_text, [option.get("label") for option in matches])
+                            return False
+                        self.msg("Choose either inventory or kits from the vendor menu.")
+                        return False
+                    state["mode"] = str(chosen_option.get("value") or "inventory").strip().lower()
+                    state["level"] = "root" if state["mode"] == "inventory" else "kit_list"
+                    state["filters"] = {}
+                    state["compare_enabled"] = bool(state.get("compare_enabled", True))
+                    self.db.vendor_state = state
+                elif state.get("mode") == "kits" and not filters.get("kit_id"):
+                    chosen_option, matches = self._resolve_vendor_menu_option(selection_text, browse_menu.get("options") or [])
+                    if not chosen_option:
+                        if matches:
+                            self.msg_vendor_matches(selection_text, [option.get("label") for option in matches])
+                            return False
+                        self.msg("That kit is not available from this vendor.")
+                        return False
+                    state["level"] = "kit_items"
+                    state["filters"] = {"kit_id": str(chosen_option.get("value") or "").strip().lower()}
+                    state["mode"] = "kits"
+                    state["compare_enabled"] = bool(state.get("compare_enabled", True))
+                    self.db.vendor_state = state
+                elif not filters.get("armor_class"):
+                    chosen_option, matches = self._resolve_vendor_menu_option(selection_text, browse_menu.get("options") or [])
+                    if not chosen_option:
+                        if matches:
+                            self.msg_vendor_matches(selection_text, [option.get("label") for option in matches])
+                            return False
+                        self.msg("That armor class is not on offer. Try 'shop' to browse the menu.")
+                        return False
+                    state["level"] = "armor_class"
+                    state["filters"] = {"armor_class": str(chosen_option.get("value") or "").strip().lower()}
+                    state["compare_enabled"] = bool(state.get("compare_enabled", True))
+                    self.db.vendor_state = state
+                elif not filters.get("armor_slot"):
+                    chosen_option, matches = self._resolve_vendor_menu_option(selection_text, browse_menu.get("options") or [])
+                    if not chosen_option:
+                        if matches:
+                            self.msg_vendor_matches(selection_text, [option.get("label") for option in matches])
+                            return False
+                        self.msg("That slot is not available in the current armor class.")
+                        return False
+                    state["level"] = "item_list"
+                    state["filters"] = {
+                        "armor_class": str(filters.get("armor_class") or "").strip().lower(),
+                        "armor_slot": str(chosen_option.get("value") or "").strip().lower(),
+                    }
+                    state["compare_enabled"] = bool(state.get("compare_enabled", True))
+                    self.db.vendor_state = state
+                else:
+                    self.msg("Use 'buy <number>' to purchase from the current list, or 'shop back' to change categories.")
+                    return False
+
+            browse_menu = self.get_vendor_browse_menu(vendor)
+            compare_supported = browse_menu.get("view") not in {"utility_categories", "utility_items"}
+            lines = []
+            if hasattr(vendor, "get_vendor_interaction_lines"):
+                lines.extend(list(vendor.get_vendor_interaction_lines(self, action="shop") or []))
+            lines.append(f"{vendor.key} offers: {browse_menu['breadcrumb']}")
+            if compare_supported:
+                lines.append(f"Comparison: {'on' if browse_menu.get('state', {}).get('compare_enabled', True) else 'off'}")
+            if browse_menu["view"] == "root_options":
+                for index, option in enumerate(browse_menu.get("options") or [], start=1):
+                    click_label = self.format_vendor_click(f"shop {option['value']}", f"[ {option['label']} ]")
+                    lines.append(f" {index}. {click_label}")
+                lines.append("Use 'shop <number>' or 'shop <option>' to choose a browse mode.")
+            elif browse_menu["view"] == "utility_categories":
+                for index, option in enumerate(browse_menu.get("options") or [], start=1):
+                    click_label = self.format_vendor_click(f"shop {option['value']}", f"[ {option['label']} ]")
+                    lines.append(f" {index}. {click_label}")
+                lines.append("Use 'shop <number>' or 'shop <section>' to browse deeper.")
+            elif browse_menu["view"] == "classes":
+                for index, option in enumerate(browse_menu.get("options") or [], start=1):
+                    click_label = self.format_vendor_click(f"shop {option['value']}", f"[ {option['label']} ]")
+                    lines.append(f" {index}. {click_label}")
+                lines.append("Use 'shop <number>' or 'shop <armor class>' to browse deeper.")
+            elif browse_menu["view"] == "slots":
+                for index, option in enumerate(browse_menu.get("options") or [], start=1):
+                    click_label = self.format_vendor_click(f"shop {option['value']}", f"[ {option['label']} ]")
+                    lines.append(f" {index}. {click_label}")
+                lines.append("Use 'shop <number>' or 'shop <slot>' to view items.")
+            elif browse_menu["view"] == "kit_groups":
+                for index, option in enumerate(browse_menu.get("options") or [], start=1):
+                    click_label = self.format_vendor_click(f"shop {option['value']}", f"[ {option['label']} ]")
+                    preview = "/".join(self._label_vendor_armor_slot(entry.get("armor_slot")) for entry in (browse_menu.get("entries") or []) if entry.get("kit_id") == option.get("value"))
+                    lines.append(f" {index}. {click_label}")
+                    if preview:
+                        lines.append(f"    {preview}")
+                lines.append("Use 'shop <number>' or 'shop <kit>' to inspect a full set.")
+            else:
+                entries = browse_menu.get("entries") or []
+                if not entries:
+                    self.msg(f"{vendor.key} has nothing for sale right now.")
+                    return False
+                for index, entry in enumerate(entries, start=1):
+                    slot_prefix = ""
+                    if browse_menu["view"] == "kit_items" and entry.get("armor_slot"):
+                        slot_prefix = f"{self._label_vendor_armor_slot(entry.get('armor_slot'))}: "
+                    click_label = self.format_vendor_click(f"buy {index}", f"[ {index} ]")
+                    lines.append(f" {click_label} {slot_prefix}{entry['display_name']} - {self.format_coins(int(entry.get('price', 0) or 0))}")
+                    if compare_supported and browse_menu.get("state", {}).get("compare_enabled", True):
+                        lines.extend(self._get_vendor_entry_comparison_lines(entry))
+                if browse_menu["view"] == "kit_items":
+                    kit_total = sum(int(entry.get("price", 0) or 0) for entry in entries)
+                    lines.append(f" {self.format_vendor_click('buy kit', '[ Buy Full Kit ]')} - {self.format_coins(kit_total)}")
+                    if compare_supported and browse_menu.get("state", {}).get("compare_enabled", True):
+                        lines.extend(self._get_vendor_kit_comparison_lines(entries))
+                lines.append("Use 'buy <number>' or 'buy <item>' to order something.")
+                if compare_supported:
+                    lines.append("Use 'shop compare on' or 'shop compare off' to toggle equipment comparison.")
+            if browse_menu["view"] not in {"classes", "root_options", "utility_categories"}:
+                lines.append(f"Use {self.format_vendor_click('shop back', '[ back ]')} to go up or {self.format_vendor_click('shop reset', '[ reset ]')} to start over.")
+            self.msg("\n".join(lines))
+            try:
+                from systems import first_area
+
+                first_area.note_vendor_interaction(self, vendor=vendor, action="shop")
+            except Exception:
+                pass
+            return True
 
         entries = self.get_vendor_inventory_entries(vendor)
         if not entries:
@@ -11146,8 +12412,145 @@ class Character(ObjectParent, DefaultCharacter):
             self.use_skill(normalized_skill, apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=difficulty)
         return True
 
-    def create_vendor_inventory_item(self, item_name):
+    def create_vendor_inventory_item(self, item_name, vendor=None):
         normalized = str(item_name or "").strip().lower()
+        if vendor is not None:
+            inventory_entry_map = getattr(getattr(vendor, "db", None), "inventory_entry_map", None)
+            if isinstance(inventory_entry_map, Mapping):
+                entry_data = inventory_entry_map.get(normalized)
+                item_id = ""
+                if isinstance(entry_data, Mapping):
+                    item_id = str(entry_data.get("item_id") or "").strip()
+                else:
+                    item_id = str(entry_data or "").strip()
+                if item_id:
+                    from server.systems import item_loader
+
+                    item_record = item_loader.get_item_record(item_id)
+                    category = str(item_record.get("category") or "misc").strip().lower()
+                    entry_tier = str(entry_data.get("tier", item_record.get("tier", "average")) or "average").strip().lower() if isinstance(entry_data, Mapping) else str(item_record.get("tier") or "average").strip().lower()
+                    key = str(entry_data.get("display_name") or item_record.get("name") or item_id) if isinstance(entry_data, Mapping) else str(item_record.get("name") or item_id)
+                    description = dict(item_record.get("description") or {})
+                    item_value = int(entry_data.get("price", item_record.get("value", 0)) or 0) if isinstance(entry_data, Mapping) else int(item_record.get("value", 0) or 0)
+                    weight = float(item_record.get("weight", 1.0) or 1.0)
+                    equipment = dict(item_record.get("equipment") or {})
+                    if category == "weapon":
+                        item = create_object("typeclasses.objects.Object", key=key, location=self, home=self)
+                        weapon_class = str(item_record.get("weapon_class") or "light_edge")
+                        damage_type_map = {
+                            "light_edge": "slice",
+                            "medium_edge": "slice",
+                            "heavy_edge": "slice",
+                            "light_blunt": "impact",
+                            "heavy_blunt": "impact",
+                            "short_bow": "puncture",
+                            "long_bow": "puncture",
+                            "crossbow": "puncture",
+                            "thrown": "puncture",
+                            "polearm": "puncture",
+                        }
+                        damage_type = damage_type_map.get(weapon_class, "impact")
+                        attack_value = int(equipment.get("attack", 0) or 0)
+                        item.db.item_type = "weapon"
+                        item.db.weapon_type = weapon_class
+                        item.db.skill = weapon_class
+                        item.db.damage_type = damage_type
+                        item.db.damage_types = {"slice": 0.0, "impact": 0.0, "puncture": 0.0, damage_type: 1.0}
+                        item.db.damage_min = max(1, attack_value)
+                        item.db.damage_max = max(item.db.damage_min + 1, attack_value + 2)
+                        item.db.roundtime = 2.5
+                    elif category in {"armor", "clothing", "jewelry"} or (category == "container" and str(equipment.get("slot") or "none").strip().lower() != "none"):
+                        item = create_object("typeclasses.wearables.Wearable", key=key, location=self, home=self)
+                        item.db.slot = str(equipment.get("slot") or "none")
+                        item.db.equip_slots = list(item_record.get("equip_slots") or ([item.db.slot] if item.db.slot != "none" else []))
+                        item.db.layer = str(item_record.get("layer") or "base").strip().lower() or "base"
+                        item.db.blocks_layers = list(item_record.get("blocks_layers") or [])
+                        item.db.item_type = category
+                        item.db.armor_type = "light_armor" if category == "armor" else category
+                        item.db.protection = int(equipment.get("defense", 0) or 0)
+                        item.db.hindrance = 0
+                        if category == "armor":
+                            item.db.armor_class = str(item_record.get("armor_class") or "light_armor").strip().lower()
+                            item.db.armor_slot = str(item_record.get("armor_slot") or item.db.slot).strip().lower()
+                            item.db.tier = entry_tier
+                            item.db.coverage = [item.db.armor_slot] if item.db.armor_slot not in {"shield", "cloak"} else []
+                            item.db.covers = []
+                    elif category == "ammunition":
+                        display_name = str(entry_data.get("display_name") or key) if isinstance(entry_data, Mapping) else key
+                        item = create_simple_item(
+                            self,
+                            key=display_name,
+                            desc=str(description.get("long") or f"A stack of {display_name} purchased from a local merchant."),
+                            item_value=int(entry_data.get("price", item_record.get("value", 0)) or 0) if isinstance(entry_data, Mapping) else item_value,
+                            value=int(entry_data.get("price", item_record.get("value", 0)) or 0) if isinstance(entry_data, Mapping) else item_value,
+                            weight=weight,
+                            item_type=category,
+                        )
+                        item.db.ammo_type = str(item_record.get("ammo_type") or "arrow").strip().lower()
+                        item.db.ammo_class = str(item_record.get("ammo_class") or "short_bow").strip().lower()
+                        item.db.quantity = int(entry_data.get("quantity", item_record.get("stack_size", 10)) or 10) if isinstance(entry_data, Mapping) else int(item_record.get("stack_size", 10) or 10)
+                        item.db.stack_size = int(item_record.get("stack_size", 10) or 10)
+                        item.db.tier = str(entry_data.get("tier", item_record.get("tier", "average")) or "average").strip().lower() if isinstance(entry_data, Mapping) else str(item_record.get("tier") or "average").strip().lower()
+                        item.db.base_price = int(item_record.get("base_price", 0) or 0)
+                        item_value = int(entry_data.get("price", item_record.get("value", 0)) or 0) if isinstance(entry_data, Mapping) else item_value
+                    else:
+                        item = create_simple_item(
+                            self,
+                            key=key,
+                            desc=str(description.get("long") or f"A {key} purchased from a local merchant."),
+                            item_value=item_value,
+                            value=item_value,
+                            weight=weight,
+                            item_type=category,
+                        )
+                    item.db.world_id = item_id
+                    item.db.item_value = item_value
+                    item.db.value = item_value
+                    item.db.weight = weight
+                    item.db.desc = str(description.get("long") or description.get("short") or f"A {key} purchased from a local merchant.")
+                    item.db.tier = entry_tier or str(item_record.get("tier") or "").strip().lower()
+                    item.db.utility_category = str(item_record.get("utility_category") or "").strip().lower()
+                    item.db.functional_type = str(item_record.get("functional_type") or "").strip().lower()
+                    item.db.tool_type = str(item_record.get("tool_type") or "").strip().lower()
+                    item.db.type = str(item_record.get("type") or "").strip().lower()
+                    item.db.durability = int(item_record.get("durability", 0) or 0)
+                    item.db.quickdraw_bonus = float(item_record.get("quickdraw_bonus", 0.0) or 0.0)
+                    if category == "container":
+                        container_data = dict(item_record.get("container") or {})
+                        item.db.capacity = int(container_data.get("capacity", 0) or 0)
+                        item.db.weight_reduction = float(container_data.get("weight_reduction", 0.0) or 0.0)
+                        item.db.ammo_container = bool(container_data.get("ammo_container", False))
+                        item.db.allowed_ammo_types = list(container_data.get("allowed_ammo_types") or [])
+                        item.db.ammo_type = str(item_record.get("ammo_type") or "arrow").strip().lower() if item.db.type == "ammo_container" else ""
+                        item.db.contents = []
+                    if item.db.functional_type == "fishing_pole":
+                        tier_ratings = {
+                            "below_average": 8,
+                            "average": 10,
+                            "above_average": 12,
+                            "exquisite": 14,
+                            "epic": 16,
+                            "legendary": 18,
+                        }
+                        item.db.is_fishing_pole = True
+                        item.db.pole_rating = int(tier_ratings.get(item.db.tier, 10))
+                        item.db.hook_attached = True
+                        item.db.line_attached = True
+                        item.db.line_tangled = False
+                    elif item.db.functional_type == "fishing_hook":
+                        item.db.is_hook = True
+                        item.db.hook_rating = 10
+                    elif item.db.functional_type == "fishing_line":
+                        item.db.is_line = True
+                        item.db.line_rating = 10
+                    elif item.db.functional_type == "bait":
+                        item.db.is_bait = True
+                        item.db.bait_family = str(item_record.get("bait_family") or "worm_cutbait").strip().lower() or "worm_cutbait"
+                        item.db.bait_type = item.db.bait_family
+                        item.db.bait_quality = float(item_record.get("bait_quality", 10.0) or 10.0)
+                    elif item.db.functional_type == "fish_string":
+                        item.db.is_fish_string = True
+                    return item
         if normalized == "basic cloak":
             item = create_object("typeclasses.wearables.Wearable", key="basic cloak", location=self, home=self)
             item.db.slot = "torso"
@@ -11300,6 +12703,110 @@ class Character(ObjectParent, DefaultCharacter):
         )
         return item
 
+    def offer_on_pending_purchase(self, offer_text):
+        pending = self.get_pending_purchase()
+        if not pending:
+            self.msg("You do not have an active purchase to negotiate.")
+            return False
+
+        vendor = self._resolve_pending_vendor(pending)
+        if not vendor:
+            self.clear_pending_purchase()
+            self.msg("The vendor is no longer here.")
+            return False
+
+        pending, pending_message = self.get_active_transaction(vendor, include_message=True)
+        if not pending:
+            self.msg(pending_message or "That quote is no longer valid. Ask the vendor again.")
+            return False
+
+        try:
+            offer_amount = self.parse_coin_amount(offer_text)
+        except ValueError as exc:
+            self.msg(str(exc))
+            return False
+
+        quoted_total = int(pending.get("quoted_total", pending.get("price", pending.get("listed_price", 0))) or 0)
+        self.record_vendor_offer(vendor, quoted_total, offer_amount)
+
+        result = vendor.evaluate_offer(self, pending, offer_amount)
+        status = str(result.get("status") or "rejected")
+        if status == "accepted":
+            previous_quoted_total = int(pending.get("quoted_total", pending.get("price", 0)) or 0)
+            agreed_price = int(result.get("agreed_price", pending.get("listed_price", 0)) or 0)
+            pending["price"] = agreed_price
+            pending["quoted_total"] = agreed_price
+            pending["total_price"] = agreed_price
+            pending["price_label"] = self.format_coins(agreed_price)
+            pending["accepted_offer"] = agreed_price < previous_quoted_total
+            self._store_pending_purchase(pending)
+            self.set_vendor_offer_streak(vendor, 0)
+            self.msg(result.get("response") or f"The vendor accepts {self.format_coins(agreed_price)}.")
+            self.msg("Use 'accept' to complete the purchase.")
+            return True
+        if status == "counter":
+            counter_price = int(result.get("agreed_price", pending.get("listed_price", 0)) or 0)
+            pending["price"] = counter_price
+            pending["quoted_total"] = counter_price
+            pending["total_price"] = counter_price
+            pending["price_label"] = self.format_coins(counter_price)
+            self._store_pending_purchase(pending)
+            self.set_vendor_offer_streak(vendor, 0)
+            self.msg(result.get("response") or f"The vendor counters at {self.format_coins(counter_price)}.")
+            self.msg("Use 'accept' to take the counter-offer, or 'offer <amount>' again.")
+            return True
+
+        if bool(result.get("lowball", False)):
+            streak = self.get_vendor_offer_streak(vendor) + 1
+            self.set_vendor_offer_streak(vendor, streak)
+            self.adjust_reputation(vendor, -0.02)
+            if streak >= 2:
+                self.adjust_reputation(vendor, -0.05)
+        
+        self.msg(result.get("response") or "The vendor rejects the offer.")
+        return False
+
+    def accept_pending_purchase(self):
+        pending = self.get_pending_purchase()
+        if not pending:
+            self.msg("You do not have a pending purchase.")
+            return False
+
+        vendor = self._resolve_pending_vendor(pending)
+        if not vendor:
+            self.clear_pending_purchase()
+            self.msg("The vendor is no longer here.")
+            return False
+
+        pending, pending_message = self.get_active_transaction(vendor, include_message=True)
+        if not pending:
+            self.msg(pending_message or "That quote is no longer valid. Ask the vendor again.")
+            return False
+
+        price = max(0, int(pending.get("quoted_total", pending.get("price", pending.get("listed_price", 0))) or 0))
+        if not self.has_coins(price):
+            self.msg("You can't afford that.")
+            return False
+
+        self.remove_coins(price)
+        completed_pending = dict(pending)
+        self.clear_pending_purchase()
+        for line_item in list(completed_pending.get("line_items") or []):
+            item_key = str(line_item.get("item_id") or line_item.get("entry_key") or line_item.get("display_name") or "").strip()
+            self.create_vendor_inventory_item(item_key, vendor=vendor)
+
+        purchase_message = None
+        if hasattr(vendor, "get_vendor_purchase_message"):
+            purchase_message = vendor.get_vendor_purchase_message(self, str(completed_pending.get("label") or "that"), price)
+        self.msg(purchase_message or f"You purchase {completed_pending.get('label') or 'that'} for {self.format_coins(price)}.")
+        self.record_vendor_purchase(vendor, completed_pending.get("source") or completed_pending.get("kind") or "item")
+        self.adjust_reputation(vendor, 0.01)
+        if bool(completed_pending.get("accepted_offer", False)):
+            self.adjust_reputation(vendor, 0.02)
+        self.set_vendor_offer_streak(vendor, 0)
+        self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        return True
+
     def buy_item(self, item_name):
         vendor = self.get_nearby_vendor()
         if not vendor:
@@ -11311,7 +12818,42 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg(trade_message)
             return False
 
-        stock_name, matches, base_query, index = self.resolve_vendor_inventory_entry(vendor, item_name)
+        existing_pending = self.get_pending_purchase()
+        if existing_pending:
+            self.clear_pending_purchase()
+            self.msg("You set aside the previous quote and ask about something else.")
+
+        browse_menu = self.get_vendor_browse_menu(vendor)
+        visible_entries = None
+        if browse_menu.get("view") in {"items", "kit_items"}:
+            visible_entries = [entry["display_name"] for entry in (browse_menu.get("entries") or [])]
+
+        if str(item_name or "").strip().lower() == "kit":
+            kit_entries = self._get_selected_kit_entries(vendor)
+            if not kit_entries:
+                self.msg("You are not currently viewing a kit.")
+                return False
+            total_price = sum(int(entry.get("price", 0) or 0) for entry in kit_entries)
+            quoted_total = self.calculate_kit_price({"base_total": total_price}, vendor)
+            kit_label = str((kit_entries[0] or {}).get("kit_name") or "full kit").strip() or "full kit"
+            pending = self._build_pending_purchase(
+                vendor,
+                label=kit_label,
+                item_id=str((kit_entries[0] or {}).get("kit_id") or "kit").strip().lower() or "kit",
+                price=quoted_total,
+                source="kit",
+                line_items=kit_entries,
+                quoted_total=quoted_total,
+                base_total=total_price,
+                kit_id=str((kit_entries[0] or {}).get("kit_id") or "").strip().lower(),
+            )
+            if hasattr(vendor, "get_vendor_quote_message"):
+                self.msg(vendor.get_vendor_quote_message(self, pending))
+            else:
+                self.msg(f"The full kit comes to {self.format_coins(quoted_total)}. Use 'accept' or 'offer <amount>'.")
+            return True
+
+        stock_name, matches, base_query, index = self.resolve_vendor_inventory_entry(vendor, item_name, entries=visible_entries)
         if not stock_name:
             if matches:
                 self.msg_vendor_matches(base_query, matches)
@@ -11320,31 +12862,26 @@ class Character(ObjectParent, DefaultCharacter):
             return False
         normalized = stock_name.lower()
 
-        price = self.get_vendor_price(vendor, normalized)
-
-        if not self.has_coins(price):
-            self.msg("You can't afford that.")
-            return False
-
-        self.remove_coins(price)
-        self.create_vendor_inventory_item(normalized)
-        purchase_message = None
-        if hasattr(vendor, "get_vendor_purchase_message"):
-            purchase_message = vendor.get_vendor_purchase_message(self, stock_name, price)
-        self.msg(purchase_message or f"You purchase {stock_name} for {self.format_coins(price)}.")
-        self.use_skill("trading", apply_roundtime=False, emit_placeholder=False, require_known=False)
+        entry_data = self._find_vendor_catalog_entry(vendor, stock_name, entries=browse_menu.get("entries") or None) or {}
+        price = int(entry_data.get("price", self.get_vendor_price(vendor, normalized)) or 0)
+        pending = self._build_pending_purchase(
+            vendor,
+            label=stock_name,
+            item_id=str(entry_data.get("item_id") or normalized).strip(),
+            price=price,
+            source="item",
+            line_items=[dict(entry_data or {"display_name": stock_name, "item_id": normalized, "price": price})],
+        )
+        if hasattr(vendor, "get_vendor_quote_message"):
+            self.msg(vendor.get_vendor_quote_message(self, pending))
+        else:
+            self.msg(f"{stock_name} will cost {self.format_coins(price)}. Use 'accept' or 'offer <amount>'.")
         try:
             from systems import onboarding
 
             completed, awarded = onboarding.note_trade_action(self, "buy")
             if completed and awarded:
                 self.msg(onboarding.format_token_feedback(onboarding.ensure_onboarding_state(self)))
-        except Exception:
-            pass
-        try:
-            from systems import first_area
-
-            first_area.note_vendor_interaction(self, vendor=vendor, action="buy")
         except Exception:
             pass
         return True
@@ -12453,16 +13990,19 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_armor_items(self):
         armor = []
+        seen = set()
         equipment = self.get_equipment()
 
-        for slot, item in equipment.items():
-            if self.is_multi_slot(slot):
-                for obj in item:
-                    if getattr(obj.db, "item_type", None) == "armor":
-                        armor.append(obj)
-            else:
-                if item and getattr(item.db, "item_type", None) == "armor":
-                    armor.append(item)
+        for stack in equipment.values():
+            for obj in list(stack or []):
+                if getattr(obj.db, "item_type", None) != "armor":
+                    continue
+                item_id = int(getattr(obj, "id", 0) or 0)
+                marker = item_id if item_id > 0 else id(obj)
+                if marker in seen:
+                    continue
+                seen.add(marker)
+                armor.append(obj)
 
         return armor
 
@@ -12628,24 +14168,16 @@ class Character(ObjectParent, DefaultCharacter):
 
         section_lines = []
         for slot in APPEARANCE_SLOT_ORDER:
-            item = equipment.get(slot)
-            if self.is_multi_slot(slot):
-                if not item:
-                    continue
-                names = ", ".join(obj.key for obj in item)
-                if looker == self:
-                    section_lines.append(f"  {slot}: {names}")
-                else:
-                    section_lines.append(f"  {names}")
+            stack = list(equipment.get(slot) or [])
+            if not stack:
                 continue
 
-            if not item:
-                continue
+            names = ", ".join(obj.key for obj in stack)
 
             if looker == self:
-                section_lines.append(f"  {slot}: {item.key}")
+                section_lines.append(f"  {slot}: {names}")
             else:
-                section_lines.append(f"  {item.key}")
+                section_lines.append(f"  {names}")
 
         if section_lines:
             lines.append(section_header)
@@ -12978,6 +14510,44 @@ class Character(ObjectParent, DefaultCharacter):
     def is_multi_slot(self, slot):
         return slot in ["fingers", "belt_attach", "back_attach", "shoulder_attach"]
 
+    def get_equipment_layer(self, item):
+        layer = str(getattr(getattr(item, "db", None), "layer", "base") or "base").strip().lower() or "base"
+        return layer if layer in EQUIPMENT_LAYER_ORDER else "base"
+
+    def get_equipment_layer_priority(self, item):
+        return int(EQUIPMENT_LAYER_ORDER.get(self.get_equipment_layer(item), EQUIPMENT_LAYER_ORDER["base"]))
+
+    def get_equipment_slots_for_item(self, item):
+        db_holder = getattr(item, "db", None)
+        raw_slots = list(getattr(db_holder, "equip_slots", None) or [])
+        normalized = []
+        if raw_slots:
+            for raw_slot in raw_slots:
+                slot = self.normalize_equipment_slot(raw_slot)
+                if slot and slot in self.get_equipment() and slot not in normalized:
+                    normalized.append(slot)
+        else:
+            slot = self.normalize_equipment_slot(getattr(db_holder, "slot", None))
+            if slot and slot in self.get_equipment():
+                normalized.append(slot)
+        return normalized
+
+    def get_equipment_blocked_layers(self, item):
+        raw_layers = list(getattr(getattr(item, "db", None), "blocks_layers", None) or [])
+        blocked = []
+        for raw_layer in raw_layers:
+            layer = str(raw_layer or "").strip().lower()
+            if layer and layer in EQUIPMENT_LAYER_ORDER and layer not in blocked:
+                blocked.append(layer)
+        return blocked
+
+    def sort_equipment_stack(self, slot):
+        equipment = self.get_equipment()
+        stack = list(equipment.get(slot) or [])
+        stack.sort(key=lambda item: (self.get_equipment_layer_priority(item), str(getattr(item, "key", "") or "").lower()))
+        equipment[slot] = stack
+        return stack
+
     def get_slot_capacity(self, slot):
         capacities = {
             "fingers": 10,
@@ -12990,20 +14560,27 @@ class Character(ObjectParent, DefaultCharacter):
     def normalize_equipment_slot(self, slot):
         if slot == "belt":
             return "waist"
+        if slot == "torso":
+            return "chest"
         return slot
 
     def is_slot_free(self, slot):
         equipment = self.get_equipment()
+        stack = list(equipment.get(slot) or [])
         if self.is_multi_slot(slot):
-            return True
-        return equipment.get(slot) is None
+            return len(stack) < self.get_slot_capacity(slot)
+        return not stack
 
     def get_worn_items(self):
         worn = []
-        for slot, item in self.get_equipment().items():
-            if self.is_multi_slot(slot):
-                worn.extend(item)
-            elif item:
+        seen = set()
+        for stack in self.get_equipment().values():
+            for item in list(stack or []):
+                item_id = int(getattr(item, "id", 0) or 0)
+                marker = item_id if item_id > 0 else id(item)
+                if marker in seen:
+                    continue
+                seen.add(marker)
                 worn.append(item)
         return worn
 
@@ -13021,52 +14598,59 @@ class Character(ObjectParent, DefaultCharacter):
 
     def clear_equipment_item(self, item):
         equipment = self.get_equipment()
+        removed = False
         for slot, equipped in equipment.items():
-            if self.is_multi_slot(slot):
-                if item in equipped:
-                    equipped.remove(item)
-                    if getattr(item.db, "worn_by", None) == self:
-                        item.db.worn_by = None
-                    if self.db.preferred_sheath == item:
-                        self.db.preferred_sheath = None
-                    return True
-                continue
-
-            if equipped == item:
-                equipment[slot] = None
-                if getattr(item.db, "worn_by", None) == self:
-                    item.db.worn_by = None
-                if self.db.preferred_sheath == item:
-                    self.db.preferred_sheath = None
-                return True
-        return False
+            stack = list(equipped or [])
+            while item in stack:
+                stack.remove(item)
+                removed = True
+            equipment[slot] = stack
+        if removed:
+            if getattr(item.db, "worn_by", None) == self:
+                item.db.worn_by = None
+            item.db.equipped_slots = []
+            if self.db.preferred_sheath == item:
+                self.db.preferred_sheath = None
+        return removed
 
     def equip_item(self, item):
         if not getattr(item.db, "wearable", False):
             return False, "You cannot wear that."
 
-        slot = self.normalize_equipment_slot(getattr(item.db, "slot", None))
-        if not slot or slot not in self.get_equipment():
+        slots = self.get_equipment_slots_for_item(item)
+        if not slots:
             return False, "That item cannot be worn."
 
         if item.location != self:
             return False, "You must be holding that to wear it."
 
         equipment = self.get_equipment()
+        layer = self.get_equipment_layer(item)
+        blocked_layers = set(self.get_equipment_blocked_layers(item))
 
-        if self.is_multi_slot(slot):
-            current = equipment.get(slot, [])
-            if len(current) >= self.get_slot_capacity(slot):
-                return False, f"You cannot wear anything more on your {slot}."
-            current.append(item)
-        else:
-            if not self.is_slot_free(slot):
-                return False, f"Your {slot} is already occupied."
-            equipment[slot] = item
+        for slot in slots:
+            stack = list(equipment.get(slot) or [])
+            if self.is_multi_slot(slot):
+                if len(stack) >= self.get_slot_capacity(slot):
+                    return False, f"You cannot wear anything more on your {slot}."
+                continue
+            for equipped in stack:
+                equipped_layer = self.get_equipment_layer(equipped)
+                if equipped_layer == layer:
+                    return False, f"You are already wearing something on the {layer} layer of your {slot}."
+                equipped_blocked_layers = set(self.get_equipment_blocked_layers(equipped))
+                if layer in equipped_blocked_layers or equipped_layer in blocked_layers:
+                    return False, f"{item.key} cannot be layered over what you are already wearing on your {slot}."
+
+        for slot in slots:
+            stack = list(equipment.get(slot) or [])
+            stack.append(item)
+            equipment[slot] = stack
+            self.sort_equipment_stack(slot)
 
         item.location = None
         item.db.worn_by = self
-        item.db.slot = slot
+        item.db.equipped_slots = list(slots)
         if getattr(item.db, "is_sheath", False) and not self.db.preferred_sheath:
             self.db.preferred_sheath = item
         self.sync_client_state()
@@ -13083,28 +14667,24 @@ class Character(ObjectParent, DefaultCharacter):
 
     def unequip_item(self, item):
         equipment = self.get_equipment()
+        removed = False
         for slot, equipped in equipment.items():
-            if self.is_multi_slot(slot):
-                if item in equipped:
-                    equipped.remove(item)
-                    item.location = self
-                    item.db.worn_by = None
-                    if self.db.preferred_sheath == item:
-                        self.db.preferred_sheath = None
-                    self.sync_client_state()
-                    return True, f"You remove {item.key}."
-                continue
+            stack = list(equipped or [])
+            while item in stack:
+                stack.remove(item)
+                removed = True
+            equipment[slot] = stack
 
-            if equipped == item:
-                equipment[slot] = None
-                item.location = self
-                item.db.worn_by = None
-                if self.db.preferred_sheath == item:
-                    self.db.preferred_sheath = None
-                self.sync_client_state()
-                return True, f"You remove {item.key}."
+        if not removed:
+            return False, "You are not wearing that."
 
-        return False, "You are not wearing that."
+        item.location = self
+        item.db.worn_by = None
+        item.db.equipped_slots = []
+        if self.db.preferred_sheath == item:
+            self.db.preferred_sheath = None
+        self.sync_client_state()
+        return True, f"You remove {item.key}."
 
     def get_worn_sheaths(self):
         self.ensure_core_defaults()
@@ -14525,17 +16105,309 @@ class Character(ObjectParent, DefaultCharacter):
             return self.get_wielded_weapon() if hasattr(self, "get_wielded_weapon") else self.get_weapon()
         return None
 
+    def _get_quiver_tier_rank(self, quiver):
+        tier_name = str(getattr(getattr(quiver, "db", None), "tier", None) or "average").strip().lower()
+        return self._get_tier_rank(tier_name)
+
+    def _set_quiver_ammo(self, quiver, stacks):
+        if quiver is None:
+            return []
+        normalized = merge_ammo_stacks(list(stacks or []))
+        quiver.db.contents = list(normalized)
+        return list(normalized)
+
+    def _migrate_legacy_quiver_state(self, quiver=None):
+        legacy_quiver = normalize_ammo_stack(getattr(self.db, "quiver", None))
+        if not legacy_quiver:
+            if hasattr(self.db, "quiver") and getattr(self.db, "quiver", None) is not None:
+                self.db.quiver = None
+            return None
+        if quiver is not None:
+            migrated = self._set_quiver_ammo(quiver, [*self.get_quiver_ammo(quiver), legacy_quiver])
+            self.db.quiver = None
+            return migrated
+        self.db.ammo_inventory = merge_ammo_stacks([*self.get_ammo_inventory(), legacy_quiver])
+        self.db.quiver = None
+        return self.get_ammo_inventory()
+
+    def get_equipped_quiver(self):
+        equipped = []
+        for stack in self.get_equipped_items_by_slot().values():
+            for item in list(stack or []):
+                if is_quiver(item):
+                    equipped.append(item)
+        if not equipped:
+            self._migrate_legacy_quiver_state(None)
+            return None
+        equipped.sort(
+            key=lambda item: (
+                self._get_quiver_tier_rank(item),
+                self.get_equipment_layer_priority(item),
+                str(getattr(item, "key", "") or "").lower(),
+            )
+        )
+        quiver = equipped[-1]
+        self._migrate_legacy_quiver_state(quiver)
+        return quiver
+
+    def get_quiver_ammo(self, quiver):
+        if quiver is None:
+            return []
+        raw_contents = getattr(getattr(quiver, "db", None), "contents", None)
+        stacks = []
+        if isinstance(raw_contents, Mapping):
+            stacks = [raw_contents]
+        elif isinstance(raw_contents, list):
+            stacks = list(raw_contents)
+        normalized = merge_ammo_stacks(stacks)
+        quiver.db.contents = list(normalized)
+        return list(normalized)
+
+    def get_quiver_capacity(self, quiver):
+        if quiver is None:
+            return 0
+        try:
+            return max(0, int(getattr(getattr(quiver, "db", None), "capacity", 0) or 0))
+        except (TypeError, ValueError):
+            return 0
+
+    def get_quiver_supported_ammo_type(self, quiver):
+        if quiver is None:
+            return ""
+        return str(getattr(getattr(quiver, "db", None), "ammo_type", None) or "arrow").strip().lower() or "arrow"
+
+    def store_ammo_in_quiver(self, quiver, ammo_stack):
+        stack = normalize_ammo_stack(ammo_stack)
+        if quiver is None or not stack:
+            return {}, stack
+        supported_ammo_type = self.get_quiver_supported_ammo_type(quiver)
+        if supported_ammo_type and str(stack.get("ammo_type") or "").strip().lower() != supported_ammo_type:
+            return {}, stack
+        capacity = self.get_quiver_capacity(quiver)
+        current_stacks = self.get_quiver_ammo(quiver)
+        used_capacity = sum(int(existing.get("quantity", 0) or 0) for existing in current_stacks)
+        remaining_capacity = max(0, capacity - used_capacity) if capacity > 0 else int(stack.get("quantity", 0) or 0)
+        stored_quantity = min(int(stack.get("quantity", 0) or 0), remaining_capacity)
+        if stored_quantity <= 0:
+            return {}, stack
+        stored_stack = dict(stack)
+        stored_stack["quantity"] = stored_quantity
+        updated_stacks = self._set_quiver_ammo(quiver, [*current_stacks, stored_stack])
+        remainder_quantity = max(0, int(stack.get("quantity", 0) or 0) - stored_quantity)
+        remainder = dict(stack)
+        remainder["quantity"] = remainder_quantity
+        return stored_stack, (remainder if remainder_quantity > 0 else {})
+
+    def consume_quiver_ammo(self, quiver, amount=1, weapon=None):
+        current_stacks = self.get_quiver_ammo(quiver)
+        if not current_stacks:
+            return {}, []
+        selected_index = None
+        for index, stack in enumerate(current_stacks):
+            if weapon is None or self.is_ammo_compatible_with_weapon(stack, weapon=weapon):
+                selected_index = index
+                break
+        if selected_index is None:
+            return {}, current_stacks
+        loaded_stack, remainder = split_ammo_stack(current_stacks[selected_index], amount)
+        updated_stacks = [stack for index, stack in enumerate(current_stacks) if index != selected_index]
+        if remainder:
+            updated_stacks.append(remainder)
+        return loaded_stack, self._set_quiver_ammo(quiver, updated_stacks)
+
+    def get_quiver(self):
+        quiver = self.get_equipped_quiver()
+        ammo_stacks = self.get_quiver_ammo(quiver)
+        return dict(ammo_stacks[0]) if ammo_stacks else None
+
+    def set_quiver(self, ammo_stack):
+        quiver = self.get_equipped_quiver()
+        self._set_quiver_ammo(quiver, [ammo_stack] if normalize_ammo_stack(ammo_stack) else [])
+        return self.get_quiver()
+
+    def get_loaded_ammo(self):
+        self.ensure_core_defaults()
+        loaded = normalize_ammo_stack(getattr(self.db, "loaded_ammo", None))
+        self.db.loaded_ammo = dict(loaded) if loaded else None
+        weapon = self.get_equipped_ranged_weapon()
+        if weapon:
+            weapon.db.ammo_loaded = bool(loaded)
+        return dict(loaded) if loaded else None
+
+    def set_loaded_ammo(self, ammo_stack):
+        loaded = normalize_ammo_stack(ammo_stack)
+        self.db.loaded_ammo = dict(loaded) if loaded else None
+        weapon = self.get_equipped_ranged_weapon()
+        if weapon:
+            weapon.db.ammo_loaded = bool(loaded)
+        return self.get_loaded_ammo()
+
+    def get_ammo_inventory(self):
+        self.ensure_core_defaults()
+        inventory = merge_ammo_stacks(getattr(self.db, "ammo_inventory", None) or [])
+        self.db.ammo_inventory = list(inventory)
+        return list(inventory)
+
+    def set_ammo_inventory(self, stacks):
+        self.db.ammo_inventory = merge_ammo_stacks(stacks)
+        return self.get_ammo_inventory()
+
+    def get_embedded_ammo(self):
+        self.ensure_core_defaults()
+        embedded = merge_ammo_stacks(getattr(self.db, "embedded_ammo", None) or [])
+        self.db.embedded_ammo = list(embedded)
+        return list(embedded)
+
+    def set_embedded_ammo(self, stacks):
+        self.db.embedded_ammo = merge_ammo_stacks(stacks)
+        return self.get_embedded_ammo()
+
+    def add_embedded_ammo(self, stacks):
+        self.db.embedded_ammo = merge_ammo_stacks([*self.get_embedded_ammo(), *list(stacks or [])])
+        return self.get_embedded_ammo()
+
+    def receive_ammo_stacks(self, stacks, prefer_quiver=True):
+        received = []
+        inventory = self.get_ammo_inventory()
+        quiver = self.get_equipped_quiver()
+        for raw in list(stacks or []):
+            stack = normalize_ammo_stack(raw)
+            if not stack:
+                continue
+            if prefer_quiver and quiver is not None:
+                stored, remainder = self.store_ammo_in_quiver(quiver, stack)
+                if stored:
+                    received.append(dict(stored))
+                if not remainder:
+                    continue
+                stack = normalize_ammo_stack(remainder)
+            inventory.append(stack)
+            received.append(dict(stack))
+        self.db.ammo_inventory = merge_ammo_stacks(inventory)
+        return merge_ammo_stacks(received)
+
+    def get_quiver_display_line(self):
+        quiver = self.get_equipped_quiver()
+        if quiver is None:
+            return "Quiver: none equipped"
+        ammo_stacks = self.get_quiver_ammo(quiver)
+        if not ammo_stacks:
+            return "Quiver (empty)"
+        total_quantity = sum(int(stack.get("quantity", 0) or 0) for stack in ammo_stacks)
+        if len(ammo_stacks) == 1:
+            return f"Quiver ({format_ammo_label(ammo_stacks[0], total_quantity)})"
+        return f"Quiver ({total_quantity} missiles)"
+
+    def get_loaded_ammo_display_line(self):
+        loaded = self.get_loaded_ammo()
+        if not loaded:
+            return "Loaded: empty"
+        weapon = self.get_equipped_ranged_weapon()
+        weapon_name = weapon.key if weapon else "weapon"
+        return f"{weapon_name} loaded with {format_ammo_label(loaded)}"
+
+    def get_ammo_inventory_display_lines(self):
+        inventory = self.get_ammo_inventory()
+        if not inventory:
+            return []
+        return [f"Ammo: {', '.join(format_ammo_label(stack) for stack in inventory)}"]
+
+    def get_held_ammo_items(self):
+        weapon = self.get_equipped_ranged_weapon()
+        held = []
+        for item in list(self.get_visible_carried_items()):
+            if item == weapon:
+                continue
+            if str(getattr(getattr(item, "db", None), "item_type", "") or "").strip().lower() != "ammunition":
+                continue
+            held.append(item)
+        return held
+
+    def get_ammo_stack_from_item(self, item, quantity=1):
+        if not item:
+            return {}
+        item_id = str(getattr(getattr(item, "db", None), "world_id", "") or "").strip().lower()
+        ammo_type = str(getattr(getattr(item, "db", None), "ammo_type", "arrow") or "arrow").strip().lower()
+        ammo_class = str(getattr(getattr(item, "db", None), "ammo_class", "") or "").strip().lower()
+        tier = str(getattr(getattr(item, "db", None), "tier", "") or "").strip().lower()
+        name = str(getattr(item, "key", "ammo") or "ammo").strip()
+        amount = max(0, int(quantity or 0))
+        if amount <= 0:
+            return {}
+        return {
+            "item_id": item_id or name.lower().replace(" ", "_"),
+            "quantity": amount,
+            "ammo_type": ammo_type,
+            "ammo_class": ammo_class,
+            "tier": tier,
+            "name": name,
+        }
+
+    def is_ammo_compatible_with_weapon(self, ammo_source, weapon=None):
+        weapon = weapon or self.get_equipped_ranged_weapon()
+        if not weapon:
+            return False
+        db_holder = getattr(ammo_source, "db", None)
+        ammo_type = str((getattr(db_holder, "ammo_type", None) if db_holder is not None else None) or (ammo_source.get("ammo_type") if isinstance(ammo_source, Mapping) else "") or "arrow").strip().lower()
+        ammo_class = str((getattr(db_holder, "ammo_class", None) if db_holder is not None else None) or (ammo_source.get("ammo_class") if isinstance(ammo_source, Mapping) else "") or "").strip().lower()
+        required_type = str(getattr(weapon.db, "ammo_type", "arrow") or "arrow").strip().lower()
+        if ammo_type != required_type:
+            return False
+        weapon_skill = str(getattr(weapon.db, "skill", "") or getattr(weapon.db, "weapon_type", "") or "").strip().lower()
+        if ammo_class and weapon_skill and ammo_class == weapon_skill:
+            return True
+        range_type = str(getattr(weapon.db, "weapon_range_type", "") or "").strip().lower()
+        if range_type == "crossbow":
+            return ammo_class in {"", "crossbow"}
+        if range_type == "bow":
+            return ammo_class in {"", "short_bow", "long_bow"}
+        return not ammo_class
+
+    def consume_held_ammo_item(self, item, quantity=1):
+        if not item:
+            return {}
+        total = max(0, int(getattr(getattr(item, "db", None), "quantity", 1) or 1))
+        requested = max(0, int(quantity or 0))
+        if requested <= 0 or total <= 0:
+            return {}
+        taken = min(total, requested)
+        ammo = self.get_ammo_stack_from_item(item, quantity=taken)
+        remaining = total - taken
+        if remaining > 0:
+            item.db.quantity = remaining
+        else:
+            item.delete()
+        return ammo
+
+    def resolve_loadable_ammo(self, weapon=None):
+        weapon = weapon or self.get_equipped_ranged_weapon()
+        if not weapon:
+            return None, None
+        for item in self.get_held_ammo_items():
+            if self.is_ammo_compatible_with_weapon(item, weapon=weapon):
+                return "held", item
+        quiver = self.get_equipped_quiver()
+        if quiver:
+            for stack in self.get_quiver_ammo(quiver):
+                if self.is_ammo_compatible_with_weapon(stack, weapon=weapon):
+                    return "quiver", quiver
+        return None, None
+
     def get_equipped_ammo_state(self):
         weapon = self.get_equipped_ranged_weapon()
         if not weapon:
             return None
+        loaded = self.get_loaded_ammo()
+        quiver = self.get_equipped_quiver()
         return {
-            "loaded": bool(getattr(weapon.db, "ammo_loaded", False)),
-            "ammo_type": str(getattr(weapon.db, "ammo_type", "arrow") or "arrow").strip().lower(),
+            "loaded": bool(loaded),
+            "ammo_type": str((loaded or {}).get("ammo_type") or self.get_quiver_supported_ammo_type(quiver) or getattr(weapon.db, "ammo_type", "arrow") or "arrow").strip().lower(),
+            "loaded_ammo": dict(loaded) if loaded else None,
             "weapon": weapon,
         }
 
     def load_ranged_weapon(self, weapon_name=""):
+        self.ensure_core_defaults()
         weapon = self.get_equipped_ranged_weapon()
         if weapon_name:
             weapon = self.search(weapon_name, candidates=[obj for obj in self.contents if getattr(obj.db, "item_type", None) == "weapon" or obj == weapon])
@@ -14543,19 +16415,65 @@ class Character(ObjectParent, DefaultCharacter):
                 return False, "You do not have that weapon."
         if not weapon or not (bool(getattr(weapon.db, "is_ranged", False)) or getattr(weapon.db, "weapon_range_type", None)):
             return False, "That weapon cannot be loaded."
-        if bool(getattr(weapon.db, "ammo_loaded", False)):
+        if self.get_loaded_ammo():
             return False, f"{weapon.key} is already loaded."
         if getattr(weapon.db, "ammo_type", None) is None:
             weapon.db.ammo_type = "arrow"
-        weapon.db.ammo_loaded = True
-        return True, f"You load {weapon.key}."
+        source_type, source = self.resolve_loadable_ammo(weapon)
+        if source_type == "held":
+            loaded = self.consume_held_ammo_item(source, 1)
+            if not loaded:
+                return False, "You fumble the ammunition and fail to load the weapon."
+        elif source_type == "quiver":
+            loaded, _remaining = self.consume_quiver_ammo(source, 1, weapon=weapon)
+            if not loaded:
+                return False, "Your quiver is empty."
+            ammo_name = str(loaded.get("ammo_type") or "arrow").strip().lower() or "arrow"
+        else:
+            if self.get_equipped_quiver() is None:
+                return False, "You have no compatible ammunition on hand and no quiver equipped."
+            return False, "You have no compatible ammunition on hand or in your quiver."
+        self.set_loaded_ammo(loaded)
+        if source_type == "quiver":
+            return True, f"You draw an {ammo_name} from your quiver and load {weapon.key}."
+        return True, f"You load {weapon.key} with {format_ammo_label(loaded)}."
 
     def consume_loaded_ammo(self):
-        weapon = self.get_equipped_ranged_weapon()
-        if not weapon or not bool(getattr(weapon.db, "ammo_loaded", False)):
-            return False
-        weapon.db.ammo_loaded = False
-        return True
+        loaded = self.get_loaded_ammo()
+        if not loaded:
+            return None
+        self.set_loaded_ammo(None)
+        return loaded
+
+    def pickup_room_ammo(self, query):
+        room = getattr(self, "location", None)
+        if not room or not hasattr(room, "get_loose_ammo"):
+            return False, ""
+        raw_query = str(query or "").strip()
+        if not raw_query:
+            return False, ""
+        quantity = None
+        target_query = raw_query
+        match = re.match(r"^(\d+)\s+(.+)$", raw_query)
+        if match:
+            quantity = max(0, int(match.group(1) or 0))
+            target_query = str(match.group(2) or "").strip()
+        stacks = room.get_loose_ammo()
+        index, stack = find_matching_ammo_stack(stacks, target_query)
+        if index < 0 or not stack:
+            return False, ""
+        requested = int(stack.get("quantity", 0) or 0) if quantity is None else quantity
+        picked_up, remainder = split_ammo_stack(stack, requested)
+        if not picked_up:
+            return False, ""
+        updated = list(stacks)
+        updated.pop(index)
+        if remainder:
+            updated.append(remainder)
+        room.set_loose_ammo(updated)
+        self.receive_ammo_stacks([picked_up], prefer_quiver=True)
+        self.sync_client_state()
+        return True, f"You pick up {format_ammo_label(picked_up)}."
 
     def get_ranger_aim_data(self):
         data = self.get_state("ranger_aiming")

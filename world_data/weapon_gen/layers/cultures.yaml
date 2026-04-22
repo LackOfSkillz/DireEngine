@@ -1,0 +1,43 @@
+jade_isles:
+  primary_styles:
+    - graceful
+    - curved
+  secondary_styles:
+    - lacquered
+    - refined
+  materials:
+    - bronze
+    - yew
+    - rayskin_wrap
+  embellishments:
+    - engraved
+    - wrapped
+
+highland_clans:
+  primary_styles:
+    - sturdy
+    - broad
+  secondary_styles:
+    - knotted
+    - weathered
+  materials:
+    - iron
+    - oak
+    - stag_horn
+  embellishments:
+    - wrapped
+
+frontier_marches:
+  primary_styles:
+    - practical
+    - spare
+  secondary_styles:
+    - balanced
+    - travel-worn
+  materials:
+    - steel
+    - ash
+    - leather_wrap
+  embellishments:
+    - none
+    - wrapped

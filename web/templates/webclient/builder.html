@@ -52,11 +52,13 @@
 
       <section class="ds-card section card builder-browser-panel builder-panel">
         <div class="panel-title-row">
-          <div class="panel-title">Rooms</div>
-          <div class="panel-subtitle">Room browser</div>
+          <div class="panel-title">World Tree</div>
+          <div class="panel-subtitle">Zone browser</div>
         </div>
-        <div class="builder-panel-note">Click a room to load it into the inspector and preview workspace.</div>
-        <div id="room-list"></div>
+        <div class="builder-panel-note">Expand a zone, then open Rooms to load a room into the inspector and map workspace.</div>
+        <div id="world-tree">
+          <div id="room-list"></div>
+        </div>
       </section>
     </aside>
 
@@ -66,6 +68,17 @@
           <div class="panel-title">Room Editor</div>
           <div class="panel-subtitle" id="builder-current-room">No room selected</div>
         </div>
+        <div class="builder-field">
+          <span class="builder-label">Selected Node</span>
+          <div id="builder-selected-node-title">No selection</div>
+        </div>
+        <section id="builder-node-placeholder" class="builder-subsection builder-field" hidden>
+          <div class="panel-title-row">
+            <div class="panel-title" id="builder-node-placeholder-title">Selection Placeholder</div>
+            <div class="panel-subtitle" id="builder-node-placeholder-type">Select a room to edit.</div>
+          </div>
+          <div id="builder-node-placeholder-body" class="builder-panel-note"></div>
+        </section>
         <section id="review-editor" class="builder-subsection builder-field" hidden>
           <div class="panel-title-row">
             <div class="panel-title">Review Editor</div>
@@ -104,6 +117,245 @@
             </div>
           </section>
         </section>
+        <section id="npc-editor-panel" class="builder-subsection builder-field" hidden>
+          <div class="panel-title-row">
+            <div class="panel-title">NPC Editor</div>
+            <div class="panel-subtitle" id="builder-current-npc">No NPC selected</div>
+          </div>
+          <div id="npc-editor-status" class="builder-panel-note">Select an NPC from the tree to edit.</div>
+          <div id="npc-form-errors" class="npc-form-errors" hidden></div>
+          <div class="builder-field">
+            <span class="builder-label">NPC Id</span>
+            <div id="npc-id-display">No NPC selected</div>
+          </div>
+          <section class="npc-section is-open" data-npc-section="general">
+            <button type="button" class="npc-section-header" data-npc-section-toggle="general" aria-expanded="true">
+              <span class="npc-section-title">🧾 General</span>
+              <span class="npc-section-chevron">▾</span>
+            </button>
+            <div class="npc-section-body">
+              <label class="builder-field" for="npc-name">
+                <span class="builder-label">Name</span>
+                <input id="npc-name" type="text" autocomplete="off">
+                <div class="npc-field-error" data-field-error-for="npc-name"></div>
+              </label>
+              <label class="builder-field" for="npc-type">
+                <span class="builder-label">Type</span>
+                <select id="npc-type">
+                  <option value="hostile">hostile</option>
+                  <option value="neutral">neutral</option>
+                  <option value="vendor">vendor</option>
+                </select>
+                <div class="npc-field-help" id="npc-type-help">Type is locked after creation.</div>
+                <div class="npc-field-error" data-field-error-for="npc-type"></div>
+              </label>
+            </div>
+          </section>
+          <section class="npc-section" data-npc-section="stats">
+            <button type="button" class="npc-section-header" data-npc-section-toggle="stats" aria-expanded="false">
+              <span class="npc-section-title">⚔️ Stats</span>
+              <span class="npc-section-chevron">▸</span>
+            </button>
+            <div class="npc-section-body" hidden>
+              <div class="action-row builder-browser-actions npc-grid-two">
+                <label class="builder-field" for="npc-level">
+                  <span class="builder-label">Level</span>
+                  <input id="npc-level" type="number" min="1" step="1" value="1">
+                  <div class="npc-field-error" data-field-error-for="npc-level"></div>
+                </label>
+                <label class="builder-field" for="npc-health">
+                  <span class="builder-label">Health</span>
+                  <input id="npc-health" type="number" min="0" step="1" value="1">
+                  <div class="npc-field-error" data-field-error-for="npc-health"></div>
+                </label>
+              </div>
+              <div class="action-row builder-browser-actions npc-grid-two">
+                <label class="builder-field" for="npc-attack">
+                  <span class="builder-label">Attack</span>
+                  <input id="npc-attack" type="number" min="0" step="1" value="0">
+                  <div class="npc-field-error" data-field-error-for="npc-attack"></div>
+                </label>
+                <label class="builder-field" for="npc-defense">
+                  <span class="builder-label">Defense</span>
+                  <input id="npc-defense" type="number" min="0" step="1" value="0">
+                  <div class="npc-field-error" data-field-error-for="npc-defense"></div>
+                </label>
+              </div>
+            </div>
+          </section>
+          <section class="npc-section" data-npc-section="behavior">
+            <button type="button" class="npc-section-header" data-npc-section-toggle="behavior" aria-expanded="false">
+              <span class="npc-section-title">🧠 Behavior</span>
+              <span class="npc-section-chevron">▸</span>
+            </button>
+            <div class="npc-section-body" hidden>
+              <label class="builder-field npc-checkbox-field" for="npc-aggressive">
+                <span class="builder-label">Aggressive</span>
+                <input type="checkbox" id="npc-aggressive">
+                <div class="npc-field-error" data-field-error-for="npc-aggressive"></div>
+              </label>
+              <label class="builder-field npc-checkbox-field" for="npc-roam">
+                <span class="builder-label">Roam</span>
+                <input type="checkbox" id="npc-roam">
+              </label>
+              <label class="builder-field npc-checkbox-field" for="npc-assist">
+                <span class="builder-label">Assist</span>
+                <input type="checkbox" id="npc-assist">
+              </label>
+            </div>
+          </section>
+          <section class="npc-section" data-npc-section="vendor">
+            <button type="button" class="npc-section-header" data-npc-section-toggle="vendor" aria-expanded="false">
+              <span class="npc-section-title">💰 Vendor</span>
+              <span class="npc-section-chevron">▸</span>
+            </button>
+            <div class="npc-section-body" hidden>
+              <label class="builder-field npc-checkbox-field" for="npc-vendor-enabled">
+                <span class="builder-label">Vendor Enabled</span>
+                <input type="checkbox" id="npc-vendor-enabled">
+              </label>
+            </div>
+          </section>
+          <section class="npc-section" data-npc-section="dialogue">
+            <button type="button" class="npc-section-header" data-npc-section-toggle="dialogue" aria-expanded="false">
+              <span class="npc-section-title">💬 Dialogue</span>
+              <span class="npc-section-chevron">▸</span>
+            </button>
+            <div class="npc-section-body" hidden>
+              <label class="builder-field" for="npc-greeting">
+                <span class="builder-label">Greeting</span>
+                <textarea id="npc-greeting"></textarea>
+              </label>
+              <label class="builder-field" for="npc-idle">
+                <span class="builder-label">Idle Lines</span>
+                <textarea id="npc-idle" class="builder-compact-textarea"></textarea>
+              </label>
+            </div>
+          </section>
+          <div class="action-row builder-browser-actions">
+            <button id="save-npc" type="button">Save NPC</button>
+            <button id="delete-npc" type="button">Delete NPC</button>
+          </div>
+        </section>
+        <section id="item-editor-panel" class="builder-subsection builder-field" hidden>
+          <div class="panel-title-row">
+            <div class="panel-title">Item Editor</div>
+            <div class="panel-subtitle" id="builder-current-item">No item selected</div>
+          </div>
+          <div id="item-editor-status" class="builder-panel-note">Select an item from the tree to edit.</div>
+          <div id="item-form-errors" class="npc-form-errors" hidden></div>
+          <div class="builder-field">
+            <span class="builder-label">Item Id</span>
+            <div id="item-id-display">No item selected</div>
+          </div>
+          <section class="npc-section is-open" data-item-section="general">
+            <button type="button" class="npc-section-header" data-item-section-toggle="general" aria-expanded="true">
+              <span class="npc-section-title">📦 General</span>
+              <span class="npc-section-chevron">▾</span>
+            </button>
+            <div class="npc-section-body">
+              <label class="builder-field" for="item-name">
+                <span class="builder-label">Name</span>
+                <input id="item-name" type="text" autocomplete="off">
+                <div class="npc-field-error" data-item-field-error-for="item-name"></div>
+              </label>
+              <label class="builder-field" for="item-category">
+                <span class="builder-label">Category</span>
+                <select id="item-category">
+                  <option value="weapon">weapon</option>
+                  <option value="armor">armor</option>
+                  <option value="consumable">consumable</option>
+                  <option value="clothing">clothing</option>
+                  <option value="jewelry">jewelry</option>
+                  <option value="furniture">furniture</option>
+                  <option value="container">container</option>
+                  <option value="misc">misc</option>
+                </select>
+                <div class="npc-field-error" data-item-field-error-for="item-category"></div>
+              </label>
+              <div class="action-row builder-browser-actions npc-grid-two">
+                <label class="builder-field" for="item-value">
+                  <span class="builder-label">Value</span>
+                  <input id="item-value" type="number" min="0" step="1" value="0">
+                  <div class="npc-field-error" data-item-field-error-for="item-value"></div>
+                </label>
+                <label class="builder-field" for="item-weight">
+                  <span class="builder-label">Weight</span>
+                  <input id="item-weight" type="number" min="0.01" step="0.1" value="1.0">
+                  <div class="npc-field-error" data-item-field-error-for="item-weight"></div>
+                </label>
+              </div>
+              <label class="builder-field npc-checkbox-field" for="item-stackable">
+                <span class="builder-label">Stackable</span>
+                <input type="checkbox" id="item-stackable">
+              </label>
+            </div>
+          </section>
+          <section class="npc-section" data-item-section="equipment">
+            <button type="button" class="npc-section-header" data-item-section-toggle="equipment" aria-expanded="false">
+              <span class="npc-section-title">🛡️ Equipment</span>
+              <span class="npc-section-chevron">▸</span>
+            </button>
+            <div class="npc-section-body" hidden>
+              <label class="builder-field" for="item-slot">
+                <span class="builder-label">Equipment Slot</span>
+                <select id="item-slot">
+                  <option value="none">none</option>
+                  <option value="head">head</option>
+                  <option value="chest">chest</option>
+                  <option value="legs">legs</option>
+                  <option value="hands">hands</option>
+                  <option value="weapon">weapon</option>
+                  <option value="offhand">offhand</option>
+                  <option value="accessory">accessory</option>
+                </select>
+              </label>
+              <div class="action-row builder-browser-actions npc-grid-two">
+                <label class="builder-field" for="item-attack">
+                  <span class="builder-label">Attack</span>
+                  <input id="item-attack" type="number" min="0" step="1" value="0">
+                </label>
+                <label class="builder-field" for="item-defense">
+                  <span class="builder-label">Defense</span>
+                  <input id="item-defense" type="number" min="0" step="1" value="0">
+                </label>
+              </div>
+            </div>
+          </section>
+          <section class="npc-section" data-item-section="consumable">
+            <button type="button" class="npc-section-header" data-item-section-toggle="consumable" aria-expanded="false">
+              <span class="npc-section-title">🧪 Consumable</span>
+              <span class="npc-section-chevron">▸</span>
+            </button>
+            <div class="npc-section-body" hidden>
+              <label class="builder-field" for="item-effect">
+                <span class="builder-label">Effect</span>
+                <input id="item-effect" type="text" autocomplete="off">
+              </label>
+              <label class="builder-field" for="item-duration">
+                <span class="builder-label">Duration</span>
+                <input id="item-duration" type="number" min="0" step="1" value="0">
+              </label>
+            </div>
+          </section>
+          <section class="npc-section" data-item-section="container">
+            <button type="button" class="npc-section-header" data-item-section-toggle="container" aria-expanded="false">
+              <span class="npc-section-title">🗃️ Container</span>
+              <span class="npc-section-chevron">▸</span>
+            </button>
+            <div class="npc-section-body" hidden>
+              <label class="builder-field" for="item-capacity">
+                <span class="builder-label">Capacity</span>
+                <input id="item-capacity" type="number" min="0" step="1" value="0">
+              </label>
+            </div>
+          </section>
+          <div class="action-row builder-browser-actions">
+            <button id="save-item" type="button">Save Item</button>
+            <button id="delete-item" type="button">Delete Item</button>
+          </div>
+        </section>
+        <div id="room-editor-fields">
         <label class="builder-field" for="room-name">
           <span class="builder-label">Name</span>
           <input id="room-name" type="text" autocomplete="off">
@@ -192,6 +444,32 @@
           <span class="builder-label">Zone</span>
           <select id="room-zone"></select>
         </label>
+        <section class="builder-subsection builder-field" id="room-npcs-section">
+          <div class="panel-title-row">
+            <div class="panel-title">Assigned NPCs</div>
+            <div class="panel-subtitle">Drop an NPC on the map or assign one here</div>
+          </div>
+          <div id="room-assigned-npc-list" class="builder-kv-list"></div>
+          <div id="room-assigned-npc-empty" class="builder-field-help">No NPCs assigned to this room.</div>
+          <label class="builder-field" for="room-assigned-npc-select">
+            <span class="builder-label">Add NPC</span>
+            <select id="room-assigned-npc-select"></select>
+          </label>
+          <button id="room-assign-npc" type="button">Assign NPC</button>
+        </section>
+        <section class="builder-subsection builder-field" id="room-items-section">
+          <div class="panel-title-row">
+            <div class="panel-title">Assigned Items</div>
+            <div class="panel-subtitle">Drop an item on the map or add it here</div>
+          </div>
+          <div id="room-assigned-item-list" class="builder-kv-list"></div>
+          <div id="room-assigned-item-empty" class="builder-field-help">No items assigned to this room.</div>
+          <label class="builder-field" for="room-assigned-item-select">
+            <span class="builder-label">Add Item</span>
+            <select id="room-assigned-item-select"></select>
+          </label>
+          <button id="room-assign-item" type="button">Add Item</button>
+        </section>
         <div class="action-row builder-browser-actions">
           <label class="builder-field" for="room-map-x">
             <span class="builder-label">Map X</span>
@@ -241,6 +519,7 @@
         <div class="action-row">
           <button id="save-room" type="button">Apply Room</button>
           <button id="delete-room" type="button">Delete Room</button>
+        </div>
         </div>
       </section>
     </main>
@@ -338,6 +617,6 @@
 
 {% block scripts %}
 <link rel="stylesheet" href="/static/webclient/js/builder-reactflow.css?v=2">
-<script src="/static/webclient/js/builder-reactflow.js?v=4"></script>
-<script src="/static/webclient/js/dragonsire-browser-v2.js?v=55"></script>
+<script src="/static/webclient/js/builder-reactflow.js?v=6"></script>
+<script src="/static/webclient/js/dragonsire-browser-v2.js?v=61"></script>
 {% endblock %}

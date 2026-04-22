@@ -2057,7 +2057,18 @@ def at_server_init():
     """
     This is called first as the server is starting up, regardless of how.
     """
-    pass
+    try:
+        from server.systems.loot import reload_loot_tables
+
+        reload_loot_tables()
+    except Exception as error:
+        logger.log_err(f"Loot table preload failed during at_server_init: {error}")
+    try:
+        from server.systems.vendor_profiles import reload_vendor_profiles
+
+        reload_vendor_profiles()
+    except Exception as error:
+        logger.log_err(f"Vendor profile preload failed during at_server_init: {error}")
 
 
 def at_server_start():

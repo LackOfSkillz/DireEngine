@@ -1,0 +1,29 @@
+id: bastion_war_mace
+name: Bastion War Mace
+category: weapon
+weapon_class: heavy_blunt
+tags:
+  - martial
+  - paladin
+level_band:
+  min: 2
+  max: 10
+value: 30
+weight: 3.2
+stackable: false
+max_stack: 1
+equipment:
+  slot: weapon
+  attack: 5
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a bastion war mace
+  long: A bastion war mace rests here with a thick steel head.
+meta:
+  source: vendor_specialization
+  imported_at: '2026-04-21'

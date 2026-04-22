@@ -1,0 +1,33 @@
+id: coil_of_rope
+name: Coil of Rope
+category: misc
+tier: average
+utility_category: tools
+functional_type: rope
+tool_type: utility
+durability: 20
+tags:
+  - utility
+  - climbing
+level_band:
+  min: 1
+  max: 12
+value: 5
+weight: 1.5
+stackable: false
+max_stack: 1
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a coil of rope
+  long: A coil of plain rope with enough life left in it to stay useful.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

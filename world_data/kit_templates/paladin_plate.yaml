@@ -1,0 +1,18 @@
+id: paladin_plate
+armor_class: plate_armor
+theme_tags:
+  - paladin
+  - martial
+required_slots:
+  - head
+  - chest
+  - hands
+  - legs
+  - feet
+optional_slots:
+  - shield
+  - shoulders
+tier_bias:
+  average: 0.45
+  above_average: 0.35
+  exquisite: 0.20

@@ -5,6 +5,10 @@ import logging
 from django.http import JsonResponse
 from evennia.utils.search import search_object
 
+from server.systems import item_loader
+from server.systems import npc_loader
+from server.systems import zone_room_item_assignments
+from server.systems import zone_room_npc_assignments
 from web.character_helpers import parse_request_data
 from world.builder.capabilities import builder_ready
 from world.builder.permissions import require_builder
@@ -616,6 +620,226 @@ def update_room(request, room_id):
     except ValueError as exc:
         return _failure(str(exc), status=400)
     return _success({"room": room_service.normalize_room(updated)})
+
+
+def assign_room_npc(request):
+    unavailable = _require_builder_api()
+    if unavailable is not None:
+        return unavailable
+    denied = _require_builder_permission(request)
+    if denied is not None:
+        return denied
+
+    payload = parse_request_data(request)
+    room_id = str(payload.get("room_id") or "").strip()
+    zone_id = str(payload.get("zone_id") or "").strip()
+    npc_id = str(payload.get("npc_id") or "").strip()
+    if not room_id:
+        return _failure("room_id is required", status=400)
+    if not npc_id:
+        return _failure("npc_id is required", status=400)
+
+    npc_records = npc_loader.load_all_npcs()
+    if npc_id not in npc_records:
+        return _failure("invalid npc_id", status=404)
+
+    try:
+        zone_payload, room_payload = zone_room_npc_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_npc_ids = list(room_payload.get("npcs") or [])
+        if npc_id not in next_npc_ids:
+            next_npc_ids.append(npc_id)
+        updated_zone, updated_room = zone_room_npc_assignments.update_room_npcs(
+            room_id,
+            next_npc_ids,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        return _failure(str(exc), status=404)
+
+    return _success({"zone": updated_zone, "room": updated_room, "npc": npc_records.get(npc_id)})
+
+
+def remove_room_npc(request):
+    unavailable = _require_builder_api()
+    if unavailable is not None:
+        return unavailable
+    denied = _require_builder_permission(request)
+    if denied is not None:
+        return denied
+
+    payload = parse_request_data(request)
+    room_id = str(payload.get("room_id") or "").strip()
+    zone_id = str(payload.get("zone_id") or "").strip()
+    npc_id = str(payload.get("npc_id") or "").strip()
+    if not room_id:
+        return _failure("room_id is required", status=400)
+    if not npc_id:
+        return _failure("npc_id is required", status=400)
+
+    try:
+        zone_payload, room_payload = zone_room_npc_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_npc_ids = [candidate for candidate in list(room_payload.get("npcs") or []) if candidate != npc_id]
+        updated_zone, updated_room = zone_room_npc_assignments.update_room_npcs(
+            room_id,
+            next_npc_ids,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        return _failure(str(exc), status=404)
+
+    return _success({"zone": updated_zone, "room": updated_room, "removed_npc_id": npc_id})
+
+
+def assign_item_to_room(request):
+    unavailable = _require_builder_api()
+    if unavailable is not None:
+        return unavailable
+    denied = _require_builder_permission(request)
+    if denied is not None:
+        return denied
+
+    payload = parse_request_data(request)
+    room_id = str(payload.get("room_id") or "").strip()
+    zone_id = str(payload.get("zone_id") or "").strip()
+    item_id = str(payload.get("item_id") or "").strip()
+    count = int(payload.get("count") or 0)
+    if not room_id:
+        return _failure("room_id is required", status=400)
+    if not item_id:
+        return _failure("item_id is required", status=400)
+    if count <= 0:
+        return _failure("count must be greater than 0", status=400)
+
+    item_records = item_loader.load_all_items()
+    item_record = item_records.get(item_id)
+    if item_record is None:
+        return _failure("invalid item_id", status=404)
+
+    try:
+        zone_payload, room_payload = zone_room_item_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_items = list(room_payload.get("items") or [])
+        merged = False
+        for entry in next_items:
+            if str((entry or {}).get("id") or "").strip() != item_id:
+                continue
+            entry["count"] = max(0, int(entry.get("count") or 0)) + count
+            merged = True
+            break
+        if not merged:
+            next_entry = {"id": item_id, "count": count}
+            if str(item_record.get("category") or "").strip().lower() == "container":
+                next_entry["items"] = []
+            next_items.append(next_entry)
+        updated_zone, updated_room = zone_room_item_assignments.update_room_items(
+            room_id,
+            next_items,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        return _failure(str(exc), status=404)
+
+    return _success({"zone": updated_zone, "room": updated_room, "item": item_record})
+
+
+def remove_item_from_room(request):
+    unavailable = _require_builder_api()
+    if unavailable is not None:
+        return unavailable
+    denied = _require_builder_permission(request)
+    if denied is not None:
+        return denied
+
+    payload = parse_request_data(request)
+    room_id = str(payload.get("room_id") or "").strip()
+    zone_id = str(payload.get("zone_id") or "").strip()
+    item_id = str(payload.get("item_id") or "").strip()
+    count = int(payload.get("count") or 1)
+    if not room_id:
+        return _failure("room_id is required", status=400)
+    if not item_id:
+        return _failure("item_id is required", status=400)
+    if count <= 0:
+        return _failure("count must be greater than 0", status=400)
+
+    try:
+        zone_payload, room_payload = zone_room_item_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_items = []
+        found_item = False
+        for entry in list(room_payload.get("items") or []):
+            normalized_entry = dict(entry or {})
+            if str(normalized_entry.get("id") or "").strip() != item_id:
+                next_items.append(normalized_entry)
+                continue
+            found_item = True
+            next_count = max(0, int(normalized_entry.get("count") or 0) - count)
+            if next_count > 0:
+                normalized_entry["count"] = next_count
+                next_items.append(normalized_entry)
+        if not found_item:
+            return _failure("item not assigned to room", status=404)
+        updated_zone, updated_room = zone_room_item_assignments.update_room_items(
+            room_id,
+            next_items,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        return _failure(str(exc), status=404)
+
+    return _success({"zone": updated_zone, "room": updated_room, "removed_item_id": item_id, "count": count})
+
+
+def update_room_item_count(request):
+    unavailable = _require_builder_api()
+    if unavailable is not None:
+        return unavailable
+    denied = _require_builder_permission(request)
+    if denied is not None:
+        return denied
+
+    payload = parse_request_data(request)
+    room_id = str(payload.get("room_id") or "").strip()
+    zone_id = str(payload.get("zone_id") or "").strip()
+    item_id = str(payload.get("item_id") or "").strip()
+    count = int(payload.get("count") or 0)
+    if not room_id:
+        return _failure("room_id is required", status=400)
+    if not item_id:
+        return _failure("item_id is required", status=400)
+    if count < 0:
+        return _failure("count cannot be negative", status=400)
+
+    item_records = item_loader.load_all_items()
+    item_record = item_records.get(item_id)
+    if item_record is None:
+        return _failure("invalid item_id", status=404)
+
+    try:
+        zone_payload, room_payload = zone_room_item_assignments.resolve_builder_zone_room(room_id, zone_id=zone_id)
+        next_items = []
+        found_item = False
+        for entry in list(room_payload.get("items") or []):
+            normalized_entry = dict(entry or {})
+            if str(normalized_entry.get("id") or "").strip() != item_id:
+                next_items.append(normalized_entry)
+                continue
+            found_item = True
+            if count > 0:
+                normalized_entry["count"] = count
+                next_items.append(normalized_entry)
+        if not found_item and count > 0:
+            next_entry = {"id": item_id, "count": count}
+            if str(item_record.get("category") or "").strip().lower() == "container":
+                next_entry["items"] = []
+            next_items.append(next_entry)
+        updated_zone, updated_room = zone_room_item_assignments.update_room_items(
+            room_id,
+            next_items,
+            zone_id=zone_payload.get("zone_id") or zone_id,
+        )
+    except ValueError as exc:
+        return _failure(str(exc), status=404)
+
+    return _success({"zone": updated_zone, "room": updated_room, "item": item_record, "count": count})
 
 
 def create_exit(request):

@@ -1,0 +1,30 @@
+id: tower_shield
+name: Tower shield
+category: armor
+armor_class: plate_armor
+armor_slot: shield
+layer: shield
+tier: above_average
+tags: []
+level_band:
+  min: 1
+  max: 10
+value: 52
+weight: 5.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: shield
+  attack: 0
+  defense: 6
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a tower shield
+  long: A tower shield lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

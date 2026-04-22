@@ -1,0 +1,33 @@
+id: miners_pick
+name: Miner's Pick
+category: misc
+tier: average
+utility_category: mining
+functional_type: mining_tool
+tool_type: mining
+durability: 30
+tags:
+  - mining
+  - utility
+level_band:
+  min: 1
+  max: 12
+value: 20
+weight: 3.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a miner's pick
+  long: A practical pick built for stone and stubborn earth rather than war.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

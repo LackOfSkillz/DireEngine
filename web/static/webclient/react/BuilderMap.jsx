@@ -8,6 +8,8 @@ import { BuilderToolbar } from './builder/BuilderToolbar.tsx';
 function BuilderBridge({ bridgeApi = null }) {
   const {
     deleteSelectedEdge,
+    updateRoomItemEntries,
+    updateRoomNpcIds,
     updateSelectedEdge,
     updateSelectedRoomColor,
   } = useBuilderStore();
@@ -20,6 +22,12 @@ function BuilderBridge({ bridgeApi = null }) {
     bridgeApi.setSelectedRoomColor = (color) => {
       updateSelectedRoomColor(String(color || 'standard'));
     };
+    bridgeApi.setRoomNpcIds = (roomId, npcIds) => {
+      updateRoomNpcIds(String(roomId || ''), Array.isArray(npcIds) ? npcIds : []);
+    };
+    bridgeApi.setRoomItemEntries = (roomId, itemEntries) => {
+      updateRoomItemEntries(String(roomId || ''), Array.isArray(itemEntries) ? itemEntries : []);
+    };
     bridgeApi.updateSelectedEdge = (updates) => {
       updateSelectedEdge(updates || {});
     };
@@ -29,10 +37,12 @@ function BuilderBridge({ bridgeApi = null }) {
 
     return () => {
       delete bridgeApi.setSelectedRoomColor;
+      delete bridgeApi.setRoomNpcIds;
+      delete bridgeApi.setRoomItemEntries;
       delete bridgeApi.updateSelectedEdge;
       delete bridgeApi.deleteSelectedEdge;
     };
-  }, [bridgeApi, deleteSelectedEdge, updateSelectedEdge, updateSelectedRoomColor]);
+  }, [bridgeApi, deleteSelectedEdge, updateRoomItemEntries, updateRoomNpcIds, updateSelectedEdge, updateSelectedRoomColor]);
 
   return null;
 }
@@ -57,6 +67,8 @@ function normalizeInitialRooms(zonePrefix, rooms = []) {
         }
         return accumulator;
       }, {}),
+      npcIds: Array.isArray(room?.npcs) ? room.npcs.map((npcId) => String(npcId || '')).filter(Boolean) : [],
+      itemEntries: Array.isArray(room?.items) ? room.items.map((entry) => ({ ...entry })) : [],
       color: String(room?.color || 'standard'),
     };
   });
@@ -67,6 +79,11 @@ export default function BuilderMap({
   zonePrefix = 'ZONE',
   selectedRoomId = null,
   viewportRequest = null,
+  npcCatalog = {},
+  onAssignNpcToRoom,
+  onRemoveNpcFromRoom,
+  onAssignItemToRoom,
+  onRoomActivate,
   onBuilderStateChange,
   bridgeApi = null,
 }) {
@@ -90,6 +107,8 @@ export default function BuilderMap({
           };
           return accumulator;
         }, {}),
+        npcIds: Array.isArray(room.npcIds) ? room.npcIds.slice() : [],
+        items: Array.isArray(room.itemEntries) ? room.itemEntries.map((entry) => ({ ...entry })) : [],
         color: room.color || 'standard',
         meta: { ...(room.meta || {}) },
       }));
@@ -126,7 +145,14 @@ export default function BuilderMap({
       >
         <BuilderBridge bridgeApi={bridgeApi} />
         <BuilderToolbar />
-        <BuilderCanvas viewportRequest={viewportRequest} />
+        <BuilderCanvas
+          viewportRequest={viewportRequest}
+          npcCatalog={npcCatalog}
+          onAssignNpcToRoom={onAssignNpcToRoom}
+          onRemoveNpcFromRoom={onRemoveNpcFromRoom}
+          onAssignItemToRoom={onAssignItemToRoom}
+          onRoomActivate={onRoomActivate}
+        />
       </BuilderStoreProvider>
     </div>
   );

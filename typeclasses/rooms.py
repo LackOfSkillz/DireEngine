@@ -14,6 +14,7 @@ from django.utils.text import slugify
 from evennia.objects.objects import DefaultRoom
 from evennia.utils.search import search_object
 from evennia.utils.utils import iter_to_str
+from server.systems.ammo_runtime import format_ammo_label, merge_ammo_stacks
 from world.law import LAW_NONE, LAW_STANDARD
 from world.systems.ranger import (
     TRAIL_DECAY_SECONDS,
@@ -92,8 +93,28 @@ class Room(ObjectParent, DefaultRoom):
         self.db.npc_boundary = False
         self.db.fishable = False
         self.db.fish_group = "River 1"
+        self.db.loose_ammo = []
         if self.db.zone_id is None:
             LOGGER.warning("Room %s created without zone_id; defaulting to default_region.", self.key)
+
+    def get_loose_ammo(self):
+        ammo = merge_ammo_stacks(getattr(self.db, "loose_ammo", None) or [])
+        self.db.loose_ammo = list(ammo)
+        return list(ammo)
+
+    def set_loose_ammo(self, stacks):
+        self.db.loose_ammo = merge_ammo_stacks(stacks)
+        return self.get_loose_ammo()
+
+    def add_loose_ammo(self, stacks):
+        self.db.loose_ammo = merge_ammo_stacks([*self.get_loose_ammo(), *list(stacks or [])])
+        return self.get_loose_ammo()
+
+    def get_loose_ammo_display_lines(self):
+        stacks = self.get_loose_ammo()
+        if not stacks:
+            return []
+        return [f"There {'is' if len(stacks) == 1 and int(stacks[0].get('quantity', 0) or 0) == 1 else 'are'} {', '.join(format_ammo_label(stack) for stack in stacks)} on the ground."]
 
     def is_bank_room(self):
         if bool(getattr(self.db, "is_bank", False)):
@@ -385,7 +406,13 @@ class Room(ObjectParent, DefaultRoom):
         if not visible:
             return ""
 
-        names = ", ".join(obj.get_display_name(looker, **kwargs) for obj in visible)
+        rendered = []
+        for obj in visible:
+            name = obj.get_display_name(looker, **kwargs)
+            hint = str(obj.get_interaction_hint(looker) if hasattr(obj, "get_interaction_hint") else "" or "").strip()
+            rendered.append(f"{name} {hint}".strip())
+
+        names = ", ".join(rendered)
         return f"Characters: {names}"
 
     def get_display_exits(self, looker, **kwargs):
@@ -550,6 +577,7 @@ class Room(ObjectParent, DefaultRoom):
                 ranger_lines = list(looker.get_ranger_room_render_lines(self) or [])
             except Exception:
                 ranger_lines = []
+        ammo_lines = self.get_loose_ammo_display_lines() if looker and getattr(looker, "location", None) == self else []
         actions = self.get_display_actions(looker, **kwargs)
-        parts = [part for part in [parent_footer, *aftermath_lines, *prestige_lines, *ranger_lines, actions] if part]
+        parts = [part for part in [parent_footer, *aftermath_lines, *prestige_lines, *ranger_lines, *ammo_lines, actions] if part]
         return "\n".join(parts)

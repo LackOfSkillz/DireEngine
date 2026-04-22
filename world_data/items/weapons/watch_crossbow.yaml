@@ -1,0 +1,29 @@
+id: watch_crossbow
+name: Watch Crossbow
+category: weapon
+weapon_class: crossbow
+tags:
+  - martial
+  - guard
+level_band:
+  min: 1
+  max: 10
+value: 27
+weight: 2.4
+stackable: false
+max_stack: 1
+equipment:
+  slot: weapon
+  attack: 4
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a watch crossbow
+  long: A watch crossbow rests here with a compact steel prod.
+meta:
+  source: vendor_specialization
+  imported_at: '2026-04-21'

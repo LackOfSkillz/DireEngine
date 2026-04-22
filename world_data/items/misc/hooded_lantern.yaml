@@ -1,0 +1,33 @@
+id: hooded_lantern
+name: Hooded Lantern
+category: misc
+tier: average
+utility_category: survival_gear
+functional_type: light_source
+tool_type: survival
+durability: 16
+tags:
+  - utility
+  - travel
+level_band:
+  min: 1
+  max: 12
+value: 14
+weight: 1.1
+stackable: false
+max_stack: 1
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a hooded lantern
+  long: A travel lantern with a sliding hood to keep the light controlled in wind and rain.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

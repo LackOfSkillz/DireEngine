@@ -12,6 +12,8 @@ from django.views.decorators.http import require_http_methods
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_object
 
+from server.systems.zone_room_npc_assignments import normalize_builder_reference_ids
+from server.systems.zone_room_item_assignments import normalize_room_item_entries
 from web.character_helpers import parse_request_data
 from world.area_forge import map_api
 from world.area_forge.paths import artifact_paths
@@ -244,6 +246,8 @@ def _normalize_builder_yaml_room(room_data, fallback_index=0):
             ],
         },
         "environment": str(room_data.get("environment") or "city").strip().lower() or "city",
+        "npcs": normalize_builder_reference_ids(room_data.get("npcs") or []),
+        "items": normalize_room_item_entries(room_data.get("items") or []),
         "zone_id": "",
         "map": {
             "x": _coerce_optional_map_coordinate(room_map.get("x", room_data.get("map_x", room_data.get("x")))),

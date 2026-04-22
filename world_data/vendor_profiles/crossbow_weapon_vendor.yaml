@@ -1,0 +1,19 @@
+id: crossbow_weapon_vendor
+category: weapon
+level_band:
+  min: 1
+  max: 10
+stock_count: 2
+allowed_weapon_classes:
+  - crossbow
+preferred_weapon_classes:
+  crossbow: 1.0
+excluded_weapon_classes: []
+ammo_types:
+  - bolt
+ammo_classes:
+  - crossbow
+ammo_stock_count: 3
+required_tags:
+  - guard
+allow_duplicates: false

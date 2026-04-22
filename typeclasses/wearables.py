@@ -6,6 +6,10 @@ class Wearable(Object):
         super().at_object_creation()
         self.db.wearable = True
         self.db.slot = None
+        self.db.equip_slots = []
+        self.db.layer = "base"
+        self.db.blocks_layers = []
+        self.db.equipped_slots = []
         if self.db.weight is None:
             self.db.weight = 1.0
         self.db.worn_by = None

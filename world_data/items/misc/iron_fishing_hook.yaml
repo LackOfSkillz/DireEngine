@@ -1,0 +1,33 @@
+id: iron_fishing_hook
+name: Iron Fishing Hook
+category: misc
+tier: average
+utility_category: fishing
+functional_type: fishing_hook
+tool_type: fishing
+durability: 10
+tags:
+  - fishing
+  - utility
+level_band:
+  min: 1
+  max: 12
+value: 2
+weight: 0.1
+stackable: false
+max_stack: 1
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: an iron fishing hook
+  long: A plain barbed hook sized for starter river work.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

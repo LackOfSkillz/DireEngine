@@ -118,6 +118,18 @@ Implemented behavior:
 - target-based combat flow
 - range and engagement handling
 - roundtime pacing
+- NPC combat behavior follows `event -> set target -> ai_tick acts on target`, where room-entry presence and damage hooks establish targets and the existing global NPC tick drives continued attacks and disengage cleanup
+- same-room guard assist is event-driven as well: assist-capable NPCs join when a nearby guard acquires a player target, then the existing target state and ai tick handle the rest
+- NPC threat tracking is layered on top of that same loop as runtime combat state: damage and assist add threat, ai tick can switch to the top valid threat, and threat is cleared when combat fully disengages
+
+### Vendors And Stock Generation
+
+Current state:
+
+- vendors still sell through the existing `db.inventory` and `price_map` contract used by `shop` and `buy`
+- vendor specialization is now profile-driven through `world_data/vendor_profiles/`
+- item YAML supports `weapon_class`, `tags`, and `level_band`, allowing one generator to produce guild-specific stock without duplicating vendor logic
+- vendor profiles can filter and weight weapon classes while still feeding the current shop interface and purchase flow
 - weapon-profile-driven offense
 - fatigue and balance pressure
 - NPC retaliation and combat cleanup

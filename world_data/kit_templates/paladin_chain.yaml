@@ -1,0 +1,17 @@
+id: paladin_chain
+armor_class: chain_armor
+theme_tags:
+  - paladin
+  - martial
+required_slots:
+  - head
+  - chest
+  - legs
+  - hands
+optional_slots:
+  - feet
+  - shield
+tier_bias:
+  average: 0.55
+  above_average: 0.30
+  exquisite: 0.15

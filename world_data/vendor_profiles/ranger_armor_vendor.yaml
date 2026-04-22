@@ -1,0 +1,39 @@
+id: ranger_armor_vendor
+category: armor
+level_band:
+  min: 1
+  max: 10
+stock_count: 12
+allowed_armor_classes:
+  - leather_armor
+  - light_armor
+preferred_armor_classes:
+  leather_armor: 0.6
+  light_armor: 0.4
+excluded_armor_classes: []
+allowed_armor_slots:
+  - chest
+  - legs
+  - hands
+  - feet
+  - head
+  - cloak
+preferred_armor_slots:
+  chest: 0.35
+  legs: 0.25
+  hands: 0.15
+  head: 0.15
+  cloak: 0.10
+slot_priority:
+  chest: high
+  legs: high
+  hands: medium
+  feet: medium
+  head: low
+  cloak: low
+kit_templates:
+  - ranger_leathers
+kit_count: 1
+snobbishness: 0.25
+required_tags: []
+allow_duplicates: true

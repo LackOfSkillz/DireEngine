@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { BuilderDirection, BuilderEdgeType, BuilderState, ConnectionState, EditorMode, LayoutMode, RoomColor, RoomNode } from "./BuilderTypes";
+import type { BuilderDirection, BuilderEdgeType, BuilderState, ConnectionState, EditorMode, LayoutMode, RoomColor, RoomItemEntry, RoomNode, SelectedNode } from "./BuilderTypes";
 import { buildRoomId, canvasToLogical, coordKey, GRID_SIZE, isBuilderDirection, isRoomColor, isValidPair, oppositeDirection } from "./BuilderUtils";
 
 type BuilderStoreValue = BuilderState & {
@@ -7,6 +7,7 @@ type BuilderStoreValue = BuilderState & {
   isSelectedRoomLocked: boolean;
   statusMessage: string | null;
   setMode: (mode: EditorMode) => void;
+  setSelectedNode: (node: SelectedNode | null) => void;
   previewLayout: () => void;
   applyLayout: () => void;
   clearLayout: () => void;
@@ -15,6 +16,8 @@ type BuilderStoreValue = BuilderState & {
   setSelectedEdge: (edgeId: string | null) => void;
   deleteRoom: (roomId: string) => boolean;
   updateRoomPosition: (roomId: string, x: number, y: number) => boolean;
+  updateRoomNpcIds: (roomId: string, npcIds: string[]) => boolean;
+  updateRoomItemEntries: (roomId: string, itemEntries: RoomItemEntry[]) => boolean;
   updateSelectedRoomColor: (color: RoomColor) => void;
   updateSelectedEdge: (updates: { type?: BuilderEdgeType; label?: string }) => boolean;
   deleteSelectedEdge: () => boolean;
@@ -57,6 +60,18 @@ function normalizeExitSpec(spec: unknown) {
   };
 }
 
+function normalizeRoomItemEntries(entries: RoomItemEntry[] = []): RoomItemEntry[] {
+  return (Array.isArray(entries) ? entries : [])
+    .map((entry) => ({
+      id: String(entry?.id || "").trim(),
+      count: Math.max(0, Math.round(Number(entry?.count) || 0)),
+      category: String(entry?.category || "").trim().toLowerCase() || undefined,
+      items: normalizeRoomItemEntries(entry?.items || []),
+    }))
+    .filter((entry) => entry.id && entry.count > 0)
+    .map((entry) => (entry.items?.length ? entry : { id: entry.id, count: entry.count, category: entry.category }));
+}
+
 function createInitialBuilderState(
   zonePrefix: string,
   rooms: RoomNode[] = [],
@@ -80,6 +95,8 @@ function createInitialBuilderState(
         }
         return accumulator;
       }, {} as RoomNode["exits"]),
+      npcIds: Array.isArray(room.npcIds) ? room.npcIds.map((npcId) => String(npcId || "")).filter(Boolean) : [],
+      itemEntries: normalizeRoomItemEntries(room.itemEntries || []),
       color: isRoomColor(String(room.color || "")) ? room.color : "standard",
       meta: { ...(room.meta || {}) },
     };
@@ -91,6 +108,16 @@ function createInitialBuilderState(
     mode: initialMode,
     selectedRoomId: selectedRoomId && roomsById[selectedRoomId] ? selectedRoomId : null,
     selectedEdgeId: null,
+    selectedNode: selectedRoomId && roomsById[selectedRoomId]
+      ? {
+          type: "room",
+          id: selectedRoomId,
+          label: selectedRoomId,
+          parent: zonePrefix,
+          children: [],
+        }
+      : null,
+    treeData: [],
     connection: EMPTY_CONNECTION,
     zonePrefix,
     roomsById,
@@ -149,6 +176,15 @@ export function BuilderStoreProvider({
         ...previous,
         selectedRoomId: nextSelectedRoomId,
         selectedEdgeId: null,
+        selectedNode: nextSelectedRoomId
+          ? {
+              type: "room",
+              id: nextSelectedRoomId,
+              label: nextSelectedRoomId,
+              parent: previous.zonePrefix,
+              children: [],
+            }
+          : null,
       };
     });
   }, [initialSelectedRoomId]);
@@ -217,6 +253,25 @@ export function BuilderStoreProvider({
       ...previous,
       selectedRoomId: roomId,
       selectedEdgeId: null,
+      selectedNode: roomId
+        ? {
+            type: "room",
+            id: roomId,
+            label: previous.roomsById[roomId]?.id || roomId,
+            parent: previous.zonePrefix,
+            children: [],
+          }
+        : null,
+    }));
+  }, []);
+
+  const setSelectedNode = useCallback((node: SelectedNode | null) => {
+    setStatusMessage(null);
+    setState((previous) => ({
+      ...previous,
+      selectedNode: node,
+      selectedRoomId: node?.type === "room" ? node.id : previous.selectedRoomId,
+      selectedEdgeId: node?.type === "room" ? null : previous.selectedEdgeId,
     }));
   }, []);
 
@@ -226,6 +281,7 @@ export function BuilderStoreProvider({
       ...previous,
       selectedRoomId: null,
       selectedEdgeId: edgeId,
+      selectedNode: null,
     }));
   }, []);
 
@@ -243,6 +299,13 @@ export function BuilderStoreProvider({
           ...previous,
           selectedRoomId: existingRoomId,
           selectedEdgeId: null,
+          selectedNode: {
+            type: "room",
+            id: existingRoomId,
+            label: previous.roomsById[existingRoomId]?.id || existingRoomId,
+            parent: previous.zonePrefix,
+            children: [],
+          },
         };
       }
 
@@ -251,6 +314,13 @@ export function BuilderStoreProvider({
         ...previous,
         selectedRoomId: roomId,
         selectedEdgeId: null,
+        selectedNode: {
+          type: "room",
+          id: roomId,
+          label: roomId,
+          parent: previous.zonePrefix,
+          children: [],
+        },
         roomsById: {
           ...previous.roomsById,
           [roomId]: {
@@ -318,6 +388,13 @@ export function BuilderStoreProvider({
         ...previous,
         selectedRoomId: targetRoomId,
         selectedEdgeId: `${startRoomId}:${startDirection}`,
+        selectedNode: {
+          type: "room",
+          id: targetRoomId,
+          label: previous.roomsById[targetRoomId]?.id || targetRoomId,
+          parent: previous.zonePrefix,
+          children: [],
+        },
         connection: EMPTY_CONNECTION,
         roomsById: {
           ...previous.roomsById,
@@ -393,6 +470,9 @@ export function BuilderStoreProvider({
         mode: "select",
         selectedRoomId: previous.selectedRoomId === roomId ? null : previous.selectedRoomId,
         selectedEdgeId: previous.selectedEdgeId?.startsWith(`${roomId}:`) ? null : previous.selectedEdgeId,
+        selectedNode: previous.selectedNode?.type === "room" && previous.selectedNode.id === roomId
+          ? null
+          : previous.selectedNode,
         connection: previous.connection.fromRoomId === roomId ? EMPTY_CONNECTION : previous.connection,
         roomsById: nextRoomsById,
         roomIdByCoord: nextRoomIdByCoord,
@@ -469,6 +549,67 @@ export function BuilderStoreProvider({
         },
       };
     });
+  }, []);
+
+  const updateRoomNpcIds = useCallback((roomId: string, npcIds: string[]) => {
+    let didUpdate = false;
+    const normalizedRoomId = String(roomId || "").trim();
+    const normalizedNpcIds = Array.isArray(npcIds)
+      ? npcIds.map((npcId) => String(npcId || "").trim()).filter(Boolean)
+      : [];
+    setStatusMessage(null);
+    setState((previous) => {
+      const room = previous.roomsById[normalizedRoomId];
+      if (!room) {
+        return previous;
+      }
+      const currentNpcIds = Array.isArray(room.npcIds) ? room.npcIds : [];
+      if (currentNpcIds.join("|") === normalizedNpcIds.join("|")) {
+        return previous;
+      }
+      didUpdate = true;
+      return {
+        ...previous,
+        roomsById: {
+          ...previous.roomsById,
+          [normalizedRoomId]: {
+            ...room,
+            npcIds: normalizedNpcIds,
+          },
+        },
+      };
+    });
+    return didUpdate;
+  }, []);
+
+  const updateRoomItemEntries = useCallback((roomId: string, itemEntries: RoomItemEntry[]) => {
+    let didUpdate = false;
+    const normalizedRoomId = String(roomId || "").trim();
+    const normalizedEntries = normalizeRoomItemEntries(itemEntries || []);
+    setStatusMessage(null);
+    setState((previous) => {
+      const room = previous.roomsById[normalizedRoomId];
+      if (!room) {
+        return previous;
+      }
+      const currentSignature = JSON.stringify(normalizeRoomItemEntries(room.itemEntries || []));
+      const nextSignature = JSON.stringify(normalizedEntries);
+      if (currentSignature === nextSignature) {
+        return previous;
+      }
+      didUpdate = true;
+      return {
+        ...previous,
+        roomsById: {
+          ...previous.roomsById,
+          [normalizedRoomId]: {
+            ...room,
+            itemEntries: normalizedEntries,
+          },
+        },
+      };
+    });
+    return didUpdate;
   }, []);
 
   const updateSelectedEdge = useCallback((updates: { type?: BuilderEdgeType; label?: string }) => {
@@ -581,6 +722,7 @@ export function BuilderStoreProvider({
     isSelectedRoomLocked: Boolean(state.selectedRoomId && state.roomsById[state.selectedRoomId]?.meta?.locked),
     statusMessage,
     setMode,
+    setSelectedNode,
     previewLayout,
     applyLayout,
     clearLayout,
@@ -589,6 +731,8 @@ export function BuilderStoreProvider({
     setSelectedEdge,
     deleteRoom,
     updateRoomPosition,
+    updateRoomNpcIds,
+    updateRoomItemEntries,
     updateSelectedRoomColor,
     updateSelectedEdge,
     deleteSelectedEdge,
@@ -603,6 +747,7 @@ export function BuilderStoreProvider({
     layoutMode,
     previewLayout,
     setMode,
+    setSelectedNode,
     setSelectedEdge,
     setSelectedRoom,
     state,
@@ -610,6 +755,8 @@ export function BuilderStoreProvider({
     toggleSelectedRoomLock,
     tryConnect,
     updateRoomPosition,
+    updateRoomNpcIds,
+    updateRoomItemEntries,
     updateSelectedEdge,
     updateSelectedRoomColor,
   ]);

@@ -1,0 +1,29 @@
+id: trailwalker_boots
+name: Trailwalker boots
+category: armor
+armor_class: light_armor
+armor_slot: feet
+tier: average
+tags: []
+level_band:
+  min: 1
+  max: 10
+value: 16
+weight: 2.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: feet
+  attack: 0
+  defense: 2
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: some trailwalker boots
+  long: Some trailwalker boots lie here.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

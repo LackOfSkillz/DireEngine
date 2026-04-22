@@ -6,6 +6,7 @@ from engine.services.combat_xp import CombatXP
 from engine.services.result import ActionResult
 from engine.services.state_service import StateService
 from engine.services.stealth_service import StealthService
+from server.systems.ammo_runtime import format_ammo_label, normalize_ammo_stack
 from domain.combat.resolution import resolve_attack
 from world.systems.ranger import RANGER_SNIPE_CONFIG
 
@@ -23,6 +24,11 @@ class CombatService:
             return preflight
 
         context = CombatService._build_context(attacker, target)
+        if bool(context.get("is_ranged_weapon", False)):
+            ammo = attacker.consume_loaded_ammo() if hasattr(attacker, "consume_loaded_ammo") else None
+            if not ammo:
+                return ActionResult.fail(data={"error_code": "needs_ammo", "outcome": "blocked"})
+            context["ammo"] = dict(ammo)
         resolution = resolve_attack(attacker, target, context=context)
         details = dict(resolution.details or {})
 
@@ -35,9 +41,11 @@ class CombatService:
                 location=details.get("hit_location"),
                 damage_type=attack_context.get("damage_type", "impact"),
                 critical=bool(details.get("critical", False)),
+                attacker=attacker,
             )
 
         CombatService._apply_post_resolution_state(attacker, target, details, resolution.hit)
+        CombatService._resolve_ranged_ammo_outcome(attacker, target, details, resolution.hit)
         CombatXP.award(attacker, target, details, resolution.hit)
         StateService.apply_fatigue(attacker, int(details.get("fatigue_cost", 0) or 0))
         StateService.apply_roundtime(attacker, resolution.roundtime, ambush=bool(details.get("ambush")))
@@ -434,6 +442,29 @@ class CombatService:
                 pass
 
     @staticmethod
+    def _resolve_ranged_ammo_outcome(attacker, target, details, hit):
+        ammo = normalize_ammo_stack(details.get("ammo"))
+        if not ammo:
+            return
+        if hit:
+            if str(details.get("outcome", "") or "").strip().lower() == "kill":
+                corpse = target.get_death_corpse() if hasattr(target, "get_death_corpse") else None
+                if corpse is not None and hasattr(corpse, "add_ammo_stacks"):
+                    corpse.add_ammo_stacks([ammo])
+                    details["ammo_state"] = "moved_to_corpse"
+                    return
+            if hasattr(target, "add_embedded_ammo"):
+                target.add_embedded_ammo([ammo])
+                details["ammo_state"] = "embedded"
+                return
+        room = getattr(target, "location", None) or getattr(attacker, "location", None)
+        if room is not None and hasattr(room, "add_loose_ammo"):
+            room.add_loose_ammo([ammo])
+            details["ammo_state"] = "dropped_in_room"
+        else:
+            details["ammo_state"] = "lost"
+
+    @staticmethod
     def _resolve_snipe_concealment(attacker, target, details, hit=False):
         if not details.get("snipe_active"):
             return
@@ -473,6 +504,8 @@ class CombatService:
             "damage": int(damage_result.amount if resolution.hit else 0),
             "damage_type": str(details.get("damage_type", "impact") or "impact"),
             "details": details,
+            "ammo_label": format_ammo_label(details.get("ammo")) if details.get("ammo") else "",
+            "ammo_state": str(details.get("ammo_state", "") or ""),
             "error_code": str(details.get("error_code", "") or ""),
             "head_stun": bool(details.get("head_stun", False)),
             "hit": bool(resolution.hit),

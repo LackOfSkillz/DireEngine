@@ -1,0 +1,6 @@
+id: string
+armor_class: leather_armor | light_armor | chain_armor | plate_armor
+theme_tags: []
+required_slots: []
+optional_slots: []
+tier_bias: {}

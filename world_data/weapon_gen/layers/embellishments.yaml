@@ -1,0 +1,13 @@
+none: {}
+
+engraved:
+  traits:
+    - etched
+
+gem_inlaid:
+  traits:
+    - decorated
+
+wrapped:
+  traits:
+    - reinforced grip

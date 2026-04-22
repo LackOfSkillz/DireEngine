@@ -1,0 +1,30 @@
+id: knight_broadsword
+name: Knight Broadsword
+category: weapon
+weapon_class: medium_edge
+tags:
+  - martial
+  - paladin
+  - guard
+level_band:
+  min: 1
+  max: 8
+value: 24
+weight: 2.7
+stackable: false
+max_stack: 1
+equipment:
+  slot: weapon
+  attack: 4
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a knight broadsword
+  long: A knight broadsword lies here in a serviceable scabbard.
+meta:
+  source: vendor_specialization
+  imported_at: '2026-04-21'

@@ -1,0 +1,29 @@
+id: templar_claymore
+name: Templar Claymore
+category: weapon
+weapon_class: heavy_edge
+tags:
+  - martial
+  - paladin
+level_band:
+  min: 4
+  max: 10
+value: 34
+weight: 3.8
+stackable: false
+max_stack: 1
+equipment:
+  slot: weapon
+  attack: 6
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a templar claymore
+  long: A templar claymore waits here in a plain leather sling.
+meta:
+  source: vendor_specialization
+  imported_at: '2026-04-21'

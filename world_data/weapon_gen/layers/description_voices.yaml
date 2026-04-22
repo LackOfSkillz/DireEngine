@@ -1,0 +1,19 @@
+functional:
+  openers:
+    - This weapon is built around
+    - This piece is constructed from
+
+observational:
+  openers:
+    - Its form suggests
+    - The weapon appears to be
+
+historical:
+  openers:
+    - Forged in
+    - Crafted in
+
+mythic:
+  openers:
+    - Legends claim
+    - It is said that

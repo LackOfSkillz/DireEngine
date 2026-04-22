@@ -14,12 +14,29 @@ export type BuilderHandleId = "n" | "e" | "s" | "w" | "ne" | "nw" | "se" | "sw" 
 
 export type BuilderEdgeType = "spatial" | "special";
 
+export type TreeNodeData = {
+  id: string;
+  label: string;
+  type: string;
+  parent?: string | null;
+  children?: TreeNodeData[];
+};
+
+export type SelectedNode = TreeNodeData;
+
 export type RoomColor = "standard" | "poi" | "shop" | "training" | "portal" | "home" | "water" | "underwater";
 
 export type BuilderExit = {
   targetId: string;
   type?: BuilderEdgeType;
   label?: string;
+};
+
+export type RoomItemEntry = {
+  id: string;
+  count: number;
+  category?: string;
+  items?: RoomItemEntry[];
 };
 
 export type Mode = "select" | "room" | "connect" | "delete";
@@ -39,6 +56,8 @@ export type RoomNode = {
   x: number;
   y: number;
   exits: Partial<Record<BuilderDirection, BuilderExit>>;
+  npcIds?: string[];
+  itemEntries?: RoomItemEntry[];
   color?: RoomColor;
   meta?: RoomNodeMeta;
 };
@@ -64,6 +83,8 @@ export type BuilderState = {
   mode: Mode;
   selectedRoomId: string | null;
   selectedEdgeId: string | null;
+  selectedNode: SelectedNode | null;
+  treeData: TreeNodeData[];
   connection: ConnectionState;
   zonePrefix: string;
   roomsById: Record<string, RoomNode>;

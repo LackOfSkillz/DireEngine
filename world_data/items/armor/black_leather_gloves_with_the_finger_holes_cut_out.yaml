@@ -1,0 +1,29 @@
+id: black_leather_gloves_with_the_finger_holes_cut_out
+name: Black leather gloves with the finger holes cut out
+category: armor
+armor_class: leather_armor
+armor_slot: hands
+tier: average
+tags: []
+level_band:
+  min: 1
+  max: 10
+value: 240
+weight: 2.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: hands
+  attack: 0
+  defense: 3
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a black leather gloves with the finger holes cut out
+  long: A black leather gloves with the finger holes cut out lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-21'

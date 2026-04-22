@@ -1,0 +1,29 @@
+id: bascinet_helm
+name: Bascinet helm
+category: armor
+armor_class: plate_armor
+armor_slot: head
+tier: fine
+tags: []
+level_band:
+  min: 8
+  max: 16
+value: 187
+weight: 17.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: head
+  attack: 0
+  defense: 26
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a bascinet helm
+  long: A bascinet helm lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-21'

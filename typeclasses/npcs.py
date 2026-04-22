@@ -6,12 +6,15 @@ from pathlib import Path
 
 from django.utils.text import slugify
 
+from server.systems.loot.loot_runtime import on_npc_defeated
+
 from typeclasses.characters import Character
 
 
 class NPC(Character):
     COMBAT_AI_INTERVAL = 1.0
     IDLE_AI_INTERVAL = 8.0
+    ASSIST_SAME_ROOM_ONLY = True
 
     def at_object_creation(self):
         super().at_object_creation()
@@ -27,6 +30,271 @@ class NPC(Character):
         self.db.blocked_professions = []
         self.db.suspects = {}
         self.db.witnessed_crime = False
+        if self.db.last_seen_target is None:
+            self.db.last_seen_target = None
+        if self.db.assist is None:
+            self.db.assist = False
+        if self.db.assist_source is None:
+            self.db.assist_source = None
+        if getattr(self.ndb, "threat_table", None) is None:
+            self.ndb.threat_table = {}
+        if self.db.loot_table is None:
+            self.db.loot_table = None
+        if self.db.interaction_type is None:
+            self.db.interaction_type = None
+
+    def get_on_click_command(self, caller=None):
+        _caller = caller
+        interaction_type = str(getattr(self.db, "interaction_type", "") or "").strip().lower()
+        if not interaction_type:
+            return None
+        return f"__clicknpc__ {int(getattr(self, 'id', 0) or 0)}"
+
+    def get_interaction_hint(self, looker=None):
+        _looker = looker
+        interaction_type = str(getattr(self.db, "interaction_type", "") or "").strip().lower()
+        if interaction_type == "vendor":
+            return "(Click to browse wares)"
+        if interaction_type:
+            return "(Click to interact)"
+        return ""
+
+    def get_display_name(self, looker=None, **kwargs):
+        base_name = super().get_display_name(looker, **kwargs)
+        command = self.get_on_click_command(looker)
+        if not command:
+            return base_name
+        return f"|lc{command}|lt[{base_name}]|le"
+
+    def at_object_receive_click(self, caller):
+        return self.handle_interaction(caller)
+
+    def handle_interaction(self, caller):
+        interaction_type = str(getattr(self.db, "interaction_type", "") or "").strip().lower()
+        if interaction_type == "vendor":
+            return self.open_vendor_ui(caller)
+        if caller:
+            caller.msg(f"{self.key} acknowledges you but has nothing to offer yet.")
+        return False
+
+    def open_vendor_ui(self, caller):
+        if caller is None:
+            return False
+        caller.msg(f"{self.key} looks up as you approach.")
+        if hasattr(caller, "record_vendor_visit"):
+            caller.record_vendor_visit(self)
+        if hasattr(self, "get_vendor_greeting_lines"):
+            for line in list(self.get_vendor_greeting_lines(caller) or []):
+                normalized_line = str(line or "").strip()
+                if normalized_line:
+                    caller.msg(normalized_line)
+        if hasattr(caller, "open_vendor_ui"):
+            return bool(caller.open_vendor_ui(self))
+        return False
+
+    def set_target(self, target):
+        super().set_target(target)
+        if target is None:
+            self.db.last_seen_target = None
+            self.db.assist_source = None
+            if hasattr(self, "clear_state"):
+                self.clear_state("last_seen_target")
+            return
+        self.db.last_seen_target = getattr(target, "id", None)
+        if hasattr(self, "set_state") and getattr(target, "id", None):
+            self.set_state("last_seen_target", target.id)
+
+    def clear_target(self):
+        self.set_target(None)
+
+    def _get_threat_table(self):
+        threat_table = getattr(getattr(self, "ndb", None), "threat_table", None)
+        if not isinstance(threat_table, dict):
+            threat_table = getattr(self.db, "threat_table", None)
+        if not isinstance(threat_table, dict):
+            threat_table = {}
+        if getattr(self, "ndb", None) is not None:
+            self.ndb.threat_table = dict(threat_table)
+        return {str(key): int(value or 0) for key, value in threat_table.items() if str(key or "").strip()}
+
+    def _resolve_threat_target(self, target_id):
+        normalized_target_id = str(target_id or "").strip()
+        if not normalized_target_id or not self.location:
+            return None
+        for obj in list(getattr(self.location, "contents", []) or []):
+            if str(getattr(obj, "id", "") or "").strip() == normalized_target_id:
+                return obj
+        return None
+
+    def get_threat(self, target):
+        target_id = str(getattr(target, "id", "") or "").strip()
+        if not target_id:
+            return 0
+        return int(self._get_threat_table().get(target_id, 0) or 0)
+
+    def add_threat(self, target, amount):
+        if not target or target == self:
+            return 0
+        if not bool(getattr(target, "has_account", False)):
+            return 0
+        target_id = str(getattr(target, "id", "") or "").strip()
+        if not target_id:
+            return 0
+        threat_table = dict(self._get_threat_table())
+        next_value = min(1000, max(0, int(threat_table.get(target_id, 0) or 0) + int(amount or 0)))
+        if next_value > 0:
+            threat_table[target_id] = next_value
+        else:
+            threat_table.pop(target_id, None)
+        if getattr(self, "ndb", None) is not None:
+            self.ndb.threat_table = threat_table
+        return next_value
+
+    def clear_threat(self):
+        if getattr(self, "ndb", None) is not None:
+            self.ndb.threat_table = {}
+
+    def remove_target(self, target):
+        target_id = str(getattr(target, "id", "") or target or "").strip()
+        if not target_id:
+            return
+        threat_table = dict(self._get_threat_table())
+        threat_table.pop(target_id, None)
+        if getattr(self, "ndb", None) is not None:
+            self.ndb.threat_table = threat_table
+
+    def prune_threat_table(self):
+        threat_table = dict(self._get_threat_table())
+        if not threat_table:
+            return {}
+        kept = {}
+        for target_id, threat_value in threat_table.items():
+            target = self._resolve_threat_target(target_id)
+            if target is None:
+                continue
+            if target == self:
+                continue
+            if not bool(getattr(target, "has_account", False)):
+                continue
+            if hasattr(target, "is_alive") and not target.is_alive():
+                continue
+            if getattr(target, "location", None) != self.location:
+                continue
+            kept[str(target_id)] = int(threat_value or 0)
+        if getattr(self, "ndb", None) is not None:
+            self.ndb.threat_table = kept
+        return kept
+
+    def get_highest_threat(self):
+        threat_table = self.prune_threat_table()
+        if not threat_table:
+            return None
+        target_id = max(threat_table, key=lambda key: int(threat_table.get(key, 0) or 0))
+        return self._resolve_threat_target(target_id)
+
+    def can_assist(self):
+        return bool(getattr(self.db, "assist", False))
+
+    def emit_assist_event(self, target):
+        if not self.location or not target:
+            return
+        for obj in list(getattr(self.location, "contents", []) or []):
+            if obj == self or not hasattr(obj, "receive_assist_event"):
+                continue
+            if hasattr(obj, "can_assist") and not obj.can_assist():
+                continue
+            obj.receive_assist_event(self, target)
+
+    def receive_assist_event(self, source, target):
+        if source is None or source == self:
+            return False
+        if not self.can_assist() or self.is_dead():
+            return False
+        if self.get_target() or getattr(self.db, "target", None) is not None:
+            return False
+        if not target or target == self:
+            return False
+        if not bool(getattr(target, "has_account", False)):
+            return False
+        if hasattr(target, "is_alive") and not target.is_alive():
+            return False
+        if hasattr(source, "is_alive") and not source.is_alive():
+            return False
+        if self.ASSIST_SAME_ROOM_ONLY:
+            if not self.location or getattr(target, "location", None) != self.location or getattr(source, "location", None) != self.location:
+                return False
+        self.add_threat(target, 5)
+        self.set_target(target)
+        self.db.assist_source = getattr(source, "id", None) or getattr(source, "key", None)
+        if self.location:
+            self.location.msg_contents(f"{self.key} rushes to assist!")
+        return True
+
+    def is_combat_loop_active(self):
+        target = self.get_target()
+        return bool(getattr(self.db, "in_combat", False) and target is not None and getattr(target, "location", None) == self.location)
+
+    def disengage(self, *, emit_message=True):
+        had_target = bool(getattr(self.db, "target", None) or self.get_target())
+        self.clear_threat()
+        self.clear_target()
+        if hasattr(self, "clear_state"):
+            self.clear_state("combat_timer")
+        if emit_message and had_target and self.location:
+            self.location.msg_contents(f"{self.key} loses interest.")
+
+    def should_auto_engage_actor(self, actor):
+        if not actor or actor == self:
+            return False
+        if self.is_dead():
+            return False
+        if not bool(getattr(self.db, "aggressive", False)):
+            return False
+        if not bool(getattr(actor, "has_account", False)):
+            return False
+        if getattr(actor, "location", None) != self.location or self.location is None:
+            return False
+        if hasattr(actor, "is_alive") and not actor.is_alive():
+            return False
+        return True
+
+    def at_attacked(self, attacker):
+        if not attacker or attacker == self:
+            return
+        if not bool(getattr(attacker, "has_account", False)):
+            return
+        current_target = getattr(self.db, "target", None) or self.get_target()
+        if current_target == attacker:
+            return
+        if current_target is not None:
+            if getattr(current_target, "location", None) == self.location and getattr(current_target, "has_account", False):
+                return
+        self.set_target(attacker)
+        if self.location:
+            self.location.msg_contents(f"{self.key} turns on {attacker.key}!")
+        self.emit_assist_event(attacker)
+
+    def maybe_auto_engage_actor(self, actor):
+        if not self.should_auto_engage_actor(actor):
+            return False
+        current_target = getattr(self.db, "target", None) or self.get_target()
+        if current_target == actor:
+            return False
+        if current_target is not None:
+            if getattr(current_target, "location", None) == self.location and getattr(current_target, "has_account", False):
+                return False
+        self.set_target(actor)
+        if self.location:
+            self.location.msg_contents(f"{self.key} snarls and attacks {actor.key}!")
+        self.emit_assist_event(actor)
+        return True
+
+    def at_death(self, cause=None, death_type="vitality"):
+        room = getattr(self, "location", None)
+        corpse = super().at_death(cause=cause, death_type=death_type)
+        if corpse is not None:
+            on_npc_defeated(self, room=room)
+        return corpse
 
     def is_shopkeeper(self):
         return bool(getattr(self.db, "is_shopkeeper", False))
@@ -60,10 +328,14 @@ class NPC(Character):
 
     def react_to(self, actor, context="presence"):
         if not actor or actor == self or not hasattr(actor, "get_profession_reaction_message"):
+            if context == "presence":
+                self.maybe_auto_engage_actor(actor)
             return None
         reaction = actor.get_profession_reaction_message(context=context, observer=self)
         if reaction:
             actor.msg(f"{self.key} {reaction}")
+        if context == "presence":
+            self.maybe_auto_engage_actor(actor)
         return reaction
 
     def can_trade(self, actor):
@@ -98,6 +370,23 @@ class NPC(Character):
             return
 
         if self.is_in_roundtime():
+            return
+
+        best_target = self.get_highest_threat()
+        current_target = self.get_target()
+        if best_target is not None and best_target != current_target:
+            self.set_target(best_target)
+
+        raw_target = getattr(self.db, "target", None)
+        if raw_target is not None:
+            if hasattr(raw_target, "is_alive") and not raw_target.is_alive():
+                self.disengage(emit_message=False)
+                return
+            if getattr(raw_target, "location", None) != self.location:
+                self.disengage()
+                return
+        elif bool(getattr(self.db, "in_combat", False)):
+            self.disengage(emit_message=False)
             return
 
         if self.is_surprised():
@@ -154,10 +443,12 @@ class NPC(Character):
                         break
 
         if not target:
+            if bool(getattr(self.db, "in_combat", False)):
+                self.disengage(emit_message=False)
             return
 
         if not target.is_alive():
-            self.set_target(None)
+            self.disengage(emit_message=False)
             return
 
         if target.is_hidden():

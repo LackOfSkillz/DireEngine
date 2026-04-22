@@ -1,0 +1,109 @@
+basalt:
+  category: stone
+  tier: common
+  tags: [heavy, rough]
+
+granite:
+  category: stone
+  tier: common
+  tags: [dense, durable]
+
+flint:
+  category: stone
+  tier: common
+  tags: [sharp, practical]
+
+riverstone:
+  category: stone
+  tier: common
+  tags: [smooth, worn]
+
+slate:
+  category: stone
+  tier: common
+  tags: [layered, dark]
+
+obsidian:
+  category: stone
+  tier: uncommon
+  tags: [sharp, brittle]
+
+marble:
+  category: stone
+  tier: uncommon
+  tags: [polished, stately]
+
+soapstone:
+  category: stone
+  tier: uncommon
+  tags: [soft, carved]
+
+jade:
+  category: stone
+  tier: uncommon
+  tags: [smooth, ceremonial]
+
+darkslate:
+  category: stone
+  tier: uncommon
+  tags: [matte, severe]
+
+quartz:
+  category: stone
+  tier: rare
+  tags: [faceted, crystalline]
+
+mana_crystal:
+  category: stone
+  tier: rare
+  tags: [glowing, arcane]
+
+moonstone:
+  category: stone
+  tier: rare
+  tags: [pale, luminous]
+
+sunstone:
+  category: stone
+  tier: rare
+  tags: [bright, warm]
+
+bloodstone:
+  category: stone
+  tier: rare
+  tags: [dark, veined]
+
+amber_crystal:
+  category: stone
+  tier: rare
+  tags: [golden, clear]
+
+prism_glass:
+  category: stone
+  tier: exotic
+  tags: [refractive, sharp]
+
+void_glass:
+  category: stone
+  tier: exotic
+  tags: [dark, unnatural]
+
+sun_crystal:
+  category: stone
+  tier: exotic
+  tags: [radiant, warm]
+
+frost_crystal:
+  category: stone
+  tier: exotic
+  tags: [cold, glowing]
+
+star_shard:
+  category: stone
+  tier: exotic
+  tags: [cosmic, keen]
+
+echo_crystal:
+  category: stone
+  tier: exotic
+  tags: [resonant, singing]

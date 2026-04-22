@@ -17,10 +17,7 @@ class CmdSlots(Command):
     def func(self):
         equipment = self.caller.get_equipment()
         lines = ["Worn Slots:"]
-        for slot, item in equipment.items():
-            if self.caller.is_multi_slot(slot):
-                display = ", ".join(obj.key for obj in item) if item else "empty"
-            else:
-                display = item.key if item else "empty"
+        for slot, stack in equipment.items():
+            display = ", ".join(obj.key for obj in stack) if stack else "empty"
             lines.append(f"  {slot}: {display}")
         self.caller.msg("\n".join(lines))

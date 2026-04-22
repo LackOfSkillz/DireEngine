@@ -1,0 +1,114 @@
+bone:
+  category: organic
+  tier: common
+  tags: [light, brittle]
+
+horn:
+  category: organic
+  tier: common
+  tags: [curved, durable]
+
+stag_horn:
+  category: organic
+  tier: common
+  tags: [natural, rugged]
+
+boar_tusk:
+  category: organic
+  tier: common
+  tags: [dense, coarse]
+
+leather_wrap:
+  category: organic
+  tier: common
+  tags: [grippy, practical]
+
+rayskin_wrap:
+  category: organic
+  tier: uncommon
+  tags: [textured, secure]
+
+chitin:
+  category: organic
+  tier: uncommon
+  tags: [layered, natural]
+
+reef_shell:
+  category: organic
+  tier: uncommon
+  tags: [smooth, curved]
+
+serrated_horn:
+  category: organic
+  tier: uncommon
+  tags: [ridged, aggressive]
+
+lamellar_hide:
+  category: organic
+  tier: uncommon
+  tags: [scaled, resilient]
+
+amber_bone:
+  category: organic
+  tier: uncommon
+  tags: [honeyed, preserved]
+
+mammoth_ivory:
+  category: organic
+  tier: rare
+  tags: [dense, carved]
+
+leviathan_bone:
+  category: organic
+  tier: rare
+  tags: [massive, strong]
+
+serpent_fang:
+  category: organic
+  tier: rare
+  tags: [sharp, venomous]
+
+phoenix_quill_shaft:
+  category: organic
+  tier: rare
+  tags: [light, heat-kissed]
+
+griffon_talon:
+  category: organic
+  tier: rare
+  tags: [hooked, fierce]
+
+wyrm_horn:
+  category: organic
+  tier: rare
+  tags: [spiraled, resonant]
+
+dragonbone:
+  category: organic
+  tier: exotic
+  tags: [legendary, resilient]
+
+demon_chitin:
+  category: organic
+  tier: exotic
+  tags: [spiked, corrupted]
+
+fungal_silk:
+  category: organic
+  tier: exotic
+  tags: [flexible, organic]
+
+voidscale:
+  category: organic
+  tier: exotic
+  tags: [dark, otherworldly]
+
+sunhide:
+  category: organic
+  tier: exotic
+  tags: [radiant, supple]
+
+echo_bone:
+  category: organic
+  tier: exotic
+  tags: [hollow, resonant]

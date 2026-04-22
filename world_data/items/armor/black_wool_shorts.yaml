@@ -1,0 +1,29 @@
+id: black_wool_shorts
+name: Black wool shorts
+category: armor
+armor_class: light_armor
+armor_slot: chest
+tier: average
+tags: []
+level_band:
+  min: 1
+  max: 10
+value: 125
+weight: 4.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: chest
+  attack: 0
+  defense: 6
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: some black wool shorts
+  long: Some black wool shorts lie here.
+meta:
+  source: direlore
+  imported_at: '2026-04-21'

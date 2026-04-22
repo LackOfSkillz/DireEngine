@@ -1,0 +1,21 @@
+id: paladin_weapon_vendor
+category: weapon
+level_band:
+  min: 1
+  max: 10
+stock_count: 3
+allowed_weapon_classes:
+  - heavy_edge
+  - medium_edge
+  - heavy_blunt
+preferred_weapon_classes:
+  heavy_edge: 0.45
+  medium_edge: 0.25
+  heavy_blunt: 0.30
+excluded_weapon_classes:
+  - short_bow
+  - long_bow
+  - thrown
+required_tags:
+  - martial
+allow_duplicates: false

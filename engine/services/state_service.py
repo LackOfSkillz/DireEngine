@@ -519,7 +519,7 @@ class StateService:
         return victims
 
     @staticmethod
-    def apply_damage(target, damage, location=None, damage_type="impact", critical=False):
+    def apply_damage(target, damage, location=None, damage_type="impact", critical=False, attacker=None):
         damage = int(damage or 0)
         if damage <= 0:
             return ActionResult.ok(data={"amount": 0, "location": location, "damage_type": damage_type, "critical": bool(critical)})
@@ -539,6 +539,12 @@ class StateService:
             target.decay_empath_link_stability(amount=None, reason="damage", emit_message=True)
         if getattr(target, "is_empath", lambda: False)() and target.get_empath_unity_state():
             target.decay_empath_unity_stability(event_key="damage", emit_message=True)
+
+        if attacker is not None and attacker != target and bool(getattr(attacker, "has_account", False)):
+            if hasattr(target, "add_threat"):
+                target.add_threat(attacker, max(10, final_damage))
+            if hasattr(target, "at_attacked"):
+                target.at_attacked(attacker)
 
         data = {"amount": final_damage, "location": location, "damage_type": damage_type, "critical": bool(critical)}
         data.update(dict(wound_result.data or {}))

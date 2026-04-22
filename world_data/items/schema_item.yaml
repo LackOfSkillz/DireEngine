@@ -1,0 +1,56 @@
+id: string
+name: string
+category: weapon | armor | ammunition | consumable | clothing | jewelry | furniture | container | misc
+weapon_class: light_edge | medium_edge | heavy_edge | light_blunt | heavy_blunt | short_bow | long_bow | crossbow | thrown | polearm
+armor_class: light_armor | leather_armor | chain_armor | plate_armor
+armor_slot: head | neck | shoulders | chest | arms | hands | waist | legs | feet | shield | cloak
+type: ammo_container
+ammo_type: arrow | bolt
+ammo_class: short_bow | long_bow | crossbow
+stack_size: int
+base_price: int
+tier: string
+capacity: int
+quickdraw_bonus: float
+utility_category: string
+functional_type: string
+tool_type: string
+durability: int
+bait_family: string
+bait_quality: float
+layer: under | base | outer | shield | accessory | attachment
+equip_slots: []
+blocks_layers: []
+tags: []
+level_band:
+  min: int
+  max: int
+
+value: int
+weight: float
+
+stackable: bool
+max_stack: int
+
+equipment:
+  slot: none | head | neck | shoulders | chest | arms | hands | waist | legs | feet | shield | cloak | weapon | offhand | accessory
+  attack: int
+  defense: int
+
+consumable:
+  effect: string
+  duration: int
+
+container:
+  capacity: int
+  weight_reduction: float
+  ammo_container: bool
+  allowed_ammo_types: []
+
+description:
+  short: string
+  long: string
+
+meta:
+  source: string
+  imported_at: string

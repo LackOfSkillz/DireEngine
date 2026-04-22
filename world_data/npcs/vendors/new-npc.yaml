@@ -1,0 +1,24 @@
+id: new-npc
+name: New NPC
+type: vendor
+stats:
+  level: 1
+  health: 1
+  attack: 0
+  defense: 0
+behavior:
+  aggressive: false
+  roam: false
+  assist: false
+vendor:
+  enabled: true
+  inventory: []
+dialogue:
+  greeting: ''
+  idle: []
+description:
+  short: ''
+  long: ''
+meta:
+  source: ''
+  imported_at: ''

@@ -1,0 +1,18 @@
+id: training_goblin
+name: Training Goblin
+type: hostile
+stats:
+  level: 1
+  health: 12
+  attack: 2
+  defense: 0
+behavior:
+  aggressive: true
+  roam: false
+  assist: false
+description:
+  short: a snarling training goblin
+  long: A scarred goblin paces in tight circles here, clutching a chipped weapon and eyeing anyone nearby for weakness.
+loot_table: test_loot
+meta:
+  source: loot_vertical_slice

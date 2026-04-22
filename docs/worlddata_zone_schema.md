@@ -30,6 +30,14 @@ rooms:
         - A carriage rattles over the stones.
         - A distant bell rings from deeper in the district.
     environment: city
+    npcs:
+      - town_guard
+      - goblin_grunt
+    items:
+      - id: iron_sword
+        count: 1
+      - id: health_potion
+        count: 5
     zone_id: kingshade
     map:
       x: 10
@@ -58,6 +66,8 @@ rooms:
 - `ambient.rate` maps to `room.db.room_message_rate`
 - `ambient.messages` maps to `room.db.room_messages`
 - `room_states` maps to tags in category `room_state`
+- `npcs` stores authored NPC definition ids assigned to the room; rooms never embed full NPC objects
+- `items` stores authored item definition ids with counts assigned to the room; item entries always use `{ id, count }` and may carry nested `items` for container-ready structure
 - `typeclass` controls the room typeclass created by `@zone load`
 - `exits.<direction>.target` maps to the destination room id
 - `exits.<direction>.typeclass` controls the exit typeclass created by `@zone load`
@@ -81,6 +91,8 @@ rooms:
 - Export only writes `desc_*` attributes into `stateful_descs`.
 - Export writes exit target, typeclass, speed, and travel_time back into YAML when present.
 - Export writes non-spatial exit keys into `special_exits` and preserves their target, typeclass, speed, and travel_time.
+- Room-level `npcs` round-trips as a list of NPC ids and remains the only authored room-to-NPC relationship field.
+- Room-level `items` round-trips as a list of `{ id, count }` entries; duplicate ids are normalized into a single counted entry.
 
 ## Cmdset Decision
 

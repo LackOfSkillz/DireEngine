@@ -1,0 +1,14 @@
+new:
+  traits:
+    - clean
+    - polished
+
+worn:
+  traits:
+    - scratched
+    - dulled
+
+ancient:
+  traits:
+    - faded
+    - rune-etched

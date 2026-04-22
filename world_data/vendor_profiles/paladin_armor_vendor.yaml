@@ -1,0 +1,41 @@
+id: paladin_armor_vendor
+category: armor
+level_band:
+  min: 1
+  max: 10
+stock_count: 14
+allowed_armor_classes:
+  - plate_armor
+  - chain_armor
+preferred_armor_classes:
+  plate_armor: 0.55
+  chain_armor: 0.45
+excluded_armor_classes: []
+allowed_armor_slots:
+  - chest
+  - legs
+  - hands
+  - feet
+  - head
+  - shield
+preferred_armor_slots:
+  chest: 0.30
+  legs: 0.25
+  head: 0.20
+  hands: 0.10
+  feet: 0.10
+  shield: 0.05
+slot_priority:
+  chest: high
+  legs: high
+  head: medium
+  hands: medium
+  feet: medium
+  shield: medium
+kit_templates:
+  - paladin_chain
+  - paladin_plate
+kit_count: 2
+snobbishness: 0.65
+required_tags: []
+allow_duplicates: true

@@ -1,0 +1,29 @@
+id: practice_shortbow
+name: Practice Shortbow
+category: weapon
+weapon_class: short_bow
+tags:
+  - martial
+  - ranger
+level_band:
+  min: 1
+  max: 8
+value: 18
+weight: 1.2
+stackable: false
+max_stack: 1
+equipment:
+  slot: weapon
+  attack: 3
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a practice shortbow
+  long: A practice shortbow rests here.
+meta:
+  source: vendor_specialization
+  imported_at: '2026-04-21'

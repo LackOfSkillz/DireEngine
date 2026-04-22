@@ -1,0 +1,41 @@
+id: hunting_quiver
+name: Hunting Quiver
+category: container
+type: ammo_container
+tier: above_average
+utility_category: containers
+functional_type: quiver
+tool_type: survival
+durability: 24
+ammo_type: arrow
+capacity: 20
+quickdraw_bonus: 0.05
+tags:
+  - utility
+  - ranged
+level_band:
+  min: 1
+  max: 12
+value: 22
+weight: 0.8
+stackable: false
+max_stack: 1
+equipment:
+  slot: back
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 20
+  weight_reduction: 0.15
+  ammo_container: true
+  allowed_ammo_types:
+    - arrow
+description:
+  short: a hunting quiver
+  long: A sturdy leather quiver built to keep arrows ordered and close at hand.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

@@ -1,0 +1,8 @@
+hard_conflicts:
+  - [graceful, brutal]
+  - [refined, crude]
+  - [precise, unwieldy]
+
+soft_conflicts:
+  - [light, heavy]
+  - [delicate, dense]

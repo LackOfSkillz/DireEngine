@@ -1,0 +1,17 @@
+weight:
+  - light
+  - heavy
+  - dense
+style:
+  - elegant
+  - brutal
+  - crude
+  - refined
+handling:
+  - precise
+  - unwieldy
+  - balanced
+condition:
+  - worn
+  - pristine
+  - ancient

@@ -196,6 +196,50 @@
     reviewImageUrl: "",
     reviewImage: null,
     reviewImageLoaded: false,
+    currentNpcId: null,
+    npcs: {},
+    currentItemId: null,
+    items: {},
+    npcEditorDirty: false,
+    npcEditorBaseline: null,
+    npcValidationErrors: {},
+    npcSectionState: {
+      general: true,
+      stats: false,
+      behavior: false,
+      vendor: false,
+      dialogue: false,
+    },
+    npcSyncingForm: false,
+    itemEditorDirty: false,
+    itemEditorBaseline: null,
+    itemValidationErrors: {},
+    itemSectionState: {
+      general: true,
+      equipment: false,
+      consumable: false,
+      container: false,
+    },
+    itemSyncingForm: false,
+    selectedTreeNode: null,
+    treeData: [],
+    expandedTreeNodes: new Set(["world", "zones"]),
+  };
+  const BUILDER_TREE_ROOT_IDS = new Set(["world", "zones", "npcs", "items", "abilities"]);
+  const NPC_TREE_CATEGORY_IDS = {
+    hostile: "npc_hostile",
+    neutral: "npc_neutral",
+    vendor: "npc_vendor",
+  };
+  const ITEM_TREE_CATEGORY_IDS = {
+    weapon: "weapons",
+    armor: "armor",
+    consumable: "consumables",
+    clothing: "clothing",
+    jewelry: "jewelry",
+    furniture: "furniture",
+    container: "containers",
+    misc: "misc",
   };
   let hasInitialized = false;
 
@@ -482,6 +526,38 @@
     return Number.isFinite(numeric) ? numeric : null;
   }
 
+  function normalizeBuilderRoomItemEntries(entries = []) {
+    const mergedEntries = new Map();
+    const orderedIds = [];
+    (Array.isArray(entries) ? entries : []).forEach((entry) => {
+      const itemId = builderRoomKey(entry?.id || entry);
+      const count = Math.max(0, Math.round(Number(entry?.count ?? (itemId ? 1 : 0)) || 0));
+      const nestedItems = normalizeBuilderRoomItemEntries(entry?.items || []);
+      if (!itemId || count <= 0) {
+        return;
+      }
+      if (!mergedEntries.has(itemId)) {
+        orderedIds.push(itemId);
+        mergedEntries.set(itemId, {
+          id: itemId,
+          count: 0,
+          items: [],
+        });
+      }
+      const currentEntry = mergedEntries.get(itemId);
+      currentEntry.count += count;
+      if (nestedItems.length) {
+        currentEntry.items = nestedItems;
+      }
+    });
+    return orderedIds.map((itemId) => {
+      const entry = mergedEntries.get(itemId);
+      return entry.items?.length
+        ? { id: itemId, count: entry.count, items: entry.items }
+        : { id: itemId, count: entry.count };
+    });
+  }
+
   function normalizeBuilderYamlRoom(room, index = 0, zoneId = "") {
     const roomId = builderRoomKey(room?.id || `room_${index + 1}`);
     const map = {
@@ -513,6 +589,8 @@
       room_states: roomStates,
       ambient,
       zone_id: builderRoomKey(room?.zone_id || zoneId),
+      npcs: normalizeBuilderStringList(room?.npcs),
+      items: normalizeBuilderRoomItemEntries(room?.items),
       map,
       map_x: map.x,
       map_y: map.y,
@@ -557,8 +635,24 @@
 
   function setBuilderDirty(isDirty = true) {
     builderState.isDirty = Boolean(isDirty);
+    syncBuilderPrimarySaveButton();
+  }
+
+  function builderHasUnsavedChanges() {
+    return Boolean(builderState.isDirty || builderState.npcEditorDirty || builderState.itemEditorDirty);
+  }
+
+  function syncBuilderPrimarySaveButton() {
     const saveButton = byId("save-zone");
     if (saveButton) {
+      if (builderState.selectedTreeNode?.type === "npc") {
+        saveButton.textContent = builderState.npcEditorDirty ? "Save NPC*" : "Save NPC";
+        return;
+      }
+      if (builderState.selectedTreeNode?.type === "item") {
+        saveButton.textContent = builderState.itemEditorDirty ? "Save Item*" : "Save Item";
+        return;
+      }
       saveButton.textContent = builderState.isDirty ? "Save Zone*" : "Save Zone";
     }
   }
@@ -568,11 +662,19 @@
       await saveBuilderReviewGraph();
       return;
     }
+    if (builderState.selectedTreeNode?.type === "npc") {
+      await saveBuilderNpc();
+      return;
+    }
+    if (builderState.selectedTreeNode?.type === "item") {
+      await saveBuilderItem();
+      return;
+    }
     await saveBuilderZone();
   }
 
   function handleBuilderBeforeUnload(event) {
-    if (!builderState.isDirty) {
+    if (!builderHasUnsavedChanges()) {
       return;
     }
     event.preventDefault();
@@ -927,6 +1029,7 @@
   function clearBuilderEditor(statusMessage, previewMessage) {
     builderState.currentRoomId = null;
     builderState.currentRoom = null;
+    setBuilderSelectedTreeNode(null, { syncInspector: false });
     window.localStorage.removeItem(BUILDER_LAST_ROOM_STORAGE_KEY);
     if (byId("room-name")) {
       byId("room-name").value = "";
@@ -969,6 +1072,8 @@
     }
     syncBuilderZoneMenus();
     renderBuilderExitList([]);
+    renderBuilderRoomNpcAssignments(null);
+    renderBuilderRoomItemAssignments(null);
     renderBuilderStatefulDescList({});
     renderBuilderDetailList({});
     syncBuilderPreviewStateOptions({ stateful_descs: {}, room_states: [] }, "");
@@ -985,6 +1090,7 @@
     renderBuilderRoomList();
     renderZoneMap();
     setBuilderPageStatus(statusMessage || "Select a room to begin.");
+    syncBuilderInspectorSelection();
   }
 
   function builderCreateRoomPosition() {
@@ -1439,10 +1545,1738 @@
   }
 
   function scrollSelectedBuilderRoomIntoView() {
-    const selected = document.querySelector("#room-list .room-item.active");
+    const selected = document.querySelector("#world-tree .builder-tree-leaf.selected, #world-tree .builder-tree-label.selected");
     if (selected && typeof selected.scrollIntoView === "function") {
       selected.scrollIntoView({ block: "nearest" });
     }
+  }
+
+  function buildBuilderSelectedNode(type, id, label, parent = "") {
+    return {
+      type: String(type || "room"),
+      id: builderRoomKey(id),
+      label: String(label || id || type || "Selection"),
+      parent: parent ? String(parent) : "",
+      children: [],
+    };
+  }
+
+  function setBuilderSelectedTreeNode(node, options = {}) {
+    builderState.selectedTreeNode = node ? { ...node } : null;
+    if (options.log !== false) {
+      console.log("Selected Tree Node:", builderState.selectedTreeNode);
+    }
+    if (options.syncInspector !== false) {
+      syncBuilderInspectorSelection();
+    }
+  }
+
+  function builderTreeLeafLabel(room) {
+    return room?.name || room?.db_key || `Room ${room?.id || ""}`;
+  }
+
+  function cloneBuilderTreeNode(node) {
+    return {
+      ...node,
+      children: Array.isArray(node?.children) ? node.children.map((child) => cloneBuilderTreeNode(child)) : [],
+    };
+  }
+
+  function updateNode(nodes, nodeId, updates) {
+    return (nodes || []).map((node) => {
+      if (node.id === nodeId) {
+        return {
+          ...node,
+          ...(updates || {}),
+        };
+      }
+      if (!Array.isArray(node.children) || !node.children.length) {
+        return node;
+      }
+      return {
+        ...node,
+        children: updateNode(node.children, nodeId, updates),
+      };
+    });
+  }
+
+  function findBuilderTreeNodeById(nodeId, nodes = builderState.treeData) {
+    for (const node of nodes || []) {
+      if (builderRoomKey(node?.id) === builderRoomKey(nodeId)) {
+        return node;
+      }
+      if (Array.isArray(node?.children) && node.children.length) {
+        const childMatch = findBuilderTreeNodeById(nodeId, node.children);
+        if (childMatch) {
+          return childMatch;
+        }
+      }
+    }
+    return null;
+  }
+
+  function findBuilderTreeParent(nodeId, nodes = builderState.treeData, parent = null) {
+    for (const node of nodes || []) {
+      if (builderRoomKey(node?.id) === builderRoomKey(nodeId)) {
+        return parent;
+      }
+      if (Array.isArray(node?.children) && node.children.length) {
+        const parentMatch = findBuilderTreeParent(nodeId, node.children, node);
+        if (parentMatch) {
+          return parentMatch;
+        }
+      }
+    }
+    return null;
+  }
+
+  function collectBuilderTreeNodeIds(node) {
+    if (!node) {
+      return [];
+    }
+    return [builderRoomKey(node.id)].concat(...(node.children || []).map((child) => collectBuilderTreeNodeIds(child)));
+  }
+
+  function buildBuilderBaseTreeData() {
+    return [{
+      id: "world",
+      label: "WORLD",
+      type: "root",
+      children: [
+        { id: "zones", label: "Zones", type: "zones", children: [] },
+        {
+          id: "npcs",
+          label: "NPCs",
+          type: "npcs",
+          children: [
+            {
+              id: "npc_hostile",
+              label: "Hostile",
+              type: "npc_category",
+              subtype: "hostile",
+              parent: "npcs",
+              children: [],
+            },
+            { id: "npc_neutral", label: "Neutral", type: "npc_category", subtype: "neutral", parent: "npcs", children: [] },
+            { id: "npc_vendor", label: "Vendors", type: "npc_category", subtype: "vendor", parent: "npcs", children: [] },
+          ],
+        },
+        {
+          id: "items",
+          label: "Items",
+          type: "items",
+          children: [
+            {
+              id: "weapons",
+              label: "Weapons",
+              type: "item_category",
+              subtype: "weapon",
+              parent: "items",
+              children: [],
+            },
+            { id: "armor", label: "Armor", type: "item_category", subtype: "armor", parent: "items", children: [] },
+            { id: "consumables", label: "Consumables", type: "item_category", subtype: "consumable", parent: "items", children: [] },
+            { id: "clothing", label: "Clothing", type: "item_category", subtype: "clothing", parent: "items", children: [] },
+            { id: "jewelry", label: "Jewelry", type: "item_category", subtype: "jewelry", parent: "items", children: [] },
+            { id: "furniture", label: "Furniture", type: "item_category", subtype: "furniture", parent: "items", children: [] },
+            { id: "containers", label: "Containers", type: "item_category", subtype: "container", parent: "items", children: [] },
+            { id: "misc", label: "Misc", type: "item_category", subtype: "misc", parent: "items", children: [] },
+          ],
+        },
+        {
+          id: "abilities",
+          label: "Abilities",
+          type: "abilities",
+          children: [
+            { id: "ability_general", label: "General", type: "ability_category", parent: "abilities", children: [{ id: "awareness", label: "Awareness", type: "ability", parent: "ability_general", children: [] }] },
+            { id: "ability_thief", label: "Thief", type: "ability_category", parent: "abilities", children: [{ id: "backstab", label: "Backstab", type: "ability", parent: "ability_thief", children: [] }] },
+            { id: "ability_empath", label: "Empath", type: "ability_category", parent: "abilities", children: [{ id: "calm", label: "Calm", type: "ability", parent: "ability_empath", children: [] }] },
+            { id: "ability_cleric", label: "Cleric", type: "ability_category", parent: "abilities", children: [{ id: "bless", label: "Bless", type: "ability", parent: "ability_cleric", children: [] }] },
+          ],
+        },
+      ],
+    }];
+  }
+
+  function normalizeBuilderNpcType(value) {
+    const npcType = String(value || "").trim().toLowerCase();
+    if (["hostile", "neutral", "vendor"].includes(npcType)) {
+      return npcType;
+    }
+    return "neutral";
+  }
+
+  function builderNpcCategoryNodeId(npcType) {
+    return NPC_TREE_CATEGORY_IDS[normalizeBuilderNpcType(npcType)] || NPC_TREE_CATEGORY_IDS.neutral;
+  }
+
+  function builderNpcById(npcId) {
+    return builderState.npcs[builderRoomKey(npcId)] || null;
+  }
+
+  function currentSelectedBuilderNpcId() {
+    return builderState.selectedTreeNode?.type === "npc"
+      ? builderRoomKey(builderState.selectedTreeNode.id)
+      : "";
+  }
+
+  function currentSelectedBuilderItemId() {
+    return builderState.selectedTreeNode?.type === "item"
+      ? builderRoomKey(builderState.selectedTreeNode.id)
+      : "";
+  }
+
+  function builderNpcDisplayName(npcId) {
+    const npc = builderNpcById(npcId);
+    return npc?.name || npcId;
+  }
+
+  function builderItemDisplayName(itemId) {
+    const item = builderItemById(itemId);
+    return item?.name || itemId;
+  }
+
+  function builderItemCategoryIcon(itemId) {
+    const category = normalizeBuilderItemCategory(builderItemById(itemId)?.category || "misc");
+    return {
+      weapon: "⚔️",
+      armor: "🛡️",
+      consumable: "🧪",
+      container: "📦",
+    }[category] || "•";
+  }
+
+  function enrichBuilderRoomItemEntries(entries = []) {
+    return normalizeBuilderRoomItemEntries(entries).map((entry) => {
+      const category = normalizeBuilderItemCategory(builderItemById(entry.id)?.category || entry.category || "misc");
+      return entry.items?.length
+        ? { ...entry, category, items: enrichBuilderRoomItemEntries(entry.items) }
+        : { ...entry, category };
+    });
+  }
+
+  function builderNpcIdleLines(value) {
+    return String(value || "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  function builderNpcSlugify(value) {
+    const normalized = String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return normalized || "npc";
+  }
+
+  function uniqueBuilderNpcId(name) {
+    const baseId = builderNpcSlugify(name);
+    let candidate = baseId;
+    let suffix = 2;
+    while (builderNpcById(candidate)) {
+      candidate = `${baseId}-${suffix}`;
+      suffix += 1;
+    }
+    return candidate;
+  }
+
+  function buildDefaultNpcPayload(npcId, npcType = "neutral", name = "New NPC") {
+    return {
+      id: builderRoomKey(npcId),
+      name,
+      type: normalizeBuilderNpcType(npcType),
+      stats: {
+        level: 1,
+        health: 1,
+        attack: 0,
+        defense: 0,
+      },
+      behavior: {
+        aggressive: normalizeBuilderNpcType(npcType) === "hostile",
+        roam: false,
+        assist: false,
+      },
+      vendor: {
+        enabled: normalizeBuilderNpcType(npcType) === "vendor",
+        inventory: [],
+      },
+      dialogue: {
+        greeting: "",
+        idle: [],
+      },
+    };
+  }
+
+  function normalizeBuilderItemCategory(value) {
+    const category = String(value || "").trim().toLowerCase();
+    if (["weapon", "armor", "consumable", "clothing", "jewelry", "furniture", "container", "misc"].includes(category)) {
+      return category;
+    }
+    return "misc";
+  }
+
+  function builderItemCategoryNodeId(category) {
+    return ITEM_TREE_CATEGORY_IDS[normalizeBuilderItemCategory(category)] || ITEM_TREE_CATEGORY_IDS.misc;
+  }
+
+  function builderItemById(itemId) {
+    return builderState.items[builderRoomKey(itemId)] || null;
+  }
+
+  function builderItemSlugify(value) {
+    const normalized = String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return normalized || "item";
+  }
+
+  function uniqueBuilderItemId(name) {
+    const baseId = builderItemSlugify(name);
+    let candidate = baseId;
+    let suffix = 2;
+    while (builderItemById(candidate)) {
+      candidate = `${baseId}-${suffix}`;
+      suffix += 1;
+    }
+    return candidate;
+  }
+
+  function buildDefaultItemPayload(itemId, category = "misc", name = "New Item") {
+    const normalizedCategory = normalizeBuilderItemCategory(category);
+    return {
+      id: builderRoomKey(itemId),
+      name,
+      category: normalizedCategory,
+      value: 0,
+      weight: 1.0,
+      stackable: false,
+      equipment: {
+        slot: normalizedCategory === "weapon" ? "weapon" : "none",
+        attack: 0,
+        defense: 0,
+      },
+      consumable: {
+        effect: "",
+        duration: 0,
+      },
+      container: {
+        capacity: 0,
+      },
+    };
+  }
+
+  function builderItemFormStateFromItem(item) {
+    const normalizedItem = item || buildDefaultItemPayload("", "misc", "New Item");
+    return {
+      id: builderRoomKey(normalizedItem.id),
+      name: String(normalizedItem.name || ""),
+      category: normalizeBuilderItemCategory(normalizedItem.category),
+      value: String(normalizedItem.value ?? 0),
+      weight: String(normalizedItem.weight ?? 1.0),
+      stackable: Boolean(normalizedItem.stackable),
+      slot: String(normalizedItem.equipment?.slot || "none"),
+      attack: String(normalizedItem.equipment?.attack ?? 0),
+      defense: String(normalizedItem.equipment?.defense ?? 0),
+      effect: String(normalizedItem.consumable?.effect || ""),
+      duration: String(normalizedItem.consumable?.duration ?? 0),
+      capacity: String(normalizedItem.container?.capacity ?? 0),
+    };
+  }
+
+  function collectBuilderItemFormState() {
+    return {
+      id: builderRoomKey(builderState.currentItemId || ""),
+      name: String(byId("item-name")?.value || ""),
+      category: normalizeBuilderItemCategory(byId("item-category")?.value || "misc"),
+      value: String(byId("item-value")?.value || ""),
+      weight: String(byId("item-weight")?.value || ""),
+      stackable: Boolean(byId("item-stackable")?.checked),
+      slot: String(byId("item-slot")?.value || "none"),
+      attack: String(byId("item-attack")?.value || ""),
+      defense: String(byId("item-defense")?.value || ""),
+      effect: String(byId("item-effect")?.value || ""),
+      duration: String(byId("item-duration")?.value || ""),
+      capacity: String(byId("item-capacity")?.value || ""),
+    };
+  }
+
+  function resetBuilderItemValidation() {
+    builderState.itemValidationErrors = {};
+    const summary = byId("item-form-errors");
+    if (summary) {
+      summary.hidden = true;
+      summary.textContent = "";
+    }
+    document.querySelectorAll("#item-editor-panel .error").forEach((element) => element.classList.remove("error"));
+    document.querySelectorAll("#item-editor-panel [data-item-field-error-for]").forEach((element) => {
+      element.textContent = "";
+    });
+  }
+
+  function applyBuilderItemValidation(errors = {}) {
+    builderState.itemValidationErrors = { ...errors };
+    const entries = Object.entries(errors || {}).filter(([, message]) => Boolean(message));
+    const summary = byId("item-form-errors");
+    document.querySelectorAll("#item-editor-panel .error").forEach((element) => element.classList.remove("error"));
+    document.querySelectorAll("#item-editor-panel [data-item-field-error-for]").forEach((element) => {
+      element.textContent = "";
+    });
+    entries.forEach(([field, message]) => {
+      const input = byId(field);
+      if (input) {
+        input.classList.add("error");
+      }
+      const fieldError = document.querySelector(`#item-editor-panel [data-item-field-error-for="${field}"]`);
+      if (fieldError) {
+        fieldError.textContent = String(message);
+      }
+    });
+    if (summary) {
+      summary.hidden = entries.length === 0;
+      summary.textContent = entries.map(([, message]) => String(message)).join(" ");
+    }
+  }
+
+  function validateBuilderItemForm(formState = collectBuilderItemFormState()) {
+    const parseInteger = (value) => Number.parseInt(String(value || ""), 10);
+    const parseFloatValue = (value) => Number.parseFloat(String(value || ""));
+    const category = normalizeBuilderItemCategory(formState.category);
+    const value = parseInteger(formState.value);
+    const weight = parseFloatValue(formState.weight);
+    const attack = parseInteger(formState.attack);
+    const defense = parseInteger(formState.defense);
+    const duration = parseInteger(formState.duration);
+    const capacity = parseInteger(formState.capacity);
+    const errors = {};
+    const name = String(formState.name || "").trim();
+    if (!name) {
+      errors["item-name"] = "Name is required.";
+    }
+    if (!["weapon", "armor", "consumable", "clothing", "jewelry", "furniture", "container", "misc"].includes(category)) {
+      errors["item-category"] = "Category is required.";
+    }
+    if (!Number.isInteger(value) || value < 0) {
+      errors["item-value"] = "Value must be 0 or greater.";
+    }
+    if (!Number.isFinite(weight) || weight <= 0) {
+      errors["item-weight"] = "Weight must be greater than 0.";
+    }
+    if (!Number.isInteger(attack) || attack < 0) {
+      errors["item-attack"] = "Attack must be 0 or greater.";
+    }
+    if (!Number.isInteger(defense) || defense < 0) {
+      errors["item-defense"] = "Defense must be 0 or greater.";
+    }
+    if (!Number.isInteger(duration) || duration < 0) {
+      errors["item-duration"] = "Duration must be 0 or greater.";
+    }
+    if (!Number.isInteger(capacity) || capacity < 0) {
+      errors["item-capacity"] = "Capacity must be 0 or greater.";
+    }
+
+    return {
+      errors,
+      isValid: Object.keys(errors).length === 0,
+      payload: {
+        id: formState.id,
+        name,
+        category,
+        value: Number.isInteger(value) ? value : 0,
+        weight: Number.isFinite(weight) ? weight : 0,
+        stackable: Boolean(formState.stackable),
+        equipment: {
+          slot: category === "weapon" ? "weapon" : String(formState.slot || "none"),
+          attack: Number.isInteger(attack) ? attack : 0,
+          defense: Number.isInteger(defense) ? defense : 0,
+        },
+        consumable: {
+          effect: category === "consumable" ? String(formState.effect || "") : "",
+          duration: category === "consumable" && Number.isInteger(duration) ? duration : 0,
+        },
+        container: {
+          capacity: category === "container" && Number.isInteger(capacity) ? capacity : 0,
+        },
+      },
+    };
+  }
+
+  function setBuilderItemDirtyState(isDirty) {
+    builderState.itemEditorDirty = Boolean(isDirty);
+    syncBuilderPrimarySaveButton();
+  }
+
+  function refreshBuilderItemDraftState() {
+    if (builderState.itemSyncingForm || !builderState.currentItemId) {
+      return;
+    }
+    const formState = collectBuilderItemFormState();
+    setBuilderItemDirtyState(JSON.stringify(formState) !== JSON.stringify(builderState.itemEditorBaseline || {}));
+    applyBuilderItemValidation(validateBuilderItemForm(formState).errors);
+    syncBuilderItemFieldState();
+    renderBuilderRoomList();
+    syncBuilderInspectorSelection();
+  }
+
+  function setBuilderItemSectionOpen(sectionName, isOpen) {
+    builderState.itemSectionState[sectionName] = Boolean(isOpen);
+    const section = document.querySelector(`#item-editor-panel [data-item-section="${sectionName}"]`);
+    if (!section) {
+      return;
+    }
+    const header = section.querySelector(".npc-section-header");
+    const body = section.querySelector(".npc-section-body");
+    const chevron = section.querySelector(".npc-section-chevron");
+    section.classList.toggle("is-open", Boolean(isOpen));
+    if (header) {
+      header.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+    if (body) {
+      body.hidden = !isOpen;
+    }
+    if (chevron) {
+      chevron.textContent = isOpen ? "▾" : "▸";
+    }
+  }
+
+  function syncBuilderItemSections() {
+    Object.entries(builderState.itemSectionState || {}).forEach(([sectionName, isOpen]) => {
+      setBuilderItemSectionOpen(sectionName, isOpen);
+    });
+  }
+
+  function discardBuilderItemDraftState() {
+    builderState.currentItemId = null;
+    builderState.itemEditorBaseline = null;
+    setBuilderItemDirtyState(false);
+    resetBuilderItemValidation();
+  }
+
+  function builderNpcFormStateFromNpc(npc) {
+    const normalizedNpc = npc || buildDefaultNpcPayload("", "neutral", "New NPC");
+    return {
+      id: builderRoomKey(normalizedNpc.id),
+      name: String(normalizedNpc.name || ""),
+      type: normalizeBuilderNpcType(normalizedNpc.type),
+      level: String(normalizedNpc.stats?.level ?? 1),
+      health: String(normalizedNpc.stats?.health ?? 1),
+      attack: String(normalizedNpc.stats?.attack ?? 0),
+      defense: String(normalizedNpc.stats?.defense ?? 0),
+      aggressive: Boolean(normalizedNpc.behavior?.aggressive),
+      roam: Boolean(normalizedNpc.behavior?.roam),
+      assist: Boolean(normalizedNpc.behavior?.assist),
+      vendorEnabled: Boolean(normalizedNpc.vendor?.enabled),
+      greeting: String(normalizedNpc.dialogue?.greeting || ""),
+      idle: Array.isArray(normalizedNpc.dialogue?.idle) ? normalizedNpc.dialogue.idle.join("\n") : "",
+    };
+  }
+
+  function collectBuilderNpcFormState() {
+    return {
+      id: builderRoomKey(builderState.currentNpcId || ""),
+      name: String(byId("npc-name")?.value || ""),
+      type: normalizeBuilderNpcType(byId("npc-type")?.value || "neutral"),
+      level: String(byId("npc-level")?.value || ""),
+      health: String(byId("npc-health")?.value || ""),
+      attack: String(byId("npc-attack")?.value || ""),
+      defense: String(byId("npc-defense")?.value || ""),
+      aggressive: Boolean(byId("npc-aggressive")?.checked),
+      roam: Boolean(byId("npc-roam")?.checked),
+      assist: Boolean(byId("npc-assist")?.checked),
+      vendorEnabled: Boolean(byId("npc-vendor-enabled")?.checked),
+      greeting: String(byId("npc-greeting")?.value || ""),
+      idle: String(byId("npc-idle")?.value || ""),
+    };
+  }
+
+  function resetBuilderNpcValidation() {
+    builderState.npcValidationErrors = {};
+    const summary = byId("npc-form-errors");
+    if (summary) {
+      summary.hidden = true;
+      summary.textContent = "";
+    }
+    document.querySelectorAll("#npc-editor-panel .error").forEach((element) => element.classList.remove("error"));
+    document.querySelectorAll("#npc-editor-panel [data-field-error-for]").forEach((element) => {
+      element.textContent = "";
+    });
+  }
+
+  function applyBuilderNpcValidation(errors = {}) {
+    builderState.npcValidationErrors = { ...errors };
+    const entries = Object.entries(errors || {}).filter(([, message]) => Boolean(message));
+    const summary = byId("npc-form-errors");
+    document.querySelectorAll("#npc-editor-panel .error").forEach((element) => element.classList.remove("error"));
+    document.querySelectorAll("#npc-editor-panel [data-field-error-for]").forEach((element) => {
+      element.textContent = "";
+    });
+    entries.forEach(([field, message]) => {
+      const input = byId(field);
+      if (input) {
+        input.classList.add("error");
+      }
+      const fieldError = document.querySelector(`#npc-editor-panel [data-field-error-for="${field}"]`);
+      if (fieldError) {
+        fieldError.textContent = String(message);
+      }
+    });
+    if (summary) {
+      summary.hidden = entries.length === 0;
+      summary.textContent = entries.map(([, message]) => String(message)).join(" ");
+    }
+  }
+
+  function validateBuilderNpcForm(formState = collectBuilderNpcFormState()) {
+    const currentNpc = builderNpcById(formState.id);
+    const errors = {};
+    const npcType = normalizeBuilderNpcType(formState.type);
+    const name = String(formState.name || "").trim();
+    const parseInteger = (value) => Number.parseInt(String(value || ""), 10);
+    const level = parseInteger(formState.level);
+    const health = parseInteger(formState.health);
+    const attack = parseInteger(formState.attack);
+    const defense = parseInteger(formState.defense);
+
+    if (!name) {
+      errors["npc-name"] = "Name is required.";
+    }
+    if (!["hostile", "neutral", "vendor"].includes(npcType)) {
+      errors["npc-type"] = "Type must be hostile, neutral, or vendor.";
+    }
+    if (currentNpc && normalizeBuilderNpcType(currentNpc.type) !== npcType) {
+      errors["npc-type"] = "Type is locked after creation.";
+    }
+    if (!Number.isInteger(level) || level <= 0) {
+      errors["npc-level"] = "Level must be > 0.";
+    }
+    if (!Number.isInteger(health) || health < 0) {
+      errors["npc-health"] = "Health must be 0 or greater.";
+    }
+    if (!Number.isInteger(attack) || attack < 0) {
+      errors["npc-attack"] = "Attack must be 0 or greater.";
+    }
+    if (!Number.isInteger(defense) || defense < 0) {
+      errors["npc-defense"] = "Defense must be 0 or greater.";
+    }
+
+    const payload = {
+      id: formState.id,
+      name,
+      type: npcType,
+      stats: {
+        level: Number.isInteger(level) ? level : 0,
+        health: Number.isInteger(health) ? health : 0,
+        attack: Number.isInteger(attack) ? attack : 0,
+        defense: Number.isInteger(defense) ? defense : 0,
+      },
+      behavior: {
+        aggressive: npcType === "hostile" ? true : Boolean(formState.aggressive),
+        roam: Boolean(formState.roam),
+        assist: Boolean(formState.assist),
+      },
+      vendor: {
+        enabled: npcType === "vendor" ? Boolean(formState.vendorEnabled) : false,
+        inventory: Array.isArray(currentNpc?.vendor?.inventory) ? currentNpc.vendor.inventory : [],
+      },
+      dialogue: {
+        greeting: String(formState.greeting || ""),
+        idle: builderNpcIdleLines(formState.idle || ""),
+      },
+    };
+
+    return {
+      errors,
+      payload,
+      isValid: Object.keys(errors).length === 0,
+    };
+  }
+
+  function setBuilderNpcDirtyState(isDirty) {
+    builderState.npcEditorDirty = Boolean(isDirty);
+    syncBuilderPrimarySaveButton();
+  }
+
+  function refreshBuilderNpcDraftState() {
+    if (builderState.npcSyncingForm || !builderState.currentNpcId) {
+      return;
+    }
+    const formState = collectBuilderNpcFormState();
+    setBuilderNpcDirtyState(JSON.stringify(formState) !== JSON.stringify(builderState.npcEditorBaseline || {}));
+    applyBuilderNpcValidation(validateBuilderNpcForm(formState).errors);
+    syncBuilderNpcFieldState();
+    renderBuilderRoomList();
+    syncBuilderInspectorSelection();
+  }
+
+  function setBuilderNpcSectionOpen(sectionName, isOpen) {
+    builderState.npcSectionState[sectionName] = Boolean(isOpen);
+    const section = document.querySelector(`#npc-editor-panel [data-npc-section="${sectionName}"]`);
+    if (!section) {
+      return;
+    }
+    const header = section.querySelector(".npc-section-header");
+    const body = section.querySelector(".npc-section-body");
+    const chevron = section.querySelector(".npc-section-chevron");
+    section.classList.toggle("is-open", Boolean(isOpen));
+    if (header) {
+      header.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+    if (body) {
+      body.hidden = !isOpen;
+    }
+    if (chevron) {
+      chevron.textContent = isOpen ? "▾" : "▸";
+    }
+  }
+
+  function syncBuilderNpcSections() {
+    Object.entries(builderState.npcSectionState || {}).forEach(([sectionName, isOpen]) => {
+      setBuilderNpcSectionOpen(sectionName, isOpen);
+    });
+  }
+
+  function discardBuilderNpcDraftState() {
+    builderState.currentNpcId = null;
+    builderState.npcEditorBaseline = null;
+    setBuilderNpcDirtyState(false);
+    resetBuilderNpcValidation();
+  }
+
+  function buildBuilderNpcTreeChildren() {
+    return [
+      { id: "npc_hostile", label: "Hostile", subtype: "hostile" },
+      { id: "npc_neutral", label: "Neutral", subtype: "neutral" },
+      { id: "npc_vendor", label: "Vendors", subtype: "vendor" },
+    ].map((category) => {
+      const children = Object.values(builderState.npcs || {})
+        .filter((npc) => normalizeBuilderNpcType(npc?.type) === category.subtype)
+        .sort((left, right) => String(left?.name || left?.id || "").localeCompare(String(right?.name || right?.id || "")))
+        .map((npc) => ({
+          id: builderRoomKey(npc.id),
+          label: String(
+            builderRoomKey(npc.id) === builderRoomKey(builderState.currentNpcId)
+              ? (String(byId("npc-name")?.value || npc.name || npc.id || "NPC").trim() || npc.id || "NPC")
+              : (npc.name || npc.id || "NPC")
+          ) + (builderState.npcEditorDirty && builderRoomKey(npc.id) === builderRoomKey(builderState.currentNpcId) ? " (unsaved)" : ""),
+          type: "npc",
+          subtype: category.subtype,
+          parent: category.id,
+          children: [],
+        }));
+      return {
+        id: category.id,
+        label: category.label,
+        type: "npc_category",
+        subtype: category.subtype,
+        parent: "npcs",
+        children,
+      };
+    });
+  }
+
+  function buildBuilderItemTreeChildren() {
+    return [
+      { id: "weapons", label: "Weapons", subtype: "weapon" },
+      { id: "armor", label: "Armor", subtype: "armor" },
+      { id: "consumables", label: "Consumables", subtype: "consumable" },
+      { id: "clothing", label: "Clothing", subtype: "clothing" },
+      { id: "jewelry", label: "Jewelry", subtype: "jewelry" },
+      { id: "furniture", label: "Furniture", subtype: "furniture" },
+      { id: "containers", label: "Containers", subtype: "container" },
+      { id: "misc", label: "Misc", subtype: "misc" },
+    ].map((category) => {
+      const children = Object.values(builderState.items || {})
+        .filter((item) => normalizeBuilderItemCategory(item?.category) === category.subtype)
+        .sort((left, right) => String(left?.name || left?.id || "").localeCompare(String(right?.name || right?.id || "")))
+        .map((item) => ({
+          id: builderRoomKey(item.id),
+          label: String(
+            builderRoomKey(item.id) === builderRoomKey(builderState.currentItemId)
+              ? (String(byId("item-name")?.value || item.name || item.id || "Item").trim() || item.id || "Item")
+              : (item.name || item.id || "Item")
+          ) + (builderState.itemEditorDirty && builderRoomKey(item.id) === builderRoomKey(builderState.currentItemId) ? " (unsaved)" : ""),
+          type: "item",
+          subtype: category.subtype,
+          parent: category.id,
+          children: [],
+        }));
+      return {
+        id: category.id,
+        label: category.label,
+        type: "item_category",
+        subtype: category.subtype,
+        parent: "items",
+        children,
+      };
+    });
+  }
+
+  function buildBuilderZoneTreeChildren() {
+    return (builderState.zones || []).map((zone) => {
+      const zoneId = normalizeBuilderZoneId(zone.id);
+      const rooms = Array.isArray(zone.rooms) ? zone.rooms : [];
+      return {
+        id: zoneId,
+        label: zone.name || zoneId || "Unassigned",
+        type: "zone",
+        parent: "zones",
+        children: [{
+          id: `${zoneId}_rooms`,
+          label: "Rooms",
+          type: "rooms",
+          parent: zoneId,
+          children: rooms.map((room) => ({
+            id: builderRoomKey(room.id),
+            label: builderTreeLeafLabel(room),
+            type: "room",
+            parent: `${zoneId}_rooms`,
+            children: [],
+          })),
+        }],
+      };
+    });
+  }
+
+  function syncBuilderTreeData() {
+    let nextTree = buildBuilderBaseTreeData();
+    nextTree = updateNode(nextTree, "zones", { children: buildBuilderZoneTreeChildren() });
+    nextTree = updateNode(nextTree, "npcs", { children: buildBuilderNpcTreeChildren() });
+    nextTree = updateNode(nextTree, "items", { children: buildBuilderItemTreeChildren() });
+    builderState.treeData = nextTree;
+    if (builderState.selectedTreeNode?.id) {
+      const refreshedSelectedNode = findBuilderTreeNodeById(builderState.selectedTreeNode.id, builderState.treeData);
+      if (refreshedSelectedNode) {
+        builderState.selectedTreeNode = { ...refreshedSelectedNode };
+      }
+    }
+  }
+
+  async function loadBuilderNPCs() {
+    const payload = await builderFetchJson("/api/npcs/");
+    builderState.npcs = Object.fromEntries(
+      Object.entries(payload || {}).map(([npcId, npc]) => [builderRoomKey(npcId), npc])
+    );
+    renderBuilderRoomNpcAssignments(builderState.currentRoom);
+  }
+
+  async function loadBuilderItems() {
+    const payload = await builderFetchJson("/api/items/");
+    builderState.items = Object.fromEntries(
+      Object.entries(payload || {}).map(([itemId, item]) => [builderRoomKey(itemId), item])
+    );
+    renderBuilderRoomItemAssignments(builderState.currentRoom);
+  }
+
+  function showNPCEditor() {
+    const npcEditor = byId("npc-editor-panel");
+    const itemEditor = byId("item-editor-panel");
+    const roomFields = byId("room-editor-fields");
+    if (npcEditor) {
+      npcEditor.hidden = false;
+    }
+    if (itemEditor) {
+      itemEditor.hidden = true;
+    }
+    if (roomFields) {
+      roomFields.hidden = true;
+    }
+    syncBuilderNpcSections();
+  }
+
+  function hideNPCEditor() {
+    const npcEditor = byId("npc-editor-panel");
+    if (npcEditor) {
+      npcEditor.hidden = true;
+    }
+  }
+
+  function showItemEditor() {
+    const npcEditor = byId("npc-editor-panel");
+    const itemEditor = byId("item-editor-panel");
+    const roomFields = byId("room-editor-fields");
+    if (npcEditor) {
+      npcEditor.hidden = true;
+    }
+    if (itemEditor) {
+      itemEditor.hidden = false;
+    }
+    if (roomFields) {
+      roomFields.hidden = true;
+    }
+    syncBuilderItemSections();
+  }
+
+  function hideItemEditor() {
+    const itemEditor = byId("item-editor-panel");
+    if (itemEditor) {
+      itemEditor.hidden = true;
+    }
+  }
+
+  function showRoomEditorFields() {
+    const roomFields = byId("room-editor-fields");
+    if (roomFields) {
+      roomFields.hidden = false;
+    }
+  }
+
+  function renderBuilderRoomNpcAssignments(room = null) {
+    const list = byId("room-assigned-npc-list");
+    const emptyState = byId("room-assigned-npc-empty");
+    const select = byId("room-assigned-npc-select");
+    const assignedNpcIds = normalizeBuilderStringList(room?.npcs || []);
+    const preferredNpcId = builderRoomKey(select?.value || currentSelectedBuilderNpcId() || "");
+
+    if (select) {
+      const npcOptions = Object.values(builderState.npcs || {})
+        .slice()
+        .sort((left, right) => String(left?.name || left?.id || "").localeCompare(String(right?.name || right?.id || "")));
+      select.innerHTML = [
+        '<option value="">Select NPC...</option>',
+        ...npcOptions.map((npc) => {
+          const npcId = builderRoomKey(npc?.id || "");
+          const label = escapeHtml(String(npc?.name || npcId || "NPC"));
+          const disabled = assignedNpcIds.includes(npcId) ? ' disabled' : '';
+          return `<option value="${escapeHtml(npcId)}"${disabled}>${label}</option>`;
+        }),
+      ].join("");
+      select.value = preferredNpcId && !assignedNpcIds.includes(preferredNpcId) ? preferredNpcId : "";
+      select.disabled = !room;
+    }
+
+    if (!list) {
+      return;
+    }
+
+    if (!room || !assignedNpcIds.length) {
+      list.innerHTML = "";
+      if (emptyState) {
+        emptyState.hidden = false;
+      }
+      return;
+    }
+
+    list.innerHTML = assignedNpcIds.map((npcId) => `
+      <div class="builder-room-assignment-row">
+        <span class="builder-room-assignment-name">${escapeHtml(builderNpcDisplayName(npcId))}</span>
+        <button type="button" class="builder-room-assignment-remove" data-room-npc-remove="${escapeHtml(npcId)}">Remove</button>
+      </div>
+    `).join("");
+    if (emptyState) {
+      emptyState.hidden = true;
+    }
+  }
+
+  function renderBuilderRoomItemAssignments(room = null) {
+    const list = byId("room-assigned-item-list");
+    const emptyState = byId("room-assigned-item-empty");
+    const select = byId("room-assigned-item-select");
+    const assignedItems = normalizeBuilderRoomItemEntries(room?.items || []);
+    const assignedItemIds = assignedItems.map((entry) => entry.id);
+    const preferredItemId = builderRoomKey(select?.value || currentSelectedBuilderItemId() || "");
+
+    if (select) {
+      const itemOptions = Object.values(builderState.items || {})
+        .slice()
+        .sort((left, right) => String(left?.name || left?.id || "").localeCompare(String(right?.name || right?.id || "")));
+      select.innerHTML = [
+        '<option value="">Select item...</option>',
+        ...itemOptions.map((item) => {
+          const itemId = builderRoomKey(item?.id || "");
+          const icon = builderItemCategoryIcon(itemId);
+          const label = `${icon} ${String(item?.name || itemId || "Item")}`;
+          return `<option value="${escapeHtml(itemId)}">${escapeHtml(label)}</option>`;
+        }),
+      ].join("");
+      select.value = preferredItemId && !assignedItemIds.includes(preferredItemId) ? preferredItemId : preferredItemId || "";
+      select.disabled = !room;
+    }
+
+    if (!list) {
+      return;
+    }
+
+    if (!room || !assignedItems.length) {
+      list.innerHTML = "";
+      if (emptyState) {
+        emptyState.hidden = false;
+      }
+      return;
+    }
+
+    list.innerHTML = assignedItems.map((entry) => `
+      <div class="builder-room-item-row">
+        <span class="builder-room-assignment-name">${escapeHtml(`${builderItemCategoryIcon(entry.id)} ${builderItemDisplayName(entry.id)} (x${entry.count})`)}</span>
+        <div class="builder-room-item-actions">
+          <button type="button" class="builder-room-item-adjust" data-room-item-decrement="${escapeHtml(entry.id)}">-</button>
+          <button type="button" class="builder-room-item-adjust" data-room-item-increment="${escapeHtml(entry.id)}">+</button>
+          <button type="button" class="builder-room-assignment-remove" data-room-item-remove="${escapeHtml(entry.id)}">Remove</button>
+        </div>
+      </div>
+    `).join("");
+    if (emptyState) {
+      emptyState.hidden = true;
+    }
+  }
+
+  function syncBuilderNpcFieldState() {
+    const npcType = normalizeBuilderNpcType(byId("npc-type")?.value || "neutral");
+    const aggressiveField = byId("npc-aggressive");
+    const vendorEnabledField = byId("npc-vendor-enabled");
+    const vendorSection = document.querySelector('#npc-editor-panel [data-npc-section="vendor"]');
+    const currentNpc = builderNpcById(builderState.currentNpcId);
+    const typeField = byId("npc-type");
+    const status = byId("npc-editor-status");
+
+    if (aggressiveField) {
+      if (npcType === "hostile") {
+        aggressiveField.checked = true;
+        aggressiveField.disabled = true;
+      } else {
+        aggressiveField.disabled = false;
+      }
+    }
+
+    if (vendorEnabledField) {
+      if (npcType !== "vendor") {
+        vendorEnabledField.checked = false;
+        vendorEnabledField.disabled = true;
+      } else {
+        vendorEnabledField.disabled = false;
+      }
+    }
+
+    if (vendorSection) {
+      vendorSection.hidden = npcType !== "vendor";
+    }
+
+    if (typeField) {
+      typeField.disabled = Boolean(currentNpc?.id);
+    }
+
+    if (status) {
+      if (builderState.npcEditorDirty) {
+        status.textContent = "Unsaved changes.";
+      } else if (currentNpc?.id) {
+        status.textContent = "Type is locked after creation.";
+      } else {
+        status.textContent = "Select an NPC from the tree to edit.";
+      }
+    }
+  }
+
+  function syncBuilderItemSectionBodyState(sectionName, enabled) {
+    const section = document.querySelector(`#item-editor-panel [data-item-section="${sectionName}"]`);
+    if (!section) {
+      return;
+    }
+    const body = section.querySelector(".npc-section-body");
+    section.classList.toggle("is-disabled", !enabled);
+    section.hidden = !enabled;
+    if (body) {
+      body.querySelectorAll("input, select, textarea, button").forEach((field) => {
+        field.disabled = !enabled;
+      });
+    }
+  }
+
+  function syncBuilderItemFieldState() {
+    const category = normalizeBuilderItemCategory(byId("item-category")?.value || "misc");
+    const equipmentEnabled = ["weapon", "armor"].includes(category);
+    const consumableEnabled = category === "consumable";
+    const containerEnabled = category === "container";
+    const slotField = byId("item-slot");
+    const status = byId("item-editor-status");
+
+    syncBuilderItemSectionBodyState("equipment", equipmentEnabled);
+    syncBuilderItemSectionBodyState("consumable", consumableEnabled);
+    syncBuilderItemSectionBodyState("container", containerEnabled);
+
+    if (slotField && category === "weapon") {
+      slotField.value = "weapon";
+      slotField.disabled = true;
+    } else if (slotField) {
+      slotField.disabled = !equipmentEnabled;
+    }
+
+    if (status) {
+      status.textContent = builderState.itemEditorDirty ? "Unsaved changes." : "Select an item from the tree to edit.";
+    }
+  }
+
+  function loadItemIntoEditor(item) {
+    const normalizedItem = item || buildDefaultItemPayload("", "misc", "New Item");
+    builderState.itemSyncingForm = true;
+    builderState.currentItemId = builderRoomKey(normalizedItem.id);
+    if (byId("builder-current-item")) {
+      byId("builder-current-item").textContent = normalizedItem.name || normalizedItem.id || "No item selected";
+    }
+    if (byId("item-id-display")) {
+      byId("item-id-display").textContent = normalizedItem.id || "No item selected";
+    }
+    if (byId("item-name")) {
+      byId("item-name").value = normalizedItem.name || "";
+    }
+    if (byId("item-category")) {
+      byId("item-category").value = normalizeBuilderItemCategory(normalizedItem.category);
+    }
+    if (byId("item-value")) {
+      byId("item-value").value = String(normalizedItem.value ?? 0);
+    }
+    if (byId("item-weight")) {
+      byId("item-weight").value = String(normalizedItem.weight ?? 1.0);
+    }
+    if (byId("item-stackable")) {
+      byId("item-stackable").checked = Boolean(normalizedItem.stackable);
+    }
+    if (byId("item-slot")) {
+      byId("item-slot").value = String(normalizedItem.equipment?.slot || "none");
+    }
+    if (byId("item-attack")) {
+      byId("item-attack").value = String(normalizedItem.equipment?.attack ?? 0);
+    }
+    if (byId("item-defense")) {
+      byId("item-defense").value = String(normalizedItem.equipment?.defense ?? 0);
+    }
+    if (byId("item-effect")) {
+      byId("item-effect").value = String(normalizedItem.consumable?.effect || "");
+    }
+    if (byId("item-duration")) {
+      byId("item-duration").value = String(normalizedItem.consumable?.duration ?? 0);
+    }
+    if (byId("item-capacity")) {
+      byId("item-capacity").value = String(normalizedItem.container?.capacity ?? 0);
+    }
+    builderState.itemEditorBaseline = builderItemFormStateFromItem(normalizedItem);
+    setBuilderItemDirtyState(false);
+    resetBuilderItemValidation();
+    builderState.itemSyncingForm = false;
+    syncBuilderItemFieldState();
+  }
+
+  function buildItemFromForm() {
+    return validateBuilderItemForm(collectBuilderItemFormState());
+  }
+
+  function upsertBuilderItemRecord(item) {
+    if (!item?.id) {
+      return;
+    }
+    builderState.items[builderRoomKey(item.id)] = item;
+  }
+
+  function deleteBuilderItemRecord(itemId) {
+    delete builderState.items[builderRoomKey(itemId)];
+  }
+
+  async function openItemEditor(itemId) {
+    if (!builderItemById(itemId)) {
+      await loadBuilderItems();
+    }
+    const item = builderItemById(itemId);
+    if (!item) {
+      throw new Error(`Unable to find item ${itemId}.`);
+    }
+    builderState.currentItemId = builderRoomKey(item.id);
+    builderState.currentRoomId = null;
+    builderState.selectedRoom = null;
+    builderState.currentRoom = null;
+    builderState.expandedTreeNodes.add("world");
+    builderState.expandedTreeNodes.add("items");
+    builderState.expandedTreeNodes.add(builderItemCategoryNodeId(item.category));
+    setBuilderSelectedTreeNode(
+      findBuilderTreeNodeById(item.id) || buildBuilderSelectedNode("item", item.id, item.name || item.id, builderItemCategoryNodeId(item.category)),
+      { syncInspector: false }
+    );
+    renderBuilderRoomList();
+    highlightSelectedBuilderRoom();
+    loadItemIntoEditor(item);
+    setBuilderPageStatus(`Editing item ${item.name || item.id}`);
+  }
+
+  async function saveBuilderItem() {
+    const { errors, payload: item, isValid } = buildItemFromForm();
+    applyBuilderItemValidation(errors);
+    if (!isValid) {
+      setBuilderPageStatus("Item validation failed.");
+      toast("Fix validation errors before saving.");
+      return;
+    }
+    setBuilderPageStatus(`Saving item ${item.name}...`);
+    const response = await builderFetchJson("/api/items/save/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(item),
+    });
+    const savedItem = response.item || item;
+    upsertBuilderItemRecord(savedItem);
+    builderState.currentItemId = builderRoomKey(savedItem.id);
+    builderState.expandedTreeNodes.add("world");
+    builderState.expandedTreeNodes.add("items");
+    builderState.expandedTreeNodes.add(builderItemCategoryNodeId(savedItem.category));
+    setBuilderSelectedTreeNode(
+      findBuilderTreeNodeById(savedItem.id) || buildBuilderSelectedNode("item", savedItem.id, savedItem.name || savedItem.id, builderItemCategoryNodeId(savedItem.category)),
+      { syncInspector: false }
+    );
+    renderBuilderRoomList();
+    loadItemIntoEditor(savedItem);
+    highlightSelectedBuilderRoom();
+    setBuilderPageStatus(`Saved item ${savedItem.name || savedItem.id}.`);
+    toast("Item saved");
+  }
+
+  async function createBuilderItem(category) {
+    const normalizedCategory = normalizeBuilderItemCategory(category);
+    const item = buildDefaultItemPayload(uniqueBuilderItemId("New Item"), normalizedCategory, "New Item");
+    const response = await builderFetchJson("/api/items/save/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(item),
+    });
+    const savedItem = response.item || item;
+    upsertBuilderItemRecord(savedItem);
+    renderBuilderRoomList();
+    await openItemEditor(savedItem.id);
+    toast("Item saved");
+  }
+
+  async function deleteBuilderItem() {
+    const item = builderItemById(builderState.currentItemId || builderState.selectedTreeNode?.id || "");
+    if (!item) {
+      toast("Select an item first.");
+      return;
+    }
+    if (!window.confirm(`Delete ${item.name || item.id}?`)) {
+      return;
+    }
+    await builderFetchJson("/api/items/delete/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: item.id }),
+    });
+    const categoryNodeId = builderItemCategoryNodeId(item.category);
+    deleteBuilderItemRecord(item.id);
+    discardBuilderItemDraftState();
+    renderBuilderRoomList();
+    setBuilderSelectedTreeNode(findBuilderTreeNodeById(categoryNodeId) || null, { syncInspector: false });
+    syncBuilderInspectorSelection();
+    highlightSelectedBuilderRoom();
+    setBuilderPageStatus(`Deleted item ${item.name || item.id}.`);
+    toast(`Deleted ${item.name || item.id}`);
+  }
+
+  function loadNPCIntoEditor(npc) {
+    const normalizedNpc = npc || buildDefaultNpcPayload("", "neutral", "New NPC");
+    builderState.npcSyncingForm = true;
+    builderState.currentNpcId = builderRoomKey(normalizedNpc.id);
+    if (byId("builder-current-npc")) {
+      byId("builder-current-npc").textContent = normalizedNpc.name || normalizedNpc.id || "No NPC selected";
+    }
+    if (byId("npc-id-display")) {
+      byId("npc-id-display").textContent = normalizedNpc.id || "No NPC selected";
+    }
+    if (byId("npc-name")) {
+      byId("npc-name").value = normalizedNpc.name || "";
+    }
+    if (byId("npc-type")) {
+      byId("npc-type").value = normalizeBuilderNpcType(normalizedNpc.type);
+    }
+    if (byId("npc-level")) {
+      byId("npc-level").value = String(normalizedNpc.stats?.level ?? 1);
+    }
+    if (byId("npc-health")) {
+      byId("npc-health").value = String(normalizedNpc.stats?.health ?? 1);
+    }
+    if (byId("npc-attack")) {
+      byId("npc-attack").value = String(normalizedNpc.stats?.attack ?? 0);
+    }
+    if (byId("npc-defense")) {
+      byId("npc-defense").value = String(normalizedNpc.stats?.defense ?? 0);
+    }
+    if (byId("npc-aggressive")) {
+      byId("npc-aggressive").checked = Boolean(normalizedNpc.behavior?.aggressive);
+    }
+    if (byId("npc-roam")) {
+      byId("npc-roam").checked = Boolean(normalizedNpc.behavior?.roam);
+    }
+    if (byId("npc-assist")) {
+      byId("npc-assist").checked = Boolean(normalizedNpc.behavior?.assist);
+    }
+    if (byId("npc-vendor-enabled")) {
+      byId("npc-vendor-enabled").checked = Boolean(normalizedNpc.vendor?.enabled);
+    }
+    if (byId("npc-greeting")) {
+      byId("npc-greeting").value = normalizedNpc.dialogue?.greeting || "";
+    }
+    if (byId("npc-idle")) {
+      byId("npc-idle").value = Array.isArray(normalizedNpc.dialogue?.idle) ? normalizedNpc.dialogue.idle.join("\n") : "";
+    }
+    builderState.npcEditorBaseline = builderNpcFormStateFromNpc(normalizedNpc);
+    setBuilderNpcDirtyState(false);
+    resetBuilderNpcValidation();
+    builderState.npcSyncingForm = false;
+    syncBuilderNpcFieldState();
+  }
+
+  function buildNPCFromForm() {
+    return validateBuilderNpcForm(collectBuilderNpcFormState());
+  }
+
+  function upsertBuilderNpcRecord(npc) {
+    if (!npc?.id) {
+      return;
+    }
+    builderState.npcs[builderRoomKey(npc.id)] = npc;
+  }
+
+  function deleteBuilderNpcRecord(npcId) {
+    delete builderState.npcs[builderRoomKey(npcId)];
+  }
+
+  async function openNPCEditor(npcId) {
+    if (!builderNpcById(npcId)) {
+      await loadBuilderNPCs();
+    }
+    const npc = builderNpcById(npcId);
+    if (!npc) {
+      throw new Error(`Unable to find NPC ${npcId}.`);
+    }
+    builderState.currentNpcId = builderRoomKey(npc.id);
+    builderState.currentRoomId = null;
+    builderState.selectedRoom = null;
+    builderState.currentRoom = null;
+    builderState.expandedTreeNodes.add("world");
+    builderState.expandedTreeNodes.add("npcs");
+    builderState.expandedTreeNodes.add(builderNpcCategoryNodeId(npc.type));
+    setBuilderSelectedTreeNode(
+      findBuilderTreeNodeById(npc.id) || buildBuilderSelectedNode("npc", npc.id, npc.name || npc.id, builderNpcCategoryNodeId(npc.type)),
+      { syncInspector: false }
+    );
+    renderBuilderRoomList();
+    highlightSelectedBuilderRoom();
+    loadNPCIntoEditor(npc);
+    setBuilderPageStatus(`Editing NPC ${npc.name || npc.id}`);
+  }
+
+  async function saveBuilderNpc() {
+    const { errors, payload: npc, isValid } = buildNPCFromForm();
+    applyBuilderNpcValidation(errors);
+    if (!isValid) {
+      setBuilderPageStatus("NPC validation failed.");
+      toast("Fix validation errors before saving.");
+      return;
+    }
+    setBuilderPageStatus(`Saving NPC ${npc.name}...`);
+    const response = await builderFetchJson("/api/npcs/save/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(npc),
+    });
+    const savedNpc = response.npc || npc;
+    upsertBuilderNpcRecord(savedNpc);
+    builderState.currentNpcId = builderRoomKey(savedNpc.id);
+    builderState.expandedTreeNodes.add("world");
+    builderState.expandedTreeNodes.add("npcs");
+    builderState.expandedTreeNodes.add(builderNpcCategoryNodeId(savedNpc.type));
+    setBuilderSelectedTreeNode(
+      findBuilderTreeNodeById(savedNpc.id) || buildBuilderSelectedNode("npc", savedNpc.id, savedNpc.name || savedNpc.id, builderNpcCategoryNodeId(savedNpc.type)),
+      { syncInspector: false }
+    );
+    renderBuilderRoomList();
+    loadNPCIntoEditor(savedNpc);
+    highlightSelectedBuilderRoom();
+    setBuilderPageStatus(`Saved NPC ${savedNpc.name || savedNpc.id}.`);
+    toast("NPC saved");
+  }
+
+  async function createBuilderNpc(npcType) {
+    const normalizedType = normalizeBuilderNpcType(npcType);
+    const npc = buildDefaultNpcPayload(uniqueBuilderNpcId("New NPC"), normalizedType, "New NPC");
+    const response = await builderFetchJson("/api/npcs/save/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(npc),
+    });
+    const savedNpc = response.npc || npc;
+    upsertBuilderNpcRecord(savedNpc);
+    renderBuilderRoomList();
+    await openNPCEditor(savedNpc.id);
+    toast("NPC saved");
+  }
+
+  async function deleteBuilderNpc() {
+    const npc = builderNpcById(builderState.currentNpcId || builderState.selectedTreeNode?.id || "");
+    if (!npc) {
+      toast("Select an NPC first.");
+      return;
+    }
+    if (!window.confirm(`Delete ${npc.name || npc.id}?`)) {
+      return;
+    }
+    await builderFetchJson("/api/npcs/delete/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: npc.id }),
+    });
+    const categoryNodeId = builderNpcCategoryNodeId(npc.type);
+    deleteBuilderNpcRecord(npc.id);
+    discardBuilderNpcDraftState();
+    renderBuilderRoomList();
+    setBuilderSelectedTreeNode(findBuilderTreeNodeById(categoryNodeId) || null, { syncInspector: false });
+    syncBuilderInspectorSelection();
+    highlightSelectedBuilderRoom();
+    setBuilderPageStatus(`Deleted NPC ${npc.name || npc.id}.`);
+    toast(`Deleted ${npc.name || npc.id}`);
+  }
+
+  function isSelectedTreeNode(id) {
+    return builderRoomKey(builderState.selectedTreeNode?.id) === builderRoomKey(id);
+  }
+
+  function selectBuilderTreeNode(node, options = {}) {
+    setBuilderSelectedTreeNode(node ? { ...node } : null, options);
+  }
+
+  function toggleBuilderTreeNode(nodeId) {
+    const targetNode = findBuilderTreeNodeById(nodeId);
+    if (!targetNode || !Array.isArray(targetNode.children) || !targetNode.children.length) {
+      return;
+    }
+    const normalizedNodeId = builderRoomKey(nodeId);
+    if (builderState.expandedTreeNodes.has(normalizedNodeId)) {
+      for (const id of collectBuilderTreeNodeIds(targetNode)) {
+        builderState.expandedTreeNodes.delete(builderRoomKey(id));
+      }
+      return;
+    }
+    const parentNode = findBuilderTreeParent(normalizedNodeId);
+    const siblings = parentNode?.children || builderState.treeData;
+    for (const sibling of siblings || []) {
+      if (builderRoomKey(sibling.id) === normalizedNodeId) {
+        continue;
+      }
+      for (const id of collectBuilderTreeNodeIds(sibling)) {
+        builderState.expandedTreeNodes.delete(builderRoomKey(id));
+      }
+    }
+    builderState.expandedTreeNodes.add(normalizedNodeId);
+  }
+
+  function handleBuilderTreeNodeSelection(node, options = {}) {
+    if (!node) {
+      return;
+    }
+    const nextNodeId = builderRoomKey(node.id);
+    const currentNpcId = builderRoomKey(builderState.currentNpcId);
+    if (builderState.npcEditorDirty && currentNpcId && nextNodeId !== currentNpcId) {
+      const shouldDiscard = window.confirm("Discard unsaved NPC changes?");
+      if (!shouldDiscard) {
+        return;
+      }
+      discardBuilderNpcDraftState();
+    }
+    const currentItemId = builderRoomKey(builderState.currentItemId);
+    if (builderState.itemEditorDirty && currentItemId && nextNodeId !== currentItemId) {
+      const shouldDiscard = window.confirm("Discard unsaved item changes?");
+      if (!shouldDiscard) {
+        return;
+      }
+      discardBuilderItemDraftState();
+    }
+    const expandIfBranch = options.expandIfBranch !== false;
+    selectBuilderTreeNode(node, { syncInspector: false });
+
+    switch (String(node.type || "")) {
+      case "npc": {
+        void openNPCEditor(node.id).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to load NPC.");
+        });
+        return;
+      }
+      case "item": {
+        void openItemEditor(node.id).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to load item.");
+        });
+        return;
+      }
+      case "room": {
+        discardBuilderNpcDraftState();
+        discardBuilderItemDraftState();
+        const parentZone = findBuilderTreeParent(node.parent || "");
+        const zoneId = normalizeBuilderZoneId(parentZone?.id || "");
+        const loadRoom = async () => {
+          if (zoneId && zoneId !== normalizeBuilderZoneId(builderState.currentZoneId)) {
+            clearBuilderConnectMode();
+            await switchBuilderZone(zoneId, { autoSelectRoom: false, preserveSelection: false });
+          }
+          await loadBuilderRoom(node.id);
+        };
+        void loadRoom().catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to load room.");
+        });
+        return;
+      }
+      case "zone": {
+        const zoneId = normalizeBuilderZoneId(node.id || "");
+        builderState.expandedTreeNodes.add("world");
+        builderState.expandedTreeNodes.add("zones");
+        if (zoneId) {
+          builderState.expandedTreeNodes.add(zoneId);
+        }
+        renderBuilderRoomList();
+        highlightSelectedBuilderRoom();
+        syncBuilderInspectorSelection();
+        if (zoneId && zoneId !== normalizeBuilderZoneId(builderState.currentZoneId)) {
+          clearBuilderConnectMode();
+          void switchBuilderZone(zoneId, { autoSelectRoom: false, preserveSelection: false }).catch((error) => {
+            console.error(error);
+            setBuilderPageStatus(error.message || "Unable to switch zone.");
+          });
+        }
+        return;
+      }
+      default:
+        if (expandIfBranch && Array.isArray(node.children) && node.children.length && !builderState.expandedTreeNodes.has(builderRoomKey(node.id))) {
+          toggleBuilderTreeNode(node.id);
+        }
+        break;
+    }
+
+    renderBuilderRoomList();
+    highlightSelectedBuilderRoom();
+    syncBuilderInspectorSelection();
+  }
+
+  function builderTreeNodeTypeLabel(node) {
+    const normalizedType = String(node?.type || "node").trim().toLowerCase();
+    const typeMap = {
+      npc: "NPC",
+      npcs: "NPCs",
+      item: "Item",
+      items: "Items",
+      room: "Room",
+      rooms: "Rooms",
+      zone: "Zone",
+      zones: "Zones",
+      root: "Root",
+      ability: "Ability",
+      abilities: "Abilities",
+      npc_category: "NPC Category",
+      item_category: "Item Category",
+      ability_category: "Ability Category",
+    };
+    if (typeMap[normalizedType]) {
+      return typeMap[normalizedType];
+    }
+    const type = normalizedType.replace(/_/g, " ").trim();
+    if (!type) {
+      return "Node";
+    }
+    return type.split(" ").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
+  }
+
+  function builderNodePlaceholder(node) {
+    if (!node) {
+      return {
+        title: "Selection Placeholder",
+        subtitle: "Select a room to edit.",
+        body: "Select a room from the World Tree to populate the room editor.",
+      };
+    }
+
+    if (node.type === "zone") {
+      return {
+        title: node.label || node.id,
+        subtitle: "Zone selected",
+        body: "Zone metadata and higher-level tools can live here next. Select a room to edit room data.",
+      };
+    }
+
+    if (node.type === "npc_category") {
+      return {
+        title: node.label || node.id,
+        subtitle: "NPC category",
+        body: "NPC tooling is not wired yet. This placeholder reserves the inspector path for drag/drop NPC authoring.",
+      };
+    }
+
+    if (node.type === "item_category") {
+      return {
+        title: node.label || node.id,
+        subtitle: "Item category",
+        body: "Use Create Item to add a new item in this category, then select it to edit category-driven item data.",
+      };
+    }
+
+    if (node.type === "ability_category") {
+      return {
+        title: node.label || node.id,
+        subtitle: "Ability category",
+        body: "Ability tooling is not wired yet. This placeholder keeps the inspector ready for ability editors.",
+      };
+    }
+
+    if (node.type === "npc") {
+      return {
+        title: node.label || node.id,
+        subtitle: "NPC placeholder",
+        body: "NPC records are not loaded from YAML yet. This placeholder reserves the inspector path for concrete NPC editing.",
+      };
+    }
+
+    if (node.type === "item") {
+      return {
+        title: node.label || node.id,
+        subtitle: "Item selected",
+        body: "Use the item editor to modify category-driven item data and save it back to YAML.",
+      };
+    }
+
+    return {
+      title: node.label || node.id || "Selection",
+      subtitle: "Selected node",
+      body: "Select a room to populate the room editor.",
+    };
+  }
+
+  function syncBuilderInspectorSelection() {
+    const node = builderState.selectedTreeNode;
+    const selectedNpc = node?.type === "npc" ? builderNpcById(node.id) : null;
+    const selectedItem = node?.type === "item" ? builderItemById(node.id) : null;
+    const title = byId("builder-selected-node-title");
+    const placeholder = byId("builder-node-placeholder");
+    const placeholderTitle = byId("builder-node-placeholder-title");
+    const placeholderType = byId("builder-node-placeholder-type");
+    const placeholderBody = byId("builder-node-placeholder-body");
+    const currentLabel = byId("builder-current-room");
+
+    if (title) {
+      const selectedLabel = node
+        ? `${node.label || node.id}${node?.type === "npc" && builderState.npcEditorDirty ? " (unsaved)" : ""}${node?.type === "item" && builderState.itemEditorDirty ? " (unsaved)" : ""}`
+        : "No selection";
+      title.textContent = node ? `Selected: ${selectedLabel} (${builderTreeNodeTypeLabel(node)})` : "No selection";
+    }
+
+    if (currentLabel) {
+      currentLabel.textContent = selectedNpc?.name || selectedItem?.name || builderState.currentRoom?.name || (node?.type === "npc" ? "No NPC selected" : node?.type === "item" ? "No item selected" : "No room selected");
+    }
+
+    if (node?.type === "npc") {
+      showNPCEditor();
+      if (selectedNpc && (!builderState.npcEditorBaseline || builderRoomKey(builderState.currentNpcId) !== builderRoomKey(selectedNpc.id))) {
+        loadNPCIntoEditor(selectedNpc);
+      }
+    } else if (node?.type === "item") {
+      showItemEditor();
+      if (selectedItem && (!builderState.itemEditorBaseline || builderRoomKey(builderState.currentItemId) !== builderRoomKey(selectedItem.id))) {
+        loadItemIntoEditor(selectedItem);
+      }
+    } else {
+      hideNPCEditor();
+      hideItemEditor();
+      showRoomEditorFields();
+    }
+
+    if (!placeholder) {
+      syncBuilderPrimarySaveButton();
+      return;
+    }
+
+    const showPlaceholder = Boolean(node && node.type !== "room" && node.type !== "npc" && node.type !== "item");
+    placeholder.hidden = !showPlaceholder;
+    if (!showPlaceholder) {
+      return;
+    }
+
+    const content = builderNodePlaceholder(node);
+    if (placeholderTitle) {
+      placeholderTitle.textContent = content.title;
+    }
+    if (placeholderType) {
+      placeholderType.textContent = content.subtitle;
+    }
+    if (placeholderBody) {
+      placeholderBody.textContent = content.body;
+    }
+    syncBuilderPrimarySaveButton();
+  }
+
+  function renderBuilderTreeNode(node, depth = 0) {
+    const hasChildren = Array.isArray(node?.children) && node.children.length > 0;
+    const isOpen = builderState.expandedTreeNodes.has(builderRoomKey(node.id));
+    const isSelected = isSelectedTreeNode(node.id);
+    const type = String(node?.type || "node");
+    const dragAttributes = type === "npc"
+      ? ` data-npc-id="${escapeHtml(node.id)}" draggable="true"`
+      : type === "item"
+        ? ` data-item-id="${escapeHtml(node.id)}" draggable="true"`
+        : "";
+    const classes = ["tree-label", "builder-tree-label"];
+    const nodeClasses = ["tree-node", "builder-tree-node"];
+    if (!hasChildren) {
+      classes.push("tree-leaf", "builder-tree-leaf");
+    }
+    if (isSelected) {
+      classes.push("selected");
+      nodeClasses.push("active");
+    }
+    if (isOpen) {
+      classes.push("is-open");
+    }
+    if (type === "zone" && builderRoomKey(node.id) === normalizeBuilderZoneId(builderState.currentZoneId)) {
+      classes.push("is-current-zone");
+    }
+
+    return `
+      <div class="${nodeClasses.join(" ")}" data-type="${escapeHtml(type)}" data-node-id="${escapeHtml(node.id)}" data-depth="${escapeHtml(String(depth))}" data-has-children="${hasChildren ? "true" : "false"}">
+        <div class="${classes.join(" ")}" data-tree-role="select-node" data-node-id="${escapeHtml(node.id)}" data-depth="${escapeHtml(String(depth))}"${dragAttributes} style="padding-left:${depth * 12}px;">
+          ${hasChildren
+            ? `<button type="button" class="builder-tree-toggle" data-tree-role="toggle-node" data-node-id="${escapeHtml(node.id)}" aria-label="Toggle ${escapeHtml(node.label)}"><span class="tree-arrow builder-tree-arrow${isOpen ? " open" : ""}">▶</span></button>`
+            : '<span class="builder-tree-spacer" aria-hidden="true">•</span>'}
+          <span class="builder-tree-label-text">${escapeHtml(node.label || node.id || "Node")}</span>
+          ${(BUILDER_TREE_ROOT_IDS.has(builderRoomKey(node.id)) || type === "zone" || type === "rooms")
+            ? `<span class="builder-tree-meta">${escapeHtml(String((node.children || []).length || ""))}</span>`
+            : ""}
+          ${type === "npc_category"
+            ? `<button type="button" class="chrome-tab builder-tree-inline-action" data-tree-role="create-npc" data-npc-type="${escapeHtml(node.subtype || "neutral")}">Create NPC</button>`
+            : type === "item_category"
+              ? `<button type="button" class="chrome-tab builder-tree-inline-action" data-tree-role="create-item" data-item-category="${escapeHtml(node.subtype || "misc")}">Create Item</button>`
+            : ""}
+        </div>
+        ${hasChildren && isOpen ? `<div class="tree-children builder-tree-children">${node.children.map((child) => renderBuilderTreeNode(child, depth + 1)).join("")}</div>` : ""}
+      </div>`;
+  }
+
+  function renderBuilderZoneTree() {
+    const list = byId("room-list");
+    if (!list) {
+      return;
+    }
+
+    syncBuilderTreeData();
+    if (!builderState.treeData.length) {
+      list.innerHTML = '<div class="builder-room-empty">No tree data available.</div>';
+      return;
+    }
+    list.innerHTML = builderState.treeData.map((node) => renderBuilderTreeNode(node)).join("");
   }
 
   function deriveBuilderShortDesc(data) {
@@ -1481,28 +3315,13 @@
   }
 
   function highlightSelectedBuilderRoom() {
-    document.querySelectorAll("#room-list .room-item").forEach((node) => {
-      const roomId = builderRoomKey(node.dataset.id || "");
-      node.classList.toggle("active", roomId === builderRoomKey(builderState.currentRoomId));
-    });
+    renderBuilderZoneTree();
+    syncBuilderInspectorSelection();
     scrollSelectedBuilderRoomIntoView();
   }
 
   function renderBuilderRoomList() {
-    const list = byId("room-list");
-    if (!list) {
-      return;
-    }
-    const rooms = builderVisibleRooms();
-    if (!rooms.length) {
-      list.innerHTML = '<div class="builder-room-empty">No rooms in this zone yet.</div>';
-      return;
-    }
-    list.innerHTML = rooms
-      .map(
-        (room) => `<div class="room-item${builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId) ? " active" : ""}" data-id="${escapeHtml(room.id)}">${escapeHtml(room.name || room.db_key || `Room ${room.id}`)}</div>`
-      )
-      .join("");
+    renderBuilderZoneTree();
   }
 
   function renderBuilderPreview(data, options = {}) {
@@ -1565,6 +3384,7 @@
     if (options.flash) {
       triggerBuilderPreviewFlash();
     }
+    syncBuilderInspectorSelection();
   }
 
   function builderMapPanel() {
@@ -1970,6 +3790,9 @@
         const mapX = Number(room?.x ?? room?.map?.x ?? room?.map_x ?? 0) || 0;
         const mapY = Number(room?.y ?? room?.map?.y ?? room?.map_y ?? 0) || 0;
         const color = String(room?.color || "standard").trim().toLowerCase() || "standard";
+        const items = normalizeBuilderRoomItemEntries(room?.items || room?.itemEntries || [])
+          .map((entry) => `${builderRoomKey(entry.id)}:${Math.max(0, Number(entry.count) || 0)}`)
+          .join(",");
         const exits = Object.entries(room?.exits || room?.exitMap || {})
           .map(([direction, targetId]) => {
             const normalizedTargetId = typeof targetId === "string"
@@ -1982,7 +3805,7 @@
           .filter((entry) => entry && !entry.startsWith(":"))
           .sort()
           .join(",");
-        return `${roomId}@${mapX},${mapY}:${color}[${exits}]`;
+        return `${roomId}@${mapX},${mapY}:${color}[${exits}]{${items}}`;
       })
       .sort()
       .join("|");
@@ -2100,6 +3923,8 @@
           ...existingRoom,
           id: builderRoomKey(roomDraft.id),
           name: existingRoom.name || builderRoomKey(roomDraft.id),
+          npcs: roomDraft.npcIds ?? existingRoom.npcs ?? [],
+          items: roomDraft.items ?? roomDraft.itemEntries ?? existingRoom.items ?? [],
           zone_id: zoneId,
           color: String(roomDraft.color || existingRoom.color || "standard"),
           map_x: Math.round(Number(roomDraft.x) || 0),
@@ -2124,12 +3949,64 @@
     if (!root || !window.DragonsireBuilderReactFlow?.mountBuilderReactFlow) {
       return false;
     }
-    const currentRoom = (zone?.rooms || []).find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
+    const zoneWithItemMeta = zone
+      ? {
+          ...zone,
+          rooms: (zone.rooms || []).map((room) => ({
+            ...room,
+            items: enrichBuilderRoomItemEntries(room?.items || []),
+          })),
+        }
+      : zone;
+    const currentRoom = (zoneWithItemMeta?.rooms || []).find((room) => builderRoomKey(room.id) === builderRoomKey(builderState.currentRoomId));
     window.DragonsireBuilderReactFlow.mountBuilderReactFlow(root, {
-      zone,
-      zonePrefix: deriveBuilderZonePrefix(zone?.zone_id || builderState.currentZoneId || ""),
+      zone: zoneWithItemMeta,
+      zonePrefix: deriveBuilderZonePrefix(zoneWithItemMeta?.zone_id || builderState.currentZoneId || ""),
       selectedRoomId: builderRoomKey(builderState.currentRoomId),
       viewportRequest: builderState.reactFlowViewportRequest,
+      npcCatalog: builderState.npcs || {},
+      onAssignNpcToRoom: (npcId, roomId) => {
+        void assignBuilderNpcToRoom(npcId, roomId).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to assign NPC.");
+          toast(error.message || "Unable to assign NPC.");
+        });
+      },
+      onRemoveNpcFromRoom: (npcId, roomId) => {
+        void removeBuilderNpcFromRoom(npcId, roomId).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to remove NPC.");
+          toast(error.message || "Unable to remove NPC.");
+        });
+      },
+      onAssignItemToRoom: (itemId, roomId, count = 1) => {
+        void assignBuilderItemToRoom(itemId, roomId, count).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to assign item.");
+          toast(error.message || "Unable to assign item.");
+        });
+      },
+      onRoomActivate: (roomId) => {
+        const selectedNpcId = currentSelectedBuilderNpcId();
+        if (!selectedNpcId) {
+          const selectedItemId = currentSelectedBuilderItemId();
+          if (!selectedItemId) {
+            return false;
+          }
+          void assignBuilderItemToRoom(selectedItemId, roomId, 1).catch((error) => {
+            console.error(error);
+            setBuilderPageStatus(error.message || "Unable to assign item.");
+            toast(error.message || "Unable to assign item.");
+          });
+          return true;
+        }
+        void assignBuilderNpcToRoom(selectedNpcId, roomId).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to assign NPC.");
+          toast(error.message || "Unable to assign NPC.");
+        });
+        return true;
+      },
       onBuilderStateChange: ({ rooms, selectedRoomId, edgeCount, selectedEdge }) => {
         const roomsChanged = syncBuilderPhaseOneRooms(rooms);
         if (selectedRoomId && builderRoomKey(selectedRoomId) !== builderRoomKey(builderState.currentRoomId)) {
@@ -2159,8 +4036,8 @@
         }
       },
     });
-    const initialRooms = normalizeBuilderZoneRooms(zone?.rooms || []);
-    const initialEdgeSummary = buildBuilderEdgeSummary(initialRooms, zone?.edges || []);
+    const initialRooms = normalizeBuilderZoneRooms(zoneWithItemMeta?.rooms || []);
+    const initialEdgeSummary = buildBuilderEdgeSummary(initialRooms, zoneWithItemMeta?.edges || []);
     syncBuilderPhaseOneEdgeInspector(null);
     updateBuilderMapMeta(initialRooms, initialEdgeSummary.edges || []);
     byId("builder-map-room-name").textContent = currentRoom ? currentRoom.name : "Awaiting room data";
@@ -2173,6 +4050,22 @@
       return;
     }
     window.DragonsireBuilderReactFlow?.setBuilderReactFlowSelectedRoomColor?.(root, color);
+  }
+
+  function setBuilderReactFlowRoomNpcIds(roomId, npcIds) {
+    const root = builderReactFlowRoot();
+    if (!root) {
+      return;
+    }
+    window.DragonsireBuilderReactFlow?.setBuilderReactFlowRoomNpcIds?.(root, roomId, npcIds || []);
+  }
+
+  function setBuilderReactFlowRoomItemEntries(roomId, itemEntries) {
+    const root = builderReactFlowRoot();
+    if (!root) {
+      return;
+    }
+    window.DragonsireBuilderReactFlow?.setBuilderReactFlowRoomItemEntries?.(root, roomId, itemEntries || []);
   }
 
   function updateBuilderReactFlowSelectedEdge(updates) {
@@ -2189,6 +4082,214 @@
       return;
     }
     window.DragonsireBuilderReactFlow?.deleteBuilderReactFlowSelectedEdge?.(root);
+  }
+
+  async function assignBuilderNpcToRoom(npcId, roomId) {
+    const normalizedNpcId = builderRoomKey(npcId);
+    const normalizedRoomId = builderRoomKey(roomId);
+    const zoneId = normalizeBuilderZoneId(builderState.currentZoneId || builderState.zone?.zone_id || builderRoomById(normalizedRoomId)?.zone_id || "");
+    if (!normalizedNpcId) {
+      throw new Error("NPC id is required.");
+    }
+    if (!normalizedRoomId) {
+      throw new Error("Room id is required.");
+    }
+    if (!zoneId) {
+      throw new Error("A zone must be loaded before assigning NPCs.");
+    }
+
+    const response = await builderFetchJson("/api/builder/room/assign-npc/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        zone_id: zoneId,
+        room_id: normalizedRoomId,
+        npc_id: normalizedNpcId,
+      }),
+    });
+
+    const zonePayload = response?.data?.zone;
+    const roomPayload = response?.data?.room;
+    if (zonePayload) {
+      replaceBuilderZone(zonePayload, { fallbackZoneId: zoneId });
+    }
+    setBuilderReactFlowRoomNpcIds(normalizedRoomId, roomPayload?.npcs || []);
+    builderState.currentRoom = builderState.currentRoomId ? builderRoomById(builderState.currentRoomId) : null;
+    if (builderRoomKey(builderState.currentRoomId) === normalizedRoomId) {
+      await loadBuilderRoom(normalizedRoomId);
+    } else {
+      renderBuilderRoomList();
+      highlightSelectedBuilderRoom();
+      renderZoneMap();
+    }
+    setBuilderPageStatus(`Assigned ${builderNpcDisplayName(normalizedNpcId)} to ${roomNameById(normalizedRoomId)}.`);
+    toast(`Assigned ${builderNpcDisplayName(normalizedNpcId)}`);
+  }
+
+  async function removeBuilderNpcFromRoom(npcId, roomId) {
+    const normalizedNpcId = builderRoomKey(npcId);
+    const normalizedRoomId = builderRoomKey(roomId);
+    const zoneId = normalizeBuilderZoneId(builderState.currentZoneId || builderState.zone?.zone_id || builderRoomById(normalizedRoomId)?.zone_id || "");
+    if (!normalizedNpcId || !normalizedRoomId || !zoneId) {
+      throw new Error("Room, zone, and NPC ids are required.");
+    }
+
+    const response = await builderFetchJson("/api/builder/room/remove-npc/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        zone_id: zoneId,
+        room_id: normalizedRoomId,
+        npc_id: normalizedNpcId,
+      }),
+    });
+
+    const zonePayload = response?.data?.zone;
+    const roomPayload = response?.data?.room;
+    if (zonePayload) {
+      replaceBuilderZone(zonePayload, { fallbackZoneId: zoneId });
+    }
+    setBuilderReactFlowRoomNpcIds(normalizedRoomId, roomPayload?.npcs || []);
+    builderState.currentRoom = builderState.currentRoomId ? builderRoomById(builderState.currentRoomId) : null;
+    if (builderRoomKey(builderState.currentRoomId) === normalizedRoomId) {
+      await loadBuilderRoom(normalizedRoomId);
+    } else {
+      renderBuilderRoomList();
+      highlightSelectedBuilderRoom();
+      renderZoneMap();
+    }
+    setBuilderPageStatus(`Removed ${builderNpcDisplayName(normalizedNpcId)} from ${roomNameById(normalizedRoomId)}.`);
+    toast(`Removed ${builderNpcDisplayName(normalizedNpcId)}`);
+  }
+
+  async function assignBuilderItemToRoom(itemId, roomId, count = 1) {
+    const normalizedItemId = builderRoomKey(itemId);
+    const normalizedRoomId = builderRoomKey(roomId);
+    const zoneId = normalizeBuilderZoneId(builderState.currentZoneId || builderState.zone?.zone_id || builderRoomById(normalizedRoomId)?.zone_id || "");
+    const normalizedCount = Math.max(1, Math.round(Number(count) || 1));
+    if (!normalizedItemId) {
+      throw new Error("Item id is required.");
+    }
+    if (!normalizedRoomId) {
+      throw new Error("Room id is required.");
+    }
+    if (!zoneId) {
+      throw new Error("A zone must be loaded before assigning items.");
+    }
+
+    console.log("Assigned item", normalizedItemId, "to", normalizedRoomId, "x", normalizedCount);
+    const response = await builderFetchJson("/api/builder/room/assign-item/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        zone_id: zoneId,
+        room_id: normalizedRoomId,
+        item_id: normalizedItemId,
+        count: normalizedCount,
+      }),
+    });
+
+    const zonePayload = response?.data?.zone;
+    const roomPayload = response?.data?.room;
+    if (zonePayload) {
+      replaceBuilderZone(zonePayload, { fallbackZoneId: zoneId });
+    }
+    setBuilderReactFlowRoomItemEntries(normalizedRoomId, roomPayload?.items || []);
+    builderState.currentRoom = builderState.currentRoomId ? builderRoomById(builderState.currentRoomId) : null;
+    if (builderRoomKey(builderState.currentRoomId) === normalizedRoomId) {
+      await loadBuilderRoom(normalizedRoomId);
+    } else {
+      renderBuilderRoomList();
+      highlightSelectedBuilderRoom();
+      renderZoneMap();
+    }
+    setBuilderPageStatus(`Assigned ${builderItemDisplayName(normalizedItemId)} to ${roomNameById(normalizedRoomId)}.`);
+    toast(`Assigned ${builderItemDisplayName(normalizedItemId)}`);
+  }
+
+  async function removeBuilderItemFromRoom(itemId, roomId, count = 1) {
+    const normalizedItemId = builderRoomKey(itemId);
+    const normalizedRoomId = builderRoomKey(roomId);
+    const zoneId = normalizeBuilderZoneId(builderState.currentZoneId || builderState.zone?.zone_id || builderRoomById(normalizedRoomId)?.zone_id || "");
+    const normalizedCount = Math.max(1, Math.round(Number(count) || 1));
+    if (!normalizedItemId || !normalizedRoomId || !zoneId) {
+      throw new Error("Room, zone, and item ids are required.");
+    }
+
+    const response = await builderFetchJson("/api/builder/room/remove-item/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        zone_id: zoneId,
+        room_id: normalizedRoomId,
+        item_id: normalizedItemId,
+        count: normalizedCount,
+      }),
+    });
+
+    const zonePayload = response?.data?.zone;
+    const roomPayload = response?.data?.room;
+    if (zonePayload) {
+      replaceBuilderZone(zonePayload, { fallbackZoneId: zoneId });
+    }
+    setBuilderReactFlowRoomItemEntries(normalizedRoomId, roomPayload?.items || []);
+    builderState.currentRoom = builderState.currentRoomId ? builderRoomById(builderState.currentRoomId) : null;
+    if (builderRoomKey(builderState.currentRoomId) === normalizedRoomId) {
+      await loadBuilderRoom(normalizedRoomId);
+    } else {
+      renderBuilderRoomList();
+      highlightSelectedBuilderRoom();
+      renderZoneMap();
+    }
+    setBuilderPageStatus(`Removed ${builderItemDisplayName(normalizedItemId)} from ${roomNameById(normalizedRoomId)}.`);
+    toast(`Removed ${builderItemDisplayName(normalizedItemId)}`);
+  }
+
+  async function updateBuilderRoomItemCount(itemId, roomId, count) {
+    const normalizedItemId = builderRoomKey(itemId);
+    const normalizedRoomId = builderRoomKey(roomId);
+    const zoneId = normalizeBuilderZoneId(builderState.currentZoneId || builderState.zone?.zone_id || builderRoomById(normalizedRoomId)?.zone_id || "");
+    const normalizedCount = Math.max(0, Math.round(Number(count) || 0));
+    if (!normalizedItemId || !normalizedRoomId || !zoneId) {
+      throw new Error("Room, zone, and item ids are required.");
+    }
+
+    const response = await builderFetchJson("/api/builder/room/update-item-count/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        zone_id: zoneId,
+        room_id: normalizedRoomId,
+        item_id: normalizedItemId,
+        count: normalizedCount,
+      }),
+    });
+
+    const zonePayload = response?.data?.zone;
+    const roomPayload = response?.data?.room;
+    if (zonePayload) {
+      replaceBuilderZone(zonePayload, { fallbackZoneId: zoneId });
+    }
+    setBuilderReactFlowRoomItemEntries(normalizedRoomId, roomPayload?.items || []);
+    builderState.currentRoom = builderState.currentRoomId ? builderRoomById(builderState.currentRoomId) : null;
+    if (builderRoomKey(builderState.currentRoomId) === normalizedRoomId) {
+      await loadBuilderRoom(normalizedRoomId);
+    } else {
+      renderBuilderRoomList();
+      highlightSelectedBuilderRoom();
+      renderZoneMap();
+    }
+    setBuilderPageStatus(`Updated ${builderItemDisplayName(normalizedItemId)} count in ${roomNameById(normalizedRoomId)}.`);
   }
 
   function updateBuilderMapMeta(rooms, edges) {
@@ -2225,6 +4326,7 @@
       }
       return [{
         ...room,
+        items: normalizeBuilderRoomItemEntries(room?.items || room?.itemEntries || []),
         map_x: mapX,
         map_y: mapY,
         x: mapX,
@@ -2777,6 +4879,39 @@
   }
 
   async function builderFetchJson(url, options) {
+    const normalizedUrl = String(url || "").trim();
+    const launcherPathMap = {
+      "/api/npcs/": "/builder-api/npcs/yaml/",
+      "/api/npcs/save/": "/builder-api/npcs/yaml/save/",
+      "/api/npcs/delete/": "/builder-api/npcs/yaml/delete/",
+      "/api/items/": "/builder-api/items/yaml/",
+      "/api/items/save/": "/builder-api/items/yaml/save/",
+      "/api/items/delete/": "/builder-api/items/yaml/delete/",
+      "/api/builder/room/assign-npc/": "/builder-api/room/assign-npc/",
+      "/api/builder/room/remove-npc/": "/builder-api/room/remove-npc/",
+      "/api/builder/room/assign-item/": "/builder-api/room/assign-item/",
+      "/api/builder/room/remove-item/": "/builder-api/room/remove-item/",
+      "/api/builder/room/update-item-count/": "/builder-api/room/update-item-count/",
+    };
+    const launcherPath = launcherPathMap[normalizedUrl];
+    if (launcherPath) {
+      let launcherBody = undefined;
+      if (options && Object.prototype.hasOwnProperty.call(options, "body")) {
+        if (typeof options.body === "string") {
+          try {
+            launcherBody = JSON.parse(options.body);
+          } catch (_) {
+            launcherBody = undefined;
+          }
+        } else {
+          launcherBody = options.body;
+        }
+      }
+      return builderLauncherRequest(launcherPath, {
+        method: options?.method || "GET",
+        body: launcherBody,
+      });
+    }
     const response = await window.fetch(url, options);
     let payload = {};
     try {
@@ -2802,6 +4937,14 @@
     }
     builderState.currentRoomId = roomId;
     builderState.selectedRoom = roomId;
+    const zoneNodeId = normalizeBuilderZoneId(data.zone_id || builderState.currentZoneId);
+    builderState.expandedTreeNodes.add("world");
+    builderState.expandedTreeNodes.add("zones");
+    if (zoneNodeId) {
+      builderState.expandedTreeNodes.add(zoneNodeId);
+      builderState.expandedTreeNodes.add(`${zoneNodeId}_rooms`);
+    }
+    setBuilderSelectedTreeNode(findBuilderTreeNodeById(roomId) || buildBuilderSelectedNode("room", roomId, builderTreeLeafLabel(data), `${zoneNodeId}_rooms`), { syncInspector: false });
     window.localStorage.setItem(BUILDER_LAST_ROOM_STORAGE_KEY, String(roomId));
     highlightSelectedBuilderRoom();
     setBuilderPageStatus(`Editing ${data.name || `room ${roomId}`}`);
@@ -2849,6 +4992,8 @@
     if (byId("room-map-layer")) {
       byId("room-map-layer").value = String(data.map?.layer ?? data.map_layer ?? 0);
     }
+    renderBuilderRoomNpcAssignments(data);
+    renderBuilderRoomItemAssignments(data);
     renderBuilderExitList(builderRoomExitsArray(data));
     renderBuilderPreview(data);
     renderZoneMap();
@@ -2856,7 +5001,7 @@
 
   async function loadBuilderRoomList() {
     builderState.rooms = builderVisibleRooms();
-    const list = byId("room-list");
+    const list = byId("world-tree");
     const savedScrollTop = Number(window.localStorage.getItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY) || 0);
     if (list && Number.isFinite(savedScrollTop) && savedScrollTop > 0) {
       list.scrollTop = savedScrollTop;
@@ -2890,7 +5035,6 @@
       toast("Select an edge first.");
       return;
     }
-    const nextType = String(byId("review-edge-type")?.value || "spatial").trim().toLowerCase() || "spatial";
     const nextLabel = String(byId("review-edge-label")?.value || "").trim();
     const sourceRoom = builderRoomById(selectedEdge.source);
     const targetRoom = builderRoomById(selectedEdge.target);
@@ -2995,6 +5139,12 @@
       builderState.currentRoom = null;
     }
     builderState.currentZoneId = normalizedZoneId;
+    builderState.expandedTreeNodes.add("world");
+    builderState.expandedTreeNodes.add("zones");
+    if (normalizedZoneId) {
+      builderState.expandedTreeNodes.add(normalizedZoneId);
+      builderState.expandedTreeNodes.add(`${normalizedZoneId}_rooms`);
+    }
     persistBuilderZoneSelection(normalizedZoneId);
     syncBuilderZoneMenus();
     renderBuilderRoomList();
@@ -3019,6 +5169,8 @@
   async function initializeBuilderData() {
     setBuilderPageStatus("Loading builder data...");
     await loadBuilderZones();
+    await loadBuilderNPCs();
+    await loadBuilderItems();
 
     const persistedRoomId = builderRoomKey(window.localStorage.getItem(BUILDER_LAST_ROOM_STORAGE_KEY) || "");
     const persistedZoneId = normalizeBuilderZoneId(window.localStorage.getItem(BUILDER_LAST_ZONE_STORAGE_KEY) || "");
@@ -3317,6 +5469,8 @@
   async function initializeBuilderReviewData() {
     setBuilderPageStatus("Loading review graphs...");
     await loadBuilderReviewGraphs();
+    await loadBuilderNPCs();
+    await loadBuilderItems();
 
     const persistedRoomId = builderRoomKey(window.localStorage.getItem(BUILDER_LAST_ROOM_STORAGE_KEY) || "");
     const persistedZoneId = normalizeBuilderZoneId(window.localStorage.getItem(BUILDER_LAST_ZONE_STORAGE_KEY) || "");
@@ -3639,7 +5793,7 @@
       }
     });
 
-    byId("room-list")?.addEventListener("scroll", (event) => {
+    byId("world-tree")?.addEventListener("scroll", (event) => {
       window.localStorage.setItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY, String(event.target.scrollTop || 0));
     });
 
@@ -3655,9 +5809,91 @@
     byId("save-zone")?.addEventListener("click", () => {
       void saveActiveBuilderDocument().catch((error) => {
         console.error(error);
-        setBuilderPageStatus(error.message || "Zone save failed.");
-        toast(error.message || "Zone save failed.");
+        setBuilderPageStatus(error.message || "Save failed.");
+        toast(error.message || "Save failed.");
       });
+    });
+
+    byId("save-npc")?.addEventListener("click", () => {
+      void saveBuilderNpc().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "NPC save failed.");
+        toast(error.message || "NPC save failed.");
+      });
+    });
+
+    byId("save-item")?.addEventListener("click", () => {
+      void saveBuilderItem().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Item save failed.");
+        toast(error.message || "Item save failed.");
+      });
+    });
+
+    byId("delete-npc")?.addEventListener("click", () => {
+      void deleteBuilderNpc().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "NPC delete failed.");
+        toast(error.message || "NPC delete failed.");
+      });
+    });
+
+    byId("delete-item")?.addEventListener("click", () => {
+      void deleteBuilderItem().catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Item delete failed.");
+        toast(error.message || "Item delete failed.");
+      });
+    });
+
+    ["npc-name", "npc-type", "npc-level", "npc-health", "npc-attack", "npc-defense", "npc-greeting", "npc-idle"].forEach((id) => {
+      byId(id)?.addEventListener("input", () => {
+        refreshBuilderNpcDraftState();
+      });
+      byId(id)?.addEventListener("change", () => {
+        refreshBuilderNpcDraftState();
+      });
+    });
+
+    ["npc-aggressive", "npc-roam", "npc-assist", "npc-vendor-enabled"].forEach((id) => {
+      byId(id)?.addEventListener("change", () => {
+        refreshBuilderNpcDraftState();
+      });
+    });
+
+    ["item-name", "item-category", "item-value", "item-weight", "item-slot", "item-attack", "item-defense", "item-effect", "item-duration", "item-capacity"].forEach((id) => {
+      byId(id)?.addEventListener("input", () => {
+        refreshBuilderItemDraftState();
+      });
+      byId(id)?.addEventListener("change", () => {
+        refreshBuilderItemDraftState();
+      });
+    });
+
+    ["item-stackable"].forEach((id) => {
+      byId(id)?.addEventListener("change", () => {
+        refreshBuilderItemDraftState();
+      });
+    });
+
+    byId("npc-editor-panel")?.addEventListener("click", (event) => {
+      const toggle = event.target.closest("[data-npc-section-toggle]");
+      if (!toggle) {
+        return;
+      }
+      const sectionName = String(toggle.dataset.npcSectionToggle || "");
+      const nextOpen = !builderState.npcSectionState[sectionName];
+      setBuilderNpcSectionOpen(sectionName, nextOpen);
+    });
+
+    byId("item-editor-panel")?.addEventListener("click", (event) => {
+      const toggle = event.target.closest("[data-item-section-toggle]");
+      if (!toggle) {
+        return;
+      }
+      const sectionName = String(toggle.dataset.itemSectionToggle || "");
+      const nextOpen = !builderState.itemSectionState[sectionName];
+      setBuilderItemSectionOpen(sectionName, nextOpen);
     });
 
     byId("reload-zone")?.addEventListener("click", () => {
@@ -3764,17 +6000,122 @@
     });
 
     document.addEventListener("click", (event) => {
-      const roomItem = event.target.closest(".room-item");
-      if (!roomItem) {
+      const toggleNode = event.target.closest('[data-tree-role="toggle-node"]');
+      if (toggleNode) {
+        event.preventDefault();
+        toggleBuilderTreeNode(String(toggleNode.dataset.nodeId || ""));
+        renderBuilderRoomList();
+        highlightSelectedBuilderRoom();
         return;
       }
-      void loadBuilderRoom(roomItem.dataset.id).catch((error) => {
-        console.error(error);
-        setBuilderPageStatus(error.message || "Unable to load room.");
-      });
+
+      const createNpcButton = event.target.closest('[data-tree-role="create-npc"]');
+      if (createNpcButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        void createBuilderNpc(String(createNpcButton.dataset.npcType || "neutral")).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to create NPC.");
+          toast(error.message || "Unable to create NPC.");
+        });
+        return;
+      }
+
+      const createItemButton = event.target.closest('[data-tree-role="create-item"]');
+      if (createItemButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        void createBuilderItem(String(createItemButton.dataset.itemCategory || "misc")).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to create item.");
+          toast(error.message || "Unable to create item.");
+        });
+        return;
+      }
+
+      const selectedTreeNode = event.target.closest('[data-tree-role="select-node"]');
+      if (!selectedTreeNode) {
+        return;
+      }
+      const nodeId = String(selectedTreeNode.dataset.nodeId || "");
+      const node = findBuilderTreeNodeById(nodeId);
+      if (!node) {
+        return;
+      }
+      handleBuilderTreeNodeSelection(node, { expandIfBranch: true });
+    });
+
+    document.addEventListener("contextmenu", (event) => {
+      const selectedTreeNode = event.target.closest('[data-tree-role="select-node"]');
+      if (!selectedTreeNode) {
+        return;
+      }
+      event.preventDefault();
+      const node = findBuilderTreeNodeById(String(selectedTreeNode.dataset.nodeId || ""));
+      if (!node) {
+        return;
+      }
+      selectBuilderTreeNode(node);
+      setBuilderPageStatus(`Context actions for ${node.label || node.id} are not wired yet.`);
+      renderBuilderRoomList();
+      highlightSelectedBuilderRoom();
     });
 
     document.addEventListener("click", (event) => {
+      const removeAssignedNpcButton = event.target.closest("[data-room-npc-remove]");
+      if (removeAssignedNpcButton) {
+        event.preventDefault();
+        if (!builderState.currentRoomId) {
+          return;
+        }
+        void removeBuilderNpcFromRoom(String(removeAssignedNpcButton.dataset.roomNpcRemove || ""), builderState.currentRoomId).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to remove NPC assignment.");
+          toast(error.message || "Unable to remove NPC assignment.");
+        });
+        return;
+      }
+
+      const removeAssignedItemButton = event.target.closest("[data-room-item-remove]");
+      if (removeAssignedItemButton) {
+        event.preventDefault();
+        if (!builderState.currentRoomId) {
+          return;
+        }
+        void updateBuilderRoomItemCount(String(removeAssignedItemButton.dataset.roomItemRemove || ""), builderState.currentRoomId, 0).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to remove item assignment.");
+          toast(error.message || "Unable to remove item assignment.");
+        });
+        return;
+      }
+
+      const incrementAssignedItemButton = event.target.closest("[data-room-item-increment]");
+      if (incrementAssignedItemButton) {
+        event.preventDefault();
+        const itemId = String(incrementAssignedItemButton.dataset.roomItemIncrement || "");
+        const currentCount = normalizeBuilderRoomItemEntries(builderState.currentRoom?.items || []).find((entry) => entry.id === builderRoomKey(itemId))?.count || 0;
+        void updateBuilderRoomItemCount(itemId, builderState.currentRoomId, currentCount + 1).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to increase item count.");
+          toast(error.message || "Unable to increase item count.");
+        });
+        return;
+      }
+
+      const decrementAssignedItemButton = event.target.closest("[data-room-item-decrement]");
+      if (decrementAssignedItemButton) {
+        event.preventDefault();
+        const itemId = String(decrementAssignedItemButton.dataset.roomItemDecrement || "");
+        const currentCount = normalizeBuilderRoomItemEntries(builderState.currentRoom?.items || []).find((entry) => entry.id === builderRoomKey(itemId))?.count || 0;
+        void updateBuilderRoomItemCount(itemId, builderState.currentRoomId, Math.max(0, currentCount - 1)).catch((error) => {
+          console.error(error);
+          setBuilderPageStatus(error.message || "Unable to decrease item count.");
+          toast(error.message || "Unable to decrease item count.");
+        });
+        return;
+      }
+
       const removeButton = event.target.closest(".builder-exit-remove");
       if (removeButton) {
         removeButton.closest(".builder-exit-row")?.remove();
@@ -3797,6 +6138,63 @@
         syncBuilderExitRowState(exitRow, { initializeSlow: event.target.matches(".builder-exit-type") });
       }
       scheduleBuilderPreviewUpdate();
+    });
+
+    document.addEventListener("dragstart", (event) => {
+      const npcTreeNode = event.target.closest('[data-tree-role="select-node"][data-npc-id]');
+      if (npcTreeNode && event.dataTransfer) {
+        const npcId = builderRoomKey(String(npcTreeNode.dataset.npcId || ""));
+        if (npcId) {
+          event.dataTransfer.setData("application/x-dragonsire-npc-id", npcId);
+          event.dataTransfer.setData("text/plain", npcId);
+          event.dataTransfer.effectAllowed = "move";
+          return;
+        }
+      }
+      const itemTreeNode = event.target.closest('[data-tree-role="select-node"][data-item-id]');
+      if (!itemTreeNode || !event.dataTransfer) {
+        return;
+      }
+      const itemId = builderRoomKey(String(itemTreeNode.dataset.itemId || ""));
+      if (!itemId) {
+        return;
+      }
+      event.dataTransfer.setData("application/x-dragonsire-room-item", itemId);
+      event.dataTransfer.effectAllowed = "copy";
+    });
+
+    byId("room-assign-npc")?.addEventListener("click", () => {
+      if (!builderState.currentRoomId) {
+        toast("Select a room first.");
+        return;
+      }
+      const selectedNpcId = builderRoomKey(byId("room-assigned-npc-select")?.value || currentSelectedBuilderNpcId() || "");
+      if (!selectedNpcId) {
+        toast("Select an NPC to assign.");
+        return;
+      }
+      void assignBuilderNpcToRoom(selectedNpcId, builderState.currentRoomId).catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Unable to assign NPC.");
+        toast(error.message || "Unable to assign NPC.");
+      });
+    });
+
+    byId("room-assign-item")?.addEventListener("click", () => {
+      if (!builderState.currentRoomId) {
+        toast("Select a room first.");
+        return;
+      }
+      const selectedItemId = builderRoomKey(byId("room-assigned-item-select")?.value || currentSelectedBuilderItemId() || "");
+      if (!selectedItemId) {
+        toast("Select an item to assign.");
+        return;
+      }
+      void assignBuilderItemToRoom(selectedItemId, builderState.currentRoomId, 1).catch((error) => {
+        console.error(error);
+        setBuilderPageStatus(error.message || "Unable to assign item.");
+        toast(error.message || "Unable to assign item.");
+      });
     });
 
     const zoneMap = zoneMapCanvas();

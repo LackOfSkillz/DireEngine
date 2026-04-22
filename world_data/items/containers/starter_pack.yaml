@@ -1,0 +1,34 @@
+id: starter_pack
+name: Starter Pack
+category: container
+tier: average
+utility_category: containers
+functional_type: pack
+tool_type: survival
+durability: 18
+tags:
+  - utility
+  - survival
+level_band:
+  min: 1
+  max: 12
+value: 9
+weight: 1.2
+stackable: false
+max_stack: 1
+equipment:
+  slot: back
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 12
+  weight_reduction: 0.1
+description:
+  short: a starter pack
+  long: A simple field pack with enough room for a beginner's tools and gathered goods.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

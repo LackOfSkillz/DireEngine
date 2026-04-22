@@ -21883,6 +21883,8 @@ var DragonsireBuilderReactFlow = (() => {
   __export(builderReactFlowEntry_exports, {
     deleteBuilderReactFlowSelectedEdge: () => deleteBuilderReactFlowSelectedEdge,
     mountBuilderReactFlow: () => mountBuilderReactFlow,
+    setBuilderReactFlowRoomItemEntries: () => setBuilderReactFlowRoomItemEntries,
+    setBuilderReactFlowRoomNpcIds: () => setBuilderReactFlowRoomNpcIds,
     setBuilderReactFlowSelectedRoomColor: () => setBuilderReactFlowSelectedRoomColor,
     unmountBuilderReactFlow: () => unmountBuilderReactFlow,
     updateBuilderReactFlowSelectedEdge: () => updateBuilderReactFlowSelectedEdge
@@ -31508,6 +31510,14 @@ var DragonsireBuilderReactFlow = (() => {
       label: String(spec?.label || "")
     };
   }
+  function normalizeRoomItemEntries(entries = []) {
+    return (Array.isArray(entries) ? entries : []).map((entry) => ({
+      id: String(entry?.id || "").trim(),
+      count: Math.max(0, Math.round(Number(entry?.count) || 0)),
+      category: String(entry?.category || "").trim().toLowerCase() || void 0,
+      items: normalizeRoomItemEntries(entry?.items || [])
+    })).filter((entry) => entry.id && entry.count > 0).map((entry) => entry.items?.length ? entry : { id: entry.id, count: entry.count, category: entry.category });
+  }
   function createInitialBuilderState(zonePrefix, rooms = [], selectedRoomId = null, initialMode = "select") {
     const roomsById = {};
     const roomIdByCoord = {};
@@ -31525,6 +31535,8 @@ var DragonsireBuilderReactFlow = (() => {
           }
           return accumulator;
         }, {}),
+        npcIds: Array.isArray(room.npcIds) ? room.npcIds.map((npcId) => String(npcId || "")).filter(Boolean) : [],
+        itemEntries: normalizeRoomItemEntries(room.itemEntries || []),
         color: isRoomColor(String(room.color || "")) ? room.color : "standard",
         meta: { ...room.meta || {} }
       };
@@ -31535,6 +31547,14 @@ var DragonsireBuilderReactFlow = (() => {
       mode: initialMode,
       selectedRoomId: selectedRoomId && roomsById[selectedRoomId] ? selectedRoomId : null,
       selectedEdgeId: null,
+      selectedNode: selectedRoomId && roomsById[selectedRoomId] ? {
+        type: "room",
+        id: selectedRoomId,
+        label: selectedRoomId,
+        parent: zonePrefix,
+        children: []
+      } : null,
+      treeData: [],
       connection: EMPTY_CONNECTION,
       zonePrefix,
       roomsById,
@@ -31581,7 +31601,14 @@ var DragonsireBuilderReactFlow = (() => {
         return {
           ...previous,
           selectedRoomId: nextSelectedRoomId,
-          selectedEdgeId: null
+          selectedEdgeId: null,
+          selectedNode: nextSelectedRoomId ? {
+            type: "room",
+            id: nextSelectedRoomId,
+            label: nextSelectedRoomId,
+            parent: previous.zonePrefix,
+            children: []
+          } : null
         };
       });
     }, [initialSelectedRoomId]);
@@ -31640,7 +31667,23 @@ var DragonsireBuilderReactFlow = (() => {
       setState((previous) => ({
         ...previous,
         selectedRoomId: roomId,
-        selectedEdgeId: null
+        selectedEdgeId: null,
+        selectedNode: roomId ? {
+          type: "room",
+          id: roomId,
+          label: previous.roomsById[roomId]?.id || roomId,
+          parent: previous.zonePrefix,
+          children: []
+        } : null
+      }));
+    }, []);
+    const setSelectedNode = (0, import_react3.useCallback)((node) => {
+      setStatusMessage(null);
+      setState((previous) => ({
+        ...previous,
+        selectedNode: node,
+        selectedRoomId: node?.type === "room" ? node.id : previous.selectedRoomId,
+        selectedEdgeId: node?.type === "room" ? null : previous.selectedEdgeId
       }));
     }, []);
     const setSelectedEdge = (0, import_react3.useCallback)((edgeId) => {
@@ -31648,7 +31691,8 @@ var DragonsireBuilderReactFlow = (() => {
       setState((previous) => ({
         ...previous,
         selectedRoomId: null,
-        selectedEdgeId: edgeId
+        selectedEdgeId: edgeId,
+        selectedNode: null
       }));
     }, []);
     const createRoomAt = (0, import_react3.useCallback)((x, y) => {
@@ -31663,7 +31707,14 @@ var DragonsireBuilderReactFlow = (() => {
           return {
             ...previous,
             selectedRoomId: existingRoomId,
-            selectedEdgeId: null
+            selectedEdgeId: null,
+            selectedNode: {
+              type: "room",
+              id: existingRoomId,
+              label: previous.roomsById[existingRoomId]?.id || existingRoomId,
+              parent: previous.zonePrefix,
+              children: []
+            }
           };
         }
         roomId = buildRoomId(previous.zonePrefix, nextX, nextY);
@@ -31671,6 +31722,13 @@ var DragonsireBuilderReactFlow = (() => {
           ...previous,
           selectedRoomId: roomId,
           selectedEdgeId: null,
+          selectedNode: {
+            type: "room",
+            id: roomId,
+            label: roomId,
+            parent: previous.zonePrefix,
+            children: []
+          },
           roomsById: {
             ...previous.roomsById,
             [roomId]: {
@@ -31724,6 +31782,13 @@ var DragonsireBuilderReactFlow = (() => {
           ...previous,
           selectedRoomId: targetRoomId,
           selectedEdgeId: `${startRoomId}:${startDirection}`,
+          selectedNode: {
+            type: "room",
+            id: targetRoomId,
+            label: previous.roomsById[targetRoomId]?.id || targetRoomId,
+            parent: previous.zonePrefix,
+            children: []
+          },
           connection: EMPTY_CONNECTION,
           roomsById: {
             ...previous.roomsById,
@@ -31792,6 +31857,7 @@ var DragonsireBuilderReactFlow = (() => {
           mode: "select",
           selectedRoomId: previous.selectedRoomId === roomId ? null : previous.selectedRoomId,
           selectedEdgeId: previous.selectedEdgeId?.startsWith(`${roomId}:`) ? null : previous.selectedEdgeId,
+          selectedNode: previous.selectedNode?.type === "room" && previous.selectedNode.id === roomId ? null : previous.selectedNode,
           connection: previous.connection.fromRoomId === roomId ? EMPTY_CONNECTION : previous.connection,
           roomsById: nextRoomsById,
           roomIdByCoord: nextRoomIdByCoord
@@ -31863,6 +31929,63 @@ var DragonsireBuilderReactFlow = (() => {
           }
         };
       });
+    }, []);
+    const updateRoomNpcIds = (0, import_react3.useCallback)((roomId, npcIds) => {
+      let didUpdate = false;
+      const normalizedRoomId = String(roomId || "").trim();
+      const normalizedNpcIds = Array.isArray(npcIds) ? npcIds.map((npcId) => String(npcId || "").trim()).filter(Boolean) : [];
+      setStatusMessage(null);
+      setState((previous) => {
+        const room = previous.roomsById[normalizedRoomId];
+        if (!room) {
+          return previous;
+        }
+        const currentNpcIds = Array.isArray(room.npcIds) ? room.npcIds : [];
+        if (currentNpcIds.join("|") === normalizedNpcIds.join("|")) {
+          return previous;
+        }
+        didUpdate = true;
+        return {
+          ...previous,
+          roomsById: {
+            ...previous.roomsById,
+            [normalizedRoomId]: {
+              ...room,
+              npcIds: normalizedNpcIds
+            }
+          }
+        };
+      });
+      return didUpdate;
+    }, []);
+    const updateRoomItemEntries = (0, import_react3.useCallback)((roomId, itemEntries) => {
+      let didUpdate = false;
+      const normalizedRoomId = String(roomId || "").trim();
+      const normalizedEntries = normalizeRoomItemEntries(itemEntries || []);
+      setStatusMessage(null);
+      setState((previous) => {
+        const room = previous.roomsById[normalizedRoomId];
+        if (!room) {
+          return previous;
+        }
+        const currentSignature = JSON.stringify(normalizeRoomItemEntries(room.itemEntries || []));
+        const nextSignature = JSON.stringify(normalizedEntries);
+        if (currentSignature === nextSignature) {
+          return previous;
+        }
+        didUpdate = true;
+        return {
+          ...previous,
+          roomsById: {
+            ...previous.roomsById,
+            [normalizedRoomId]: {
+              ...room,
+              itemEntries: normalizedEntries
+            }
+          }
+        };
+      });
+      return didUpdate;
     }, []);
     const updateSelectedEdge = (0, import_react3.useCallback)((updates) => {
       let didUpdate = false;
@@ -31968,6 +32091,7 @@ var DragonsireBuilderReactFlow = (() => {
       isSelectedRoomLocked: Boolean(state.selectedRoomId && state.roomsById[state.selectedRoomId]?.meta?.locked),
       statusMessage,
       setMode,
+      setSelectedNode,
       previewLayout,
       applyLayout,
       clearLayout,
@@ -31976,6 +32100,8 @@ var DragonsireBuilderReactFlow = (() => {
       setSelectedEdge,
       deleteRoom,
       updateRoomPosition,
+      updateRoomNpcIds,
+      updateRoomItemEntries,
       updateSelectedRoomColor,
       updateSelectedEdge,
       deleteSelectedEdge,
@@ -31990,6 +32116,7 @@ var DragonsireBuilderReactFlow = (() => {
       layoutMode,
       previewLayout,
       setMode,
+      setSelectedNode,
       setSelectedEdge,
       setSelectedRoom,
       state,
@@ -31997,6 +32124,8 @@ var DragonsireBuilderReactFlow = (() => {
       toggleSelectedRoomLock,
       tryConnect,
       updateRoomPosition,
+      updateRoomNpcIds,
+      updateRoomItemEntries,
       updateSelectedEdge,
       updateSelectedRoomColor
     ]);
@@ -32143,6 +32272,32 @@ var DragonsireBuilderReactFlow = (() => {
     up: { position: Position.Top, style: { top: ROOM_BODY_MIN2 - HANDLE_OUTSIDE_OFFSET2 - VERTICAL_HANDLE_OFFSET2, left: ROOM_BODY_CENTER2, transform: "translate(-50%, -50%)" } },
     down: { position: Position.Bottom, style: { top: ROOM_BODY_MAX2 + HANDLE_OUTSIDE_OFFSET2 + VERTICAL_HANDLE_OFFSET2, left: ROOM_BODY_CENTER2, transform: "translate(-50%, -50%)" } }
   };
+  var NPC_BADGE_MAX_VISIBLE = 2;
+  var NPC_TYPE_STYLES = {
+    vendor: "is-vendor",
+    hostile: "is-hostile",
+    neutral: "is-neutral"
+  };
+  function normalizeNpcType(npc) {
+    if (Boolean(npc?.vendor?.enabled) || String(npc?.type || "").trim().toLowerCase() === "vendor") {
+      return "vendor";
+    }
+    const normalized = String(npc?.type || "").trim().toLowerCase();
+    if (normalized === "hostile") {
+      return "hostile";
+    }
+    return "neutral";
+  }
+  function humanizeNpcId(npcId) {
+    return String(npcId || "").split(/[_-]+/).map((part) => part.trim()).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
+  }
+  function truncateNpcBadgeLabel(label, maxLength = 12) {
+    const normalized = String(label || "").trim();
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return `${normalized.slice(0, Math.max(1, maxLength - 1)).trimEnd()}...`;
+  }
   var HANDLE_TITLES = {
     north: "North",
     east: "East",
@@ -32183,67 +32338,156 @@ var DragonsireBuilderReactFlow = (() => {
     const activeSourceHandleId = String(data?.activeSourceHandleId || "").trim() || null;
     const validTargetHandleId = activeSourceHandleId ? OPPOSITE_HANDLE_ID[activeSourceHandleId] || null : null;
     const roomLabel = room?.id || roomId;
-    return /* @__PURE__ */ import_react5.default.createElement("div", { className: [
-      "builder-phase1-node",
-      isSelected ? "is-selected" : "",
-      isLocked ? "is-locked" : "",
-      isCorridor ? "is-corridor" : "",
-      isHub ? "is-hub" : ""
-    ].filter(Boolean).join(" ") }, BUILDER_DIRECTIONS.map((direction) => {
-      const handleId = directionToHandleId(direction);
-      const handleLayout = HANDLE_LAYOUT[direction];
-      const isSource = Boolean(activeSourceHandleId && activeSourceHandleId === handleId);
-      const isValidTarget = Boolean(validTargetHandleId && validTargetHandleId === handleId);
-      const isDimmed = Boolean(activeSourceHandleId && !isSource && !isValidTarget);
-      const glyphStyle = direction === "down" ? {
-        ...handleLayout.style,
-        transform: `${String(handleLayout.style.transform || "")} translateY(-2px)`.trim()
-      } : handleLayout.style;
-      return /* @__PURE__ */ import_react5.default.createElement(import_react5.default.Fragment, { key: direction }, /* @__PURE__ */ import_react5.default.createElement(
-        Handle,
-        {
-          id: handleId,
-          type: "source",
-          position: handleLayout.position,
-          className: [
-            "builder-phase1-handle",
-            `is-${direction}`,
-            isSource ? "is-source" : "",
-            isValidTarget ? "is-valid-target" : "",
-            isDimmed ? "is-dimmed" : ""
-          ].filter(Boolean).join(" "),
-          style: handleLayout.style,
-          "data-direction": direction,
-          "data-handle-id": handleId,
-          title: `${HANDLE_TITLES[direction]} (${handleId})`,
-          "aria-label": `${HANDLE_TITLES[direction]} handle`,
-          isConnectable: true
-        }
-      ), direction === "up" || direction === "down" ? /* @__PURE__ */ import_react5.default.createElement(
-        "span",
-        {
-          className: `builder-phase1-handle-glyph is-${direction}`,
-          style: glyphStyle,
-          "aria-hidden": "true"
-        },
-        direction === "up" ? "\u2191" : "\u2193"
-      ) : null);
-    }), /* @__PURE__ */ import_react5.default.createElement(
+    const npcIds = Array.isArray(room?.npcIds) ? room.npcIds : [];
+    const npcCount = npcIds.length;
+    const npcCatalog = data?.npcCatalog || {};
+    const [isDropTarget, setIsDropTarget] = import_react5.default.useState(false);
+    const visibleNpcBadges = npcIds.slice(0, NPC_BADGE_MAX_VISIBLE).map((npcId) => {
+      const npc = npcCatalog[String(npcId || "")] || null;
+      const npcName = String(npc?.name || humanizeNpcId(npcId) || npcId);
+      const npcType = normalizeNpcType(npc);
+      return {
+        id: String(npcId || ""),
+        label: truncateNpcBadgeLabel(npcName),
+        fullLabel: npcName,
+        type: npcType
+      };
+    });
+    const hiddenNpcCount = Math.max(0, npcCount - visibleNpcBadges.length);
+    const npcTooltip = npcIds.map((npcId) => {
+      const npc = npcCatalog[String(npcId || "")] || null;
+      const npcName = String(npc?.name || humanizeNpcId(npcId) || npcId);
+      const npcType = normalizeNpcType(npc);
+      return `${npcName} \u2022 ${npcType}`;
+    }).join("\n");
+    const handleDragOver = (event) => {
+      const payloadTypes = Array.from(event.dataTransfer.types || []);
+      const hasNpcPayload = payloadTypes.includes("application/x-dragonsire-npc-id");
+      const hasItemPayload = payloadTypes.includes("application/x-dragonsire-room-item");
+      if (!hasNpcPayload && !hasItemPayload) {
+        return;
+      }
+      event.preventDefault();
+      event.dataTransfer.dropEffect = hasItemPayload ? "copy" : "move";
+      setIsDropTarget(true);
+    };
+    const handleDragLeave = () => {
+      setIsDropTarget(false);
+    };
+    const handleDrop = (event) => {
+      const npcId = String(event.dataTransfer.getData("application/x-dragonsire-npc-id") || event.dataTransfer.getData("text/plain") || "").trim();
+      event.preventDefault();
+      setIsDropTarget(false);
+      if (npcId) {
+        data?.onNpcDrop?.(npcId, roomId);
+        return;
+      }
+      const itemId = String(event.dataTransfer.getData("application/x-dragonsire-room-item") || "").trim();
+      if (itemId) {
+        data?.onItemDrop?.(itemId, roomId, 1);
+      }
+    };
+    const handleNpcBadgeRemove = (event, npcId) => {
+      event.preventDefault();
+      event.stopPropagation();
+      data?.onNpcRemove?.(npcId, roomId);
+    };
+    return /* @__PURE__ */ import_react5.default.createElement(
       "div",
       {
-        className: "builder-phase1-room-body",
-        style: {
-          left: ROOM_BODY_OFFSET,
-          top: ROOM_BODY_OFFSET,
-          width: ROOM_BODY_SIZE,
-          height: ROOM_BODY_SIZE,
-          backgroundColor: roomColor,
-          pointerEvents: "none"
-        },
-        title: roomLabel
+        className: [
+          "builder-phase1-node",
+          isSelected ? "is-selected" : "",
+          isLocked ? "is-locked" : "",
+          isCorridor ? "is-corridor" : "",
+          isHub ? "is-hub" : "",
+          isDropTarget ? "is-npc-drop-target" : ""
+        ].filter(Boolean).join(" "),
+        onDragOver: handleDragOver,
+        onDragEnter: handleDragOver,
+        onDragLeave: handleDragLeave,
+        onDrop: handleDrop
       },
-      /* @__PURE__ */ import_react5.default.createElement("span", { className: `builder-phase1-room-label${showLabel ? "" : " is-hidden-by-zoom"}` }, roomLabel)
-    ));
+      BUILDER_DIRECTIONS.map((direction) => {
+        const handleId = directionToHandleId(direction);
+        const handleLayout = HANDLE_LAYOUT[direction];
+        const isSource = Boolean(activeSourceHandleId && activeSourceHandleId === handleId);
+        const isValidTarget = Boolean(validTargetHandleId && validTargetHandleId === handleId);
+        const isDimmed = Boolean(activeSourceHandleId && !isSource && !isValidTarget);
+        const glyphStyle = direction === "down" ? {
+          ...handleLayout.style,
+          transform: `${String(handleLayout.style.transform || "")} translateY(-2px)`.trim()
+        } : handleLayout.style;
+        return /* @__PURE__ */ import_react5.default.createElement(import_react5.default.Fragment, { key: direction }, /* @__PURE__ */ import_react5.default.createElement(
+          Handle,
+          {
+            id: handleId,
+            type: "source",
+            position: handleLayout.position,
+            className: [
+              "builder-phase1-handle",
+              `is-${direction}`,
+              isSource ? "is-source" : "",
+              isValidTarget ? "is-valid-target" : "",
+              isDimmed ? "is-dimmed" : ""
+            ].filter(Boolean).join(" "),
+            style: handleLayout.style,
+            "data-direction": direction,
+            "data-handle-id": handleId,
+            title: `${HANDLE_TITLES[direction]} (${handleId})`,
+            "aria-label": `${HANDLE_TITLES[direction]} handle`,
+            isConnectable: true
+          }
+        ), direction === "up" || direction === "down" ? /* @__PURE__ */ import_react5.default.createElement(
+          "span",
+          {
+            className: `builder-phase1-handle-glyph is-${direction}`,
+            style: glyphStyle,
+            "aria-hidden": "true"
+          },
+          direction === "up" ? "\u2191" : "\u2193"
+        ) : null);
+      }),
+      /* @__PURE__ */ import_react5.default.createElement(
+        "div",
+        {
+          className: "builder-phase1-room-body",
+          style: {
+            left: ROOM_BODY_OFFSET,
+            top: ROOM_BODY_OFFSET,
+            width: ROOM_BODY_SIZE,
+            height: ROOM_BODY_SIZE,
+            backgroundColor: roomColor,
+            pointerEvents: "none"
+          },
+          title: roomLabel
+        },
+        /* @__PURE__ */ import_react5.default.createElement("span", { className: `builder-phase1-room-label${showLabel ? "" : " is-hidden-by-zoom"}` }, roomLabel),
+        npcCount ? /* @__PURE__ */ import_react5.default.createElement("div", { className: "builder-phase1-room-npc-badges", title: npcTooltip || `${npcCount} NPC${npcCount === 1 ? "" : "s"} assigned` }, visibleNpcBadges.map((npcBadge) => /* @__PURE__ */ import_react5.default.createElement(
+          "span",
+          {
+            key: npcBadge.id,
+            className: [
+              "builder-phase1-room-npc-badge",
+              NPC_TYPE_STYLES[npcBadge.type] || NPC_TYPE_STYLES.neutral
+            ].join(" "),
+            title: `${npcBadge.fullLabel} \u2022 ${npcBadge.type}`
+          },
+          /* @__PURE__ */ import_react5.default.createElement("span", { className: "builder-phase1-room-npc-badge-label" }, npcBadge.label),
+          /* @__PURE__ */ import_react5.default.createElement(
+            "button",
+            {
+              type: "button",
+              className: "builder-phase1-room-npc-badge-remove",
+              "aria-label": `Remove ${npcBadge.fullLabel}`,
+              title: `Remove ${npcBadge.fullLabel}`,
+              onClick: (event) => handleNpcBadgeRemove(event, npcBadge.id)
+            },
+            "x"
+          )
+        )), hiddenNpcCount ? /* @__PURE__ */ import_react5.default.createElement("span", { className: "builder-phase1-room-npc-badge is-overflow", title: npcTooltip }, "+", hiddenNpcCount) : null) : null
+      )
+    );
   }
 
   // web/static/webclient/react/builder/BuilderCanvas.tsx
@@ -32257,7 +32501,7 @@ var DragonsireBuilderReactFlow = (() => {
       });
     });
   }
-  function BuilderCanvasSurface({ viewportRequest = null }) {
+  function BuilderCanvasSurface({ viewportRequest = null, npcCatalog = {}, onAssignNpcToRoom, onRemoveNpcFromRoom, onAssignItemToRoom, onRoomActivate }) {
     const {
       applyLayout,
       clearLayout,
@@ -32331,10 +32575,14 @@ var DragonsireBuilderReactFlow = (() => {
           isHub: Boolean(meta?.isHub),
           isPreviewGhost: false,
           color: room.color || "standard",
-          activeSourceHandleId
+          activeSourceHandleId,
+          npcCatalog,
+          onNpcDrop: onAssignNpcToRoom,
+          onNpcRemove: onRemoveNpcFromRoom,
+          onItemDrop: onAssignItemToRoom
         }
       };
-    }), [activeSourceHandleId, renderTransform.positionsByRoomId, roomList, zoomLevel]);
+    }), [activeSourceHandleId, npcCatalog, onAssignItemToRoom, onAssignNpcToRoom, onRemoveNpcFromRoom, renderTransform.positionsByRoomId, roomList, zoomLevel]);
     const [canvasNodes, setCanvasNodes] = (0, import_react7.useState)(baseNodes);
     (0, import_react7.useEffect)(() => {
       if (isDraggingRef.current) {
@@ -32530,6 +32778,10 @@ var DragonsireBuilderReactFlow = (() => {
             if (mode !== "select") {
               return;
             }
+            if (onRoomActivate?.(node.id) === true) {
+              setSelectedEdge(null);
+              return;
+            }
             setSelectedEdge(null);
             setSelectedRoom(node.id);
           },
@@ -32703,6 +32955,8 @@ var DragonsireBuilderReactFlow = (() => {
   function BuilderBridge({ bridgeApi = null }) {
     const {
       deleteSelectedEdge,
+      updateRoomItemEntries,
+      updateRoomNpcIds,
       updateSelectedEdge,
       updateSelectedRoomColor
     } = useBuilderStore();
@@ -32713,6 +32967,12 @@ var DragonsireBuilderReactFlow = (() => {
       bridgeApi.setSelectedRoomColor = (color2) => {
         updateSelectedRoomColor(String(color2 || "standard"));
       };
+      bridgeApi.setRoomNpcIds = (roomId, npcIds) => {
+        updateRoomNpcIds(String(roomId || ""), Array.isArray(npcIds) ? npcIds : []);
+      };
+      bridgeApi.setRoomItemEntries = (roomId, itemEntries) => {
+        updateRoomItemEntries(String(roomId || ""), Array.isArray(itemEntries) ? itemEntries : []);
+      };
       bridgeApi.updateSelectedEdge = (updates) => {
         updateSelectedEdge(updates || {});
       };
@@ -32721,10 +32981,12 @@ var DragonsireBuilderReactFlow = (() => {
       };
       return () => {
         delete bridgeApi.setSelectedRoomColor;
+        delete bridgeApi.setRoomNpcIds;
+        delete bridgeApi.setRoomItemEntries;
         delete bridgeApi.updateSelectedEdge;
         delete bridgeApi.deleteSelectedEdge;
       };
-    }, [bridgeApi, deleteSelectedEdge, updateSelectedEdge, updateSelectedRoomColor]);
+    }, [bridgeApi, deleteSelectedEdge, updateRoomItemEntries, updateRoomNpcIds, updateSelectedEdge, updateSelectedRoomColor]);
     return null;
   }
   function normalizeInitialRooms(zonePrefix, rooms = []) {
@@ -32745,6 +33007,8 @@ var DragonsireBuilderReactFlow = (() => {
           }
           return accumulator;
         }, {}),
+        npcIds: Array.isArray(room?.npcs) ? room.npcs.map((npcId) => String(npcId || "")).filter(Boolean) : [],
+        itemEntries: Array.isArray(room?.items) ? room.items.map((entry) => ({ ...entry })) : [],
         color: String(room?.color || "standard")
       };
     });
@@ -32754,6 +33018,11 @@ var DragonsireBuilderReactFlow = (() => {
     zonePrefix = "ZONE",
     selectedRoomId = null,
     viewportRequest = null,
+    npcCatalog = {},
+    onAssignNpcToRoom,
+    onRemoveNpcFromRoom,
+    onAssignItemToRoom,
+    onRoomActivate,
     onBuilderStateChange,
     bridgeApi = null
   }) {
@@ -32774,6 +33043,8 @@ var DragonsireBuilderReactFlow = (() => {
           };
           return accumulator;
         }, {}),
+        npcIds: Array.isArray(room.npcIds) ? room.npcIds.slice() : [],
+        items: Array.isArray(room.itemEntries) ? room.itemEntries.map((entry) => ({ ...entry })) : [],
         color: room.color || "standard",
         meta: { ...room.meta || {} }
       }));
@@ -32806,7 +33077,17 @@ var DragonsireBuilderReactFlow = (() => {
       },
       /* @__PURE__ */ import_react10.default.createElement(BuilderBridge, { bridgeApi }),
       /* @__PURE__ */ import_react10.default.createElement(BuilderToolbar, null),
-      /* @__PURE__ */ import_react10.default.createElement(BuilderCanvas, { viewportRequest })
+      /* @__PURE__ */ import_react10.default.createElement(
+        BuilderCanvas,
+        {
+          viewportRequest,
+          npcCatalog,
+          onAssignNpcToRoom,
+          onRemoveNpcFromRoom,
+          onAssignItemToRoom,
+          onRoomActivate
+        }
+      )
     ));
   }
 
@@ -32827,6 +33108,14 @@ var DragonsireBuilderReactFlow = (() => {
   function setBuilderReactFlowSelectedRoomColor(container, color2) {
     const record = container ? roots.get(container) : null;
     record?.bridgeApi?.setSelectedRoomColor?.(color2);
+  }
+  function setBuilderReactFlowRoomNpcIds(container, roomId, npcIds) {
+    const record = container ? roots.get(container) : null;
+    record?.bridgeApi?.setRoomNpcIds?.(roomId, Array.isArray(npcIds) ? npcIds : []);
+  }
+  function setBuilderReactFlowRoomItemEntries(container, roomId, itemEntries) {
+    const record = container ? roots.get(container) : null;
+    record?.bridgeApi?.setRoomItemEntries?.(roomId, Array.isArray(itemEntries) ? itemEntries : []);
   }
   function updateBuilderReactFlowSelectedEdge(container, updates) {
     const record = container ? roots.get(container) : null;

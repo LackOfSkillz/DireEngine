@@ -16,4 +16,7 @@ class CmdShop(Command):
     help_category = "Lore"
 
     def func(self):
-        self.caller.list_vendor_inventory()
+        args = (self.args or "").strip()
+        if args and self.caller.open_interaction_with(args, preferred_type="vendor", silent=True):
+            return
+        self.caller.list_vendor_inventory(self.args)

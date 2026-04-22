@@ -8,6 +8,7 @@ from evennia.objects.models import ObjectDB
 from evennia.prototypes.spawner import search_prototype, spawn
 from evennia.utils.create import create_object
 
+from server.systems import zone_room_item_assignments, zone_room_npc_assignments, zone_runtime_spawn
 from world.builder.services.map_exporter import _rooms_for_zone
 
 
@@ -39,6 +40,7 @@ REVERSE_DIRECTIONS = {
 
 MAP_SPREAD_WARNING_THRESHOLD = 2
 GENERIC_OBJECT_TYPECLASS = "typeclasses.objects.Object"
+DEFAULT_NPC_TYPECLASS = "typeclasses.npcs.NPC"
 DEFAULT_ROOM_TYPECLASS = "typeclasses.rooms_extended.ExtendedDireRoom"
 DEFAULT_EXIT_TYPECLASS = "typeclasses.exits.Exit"
 DEFAULT_SLOW_EXIT_TYPECLASS = "typeclasses.exits_slow.SlowDireExit"
@@ -211,6 +213,8 @@ def _normalize_room_specs(zone_id: str, rooms_data: list[dict], warnings: list[s
             "details": _normalize_string_map(room_data.get("details") or {}),
             "room_states": sorted({state.lower() for state in _normalize_string_list(room_data.get("room_states") or [])}),
             "ambient": _normalize_ambient(room_data.get("ambient") or {}),
+            "npcs": zone_room_npc_assignments.normalize_builder_reference_ids(room_data.get("npcs") or []),
+            "items": zone_room_item_assignments.normalize_room_item_entries(room_data.get("items") or []),
             "map": {
                 "x": int(map_x),
                 "y": int(map_y),
@@ -359,7 +363,8 @@ def _safe_prototype_exists(prototype_key: str) -> bool:
 
 def _resolve_spawn_blueprint(placement: dict, kind: str, warnings: list[str]) -> tuple[str | None, str]:
     prototype = str(placement.get("prototype") or "").strip() or None
-    typeclass = str(placement.get("typeclass") or GENERIC_OBJECT_TYPECLASS).strip() or GENERIC_OBJECT_TYPECLASS
+    default_typeclass = DEFAULT_NPC_TYPECLASS if str(kind or "").strip().lower() == "npc" else GENERIC_OBJECT_TYPECLASS
+    typeclass = str(placement.get("typeclass") or default_typeclass).strip() or default_typeclass
     if prototype and not _safe_prototype_exists(prototype):
         warnings.append(f"Missing {kind} prototype '{prototype}' for '{placement.get('id')}', using {GENERIC_OBJECT_TYPECLASS}.")
         return None, GENERIC_OBJECT_TYPECLASS
@@ -378,15 +383,21 @@ def _build_import_plan(zone_id: str, data: dict) -> dict:
     placements, placement_warnings = _normalize_placements(dict(data.get("placements") or {}), rooms_by_id)
     warnings.extend(placement_warnings)
 
+    room_assignment_placements = zone_runtime_spawn.build_room_assignment_placements(normalized_rooms)
+    placements["npcs"].extend(room_assignment_placements["npcs"])
+    placements["items"].extend(room_assignment_placements["items"])
+
     for placement in placements["npcs"]:
         prototype, typeclass = _resolve_spawn_blueprint(placement, "npc", warnings)
         placement["resolved_prototype"] = prototype
         placement["resolved_typeclass"] = typeclass
+        placement["spawn_key"] = str(placement.get("spawn_key") or placement.get("id") or "").strip()
 
     for placement in placements["items"]:
         prototype, typeclass = _resolve_spawn_blueprint(placement, "item", warnings)
         placement["resolved_prototype"] = prototype
         placement["resolved_typeclass"] = typeclass
+        placement["spawn_key"] = str(placement.get("spawn_key") or placement.get("id") or "").strip()
 
     exit_count = sum(len(room_spec["exits"]) for room_spec in normalized_rooms)
     special_exit_count = sum(len(room_spec["special_exits"]) for room_spec in normalized_rooms)
@@ -420,6 +431,21 @@ def _delete_existing_zone(zone_id: str) -> None:
         obj.delete()
 
 
+def _delete_existing_zone_runtime_objects(zone_id: str) -> None:
+    runtime_objects = []
+    for obj in _iter_zone_objects(zone_id):
+        if bool(getattr(obj, "has_account", False)):
+            continue
+        if getattr(obj, "destination", None) is not None:
+            continue
+        if getattr(obj, "location", None) is None:
+            continue
+        runtime_objects.append(obj)
+
+    for obj in sorted(runtime_objects, key=lambda candidate: int(getattr(candidate, "id", 0) or 0), reverse=True):
+        obj.delete()
+
+
 def _apply_room_data(room, room_data: dict, zone_id: str) -> None:
     room.key = room_data["name"]
     room.db.world_id = room_data["id"]
@@ -430,12 +456,83 @@ def _apply_room_data(room, room_data: dict, zone_id: str) -> None:
     room.db.map_y = room_data["map"]["y"]
     room.db.map_layer = room_data["map"].get("layer", 0)
     room.db.short_desc = room_data.get("short_desc")
+    room.db.authored_npcs = list(room_data.get("npcs") or [])
+    room.db.authored_items = list(room_data.get("items") or [])
+    room.ndb.runtime_npcs = []
+    room.ndb.runtime_items = []
     _apply_extended_room_fields(room, room_data)
     flags = room_data.get("flags") or {}
     room.db.safe_zone = bool(flags.get("safe_zone", False))
     room.db.is_shop = bool(flags.get("is_shop", False))
     _tag_syncable(room, zone_id)
     _tag_room_for_builder(room, zone_id)
+
+
+def _track_room_runtime(room, kind: str, obj) -> None:
+    if kind == "npc":
+        room.ndb.runtime_npcs = list(getattr(room.ndb, "runtime_npcs", []) or []) + [obj]
+        return
+    room.ndb.runtime_items = list(getattr(room.ndb, "runtime_items", []) or []) + [obj]
+
+
+def _spawn_zone_runtime_contents(zone_id: str, plan: dict, room_lookup: dict[str, object]) -> tuple[int, int]:
+    item_lookup = {}
+
+    for placement in plan["placements"]["npcs"]:
+        npc = _create_spawned_object(placement)
+        target_room = room_lookup[placement["room"]]
+        npc.location = target_room
+        npc.home = npc.location
+        definition = dict(placement.get("definition") or {})
+        npc.key = str(definition.get("name") or getattr(npc, "key", "") or placement["id"])
+        npc.db.world_id = placement["id"]
+        npc.db.prototype = placement.get("resolved_prototype") or placement.get("prototype")
+        npc.db.runtime_definition_id = placement["id"]
+        npc.db.runtime_definition_kind = "npc"
+        npc.db.runtime_spawn_source = placement.get("spawn_source") or "zone_placement"
+        npc.db.is_npc = True
+        zone_runtime_spawn.apply_runtime_npc_definition(npc, definition)
+        _tag_syncable(npc, zone_id)
+        _track_room_runtime(target_room, "npc", npc)
+        print(f"Spawned npc {placement['id']} in {placement['room']}")
+
+    for placement in plan["placements"]["items"]:
+        item = _create_spawned_object(placement)
+        definition = dict(placement.get("definition") or {})
+        count = max(1, int(placement.get("count", 1) or 1))
+        base_name = str(definition.get("name") or getattr(item, "key", "") or placement["id"])
+        item.key = f"{base_name} (x{count})" if count > 1 else base_name
+        item.aliases.add(base_name)
+        item.aliases.add(str(placement["id"]))
+        item.db.world_id = placement["id"]
+        item.db.prototype = placement.get("resolved_prototype") or placement.get("prototype")
+        item.db.runtime_definition_id = placement["id"]
+        item.db.runtime_definition_kind = "item"
+        item.db.runtime_spawn_source = placement.get("spawn_source") or "zone_placement"
+        item.db.stack_count = count
+        item.db.is_npc = False
+        _tag_syncable(item, zone_id)
+        item_lookup[placement["spawn_key"]] = item
+
+    spawned_item_count = 0
+    for placement in plan["placements"]["items"]:
+        item = item_lookup[placement["spawn_key"]]
+        parent_key = str(placement.get("parent_spawn_key") or placement.get("parent") or "").strip()
+        if parent_key:
+            parent = item_lookup.get(parent_key)
+            if parent is None:
+                raise ValueError(f"Item placement '{placement['id']}' points to missing parent '{parent_key}'.")
+            item.location = parent
+            item.home = room_lookup.get(placement.get("room")) or item.location
+        else:
+            target_room = room_lookup[placement["room"]]
+            item.location = target_room
+            item.home = item.location
+            _track_room_runtime(target_room, "item", item)
+        spawned_item_count += 1
+        print(f"Spawned item {placement['id']} x{item.db.stack_count} in {placement['room']}")
+
+    return len(plan["placements"]["npcs"]), spawned_item_count
 
 
 def _iter_zone_objects(zone_id: str) -> list[object]:
@@ -512,6 +609,9 @@ def _warm_load_zone(zone_id: str, plan: dict) -> dict:
         for stale_exit in existing_exits.values():
             stale_exit.delete()
 
+    _delete_existing_zone_runtime_objects(zone_id)
+    spawned_npcs, spawned_items = _spawn_zone_runtime_contents(zone_id, plan, room_lookup)
+
     resolver_rooms = list(_rooms_for_zone(zone_id))
     if len(resolver_rooms) < len(target_room_ids):
         raise RuntimeError(
@@ -529,8 +629,8 @@ def _warm_load_zone(zone_id: str, plan: dict) -> dict:
         "rooms": len(target_room_ids),
         "exits": plan["summary"]["exits"],
         "special_exits": plan["summary"]["special_exits"],
-        "npcs": 0,
-        "items": 0,
+        "npcs": spawned_npcs,
+        "items": spawned_items,
         "containers_linked": 0,
         "auto_reverse_exits": plan["summary"]["auto_reverse_exits"],
     }
@@ -569,7 +669,6 @@ def load_zone(zone_id: str, dry_run: bool = False, preserve_existing: bool = Fal
     _delete_existing_zone(normalized_zone_id)
 
     room_lookup = {}
-    item_lookup = {}
     created_exit_pairs: set[tuple[str, str]] = set()
 
     for room_data in plan["rooms"]:
@@ -625,36 +724,7 @@ def load_zone(zone_id: str, dry_run: bool = False, preserve_existing: bool = Fal
             _tag_syncable(exit_obj, normalized_zone_id)
             created_exit_pairs.add(exit_key)
 
-    for placement in plan["placements"]["npcs"]:
-        npc = _create_spawned_object(placement)
-        npc.location = room_lookup[placement["room"]]
-        npc.home = npc.location
-        npc.key = str(getattr(npc, "key", "") or placement["id"])
-        npc.db.world_id = placement["id"]
-        npc.db.prototype = placement.get("resolved_prototype") or placement.get("prototype")
-        npc.db.is_npc = True
-        _tag_syncable(npc, normalized_zone_id)
-
-    for placement in plan["placements"]["items"]:
-        item = _create_spawned_object(placement)
-        item.key = str(getattr(item, "key", "") or placement["id"])
-        item.db.world_id = placement["id"]
-        item.db.prototype = placement.get("resolved_prototype") or placement.get("prototype")
-        item.db.is_npc = False
-        _tag_syncable(item, normalized_zone_id)
-        item_lookup[placement["id"]] = item
-
-    for placement in plan["placements"]["items"]:
-        item = item_lookup[placement["id"]]
-        if placement.get("parent"):
-            parent = item_lookup.get(placement["parent"])
-            if parent is None:
-                raise ValueError(f"Item placement '{placement['id']}' points to missing parent '{placement['parent']}'.")
-            item.location = parent
-            item.home = room_lookup.get(placement.get("room")) or item.location
-        else:
-            item.location = room_lookup[placement["room"]]
-            item.home = item.location
+    spawned_npcs, spawned_items = _spawn_zone_runtime_contents(normalized_zone_id, plan, room_lookup)
 
     resolver_rooms = list(_rooms_for_zone(normalized_zone_id))
     if len(resolver_rooms) != len(room_lookup):
@@ -662,8 +732,8 @@ def load_zone(zone_id: str, dry_run: bool = False, preserve_existing: bool = Fal
             f"Builder resolver mismatch for zone {normalized_zone_id}: expected {len(room_lookup)} rooms, got {len(resolver_rooms)}."
         )
 
-    print(f"NPCs placed: {plan['summary']['npcs']}")
-    print(f"Items placed: {plan['summary']['items']}")
+    print(f"NPCs placed: {spawned_npcs}")
+    print(f"Items placed: {spawned_items}")
     print(f"Containers linked: {plan['summary']['containers_linked']}")
 
     return {
@@ -673,8 +743,8 @@ def load_zone(zone_id: str, dry_run: bool = False, preserve_existing: bool = Fal
         "rooms": len(room_lookup),
         "exits": plan["summary"]["exits"],
         "special_exits": plan["summary"]["special_exits"],
-        "npcs": len(plan["placements"]["npcs"]),
-        "items": len(item_lookup),
+        "npcs": spawned_npcs,
+        "items": spawned_items,
         "containers_linked": plan["summary"]["containers_linked"],
         "auto_reverse_exits": plan["summary"]["auto_reverse_exits"],
     }

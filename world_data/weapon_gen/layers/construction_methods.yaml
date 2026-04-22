@@ -1,0 +1,19 @@
+forged:
+  traits:
+    - solid
+    - reliable
+
+folded:
+  traits:
+    - layered
+    - resilient
+
+cast:
+  traits:
+    - brittle
+    - shaped
+
+grown:
+  traits:
+    - organic
+    - seamless

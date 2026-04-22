@@ -1,0 +1,35 @@
+id: cut_worm_bait
+name: Cut Worm Bait
+category: consumable
+tier: average
+utility_category: fishing
+functional_type: bait
+tool_type: fishing
+durability: 1
+bait_family: worm_cutbait
+bait_quality: 12.0
+tags:
+  - fishing
+  - bait
+level_band:
+  min: 1
+  max: 12
+value: 3
+weight: 0.1
+stackable: true
+max_stack: 10
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: bait
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: cut worm bait
+  long: A tin of cut worm bait sealed with damp cloth to keep it useful through the day.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

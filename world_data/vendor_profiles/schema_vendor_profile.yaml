@@ -1,0 +1,27 @@
+id: string
+category: weapon | armor | consumable | clothing | jewelry | furniture | container | misc | general_goods
+level_band:
+  min: int
+  max: int
+stock_count: int
+allowed_weapon_classes: []
+preferred_weapon_classes: {}
+excluded_weapon_classes: []
+allowed_armor_classes: []
+preferred_armor_classes: {}
+excluded_armor_classes: []
+allowed_armor_slots: []
+preferred_armor_slots: {}
+slot_targets: {}
+slot_priority: {}
+kit_templates: []
+kit_count: int
+snobbishness: float
+ammo_types: []
+ammo_classes: []
+ammo_stock_count: int
+required_tags: []
+allow_duplicates: bool
+essential_item_ids: []
+optional_item_ids: []
+optional_stock_count: int

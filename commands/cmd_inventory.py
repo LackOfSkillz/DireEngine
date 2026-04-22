@@ -36,6 +36,12 @@ class CmdInventory(Command):
         ]
         if not carried:
             lines = ["You are carrying nothing.", f"Coins: {coin_text}"]
+            if hasattr(self.caller, "get_quiver_display_line"):
+                lines.append(self.caller.get_quiver_display_line())
+            if hasattr(self.caller, "get_loaded_ammo_display_line"):
+                lines.append(self.caller.get_loaded_ammo_display_line())
+            if hasattr(self.caller, "get_ammo_inventory_display_lines"):
+                lines.extend(self.caller.get_ammo_inventory_display_lines())
             if weight_text:
                 lines.append(weight_text)
             if encumbrance_text:
@@ -51,6 +57,12 @@ class CmdInventory(Command):
             return
 
         lines = ["You are carrying:", f"Coins: {coin_text}"]
+        if hasattr(self.caller, "get_quiver_display_line"):
+            lines.append(self.caller.get_quiver_display_line())
+        if hasattr(self.caller, "get_loaded_ammo_display_line"):
+            lines.append(self.caller.get_loaded_ammo_display_line())
+        if hasattr(self.caller, "get_ammo_inventory_display_lines"):
+            lines.extend(self.caller.get_ammo_inventory_display_lines())
         if weight_text:
             lines.append(weight_text)
         if encumbrance_text:

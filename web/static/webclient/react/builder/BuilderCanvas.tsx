@@ -26,9 +26,14 @@ function scheduleFitView(reactFlow: ReturnType<typeof useReactFlow>, duration: n
 
 type BuilderCanvasProps = {
   viewportRequest?: { type?: string; token?: number } | null;
+  npcCatalog?: Record<string, unknown>;
+  onAssignNpcToRoom?: (npcId: string, roomId: string) => void;
+  onRemoveNpcFromRoom?: (npcId: string, roomId: string) => void;
+  onAssignItemToRoom?: (itemId: string, roomId: string, count?: number) => void;
+  onRoomActivate?: (roomId: string) => boolean | void;
 };
 
-function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
+function BuilderCanvasSurface({ viewportRequest = null, npcCatalog = {}, onAssignNpcToRoom, onRemoveNpcFromRoom, onAssignItemToRoom, onRoomActivate }: BuilderCanvasProps) {
   const {
     applyLayout,
     clearLayout,
@@ -114,10 +119,14 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
             isPreviewGhost: false,
             color: room.color || "standard",
             activeSourceHandleId,
+            npcCatalog,
+            onNpcDrop: onAssignNpcToRoom,
+            onNpcRemove: onRemoveNpcFromRoom,
+            onItemDrop: onAssignItemToRoom,
           },
         };
       })
-  ), [activeSourceHandleId, renderTransform.positionsByRoomId, roomList, zoomLevel]);
+  ), [activeSourceHandleId, npcCatalog, onAssignItemToRoom, onAssignNpcToRoom, onRemoveNpcFromRoom, renderTransform.positionsByRoomId, roomList, zoomLevel]);
   const [canvasNodes, setCanvasNodes] = useState<Array<Node<{ roomId: string }>>>(baseNodes);
 
   useEffect(() => {
@@ -340,6 +349,11 @@ function BuilderCanvasSurface({ viewportRequest = null }: BuilderCanvasProps) {
           }
 
           if (mode !== "select") {
+            return;
+          }
+
+          if (onRoomActivate?.(node.id) === true) {
+            setSelectedEdge(null);
             return;
           }
 

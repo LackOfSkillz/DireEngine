@@ -32,7 +32,47 @@ type BuilderRoomNodeData = {
   isPreviewGhost?: boolean;
   color?: RoomColor;
   activeSourceHandleId?: string | null;
+  npcCatalog?: Record<string, { id?: string; name?: string; type?: string; vendor?: { enabled?: boolean } }>;
+  onNpcDrop?: ((npcId: string, roomId: string) => void) | null;
+  onNpcRemove?: ((npcId: string, roomId: string) => void) | null;
+  onItemDrop?: ((itemId: string, roomId: string, count?: number) => void) | null;
 };
+
+const NPC_BADGE_MAX_VISIBLE = 2;
+
+const NPC_TYPE_STYLES: Record<string, string> = {
+  vendor: "is-vendor",
+  hostile: "is-hostile",
+  neutral: "is-neutral",
+};
+
+function normalizeNpcType(npc: { type?: string; vendor?: { enabled?: boolean } } | null | undefined) {
+  if (Boolean(npc?.vendor?.enabled) || String(npc?.type || "").trim().toLowerCase() === "vendor") {
+    return "vendor";
+  }
+  const normalized = String(npc?.type || "").trim().toLowerCase();
+  if (normalized === "hostile") {
+    return "hostile";
+  }
+  return "neutral";
+}
+
+function humanizeNpcId(npcId: string) {
+  return String(npcId || "")
+    .split(/[_-]+/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function truncateNpcBadgeLabel(label: string, maxLength = 12) {
+  const normalized = String(label || "").trim();
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+  return `${normalized.slice(0, Math.max(1, maxLength - 1)).trimEnd()}...`;
+}
 
 const HANDLE_TITLES: Record<BuilderDirection, string> = {
   north: "North",
@@ -77,6 +117,64 @@ export function RoomNode({ data }: NodeProps<BuilderRoomNodeData>) {
   const activeSourceHandleId = String(data?.activeSourceHandleId || "").trim() || null;
   const validTargetHandleId = activeSourceHandleId ? OPPOSITE_HANDLE_ID[activeSourceHandleId] || null : null;
   const roomLabel = room?.id || roomId;
+  const npcIds = Array.isArray(room?.npcIds) ? room.npcIds : [];
+  const npcCount = npcIds.length;
+  const npcCatalog = data?.npcCatalog || {};
+  const [isDropTarget, setIsDropTarget] = React.useState(false);
+  const visibleNpcBadges = npcIds.slice(0, NPC_BADGE_MAX_VISIBLE).map((npcId) => {
+    const npc = npcCatalog[String(npcId || "")] || null;
+    const npcName = String(npc?.name || humanizeNpcId(npcId) || npcId);
+    const npcType = normalizeNpcType(npc);
+    return {
+      id: String(npcId || ""),
+      label: truncateNpcBadgeLabel(npcName),
+      fullLabel: npcName,
+      type: npcType,
+    };
+  });
+  const hiddenNpcCount = Math.max(0, npcCount - visibleNpcBadges.length);
+  const npcTooltip = npcIds.map((npcId) => {
+    const npc = npcCatalog[String(npcId || "")] || null;
+    const npcName = String(npc?.name || humanizeNpcId(npcId) || npcId);
+    const npcType = normalizeNpcType(npc);
+    return `${npcName} • ${npcType}`;
+  }).join("\n");
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    const payloadTypes = Array.from(event.dataTransfer.types || []);
+    const hasNpcPayload = payloadTypes.includes("application/x-dragonsire-npc-id");
+    const hasItemPayload = payloadTypes.includes("application/x-dragonsire-room-item");
+    if (!hasNpcPayload && !hasItemPayload) {
+      return;
+    }
+    event.preventDefault();
+    event.dataTransfer.dropEffect = hasItemPayload ? "copy" : "move";
+    setIsDropTarget(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDropTarget(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    const npcId = String(event.dataTransfer.getData("application/x-dragonsire-npc-id") || event.dataTransfer.getData("text/plain") || "").trim();
+    event.preventDefault();
+    setIsDropTarget(false);
+    if (npcId) {
+      data?.onNpcDrop?.(npcId, roomId);
+      return;
+    }
+    const itemId = String(event.dataTransfer.getData("application/x-dragonsire-room-item") || "").trim();
+    if (itemId) {
+      data?.onItemDrop?.(itemId, roomId, 1);
+    }
+  };
+
+  const handleNpcBadgeRemove = (event: React.MouseEvent<HTMLButtonElement>, npcId: string) => {
+    event.preventDefault();
+    event.stopPropagation();
+    data?.onNpcRemove?.(npcId, roomId);
+  };
 
   return (
     <div className={[
@@ -85,7 +183,12 @@ export function RoomNode({ data }: NodeProps<BuilderRoomNodeData>) {
       isLocked ? "is-locked" : "",
       isCorridor ? "is-corridor" : "",
       isHub ? "is-hub" : "",
-    ].filter(Boolean).join(" ")}>
+      isDropTarget ? "is-npc-drop-target" : "",
+    ].filter(Boolean).join(" ")}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}>
       {BUILDER_DIRECTIONS.map((direction) => {
         const handleId = directionToHandleId(direction);
         const handleLayout = HANDLE_LAYOUT[direction];
@@ -144,6 +247,34 @@ export function RoomNode({ data }: NodeProps<BuilderRoomNodeData>) {
         title={roomLabel}
       >
         <span className={`builder-phase1-room-label${showLabel ? "" : " is-hidden-by-zoom"}`}>{roomLabel}</span>
+        {npcCount ? (
+          <div className="builder-phase1-room-npc-badges" title={npcTooltip || `${npcCount} NPC${npcCount === 1 ? "" : "s"} assigned`}>
+            {visibleNpcBadges.map((npcBadge) => (
+              <span
+                key={npcBadge.id}
+                className={[
+                  "builder-phase1-room-npc-badge",
+                  NPC_TYPE_STYLES[npcBadge.type] || NPC_TYPE_STYLES.neutral,
+                ].join(" ")}
+                title={`${npcBadge.fullLabel} • ${npcBadge.type}`}
+              >
+                <span className="builder-phase1-room-npc-badge-label">{npcBadge.label}</span>
+                <button
+                  type="button"
+                  className="builder-phase1-room-npc-badge-remove"
+                  aria-label={`Remove ${npcBadge.fullLabel}`}
+                  title={`Remove ${npcBadge.fullLabel}`}
+                  onClick={(event) => handleNpcBadgeRemove(event, npcBadge.id)}
+                >
+                  x
+                </button>
+              </span>
+            ))}
+            {hiddenNpcCount ? (
+              <span className="builder-phase1-room-npc-badge is-overflow" title={npcTooltip}>+{hiddenNpcCount}</span>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );

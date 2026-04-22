@@ -22,6 +22,7 @@ from commands.cmd_admin_identity import CmdCheckIdentityIntegrity, CmdHealIdenti
 from commands.cmd_appraise import CmdAppraise
 from commands.cmd_shift import CmdShift
 from commands.cmd_ask import CmdAsk
+from commands.cmd_talk import CmdTalk
 from commands.cmd_assess import CmdAssess
 from commands.cmd_assessstance import CmdAssessStance
 from commands.cmd_attack import CmdAttack
@@ -35,6 +36,7 @@ from commands.cmd_ability import CmdAbility
 from commands.cmd_ability_nomatch import CmdAbilityNoMatch
 from commands.cmd_cast import CmdCast
 from commands.cmd_channel import CmdChannel
+from commands.cmd_clickvendor import CmdClickVendor
 from commands.cmd_clickmove import CmdClickMove
 from commands.cmd_chargen import (
     CmdCharCreate,
@@ -110,6 +112,7 @@ from commands.cmd_join import CmdJoin
 from commands.cmd_bounty import CmdBounty
 from commands.cmd_bounties import CmdBounties
 from commands.cmd_acceptbounty import CmdAcceptBounty
+from commands.cmd_accept import CmdAccept
 from commands.cmd_bribe import CmdBribe
 from commands.cmd_burgle import CmdBurgle
 from commands.cmd_capture import CmdCapture
@@ -117,6 +120,7 @@ from commands.cmd_laylow import CmdLayLow
 from commands.cmd_language import CmdLanguage
 from commands.cmd_load import CmdLoad
 from commands.cmd_loot import CmdLoot
+from commands.cmd_lootdebug import CmdLootDebug
 from commands.cmd_link import CmdLink
 from commands.cmd_manipulate import CmdManipulate
 from commands.cmd_mark import CmdMark
@@ -125,6 +129,7 @@ from commands.cmd_mindstate import CmdMindstate
 from commands.cmd_maptest import CmdMapTest
 from commands.cmd_hide import CmdHide
 from commands.cmd_observe import CmdObserve
+from commands.cmd_offer import CmdOffer
 from commands.cmd_onboarding import CmdOnboardingGender, CmdOnboardingIntake, CmdOnboardingName, CmdOnboardingSet, CmdOnboardingStand
 from commands.cmd_open import CmdOpen
 from commands.cmd_pick import CmdPick
@@ -227,6 +232,7 @@ from commands.cmd_balance import CmdBalance
 from commands.cmd_deposit import CmdDeposit
 from commands.cmd_creeper import CmdCreeper
 from commands.cmd_decaycorpse import CmdDecayCorpse
+from commands.cmd_debug import CmdDebug
 from commands.cmd_retrieve import CmdRetrieve
 from commands.cmd_deathinspect import CmdDeathInspect
 from commands.cmd_store import CmdStore
@@ -276,6 +282,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdBounty())
         self.add(CmdBounties())
         self.add(CmdAcceptBounty())
+        self.add(CmdAccept())
         self.add(CmdBribe())
         self.add(CmdBurgle())
         self.add(CmdCast())
@@ -285,6 +292,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCharge())
         self.add(CmdCircle())
         self.add(CmdCommune())
+        self.add(CmdClickVendor())
         self.add(CmdClickMove())
         self.add(CmdClimb())
         self.add(CmdCompanion())
@@ -301,6 +309,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdChargenMirrorConfirm())
         self.add(CmdChargenMirrorCancel())
         self.add(CmdDecayCorpse())
+        self.add(CmdDebug())
         self.add(CmdDisarm())
         self.add(CmdDraw())
         self.add(CmdEnterPassage())
@@ -348,12 +357,14 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdLink())
         self.add(CmdLoad())
         self.add(CmdLoot())
+        self.add(CmdLootDebug())
         self.add(CmdManipulate())
         self.add(CmdMark())
         self.add(CmdMend())
         self.add(CmdMapTest())
         self.add(CmdMindstate())
         self.add(CmdObserve())
+        self.add(CmdOffer())
         self.add(CmdOnboardingGender())
         self.add(CmdOnboardingStand())
         self.add(CmdOnboardingSet())
@@ -401,6 +412,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSetTrap())
         self.add(CmdSetCircle())
         self.add(CmdSetRace())
+        self.add(CmdTalk())
         self.add(CmdExperience())
         self.add(CmdSkillDebug())
         self.add(CmdRetreat())

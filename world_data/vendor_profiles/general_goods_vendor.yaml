@@ -1,0 +1,22 @@
+id: general_goods_vendor
+category: general_goods
+level_band:
+  min: 1
+  max: 12
+stock_count: 10
+essential_item_ids:
+  - starter_pack
+  - coil_of_rope
+  - hooded_lantern
+  - river_fishing_pole
+  - iron_fishing_hook
+  - waxed_fishing_line
+  - cut_worm_bait
+  - miners_pick
+  - stitchers_awl
+optional_item_ids:
+  - hunting_quiver
+  - fish_string
+optional_stock_count: 1
+required_tags: []
+allow_duplicates: false

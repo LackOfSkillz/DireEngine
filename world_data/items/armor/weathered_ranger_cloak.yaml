@@ -1,0 +1,30 @@
+id: weathered_ranger_cloak
+name: Weathered ranger cloak
+category: armor
+armor_class: light_armor
+armor_slot: cloak
+layer: outer
+tier: average
+tags: []
+level_band:
+  min: 1
+  max: 10
+value: 20
+weight: 2.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: cloak
+  attack: 0
+  defense: 2
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a weathered ranger cloak
+  long: A weathered ranger cloak lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

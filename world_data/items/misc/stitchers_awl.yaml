@@ -1,0 +1,33 @@
+id: stitchers_awl
+name: Stitcher's Awl
+category: misc
+tier: average
+utility_category: crafting_tools
+functional_type: crafting_tool
+tool_type: crafting
+durability: 18
+tags:
+  - crafting
+  - utility
+level_band:
+  min: 1
+  max: 12
+value: 11
+weight: 0.4
+stackable: false
+max_stack: 1
+equipment:
+  slot: none
+  attack: 0
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a stitcher's awl
+  long: A stout awl used for leather repair, pack work, and rough camp crafting.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

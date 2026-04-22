@@ -1,0 +1,29 @@
+id: iron_banded_kite_shield
+name: Iron-banded kite shield
+category: armor
+armor_class: chain_armor
+armor_slot: shield
+tier: average
+tags: []
+level_band:
+  min: 1
+  max: 10
+value: 36
+weight: 4.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: shield
+  attack: 0
+  defense: 5
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: an iron-banded kite shield
+  long: An iron-banded kite shield lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-22'

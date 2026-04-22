@@ -1,0 +1,29 @@
+id: black_leathers_studded_with_darkstone_rivets
+name: Black leathers studded with darkstone rivets
+category: armor
+armor_class: leather_armor
+armor_slot: chest
+tier: fine
+tags: []
+level_band:
+  min: 8
+  max: 16
+value: 1093
+weight: 22.0
+stackable: false
+max_stack: 1
+equipment:
+  slot: chest
+  attack: 0
+  defense: 33
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a black leathers studded with darkstone rivets
+  long: A black leathers studded with darkstone rivets lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-21'

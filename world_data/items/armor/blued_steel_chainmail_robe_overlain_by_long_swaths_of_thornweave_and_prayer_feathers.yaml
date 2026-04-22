@@ -1,0 +1,30 @@
+id: blued_steel_chainmail_robe_overlain_by_long_swaths_of_thornweave_and_prayer_feathers
+name: Blued-steel chainmail robe overlain by long swaths of thornweave and prayer-feathers
+category: armor
+armor_class: chain_armor
+armor_slot: chest
+tier: fine
+tags: []
+level_band:
+  min: 10
+  max: 20
+value: 11250
+weight: 22.5
+stackable: false
+max_stack: 1
+equipment:
+  slot: chest
+  attack: 0
+  defense: 34
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a blued-steel chainmail robe overlain by long swaths of thornweave and prayer-feathers
+  long: A blued-steel chainmail robe overlain by long swaths of thornweave and prayer-feathers
+    lies here.
+meta:
+  source: direlore
+  imported_at: '2026-04-21'

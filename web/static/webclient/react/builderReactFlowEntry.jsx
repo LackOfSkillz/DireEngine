@@ -22,6 +22,16 @@ export function setBuilderReactFlowSelectedRoomColor(container, color) {
   record?.bridgeApi?.setSelectedRoomColor?.(color);
 }
 
+export function setBuilderReactFlowRoomNpcIds(container, roomId, npcIds) {
+  const record = container ? roots.get(container) : null;
+  record?.bridgeApi?.setRoomNpcIds?.(roomId, Array.isArray(npcIds) ? npcIds : []);
+}
+
+export function setBuilderReactFlowRoomItemEntries(container, roomId, itemEntries) {
+  const record = container ? roots.get(container) : null;
+  record?.bridgeApi?.setRoomItemEntries?.(roomId, Array.isArray(itemEntries) ? itemEntries : []);
+}
+
 export function updateBuilderReactFlowSelectedEdge(container, updates) {
   const record = container ? roots.get(container) : null;
   record?.bridgeApi?.updateSelectedEdge?.(updates || {});

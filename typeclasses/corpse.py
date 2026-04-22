@@ -5,6 +5,7 @@ import time
 from evennia.objects.objects import DefaultObject
 from evennia.utils.create import create_object
 from evennia.utils.search import search_object
+from server.systems.ammo_runtime import merge_ammo_stacks
 
 from .objects import ObjectParent
 
@@ -192,6 +193,7 @@ class Corpse(ObjectParent, DefaultObject):
         self.db.irrecoverable = False
         self.db.resurrection_failures = 0
         self.db.stored_coins = 0
+        self.db.ammo_inventory = []
         self.db.recovery_allowed = []
         self.db.is_valid_for_revive = True
         self.db.ritual_state = "unprepared"
@@ -606,6 +608,7 @@ class Corpse(ObjectParent, DefaultObject):
         owner = self.get_owner() if hasattr(self, "get_owner") else None
         if owner and hasattr(owner, "clear_death_corpse_link"):
             owner.clear_death_corpse_link()
+        self.spill_ammo_to_room()
         self.delete()
         return None
 
@@ -755,6 +758,28 @@ class Corpse(ObjectParent, DefaultObject):
         result = search_object(f"#{owner_id}")
         return result[0] if result else None
 
+    def get_ammo_inventory(self):
+        ammo = merge_ammo_stacks(getattr(self.db, "ammo_inventory", None) or [])
+        self.db.ammo_inventory = list(ammo)
+        return list(ammo)
+
+    def set_ammo_inventory(self, stacks):
+        self.db.ammo_inventory = merge_ammo_stacks(stacks)
+        return self.get_ammo_inventory()
+
+    def add_ammo_stacks(self, stacks):
+        self.db.ammo_inventory = merge_ammo_stacks([*self.get_ammo_inventory(), *list(stacks or [])])
+        return self.get_ammo_inventory()
+
+    def spill_ammo_to_room(self):
+        ammo = self.get_ammo_inventory()
+        room = getattr(self, "location", None)
+        if not ammo or room is None or not hasattr(room, "add_loose_ammo"):
+            return []
+        room.add_loose_ammo(ammo)
+        self.db.ammo_inventory = []
+        return ammo
+
     def is_orphaned(self):
         return self.get_owner() is None
 
@@ -805,6 +830,7 @@ class Corpse(ObjectParent, DefaultObject):
 
         grave.db.coins = max(0, int(getattr(self.db, "stored_coins", 0) if stored_coins is None else stored_coins or 0))
         grave.db.stored_coins = grave.db.coins
+        self.spill_ammo_to_room()
         stored_items = []
         for item in list(self.contents):
             if item.move_to(grave, quiet=True):

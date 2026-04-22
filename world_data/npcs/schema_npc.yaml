@@ -1,0 +1,31 @@
+id: string
+name: string
+type: hostile | neutral | vendor
+vendor_profile_id: string
+
+stats:
+  level: int
+  health: int
+  attack: int
+  defense: int
+
+behavior:
+  aggressive: bool
+  roam: bool
+  assist: bool
+
+vendor:
+  enabled: bool
+  inventory: []
+
+dialogue:
+  greeting: string
+  idle: []
+
+description:
+  short: string
+  long: string
+
+meta:
+  source: string
+  imported_at: string

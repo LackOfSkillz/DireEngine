@@ -1,0 +1,30 @@
+id: balanced_throwing_knife
+name: Balanced Throwing Knife
+category: weapon
+weapon_class: thrown
+tags:
+  - martial
+  - ranger
+  - guard
+level_band:
+  min: 1
+  max: 10
+value: 16
+weight: 0.5
+stackable: false
+max_stack: 1
+equipment:
+  slot: weapon
+  attack: 3
+  defense: 0
+consumable:
+  effect: ''
+  duration: 0
+container:
+  capacity: 0
+description:
+  short: a balanced throwing knife
+  long: A balanced throwing knife glints with a narrow edge.
+meta:
+  source: vendor_specialization
+  imported_at: '2026-04-21'

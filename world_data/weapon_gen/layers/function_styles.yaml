@@ -1,0 +1,14 @@
+duelist:
+  traits:
+    - precise
+    - lightweight
+
+executioner:
+  traits:
+    - heavy
+    - brutal
+
+hunter:
+  traits:
+    - efficient
+    - practical
