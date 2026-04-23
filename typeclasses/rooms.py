@@ -93,25 +93,81 @@ class Room(ObjectParent, DefaultRoom):
         self.db.npc_boundary = False
         self.db.fishable = False
         self.db.fish_group = "River 1"
+        self.db.ground_ammo = []
         self.db.loose_ammo = []
         if self.db.zone_id is None:
             LOGGER.warning("Room %s created without zone_id; defaulting to default_region.", self.key)
 
-    def get_loose_ammo(self):
-        ammo = merge_ammo_stacks(getattr(self.db, "loose_ammo", None) or [])
+    def _get_ground_ammo_stacks(self):
+        ground_ammo = getattr(self.db, "ground_ammo", None)
+        if ground_ammo is None:
+            ground_ammo = getattr(self.db, "loose_ammo", None)
+        ammo = merge_ammo_stacks(ground_ammo or [])
+        self.db.ground_ammo = list(ammo)
         self.db.loose_ammo = list(ammo)
         return list(ammo)
 
+    def get_ground_ammo(self, ammo_type=None):
+        ammo = self._get_ground_ammo_stacks()
+        if ammo_type is None:
+            return ammo
+        target_type = str(ammo_type or "").strip().lower()
+        if not target_type:
+            return None
+        for stack in ammo:
+            if str(stack.get("ammo_type") or "").strip().lower() == target_type:
+                return dict(stack)
+        return None
+
+    def set_ground_ammo(self, stacks):
+        ammo = merge_ammo_stacks(stacks)
+        self.db.ground_ammo = list(ammo)
+        self.db.loose_ammo = list(ammo)
+        return self.get_ground_ammo()
+
+    def add_ground_ammo(self, stacks):
+        ammo = merge_ammo_stacks([*self.get_ground_ammo(), *list(stacks or [])])
+        self.db.ground_ammo = list(ammo)
+        self.db.loose_ammo = list(ammo)
+        return self.get_ground_ammo()
+
+    def consume_ground_ammo(self, ammo_type=None, amount=1):
+        requested = max(0, int(amount or 0))
+        if requested <= 0:
+            return {}, self.get_ground_ammo()
+        stacks = list(self.get_ground_ammo())
+        target_type = str(ammo_type or "").strip().lower()
+        for index, stack in enumerate(stacks):
+            stack_type = str(stack.get("ammo_type") or "").strip().lower()
+            if target_type and stack_type != target_type:
+                continue
+            quantity = max(0, int(stack.get("quantity", 0) or 0))
+            if quantity <= 0:
+                continue
+            taken = min(quantity, requested)
+            consumed = dict(stack)
+            consumed["quantity"] = taken
+            remaining = dict(stack)
+            remaining["quantity"] = quantity - taken
+            updated = list(stacks)
+            updated.pop(index)
+            if remaining["quantity"] > 0:
+                updated.append(remaining)
+            self.set_ground_ammo(updated)
+            return consumed, self.get_ground_ammo()
+        return {}, stacks
+
+    def get_loose_ammo(self):
+        return self.get_ground_ammo()
+
     def set_loose_ammo(self, stacks):
-        self.db.loose_ammo = merge_ammo_stacks(stacks)
-        return self.get_loose_ammo()
+        return self.set_ground_ammo(stacks)
 
     def add_loose_ammo(self, stacks):
-        self.db.loose_ammo = merge_ammo_stacks([*self.get_loose_ammo(), *list(stacks or [])])
-        return self.get_loose_ammo()
+        return self.add_ground_ammo(stacks)
 
     def get_loose_ammo_display_lines(self):
-        stacks = self.get_loose_ammo()
+        stacks = self.get_ground_ammo()
         if not stacks:
             return []
         return [f"There {'is' if len(stacks) == 1 and int(stacks[0].get('quantity', 0) or 0) == 1 else 'are'} {', '.join(format_ammo_label(stack) for stack in stacks)} on the ground."]

@@ -16391,6 +16391,12 @@ class Character(ObjectParent, DefaultCharacter):
             for stack in self.get_quiver_ammo(quiver):
                 if self.is_ammo_compatible_with_weapon(stack, weapon=weapon):
                     return "quiver", quiver
+        room = getattr(self, "location", None)
+        if room and hasattr(room, "get_ground_ammo"):
+            required_type = str(getattr(weapon.db, "ammo_type", "arrow") or "arrow").strip().lower()
+            stack = room.get_ground_ammo(required_type)
+            if stack and self.is_ammo_compatible_with_weapon(stack, weapon=weapon):
+                return "ground", room
         return None, None
 
     def get_equipped_ammo_state(self):
@@ -16429,13 +16435,24 @@ class Character(ObjectParent, DefaultCharacter):
             if not loaded:
                 return False, "Your quiver is empty."
             ammo_name = str(loaded.get("ammo_type") or "arrow").strip().lower() or "arrow"
+        elif source_type == "ground":
+            ammo_type = str(getattr(weapon.db, "ammo_type", "arrow") or "arrow").strip().lower() or "arrow"
+            loaded, _remaining = source.consume_ground_ammo(ammo_type, 1) if hasattr(source, "consume_ground_ammo") else ({}, [])
+            if not loaded:
+                return False, "There is no compatible ammunition on the ground."
+            ammo_name = str(loaded.get("ammo_type") or ammo_type).strip().lower() or ammo_type
         else:
             if self.get_equipped_quiver() is None:
-                return False, "You have no compatible ammunition on hand and no quiver equipped."
-            return False, "You have no compatible ammunition on hand or in your quiver."
+                room = getattr(self, "location", None)
+                if room and hasattr(room, "get_ground_ammo") and room.get_ground_ammo(str(getattr(weapon.db, "ammo_type", "arrow") or "arrow")):
+                    return False, "You have compatible ammunition on the ground, but you fumble the load."
+                return False, "You have no compatible ammunition on hand, no quiver equipped, and nothing usable on the ground."
+            return False, "You have no compatible ammunition on hand, in your quiver, or on the ground."
         self.set_loaded_ammo(loaded)
         if source_type == "quiver":
             return True, f"You draw an {ammo_name} from your quiver and load {weapon.key}."
+        if source_type == "ground":
+            return True, f"You grab an {ammo_name} from the ground and load {weapon.key}."
         return True, f"You load {weapon.key} with {format_ammo_label(loaded)}."
 
     def consume_loaded_ammo(self):

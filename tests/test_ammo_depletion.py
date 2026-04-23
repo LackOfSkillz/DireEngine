@@ -73,6 +73,11 @@ class DummyQuiverItem:
 
 
 class DummyRoom:
+    _get_ground_ammo_stacks = Room._get_ground_ammo_stacks
+    get_ground_ammo = Room.get_ground_ammo
+    set_ground_ammo = Room.set_ground_ammo
+    add_ground_ammo = Room.add_ground_ammo
+    consume_ground_ammo = Room.consume_ground_ammo
     get_loose_ammo = Room.get_loose_ammo
     set_loose_ammo = Room.set_loose_ammo
     add_loose_ammo = Room.add_loose_ammo
@@ -80,6 +85,7 @@ class DummyRoom:
 
     def __init__(self):
         self.db = DummyHolder()
+        self.db.ground_ammo = []
         self.db.loose_ammo = []
         self.contents = []
 
@@ -235,7 +241,81 @@ class AmmoDepletionTests(unittest.TestCase):
         ok, message = attacker.load_ranged_weapon()
 
         self.assertFalse(ok)
-        self.assertIn("no quiver equipped", message)
+        self.assertIn("nothing usable on the ground", message)
+
+    def test_load_uses_ground_ammo_after_quiver_is_empty(self):
+        room = DummyRoom()
+        room.add_ground_ammo(
+            [
+                {
+                    "item_id": "practice_shortbow_arrows",
+                    "quantity": 3,
+                    "ammo_type": "arrow",
+                    "ammo_class": "short_bow",
+                    "tier": "average",
+                    "name": "Practice shortbow arrows",
+                }
+            ]
+        )
+        attacker = AmmoDummyCharacter()
+        attacker.location = room
+        attacker.set_quiver(None)
+
+        ok, message = attacker.load_ranged_weapon()
+
+        self.assertTrue(ok)
+        self.assertIn("from the ground", message)
+        self.assertEqual(attacker.get_loaded_ammo()["quantity"], 1)
+        self.assertEqual(room.get_ground_ammo("arrow")["quantity"], 2)
+
+    def test_load_prefers_quiver_before_ground_ammo(self):
+        room = DummyRoom()
+        room.add_ground_ammo(
+            [
+                {
+                    "item_id": "practice_shortbow_arrows",
+                    "quantity": 4,
+                    "ammo_type": "arrow",
+                    "ammo_class": "short_bow",
+                    "tier": "average",
+                    "name": "Practice shortbow arrows",
+                }
+            ]
+        )
+        attacker = AmmoDummyCharacter()
+        attacker.location = room
+
+        ok, _message = attacker.load_ranged_weapon()
+
+        self.assertTrue(ok)
+        self.assertEqual(attacker.get_quiver()["quantity"], 9)
+        self.assertEqual(room.get_ground_ammo("arrow")["quantity"], 4)
+
+    def test_ground_ammo_helper_merges_stacks(self):
+        room = DummyRoom()
+
+        room.add_ground_ammo(
+            [
+                {
+                    "item_id": "practice_shortbow_arrows",
+                    "quantity": 1,
+                    "ammo_type": "arrow",
+                    "ammo_class": "short_bow",
+                    "tier": "average",
+                    "name": "Practice shortbow arrows",
+                },
+                {
+                    "item_id": "practice_shortbow_arrows",
+                    "quantity": 2,
+                    "ammo_type": "arrow",
+                    "ammo_class": "short_bow",
+                    "tier": "average",
+                    "name": "Practice shortbow arrows",
+                },
+            ]
+        )
+
+        self.assertEqual(room.get_ground_ammo("arrow")["quantity"], 3)
 
     def test_special_held_ammo_overrides_quiver(self):
         attacker = AmmoDummyCharacter()

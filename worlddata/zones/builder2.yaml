@@ -148,7 +148,7 @@ rooms:
 - id: CRO_550_350
   name: CRO_550_350
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
-  short_desc: null
+  short_desc: CRO_550_350
   desc: ''
   stateful_descs: {}
   details: {}
