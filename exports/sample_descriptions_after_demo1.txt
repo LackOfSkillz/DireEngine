@@ -1,0 +1,56 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+At this intersection, three exits lead in different directions: east, south, and southwest.
+
+---
+
+[Room: CRO_500_100]
+In room CRO_500_100 of demo1, a narrow passage stretches east-west with exits leading down and west.
+
+---
+
+[Room: CRO_400_150]
+The room is a dead end, with a single exit leading northeast.
+
+---
+
+[Room: CRO_450_150]
+Room CRO_450_150 in zone demo1 is a dead-end room with one exit leading north.
+
+---
+
+[Room: CRO_500_150]
+Room CRO_500_150 in zone demo1 is a dead-end chamber with one exit leading up.
+
+---
+
+Repeated phrases:
+- "is a dead end" (3)
+- "a dead end" (3)
+- "is a dead" (3)
+- "150 in zone demo1 is" (2)
+- "demo1 is a dead end" (2)
+- "in zone demo1 is a" (2)
+- "zone demo1 is a dead" (2)
+- "150 in zone demo1" (2)
+- "demo1 is a dead" (2)
+- "in zone demo1 is" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 15.60

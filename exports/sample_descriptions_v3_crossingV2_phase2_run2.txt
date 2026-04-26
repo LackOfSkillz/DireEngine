@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+A worn bridge spans the river, serving as a market stall. Two paths continue through this bottleneck space, one leading east, the other south. The bridge's surface bears marks of time and use, its planks rough underfoot.
+
+---
+
+[Room: crossingV2_628_184]
+In this narrow passage, two paths diverge. The space stretches eastward and continues south, opening up slightly as it goes. The floor is worn smooth by countless footsteps, reflecting the constant bustle of the city outside.
+
+---
+
+[Room: crossingV2_628_208]
+At this intersection, three passages converge. To the north, a path continues straight ahead, while to the south, it bends slightly, opening into a wider space. The western passage narrows, leading through a tight archway. The floor is worn smooth by countless footsteps.
+
+---
+
+[Room: crossingV2_352_238]
+In the heart of crossingV2, this square room stands enclosed, no exits hinting at its interior. The well-maintained space serves as a temple, dedicated to devotional focus with a prominent shrine at its center. Prayer-flags adorn the walls, their gentle sway suggesting a subtle breeze from unseen windows.
+
+---
+
+[Room: crossingV2_382_238]
+In this space, a single path leads eastward. The walls here are rough, their surfaces worn by time and use. This room is compact, confining, with a low ceiling that seems to press down. The passage narrows as it continues, leading towards the only exit.
+
+---
+
+[Room: crossingV2_432_238]
+The space is a long, narrow passage, two exits branching off it. The southern end opens onto a wider area, while the western exit continues the tight corridor. The floor is rough underfoot, cobbled stones worn smooth by countless footsteps and cart wheels. The walls are crumbling stone, stained dark with tar from years of use as a dockside warehouse.
+
+---
+
+Repeated phrases:
+- "worn smooth by countless footsteps" (3)
+- "smooth by countless footsteps" (3)
+- "worn smooth by countless" (3)
+- "by countless footsteps" (3)
+- "smooth by countless" (3)
+- "the floor is" (3)
+- "worn smooth by" (3)
+- "floor is worn smooth by" (2)
+- "is worn smooth by countless" (2)
+- "the floor is worn smooth" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 1
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 1
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 1
+- "tilts": 0
+Geometry violations: 1
+Over 80 words: 0
+Average words: 45.17
+Sentence count flags: 0
+Average sentences: 3.50
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 1
+- "the floor is": 3
+Repeated sentence start total: 4

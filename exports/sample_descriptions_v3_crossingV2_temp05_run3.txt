@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+In this passage, two paths diverge from a central point. To the east, the path continues straight, while to the south, it bends gently. The space is narrow, with walls close on either side, guiding you forward along the route. The floor underfoot is worn smooth by countless footsteps, reflecting the bustling nature of this river trade city's crossingV2 district.
+
+---
+
+[Room: crossingV2_628_184]
+In this narrow passage, two paths diverge. The floor slopes gently eastward, leading to a southern exit. To the south, the space widens slightly, while the path continues unimpeded to the east. The walls here are rough and damp, hinting at the river valley's humidity.
+
+---
+
+[Room: crossingV2_628_208]
+At the intersection of three passages, the space opens into a bustling thoroughfare. Three paths diverge: one leads north, another south, and a third veers west. The floor is worn smooth by countless footsteps, reflecting the ceaseless flow of traffic through this city crossroads.
+
+---
+
+[Room: crossingV2_352_238]
+In this enclosed room, no exits are listed. The space is tight, bounded by walls that meet in sharp corners. The floor feels solid underfoot, smooth and even. This room does not lead elsewhere; it stands alone, a self-contained space within the bustling city.
+
+---
+
+[Room: crossingV2_382_238]
+The space ends abruptly here. A single exit leads eastward. The walls close in, confining the area. The floor is smooth underfoot, worn by countless passersby.
+
+---
+
+[Room: crossingV2_432_238]
+A narrow passage stretches southward, a western path beckoning halfway through. The walls here are rough, their texture hinting at age and wear from countless travelers. This space continues on both paths, opening up slightly to the west before narrowing again towards its southern end.
+
+---
+
+Repeated phrases:
+- "by countless footsteps reflecting the" (2)
+- "is worn smooth by countless" (2)
+- "smooth by countless footsteps reflecting" (2)
+- "the walls here are rough" (2)
+- "worn smooth by countless footsteps" (2)
+- "by countless footsteps reflecting" (2)
+- "countless footsteps reflecting the" (2)
+- "is worn smooth by" (2)
+- "passage two paths diverge" (2)
+- "smooth by countless footsteps" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 1
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 1
+- "tilts": 0
+Geometry violations: 2
+Over 80 words: 0
+Average words: 44.17
+Sentence count flags: 0
+Average sentences: 3.67
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 2
+Repeated sentence start total: 2

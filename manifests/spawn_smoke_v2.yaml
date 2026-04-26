@@ -1,0 +1,7 @@
+area_id: spawn_smoke_v2
+map_file: maps/1000025299.png
+profile: yaml_graph
+generation:
+  synthesize_street_names: false
+  synthesize_room_descriptions: false
+  synthesize_special_exits: false

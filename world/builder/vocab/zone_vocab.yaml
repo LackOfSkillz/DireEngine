@@ -1,0 +1,40 @@
+setting_types:
+  - city
+  - town
+  - village
+  - dungeon
+  - wilderness
+  - ruin
+  - ship
+  - estate
+eras:
+  - medieval
+  - late-medieval
+  - ancient
+  - pre-industrial
+  - mythic
+cultures:
+  - generic-fantasy
+  - norse-inspired
+  - mediterranean
+  - eastern
+  - desert-kingdom
+  - swampland
+  - forest-elven
+  - dwarven-hold
+  - multicultural
+moods:
+  - bustling
+  - quiet
+  - tense
+  - oppressive
+  - cheerful
+  - haunted
+  - sacred
+climates:
+  - temperate
+  - tropical
+  - arctic
+  - arid
+  - coastal
+  - river-valley

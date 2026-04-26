@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from world.area_forge.ai.adjudicator import adjudicate_area_spec
@@ -6,7 +7,7 @@ from world.area_forge.build.review_graph import area_spec_to_review_graph
 from world.area_forge.build.review_normalization import generate_normalization_report
 from world.area_forge.build.snapshots import load_snapshot, save_snapshot
 from world.area_forge.build.zone_yaml_export import write_zone_yaml_from_review_graph
-from world.area_forge.extract.yaml_graph import extract_yaml_graph_area_spec
+from world.area_forge.extract.yaml_graph import extract_yaml_graph_area_spec_v2
 from world.area_forge.intake.manifest import create_manifest, load_manifest
 from world.area_forge.paths import artifact_paths
 from world.area_forge.review import generate_review_flags, save_review_report
@@ -15,7 +16,7 @@ from world.area_forge.serializer import load_area_spec, load_review_graph, save_
 
 def _extract_area(area_id, map_path, use_ocr=True, use_ai_adjudication=False, profile=None, style=None):
     if profile == "yaml_graph":
-        return extract_yaml_graph_area_spec(
+        return extract_yaml_graph_area_spec_v2(
             map_path=map_path,
             use_ocr=use_ocr,
             use_ai_adjudication=use_ai_adjudication,
@@ -59,6 +60,26 @@ def _build_evennia_area(area_id, area_spec, profile=None):
     return build_the_landing_from_area_spec(area_spec)
 
 
+def _ensure_evennia_django():
+    from django.conf import settings
+
+    if settings.configured:
+        return
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
+
+    import django
+
+    django.setup()
+
+
+def _spawn_zone(area_id, *, dry_run=False):
+    _ensure_evennia_django()
+    from world.worlddata.services.import_zone_service import load_zone
+
+    return load_zone(area_id, dry_run=dry_run)
+
+
 def _summarize_extraction(area_spec, normalization_report=None):
     meta = area_spec.get("meta") if isinstance(area_spec.get("meta"), dict) else {}
     print("Extraction summary:")
@@ -83,7 +104,21 @@ def _summarize_extraction(area_spec, normalization_report=None):
         print(f" - Normalization overlaps: {normalization_report.get('overlap_count', 0)}")
 
 
-def run_area_forge(map_path, area_id, mode="full", manifest_path=None, use_ocr=True, profile=None):
+def run_area_forge(
+    map_path,
+    area_id,
+    mode="full",
+    manifest_path=None,
+    use_ocr=True,
+    profile=None,
+    spawn=False,
+    dry_run_spawn=False,
+):
+    if spawn and dry_run_spawn:
+        raise ValueError("Choose either spawn or dry_run_spawn, not both.")
+    if (spawn or dry_run_spawn) and mode not in {"build", "full"}:
+        raise ValueError("Spawn options are only supported in build or full mode.")
+
     if not manifest_path:
         manifest_path = create_manifest(map_path, area_id, profile=profile or "yaml_graph")
 
@@ -98,6 +133,7 @@ def run_area_forge(map_path, area_id, mode="full", manifest_path=None, use_ocr=T
 
     area_spec = None
     build_result = None
+    spawn_result = None
     changes = []
     normalization_report = None
     if mode == "build":
@@ -175,6 +211,8 @@ def run_area_forge(map_path, area_id, mode="full", manifest_path=None, use_ocr=T
             save_review_graph(artifacts["review_graph"], review_graph)
             normalization_report = generate_normalization_report(review_graph, output_path=artifacts["normalization_report"])
         build_result = _build_evennia_area(area_id, area_spec, profile=profile)
+        if spawn or dry_run_spawn:
+            spawn_result = _spawn_zone(area_id, dry_run=dry_run_spawn)
         save_snapshot(area_id, area_spec)
     elif mode == "full":
         old_snapshot = load_snapshot(area_id)
@@ -188,6 +226,8 @@ def run_area_forge(map_path, area_id, mode="full", manifest_path=None, use_ocr=T
         flags = generate_review_flags(area_spec["nodes"], area_spec["edges"])
         save_review_report(artifacts["review"], flags)
         build_result = _build_evennia_area(area_id, area_spec, profile=profile)
+        if spawn or dry_run_spawn:
+            spawn_result = _spawn_zone(area_id, dry_run=dry_run_spawn)
         save_snapshot(area_id, area_spec)
     else:
         raise ValueError(f"Unsupported mode: {mode}")
@@ -208,6 +248,18 @@ def run_area_forge(map_path, area_id, mode="full", manifest_path=None, use_ocr=T
         print(f" - {artifacts['normalization_report']}")
     if build_result and build_result.get("zone_yaml"):
         print(f" - {build_result['zone_yaml']}")
+    if spawn_result:
+        if spawn_result.get("dry_run"):
+            print("Spawn dry run:")
+        else:
+            print("Spawn result:")
+        print(f" - Zone: {spawn_result['zone_id']}")
+        print(f" - Rooms: {spawn_result['rooms']}")
+        print(f" - Exits: {spawn_result['exits']}")
+        print(f" - NPCs: {spawn_result['npcs']}")
+        print(f" - Items: {spawn_result['items']}")
+        for warning in list(spawn_result.get("warnings") or []):
+            print(f" - Warning: {warning}")
 
     return {
         "area_id": area_id,
@@ -216,4 +268,5 @@ def run_area_forge(map_path, area_id, mode="full", manifest_path=None, use_ocr=T
         "artifacts": artifacts,
         "changes": changes,
         "build_result": build_result,
+        "spawn_result": spawn_result,
     }

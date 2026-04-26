@@ -3037,6 +3037,126 @@ body {
   background: rgba(18, 10, 5, 0.4);
 }
 
+.builder-zone-context-panel {
+  flex: 0 0 auto;
+}
+
+.builder-collapsible {
+  border: 1px solid rgba(255, 180, 90, 0.12);
+  border-radius: 8px;
+  background: rgba(18, 10, 5, 0.35);
+}
+
+.builder-collapsible-summary {
+  cursor: pointer;
+  padding: 10px 12px;
+  color: #f0dfbf;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.builder-collapsible-body {
+  padding: 0 12px 12px;
+}
+
+.builder-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.builder-chip {
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 180, 90, 0.18);
+  border-radius: 999px;
+  background: rgba(18, 10, 5, 0.62);
+  color: #d8c5a3;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.builder-chip:hover,
+.builder-chip:focus-visible {
+  outline: none;
+  border-color: rgba(255, 180, 90, 0.42);
+  color: #f0dfbf;
+}
+
+.builder-chip.is-selected {
+  background: rgba(176, 111, 38, 0.28);
+  border-color: rgba(255, 190, 110, 0.42);
+  color: #fff0cc;
+}
+
+.builder-chip[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.builder-chip.builder-chip-muted {
+  background: rgba(39, 33, 28, 0.74);
+  border-color: rgba(168, 146, 112, 0.18);
+  color: #bea884;
+}
+
+.builder-chip.builder-chip-add {
+  border-style: dashed;
+}
+
+.builder-room-tag-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.builder-room-tag-group {
+  display: grid;
+  gap: 6px;
+}
+
+.builder-tag-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.builder-tag-input-row input {
+  width: 100%;
+}
+
+.builder-zone-context-textarea {
+  min-height: 110px !important;
+  height: 110px !important;
+}
+
+.builder-generation-actions {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.builder-generation-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.builder-generation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(57, 92, 66, 0.3);
+  border: 1px solid rgba(121, 183, 137, 0.26);
+  color: #d7f0dc;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .builder-compact-textarea {
   min-height: 96px !important;
   height: 96px !important;

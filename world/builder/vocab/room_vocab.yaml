@@ -1,0 +1,57 @@
+structure:
+  - street
+  - square
+  - intersection
+  - plaza
+  - alley
+  - courtyard
+  - building-interior
+  - threshold
+  - bridge
+  - dock
+  - stair
+  - hallway
+  - chamber
+  - entrance
+
+specific_function:
+  - shop
+  - tavern
+  - inn
+  - temple
+  - guild-hall
+  - forge
+  - bakery
+  - brothel
+  - jail
+  - residence
+  - barracks
+  - library
+  - warehouse
+  - market-stall
+  - kitchen
+  - cellar
+
+named_feature:
+  - fountain
+  - statue
+  - well
+  - signpost
+  - gibbet
+  - shrine
+  - well-house
+  - firepit
+  - altar
+  - pulpit
+  - throne
+  - hearth
+  - workbench
+
+condition:
+  - pristine
+  - well-maintained
+  - worn
+  - crumbling
+  - burnt-out
+  - abandoned
+  - refurbished

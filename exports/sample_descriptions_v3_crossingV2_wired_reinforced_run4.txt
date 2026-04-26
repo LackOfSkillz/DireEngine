@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+In this passage, two paths diverge. The space narrows eastward, continuing on in that direction, while to the south, it opens wider. The floor is worn smooth by countless footsteps.
+
+---
+
+[Room: crossingV2_628_184]
+A narrow passage stretches east-west. Two clear paths lead out: one to the east, the other curving south. The space is tight, walls close on either side. The floor underfoot is worn smooth by countless feet.
+
+---
+
+[Room: crossingV2_628_208]
+In crossingV2, a passage stretches north and west. It's a narrow, elongated space with two clear paths out. The floor is smooth underfoot, worn by countless footsteps. The walls are close, their surfaces rough to the touch. The passage continues on, opening up slightly as it leads towards the exits.
+
+---
+
+[Room: crossingV2_352_238]
+The space is enclosed, with no visible exits. The walls are smooth, their surfaces worn from time and use. The room's scale is compact, its confines tight yet open enough to allow a sense of movement within.
+
+---
+
+[Room: crossingV2_382_238]
+In this space, a single path leads east. The walls here form a tight end, closing off further progress. The floor is smooth underfoot, worn by countless footsteps. A dim light filters from the eastern passage, hinting at what lies beyond.
+
+---
+
+[Room: crossingV2_432_238]
+The passage extends southward and westward. It's a narrow, straight corridor with two clear exit paths. The floor is worn smooth underfoot, hinting at frequent traffic.
+
+---
+
+Repeated phrases:
+- "the floor is" (4)
+- "by countless footsteps" (3)
+- "is worn smooth" (3)
+- "floor is smooth underfoot worn" (2)
+- "is smooth underfoot worn by" (2)
+- "is worn smooth by countless" (2)
+- "smooth underfoot worn by countless" (2)
+- "the floor is smooth underfoot" (2)
+- "the floor is worn smooth" (2)
+- "underfoot worn by countless footsteps" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 1
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 36.83
+Sentence count flags: 0
+Average sentences: 3.67
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 2
+- "the floor is": 4
+Repeated sentence start total: 6

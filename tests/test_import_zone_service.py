@@ -60,3 +60,72 @@ class ImportZoneServiceTests(unittest.TestCase):
         self.assertEqual(plan["summary"]["npcs"], 1)
         self.assertEqual(plan["placements"]["npcs"][0]["id"], "armorer_01")
         self.assertEqual(plan["placements"]["npcs"][0]["room"], "market_square")
+
+    def test_build_import_plan_migrates_missing_room_tags_to_empty_object(self):
+        plan = import_zone_service._build_import_plan(
+            "builder2",
+            {
+                "schema_version": "v1",
+                "zone_id": "builder2",
+                "name": "Builder Two",
+                "rooms": [
+                    {
+                        "id": "market_square",
+                        "name": "Market Square",
+                        "desc": "A broad plaza.",
+                        "map": {"x": 1, "y": 2, "layer": 0},
+                        "exits": {},
+                    }
+                ],
+                "placements": {"npcs": [], "items": []},
+            },
+        )
+
+        self.assertEqual(
+            plan["rooms"][0]["tags"],
+            {
+                "structure": None,
+                "specific_function": None,
+                "named_feature": None,
+                "condition": None,
+                "custom": [],
+            },
+        )
+
+    def test_build_import_plan_preserves_and_normalizes_room_tags(self):
+        plan = import_zone_service._build_import_plan(
+            "builder2",
+            {
+                "schema_version": "v1",
+                "zone_id": "builder2",
+                "name": "Builder Two",
+                "rooms": [
+                    {
+                        "id": "market_square",
+                        "name": "Market Square",
+                        "desc": "A broad plaza.",
+                        "tags": {
+                            "structure": "square",
+                            "specific_function": "market-stall",
+                            "named_feature": "fountain",
+                            "condition": "worn",
+                            "custom": ["awning", "crowded", "awning"],
+                        },
+                        "map": {"x": 1, "y": 2, "layer": 0},
+                        "exits": {},
+                    }
+                ],
+                "placements": {"npcs": [], "items": []},
+            },
+        )
+
+        self.assertEqual(
+            plan["rooms"][0]["tags"],
+            {
+                "structure": "square",
+                "specific_function": "market-stall",
+                "named_feature": "fountain",
+                "condition": "worn",
+                "custom": ["awning", "crowded"],
+            },
+        )

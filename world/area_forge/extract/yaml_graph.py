@@ -6,6 +6,7 @@ import re
 
 from world.area_forge.extract.ocr import extract_ocr_bundle, is_exit_command, normalize_ocr_text, ocr_available
 from world.area_forge.model.confidence import classify_confidence, score_label_confidence
+from world.area_forge.normalize import assign_lane_clusters, audit_graph, detect_long_edges, normalize_edges, validate_direction_consistency
 from world.area_forge.serializer import save_json
 
 try:
@@ -512,6 +513,50 @@ def _detect_nodes(img, area_slug: str, config):
     }
     node_preserve_mask = _mask_from_candidates(img.size, raw_candidates, expand=1)
     return deduped, weak_candidates, marker_report, node_preserve_mask
+
+
+def _cv_room_to_node(room):
+    bbox_x = int(room["x"] - room["w"] / 2)
+    bbox_y = int(room["y"] - room["h"] / 2)
+    return {
+        "id": room["id"],
+        "x": int(room["x"]),
+        "y": int(room["y"]),
+        "kind": "room",
+        "w": int(room["w"]),
+        "h": int(room["h"]),
+        "area": int(room["area"]),
+        "bbox": {"x": bbox_x, "y": bbox_y, "w": int(room["w"]), "h": int(room["h"])} ,
+        "color_bucket": room["color"],
+        "room_color": room["color"],
+        "marker_strength": "cv_v2",
+        "source_cluster_ids": [room["id"]],
+    }
+
+
+def _detect_nodes_cv_v2(map_path, area_slug: str):
+    from .cv_pipeline import build_preserve_mask, detect_rooms, load_bgr, write_room_overlay
+
+    image_bgr = load_bgr(str(map_path))
+    rooms = detect_rooms(image_bgr)
+    write_room_overlay(image_bgr, rooms, _artifact_dir(area_slug) / "debug_room_overlay.png")
+    nodes = [_cv_room_to_node(room) for room in rooms]
+    marker_report = {
+        "raw_cluster_count": len(rooms),
+        "candidate_count": len(rooms),
+        "accepted_count": len(nodes),
+        "weak_candidate_count": 0,
+        "rejected_count": 0,
+        "weak_promoted_count": 0,
+        "forced_promoted_count": 0,
+        "missing_count": 0,
+        "coverage": 1.0 if rooms else 0.0,
+        "raw_candidates": [],
+        "weak_candidates": [],
+        "rejected_candidates": [],
+    }
+    node_preserve_mask = build_preserve_mask(image_bgr.shape, rooms).astype(bool).tolist()
+    return nodes, [], marker_report, node_preserve_mask
 
 
 def _candidate_matches_existing_node(candidate, nodes, tolerance):
@@ -1312,7 +1357,9 @@ def _infer_special_target_text(text):
     if match:
         return match.group(0)
     if " to " in normalized.lower():
-        return normalized.split(" to ", 1)[1].strip()
+        parts = re.split(r" to ", normalized, maxsplit=1, flags=re.IGNORECASE)
+        if len(parts) == 2:
+            return parts[1].strip()
     return ""
 
 
@@ -1376,6 +1423,7 @@ def _attach_edge_labels(edges, nodes, ocr_lines, config):
             "distance": best_distance,
             "final_exit_name": direction,
             "exit_type": "directional",
+            "auto_reverse": bool(edge_audit.get("auto_reverse", False)),
             "confidence_tier": classify_confidence(score_label_confidence(best_distance, best.get("confidence", 0.0))) if best else classify_confidence(edge_audit.get("confidence", 0.0)),
             "needs_review": False,
             "derivation_method": edge_audit.get("derivation_method", "corridor"),
@@ -1413,10 +1461,8 @@ def extract_yaml_graph_area_spec(map_path, area_id, use_ocr=True, use_ai_adjudic
         fragment_rejected_candidates,
     )
     corridor_graph = _attach_markers_to_corridors(nodes, merged_segments, junctions, config)
-    grid_recovered_nodes, inferred_grid_spacing = _recover_grid_nodes_from_corridors(image, nodes, corridor_graph, area_slug, config)
-    if grid_recovered_nodes:
-        nodes = nodes + grid_recovered_nodes
-        corridor_graph = _attach_markers_to_corridors(nodes, merged_segments, junctions, config)
+    grid_recovered_nodes = []
+    inferred_grid_spacing = _infer_grid_spacing(nodes, config)
     segment_node_counts = _build_segment_node_counts(corridor_graph)
     _write_debug_json(area_slug, "debug_corridor_graph.json", {"segments": corridor_graph["segments"], "junctions": corridor_graph["junctions"], "attached_nodes": corridor_graph["attachments"]}, bool(config["debug_corridors"]))
     spatial_edges, exit_audit = _derive_edges_from_corridors(image, nodes, corridor_graph, config, inferred_grid_spacing=inferred_grid_spacing)
@@ -1464,6 +1510,192 @@ def extract_yaml_graph_area_spec(map_path, area_id, use_ocr=True, use_ai_adjudic
             "corridor_segments": corridor_graph["segments"],
             "corridor_segment_count": len(corridor_graph["segments"]),
             "segment_node_counts": segment_node_counts,
+            "special_exit_candidates": special_exit_candidates,
+            "special_exit_candidate_count": len(special_exit_candidates),
+            "ocr_label_candidates": ocr_lines,
+            "ocr_attachment_audit": ocr_attachment_audit,
+            "exit_derivation": exit_audit,
+            "isolated_node_audit": isolated_node_audit,
+            "isolated_node_count": len(isolated_node_audit),
+            "unnamed_room_count": sum(1 for node in nodes if not node.get("final_label")),
+            "source_image": str(map_path),
+        },
+    }
+
+
+def extract_yaml_graph_area_spec_v2(map_path, area_id, use_ocr=True, use_ai_adjudication=False, profile=None, style_settings=None):
+    from .cv_pipeline import LineDetectConfig, attach_rooms_to_corridors, build_line_mask, corridors_to_edges, extract_corridor_graph, load_bgr
+
+    del use_ai_adjudication, profile
+    area_slug = _slugify_area_id(area_id)
+    config = _extract_config(style_settings)
+    image = _load_map_image(map_path)
+    image_bgr = load_bgr(str(map_path))
+    nodes, weak_candidates, marker_report, node_preserve_mask = _detect_nodes_cv_v2(map_path, area_slug)
+    del weak_candidates
+    line_cfg = LineDetectConfig(debug_output_dir=_artifact_dir(area_slug))
+    line_mask = build_line_mask(image_bgr, node_preserve_mask, cfg=line_cfg)
+    _write_debug_mask(area_slug, "debug_node_mask.png", node_preserve_mask, bool(config["debug_markers"]))
+    promoted_weak_nodes = []
+    raw_corridor_graph = extract_corridor_graph(line_mask, cfg=line_cfg)
+    raw_attachments = attach_rooms_to_corridors(
+        nodes,
+        raw_corridor_graph["segments"],
+        max_distance=int(config.get("line_attach_distance", 20)),
+        cfg=line_cfg,
+    )
+    room_attachment_counts = defaultdict(int)
+    for attached_room_ids in raw_attachments.values():
+        for room_id in attached_room_ids:
+            room_attachment_counts[str(room_id)] += 1
+    attached_room_ids = {room_id for room_id, count in room_attachment_counts.items() if count > 0}
+    unattached_room_ids = sorted(node["id"] for node in nodes if node["id"] not in attached_room_ids)
+    for node in nodes:
+        attachment_count = room_attachment_counts.get(str(node.get("id") or ""), 0)
+        node["corridor_attachment_count"] = attachment_count
+        if attachment_count == 0:
+            node["review_flag"] = "no_corridor_attachment"
+
+    attached_segments = []
+    edge_segments = []
+    for segment in raw_corridor_graph["segments"]:
+        attachment_count = len(raw_attachments.get(segment.get("id"), []))
+        if attachment_count < 1:
+            continue
+        next_segment = dict(segment)
+        next_segment["dead_end"] = attachment_count == 1
+        attached_segments.append(next_segment)
+        edge_segments.append(next_segment)
+    edge_segment_ids = {segment.get("id") for segment in edge_segments}
+    edge_attachments = {segment_id: sorted(raw_attachments.get(segment_id, [])) for segment_id in edge_segment_ids}
+    edge_segment_pixels = {
+        (int(pixel.get("x", 0)), int(pixel.get("y", 0)))
+        for segment in edge_segments
+        for pixel in list(segment.get("pixels") or [])
+    }
+    junction_keep_radius = max(3, int(line_cfg.junction_dilate) + 1)
+    filtered_junctions = [
+        junction
+        for junction in raw_corridor_graph["junctions"]
+        if any(
+            (int(junction.get("x", 0)) + dx, int(junction.get("y", 0)) + dy) in edge_segment_pixels
+            for dx in range(-junction_keep_radius, junction_keep_radius + 1)
+            for dy in range(-junction_keep_radius, junction_keep_radius + 1)
+        )
+    ]
+    filtered_debug_mask = [[False] * len(line_mask[0]) for _ in range(len(line_mask))]
+    for pixel_x, pixel_y in edge_segment_pixels:
+        filtered_debug_mask[pixel_y][pixel_x] = True
+    for junction in filtered_junctions:
+        junction_x = int(junction.get("x", 0))
+        junction_y = int(junction.get("y", 0))
+        if 0 <= junction_y < len(filtered_debug_mask) and 0 <= junction_x < len(filtered_debug_mask[0]):
+            filtered_debug_mask[junction_y][junction_x] = True
+    corridor_graph = {
+        "segments": edge_segments,
+        "junctions": filtered_junctions,
+        "attachments": edge_attachments,
+    }
+    _write_debug_mask(area_slug, "debug_skeleton_filtered.png", filtered_debug_mask, True)
+    _write_debug_json(
+        area_slug,
+        "debug_corridor_graph_raw.json",
+        {"segments": raw_corridor_graph["segments"], "junctions": raw_corridor_graph["junctions"]},
+        True,
+    )
+    _write_debug_json(
+        area_slug,
+        "debug_corridor_graph_filtered.json",
+        {
+            "segments": edge_segments,
+            "junctions": filtered_junctions,
+            "attached_segments": attached_segments,
+            "attached_rooms": edge_attachments,
+        },
+        True,
+    )
+    _write_debug_json(area_slug, "debug_corridor_graph.json", {"segments": edge_segments, "junctions": filtered_junctions, "attached_rooms": edge_attachments}, True)
+    _write_debug_json(area_slug, "debug_room_attachments_raw.json", raw_attachments, True)
+    _write_debug_json(area_slug, "debug_room_attachments_filtered.json", edge_attachments, True)
+    _write_debug_json(area_slug, "debug_room_attachments.json", edge_attachments, True)
+    grid_recovered_nodes = []
+    inferred_grid_spacing = _infer_grid_spacing(nodes, config)
+    segment_node_counts = [
+        {"segment_id": segment.get("id"), "node_count": len(edge_attachments.get(segment.get("id"), []))}
+        for segment in edge_segments
+    ]
+    exit_audit = corridors_to_edges(nodes, edge_segments, edge_attachments, filtered_junctions)
+    pre_normalization_audit = audit_graph(nodes, exit_audit)
+    normalized_exit_audit = normalize_edges(exit_audit)
+    lane_tolerance = max(3, int(round(inferred_grid_spacing / 2))) if inferred_grid_spacing else 12
+    lane_clusters = assign_lane_clusters(nodes, tolerance=lane_tolerance)
+    graph_audit = audit_graph(nodes, normalized_exit_audit)
+    long_edges = detect_long_edges(nodes, normalized_exit_audit, threshold=3)
+    direction_mismatches = validate_direction_consistency(nodes, normalized_exit_audit)
+    spatial_edges = [(edge["source"], edge["direction"], edge["target"], edge) for edge in normalized_exit_audit]
+    isolated_node_audit = _build_isolated_node_audit(nodes, normalized_exit_audit)
+    _write_debug_json(area_slug, "debug_graph_audit.json", {"before_normalization": pre_normalization_audit, "after_normalization": graph_audit}, True)
+    _write_debug_json(area_slug, "debug_long_edges.json", long_edges, True)
+    _write_debug_json(area_slug, "debug_direction_mismatches.json", direction_mismatches, True)
+    _write_debug_json(area_slug, "debug_lane_clusters.json", lane_clusters, True)
+    _write_debug_json(area_slug, "debug_exit_derivation.json", normalized_exit_audit, bool(config["debug_corridors"]))
+    _write_debug_json(area_slug, "debug_isolated_nodes.json", isolated_node_audit, bool(config["debug_corridors"]))
+
+    ocr_bundle = None
+    ocr_lines = []
+    if use_ocr and ocr_available():
+        try:
+            ocr_bundle = extract_ocr_bundle(map_path)
+        except RuntimeError:
+            ocr_bundle = None
+        else:
+            ocr_lines = list(ocr_bundle.get("lines") or [])
+
+    ocr_attachment_audit = _attach_node_labels(nodes, ocr_lines, config)
+    special_exit_candidates, special_attachment_audit = _build_special_exit_candidates(nodes, ocr_lines, corridor_graph, (line_mask > 0).tolist())
+    ocr_attachment_audit.extend(special_attachment_audit)
+    _write_debug_json(area_slug, "debug_ocr_attachments.json", ocr_attachment_audit, bool(config["debug_ocr"]))
+
+    artifact_edges = _attach_edge_labels(spatial_edges, nodes, ocr_lines, config)
+    return {
+        "nodes": nodes,
+        "edges": artifact_edges,
+        "meta": {
+            "area_id": area_id,
+            "area_slug": area_slug,
+            "area_name": str(area_id or "").replace("_", " ").replace("-", " ").title(),
+            "ocr_used": bool(ocr_bundle),
+            "node_count": len(nodes),
+            "raw_cluster_count": marker_report["raw_cluster_count"],
+            "weak_marker_candidate_count": marker_report["weak_candidate_count"],
+            "weak_marker_promoted_count": marker_report["weak_promoted_count"],
+            "forced_marker_promoted_count": marker_report.get("forced_promoted_count", 0),
+            "missing_marker_count": marker_report.get("missing_count", 0),
+            "marker_coverage": marker_report.get("coverage", 0.0),
+            "under_detected": len(nodes) < 170,
+            "grid_recovered_count": len(grid_recovered_nodes),
+            "inferred_grid_spacing": inferred_grid_spacing,
+            "weak_nodes": promoted_weak_nodes,
+            "edge_count": len(artifact_edges),
+            "edge_count_pre_normalization": len(exit_audit),
+            "pipeline": "cv_v2",
+            "corridor_segments": edge_segments,
+            "corridor_segment_count": len(edge_segments),
+            "corridor_segment_count_raw": len(raw_corridor_graph["segments"]),
+            "corridor_segment_count_attached": len(attached_segments),
+            "junction_count": len(filtered_junctions),
+            "junction_count_raw": len(raw_corridor_graph["junctions"]),
+            "corridor_attachment_count": sum(len(room_ids) for room_ids in edge_attachments.values()),
+            "attached_room_count": len(attached_room_ids),
+            "unattached_room_count": len(unattached_room_ids),
+            "unattached_room_ids": unattached_room_ids,
+            "segment_node_counts": segment_node_counts,
+            "raw_room_attachments": raw_attachments,
+            "filtered_room_attachments": edge_attachments,
+            "graph_audit": graph_audit,
+            "long_edge_count": len(long_edges),
+            "direction_mismatch_count": len(direction_mismatches),
+            "lane_cluster_tolerance": lane_tolerance,
             "special_exit_candidates": special_exit_candidates,
             "special_exit_candidate_count": len(special_exit_candidates),
             "ocr_label_candidates": ocr_lines,

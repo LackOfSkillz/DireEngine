@@ -1,0 +1,61 @@
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+At Amberwick Lane's Western Run: A three-way intersection with exits leading east, southwest, and west.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+Amberwick Lane, Midway is a passage-shaped room with exits to the east and west.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+Amberwick Lane, Eastern Run is a narrow passage with exits to the east and west.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+At Amberwick Lane's East Reach, three paths diverge: east, southeast, and west.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+At the intersection of Saltward Street and Amberwick Lane, a narrow passage stretches south and west.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+Kingshade Street and Amberwick Lane is a narrow passage with exits to the east and south.
+
+---
+
+Repeated phrases:
+- "exits to the east and" (3)
+- "with exits to the east" (3)
+- "exits to the east" (3)
+- "to the east and" (3)
+- "with exits to the" (3)
+- "a narrow passage" (3)
+- "exits to the" (3)
+- "the east and" (3)
+- "to the east" (3)
+- "with exits to" (3)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 15.00

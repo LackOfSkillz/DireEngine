@@ -1,0 +1,64 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+A narrow passage stretches eastwards, opening to the south. The space is long and thin, clearly intended for movement rather than lingering. The floor is smooth underfoot, worn by time and travel. Exits lead directly ahead and to the left.
+
+---
+
+[Room: crossingV2_628_184]
+The room is a narrow passage, clearly designed for travel rather than lingering. It stretches east to west, with exits in those directions. The floor is smooth and even, showing signs of frequent use. The southern exit leads into a wider space, while the eastern continues the passage's linear flow.
+
+---
+
+[Room: crossingV2_628_208]
+In this room, three paths diverge, each leading in a different direction. The space is wide and open, with a smooth, even floor that extends out from the center towards each exit. To the north, south, and west, archways mark the entrances to other areas, their surfaces worn smooth by time and use.
+
+---
+
+[Room: crossingV2_352_238]
+In this enclosed room, there are no exits leading out. The space is self-contained and compact, with a smooth, even floor that suggests it was once well-maintained. The walls are rough to the touch, indicating they were carved from natural stone.
+
+---
+
+[Room: crossingV2_382_238]
+The room is a dead end, its single exit to the east hinting at a narrowing path ahead. The space is roughly rectangular, closing off around its one way out, creating a sense of confinement. The walls are smooth and unadorned, their surfaces worn by time and use.
+
+---
+
+[Room: crossingV2_432_238]
+In this narrow passage, the space is designed for movement rather than pause. Two exits lead south and west, defining a clear path forward. The floor is smooth underfoot, worn by frequent travel in these directions.
+
+---
+
+Repeated phrases:
+- "the space is" (5)
+- "the floor is smooth" (3)
+- "by time and" (3)
+- "floor is smooth" (3)
+- "the floor is" (3)
+- "a smooth even floor that" (2)
+- "floor is smooth underfoot worn" (2)
+- "is smooth underfoot worn by" (2)
+- "the floor is smooth underfoot" (2)
+- "with a smooth even floor" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 45.00
+Sentence count flags: 0
+Average sentences: 3.33
+Dead outputs: 0

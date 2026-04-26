@@ -1,0 +1,76 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+In the heart of an ancient, crumbling fortress, you find yourself in a long-abandoned chamber, its once-grand purpose now lost to time. The air is thick with dust motes dancing in the dim light filtering through narrow arrow slits high above, casting eerie shadows on the cold stone floor. To the east, a heavy wooden door, bound in rusted iron, stands ajar, revealing a glimpse of a dark, winding corridor leading deeper into the keep. Southward, a low archway beckons, its threshold worn smooth by the passage of countless footsteps through generations long past. Southwest lies a broken doorway, its frame twisted and askew, hinting at some forgotten violence that left this place in ruin.
+
+---
+
+[Room: CRO_500_100]
+In the heart of demo1's uncharted depths, CRO_500_100 unfurls like an ancient secret, shrouded in perpetual twilight. The air is heavy with damp earth and a faint whiff of sulfur, hinting at subterranean fires long extinguished. A labyrinth of moss-covered tunnels stretches out westwards, while below, a narrow path winds down into the abyss, echoing with distant drips of water. The silence is profound, broken only by the occasional scuttling of unseen creatures in the darkness.
+
+---
+
+[Room: CRO_400_150]
+In the heart of demo1 lies a chamber that bears no name but whispers secrets in the silence. The air here is heavy with an unknown dampness, as if the very atmosphere is holding its breath. A faint, earthy scent wafts from unseen crevices, mingling with the cool, musty aroma of age-old stone. The northeast exit beckons through a worn archway, hinting at mysteries yet unexplored. Despite the lack of defining features, this room feels... expectant, as if it has been waiting for an unknown visitor to stir its slumbering heart.
+
+---
+
+[Room: CRO_450_150]
+In the heart of demo1, a forgotten chamber lies shrouded in dust and silence. The room is small, barely large enough for two to stand shoulder to shoulder, with cold, unadorned stone walls that hint at ancient craftsmanship. A single, narrow window, high and barred, admits a meager beam of moonlight, casting long, dancing shadows across the uneven floor. To the north, a heavy wooden door, worn smooth by time and touch, bears the only visible exit from this quiet, forsaken place.
+
+---
+
+[Room: CRO_500_150]
+In the hushed heart of demo1, CRO_500_150 unfurls like a secret whispered in stone. A narrow spiral staircase, worn smooth by time and feet, winds upward into the gloom, its iron railings cold to the touch. The air is heavy with dust and disuse, the silence so profound it hums in your ears. No sunlight pierces this depths; instead, flickering globes of ethereal light cast eerie shadows on the rough-hewn walls, their soft glow hinting at a forgotten magic. The stone floor bears no mark or sign, yet you feel an ancient weight pressing down from above, as if the very air is holding its breath. Upward leads the only way out, but the question echoes in the silence: what awaits at the top?
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+In the heart of an unseen realm, you stand in a chamber that seems to defy the laws of nature. The walls, floors, and ceiling are crafted from a smooth, iridescent stone that shifts colors as if reflecting a nonexistent sky. No windows offer a view of the world outside, yet an ethereal glow illuminates the space, casting no shadows. Two archways, one to the east and another to the south, beckon, their edges adorned with intricate carvings that appear to shift subtly as you gaze upon them. The air is filled with a soft, humming resonance, like the distant echo of ancient whispers, and carries a faint scent of ozone, as if a storm is brewing in this timeless place.
+
+---
+
+[Room: crossingV2_628_184]
+In the heart of the Crossing, a labyrinthine intersection echoes with the distant hum of unseen life. The air is thick with dust motes dancing in the meagre light filtering through a grated skylight far above. Two paths diverge here, one leading eastwards into the gloom, the other south, where a rusted sign creaks softly in the unseen breeze. The walls bear the scars of time and countless passersby, their graffiti a silent testament to the countless stories woven through this place.
+
+---
+
+[Room: crossingV2_628_208]
+In the heart of an uncharted realm lies a silent crossroads, a stone's throw from the unknown. The air is thick with anticipation, carrying whispers of distant secrets on its breath. A worn path stretches to the north and west, disappearing into dense, emerald foliage that seems to hum with untold tales. To the south, an ancient trail winds towards towering peaks, their jagged silhouettes shrouded in a perpetual mist. The sun dips low here, casting long shadows that dance and flicker across the earth, as if nature itself is engaged in some mysterious ballet. No birds sing, no creatures stir; it's as if the world holds its breath, waiting for your next step.
+
+---
+
+[Room: crossingV2_352_238]
+In the heart of Dragonsire's enigmatic Crossing lies a room forgotten to time. The air hangs heavy with dust motes dancing in the faint glow of an ancient, rusted lantern. Cobblestones beneath your feet bear the imprints of countless unseen feet, worn smooth by the passage of unremembered years. The walls, a symphony of crumbling stone and chipped mortar, whisper secrets to the shadows that lurk in their corners. A sense of profound silence, undisturbed for centuries, presses against your ears, broken only by the distant drip of unseen water echoing through the labyrinthine passageways beyond this solitary exit.
+
+---
+
+[Room: crossingV2_382_238]
+In the hushed embrace of this vaulted chamber, shadows cling to ancient stonework, their fingers tracing an intricate dance across time-worn carvings. The air is thick with dust motes, dancing in the meager light that trickles through a solitary, arched window. The silence is profound, undisturbed save for the distant drip of water echoing from unseen depths. To the east, a heavy door stands sentinel, its iron bands and tarnished lock bearing silent testament to the passage of eras.
+
+---
+
+[Room: crossingV2_432_238]
+In the heart of an uncharted realm, a stone archway stands as the threshold to this silent chamber. The air is thick with dust motes dancing in the faint light filtering from above, casting long, shifting shadows across the cold floor. To the south, a heavy curtain of cobwebs obscures your path, hinting at untouched secrets beyond. Westwards, an ancient door lies ajar, its worn hinges creaking softly as if whispering tales of times past. The silence is profound, yet not oppressive; it's as if the very atmosphere holds its breath, waiting for your intrusion to release its pent-up stories.
+
+---
+
+[Room: crossingV2_348_266]
+In the hushed heart of this ancient crossing, a faint, forgotten path winds between towering, gnarled trees. Their twisted branches claw at the misty twilight, as if trying to grasp at secrets long buried in the undergrowth. The air is thick with the scent of damp earth and decaying leaves, whispering tales of time's relentless march. To the south, a faint trail beckons, half-hidden by nature's creeping reclaimation.
+
+---
+
+Repeated phrases:
+- "in the heart of" (9)
+- "in the heart" (9)
+- "the air is" (9)
+- "the heart of" (9)
+- "the air is thick with" (6)
+- "air is thick with" (6)
+- "the air is thick" (6)
+- "air is thick" (6)
+- "is thick with" (6)
+- "dust motes dancing in the" (5)

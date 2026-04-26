@@ -1,0 +1,112 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+In the heart of Demo 1 lies a chamber of quiet contemplation, CRO_450_100. The air here is cool and still, undisturbed by the echoes of distant clamors. Faint light filters through an unseen skylight above, casting dappled shadows on the worn stone floor. To the east, a heavy wooden door, its surface scarred with time and tales untold, beckons with silent intrigue. Southward, a narrow archway leads to a room shrouded in deeper darkness, while southwest, an ornate tapestry partially obscures another exit, hinting at mysteries beyond. The chamber's walls bear no adornment save for the faint outlines of long-removed art, leaving you to wonder what stories these stones might whisper if they could speak.
+
+---
+
+[Room: CRO_500_100]
+Beneath an archway of ancient stone, the chamber unfolds like a secret whispered in the depths. A single torch flickers in a sconce, casting dancing shadows on the roughly hewn walls, damp with condensation that glistens like tears in the meager light. The air is thick with the scent of earth and something faintly acrid, like old smoke. To the west, a narrow tunnel winds out of sight, its darkness impenetrable save for the distant echo of dripping water. A cold draught rises from the stairs leading down, carrying with it an eerie stillness that seems to hold its breath, waiting.
+
+---
+
+[Room: CRO_400_150]
+In the heart of the demo1 expanse lies CRO_400_150, a chamber untouched by time's relentless march. The air is thick with dust motes dancing in the meager light filtering through a single, high archway to the northeast. The room is a study in symmetry, with four stone pillars supporting an unseen ceiling, each carved with intricate patterns that hint at forgotten lore. A cold, unyielding silence permeates the space, broken only by the distant echo of your footfalls on the ancient flagstones.
+
+---
+
+[Room: CRO_450_150]
+In the heart of a long-forgotten keep, you find yourself in a cold, silent chamber. The air is thick with dust and the scent of ancient stone, untouched for centuries. Faint moonlight slants through narrow arrow slits, casting long, dancing shadows across the worn flagstones. To the north, a heavy wooden door, its iron hinges rusted with age, beckons with a sense of mystery. The silence is absolute, broken only by the distant echo of your own heartbeat, as if the very air holds its breath, waiting for you to disturb its slumber.
+
+---
+
+[Room: CRO_500_150]
+In the heart of an ancient, forgotten tower, a circular chamber lies silent, untouched by time. The ceiling soars high above, supported by weathered stone pillars that bear the weight of the centuries. A narrow, spiraling staircase hewn into the wall leads upward, beckoning with its shadowy, winding path. The air is heavy with dust and the faintest whisper of old magic, a chill breeze from an unseen window carrying echoes of long-silenced voices.
+
+---
+
+Repeated phrases:
+- "in the heart of" (4)
+- "in the heart" (4)
+- "the air is" (4)
+- "the heart of" (4)
+- "the air is thick with" (3)
+- "air is thick with" (3)
+- "the air is thick" (3)
+- "the distant echo of" (3)
+- "air is thick" (3)
+- "distant echo of" (3)
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+In the hushed heart of this unknown realm, you find yourself in a vaulted chamber, its walls etched with runes that seem to whisper secrets of old. The air is cool and carries a faint tang of earth and stone, as if the very walls are breathing. Two archways yawn open, one to the east, one to the south, beckoning you deeper into the Crossing's embrace.
+
+---
+
+[Room: crossingV2_628_184]
+In the heart of the Crossing, a silent, abandoned intersection stretches before you, bathed in an eerie twilight despite the unseen sun. The cobblestone path diverges eastward and southward, swallowed by the shadows cast by towering, crumbling buildings that loom like ancient sentinels. A heavy, oppressive silence hangs in the air, broken only by the distant echo of unseen birdsong, as if even nature holds its breath here.
+
+---
+
+[Room: crossingV2_628_208]
+In the heart of an ancient, forgotten crossing lies a chamber untouched by time's relentless march. The air here is thick with the scent of old stone and damp earth, a testament to the countless ages this place has stood silent and unseen. Faint echoes of distant, unknowable whispers hint at secrets long buried in the gloom. A narrow path leads northward, swallowed by shadows that cling tenaciously to the cold, grey walls. To the south, a wider passage beckons, its entrance framed by strange, moss-covered symbols etched into the stone. Westwards, another path mirrors the northern route, vanishing into darkness as if Nature herself has drawn a curtain across this place, hiding it from prying eyes. No light penetrates here; only the faint glow of luminescent fungi clinging to the ceiling breaks the oppressive gloom, casting eerie shadows that dance and flicker like phantoms in the corners of one's vision.
+
+---
+
+[Room: crossingV2_352_238]
+In the heart of an enigmatic realm, a chamber unfolds, untouched by time's relentless march. The air is still, heavy with anticipation, as if the very breath of the world has been held captive within these walls. A faint, ethereal glow emanates from the ceiling, casting long, dancing shadows that seem to whisper secrets in the corners. The room is a symphony of silence, broken only by the soft, rhythmic echo of distant, unseen waters dripping into an abyss below. No exits present themselves, leaving one suspended in this timeless void, awaiting the unknown's reveal.
+
+---
+
+[Room: crossingV2_382_238]
+In the heart of Crossing V2's enigmatic expanse lies a chamber that seems to have been forgotten by time itself. The air is damp and heavy with an unseen tension, as if the very walls hold their breath in anticipation. A faint, eerie glow emanates from no discernible source, casting long, dancing shadows that hint at secrets hidden just beyond sight. To the east, a narrow archway beckons, its edges worn smooth by the touch of ages. The silence is profound, yet not entirely empty; there's a subtle rustling, like whispers carried on an unseen breeze, urging you onward through the arched exit.
+
+---
+
+[Room: crossingV2_432_238]
+In the hushed heart of an unseen realm, a quiet chamber unfolds, its walls draped in shadows that dance with an unknown light. The air hangs heavy, laced with a scent that whispers of distant storms and forgotten spices. To the south, a narrow archway beckons, framed by stonework that seems to writhe like serpents beneath the touch of time. Westwards, a heavy door stands ajar, revealing glimpses of another world, its silence broken only by the faintest echo of whispers on the wind. Here, in this nameless space, the very air hums with secrets untold, waiting for the breath of life to awaken them.
+
+---
+
+Repeated phrases:
+- "in the heart of" (4)
+- "in the heart" (4)
+- "the heart of" (4)
+- "as if the very" (3)
+- "broken only by the" (3)
+- "as if the" (3)
+- "broken only by" (3)
+- "heart of an" (3)
+- "if the very" (3)
+- "only by the" (3)
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+In Amberwick Lane's western run, the city's breath is visible in the chill air, a subtle reminder of its relentless pulse. The lane unfurls like a worn ribbon, hemmed in by tall, timber-framed buildings that lean in as if sharing secrets. Their aged stone facades, worn smooth by time and touch, bear witness to generations past. Here, the city's heart beats a little softer; the clatter of carts and the hum of gossip are dampened, replaced by the rustle of leaves and the distant murmur of the city waking up. A scent lingers, not quite perfume, not quite decay - the smell of history, of stories embedded in stone and timber, waiting to be whispered on the wind. To the east, the lane stretches out, tantalizingly inviting, while to the southwest, Kingshade Street beckons with a promise of wider thoroughfares and busier lives. Yet here, in this quiet stretch, the city feels more like a neighbor than an imposing giant.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+Amberwick Lane unfurls before you like a well-worn ribbon, narrower than its grand cousins but no less alive with city breath. Ashlar stones, weathered into soft warmth by countless suns, form the facades of townhouses that stand sentinel on either side, their tidy rows broken only by the occasional guild hall, sterner and more severe in its stone discipline. The air hums with a symphony of life - hushed conversations interspersed with the rumble of carriage wheels, distant church bells tolling the hours, and the hurried footfalls of purposeful folk. Here, Clerie's 6 casts an almost imperceptible influence, lending an extra polish to the stonework, a subtle quietude to the otherwise bustling scene. Exits beckon east and west, promising more slices of this vibrant urban tapestry.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+Amberwick Lane unfurls before you, a slender artery pulsating with life that weaves eastward into the heart of New Landing. The road is a symphony of cobbles, tight-set and gleaming like polished jet, reflecting the day's waning light. Elegant facades, dressed in plaster and stone, lean in from both sides, their iron crests glinting like secrets above weathered doors. Here, Clerie's 6 stands sentinel, its clean lines and quiet dignity imparting a sense of order to the lane. The buildings seem to huddle together, sharing whispered tales as they await your passage through this bustling thoroughfare.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+Amberwick Lane stretches eastward like a welcoming arm, its narrow cobbles gleaming from decades of careful tending. The lane is a harmonious dance of stone and timber, with elegant facades leaning gently towards each other, their eaves almost whispering secrets. Here, the district's craftsmanship is evident in clean, dressed stonework and subtle iron crests that guard doorways like silent sentinels. A quiet order pervades, as if the lane itself is holding its breath before releasing you eastward into Saltward Street or southeast towards the midway hubbub.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+At the convergence of Saltward Street and Amberwick Lane, a bustling knot of paving stones bears the imprints of countless cartwheels and footsteps, each layer telling tales of passing time. Here, the road's original grandeur persists, its clean lines and sturdy build a testament to the city planners' vision. The air carries a refreshing blend of rain-kissed cobblestones, smoldering hearths from nearby homes, the distant hint of horses, and the crisp scent of trimmed greenery whispering from walled courtyards. A palpable sense of urban edge lingers, with boundary stones and walls hinting at the city's fringe, while the North Gate looms nearby, stamping this stretch with its own unique identity. The architecture here is more deliberate, stone facades cleaner, their ordered lines speaking of civic pride and quiet resilience.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+In the heart of New Landing, Kingshade Street entwines with Amberwick Lane at a bustling intersection where cobblestones bear witness to centuries of commerce. The paving here is not merely well-cared for but proudly tended, its tight-set stones gleaming like polished ebony beneath your feet. Elegant facades lean in, their plaster and dressed stone faces bearing the patina of time, yet unmarred by neglect. Iron crests, subtle and dignified, gaze down from above doorways, silent sentinels of this quiet civic order. The Residential Cloister arches gracefully to the northeast, lending an air of distinction to these well-heeled streets, where every line and curve whispers a harmony of purpose.
+
+---

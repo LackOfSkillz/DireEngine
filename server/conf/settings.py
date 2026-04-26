@@ -82,6 +82,12 @@ PORTAL_LOG_MAX_SIZE = 50_000_000
 PORTAL_SERVICES_PLUGIN_MODULES.append("evennia.contrib.base_systems.godotwebsocket.webclient")
 GODOT_CLIENT_WEBSOCKET_PORT = 4008
 GODOT_CLIENT_WEBSOCKET_CLIENT_INTERFACE = "127.0.0.1"
+LLM_ENABLED = False
+LLM_BASE_URL = "http://192.168.200.246:1234"
+LLM_MODEL = "mistral-nemo-12b-instruct"
+LLM_TIMEOUT = 60.0
+LLM_TEMPERATURE = 0.5
+LOG_LLM_CALLS = True
 
 
 ######################################################################

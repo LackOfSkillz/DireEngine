@@ -1,0 +1,31 @@
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+In Amberwick Lane's western run, the city's breath is visible in the chill air, a subtle reminder of its relentless pulse. The lane unfurls like a worn ribbon, hemmed in by tall, timber-framed buildings that lean in as if sharing secrets. Their aged stone facades, worn smooth by time and touch, bear witness to generations past. Here, the city's heart beats a little softer; the clatter of carts and the hum of gossip are dampened, replaced by the rustle of leaves and the distant murmur of the city waking up. A scent lingers, not quite perfume, not quite decay - the smell of history, of stories embedded in stone and timber, waiting to be whispered on the wind. To the east, the lane stretches out, tantalizingly inviting, while to the southwest, Kingshade Street beckons with a promise of wider thoroughfares and busier lives. Yet here, in this quiet stretch, the city feels more like a neighbor than an imposing giant.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+Amberwick Lane unfurls before you like a well-worn ribbon, narrower than its grand cousins but no less alive with city breath. Ashlar stones, weathered into soft warmth by countless suns, form the facades of townhouses that stand sentinel on either side, their tidy rows broken only by the occasional guild hall, sterner and more severe in its stone discipline. The air hums with a symphony of life - hushed conversations interspersed with the rumble of carriage wheels, distant church bells tolling the hours, and the hurried footfalls of purposeful folk. Here, Clerie's 6 casts an almost imperceptible influence, lending an extra polish to the stonework, a subtle quietude to the otherwise bustling scene. Exits beckon east and west, promising more slices of this vibrant urban tapestry.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+Amberwick Lane unfurls before you, a slender artery pulsating with life that weaves eastward into the heart of New Landing. The road is a symphony of cobbles, tight-set and gleaming like polished jet, reflecting the day's waning light. Elegant facades, dressed in plaster and stone, lean in from both sides, their iron crests glinting like secrets above weathered doors. Here, Clerie's 6 stands sentinel, its clean lines and quiet dignity imparting a sense of order to the lane. The buildings seem to huddle together, sharing whispered tales as they await your passage through this bustling thoroughfare.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+Amberwick Lane stretches eastward like a welcoming arm, its narrow cobbles gleaming from decades of careful tending. The lane is a harmonious dance of stone and timber, with elegant facades leaning gently towards each other, their eaves almost whispering secrets. Here, the district's craftsmanship is evident in clean, dressed stonework and subtle iron crests that guard doorways like silent sentinels. A quiet order pervades, as if the lane itself is holding its breath before releasing you eastward into Saltward Street or southeast towards the midway hubbub.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+At the convergence of Saltward Street and Amberwick Lane, a bustling knot of paving stones bears the imprints of countless cartwheels and footsteps, each layer telling tales of passing time. Here, the road's original grandeur persists, its clean lines and sturdy build a testament to the city planners' vision. The air carries a refreshing blend of rain-kissed cobblestones, smoldering hearths from nearby homes, the distant hint of horses, and the crisp scent of trimmed greenery whispering from walled courtyards. A palpable sense of urban edge lingers, with boundary stones and walls hinting at the city's fringe, while the North Gate looms nearby, stamping this stretch with its own unique identity. The architecture here is more deliberate, stone facades cleaner, their ordered lines speaking of civic pride and quiet resilience.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+In the heart of New Landing, Kingshade Street entwines with Amberwick Lane at a bustling intersection where cobblestones bear witness to centuries of commerce. The paving here is not merely well-cared for but proudly tended, its tight-set stones gleaming like polished ebony beneath your feet. Elegant facades lean in, their plaster and dressed stone faces bearing the patina of time, yet unmarred by neglect. Iron crests, subtle and dignified, gaze down from above doorways, silent sentinels of this quiet civic order. The Residential Cloister arches gracefully to the northeast, lending an air of distinction to these well-heeled streets, where every line and curve whispers a harmony of purpose.
+
+---

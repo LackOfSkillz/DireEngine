@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+A narrow passage stretches east and south. The space is confined, walls close on either side. A rough texture underfoot suggests worn stone flooring. This path continues unobstructed in both directions.
+
+---
+
+[Room: crossingV2_628_184]
+The passage stretches east-west, with a southern exit breaking its linear flow. The floor is worn smooth underfoot, reflecting the constant traffic through this thoroughfare.
+
+---
+
+[Room: crossingV2_628_208]
+In this intersection, three paths diverge. The north and south passages branch sharply from a central space, while the west path continues straight ahead. The floor is worn smooth by countless footsteps, reflecting the bustling nature of the city.
+
+---
+
+[Room: crossingV2_352_238]
+In crossingV2, a closed room offers no immediate exit. The space is confined, defined by four walls that meet at right angles. The floor beneath is smooth, unbroken by any passage or path. No door or window interrupts the wall's continuous surface.
+
+---
+
+[Room: crossingV2_382_238]
+The space ends abruptly here. A single path leads eastward, blocked by a heavy door. The walls are close, confining, their rough texture hinting at age and wear. The floor is smooth underfoot, worn from countless footsteps in this bustling river trade city.
+
+---
+
+[Room: crossingV2_432_238]
+In crossingV2, a narrow passage stretches southward. Two exits branch off from this space, one leading west. The path continues unobstructed in both directions, revealing no immediate obstacles or turns. The floor is smooth underfoot, worn by countless passing feet.
+
+---
+
+Repeated phrases:
+- "the floor is" (4)
+- "continues unobstructed in both directions" (2)
+- "floor is smooth underfoot worn" (2)
+- "path continues unobstructed in both" (2)
+- "the floor is smooth underfoot" (2)
+- "the floor is worn smooth" (2)
+- "a narrow passage stretches" (2)
+- "continues unobstructed in both" (2)
+- "floor is smooth underfoot" (2)
+- "floor is worn smooth" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 2
+- "window": 1
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 3
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 36.83
+Sentence count flags: 1
+Average sentences: 3.50
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 1
+- "the floor is": 4
+Repeated sentence start total: 5

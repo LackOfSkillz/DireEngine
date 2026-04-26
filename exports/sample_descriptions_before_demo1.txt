@@ -1,0 +1,38 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+In the heart of Demo 1 lies a chamber of quiet contemplation, CRO_450_100. The air here is cool and still, undisturbed by the echoes of distant clamors. Faint light filters through an unseen skylight above, casting dappled shadows on the worn stone floor. To the east, a heavy wooden door, its surface scarred with time and tales untold, beckons with silent intrigue. Southward, a narrow archway leads to a room shrouded in deeper darkness, while southwest, an ornate tapestry partially obscures another exit, hinting at mysteries beyond. The chamber's walls bear no adornment save for the faint outlines of long-removed art, leaving you to wonder what stories these stones might whisper if they could speak.
+
+---
+
+[Room: CRO_500_100]
+Beneath an archway of ancient stone, the chamber unfolds like a secret whispered in the depths. A single torch flickers in a sconce, casting dancing shadows on the roughly hewn walls, damp with condensation that glistens like tears in the meager light. The air is thick with the scent of earth and something faintly acrid, like old smoke. To the west, a narrow tunnel winds out of sight, its darkness impenetrable save for the distant echo of dripping water. A cold draught rises from the stairs leading down, carrying with it an eerie stillness that seems to hold its breath, waiting.
+
+---
+
+[Room: CRO_400_150]
+In the heart of the demo1 expanse lies CRO_400_150, a chamber untouched by time's relentless march. The air is thick with dust motes dancing in the meager light filtering through a single, high archway to the northeast. The room is a study in symmetry, with four stone pillars supporting an unseen ceiling, each carved with intricate patterns that hint at forgotten lore. A cold, unyielding silence permeates the space, broken only by the distant echo of your footfalls on the ancient flagstones.
+
+---
+
+[Room: CRO_450_150]
+In the heart of a long-forgotten keep, you find yourself in a cold, silent chamber. The air is thick with dust and the scent of ancient stone, untouched for centuries. Faint moonlight slants through narrow arrow slits, casting long, dancing shadows across the worn flagstones. To the north, a heavy wooden door, its iron hinges rusted with age, beckons with a sense of mystery. The silence is absolute, broken only by the distant echo of your own heartbeat, as if the very air holds its breath, waiting for you to disturb its slumber.
+
+---
+
+[Room: CRO_500_150]
+In the heart of an ancient, forgotten tower, a circular chamber lies silent, untouched by time. The ceiling soars high above, supported by weathered stone pillars that bear the weight of the centuries. A narrow, spiraling staircase hewn into the wall leads upward, beckoning with its shadowy, winding path. The air is heavy with dust and the faintest whisper of old magic, a chill breeze from an unseen window carrying echoes of long-silenced voices.
+
+---
+
+Repeated phrases:
+- "in the heart of" (4)
+- "in the heart" (4)
+- "the air is" (4)
+- "the heart of" (4)
+- "the air is thick with" (3)
+- "air is thick with" (3)
+- "the air is thick" (3)
+- "the distant echo of" (3)
+- "air is thick" (3)
+- "distant echo of" (3)

@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+In this passage, two paths diverge. The space is narrow, continuing eastward and southward. The floor is smooth underfoot, worn by time and travel.
+
+---
+
+[Room: crossingV2_628_184]
+This passage continues eastward and southward, leading onwards in two directions. The space is narrow, defined by walls that stretch out to either side, guiding one's path. The floor is smooth underfoot, allowing for steady progress along its length.
+
+---
+
+[Room: crossingV2_628_208]
+At this intersection, three passages branch out, leading north, south, and west. The space is open, with no walls confining it. A rough floor marks the meeting point of these paths.
+
+---
+
+[Room: crossingV2_352_238]
+In this space, there are no visible paths out. It's an enclosed room, with walls meeting at right angles to form a square. The floor is flat and smooth underfoot, suggesting a level space. No exits are listed for this area.
+
+---
+
+[Room: crossingV2_382_238]
+The space ends abruptly at a single exit to the east. It's a tight passage, confined by close walls on either side. The floor is smooth underfoot, leading directly towards the eastern path.
+
+---
+
+[Room: crossingV2_432_238]
+This passage leads southward and westward. It stretches out in both directions, continuing on without interruption. The floor is smooth underfoot, extending evenly towards each exit.
+
+---
+
+Repeated phrases:
+- "the floor is" (5)
+- "the floor is smooth underfoot" (4)
+- "floor is smooth underfoot" (4)
+- "the floor is smooth" (4)
+- "floor is smooth" (4)
+- "is smooth underfoot" (4)
+- "the space is" (3)
+- "the space is narrow" (2)
+- "eastward and southward" (2)
+- "space is narrow" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 32.33
+Sentence count flags: 0
+Average sentences: 3.17
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 5
+Repeated sentence start total: 5

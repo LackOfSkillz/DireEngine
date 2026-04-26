@@ -874,6 +874,43 @@ Godot UI
 → LM Studio
 → Response returned to UI
 
+4.3.1 Runtime Configuration
+
+The current builder integration reads LLM settings from Django settings, with `server/conf/secret_settings.py`
+available for local overrides.
+
+Defaults in `server/conf/settings.py`:
+
+- `LLM_ENABLED = False`
+- `LLM_BASE_URL = "http://192.168.200.246:1234"`
+- `LLM_MODEL = "mistral-nemo-12b-instruct"`
+- `LLM_TIMEOUT = 60.0`
+- `LLM_TEMPERATURE = 0.5`
+
+The default temperature is pinned lower because the builder prompt has shown better zone-context compliance and a lower banned-noun leak rate at `0.5` than at `0.75`, without a meaningful loss of prose variety.
+
+Typical local override:
+
+```python
+LLM_ENABLED = True
+LLM_BASE_URL = "http://192.168.200.246:1234"
+LLM_MODEL = "mistral-nemo-12b-instruct"
+LLM_TIMEOUT = 60.0
+LLM_TEMPERATURE = 0.5
+```
+
+Health check:
+
+- `GET /api/llm/health`
+- returns `200` with `{model, base_url, reachable: true, latency_ms}` when the local endpoint is reachable
+- returns `503` with error detail when disabled or unreachable
+
+Builder behavior when disabled or offline:
+
+- the builder must not crash
+- generation actions stay unavailable or surface a non-fatal error toast
+- LLM failures are treated as recoverable UI errors, not fatal builder errors
+
 4.4 Input Model
 Tags (Primary)
 
@@ -924,6 +961,18 @@ item_generator
 behavior_generator
 inventory_generator
 prompt_builder
+
+4.7.1 Prompt Change Evaluation Methodology
+
+Any change to the room description prompt must be evaluated on at least 4 runs of the same fixed room set, with the comparison reporting:
+
+- Banned-noun leak rate across the 4 runs (number of runs with at least one violation)
+- Geometry violation count across the 4 runs
+- Identity term distribution per run (min, max, average across the 4)
+- Subjective read on prose variety vs. monotony
+
+Single-run before/after comparisons are not sufficient. Stochastic variance at temp `0.5` is large enough that single samples can be misleading. The fixed crossingV2 six-room slice is the canonical test set.
+
 5. NPC Behavior and Vendor System
 5.1 NPC Template Structure
 

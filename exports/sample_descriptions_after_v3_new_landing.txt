@@ -1,0 +1,86 @@
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+At this intersection, three paths diverge. A broad passage leads eastward, while a narrower path winds southwest. Straight ahead, the way west opens into a wider space. The floor here is worn smooth by countless footsteps.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+In this passage, two paths diverge from a central point. One leads eastward, the other west. The space is narrow and linear, with a smooth floor underfoot.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+In this passage-shaped space, two paths diverge. A path leads eastward, while another continues west. The floor is smooth underfoot, with no obstacles hindering progress in either direction.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+At Amberwick Lane's East Reach, three paths diverge from a central space. A wide passage leads eastward, while a narrower path branches southeast, and a broad way opens to the west. The floor is worn smooth by countless footsteps.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+A narrow passage stretches between two exits. The space continues southward and westward, opening into broader paths. The floor is smooth underfoot, worn by time and travel.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+This passage continues eastward and southward, a narrow path defined by its two exit points. The space is elongated, stretching between the east and south paths. It's tight, with walls close on either side, guiding you forward.
+
+---
+
+Repeated phrases:
+- "leads eastward while" (3)
+- "the floor is" (3)
+- "eastward while a narrower path" (2)
+- "is worn smooth by countless" (2)
+- "leads eastward while a narrower" (2)
+- "passage leads eastward while a" (2)
+- "paths diverge from a central" (2)
+- "the floor is smooth underfoot" (2)
+- "worn smooth by countless footsteps" (2)
+- "diverge from a central" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 1
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 32.50
+Sentence count flags: 0
+Average sentences: 3.17
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 3
+Repeated sentence start total: 3

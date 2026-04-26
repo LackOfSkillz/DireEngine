@@ -18,6 +18,8 @@ from web.character_helpers import parse_request_data
 from world.area_forge import map_api
 from world.area_forge.paths import artifact_paths
 from world.area_forge.serializer import load_review_graph, save_review_graph
+from world.builder.schemas.generation_context_schema import normalize_generation_context
+from world.builder.schemas.room_tag_schema import normalize_room_tags
 from world.builder.services import exit_service, zone_service
 from world.worlddata.services.import_zone_service import DEFAULT_ROOM_TYPECLASS, load_zone
 
@@ -247,6 +249,7 @@ def _normalize_builder_yaml_room(room_data, fallback_index=0):
         },
         "environment": str(room_data.get("environment") or "city").strip().lower() or "city",
         "npcs": normalize_builder_reference_ids(room_data.get("npcs") or []),
+            "tags": normalize_room_tags(room_data.get("tags")),
         "items": normalize_room_item_entries(room_data.get("items") or []),
         "zone_id": "",
         "map": {
@@ -299,6 +302,7 @@ def _normalize_builder_zone_payload(data, fallback_zone_id=""):
         "schema_version": str(data.get("schema_version") or "v1"),
         "zone_id": zone_id,
         "name": str(data.get("name") or _titleize_zone_id(zone_id)),
+        "generation_context": normalize_generation_context(data.get("generation_context")),
         "rooms": rooms,
         "placements": {
             "npcs": list(placements.get("npcs") or []),
@@ -331,6 +335,8 @@ def _write_builder_zone_yaml(zone_id, payload):
 def _serialize_yaml_builder_zones():
     zones = []
     for file_path in sorted(_worlddata_zones_dir().glob("*.yaml")):
+        if file_path.name.endswith(".raw.yaml"):
+            continue
         with file_path.open(encoding="utf-8") as file_handle:
             data = yaml.safe_load(file_handle) or {}
         payload = _normalize_builder_zone_payload(data, fallback_zone_id=file_path.stem)
@@ -619,6 +625,7 @@ def _serialize_builder_room(room, fallback_index=0):
             for state in (room.tags.get(category="room_state", return_list=True) or [])
             if str(state or "").strip()
         }),
+        "tags": normalize_room_tags(getattr(room.db, "room_tags", None)),
         "ambient": {
             "rate": _coerce_map_coordinate(getattr(room.db, "room_message_rate", 0), 0),
             "messages": [
@@ -881,6 +888,7 @@ def builder_zone_create(request):
                 "id": zone["zone_id"],
                 "name": zone["name"],
                 "area": zone.get("area") or zone["zone_id"],
+                "generation_context": zone.get("generation_context"),
                 "rooms": [],
             },
         },
@@ -919,6 +927,7 @@ def builder_room_create(request):
         if str(state or "").strip()
     })
     ambient = dict(data.get("ambient") or {}) if isinstance(data.get("ambient"), dict) else {}
+    room_tags = normalize_room_tags(data.get("tags"))
     ambient_messages = [
         str(message or "")
         for message in list(ambient.get("messages") or [])
@@ -951,6 +960,7 @@ def builder_room_create(request):
         room.db.details = details
         room.db.room_messages = ambient_messages
         room.db.room_message_rate = ambient_rate
+        room.db.room_tags = room_tags
         room.tags.clear(category="room_state")
         for state in room_states:
             room.tags.add(state, category="room_state")
@@ -1031,6 +1041,7 @@ def builder_room_save(request, room_id):
         if str(state or "").strip()
     })
     ambient = dict(data.get("ambient") or {}) if isinstance(data.get("ambient"), dict) else {}
+    room_tags = normalize_room_tags(data.get("tags"))
     ambient_messages = [
         str(message or "")
         for message in list(ambient.get("messages") or [])
@@ -1068,6 +1079,7 @@ def builder_room_save(request, room_id):
         room.db.details = details
         room.db.room_messages = ambient_messages
         room.db.room_message_rate = ambient_rate
+        room.db.room_tags = room_tags
         for attr in list(room.db_attributes.filter(db_key__startswith="desc_")):
             room.attributes.remove(attr.key)
         for state, text in stateful_descs.items():

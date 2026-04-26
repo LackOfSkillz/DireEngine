@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+Beneath a worn signpost, the bridge's floor spans the river, connecting two paths. The space narrows from east to south, bottlenecking at the riverside market stall.
+
+---
+
+[Room: crossingV2_628_184]
+In this narrow passage, two paths diverge. To the east, a continuation of the path leads onward, while to the south, it widens slightly, beckoning further exploration. The floor here is worn smooth from frequent use, reflecting the bustling nature of its surroundings.
+
+---
+
+[Room: crossingV2_628_208]
+In this bustling intersection, three passages branch out from a central space. To the north and south, paths continue straight ahead, while to the west, a narrow passage opens up. The floor here is worn smooth by countless footsteps, reflecting the city's constant activity.
+
+---
+
+[Room: crossingV2_352_238]
+In the crossingV2 temple, four walls contain a square space. The shrine at the center draws focus, surrounded by smooth, well-maintained floor. Prayer-flags hang from the ceiling, swaying gently in unseen currents. No exits lead out, enclosing this devotional area within its own confines.
+
+---
+
+[Room: crossingV2_382_238]
+In this space, a single passage leads eastward. The walls here are rough-hewn, their texture hinting at haste or simplicity in construction. This room is open and uncluttered, with no branching paths or dividing structures. The floor underfoot is solid and smooth, worn by countless footsteps.
+
+---
+
+[Room: crossingV2_432_238]
+The room is a narrow passage, stretching between two points of egress. Two exits lead from this space, one to the south and another to the west. The walls, though once sturdy stone, now bear signs of decay, crumbling in places. Tar stains mark the floor, evidence of its use as a dockside warehouse, while scattered remnants of cargo hint at its recent activity.
+
+---
+
+Repeated phrases:
+- "floor here is worn smooth" (2)
+- "the floor here is worn" (2)
+- "floor here is worn" (2)
+- "here is worn smooth" (2)
+- "the floor here is" (2)
+- "a narrow passage" (2)
+- "by countless footsteps" (2)
+- "floor here is" (2)
+- "here is worn" (2)
+- "is worn smooth" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 45.00
+Sentence count flags: 1
+Average sentences: 3.33
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 1
+- "the walls are": 0
+- "the floor is": 0
+Repeated sentence start total: 1

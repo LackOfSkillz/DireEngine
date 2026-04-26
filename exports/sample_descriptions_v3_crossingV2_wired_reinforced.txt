@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+In this bustling river trade city, a narrow passage stretches eastward, continuing southwards. The space is confined, walls close on either side, guiding you forward. Two paths diverge ahead, one leading east, the other branching south. The floor underfoot is worn smooth by countless feet, reflecting the ceaseless activity of this late-medieval city.
+
+---
+
+[Room: crossingV2_628_184]
+In crossingV2, a passage stretches eastward, opening to the south. Two paths diverge from this point, one leading directly ahead into the eastern expanse, the other branching off to the south. The space is narrow but extends far enough to accommodate a steady flow of traffic. The floor underfoot is worn smooth by countless footsteps, reflecting the bustling nature of the city.
+
+---
+
+[Room: crossingV2_628_208]
+In this passage, two paths diverge northward and westward. The space narrows, walls closing in as it extends onward. Floor is rough underfoot, worn by countless footsteps. Exits branch off, continuing through the confining corridor.
+
+---
+
+[Room: crossingV2_352_238]
+The space is enclosed, with no visible exits. The walls are smooth, unbroken by any passage or path. The room's scale is compact, its floor flat and even underfoot.
+
+---
+
+[Room: crossingV2_382_238]
+The space here ends abruptly. A single passage leads eastward, the only way out. The walls are close, confining, their surfaces rough to the touch. The path narrows as it continues into the darkness ahead.
+
+---
+
+[Room: crossingV2_432_238]
+A narrow passage stretches out, two paths branching off. The floor is worn smooth underfoot from countless feet traversing southward or westward. The space continues unobstructed in both directions, opening up slightly to the west.
+
+---
+
+Repeated phrases:
+- "is worn smooth" (3)
+- "the space is" (3)
+- "two paths diverge" (3)
+- "floor underfoot is worn smooth" (2)
+- "is worn smooth by countless" (2)
+- "the floor underfoot is worn" (2)
+- "underfoot is worn smooth by" (2)
+- "a narrow passage stretches" (2)
+- "floor underfoot is worn" (2)
+- "is worn smooth by" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 1
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 41.67
+Sentence count flags: 0
+Average sentences: 3.67
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 2
+- "the floor is": 1
+Repeated sentence start total: 3

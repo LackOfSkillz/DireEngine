@@ -9,6 +9,7 @@ from evennia.prototypes.spawner import search_prototype, spawn
 from evennia.utils.create import create_object
 
 from server.systems import zone_room_item_assignments, zone_room_npc_assignments, zone_runtime_spawn
+from world.builder.schemas.room_tag_schema import normalize_room_tags
 from world.builder.services.map_exporter import _rooms_for_zone
 
 
@@ -126,10 +127,12 @@ def _apply_extended_room_fields(room, room_data: dict) -> None:
     details = _normalize_string_map(room_data.get("details") or {})
     room_states = sorted({state.lower() for state in _normalize_string_list(room_data.get("room_states") or [])})
     ambient = _normalize_ambient(room_data.get("ambient") or {})
+    room_tags = normalize_room_tags(room_data.get("tags"))
 
     room.db.details = details
     room.db.room_messages = ambient["messages"]
     room.db.room_message_rate = ambient["rate"]
+    room.db.room_tags = room_tags
 
     for attr in list(room.db_attributes.filter(db_key__startswith="desc_")):
         room.attributes.remove(attr.key)
@@ -213,6 +216,7 @@ def _normalize_room_specs(zone_id: str, rooms_data: list[dict], warnings: list[s
             "details": _normalize_string_map(room_data.get("details") or {}),
             "room_states": sorted({state.lower() for state in _normalize_string_list(room_data.get("room_states") or [])}),
             "ambient": _normalize_ambient(room_data.get("ambient") or {}),
+            "tags": normalize_room_tags(room_data.get("tags")),
             "npcs": zone_room_npc_assignments.normalize_builder_reference_ids(room_data.get("npcs") or []),
             "items": zone_room_item_assignments.normalize_room_item_entries(room_data.get("items") or []),
             "map": {

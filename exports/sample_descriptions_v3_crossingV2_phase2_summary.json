@@ -1,0 +1,62 @@
+[
+  {
+    "run": 1,
+    "output_path": "c:\\Users\\gary\\dragonsire\\exports\\sample_descriptions_v3_crossingV2_phase2_run1.txt",
+    "noun_violations": 0,
+    "geometry_violations": 0,
+    "identity_count": 4,
+    "texts": {
+      "crossingV2_628_178": "A narrow bridge spans the river, serving as a bustling market stall. Worn by time and use, it bears a signpost pointing east and south. The bridge continues in both directions, bottlenecked here.",
+      "crossingV2_628_184": "In this late-medieval river trade city crossing, a passage stretches eastward, branching to the south. The space is narrow yet open, defined by rough walls that bear the wear of countless passing traders and locals. A tight path continues in both directions, the floor underfoot worn smooth from use.",
+      "crossingV2_628_208": "At the intersection of three passages, a bustling hub unfolds. Three paths diverge from this central space: one leads north, another south, and a third veers west. The floor is worn smooth by countless footsteps, reflecting the ceaseless flow of traffic through this crossing.",
+      "crossingV2_352_238": "In the heart of crossingV2, a square temple stands enclosed, no exits piercing its walls. The space is well-maintained, devotional focus centered on a prominent shrine. Prayer-flags adorn the room, their vibrant colors stark against the smooth, clean surfaces.",
+      "crossingV2_382_238": "In this space, a single path leads east. The room is a dead end, its walls closing in tightly around the floor. The passage narrows as it nears the eastern exit, the walls rough to the touch. A cold draft from outside seeps through the gap ahead.",
+      "crossingV2_432_238": "The space stretches out as a long, narrow dock, designed for the flow of goods and people. Two exits continue through this crumbling warehouse, one to the south, the other to the west. The stone floor is rough underfoot, worn smooth in places by years of use and stained dark with tar from countless cargo ships."
+    }
+  },
+  {
+    "run": 2,
+    "output_path": "c:\\Users\\gary\\dragonsire\\exports\\sample_descriptions_v3_crossingV2_phase2_run2.txt",
+    "noun_violations": 1,
+    "geometry_violations": 1,
+    "identity_count": 2,
+    "texts": {
+      "crossingV2_628_178": "A worn bridge spans the river, serving as a market stall. Two paths continue through this bottleneck space, one leading east, the other south. The bridge's surface bears marks of time and use, its planks rough underfoot.",
+      "crossingV2_628_184": "In this narrow passage, two paths diverge. The space stretches eastward and continues south, opening up slightly as it goes. The floor is worn smooth by countless footsteps, reflecting the constant bustle of the city outside.",
+      "crossingV2_628_208": "At this intersection, three passages converge. To the north, a path continues straight ahead, while to the south, it bends slightly, opening into a wider space. The western passage narrows, leading through a tight archway. The floor is worn smooth by countless footsteps.",
+      "crossingV2_352_238": "In the heart of crossingV2, this square room stands enclosed, no exits hinting at its interior. The well-maintained space serves as a temple, dedicated to devotional focus with a prominent shrine at its center. Prayer-flags adorn the walls, their gentle sway suggesting a subtle breeze from unseen windows.",
+      "crossingV2_382_238": "In this space, a single path leads eastward. The walls here are rough, their surfaces worn by time and use. This room is compact, confining, with a low ceiling that seems to press down. The passage narrows as it continues, leading towards the only exit.",
+      "crossingV2_432_238": "The space is a long, narrow passage, two exits branching off it. The southern end opens onto a wider area, while the western exit continues the tight corridor. The floor is rough underfoot, cobbled stones worn smooth by countless footsteps and cart wheels. The walls are crumbling stone, stained dark with tar from years of use as a dockside warehouse."
+    }
+  },
+  {
+    "run": 3,
+    "output_path": "c:\\Users\\gary\\dragonsire\\exports\\sample_descriptions_v3_crossingV2_phase2_run3.txt",
+    "noun_violations": 0,
+    "geometry_violations": 0,
+    "identity_count": 2,
+    "texts": {
+      "crossingV2_628_178": "Beneath a worn signpost, the bridge's floor spans the river, connecting two paths. The space narrows from east to south, bottlenecking at the riverside market stall.",
+      "crossingV2_628_184": "In this narrow passage, two paths diverge. To the east, a continuation of the path leads onward, while to the south, it widens slightly, beckoning further exploration. The floor here is worn smooth from frequent use, reflecting the bustling nature of its surroundings.",
+      "crossingV2_628_208": "In this bustling intersection, three passages branch out from a central space. To the north and south, paths continue straight ahead, while to the west, a narrow passage opens up. The floor here is worn smooth by countless footsteps, reflecting the city's constant activity.",
+      "crossingV2_352_238": "In the crossingV2 temple, four walls contain a square space. The shrine at the center draws focus, surrounded by smooth, well-maintained floor. Prayer-flags hang from the ceiling, swaying gently in unseen currents. No exits lead out, enclosing this devotional area within its own confines.",
+      "crossingV2_382_238": "In this space, a single passage leads eastward. The walls here are rough-hewn, their texture hinting at haste or simplicity in construction. This room is open and uncluttered, with no branching paths or dividing structures. The floor underfoot is solid and smooth, worn by countless footsteps.",
+      "crossingV2_432_238": "The room is a narrow passage, stretching between two points of egress. Two exits lead from this space, one to the south and another to the west. The walls, though once sturdy stone, now bear signs of decay, crumbling in places. Tar stains mark the floor, evidence of its use as a dockside warehouse, while scattered remnants of cargo hint at its recent activity."
+    }
+  },
+  {
+    "run": 4,
+    "output_path": "c:\\Users\\gary\\dragonsire\\exports\\sample_descriptions_v3_crossingV2_phase2_run4.txt",
+    "noun_violations": 0,
+    "geometry_violations": 0,
+    "identity_count": 8,
+    "texts": {
+      "crossingV2_628_178": "A worn bridge stretches east-west, a bottleneck over the river. The space narrows as it continues in both directions, marked by a signpost at its center. The floor bears the grooves of countless carts, smooth underfoot yet rough with age.",
+      "crossingV2_628_184": "In crossingV2, a narrow passage stretches out, connecting two paths. To the east, the way continues, opening up slightly as it disappears around a gentle bend. Southwards, the path narrows, leading into a tight space between high walls before turning sharply. The floor is worn smooth by countless footsteps, reflecting the bustling nature of this river trade city.",
+      "crossingV2_628_208": "At this intersection, three paths converge. A broad north-south passage bisects a narrower west path. The space is open, with no barriers between passages. The floor here is worn smooth by countless feet.",
+      "crossingV2_352_238": "In the heart of crossingV2, a square room stands as a temple, its devotional focus centered on an intricately carved shrine. The space is well-maintained, with no exits leading out, creating a sense of quiet seclusion. Prayer-flags hang from the ceiling, their colors muted by the soft light filtering through the high windows, casting gentle shadows on the smooth stone floor.",
+      "crossingV2_382_238": "The space ends abruptly at a solid wall to the east. A single exit, a narrow archway, opens in that direction, cutting through the otherwise unbroken expanse of stone. The floor here is even and smooth underfoot, worn by countless footsteps over time. The passage continues eastward, leading out into the bustling city beyond.",
+      "crossingV2_432_238": "The space stretches out as a long, narrow dock, designed for loading and unloading cargo. It's a crumbling stone path, clearly worn from years of use, with two exits continuing through this passage - one to the south, the other to the west. Tar stains and scattered remnants of cargo litter the floor, testament to its current function as a bustling warehouse in this late-medieval river trade city."
+    }
+  }
+]

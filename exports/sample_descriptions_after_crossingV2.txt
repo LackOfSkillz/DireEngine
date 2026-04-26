@@ -1,0 +1,53 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+This narrow passage allows movement eastward and southward.
+
+---
+
+[Room: crossingV2_628_184]
+A narrow passage stretches east-west with exits leading in both directions.
+
+---
+
+[Room: crossingV2_628_208]
+At the intersection of three paths lies this meeting point. Exits lead north, south, and west.
+
+---
+
+[Room: crossingV2_352_238]
+Enclosed room, no exits.
+
+---
+
+[Room: crossingV2_382_238]
+In this dead-end room, a single exit leads east.
+
+---
+
+[Room: crossingV2_432_238]
+The room is a narrow passage with exits to the south and west.
+
+---
+
+Repeated phrases:
+- "a narrow passage" (2)
+- "south and west" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 10.50

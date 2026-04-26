@@ -1,0 +1,64 @@
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+In Amberwick Lane's Western Run, three paths diverge at a broad intersection. The ground is cobblestone, worn smooth by time and feet. Two lanes branch east and southwest, narrowing as they curve away, while a wider path leads west, opening into a potential thoroughfare.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+Amberwick Lane, Midway is a narrow passage stretching east-west, suggesting a thoroughfare rather than a destination. The floor is smooth and even, worn by time and foot traffic. Two exits lead out: one to the east, the other to the west, both archways opening into adjacent spaces.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+Amberwick Lane, Eastern Run is a narrow passage that encourages movement rather than lingering. It stretches east-west, with exits at both ends. The floor is smooth and even, worn by frequent use. The space feels open, defined by high walls on either side, leading directly to the exits.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+Amberwick Lane, East Reach is a spacious intersection, branching into three directions. The room is roughly triangular, with exits leading east, southeast, and west. The floor is smooth underfoot, worn by time and traffic. The walls are bare, their surfaces rough to the touch.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+The room is a narrow passage, designed for movement rather than lingering. It extends southward and westward, with exits in those directions. The floor is smooth underfoot, worn by frequent traffic. The walls are rough, their surfaces marked by time and use. The space opens up slightly towards the west exit, hinting at what lies beyond.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+Kingshade Street and Amberwick Lane is a narrow, elongated passage that encourages movement through it rather than lingering. The space is defined by its two clear exit points: one leading east, the other south. Its walls are smooth to the touch, suggesting well-maintained stonework, while the floor bears signs of wear from frequent use, particularly around the exits where foot traffic has been most concentrated.
+
+---
+
+Repeated phrases:
+- "the floor is smooth" (4)
+- "by time and" (4)
+- "floor is smooth" (4)
+- "is a narrow" (4)
+- "the floor is" (4)
+- "is a narrow passage" (3)
+- "a narrow passage" (3)
+- "rather than lingering" (3)
+- "floor is smooth and even" (2)
+- "floor is smooth underfoot worn" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 51.17
+Sentence count flags: 0
+Average sentences: 3.67
+Dead outputs: 0

@@ -1,0 +1,1931 @@
+{
+  "index_url": "https://elanthipedia.play.net/Ranik_Maps",
+  "output_dir": "C:\\Dev\\DireLore\\Assets\\ranik-maps",
+  "manifest_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\manifest.json",
+  "candidate_pages": 240,
+  "downloaded": 21,
+  "skipped": 219,
+  "failed": 0,
+  "records": [
+    {
+      "page_url": "https://elanthipedia.play.net/Simutronics_Maps",
+      "page_title": "Simutronics Maps",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/43/Elanthia2.jpg",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Simutronics_Maps.jpg",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Official_color_map",
+      "page_title": "Official color map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/82/DR-elanthia.jpg",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Official_color_map.jpg",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Zone_map",
+      "page_title": "Zone map",
+      "image_url": null,
+      "saved_path": null,
+      "status": "skipped",
+      "detail": "No primary map image found on page."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Travel_map",
+      "page_title": "Travel map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/82/TravelMap.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Travel_map.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Mapmakers_Timeline",
+      "page_title": "Mapmakers timeline",
+      "image_url": null,
+      "saved_path": null,
+      "status": "skipped",
+      "detail": "No primary map image found on page."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/File:Hand_sketched_realms_map.JPG",
+      "page_title": "File : Hand sketched realms map.JPG",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/69/Hand_sketched_realms_map.JPG",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\File_Hand_sketched_realms_map.JPG.jpg",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap61b",
+      "page_title": "RanikMap61b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/d4/Map61b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap61b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap99",
+      "page_title": "RanikMap99",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f1/Map99.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap99.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap114",
+      "page_title": "RanikMap114",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/13/Map114.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap114.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap7b",
+      "page_title": "RanikMap7b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/35/Map7b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap7b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap121",
+      "page_title": "RanikMap121",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/13/Map121.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap121.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1",
+      "page_title": "RanikMap1",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f5/CrossingMap.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap13",
+      "page_title": "RanikMap13",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/35/Map13.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap13.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap41",
+      "page_title": "RanikMap41",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/6e/Map41.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap41.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap150",
+      "page_title": "RanikMap150",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/eb/Map150.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap150.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap106",
+      "page_title": "RanikMap106",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/0f/Map106.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap106.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap30",
+      "page_title": "RanikMap30",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/84/Map30.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap30.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap117",
+      "page_title": "RanikMap117",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/ae/Map117.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap117.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap116",
+      "page_title": "RanikMap116",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/70/Map116.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap116.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap112",
+      "page_title": "RanikMap112",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/e9/Map112.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap112.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap90f",
+      "page_title": "RanikMap90f",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a9/Map90f.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap90f.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap9",
+      "page_title": "RanikMap9",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/bd/Map9.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap9.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap5a",
+      "page_title": "RanikMap5a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/05/Map5a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap5a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap40",
+      "page_title": "RanikMap40",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/31/Map40.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap40.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap61",
+      "page_title": "RanikMap61",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/6a/Map61.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap61.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap108",
+      "page_title": "RanikMap108",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/02/Map108.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap108.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap107",
+      "page_title": "RanikMap107",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/fc/Map107.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap107.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap47",
+      "page_title": "RanikMap47",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/7f/Map47.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap47.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap90",
+      "page_title": "RanikMap90",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/fd/Map90.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap90.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap91",
+      "page_title": "RanikMap91",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/92/Map91.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap91.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap127",
+      "page_title": "RanikMap127",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/64/Map127.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap127.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap34a",
+      "page_title": "RanikMap34a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2b/Map34a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap34a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap67",
+      "page_title": "RanikMap67",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/df/Map67.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap67.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap149",
+      "page_title": "RanikMap149",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c6/Map149.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap149.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap66a",
+      "page_title": "RanikMap66a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8a/Map66a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap66a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap10",
+      "page_title": "RanikMap10",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8f/Zoluren%2C_10%2C_Stone_Clan.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap10.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap42",
+      "page_title": "RanikMap42",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/0c/Map42.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap42.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap35",
+      "page_title": "RanikMap35",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/14/Map35.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap35.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap4a",
+      "page_title": "RanikMap4a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/64/Map4a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap4a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap5",
+      "page_title": "RanikMap5",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/40/Map5.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap5.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap71a",
+      "page_title": "RanikMap71a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/7a/Map71a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap71a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap0",
+      "page_title": "RanikMap0",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a3/Map0.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap0.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1a",
+      "page_title": "RanikMap1a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/b3/Map1a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1b",
+      "page_title": "RanikMap1b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2a/Map1b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1c",
+      "page_title": "RanikMap1c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/39/Map1c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1d",
+      "page_title": "RanikMap1d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/45/Map1d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1e",
+      "page_title": "RanikMap1e",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c8/Map1e.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1e.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1f",
+      "page_title": "RanikMap1f",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/24/Map1f.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1f.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1g",
+      "page_title": "RanikMap1g",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/87/Map1g.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1g.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1h",
+      "page_title": "RanikMap1h",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f6/Map1h.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1h.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1i",
+      "page_title": "RanikMap1i",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/0e/Map1i.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1i.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1j",
+      "page_title": "RanikMap1j",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/86/Map_1j.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1j.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap1k",
+      "page_title": "RanikMap1k",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c6/Map_1k.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap1k.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap2",
+      "page_title": "RanikMap2",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/1c/Map2.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap2.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap2a",
+      "page_title": "RanikMap2a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/6a/Map2a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap2a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap2b",
+      "page_title": "RanikMap2b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/09/Map2b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap2b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap2c",
+      "page_title": "RanikMap2c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/6a/Map2c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap2c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap2d",
+      "page_title": "RanikMap2d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/06/Map2d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap2d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap3",
+      "page_title": "RanikMap3",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/1f/Map3.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap3.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap3a",
+      "page_title": "RanikMap3a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f4/Map3a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap3a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap4",
+      "page_title": "RanikMap4",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/bf/Map4.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap4.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap5b",
+      "page_title": "RanikMap5b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/01/RanikMap5b.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap5b.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap6",
+      "page_title": "RanikMap6",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/dd/Zoluren%2C_6%2C_North_Gate_%26_Monastary.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap6.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap6a",
+      "page_title": "RanikMap6a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/42/Zoluren%2C_6a%2C_Brambles_out_North_Gate.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap6a.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap8",
+      "page_title": "RanikMap8",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/39/Map8.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap8.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap8a",
+      "page_title": "RanikMap8a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/77/Map8a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap8a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap8b",
+      "page_title": "RanikMap8b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/36/Map8b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap8b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap7",
+      "page_title": "RanikMap7",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a6/Map7.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap7.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap7a",
+      "page_title": "RanikMap7a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/10/Map7a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap7a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap9a",
+      "page_title": "RanikMap9a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/b6/Map9a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap9a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap9b",
+      "page_title": "RanikMap9b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/95/Map9b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap9b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap9c",
+      "page_title": "RanikMap9c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/be/Map_9c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap9c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap10a",
+      "page_title": "RanikMap10a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/1f/Map10a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap10a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap11",
+      "page_title": "RanikMap11",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f3/Zoluren%2C_11%2C_NTR%2C_Vipers_%26_Rock_Guardians.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap11.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap11a",
+      "page_title": "RanikMap11a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c2/Map11a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap11a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap12",
+      "page_title": "RanikMap12",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/1c/Map12.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap12.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap12a",
+      "page_title": "RanikMap12a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/ae/Map12a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap12a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap13a",
+      "page_title": "RanikMap13a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/ea/Map13a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap13a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap14",
+      "page_title": "RanikMap14",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/b9/Map14.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap14.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap14a",
+      "page_title": "RanikMap14a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8c/Map14a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap14a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap14b",
+      "page_title": "RanikMap14b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/82/Map14b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap14b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap14c",
+      "page_title": "RanikMap14c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/3d/Map14c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap14c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap14d",
+      "page_title": "RanikMap14d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/05/Map14d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap14d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap60",
+      "page_title": "RanikMap60",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a4/Map60.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap60.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap60a",
+      "page_title": "RanikMap60a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/b1/Map60a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap60a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap60b",
+      "page_title": "RanikMap60b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/5d/Map60b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap60b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap60c",
+      "page_title": "RanikMap60c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/91/Map60c.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap60c.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap61a",
+      "page_title": "RanikMap61a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/06/Map61a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap61a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap61c",
+      "page_title": "RanikMap61c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/16/Map61c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap61c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap62",
+      "page_title": "RanikMap62",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/42/Map62.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap62.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap62a",
+      "page_title": "RanikMap62a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/ee/Map62a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap62a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap63",
+      "page_title": "RanikMap63",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c7/Map63.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap63.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap63a",
+      "page_title": "RanikMap63a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/e0/Map63a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap63a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap111",
+      "page_title": "RanikMap111",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c4/Map111.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap111.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap112a",
+      "page_title": "RanikMap112a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/10/Map112a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap112a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap113",
+      "page_title": "RanikMap113",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/04/Map113.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap113.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap30a",
+      "page_title": "RanikMap30a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8d/Map30a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap30a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap30b",
+      "page_title": "RanikMap30b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/fc/Map30b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap30b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap30c",
+      "page_title": "RanikMap30c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/39/Map30c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap30c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31",
+      "page_title": "RanikMap31",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c7/Map31.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31a",
+      "page_title": "RanikMap31a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8c/Map31a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31b",
+      "page_title": "RanikMap31b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/9e/Map31b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31c",
+      "page_title": "RanikMap31c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/09/Map31c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31d",
+      "page_title": "RanikMap31d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2f/Map31d.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31d.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31e",
+      "page_title": "RanikMap31e",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/31/Map31e.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31e.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31f",
+      "page_title": "RanikMap31f",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/ce/Map31f.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31f.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap32",
+      "page_title": "RanikMap32",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/58/Map32.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap32.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap32a",
+      "page_title": "RanikMap32a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f6/Map32a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap32a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap33",
+      "page_title": "RanikMap33",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/b4/Map33.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap33.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap34",
+      "page_title": "RanikMap34",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/17/Map34.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap34.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap34b",
+      "page_title": "RanikMap34b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8f/Map34b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap34b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap34c",
+      "page_title": "RanikMap34c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/6f/Map34c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap34c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap34d",
+      "page_title": "RanikMap34d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/69/Map34d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap34d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap35a",
+      "page_title": "RanikMap35a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/03/Map35a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap35a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap40a",
+      "page_title": "RanikMap40a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/1e/Map40a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap40a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap40b",
+      "page_title": "RanikMap40b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/02/Map40b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap40b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap146",
+      "page_title": "RanikMap146",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/7d/Map146.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap146.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap147",
+      "page_title": "RanikMap147",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c8/RanikMap147.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap147.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap148",
+      "page_title": "RanikMap148",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8c/Map148.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap148.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap41b",
+      "page_title": "RanikMap41b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a4/Map41b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap41b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap41a",
+      "page_title": "RanikMap41a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/3e/Map41a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap41a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap42a",
+      "page_title": "RanikMap42a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f2/Map42a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap42a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap42b",
+      "page_title": "RanikMap42b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/eb/Map42b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap42b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap43",
+      "page_title": "RanikMap43",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/85/Map43.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap43.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap44",
+      "page_title": "RanikMap44",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/7c/Map44.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap44.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap45",
+      "page_title": "RanikMap45",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/1a/Map45.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap45.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap46",
+      "page_title": "RanikMap46",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/9e/Map46.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap46.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap46a",
+      "page_title": "RanikMap46a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/55/Map46a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap46a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap47a",
+      "page_title": "RanikMap47a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/98/Map47a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap47a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap47b",
+      "page_title": "RanikMap47b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/4b/Map47b.GIF",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap47b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap48",
+      "page_title": "RanikMap48",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/18/Map48.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap48.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap64",
+      "page_title": "RanikMap64",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/b0/Ilithi%2C_64%2C_STR_south_of_gondola.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap64.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap64a",
+      "page_title": "RanikMap64a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/eb/Map64a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap64a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap64b",
+      "page_title": "RanikMap64b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/54/Map64b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap64b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap64c",
+      "page_title": "RanikMap64c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/7b/Map64c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap64c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap64d",
+      "page_title": "RanikMap64d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/09/Map64d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap64d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap64e",
+      "page_title": "RanikMap64e",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/d3/Map64e.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap64e.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap65",
+      "page_title": "RanikMap65",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/28/Map65.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap65.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap66",
+      "page_title": "RanikMap66",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/41/Map66.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap66.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap66b",
+      "page_title": "RanikMap66b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/89/Map66b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap66b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap66c",
+      "page_title": "RanikMap66c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/25/Map66c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap66c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap66d",
+      "page_title": "RanikMap66d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/35/Map66d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap66d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap67a",
+      "page_title": "RanikMap67a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/1c/Map67a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap67a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap67b",
+      "page_title": "RanikMap67b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/de/Map67b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap67b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap67c",
+      "page_title": "RanikMap67c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2d/Map67c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap67c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap67d",
+      "page_title": "RanikMap67d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c2/Map67d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap67d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap67e",
+      "page_title": "RanikMap67e",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/e2/Map67e.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap67e.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap68",
+      "page_title": "RanikMap68",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/25/Map68.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap68.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap68a",
+      "page_title": "RanikMap68a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/ac/Map68a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap68a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap68b",
+      "page_title": "RanikMap68b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/6e/Map68b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap68b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap69",
+      "page_title": "RanikMap69",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/bf/Map69.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap69.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap69a",
+      "page_title": "RanikMap69a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a9/Map69a.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap69a.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap70",
+      "page_title": "RanikMap70",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/14/Map70.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap70.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap70a",
+      "page_title": "RanikMap70a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/16/Map70a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap70a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap70b",
+      "page_title": "RanikMap70b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/52/Map70b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap70b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap71",
+      "page_title": "RanikMap71",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/12/Map71.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap71.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap151",
+      "page_title": "RanikMap151",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/58/Map151.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap151.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap90a",
+      "page_title": "RanikMap90a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/fd/Map90a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap90a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap90b",
+      "page_title": "RanikMap90b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/75/Map90b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap90b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap90c",
+      "page_title": "RanikMap90c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/bf/Map90c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap90c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap90d",
+      "page_title": "RanikMap90d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f2/Map90d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap90d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap90e",
+      "page_title": "RanikMap90e",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/ee/Map90e.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap90e.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap91a",
+      "page_title": "RanikMap91a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/36/Map91a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap91a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap91b",
+      "page_title": "RanikMap91b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/85/Map91b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap91b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap92",
+      "page_title": "RanikMap92",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/db/Map92.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap92.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap93",
+      "page_title": "RanikMap93",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/98/Qi%2C_93%2C_Reshalian_Trade_Road2.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap93.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap94",
+      "page_title": "RanikMap94",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/04/Map94.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap94.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap94a",
+      "page_title": "RanikMap94a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/66/Map94a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap94a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap95",
+      "page_title": "RanikMap95",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/d0/Map95.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap95.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap97",
+      "page_title": "RanikMap97",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/47/Map97.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap97.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap97a",
+      "page_title": "RanikMap97a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/dd/Map97a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap97a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap98",
+      "page_title": "RanikMap98",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2e/Map98.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap98.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap98a",
+      "page_title": "RanikMap98a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/29/Map98a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap98a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap98b",
+      "page_title": "RanikMap98b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/72/Map98b.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap98b.png",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap98c",
+      "page_title": "RanikMap98c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a2/Map98c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap98c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap99a",
+      "page_title": "RanikMap99a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a5/Map99a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap99a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap99b",
+      "page_title": "RanikMap99b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c2/Map99b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap99b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap99c",
+      "page_title": "RanikMap99c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/49/Map99c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap99c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap99d",
+      "page_title": "RanikMap99d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/46/Map99d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap99d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap107a",
+      "page_title": "RanikMap107a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/de/Map107a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap107a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap107b",
+      "page_title": "RanikMap107b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/6/66/Map107b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap107b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap109",
+      "page_title": "RanikMap109",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/fd/Map109.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap109.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap109a",
+      "page_title": "RanikMap109a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f8/Map109a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap109a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap109b",
+      "page_title": "RanikMap109b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/36/Map109b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap109b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap109c",
+      "page_title": "RanikMap109c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/06/Map109c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap109c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap109d",
+      "page_title": "RanikMap109d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/e2/Map109d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap109d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap110",
+      "page_title": "RanikMap110",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/11/Map110.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap110.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap110a",
+      "page_title": "RanikMap110a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/18/Map110a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap110a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap114a",
+      "page_title": "RanikMap114a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/86/Map114a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap114a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap115",
+      "page_title": "RanikMap115",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/ed/Map115.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap115.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap116a",
+      "page_title": "RanikMap116a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/52/Map116a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap116a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap116b",
+      "page_title": "RanikMap116b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/bc/Map116b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap116b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap117a",
+      "page_title": "RanikMap117a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/1/12/Map117a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap117a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap117b",
+      "page_title": "RanikMap117b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a7/Map117b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap117b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap118",
+      "page_title": "RanikMap118",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/8f/Map118.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap118.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap118a",
+      "page_title": "RanikMap118a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2f/Map118a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap118a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap118b",
+      "page_title": "RanikMap118b",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/37/Map118b.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap118b.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap118c",
+      "page_title": "RanikMap118c",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c2/Map118c.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap118c.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap118d",
+      "page_title": "RanikMap118d",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/f3/Map118d.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap118d.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap118e",
+      "page_title": "RanikMap118e",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/24/Map118e.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap118e.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap119",
+      "page_title": "RanikMap119",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/de/Map119.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap119.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap120",
+      "page_title": "RanikMap120",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/b/b5/Map120.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap120.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap122",
+      "page_title": "RanikMap122",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c8/Map122.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap122.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap123",
+      "page_title": "RanikMap123",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/0e/Map123.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap123.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap123a",
+      "page_title": "RanikMap123a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/41/Map123a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap123a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap124",
+      "page_title": "RanikMap124",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2a/Map124.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap124.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap125",
+      "page_title": "RanikMap125",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a1/Map125.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap125.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap121a",
+      "page_title": "RanikMap121a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/7a/Map121a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap121a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap128",
+      "page_title": "RanikMap128",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/26/Map128.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap128.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap128a",
+      "page_title": "RanikMap128a",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/51/Map128a.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap128a.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap130",
+      "page_title": "RanikMap130",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/75/Map130.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap130.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap129",
+      "page_title": "RanikMap129",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/25/Map129.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap129.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap131",
+      "page_title": "RanikMap131",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/9/93/Map131.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap131.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap132",
+      "page_title": "RanikMap132",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/d/d8/Map132.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap132.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap133",
+      "page_title": "RanikMap133",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/76/Map133.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap133.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap134",
+      "page_title": "RanikMap134",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/5c/Map134.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap134.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap135",
+      "page_title": "RanikMap135",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/4f/Map135.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap135.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap136",
+      "page_title": "RanikMap136",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/0f/Map136.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap136.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap137",
+      "page_title": "RanikMap137",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/3d/Map137.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap137.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap138",
+      "page_title": "RanikMap138",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/f/ff/Map138.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap138.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap139",
+      "page_title": "RanikMap139",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/81/Map139.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap139.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap140",
+      "page_title": "RanikMap140",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/37/Map140.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap140.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap126",
+      "page_title": "RanikMap126",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/76/Map126.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap126.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap141",
+      "page_title": "RanikMap141",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/5f/Map141.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap141.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap142",
+      "page_title": "RanikMap142",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/4/4f/Map142.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap142.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap143",
+      "page_title": "RanikMap143",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/8/89/Map143.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap143.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap144",
+      "page_title": "RanikMap144",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/5/54/Map144.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap144.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap145",
+      "page_title": "RanikMap145",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/a2/RanikMap145.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap145.gif",
+      "status": "skipped",
+      "detail": "File already exists."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/RanikMap31n",
+      "page_title": "RanikMap31n",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/3/3c/SoulOfMaelshyve.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\RanikMap31n.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Microcosm_(Map)",
+      "page_title": "Microcosm (Map)",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/a/ac/Microcosm.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Microcosm__Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Jeraya_Bayajen",
+      "page_title": "Jeraya Bayajen",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/e/e8/Jeraya_Bayajen.png",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Jeraya_Bayajen.png",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Hollow_Eve_Festival_392_Map",
+      "page_title": "Hollow Eve Festival 392 Map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/7/74/October08fest.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Hollow_Eve_Festival_392_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Magma_Falls_Mini-Festival",
+      "page_title": "Magma Falls Mini-Festival",
+      "image_url": null,
+      "saved_path": null,
+      "status": "skipped",
+      "detail": "No primary map image found on page."
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Hollow_Eve_Festival_396_Map",
+      "page_title": "Hollow Eve Festival 396 Map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/cf/Holloweve396-2b.GIF",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Hollow_Eve_Festival_396_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Hollow_Eve_399_Map",
+      "page_title": "Hollow Eve Festival 399 Map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/cf/Holloweve396-2b.GIF",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Hollow_Eve_399_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Hollow_Eve_403_Map",
+      "page_title": "Hollow Eve Festival 403 Map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/cf/Holloweve396-2b.GIF",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Hollow_Eve_403_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Hollow_Eve_Festival_406_Map",
+      "page_title": "Hollow Eve Festival 406 Map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/cf/Holloweve396-2b.GIF",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Hollow_Eve_Festival_406_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Hollow_Eve_Festival_410_Map",
+      "page_title": "Hollow Eve Festival 410 Map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/2/2f/Baby_Spider_HE.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Hollow_Eve_Festival_410_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Taisidon_Safari_412_Map",
+      "page_title": "Taisidon Safari 412",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/0/0d/TaisidonSafari412.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Taisidon_Safari_412_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    },
+    {
+      "page_url": "https://elanthipedia.play.net/Tiel-Minavsel_Map",
+      "page_title": "Tiel-Minavsel Map",
+      "image_url": "https://elanthipedia.play.net/images/drwiki/c/c2/Teil-Minavsel.gif",
+      "saved_path": "C:\\Dev\\DireLore\\Assets\\ranik-maps\\Tiel-Minavsel_Map.gif",
+      "status": "downloaded",
+      "detail": null
+    }
+  ]
+}

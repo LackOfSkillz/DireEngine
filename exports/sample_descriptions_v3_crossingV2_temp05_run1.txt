@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+In this passage, two paths diverge, one leading eastward, the other south. The space is narrow, walls close on either side, guiding you along its length. Floor is worn smooth by countless footsteps, reflecting the bustling nature of the city beyond.
+
+---
+
+[Room: crossingV2_628_184]
+In crossingV2, a narrow passage stretches east-west. Two paths diverge here, one leading southwards. The space is defined by rough walls that frame the intersecting paths. The floor, worn smooth from foot traffic, continues unbroken under both exits.
+
+---
+
+[Room: crossingV2_628_208]
+At this intersection, three paths diverge. A wide passage leads north, while a narrower path winds southward. To the west, a broad avenue opens up, inviting further exploration. The space is open, with no barriers restricting movement between the branching passages. The floor here is worn smooth by countless footsteps, testament to the bustling activity of this late-medieval river trade city.
+
+---
+
+[Room: crossingV2_352_238]
+In this space, there are no visible paths out. The room is enclosed, a tight square with walls that meet at sharp angles. The floor is flat underfoot, smooth and even. The space feels confined, hemmed in by the solid walls.
+
+---
+
+[Room: crossingV2_382_238]
+The space ends abruptly here. A single exit to the east marks the boundary of this room. The walls are close, confining the area. The floor is smooth underfoot, worn from use.
+
+---
+
+[Room: crossingV2_432_238]
+A narrow passage stretches southward, opening to the west. Two paths diverge from this point, one leading further into the city's bustling heart, the other branching off towards an unknown district. The space is tight, confined by rough walls that bear the marks of time and trade.
+
+---
+
+Repeated phrases:
+- "the space is" (4)
+- "two paths diverge" (3)
+- "is worn smooth by countless" (2)
+- "worn smooth by countless footsteps" (2)
+- "a narrow passage stretches" (2)
+- "by rough walls that" (2)
+- "is worn smooth by" (2)
+- "smooth by countless footsteps" (2)
+- "west two paths diverge" (2)
+- "worn smooth by countless" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 43.67
+Sentence count flags: 0
+Average sentences: 3.83
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 1
+- "the walls are": 1
+- "the floor is": 2
+Repeated sentence start total: 4

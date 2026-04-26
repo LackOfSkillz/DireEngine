@@ -50,6 +50,49 @@
         </div>
       </section>
 
+      <section class="ds-card section card builder-browser-panel builder-panel builder-zone-context-panel">
+        <div class="panel-title-row">
+          <div class="panel-title">Generation Context</div>
+          <div class="panel-subtitle" id="builder-zone-context-summary">Optional tone and setting guidance</div>
+        </div>
+        <div class="builder-panel-note">This prepares zone-level prompt context only. It will stay inert until room generation is explicitly requested.</div>
+        <details id="builder-zone-context-details" class="builder-collapsible" open>
+          <summary class="builder-collapsible-summary">Zone prompt scaffold</summary>
+          <div class="builder-collapsible-body">
+            <label class="builder-field" for="builder-zone-setting-type">
+              <span class="builder-label">Setting Type</span>
+              <select id="builder-zone-setting-type">
+                <option value="">Not set</option>
+              </select>
+            </label>
+            <label class="builder-field" for="builder-zone-era-feel">
+              <span class="builder-label">Era Feel</span>
+              <select id="builder-zone-era-feel">
+                <option value="">Not set</option>
+              </select>
+            </label>
+            <div class="builder-field">
+              <span class="builder-label">Cultural Palette</span>
+              <div id="builder-zone-culture-chips" class="builder-chip-group" role="group" aria-label="Cultural Palette"></div>
+            </div>
+            <div class="builder-field">
+              <span class="builder-label">Mood</span>
+              <div id="builder-zone-mood-chips" class="builder-chip-group" role="group" aria-label="Mood"></div>
+            </div>
+            <label class="builder-field" for="builder-zone-climate">
+              <span class="builder-label">Climate</span>
+              <select id="builder-zone-climate">
+                <option value="">Not set</option>
+              </select>
+            </label>
+            <label class="builder-field" for="builder-zone-voice">
+              <span class="builder-label">Voice Notes</span>
+              <textarea id="builder-zone-voice" class="builder-zone-context-textarea" placeholder="Short guidance for tone, diction, and narration."></textarea>
+            </label>
+          </div>
+        </details>
+      </section>
+
       <section class="ds-card section card builder-browser-panel builder-panel">
         <div class="panel-title-row">
           <div class="panel-title">World Tree</div>
@@ -368,6 +411,54 @@
           <span class="builder-label">Full Description</span>
           <textarea id="room-desc"></textarea>
         </label>
+        <section class="builder-subsection builder-field" id="room-description-generation-section">
+          <div class="panel-title-row">
+            <div class="panel-title">Description Generation</div>
+            <div class="panel-subtitle" id="builder-room-generation-status">Generate a draft from the current room and zone context.</div>
+          </div>
+          <div class="builder-generation-meta-row">
+            <span id="builder-room-generation-badge" class="builder-generation-badge" hidden></span>
+            <button id="builder-room-generation-revert" type="button" hidden>Revert Generated Text</button>
+          </div>
+          <div class="action-row builder-browser-actions builder-generation-actions">
+            <button id="generate-room-description" type="button">Generate Description</button>
+          </div>
+        </section>
+        <section class="builder-subsection builder-field" id="room-tags-section">
+          <div class="panel-title-row">
+            <div class="panel-title">Tags</div>
+            <div class="panel-subtitle">Inherited zone context plus room-level specificity</div>
+          </div>
+          <div class="builder-room-tag-stack">
+            <div class="builder-room-tag-group">
+              <div class="builder-label">Inherited Tags</div>
+              <div id="room-inherited-tag-chips" class="builder-chip-group" role="group" aria-label="Inherited zone tags"></div>
+            </div>
+            <div class="builder-room-tag-group">
+              <div class="builder-label">Structure</div>
+              <div id="room-tag-structure" class="builder-chip-group" role="group" aria-label="Room structure tags"></div>
+            </div>
+            <div class="builder-room-tag-group">
+              <div class="builder-label">Function</div>
+              <div id="room-tag-specific-function" class="builder-chip-group" role="group" aria-label="Room function tags"></div>
+            </div>
+            <div class="builder-room-tag-group">
+              <div class="builder-label">Feature</div>
+              <div id="room-tag-named-feature" class="builder-chip-group" role="group" aria-label="Room feature tags"></div>
+            </div>
+            <div class="builder-room-tag-group">
+              <div class="builder-label">Condition</div>
+              <div id="room-tag-condition" class="builder-chip-group" role="group" aria-label="Room condition tags"></div>
+            </div>
+            <div class="builder-room-tag-group">
+              <div class="builder-label">Custom Tags</div>
+              <div id="room-tag-custom" class="builder-chip-group" role="group" aria-label="Custom room tags"></div>
+              <div id="room-tag-custom-input-row" class="builder-tag-input-row" hidden>
+                <input id="room-tag-custom-input" type="text" autocomplete="off" placeholder="Add a custom tag and press Enter">
+              </div>
+            </div>
+          </div>
+        </section>
         <section class="builder-subsection builder-field" id="room-stateful-descs">
           <div class="panel-title-row">
             <div class="panel-title">Stateful Descriptions</div>

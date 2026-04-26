@@ -1,0 +1,81 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+Three passages converge at this intersection, branching east, south, and southwest. The space is open, with no barriers between paths. The floor is smooth underfoot, worn by time and traffic.
+
+---
+
+[Room: CRO_500_100]
+This passage continues, leading in two directions. It extends downwards, a path that opens to reveal more of this space. To the west, it widens, allowing for easier movement. The floor is smooth underfoot, worn by time and use. This path seems to continue indefinitely, with no end in sight.
+
+---
+
+[Room: CRO_400_150]
+The space narrows to a halt at this point, a dead end ahead. A single exit leads northeast, the passage tapering slightly as it disappears into darkness. The walls here are rough, their texture abrasive under touch.
+
+---
+
+[Room: CRO_450_150]
+The space opens to the north, terminating in a dead end. It's a tight passage, bounded by smooth walls that seem to close in slightly as they meet the floor. The path ends abruptly, offering no further continuation.
+
+---
+
+[Room: CRO_500_150]
+The space ends abruptly with a single path leading upward. A narrow passage stretches out, framed by rough walls that rise to meet a ceiling barely visible in the dim light. The floor is smooth underfoot, sloping gently towards the exit.
+
+---
+
+Repeated phrases:
+- "the floor is smooth underfoot" (3)
+- "floor is smooth underfoot" (3)
+- "the floor is smooth" (3)
+- "floor is smooth" (3)
+- "is smooth underfoot" (3)
+- "the floor is" (3)
+- "floor is smooth underfoot worn" (2)
+- "is smooth underfoot worn by" (2)
+- "smooth underfoot worn by time" (2)
+- "underfoot worn by time and" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 39.20
+Sentence count flags: 0
+Average sentences: 3.40
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 3
+Repeated sentence start total: 3

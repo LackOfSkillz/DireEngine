@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+The passage stretches east-west, with a southward turn. Two paths diverge from this point, one leading east, the other south. The floor here is worn smooth by countless footsteps.
+
+---
+
+[Room: crossingV2_628_184]
+In crossingV2, a narrow passage stretches east-west, with paths continuing in both directions. The space is enclosed by walls on either side, opening up to the north and south. The floor is worn smooth from foot traffic, hinting at its frequent use.
+
+---
+
+[Room: crossingV2_628_208]
+In this intersection, three passages converge. A path leads north, another south, and a third branches west. The space is open, with no barriers between the converging paths. The floor here is worn smooth by countless footsteps, reflecting the bustling nature of this river trade city.
+
+---
+
+[Room: crossingV2_352_238]
+The room is enclosed, with no visible exits. It's a small, tight space, its walls close enough to touch on all sides. The floor underfoot is smooth and even, worn from years of use in this late-medieval, multicultural river trade city.
+
+---
+
+[Room: crossingV2_382_238]
+In this space, a single path leads east. The room is a dead end, terminating abruptly with no further routes beyond. A rough feel permeates the walls, their texture worn by time and usage. The space narrows as it approaches the eastern exit, funneling flow towards that solitary path out.
+
+---
+
+[Room: crossingV2_432_238]
+A narrow passage stretches southward, opening to the west. This space continues in both directions, branching at the midpoint. The floor is worn smooth underfoot, reflecting the constant flow of traffic through this bustling city crossing.
+
+---
+
+Repeated phrases:
+- "is worn smooth" (4)
+- "floor here is worn smooth" (2)
+- "here is worn smooth by" (2)
+- "is worn smooth by countless" (2)
+- "passage stretches east west with" (2)
+- "the floor here is worn" (2)
+- "the floor is worn smooth" (2)
+- "worn smooth by countless footsteps" (2)
+- "a narrow passage stretches" (2)
+- "floor here is worn" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 41.17
+Sentence count flags: 0
+Average sentences: 3.33
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 2
+- "the walls are": 0
+- "the floor is": 2
+Repeated sentence start total: 4

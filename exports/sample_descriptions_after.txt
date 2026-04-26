@@ -1,0 +1,170 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+At this intersection, three exits lead in different directions: east, south, and southwest.
+
+---
+
+[Room: CRO_500_100]
+In room CRO_500_100 of demo1, a narrow passage stretches east-west with exits leading down and west.
+
+---
+
+[Room: CRO_400_150]
+The room is a dead end, with a single exit leading northeast.
+
+---
+
+[Room: CRO_450_150]
+Room CRO_450_150 in zone demo1 is a dead-end room with one exit leading north.
+
+---
+
+[Room: CRO_500_150]
+Room CRO_500_150 in zone demo1 is a dead-end chamber with one exit leading up.
+
+---
+
+Repeated phrases:
+- "is a dead end" (3)
+- "a dead end" (3)
+- "is a dead" (3)
+- "150 in zone demo1 is" (2)
+- "demo1 is a dead end" (2)
+- "in zone demo1 is a" (2)
+- "zone demo1 is a dead" (2)
+- "150 in zone demo1" (2)
+- "demo1 is a dead" (2)
+- "in zone demo1 is" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 15.60
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+This narrow passage allows movement eastward and southward.
+
+---
+
+[Room: crossingV2_628_184]
+A narrow passage stretches east-west with exits leading in both directions.
+
+---
+
+[Room: crossingV2_628_208]
+At the intersection of three paths lies this meeting point. Exits lead north, south, and west.
+
+---
+
+[Room: crossingV2_352_238]
+Enclosed room, no exits.
+
+---
+
+[Room: crossingV2_382_238]
+In this dead-end room, a single exit leads east.
+
+---
+
+[Room: crossingV2_432_238]
+The room is a narrow passage with exits to the south and west.
+
+---
+
+Repeated phrases:
+- "a narrow passage" (2)
+- "south and west" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 10.50
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+At Amberwick Lane's Western Run: A three-way intersection with exits leading east, southwest, and west.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+Amberwick Lane, Midway is a passage-shaped room with exits to the east and west.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+Amberwick Lane, Eastern Run is a narrow passage with exits to the east and west.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+At Amberwick Lane's East Reach, three paths diverge: east, southeast, and west.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+At the intersection of Saltward Street and Amberwick Lane, a narrow passage stretches south and west.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+Kingshade Street and Amberwick Lane is a narrow passage with exits to the east and south.
+
+---
+
+Repeated phrases:
+- "exits to the east and" (3)
+- "with exits to the east" (3)
+- "exits to the east" (3)
+- "to the east and" (3)
+- "with exits to the" (3)
+- "a narrow passage" (3)
+- "exits to the" (3)
+- "the east and" (3)
+- "to the east" (3)
+- "with exits to" (3)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 15.00

@@ -1,0 +1,67 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+[ERROR] LLM HTTP error [8099fd2d8cf7]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: CRO_500_100]
+[ERROR] LLM HTTP error [49700b3a7b09]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: CRO_400_150]
+[ERROR] LLM HTTP error [beae9f4b90be]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: CRO_450_150]
+[ERROR] LLM HTTP error [242b512bfc0a]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: CRO_500_150]
+[ERROR] LLM HTTP error [94e1201e79a3]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+[ERROR] LLM HTTP error [17c08e3d633a]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: crossingV2_628_184]
+[ERROR] LLM HTTP error [d84c3f63bd88]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: crossingV2_628_208]
+[ERROR] LLM HTTP error [113ac69ad407]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: crossingV2_352_238]
+[ERROR] LLM HTTP error [cf156a7318fb]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: crossingV2_382_238]
+[ERROR] LLM HTTP error [d0d5b2a99c6d]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: crossingV2_432_238]
+[ERROR] LLM HTTP error [31e8157e8a1e]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+[Room: crossingV2_348_266]
+[ERROR] LLM HTTP error [cdbac3e66f28]: Request URL is missing an 'http://' or 'https://' protocol.
+
+---
+
+Repeated phrases:
+- none

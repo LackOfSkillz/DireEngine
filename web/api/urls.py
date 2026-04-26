@@ -1,6 +1,7 @@
 from django.urls import include, path
 
 from web.api.item_api import delete_item, get_all_items, save_item
+from web.api.llm_api import llm_generate_room_description, llm_health, room_generate_description
 from web.api.npc_api import delete_npc, get_all_npcs, save_npc
 from web.api.views import (
     AccountMeApiView,
@@ -34,6 +35,9 @@ urlpatterns = [
     path("items/", get_all_items, name="api-items"),
     path("items/save/", save_item, name="api-items-save"),
     path("items/delete/", delete_item, name="api-items-delete"),
+    path("llm/health", llm_health, name="api-llm-health"),
+    path("llm/generate-room-description", llm_generate_room_description, name="api-llm-generate-room-description"),
+    path("rooms/<str:room_id>/generate-description", room_generate_description, name="api-room-generate-description"),
 ]
 
 if builder_ready and builder_ready():

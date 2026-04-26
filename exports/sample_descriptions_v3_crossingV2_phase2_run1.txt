@@ -1,0 +1,84 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+A narrow bridge spans the river, serving as a bustling market stall. Worn by time and use, it bears a signpost pointing east and south. The bridge continues in both directions, bottlenecked here.
+
+---
+
+[Room: crossingV2_628_184]
+In this late-medieval river trade city crossing, a passage stretches eastward, branching to the south. The space is narrow yet open, defined by rough walls that bear the wear of countless passing traders and locals. A tight path continues in both directions, the floor underfoot worn smooth from use.
+
+---
+
+[Room: crossingV2_628_208]
+At the intersection of three passages, a bustling hub unfolds. Three paths diverge from this central space: one leads north, another south, and a third veers west. The floor is worn smooth by countless footsteps, reflecting the ceaseless flow of traffic through this crossing.
+
+---
+
+[Room: crossingV2_352_238]
+In the heart of crossingV2, a square temple stands enclosed, no exits piercing its walls. The space is well-maintained, devotional focus centered on a prominent shrine. Prayer-flags adorn the room, their vibrant colors stark against the smooth, clean surfaces.
+
+---
+
+[Room: crossingV2_382_238]
+In this space, a single path leads east. The room is a dead end, its walls closing in tightly around the floor. The passage narrows as it nears the eastern exit, the walls rough to the touch. A cold draft from outside seeps through the gap ahead.
+
+---
+
+[Room: crossingV2_432_238]
+The space stretches out as a long, narrow dock, designed for the flow of goods and people. Two exits continue through this crumbling warehouse, one to the south, the other to the west. The stone floor is rough underfoot, worn smooth in places by years of use and stained dark with tar from countless cargo ships.
+
+---
+
+Repeated phrases:
+- "continues in both directions" (2)
+- "to the south the" (2)
+- "continues in both" (2)
+- "in both directions" (2)
+- "the south the" (2)
+- "the space is" (2)
+- "to the south" (2)
+- "underfoot worn smooth" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 1
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 45.17
+Sentence count flags: 0
+Average sentences: 3.17
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 1
+- "the walls are": 0
+- "the floor is": 1
+Repeated sentence start total: 2

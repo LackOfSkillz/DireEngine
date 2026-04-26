@@ -1,0 +1,6556 @@
+schema_version: v1
+zone_id: spawn_smoke_v2
+name: spawn_smoke_v2
+rooms:
+- id: room_0001
+  name: room_0001
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: -2640
+    layer: 0
+  exits:
+    east:
+      target: room_0003
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0006
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0002
+  name: room_0002
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: -2640
+    layer: 0
+  exits:
+    south:
+      target: room_0006
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0000
+  name: room_0000
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: -2640
+    layer: 0
+  exits:
+    south:
+      target: room_0004
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0005:
+      target: room_0005
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0003
+  name: room_0003
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: -2640
+    layer: 0
+  exits:
+    south:
+      target: room_0004
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0001
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0007
+  name: room_0007
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: -2640
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0008
+  name: room_0008
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -560
+    y: -2640
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0009
+  name: room_0009
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: -2640
+    layer: 0
+  exits:
+    east:
+      target: room_0010
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0017
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0010
+  name: room_0010
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -280
+    y: -2640
+    layer: 0
+  exits:
+    east:
+      target: room_0011
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0009
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0011
+  name: room_0011
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -240
+    y: -2640
+    layer: 0
+  exits:
+    east:
+      target: room_0014
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0010
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0014
+  name: room_0014
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -160
+    y: -2640
+    layer: 0
+  exits:
+    west:
+      target: room_0011
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0012
+  name: room_0012
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 40
+    y: -2640
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0013
+  name: room_0013
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 240
+    y: -2640
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0006
+  name: room_0006
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: -2560
+    layer: 0
+  exits:
+    north:
+      target: room_0001
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0002:
+      target: room_0002
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0004
+  name: room_0004
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: -2560
+    layer: 0
+  exits:
+    north:
+      target: room_0000
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0003:
+      target: room_0003
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0005
+  name: room_0005
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: -2560
+    layer: 0
+  exits:
+    north:
+      target: room_0000
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0017
+  name: room_0017
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: -2560
+    layer: 0
+  exits:
+    north:
+      target: room_0009
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0025
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0025
+  name: room_0025
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: -2480
+    layer: 0
+  exits:
+    north:
+      target: room_0017
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0015
+  name: room_0015
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: -2320
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0024:
+      target: room_0024
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0033:
+      target: room_0033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0016
+  name: room_0016
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: -2320
+    layer: 0
+  exits:
+    south:
+      target: room_0021
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0022:
+      target: room_0022
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0019
+  name: room_0019
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -440
+    y: -2320
+    layer: 0
+  exits:
+    south:
+      target: room_0023
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0018
+  name: room_0018
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -80
+    y: -2320
+    layer: 0
+  exits:
+    south:
+      target: room_0026
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0029
+  name: room_0029
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 120
+    y: -2320
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0030
+  name: room_0030
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 320
+    y: -2320
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0040
+  name: room_0040
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: -2320
+    layer: 0
+  exits:
+    south:
+      target: room_0044
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0042:
+      target: room_0042
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0042
+  name: room_0042
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: -2320
+    layer: 0
+  exits:
+    south:
+      target: room_0044
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0040:
+      target: room_0040
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0048:
+      target: room_0048
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0041
+  name: room_0041
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 840
+    y: -2320
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0021
+  name: room_0021
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: -2240
+    layer: 0
+  exits:
+    north:
+      target: room_0016
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0022
+  name: room_0022
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: -2240
+    layer: 0
+  exits:
+    north:
+      target: room_0016
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0024
+  name: room_0024
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: -2240
+    layer: 0
+  exits:
+    south:
+      target: room_0033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0015:
+      target: room_0015
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0020
+  name: room_0020
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: -2240
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0023:
+      target: room_0023
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0027:
+      target: room_0027
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0031:
+      target: room_0031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0027
+  name: room_0027
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: -2240
+    layer: 0
+  exits:
+    east:
+      target: room_0028
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0035
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0020:
+      target: room_0020
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0031:
+      target: room_0031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0028
+  name: room_0028
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -280
+    y: -2240
+    layer: 0
+  exits:
+    west:
+      target: room_0027
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0026
+  name: room_0026
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -80
+    y: -2240
+    layer: 0
+  exits:
+    north:
+      target: room_0018
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0032
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0053
+  name: room_0053
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 520
+    y: -2240
+    layer: 0
+  exits:
+    east:
+      target: room_0044
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0044
+  name: room_0044
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: -2240
+    layer: 0
+  exits:
+    north:
+      target: room_0040
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0053
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0042:
+      target: room_0042
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0048:
+      target: room_0048
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0048
+  name: room_0048
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: -2240
+    layer: 0
+  exits:
+    north:
+      target: room_0042
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0044:
+      target: room_0044
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0039
+  name: room_0039
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: -2160
+    layer: 0
+  exits:
+    east:
+      target: room_0034
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0034
+  name: room_0034
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: -2160
+    layer: 0
+  exits:
+    east:
+      target: room_0037
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0039
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0037
+  name: room_0037
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: -2160
+    layer: 0
+  exits:
+    east:
+      target: room_0033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0043
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0034
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0033
+  name: room_0033
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: -2160
+    layer: 0
+  exits:
+    east:
+      target: room_0031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0021
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0037
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0015:
+      target: room_0015
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0022:
+      target: room_0022
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0024:
+      target: room_0024
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0038:
+      target: room_0038
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0038
+  name: room_0038
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: -2160
+    layer: 0
+  exits:
+    east:
+      target: room_0031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0033:
+      target: room_0033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0031
+  name: room_0031
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -480
+    y: -2160
+    layer: 0
+  exits:
+    east:
+      target: room_0023
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0033
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0020:
+      target: room_0020
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0027:
+      target: room_0027
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0035:
+      target: room_0035
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0036:
+      target: room_0036
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0038:
+      target: room_0038
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0023
+  name: room_0023
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -440
+    y: -2160
+    layer: 0
+  exits:
+    north:
+      target: room_0019
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0020:
+      target: room_0020
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0036
+  name: room_0036
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -400
+    y: -2160
+    layer: 0
+  exits:
+    east:
+      target: room_0035
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0058
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0035
+  name: room_0035
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: -2160
+    layer: 0
+  exits:
+    north:
+      target: room_0027
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0031
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0036:
+      target: room_0036
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0032
+  name: room_0032
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -80
+    y: -2160
+    layer: 0
+  exits:
+    north:
+      target: room_0026
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0052
+  name: room_0052
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: -1920
+    layer: 0
+  exits:
+    east:
+      target: room_0043
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0056:
+      target: room_0056
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0057:
+      target: room_0057
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0043
+  name: room_0043
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: -1920
+    layer: 0
+  exits:
+    north:
+      target: room_0037
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0052
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0056:
+      target: room_0056
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0057:
+      target: room_0057
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0056
+  name: room_0056
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: -1920
+    layer: 0
+  exits:
+    west:
+      target: room_0052
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0043:
+      target: room_0043
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0057:
+      target: room_0057
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0057
+  name: room_0057
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: -1920
+    layer: 0
+  exits:
+    south:
+      target: room_0060
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0052
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0043:
+      target: room_0043
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0056:
+      target: room_0056
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0065
+  name: room_0065
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -840
+    y: -1840
+    layer: 0
+  exits:
+    east:
+      target: room_0060
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0077
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0060
+  name: room_0060
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: -1840
+    layer: 0
+  exits:
+    north:
+      target: room_0057
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0065
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0061:
+      target: room_0061
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0061
+  name: room_0061
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: -1840
+    layer: 0
+  exits:
+    east:
+      target: room_0062
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0060:
+      target: room_0060
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0062
+  name: room_0062
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: -1840
+    layer: 0
+  exits:
+    east:
+      target: room_0058
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0061
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0068:
+      target: room_0068
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0068
+  name: room_0068
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: -1840
+    layer: 0
+  exits:
+    east:
+      target: room_0058
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0062
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0058
+  name: room_0058
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -400
+    y: -1840
+    layer: 0
+  exits:
+    north:
+      target: room_0036
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0062
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0068:
+      target: room_0068
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0077
+  name: room_0077
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -840
+    y: -1680
+    layer: 0
+  exits:
+    east:
+      target: room_0079
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0065
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0079
+  name: room_0079
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: -1680
+    layer: 0
+  exits:
+    east:
+      target: room_0084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0077
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0083:
+      target: room_0083
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0083
+  name: room_0083
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: -1680
+    layer: 0
+  exits:
+    east:
+      target: room_0084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0079:
+      target: room_0079
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0084
+  name: room_0084
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: -1680
+    layer: 0
+  exits:
+    north:
+      target: room_0062
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0104
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0079
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0083:
+      target: room_0083
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0108
+  name: room_0108
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -920
+    y: -1360
+    layer: 0
+  exits:
+    east:
+      target: room_0105
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0118
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0105
+  name: room_0105
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -880
+    y: -1360
+    layer: 0
+  exits:
+    east:
+      target: room_0104
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0108
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0104
+  name: room_0104
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: -1360
+    layer: 0
+  exits:
+    north:
+      target: room_0084
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0105
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0118
+  name: room_0118
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -920
+    y: -1200
+    layer: 0
+  exits:
+    north:
+      target: room_0108
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0045
+  name: room_0045
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: -1040
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0046
+  name: room_0046
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: -1040
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0047
+  name: room_0047
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -600
+    y: -1040
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0049
+  name: room_0049
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -400
+    y: -1040
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0050
+  name: room_0050
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -80
+    y: -1040
+    layer: 0
+  exits:
+    south:
+      target: room_0055
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0051
+  name: room_0051
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 120
+    y: -1040
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0059
+  name: room_0059
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: -1040
+    layer: 0
+  exits:
+    south:
+      target: room_0069
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0075:
+      target: room_0075
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0054
+  name: room_0054
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -200
+    y: -960
+    layer: 0
+  exits:
+    east:
+      target: room_0055
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0055
+  name: room_0055
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -80
+    y: -960
+    layer: 0
+  exits:
+    north:
+      target: room_0050
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0054
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0073
+  name: room_0073
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 520
+    y: -960
+    layer: 0
+  exits:
+    east:
+      target: room_0074
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0074
+  name: room_0074
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 560
+    y: -960
+    layer: 0
+  exits:
+    east:
+      target: room_0075
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0085
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0073
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0069
+  name: room_0069
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: -960
+    layer: 0
+  exits:
+    east:
+      target: room_0070
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0059
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0075
+  name: room_0075
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: -960
+    layer: 0
+  exits:
+    north:
+      target: room_0059
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0087
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0074
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0070
+  name: room_0070
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: -960
+    layer: 0
+  exits:
+    west:
+      target: room_0069
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0085
+  name: room_0085
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 560
+    y: -800
+    layer: 0
+  exits:
+    east:
+      target: room_0087
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0074
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0096
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0091:
+      target: room_0091
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0091
+  name: room_0091
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 560
+    y: -800
+    layer: 0
+  exits:
+    east:
+      target: room_0087
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0096
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0085:
+      target: room_0085
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0087
+  name: room_0087
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: -800
+    layer: 0
+  exits:
+    north:
+      target: room_0075
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0099
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0085
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0091:
+      target: room_0091
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0096
+  name: room_0096
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 560
+    y: -720
+    layer: 0
+  exits:
+    east:
+      target: room_0098
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0085
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0091:
+      target: room_0091
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0098
+  name: room_0098
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: -720
+    layer: 0
+  exits:
+    east:
+      target: room_0099
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0101
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0096
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0099
+  name: room_0099
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: -720
+    layer: 0
+  exits:
+    north:
+      target: room_0087
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0098
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0101
+  name: room_0101
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: -560
+    layer: 0
+  exits:
+    north:
+      target: room_0098
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0122:
+      target: room_0122
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0127
+  name: room_0127
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 320
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0124
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0124
+  name: room_0124
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 360
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0125
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0127
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0125
+  name: room_0125
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 440
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0128
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0124
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0128
+  name: room_0128
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 480
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0126
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0125
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0126
+  name: room_0126
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 520
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0122
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0128
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0143
+  name: room_0143
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0140
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0144
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0183:
+      target: room_0183
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0121
+  name: room_0121
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0123
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0140:
+      target: room_0140
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0122
+  name: room_0122
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: -320
+    layer: 0
+  exits:
+    west:
+      target: room_0126
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0101:
+      target: room_0101
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0140:
+      target: room_0140
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0140
+  name: room_0140
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0136
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0143
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0121:
+      target: room_0121
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0122:
+      target: room_0122
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0145:
+      target: room_0145
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0145
+  name: room_0145
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 680
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0136
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0140
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0123
+  name: room_0123
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0136
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0121
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0136
+  name: room_0136
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: -320
+    layer: 0
+  exits:
+    east:
+      target: room_0129
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0181
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0123
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0140:
+      target: room_0140
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0145:
+      target: room_0145
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0129
+  name: room_0129
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 880
+    y: -320
+    layer: 0
+  exits:
+    west:
+      target: room_0136
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0146
+  name: room_0146
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 320
+    y: -240
+    layer: 0
+  exits:
+    east:
+      target: room_0152
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0147:
+      target: room_0147
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0147
+  name: room_0147
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 320
+    y: -240
+    layer: 0
+  exits:
+    east:
+      target: room_0152
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0146:
+      target: room_0146
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0157:
+      target: room_0157
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0152
+  name: room_0152
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 360
+    y: -240
+    layer: 0
+  exits:
+    east:
+      target: room_0157
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0161
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0146
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0147:
+      target: room_0147
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0157
+  name: room_0157
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 440
+    y: -240
+    layer: 0
+  exits:
+    east:
+      target: room_0144
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0159
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0147
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0152:
+      target: room_0152
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0156:
+      target: room_0156
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0162:
+      target: room_0162
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0162
+  name: room_0162
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 480
+    y: -240
+    layer: 0
+  exits:
+    east:
+      target: room_0156
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0157
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0156
+  name: room_0156
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 520
+    y: -240
+    layer: 0
+  exits:
+    east:
+      target: room_0144
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0157
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0162:
+      target: room_0162
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0144
+  name: room_0144
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: -240
+    layer: 0
+  exits:
+    north:
+      target: room_0143
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0156
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0157:
+      target: room_0157
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0161
+  name: room_0161
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 360
+    y: -160
+    layer: 0
+  exits:
+    east:
+      target: room_0159
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0152
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0159
+  name: room_0159
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 440
+    y: -160
+    layer: 0
+  exits:
+    north:
+      target: room_0157
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0161
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0173
+  name: room_0173
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: -80
+    layer: 0
+  exits:
+    south:
+      target: room_0181
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0180
+  name: room_0180
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: -80
+    layer: 0
+  exits:
+    east:
+      target: room_0172
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0181
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0172
+  name: room_0172
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 880
+    y: -80
+    layer: 0
+  exits:
+    west:
+      target: room_0180
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0183
+  name: room_0183
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: 0
+    layer: 0
+  exits:
+    north:
+      target: room_0143
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0189
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0181
+  name: room_0181
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: 0
+    layer: 0
+  exits:
+    north:
+      target: room_0136
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0173:
+      target: room_0173
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0180:
+      target: room_0180
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0196:
+      target: room_0196
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0193
+  name: room_0193
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 520
+    y: 80
+    layer: 0
+  exits:
+    east:
+      target: room_0189
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0197:
+      target: room_0197
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0189
+  name: room_0189
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: 80
+    layer: 0
+  exits:
+    east:
+      target: room_0194
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0183
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0193
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0197:
+      target: room_0197
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0197
+  name: room_0197
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: 80
+    layer: 0
+  exits:
+    west:
+      target: room_0193
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0189:
+      target: room_0189
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0194
+  name: room_0194
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: 80
+    layer: 0
+  exits:
+    east:
+      target: room_0196
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0189
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0196
+  name: room_0196
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 80
+    layer: 0
+  exits:
+    south:
+      target: room_0198
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0194
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0181:
+      target: room_0181
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0219:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0198
+  name: room_0198
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 160
+    layer: 0
+  exits:
+    north:
+      target: room_0196
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0199:
+      target: room_0199
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0199
+  name: room_0199
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 160
+    layer: 0
+  exits:
+    south:
+      target: room_0205
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0198:
+      target: room_0198
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0219:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0200
+  name: room_0200
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 920
+    y: 160
+    layer: 0
+  exits:
+    south:
+      target: room_0202
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0206:
+      target: room_0206
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0205
+  name: room_0205
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 240
+    layer: 0
+  exits:
+    north:
+      target: room_0199
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0207:
+      target: room_0207
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0213:
+      target: room_0213
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0219:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0207
+  name: room_0207
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 240
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0205:
+      target: room_0205
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0213:
+      target: room_0213
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0213
+  name: room_0213
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 240
+    layer: 0
+  exits:
+    south:
+      target: room_0217
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0205:
+      target: room_0205
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0207:
+      target: room_0207
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0219
+  name: room_0219
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 240
+    layer: 0
+  exits:
+    east:
+      target: room_0202
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0196
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0217
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0198:
+      target: room_0198
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0199:
+      target: room_0199
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0205:
+      target: room_0205
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0206:
+      target: room_0206
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0208:
+      target: room_0208
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0226:
+      target: room_0226
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0227:
+      target: room_0227
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0202
+  name: room_0202
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 920
+    y: 240
+    layer: 0
+  exits:
+    north:
+      target: room_0200
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0206
+  name: room_0206
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 920
+    y: 240
+    layer: 0
+  exits:
+    east:
+      target: room_0208
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0200
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0208
+  name: room_0208
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 960
+    y: 240
+    layer: 0
+  exits:
+    west:
+      target: room_0206
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0219:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0217
+  name: room_0217
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 320
+    layer: 0
+  exits:
+    north:
+      target: room_0213
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0219:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0227:
+      target: room_0227
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0226
+  name: room_0226
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 320
+    layer: 0
+  exits:
+    north:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0227:
+      target: room_0227
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0227
+  name: room_0227
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 760
+    y: 320
+    layer: 0
+  exits:
+    north:
+      target: room_0219
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0217:
+      target: room_0217
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0226:
+      target: room_0226
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0067
+  name: room_0067
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: 480
+    layer: 0
+  exits:
+    east:
+      target: room_0066
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0071
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0064
+  name: room_0064
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: 480
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0066:
+      target: room_0066
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0066
+  name: room_0066
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -960
+    y: 480
+    layer: 0
+  exits:
+    east:
+      target: room_0063
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0067
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0064:
+      target: room_0064
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0063
+  name: room_0063
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -920
+    y: 480
+    layer: 0
+  exits:
+    west:
+      target: room_0066
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0072
+  name: room_0072
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -720
+    y: 480
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0076
+  name: room_0076
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 480
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0078
+  name: room_0078
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -320
+    y: 480
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0080
+  name: room_0080
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -120
+    y: 480
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0081
+  name: room_0081
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 80
+    y: 480
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0082
+  name: room_0082
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 280
+    y: 480
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0086
+  name: room_0086
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 480
+    y: 480
+    layer: 0
+  exits:
+    south:
+      target: room_0089
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0071
+  name: room_0071
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: 560
+    layer: 0
+  exits:
+    north:
+      target: room_0067
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0089
+  name: room_0089
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 480
+    y: 560
+    layer: 0
+  exits:
+    north:
+      target: room_0086
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0088
+  name: room_0088
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: 720
+    layer: 0
+  exits:
+    south:
+      target: room_0095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0090
+  name: room_0090
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 120
+    y: 720
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0092
+  name: room_0092
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 320
+    y: 720
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0093
+  name: room_0093
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 520
+    y: 720
+    layer: 0
+  exits:
+    east:
+      target: room_0097
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0097
+  name: room_0097
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: 720
+    layer: 0
+  exits:
+    west:
+      target: room_0093
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0100
+  name: room_0100
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: 720
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0107
+  name: room_0107
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 1000
+    y: 720
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0094
+  name: room_0094
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: 880
+    layer: 0
+  exits:
+    south:
+      target: room_0095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0102:
+      target: room_0102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0095
+  name: room_0095
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: 960
+    layer: 0
+  exits:
+    north:
+      target: room_0088
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0094:
+      target: room_0094
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0102:
+      target: room_0102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0103:
+      target: room_0103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0106:
+      target: room_0106
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0102
+  name: room_0102
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: 960
+    layer: 0
+  exits:
+    north:
+      target: room_0094
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0095:
+      target: room_0095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0103:
+      target: room_0103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0106:
+      target: room_0106
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0110
+  name: room_0110
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: 1040
+    layer: 0
+  exits:
+    east:
+      target: room_0103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0115
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0102:
+      target: room_0102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0106:
+      target: room_0106
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0109:
+      target: room_0109
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0103
+  name: room_0103
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: 1040
+    layer: 0
+  exits:
+    west:
+      target: room_0110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0095:
+      target: room_0095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0102:
+      target: room_0102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0106:
+      target: room_0106
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0106
+  name: room_0106
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: 1040
+    layer: 0
+  exits:
+    west:
+      target: room_0110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0095:
+      target: room_0095
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0102:
+      target: room_0102
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0103:
+      target: room_0103
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0109
+  name: room_0109
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -600
+    y: 1040
+    layer: 0
+  exits:
+    east:
+      target: room_0112
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0111
+  name: room_0111
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1040
+    layer: 0
+  exits:
+    south:
+      target: room_0133
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0112:
+      target: room_0112
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0112
+  name: room_0112
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1040
+    layer: 0
+  exits:
+    south:
+      target: room_0133
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0109
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0111:
+      target: room_0111
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0114
+  name: room_0114
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: 1120
+    layer: 0
+  exits:
+    east:
+      target: room_0116
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0116
+  name: room_0116
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -920
+    y: 1120
+    layer: 0
+  exits:
+    east:
+      target: room_0117
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0114
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0117
+  name: room_0117
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: 1120
+    layer: 0
+  exits:
+    east:
+      target: room_0115
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0137
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0116
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0115
+  name: room_0115
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -760
+    y: 1120
+    layer: 0
+  exits:
+    north:
+      target: room_0110
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0117
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0119
+  name: room_0119
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -400
+    y: 1120
+    layer: 0
+  exits:
+    south:
+      target: room_0134
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0113
+  name: room_0113
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -200
+    y: 1120
+    layer: 0
+  exits:
+    south:
+      target: room_0120
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0132:
+      target: room_0132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0139
+  name: room_0139
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: 1200
+    layer: 0
+  exits:
+    east:
+      target: room_0131
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0148
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0149:
+      target: room_0149
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0131
+  name: room_0131
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -640
+    y: 1200
+    layer: 0
+  exits:
+    west:
+      target: room_0139
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0133:
+      target: room_0133
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0120
+  name: room_0120
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -200
+    y: 1200
+    layer: 0
+  exits:
+    north:
+      target: room_0113
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0130
+  name: room_0130
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -840
+    y: 1280
+    layer: 0
+  exits:
+    east:
+      target: room_0137
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0137
+  name: room_0137
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: 1280
+    layer: 0
+  exits:
+    east:
+      target: room_0141
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0117
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0130
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0141
+  name: room_0141
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: 1280
+    layer: 0
+  exits:
+    west:
+      target: room_0137
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0149:
+      target: room_0149
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0148
+  name: room_0148
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: 1280
+    layer: 0
+  exits:
+    north:
+      target: room_0139
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0149
+  name: room_0149
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -680
+    y: 1280
+    layer: 0
+  exits:
+    north:
+      target: room_0139
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0141:
+      target: room_0141
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0133
+  name: room_0133
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1280
+    layer: 0
+  exits:
+    east:
+      target: room_0134
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0111
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0151
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0112:
+      target: room_0112
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0131:
+      target: room_0131
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0134
+  name: room_0134
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -400
+    y: 1280
+    layer: 0
+  exits:
+    east:
+      target: room_0135
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0119
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0133
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0135
+  name: room_0135
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -320
+    y: 1280
+    layer: 0
+  exits:
+    east:
+      target: room_0132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0134
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0132
+  name: room_0132
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -200
+    y: 1280
+    layer: 0
+  exits:
+    east:
+      target: room_0138
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0113
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0135
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0120:
+      target: room_0120
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0150:
+      target: room_0150
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0138
+  name: room_0138
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -80
+    y: 1280
+    layer: 0
+  exits:
+    west:
+      target: room_0132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0150:
+      target: room_0150
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0150
+  name: room_0150
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -80
+    y: 1280
+    layer: 0
+  exits:
+    west:
+      target: room_0132
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0138:
+      target: room_0138
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0151
+  name: room_0151
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1360
+    layer: 0
+  exits:
+    north:
+      target: room_0133
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0169
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0169
+  name: room_0169
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1440
+    layer: 0
+  exits:
+    east:
+      target: room_0166
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    north:
+      target: room_0151
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0182
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0166
+  name: room_0166
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -440
+    y: 1440
+    layer: 0
+  exits:
+    east:
+      target: room_0167
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0169
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0167
+  name: room_0167
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: 1440
+    layer: 0
+  exits:
+    east:
+      target: room_0165
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0166
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0165
+  name: room_0165
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -320
+    y: 1440
+    layer: 0
+  exits:
+    west:
+      target: room_0167
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0182
+  name: room_0182
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1600
+    layer: 0
+  exits:
+    north:
+      target: room_0169
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0186:
+      target: room_0186
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0186
+  name: room_0186
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1600
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0182:
+      target: room_0182
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0187:
+      target: room_0187
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0187
+  name: room_0187
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 1600
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0186:
+      target: room_0186
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0142
+  name: room_0142
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0153
+  name: room_0153
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0154
+  name: room_0154
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -600
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0164
+  name: room_0164
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -400
+    y: 1840
+    layer: 0
+  exits:
+    east:
+      target: room_0155
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0155
+  name: room_0155
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -360
+    y: 1840
+    layer: 0
+  exits:
+    west:
+      target: room_0164
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0158
+  name: room_0158
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -160
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0160
+  name: room_0160
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 40
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0163
+  name: room_0163
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 240
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0168
+  name: room_0168
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 440
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0174
+  name: room_0174
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 640
+    y: 1840
+    layer: 0
+  exits:
+    east:
+      target: room_0171
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0171
+  name: room_0171
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: 1840
+    layer: 0
+  exits:
+    west:
+      target: room_0174
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0179:
+      target: room_0179
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0179
+  name: room_0179
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 720
+    y: 1840
+    layer: 0
+  exits:
+    east:
+      target: room_0170
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0171:
+      target: room_0171
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0170
+  name: room_0170
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: 1840
+    layer: 0
+  exits:
+    west:
+      target: room_0179
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits:
+    to_room_0178:
+      target: room_0178
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0178
+  name: room_0178
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: 1840
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0170:
+      target: room_0170
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0175
+  name: room_0175
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: 2000
+    layer: 0
+  exits:
+    east:
+      target: room_0176
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0176
+  name: room_0176
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -920
+    y: 2000
+    layer: 0
+  exits:
+    west:
+      target: room_0175
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0177
+  name: room_0177
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -720
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0184
+  name: room_0184
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -520
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0185
+  name: room_0185
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -320
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0188
+  name: room_0188
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -120
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0190
+  name: room_0190
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 80
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0191
+  name: room_0191
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 280
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0192
+  name: room_0192
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 480
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0195
+  name: room_0195
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 680
+    y: 2000
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0201
+  name: room_0201
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 960
+    y: 2000
+    layer: 0
+  exits:
+    south:
+      target: room_0216
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0211
+  name: room_0211
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 880
+    y: 2080
+    layer: 0
+  exits:
+    east:
+      target: room_0216
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0229
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0216
+  name: room_0216
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 960
+    y: 2080
+    layer: 0
+  exits:
+    north:
+      target: room_0201
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: room_0221
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: room_0211
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0229
+  name: room_0229
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 880
+    y: 2160
+    layer: 0
+  exits:
+    north:
+      target: room_0211
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0221
+  name: room_0221
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 960
+    y: 2160
+    layer: 0
+  exits:
+    north:
+      target: room_0216
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+  special_exits: {}
+- id: room_0203
+  name: room_0203
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0204
+  name: room_0204
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0209
+  name: room_0209
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -600
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0210
+  name: room_0210
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -400
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0212
+  name: room_0212
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -200
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0214
+  name: room_0214
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 0
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0215
+  name: room_0215
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 200
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0218
+  name: room_0218
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 400
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0220
+  name: room_0220
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0222:
+      target: room_0222
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0230:
+      target: room_0230
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0222
+  name: room_0222
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0220:
+      target: room_0220
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0230:
+      target: room_0230
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0230
+  name: room_0230
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 600
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits:
+    to_room_0220:
+      target: room_0220
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    to_room_0222:
+      target: room_0222
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: room_0223
+  name: room_0223
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 800
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0224
+  name: room_0224
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: 1000
+    y: 2400
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0225
+  name: room_0225
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -1000
+    y: 2640
+    layer: 0
+  exits: {}
+  special_exits: {}
+- id: room_0228
+  name: room_0228
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: null
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  zone_id: spawn_smoke_v2
+  map:
+    x: -800
+    y: 2640
+    layer: 0
+  exits: {}
+  special_exits: {}
+placements:
+  npcs: []
+  items: []

@@ -1,0 +1,187 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+The room is an intersection where three paths meet. The space opens up from a narrow eastern entrance, branching out southwards and southwestwards. The floor is smooth underfoot, worn by time and travel.
+
+---
+
+[Room: CRO_500_100]
+The room is a long, narrow passage, clearly designed for movement rather than lingering. It stretches out to the west, with an exit visible in that direction, while another exit leads downwards at its southern end. The floor is smooth and even underfoot, showing signs of frequent use. The walls are rough-hewn, their surfaces marked by tool strokes, and they seem to narrow slightly as they recede into the distance, giving a sense of confinement despite the room's length.
+
+---
+
+[Room: CRO_400_150]
+The space narrows to a halt at this dead end, its single exit pointing northeast. The walls, rough and close, seem to lean in slightly as they meet the ceiling above, creating a tight, confined feel. The floor is smooth underfoot, worn down from use, leading directly towards the lone exit.
+
+---
+
+[Room: CRO_450_150]
+The room is a dead end, the space narrowing as it leads north. The walls are rough and uneven, closing in around the single exit. The floor slopes gently upwards towards the north, leading to a heavy wooden door that blocks further passage.
+
+---
+
+[Room: CRO_500_150]
+The room is a tight, enclosed space with one exit leading upwards. The walls close in around this singular path out, creating a sense of confinement. The floor is smooth underfoot, hinting at regular use or maintenance. The single exit looms above, framed by the narrowing walls, making it the clear focus of the room.
+
+---
+
+Repeated phrases:
+- "the floor is smooth" (4)
+- "floor is smooth" (4)
+- "the floor is" (4)
+- "the room is" (4)
+- "the floor is smooth underfoot" (3)
+- "floor is smooth underfoot" (3)
+- "the room is a" (3)
+- "is smooth underfoot" (3)
+- "room is a" (3)
+- "floor is smooth underfoot worn" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 52.40
+Sentence count flags: 0
+Average sentences: 3.40
+Dead outputs: 0
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+A narrow passage stretches eastwards, opening to the south. The space is long and thin, clearly intended for movement rather than lingering. The floor is smooth underfoot, worn by time and travel. Exits lead directly ahead and to the left.
+
+---
+
+[Room: crossingV2_628_184]
+The room is a narrow passage, clearly designed for travel rather than lingering. It stretches east to west, with exits in those directions. The floor is smooth and even, showing signs of frequent use. The southern exit leads into a wider space, while the eastern continues the passage's linear flow.
+
+---
+
+[Room: crossingV2_628_208]
+In this room, three paths diverge, each leading in a different direction. The space is wide and open, with a smooth, even floor that extends out from the center towards each exit. To the north, south, and west, archways mark the entrances to other areas, their surfaces worn smooth by time and use.
+
+---
+
+[Room: crossingV2_352_238]
+In this enclosed room, there are no exits leading out. The space is self-contained and compact, with a smooth, even floor that suggests it was once well-maintained. The walls are rough to the touch, indicating they were carved from natural stone.
+
+---
+
+[Room: crossingV2_382_238]
+The room is a dead end, its single exit to the east hinting at a narrowing path ahead. The space is roughly rectangular, closing off around its one way out, creating a sense of confinement. The walls are smooth and unadorned, their surfaces worn by time and use.
+
+---
+
+[Room: crossingV2_432_238]
+In this narrow passage, the space is designed for movement rather than pause. Two exits lead south and west, defining a clear path forward. The floor is smooth underfoot, worn by frequent travel in these directions.
+
+---
+
+Repeated phrases:
+- "the space is" (5)
+- "the floor is smooth" (3)
+- "by time and" (3)
+- "floor is smooth" (3)
+- "the floor is" (3)
+- "a smooth even floor that" (2)
+- "floor is smooth underfoot worn" (2)
+- "is smooth underfoot worn by" (2)
+- "the floor is smooth underfoot" (2)
+- "with a smooth even floor" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 45.00
+Sentence count flags: 0
+Average sentences: 3.33
+Dead outputs: 0
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+In Amberwick Lane's Western Run, three paths diverge at a broad intersection. The ground is cobblestone, worn smooth by time and feet. Two lanes branch east and southwest, narrowing as they curve away, while a wider path leads west, opening into a potential thoroughfare.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+Amberwick Lane, Midway is a narrow passage stretching east-west, suggesting a thoroughfare rather than a destination. The floor is smooth and even, worn by time and foot traffic. Two exits lead out: one to the east, the other to the west, both archways opening into adjacent spaces.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+Amberwick Lane, Eastern Run is a narrow passage that encourages movement rather than lingering. It stretches east-west, with exits at both ends. The floor is smooth and even, worn by frequent use. The space feels open, defined by high walls on either side, leading directly to the exits.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+Amberwick Lane, East Reach is a spacious intersection, branching into three directions. The room is roughly triangular, with exits leading east, southeast, and west. The floor is smooth underfoot, worn by time and traffic. The walls are bare, their surfaces rough to the touch.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+The room is a narrow passage, designed for movement rather than lingering. It extends southward and westward, with exits in those directions. The floor is smooth underfoot, worn by frequent traffic. The walls are rough, their surfaces marked by time and use. The space opens up slightly towards the west exit, hinting at what lies beyond.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+Kingshade Street and Amberwick Lane is a narrow, elongated passage that encourages movement through it rather than lingering. The space is defined by its two clear exit points: one leading east, the other south. Its walls are smooth to the touch, suggesting well-maintained stonework, while the floor bears signs of wear from frequent use, particularly around the exits where foot traffic has been most concentrated.
+
+---
+
+Repeated phrases:
+- "the floor is smooth" (4)
+- "by time and" (4)
+- "floor is smooth" (4)
+- "is a narrow" (4)
+- "the floor is" (4)
+- "is a narrow passage" (3)
+- "a narrow passage" (3)
+- "rather than lingering" (3)
+- "floor is smooth and even" (2)
+- "floor is smooth underfoot worn" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Over 80 words: 0
+Average words: 51.17
+Sentence count flags: 0
+Average sentences: 3.67
+Dead outputs: 0

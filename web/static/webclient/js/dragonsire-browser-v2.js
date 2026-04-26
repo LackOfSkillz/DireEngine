@@ -161,6 +161,19 @@
     village: "Moonlit guardians of the hamlet.png",
     fallback: "hero.png",
   };
+  const BUILDER_ZONE_GENERATION_VOCAB = {
+    setting_types: ["city", "town", "village", "dungeon", "wilderness", "ruin", "ship", "estate"],
+    eras: ["medieval", "late-medieval", "ancient", "pre-industrial", "mythic"],
+    cultures: ["generic-fantasy", "norse-inspired", "mediterranean", "eastern", "desert-kingdom", "swampland", "forest-elven", "dwarven-hold", "multicultural"],
+    moods: ["bustling", "quiet", "tense", "oppressive", "cheerful", "haunted", "sacred"],
+    climates: ["temperate", "tropical", "arctic", "arid", "coastal", "river-valley"],
+  };
+  const BUILDER_ROOM_TAG_VOCAB = {
+    structure: ["street", "square", "intersection", "plaza", "alley", "courtyard", "building-interior", "threshold", "bridge", "dock", "stair", "hallway", "chamber", "entrance"],
+    specific_function: ["shop", "tavern", "inn", "temple", "guild-hall", "forge", "bakery", "brothel", "jail", "residence", "barracks", "library", "warehouse", "market-stall", "kitchen", "cellar"],
+    named_feature: ["fountain", "statue", "well", "signpost", "gibbet", "shrine", "well-house", "firepit", "altar", "pulpit", "throne", "hearth", "workbench"],
+    condition: ["pristine", "well-maintained", "worn", "crumbling", "burnt-out", "abandoned", "refurbished"],
+  };
   const builderState = {
     currentRoomId: null,
     selectedRoom: null,
@@ -200,6 +213,7 @@
     npcs: {},
     currentItemId: null,
     items: {},
+    roomGenerationMeta: {},
     npcEditorDirty: false,
     npcEditorBaseline: null,
     npcValidationErrors: {},
@@ -485,6 +499,59 @@
       .filter((item, index, array) => array.indexOf(item) === index);
   }
 
+  function normalizeBuilderGenerationContext(value) {
+    const payload = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const normalized = {
+      setting_type: String(payload.setting_type || "").trim().toLowerCase(),
+      era_feel: String(payload.era_feel || "").trim().toLowerCase(),
+      culture: normalizeBuilderStringList(payload.culture),
+      mood: normalizeBuilderStringList(payload.mood),
+      climate: String(payload.climate || "").trim().toLowerCase(),
+      voice: String(payload.voice || "").trim(),
+      banned_phrases: Array.isArray(payload.banned_phrases)
+        ? payload.banned_phrases.map((item) => String(item || "").trim()).filter(Boolean).filter((item, index, array) => array.indexOf(item) === index)
+        : [],
+    };
+    if (!normalized.setting_type && !normalized.era_feel && !normalized.culture.length && !normalized.mood.length && !normalized.climate && !normalized.voice && !normalized.banned_phrases.length) {
+      return null;
+    }
+    return normalized;
+  }
+
+  function normalizeBuilderRoomTags(value) {
+    const payload = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const normalizeSingle = (fieldName) => {
+      const normalizedValue = String(payload[fieldName] || "").trim().toLowerCase();
+      return BUILDER_ROOM_TAG_VOCAB[fieldName].includes(normalizedValue) ? normalizedValue : "";
+    };
+    const custom = [];
+    const seenCustom = new Set();
+    (Array.isArray(payload.custom) ? payload.custom : []).forEach((item) => {
+      const text = String(item || "").trim();
+      const key = text.toLowerCase();
+      if (!text || seenCustom.has(key)) {
+        return;
+      }
+      seenCustom.add(key);
+      custom.push(text);
+    });
+    return {
+      structure: normalizeSingle("structure"),
+      specific_function: normalizeSingle("specific_function"),
+      named_feature: normalizeSingle("named_feature"),
+      condition: normalizeSingle("condition"),
+      custom,
+    };
+  }
+
+  function builderGenerationLabel(value) {
+    return String(value || "")
+      .split(/[_\s-]+/)
+      .filter(Boolean)
+      .map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+      .join(" ");
+  }
+
   function normalizeBuilderAmbient(value) {
     const raw = value && typeof value === "object" && !Array.isArray(value) ? value : {};
     const rate = Number.parseInt(raw.rate ?? 0, 10);
@@ -568,6 +635,7 @@
     const statefulDescs = normalizeBuilderStringMap(room?.stateful_descs);
     const details = normalizeBuilderStringMap(room?.details);
     const roomStates = normalizeBuilderStringList(room?.room_states);
+    const tags = normalizeBuilderRoomTags(room?.tags);
     const ambient = normalizeBuilderAmbient(room?.ambient);
     const exits = normalizeBuilderYamlExits(room?.exits || room?.exitMap || {});
     const exitMap = Object.entries(exits).reduce((accumulator, [direction, spec]) => {
@@ -587,6 +655,7 @@
       stateful_descs: statefulDescs,
       details,
       room_states: roomStates,
+      tags,
       ambient,
       zone_id: builderRoomKey(room?.zone_id || zoneId),
       npcs: normalizeBuilderStringList(room?.npcs),
@@ -609,6 +678,7 @@
       schema_version: payload?.schema_version || "v1",
       zone_id: zoneId,
       name: payload?.name || zoneId || "Untitled Zone",
+      generation_context: normalizeBuilderGenerationContext(payload?.generation_context),
       placements: payload?.placements || { npcs: [], items: [] },
       rooms,
     };
@@ -703,6 +773,97 @@
     rebuildBuilderRoomIndexes();
     builderState.zoneZoomInitialized = false;
     builderState.zoneMapNeedsFit = true;
+    renderBuilderZoneContextEditor();
+  }
+
+  function renderBuilderZoneChipGroup(containerId, fieldName, options, selectedValues, disabled = false) {
+    const container = byId(containerId);
+    if (!container) {
+      return;
+    }
+    const selected = new Set(selectedValues || []);
+    container.innerHTML = options.map((value) => {
+      const selectedClass = selected.has(value) ? " is-selected" : "";
+      const disabledAttr = disabled ? " disabled" : "";
+      return `<button type="button" class="builder-chip${selectedClass}" data-generation-field="${escapeHtml(fieldName)}" data-generation-value="${escapeHtml(value)}" aria-pressed="${selected.has(value) ? "true" : "false"}"${disabledAttr}>${escapeHtml(builderGenerationLabel(value))}</button>`;
+    }).join("");
+  }
+
+  function collectBuilderZoneContextDraft() {
+    return normalizeBuilderGenerationContext({
+      setting_type: String(byId("builder-zone-setting-type")?.value || "").trim().toLowerCase(),
+      era_feel: String(byId("builder-zone-era-feel")?.value || "").trim().toLowerCase(),
+      climate: String(byId("builder-zone-climate")?.value || "").trim().toLowerCase(),
+      voice: String(byId("builder-zone-voice")?.value || "").trim(),
+      culture: Array.from(document.querySelectorAll("#builder-zone-culture-chips .builder-chip.is-selected"))
+        .map((chip) => String(chip.dataset.generationValue || "").trim().toLowerCase())
+        .filter(Boolean),
+      mood: Array.from(document.querySelectorAll("#builder-zone-mood-chips .builder-chip.is-selected"))
+        .map((chip) => String(chip.dataset.generationValue || "").trim().toLowerCase())
+        .filter(Boolean),
+      banned_phrases: builderState.zone?.generation_context?.banned_phrases || [],
+    });
+  }
+
+  function renderBuilderZoneContextEditor() {
+    const activeZoneId = normalizeBuilderZoneId(builderState.zone?.zone_id || builderState.currentZoneId || "");
+    const context = normalizeBuilderGenerationContext(builderState.zone?.generation_context);
+    const disabled = !activeZoneId;
+    const summary = byId("builder-zone-context-summary");
+    const selectDefinitions = [
+      ["builder-zone-setting-type", BUILDER_ZONE_GENERATION_VOCAB.setting_types, context?.setting_type || ""],
+      ["builder-zone-era-feel", BUILDER_ZONE_GENERATION_VOCAB.eras, context?.era_feel || ""],
+      ["builder-zone-climate", BUILDER_ZONE_GENERATION_VOCAB.climates, context?.climate || ""],
+    ];
+    selectDefinitions.forEach(([id, values, selectedValue]) => {
+      const field = byId(id);
+      if (!field) {
+        return;
+      }
+      field.innerHTML = ['<option value="">Not set</option>']
+        .concat(values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(builderGenerationLabel(value))}</option>`))
+        .join("");
+      field.value = selectedValue;
+      field.disabled = disabled;
+    });
+    if (byId("builder-zone-voice")) {
+      byId("builder-zone-voice").value = context?.voice || "";
+      byId("builder-zone-voice").disabled = disabled;
+    }
+    renderBuilderZoneChipGroup("builder-zone-culture-chips", "culture", BUILDER_ZONE_GENERATION_VOCAB.cultures, context?.culture || [], disabled);
+    renderBuilderZoneChipGroup("builder-zone-mood-chips", "mood", BUILDER_ZONE_GENERATION_VOCAB.moods, context?.mood || [], disabled);
+    if (!summary) {
+      renderInheritedRoomTagChips();
+      return;
+    }
+    if (disabled) {
+      summary.textContent = "Load a zone to edit its prompt scaffold";
+      renderInheritedRoomTagChips();
+      return;
+    }
+    const fragments = [];
+    if (context?.setting_type) {
+      fragments.push(builderGenerationLabel(context.setting_type));
+    }
+    if (context?.era_feel) {
+      fragments.push(builderGenerationLabel(context.era_feel));
+    }
+    if (context?.mood?.length) {
+      fragments.push(context.mood.map((value) => builderGenerationLabel(value)).join(", "));
+    }
+    summary.textContent = fragments.length ? fragments.join(" • ") : "Optional tone and setting guidance";
+    renderInheritedRoomTagChips();
+  }
+
+  function applyBuilderZoneContextDraft(options = {}) {
+    if (!builderState.zone) {
+      return;
+    }
+    builderState.zone.generation_context = collectBuilderZoneContextDraft();
+    if (options.markDirty) {
+      setBuilderDirty(true);
+    }
+    renderBuilderZoneContextEditor();
   }
 
   function updateBuilderZoneRoom(roomId, overrides = {}) {
@@ -755,6 +916,7 @@
       stateful_descs: draft.stateful_descs,
       details: draft.details,
       room_states: draft.room_states,
+      tags: draft.tags,
       ambient: draft.ambient,
       environment: draft.environment,
       zone_id: draft.zone_id,
@@ -1040,6 +1202,7 @@
     if (byId("room-desc")) {
       byId("room-desc").value = "";
     }
+    syncBuilderRoomGenerationUi();
     BUILDER_SEASON_STATES.forEach((state) => {
       const field = byId(`room-desc-${state}`);
       if (field) {
@@ -1076,6 +1239,7 @@
     renderBuilderRoomItemAssignments(null);
     renderBuilderStatefulDescList({});
     renderBuilderDetailList({});
+    renderBuilderRoomTagsEditor({ tags: null });
     syncBuilderPreviewStateOptions({ stateful_descs: {}, room_states: [] }, "");
     renderBuilderPreview({
       name: "No room selected",
@@ -1083,6 +1247,7 @@
       stateful_descs: {},
       details: {},
       room_states: [],
+      tags: null,
       ambient: { rate: 0, messages: [] },
       environment: "city",
       exits: [],
@@ -1145,6 +1310,7 @@
       stateful_descs: collectBuilderStatefulDescs(),
       details: collectBuilderDetails(),
       room_states: collectBuilderRoomStates(),
+      tags: collectBuilderRoomTagDraft(),
       ambient: {
         rate: Number.parseInt(byId("room-ambient-rate")?.value || "0", 10) || 0,
         messages: collectBuilderAmbientMessages(),
@@ -1157,6 +1323,145 @@
       map_y: Number.parseInt(byId("room-map-y")?.value || `${builderState.currentRoom?.map?.y ?? builderState.currentRoom?.map_y ?? builderState.currentRoom?.y ?? 0}`, 10) || 0,
       map_layer: Number.parseInt(byId("room-map-layer")?.value || `${builderState.currentRoom?.map?.layer ?? builderState.currentRoom?.map_layer ?? 0}`, 10) || 0,
     };
+  }
+
+  function currentBuilderRoomGenerationMeta() {
+    return builderState.roomGenerationMeta[builderRoomKey(builderState.currentRoomId || "")] || null;
+  }
+
+  function syncBuilderRoomGenerationUi() {
+    const button = byId("generate-room-description");
+    const badge = byId("builder-room-generation-badge");
+    const revertButton = byId("builder-room-generation-revert");
+    const status = byId("builder-room-generation-status");
+    const meta = currentBuilderRoomGenerationMeta();
+    if (button) {
+      button.disabled = !builderState.currentRoomId;
+    }
+    if (!meta) {
+      if (badge) {
+        badge.hidden = true;
+        badge.textContent = "";
+      }
+      if (revertButton) {
+        revertButton.hidden = true;
+      }
+      if (status) {
+        status.textContent = builderState.currentRoomId
+          ? "Generate a draft from the current room and zone context."
+          : "Load a room to generate a draft.";
+      }
+      return;
+    }
+    const fragments = ["AI draft"];
+    if (meta.provenance?.model) {
+      fragments.push(String(meta.provenance.model));
+    }
+    if (meta.provenance?.prompt_trimmed) {
+      fragments.push("trimmed");
+    }
+    if (badge) {
+      badge.hidden = false;
+      badge.textContent = fragments.join(" · ");
+    }
+    if (revertButton) {
+      revertButton.hidden = false;
+    }
+    if (status) {
+      status.textContent = "Generated text is in the editor. Review it, then save the room and zone if you want to keep it.";
+    }
+  }
+
+  async function generateBuilderRoomDescription() {
+    const draft = currentBuilderDraft();
+    if (!draft.id) {
+      toast("Select a room first.");
+      return;
+    }
+    const generateButton = byId("generate-room-description");
+    const originalLabel = generateButton?.textContent || "Generate Description";
+    if (generateButton) {
+      generateButton.disabled = true;
+      generateButton.textContent = "Generating...";
+    }
+    setBuilderPageStatus(`Generating description for ${draft.name || draft.id}...`);
+    try {
+      const response = await window.fetch("/api/llm/generate-room-description", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          room: draft,
+          zone: {
+            zone_id: builderState.zone?.zone_id || draft.zone_id,
+            name: builderState.zone?.name || currentBuilderZoneLabel(),
+            generation_context: builderState.zone?.generation_context || null,
+          },
+        }),
+      });
+      let payload = {};
+      try {
+        payload = await response.json();
+      } catch (error) {
+        payload = {};
+      }
+      if (!response.ok || !payload.ok || !String(payload.text || "").trim()) {
+        const message = payload.error || `Description generation failed (${response.status})`;
+        setBuilderPageStatus(message);
+        toast(message);
+        return;
+      }
+      const generatedText = String(payload.text || "").trim();
+      const previousDesc = draft.desc || "";
+      builderState.roomGenerationMeta[draft.id] = {
+        previousDesc,
+        generatedDesc: generatedText,
+        provenance: payload.provenance || {},
+      };
+      const updatedRoom = updateBuilderZoneRoom(draft.id, {
+        ...draft,
+        desc: generatedText,
+      });
+      if (byId("room-desc")) {
+        byId("room-desc").value = generatedText;
+      }
+      builderState.currentRoom = updatedRoom;
+      renderBuilderPreview(updatedRoom, { flash: true });
+      syncBuilderRoomGenerationUi();
+      setBuilderPageStatus(`Generated description for ${updatedRoom.name || updatedRoom.id}. Save zone to persist.`);
+      toast("Description generated");
+    } catch (error) {
+      console.error(error);
+      setBuilderPageStatus(error.message || "Description generation failed.");
+      toast(error.message || "Description generation failed.");
+    } finally {
+      if (generateButton) {
+        generateButton.disabled = !builderState.currentRoomId;
+        generateButton.textContent = originalLabel;
+      }
+    }
+  }
+
+  function revertBuilderGeneratedRoomDescription() {
+    const draft = currentBuilderDraft();
+    const meta = currentBuilderRoomGenerationMeta();
+    if (!draft.id || !meta) {
+      return;
+    }
+    const updatedRoom = updateBuilderZoneRoom(draft.id, {
+      ...draft,
+      desc: meta.previousDesc || "",
+    });
+    delete builderState.roomGenerationMeta[draft.id];
+    if (byId("room-desc")) {
+      byId("room-desc").value = meta.previousDesc || "";
+    }
+    builderState.currentRoom = updatedRoom;
+    renderBuilderPreview(updatedRoom, { flash: true });
+    syncBuilderRoomGenerationUi();
+    setBuilderPageStatus(`Reverted generated description for ${updatedRoom.name || updatedRoom.id}.`);
+    toast("Reverted generated description");
   }
 
   function ensureBuilderRoomColorField() {
@@ -1218,6 +1523,93 @@
         <button type="button" class="builder-kv-remove">Delete</button>
       </div>
     `).join("");
+  }
+
+  function renderTagChipGroup(containerId, fieldName, vocabulary, value, options = {}) {
+    const container = byId(containerId);
+    if (!container) {
+      return;
+    }
+    const disabled = Boolean(options.disabled);
+    const selectedValue = String(value || "").trim().toLowerCase();
+    container.innerHTML = vocabulary.map((entry) => {
+      const isSelected = entry === selectedValue;
+      const disabledAttr = disabled ? " disabled" : "";
+      return `<button type="button" class="builder-chip${isSelected ? " is-selected" : ""}" data-room-tag-field="${escapeHtml(fieldName)}" data-room-tag-value="${escapeHtml(entry)}" aria-pressed="${isSelected ? "true" : "false"}"${disabledAttr}>${escapeHtml(builderGenerationLabel(entry))}</button>`;
+    }).join("");
+  }
+
+  function renderInheritedRoomTagChips() {
+    const container = byId("room-inherited-tag-chips");
+    if (!container) {
+      return;
+    }
+    const context = normalizeBuilderGenerationContext(builderState.zone?.generation_context);
+    const values = [];
+    if (context?.setting_type) {
+      values.push(context.setting_type);
+    }
+    if (context?.era_feel) {
+      values.push(context.era_feel);
+    }
+    if (context?.climate) {
+      values.push(context.climate);
+    }
+    (context?.culture || []).forEach((value) => values.push(value));
+    (context?.mood || []).forEach((value) => values.push(value));
+    if (!values.length) {
+      container.innerHTML = '<span class="builder-field-help">No inherited zone tags.</span>';
+      return;
+    }
+    container.innerHTML = values
+      .map((value) => `<button type="button" class="builder-chip builder-chip-muted" disabled>${escapeHtml(builderGenerationLabel(value))}</button>`)
+      .join("");
+  }
+
+  function renderCustomRoomTagGroup(customTags = [], disabled = false) {
+    const container = byId("room-tag-custom");
+    if (!container) {
+      return;
+    }
+    const normalizedTags = normalizeBuilderRoomTags({ custom: customTags }).custom;
+    const disabledAttr = disabled ? " disabled" : "";
+    container.innerHTML = normalizedTags
+      .map((value) => `<button type="button" class="builder-chip is-selected" data-room-custom-tag="${escapeHtml(value)}"${disabledAttr}>${escapeHtml(value)}</button>`)
+      .concat([`<button type="button" class="builder-chip builder-chip-add" id="room-tag-custom-add"${disabledAttr}>+ add custom</button>`])
+      .join("");
+    const inputRow = byId("room-tag-custom-input-row");
+    const input = byId("room-tag-custom-input");
+    if (inputRow) {
+      inputRow.hidden = true;
+    }
+    if (input) {
+      input.value = "";
+      input.disabled = disabled;
+    }
+  }
+
+  function renderBuilderRoomTagsEditor(room) {
+    const normalizedRoom = normalizeBuilderYamlRoom(room || {}, 0, builderState.currentZoneId || "");
+    const tags = normalizeBuilderRoomTags(normalizedRoom.tags);
+    const disabled = !builderState.currentRoomId;
+    renderInheritedRoomTagChips();
+    renderTagChipGroup("room-tag-structure", "structure", BUILDER_ROOM_TAG_VOCAB.structure, tags.structure, { disabled });
+    renderTagChipGroup("room-tag-specific-function", "specific_function", BUILDER_ROOM_TAG_VOCAB.specific_function, tags.specific_function, { disabled });
+    renderTagChipGroup("room-tag-named-feature", "named_feature", BUILDER_ROOM_TAG_VOCAB.named_feature, tags.named_feature, { disabled });
+    renderTagChipGroup("room-tag-condition", "condition", BUILDER_ROOM_TAG_VOCAB.condition, tags.condition, { disabled });
+    renderCustomRoomTagGroup(tags.custom, disabled);
+  }
+
+  function collectBuilderRoomTagDraft() {
+    return normalizeBuilderRoomTags({
+      structure: document.querySelector("#room-tag-structure .builder-chip.is-selected")?.dataset.roomTagValue || "",
+      specific_function: document.querySelector("#room-tag-specific-function .builder-chip.is-selected")?.dataset.roomTagValue || "",
+      named_feature: document.querySelector("#room-tag-named-feature .builder-chip.is-selected")?.dataset.roomTagValue || "",
+      condition: document.querySelector("#room-tag-condition .builder-chip.is-selected")?.dataset.roomTagValue || "",
+      custom: Array.from(document.querySelectorAll("#room-tag-custom [data-room-custom-tag]"))
+        .map((chip) => String(chip.dataset.roomCustomTag || "").trim())
+        .filter(Boolean),
+    });
   }
 
   function collectBuilderStatefulDescs() {
@@ -3667,6 +4059,7 @@
       stateful_descs: overrides.stateful_descs ?? baseRoom.stateful_descs ?? {},
       details: overrides.details ?? baseRoom.details ?? {},
       room_states: overrides.room_states ?? baseRoom.room_states ?? [],
+      tags: overrides.tags ?? baseRoom.tags ?? { structure: "", specific_function: "", named_feature: "", condition: "", custom: [] },
       ambient: overrides.ambient ?? baseRoom.ambient ?? { rate: 0, messages: [] },
       environment: overrides.environment ?? baseRoom.environment ?? "city",
       color: overrides.color ?? baseRoom.color ?? "standard",
@@ -4963,6 +5356,7 @@
     if (byId("room-desc")) {
       byId("room-desc").value = data.desc || "";
     }
+    renderBuilderRoomTagsEditor(data);
     renderBuilderStatefulDescList(data.stateful_descs || {});
     renderBuilderDetailList(data.details || {});
     if (byId("room-active-states")) {
@@ -4995,6 +5389,7 @@
     renderBuilderRoomNpcAssignments(data);
     renderBuilderRoomItemAssignments(data);
     renderBuilderExitList(builderRoomExitsArray(data));
+    syncBuilderRoomGenerationUi();
     renderBuilderPreview(data);
     renderZoneMap();
   }
@@ -5521,6 +5916,7 @@
         stateful_descs: draft.stateful_descs,
         details: draft.details,
         room_states: draft.room_states,
+        tags: draft.tags,
         ambient: draft.ambient,
         environment: draft.environment,
         color: draft.color,
@@ -5599,6 +5995,7 @@
         stateful_descs: {},
         details: {},
         room_states: [],
+        tags: { structure: "", specific_function: "", named_feature: "", condition: "", custom: [] },
         ambient: { rate: 0, messages: [] },
         environment,
         zone_id: zoneId,
@@ -5774,6 +6171,40 @@
     });
 
     byId("room-editor")?.addEventListener("click", (event) => {
+      const tagChip = event.target.closest("[data-room-tag-field]");
+      if (tagChip && !tagChip.disabled) {
+        event.preventDefault();
+        const fieldName = String(tagChip.dataset.roomTagField || "").trim();
+        const nextTags = collectBuilderRoomTagDraft();
+        const value = String(tagChip.dataset.roomTagValue || "").trim().toLowerCase();
+        nextTags[fieldName] = nextTags[fieldName] === value ? "" : value;
+        renderBuilderRoomTagsEditor({ ...(builderState.currentRoom || currentBuilderDraft()), tags: nextTags });
+        scheduleBuilderPreviewUpdate();
+        return;
+      }
+      const customTagChip = event.target.closest("[data-room-custom-tag]");
+      if (customTagChip && !customTagChip.disabled) {
+        event.preventDefault();
+        const nextTags = collectBuilderRoomTagDraft();
+        nextTags.custom = nextTags.custom.filter((value) => value.toLowerCase() !== String(customTagChip.dataset.roomCustomTag || "").trim().toLowerCase());
+        renderBuilderRoomTagsEditor({ ...(builderState.currentRoom || currentBuilderDraft()), tags: nextTags });
+        scheduleBuilderPreviewUpdate();
+        return;
+      }
+      const addCustomTag = event.target.closest("#room-tag-custom-add");
+      if (addCustomTag && !addCustomTag.disabled) {
+        event.preventDefault();
+        const inputRow = byId("room-tag-custom-input-row");
+        const input = byId("room-tag-custom-input");
+        if (inputRow) {
+          inputRow.hidden = false;
+        }
+        if (input) {
+          input.value = "";
+          input.focus();
+        }
+        return;
+      }
       const button = event.target.closest(".builder-kv-remove");
       if (!button) {
         return;
@@ -5793,6 +6224,33 @@
       }
     });
 
+    byId("room-tag-custom-input")?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        if (byId("room-tag-custom-input-row")) {
+          byId("room-tag-custom-input-row").hidden = true;
+        }
+        event.target.value = "";
+        return;
+      }
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      const text = String(event.target.value || "").trim();
+      if (!text) {
+        if (byId("room-tag-custom-input-row")) {
+          byId("room-tag-custom-input-row").hidden = true;
+        }
+        event.target.value = "";
+        return;
+      }
+      const nextTags = collectBuilderRoomTagDraft();
+      nextTags.custom = normalizeBuilderRoomTags({ custom: nextTags.custom.concat([text]) }).custom;
+      renderBuilderRoomTagsEditor({ ...(builderState.currentRoom || currentBuilderDraft()), tags: nextTags });
+      scheduleBuilderPreviewUpdate();
+    });
+
     byId("world-tree")?.addEventListener("scroll", (event) => {
       window.localStorage.setItem(BUILDER_ROOM_LIST_SCROLL_STORAGE_KEY, String(event.target.scrollTop || 0));
     });
@@ -5804,6 +6262,14 @@
         resetSaveState();
         toast(error.message || "Room update failed.");
       });
+    });
+
+    byId("generate-room-description")?.addEventListener("click", () => {
+      void generateBuilderRoomDescription();
+    });
+
+    byId("builder-room-generation-revert")?.addEventListener("click", () => {
+      revertBuilderGeneratedRoomDescription();
     });
 
     byId("save-zone")?.addEventListener("click", () => {
@@ -5910,6 +6376,27 @@
         setBuilderPageStatus(error.message || "Delete failed.");
         toast(error.message || "Delete failed.");
       });
+    });
+
+    ["builder-zone-setting-type", "builder-zone-era-feel", "builder-zone-climate"].forEach((id) => {
+      byId(id)?.addEventListener("change", () => {
+        applyBuilderZoneContextDraft({ markDirty: true });
+      });
+    });
+
+    byId("builder-zone-voice")?.addEventListener("blur", () => {
+      applyBuilderZoneContextDraft({ markDirty: true });
+    });
+
+    byId("builder-zone-context-details")?.addEventListener("click", (event) => {
+      const chip = event.target.closest(".builder-chip");
+      if (!chip || chip.disabled) {
+        return;
+      }
+      event.preventDefault();
+      chip.classList.toggle("is-selected");
+      chip.setAttribute("aria-pressed", chip.classList.contains("is-selected") ? "true" : "false");
+      applyBuilderZoneContextDraft({ markDirty: true });
     });
 
     byId("review-edge-type")?.addEventListener("change", () => {
@@ -6778,6 +7265,8 @@
       return;
     }
     bindBuilderInputs();
+    renderBuilderZoneContextEditor();
+    syncBuilderRoomGenerationUi();
     syncBuilderZoneMenus();
     renderBuilderExitList([]);
     renderBuilderPreview({

@@ -1,0 +1,86 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_628_178]
+This narrow passage stretches eastward, opening to the south. Two paths diverge here, each continuing on their respective courses. The floor is worn smooth by countless footsteps, reflecting the bustling energy of the city outside.
+
+---
+
+[Room: crossingV2_628_184]
+In crossingV2, a narrow passage stretches eastward and southward, continuing on both ends. The space is open, unobstructed by barriers. The floor is worn smooth from heavy foot traffic, reflecting the bustling city atmosphere.
+
+---
+
+[Room: crossingV2_628_208]
+In crossingV2, a narrow passage stretches out, two paths branching ahead. The space continues northwards and westwards, opening into broader areas beyond. The floor is worn smooth by countless footsteps, reflecting the bustling nature of this late-medieval river trade city.
+
+---
+
+[Room: crossingV2_352_238]
+In crossingV2_352_238, space is confined, enclosed by walls. No exits lead out; it's a dead end. The room is small, tight, with a low ceiling. Floor is rough underfoot, worn smooth in places from heavy use.
+
+---
+
+[Room: crossingV2_382_238]
+In this late-medieval river trade city, a narrow path ends abruptly at a sturdy wooden wall, hinting at a once-busy thoroughfare now closed off. The rough-hewn stones of the walls bear the wear of time and countless passing feet, their surfaces damp from the valley's humidity. A single exit to the east marks the only way out of this tight, confined space.
+
+---
+
+[Room: crossingV2_432_238]
+In crossingV2, a bustling river trade city, you find yourself in a narrow passage that stretches southward and westward. The space is long and tight, defined by rough walls that seem to lean slightly inward as they rise. A worn path marks the center, leading directly towards both exits.
+
+---
+
+Repeated phrases:
+- "the floor is worn smooth" (3)
+- "floor is worn smooth" (3)
+- "the floor is worn" (3)
+- "a narrow passage" (3)
+- "floor is worn" (3)
+- "in crossingv2 a" (3)
+- "is worn smooth" (3)
+- "narrow passage stretches" (3)
+- "reflecting the bustling" (3)
+- "river trade city" (3)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Over 80 words: 0
+Average words: 43.67
+Sentence count flags: 0
+Average sentences: 3.17
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 1
+- "the walls are": 0
+- "the floor is": 3
+Repeated sentence start total: 4
