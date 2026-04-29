@@ -1,6 +1,11 @@
 import unittest
 
-from world.builder.prompting.room_description_prompt import assemble_room_description_prompt, load_room_description_system_prompt
+from world.builder.prompting.room_description_prompt import (
+    assemble_room_description_prompt,
+    determine_applicable_state_groups,
+    determine_applicable_states,
+    load_room_description_system_prompt,
+)
 
 
 CONTEXT_LICENSE_CLAUSE = (
@@ -11,6 +16,7 @@ EXAMPLE_BLOCK_LINE = "Examples of the craft level expected:"
 REINFORCEMENT_CLAUSE = "Stay within the licensed truth set: structural tags, exit data, zone context, and atmospheric tags when present."
 STYLE_CONTRACT_START = "Write 3 to 5 sentences. Do not write fewer than 3 sentences and do not exceed 5 sentences."
 STYLE_CONTRACT_END = "If facts are sparse, use room shape, exits, surfaces, boundaries, and safe environment-specific features only."
+STATEFUL_BLOCK_LINE = "STATEFUL FRAGMENTS"
 class RoomDescriptionPromptTests(unittest.TestCase):
     def _assert_not_form_shaped(self, prompt_text: str) -> None:
         for forbidden in (
@@ -632,6 +638,130 @@ class RoomDescriptionPromptTests(unittest.TestCase):
         )
 
         self.assertIn("Only these objects may receive look text: heavy timber door and narrow stairway.", prompt.prompt)
+
+    def test_prompt_includes_stateful_fragment_guidance(self):
+        prompt = assemble_room_description_prompt(
+            {
+                "id": "market_square",
+                "name": "Market Square",
+                "exits": {
+                    "north": {"target": "north_lane"},
+                    "south": {"target": "south_lane"},
+                },
+            },
+            {
+                "zone_id": "crossingv2",
+                "name": "The Crossing",
+                "generation_context": {"setting_type": "city"},
+            },
+        )
+
+        self.assertIn(STATEFUL_BLOCK_LINE, prompt.prompt)
+        self.assertIn("Only use states from this room's applicable_states list", prompt.prompt)
+        self.assertIn("$state(name, content)", prompt.prompt)
+        self.assertIn("Only use these state names when writing stateful fragments:", prompt.prompt)
+        self.assertIn("include at least one $state fragment for each listed group", prompt.prompt)
+        self.assertIn("Complete example (urban street, applicable state groups: season, time, weather):", prompt.prompt)
+        self.assertIn("Do not write meta-commentary about state variability", prompt.prompt)
+
+    def test_state_mapping_uses_urban_city_fallback_for_untyped_exterior_room(self):
+        groups = determine_applicable_state_groups(
+            {
+                "id": "crossingV2_192_132",
+                "exits": {"west": {"target": "crossingV2_178_132"}},
+            },
+            {
+                "zone_id": "crossingv2",
+                "name": "The Crossing",
+                "generation_context": {"setting_type": "city"},
+            },
+        )
+
+        self.assertEqual(groups, ["season", "time", "weather", "invasion"])
+        self.assertEqual(
+            determine_applicable_states(
+                {
+                    "id": "crossingV2_192_132",
+                    "exits": {"west": {"target": "crossingV2_178_132"}},
+                },
+                {
+                    "zone_id": "crossingv2",
+                    "name": "The Crossing",
+                    "generation_context": {"setting_type": "city"},
+                },
+            ),
+            ["spring", "summer", "autumn", "winter", "morning", "midday", "evening", "night", "rain", "snow", "fog", "invasion"],
+        )
+
+    def test_state_mapping_uses_room_tags_for_interior_room(self):
+        groups = determine_applicable_state_groups(
+            {
+                "id": "crossingV2_178_132",
+                "tags": {
+                    "structure": "hallway",
+                    "specific_function": "tavern",
+                    "named_feature": "hearth",
+                    "condition": "worn",
+                    "custom": [],
+                    "atmosphere": {},
+                },
+                "exits": {
+                    "east": {"target": "crossingV2_192_132"},
+                    "south": {"target": "crossingV2_178_154"},
+                },
+            },
+            {
+                "zone_id": "crossingv2",
+                "name": "The Crossing",
+                "generation_context": {"setting_type": "city"},
+            },
+        )
+
+        self.assertEqual(groups, ["season", "time", "invasion"])
+
+    def test_state_mapping_uses_legacy_underground_fallback_for_cro_rooms(self):
+        groups = determine_applicable_state_groups(
+            {
+                "id": "CRO_500_100",
+                "exits": {
+                    "west": {"target": "CRO_450_100"},
+                    "down": {"target": "CRO_500_150"},
+                },
+            },
+            {"zone_id": "demo1", "name": "demo1", "generation_context": None},
+        )
+
+        self.assertEqual(groups, ["season"])
+
+    def test_prompt_includes_applicable_states_list_for_room(self):
+        prompt = assemble_room_description_prompt(
+            {
+                "id": "crossingV2_178_132",
+                "tags": {
+                    "structure": "hallway",
+                    "specific_function": "tavern",
+                    "named_feature": "hearth",
+                    "condition": "worn",
+                    "custom": [],
+                    "atmosphere": {},
+                },
+                "exits": {
+                    "east": {"target": "crossingV2_192_132"},
+                    "south": {"target": "crossingV2_178_154"},
+                },
+            },
+            {
+                "zone_id": "crossingv2",
+                "name": "The Crossing",
+                "generation_context": {"setting_type": "city"},
+            },
+        )
+
+        self.assertIn("Applicable state groups for this room are season, time, and invasion.", prompt.prompt)
+        self.assertIn(
+            "The applicable_states list for this room is spring, summer, autumn, winter, morning, midday, evening, night, and invasion.",
+            prompt.prompt,
+        )
 
 
 if __name__ == "__main__":

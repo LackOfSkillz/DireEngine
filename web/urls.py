@@ -23,6 +23,8 @@ from evennia.web.urls import urlpatterns as evennia_default_urlpatterns
 # add patterns
 urlpatterns = [
     path("builder/", views.builder_view, name="builder"),
+    path("direbuilder/", views.direbuilder_view, name="direbuilder"),
+    path("testbuilder.html", views.test_builder_mockup_view, name="test-builder-mockup"),
     path("builder/api/zones/", views.builder_zone_list, name="builder-zone-list"),
     path("builder/api/review-graphs/", views.builder_review_graph_list, name="builder-review-graph-list"),
     path("builder/api/zones/create/", views.builder_zone_create, name="builder-zone-create"),

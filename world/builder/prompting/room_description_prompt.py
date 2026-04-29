@@ -8,7 +8,35 @@ from world.builder.schemas.typed_generation_input_schema import resolve_typed_ge
 
 
 _SYSTEM_PROMPT_PATH = Path(__file__).resolve().parent.parent / "templates" / "room_description_system_prompt.txt"
-PROMPT_VERSION = "v6_diremud_condensed_zone_scrub"
+PROMPT_VERSION = "v8_diremud_required_stateful_fragments"
+
+_STATE_GROUP_VOCABULARY = {
+    "time": ("morning", "midday", "evening", "night"),
+    "season": ("spring", "summer", "autumn", "winter"),
+    "weather": ("rain", "snow", "fog"),
+    "invasion": ("invasion",),
+}
+_INTERIOR_STRUCTURES = {"building-interior", "hallway", "chamber", "threshold", "entrance"}
+_URBAN_EXTERIOR_STRUCTURES = {"street", "square", "intersection", "plaza", "alley", "courtyard", "bridge", "dock"}
+_INTERIOR_FUNCTIONS = {
+    "shop",
+    "tavern",
+    "inn",
+    "temple",
+    "guild-hall",
+    "forge",
+    "bakery",
+    "brothel",
+    "jail",
+    "residence",
+    "barracks",
+    "library",
+    "warehouse",
+    "market-stall",
+    "kitchen",
+    "cellar",
+}
+_INTERIOR_FEATURES = {"hearth", "altar", "pulpit", "throne", "workbench"}
 
 # ORIGINAL_PROMPT_BASELINE
 # System:
@@ -135,6 +163,61 @@ def _shape_hint(shape: str) -> str:
 
 def _nonempty_text(value: object) -> str:
     return str(value or "").strip()
+
+
+def _has_vertical_exit(exit_directions: list[str]) -> bool:
+    return any(direction in {"up", "down"} for direction in exit_directions)
+
+
+def determine_applicable_state_groups(
+    room_payload: dict | None,
+    zone_payload: dict | None,
+    generation_context: dict | None = None,
+) -> list[str]:
+    room_data = room_payload or {}
+    zone_data = zone_payload or {}
+    context = generation_context or zone_data.get("generation_context") or {}
+    room_tags = normalize_room_tags(room_data.get("tags"))
+    structure = str(room_tags.get("structure") or "").strip().lower()
+    specific_function = str(room_tags.get("specific_function") or "").strip().lower()
+    named_feature = str(room_tags.get("named_feature") or "").strip().lower()
+    setting_type = _nonempty_text(context.get("setting_type") or room_data.get("environment")).lower()
+    room_id = str(room_data.get("id") or "").strip().upper()
+    exit_directions = _normalized_exit_directions(room_data)
+
+    is_interior = (
+        structure in _INTERIOR_STRUCTURES
+        or specific_function in _INTERIOR_FUNCTIONS
+        or named_feature in _INTERIOR_FEATURES
+    )
+    is_urban_exterior = structure in _URBAN_EXTERIOR_STRUCTURES or (setting_type == "city" and not is_interior)
+    # Legacy cave rooms can arrive without structure tags. Prefer tags first, but keep a
+    # narrow fallback so current underground rooms still get sane state applicability.
+    is_underground = (
+        setting_type in {"cave", "underground"}
+        or structure in {"cave", "cave-passage", "cave-tunnel", "tunnel"}
+        or (not setting_type and _has_vertical_exit(exit_directions))
+        or room_id.startswith("CRO_")
+    )
+
+    if is_underground:
+        return ["season"]
+    if is_interior:
+        return ["season", "time", "invasion"]
+    if is_urban_exterior:
+        return ["season", "time", "weather", "invasion"]
+    return ["season", "time", "weather"]
+
+
+def determine_applicable_states(
+    room_payload: dict | None,
+    zone_payload: dict | None,
+    generation_context: dict | None = None,
+) -> list[str]:
+    states: list[str] = []
+    for group in determine_applicable_state_groups(room_payload, zone_payload, generation_context):
+        states.extend(_STATE_GROUP_VOCABULARY[group])
+    return states
 
 
 def _human_room_name(room_name: str, room_id: str) -> str:
@@ -359,6 +442,8 @@ def _build_typed_generation_sections(room_payload: dict, zone_payload: dict) -> 
 def _build_model_prompt_lines(room_payload: dict, zone_payload: dict, generation_context: dict, room_id: str, room_name: str, zone_name: str, shape: str, shape_hint: str, exit_directions: list[str]) -> list[str]:
     area_payload = _extract_area_payload(room_payload, zone_payload)
     typed_payload = resolve_typed_generation_input(room_payload, zone_payload, area_payload)
+    applicable_state_groups = determine_applicable_state_groups(room_payload, zone_payload, generation_context)
+    applicable_states = determine_applicable_states(room_payload, zone_payload, generation_context)
     display_room_name = _human_room_name(room_name, room_id)
     display_zone_name = _human_zone_name(zone_name, str(zone_payload.get("zone_id") or "").strip())
     lines = [
@@ -467,6 +552,12 @@ def _build_model_prompt_lines(room_payload: dict, zone_payload: dict, generation
     forbidden = [str(item).strip() for item in list(typed_payload.get("forbidden_features") or []) if str(item).strip()]
     if forbidden:
         lines.append(f"Forbidden features include {_natural_join(forbidden)}.")
+    if applicable_state_groups:
+        lines.append(f"Applicable state groups for this room are {_natural_join(applicable_state_groups)}.")
+    if applicable_states:
+        lines.append(f"The applicable_states list for this room is {_natural_join(applicable_states)}.")
+    else:
+        lines.append("The applicable_states list for this room is empty.")
 
     allowed_exits = list(typed_payload.get("allowed_exits") or [])
     if allowed_exits:
@@ -495,7 +586,7 @@ def _build_model_prompt_lines(room_payload: dict, zone_payload: dict, generation
     return lines
 
 
-def assemble_room_description_prompt(room: dict | None, zone: dict | None, *, max_prompt_chars: int = 10000) -> RoomDescriptionPrompt:
+def assemble_room_description_prompt(room: dict | None, zone: dict | None, *, max_prompt_chars: int = 22000) -> RoomDescriptionPrompt:
     room_payload = room or {}
     zone_payload = zone or {}
     generation_context = zone_payload.get("generation_context") or {}

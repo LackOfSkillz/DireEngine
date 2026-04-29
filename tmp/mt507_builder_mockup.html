@@ -1,0 +1,2494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DireBuilder Mockup</title>
+  <style>
+    :root {
+      --bg: #120d0a;
+      --bg-deep: #0c0806;
+      --panel: #1c1410;
+      --panel-raised: #241a15;
+      --panel-soft: #2a1f18;
+      --panel-ink: #15100d;
+      --border: rgba(236, 208, 162, 0.16);
+      --border-strong: rgba(221, 174, 104, 0.3);
+      --text: #f1e5cf;
+      --text-soft: #cebda3;
+      --text-dim: #a69277;
+      --accent: #b97a3b;
+      --accent-bright: #d39a57;
+      --accent-deep: #6d4726;
+      --danger: #7d342c;
+      --danger-bright: #b54d40;
+      --success: #62744b;
+      --shadow: 0 24px 40px rgba(0, 0, 0, 0.45);
+      --shadow-soft: 0 12px 24px rgba(0, 0, 0, 0.25);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --space-1: 8px;
+      --space-2: 16px;
+      --space-3: 24px;
+      --space-4: 32px;
+      --space-5: 40px;
+      --serif: Georgia, Cambria, "Times New Roman", serif;
+      --sans: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(149, 95, 43, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(255, 207, 144, 0.06), transparent 22%),
+        linear-gradient(180deg, #18110d 0%, #100b08 48%, #0b0705 100%);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow: hidden;
+    }
+
+    body {
+      height: 100vh;
+      padding: var(--space-4);
+    }
+
+    .mockup-page {
+      max-width: 1420px;
+      height: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      min-height: 0;
+    }
+
+    .page-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(245, 224, 192, 0.1);
+      background:
+        linear-gradient(180deg, rgba(56, 39, 28, 0.95), rgba(22, 15, 11, 0.98));
+      box-shadow: var(--shadow);
+    }
+
+    .page-banner h1,
+    .panel-title,
+    .editor-title,
+    .section-title,
+    .mode-heading,
+    .tab-heading {
+      margin: 0;
+      font-family: var(--serif);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #fff2d8;
+    }
+
+    .page-banner h1 {
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1.05;
+    }
+
+    .page-banner p {
+      margin: var(--space-1) 0 0;
+      color: var(--text-soft);
+      max-width: 760px;
+      line-height: 1.5;
+    }
+
+    .banner-chip-row {
+      display: flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .banner-chip,
+    .status-pill,
+    .tag-pill,
+    .custom-state-pill,
+    .readonly-pill,
+    .mode-toggle,
+    .tab-toggle,
+    .option-pill,
+    .small-badge,
+    .ghost-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(233, 201, 142, 0.18);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .banner-chip,
+    .small-badge,
+    .mode-toggle.is-active,
+    .tab-toggle.is-active,
+    .option-pill.is-selected,
+    .primary-pill {
+      background: linear-gradient(180deg, rgba(162, 119, 72, 0.98), rgba(93, 60, 31, 0.98));
+      color: #fff1d3;
+      border-color: rgba(233, 201, 142, 0.26);
+      box-shadow: inset 0 1px 0 rgba(255, 244, 220, 0.08);
+    }
+
+    .banner-chip:hover,
+    .mode-toggle:hover,
+    .tab-toggle:hover,
+    .option-pill:hover,
+    .ghost-pill:hover,
+    .button:hover,
+    .accordion-summary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.22);
+    }
+
+    .banner-chip.subtle,
+    .mode-toggle,
+    .tab-toggle,
+    .ghost-pill,
+    .option-pill,
+    .readonly-pill,
+    .tag-pill,
+    .custom-state-pill,
+    .status-pill {
+      background: linear-gradient(180deg, rgba(70, 51, 39, 0.92), rgba(35, 25, 19, 0.98));
+      color: var(--text-soft);
+    }
+
+    .ghost-pill {
+      border-style: dashed;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(245, 224, 192, 0.1);
+      background: linear-gradient(180deg, rgba(40, 28, 21, 0.98), rgba(18, 12, 9, 0.99));
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    .app-header-copy {
+      display: grid;
+      gap: 6px;
+    }
+
+    .header-zone-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 11px;
+    }
+
+    .header-zone-switcher select {
+      min-width: 240px;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(233, 201, 142, 0.2);
+      background: linear-gradient(180deg, rgba(70, 51, 39, 0.92), rgba(35, 25, 19, 0.98));
+      color: #fff0d0;
+      font: inherit;
+      letter-spacing: 0.04em;
+    }
+
+    .app-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(30px, 3vw, 42px);
+      line-height: 1;
+      color: #fff2d8;
+      letter-spacing: 0.02em;
+    }
+
+    .app-subtitle {
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 11px;
+    }
+
+    .mockup-shell {
+      display: grid;
+      grid-template-columns: minmax(320px, 380px) minmax(0, 1fr) minmax(560px, 620px);
+      gap: var(--space-3);
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .map-placeholder-shell {
+      height: 100%;
+      min-height: 0;
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(170, 170, 170, 0.22);
+      background: rgba(160, 160, 160, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(162, 119, 72, 0.6) rgba(0, 0, 0, 0.18);
+    }
+
+    .map-placeholder-copy {
+      color: rgba(212, 212, 212, 0.55);
+      text-align: center;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .zone-editor-shell,
+    .room-editor-shell {
+      height: 100%;
+      min-height: 0;
+      border-radius: 30px;
+      padding: var(--space-3);
+      background:
+        linear-gradient(180deg, rgba(40, 28, 21, 0.98), rgba(18, 12, 9, 0.99));
+      border: 1px solid rgba(246, 224, 190, 0.12);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(162, 119, 72, 0.6) rgba(0, 0, 0, 0.18);
+    }
+
+    .zone-editor-shell {
+      min-height: 0;
+    }
+
+    .zone-editor-shell::-webkit-scrollbar,
+    .room-editor-shell::-webkit-scrollbar,
+    .map-placeholder-shell::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .zone-editor-shell::-webkit-scrollbar-track,
+    .room-editor-shell::-webkit-scrollbar-track,
+    .map-placeholder-shell::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 999px;
+    }
+
+    .zone-editor-shell::-webkit-scrollbar-thumb,
+    .room-editor-shell::-webkit-scrollbar-thumb,
+    .map-placeholder-shell::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(162, 119, 72, 0.6), rgba(93, 60, 31, 0.6));
+      border-radius: 999px;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .zone-editor-shell::-webkit-scrollbar-thumb:hover,
+    .room-editor-shell::-webkit-scrollbar-thumb:hover,
+    .map-placeholder-shell::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(205, 145, 73, 0.7), rgba(130, 75, 32, 0.7));
+    }
+
+    .zone-editor-shell::before {
+      content: "Zone Editor Mockup";
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(250, 228, 196, 0.35);
+    }
+
+    .room-editor-shell::before {
+      content: "Right Column Mockup";
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(250, 228, 196, 0.35);
+    }
+
+    .mode-switcher {
+      display: flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: var(--space-2);
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(245, 220, 182, 0.06);
+    }
+
+    .mode-switcher-label {
+      color: rgba(206, 189, 163, 0.56);
+      font-size: 11px;
+      font-style: italic;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .mode-toggle {
+      cursor: pointer;
+      user-select: none;
+      min-height: 28px;
+      padding: 4px 12px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      opacity: 0.82;
+    }
+
+    .editor-mode {
+      display: none;
+      background:
+        linear-gradient(180deg, rgba(29, 20, 16, 0.94), rgba(19, 13, 10, 0.98));
+      border-radius: 22px;
+      border: 1px solid rgba(244, 216, 177, 0.08);
+      padding: var(--space-3);
+      box-shadow: inset 0 1px 0 rgba(255, 247, 228, 0.03);
+    }
+
+    .editor-mode.is-active {
+      display: block;
+    }
+
+    .editor-header {
+      display: grid;
+      gap: 10px;
+    }
+
+    .zone-editor-header {
+      display: grid;
+      gap: 12px;
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid rgba(240, 214, 170, 0.08);
+      margin-bottom: var(--space-3);
+    }
+
+    .editor-heading-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .editor-heading-copy {
+      display: grid;
+      gap: 6px;
+    }
+
+    .zone-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .zone-title-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-left: auto;
+      position: relative;
+    }
+
+    .editor-title {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .editor-kicker {
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 11px;
+    }
+
+    .editor-meta {
+      display: flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .zone-properties {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .zone-browser-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .zone-browser-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(242, 214, 173, 0.06);
+      background: rgba(255, 255, 255, 0.025);
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+
+    .zone-browser-row strong {
+      color: #fff0d0;
+      font-weight: 700;
+    }
+
+    .zone-browser-row.is-active {
+      border-color: rgba(244, 198, 128, 0.24);
+      background: linear-gradient(180deg, rgba(171, 116, 57, 0.16), rgba(104, 63, 28, 0.18));
+    }
+
+    .zone-browser-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sticky-room-actions {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: linear-gradient(180deg, rgba(33, 23, 17, 0.98), rgba(33, 23, 17, 0.92));
+      padding: 0 0 var(--space-2);
+      margin-bottom: var(--space-2);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(240, 214, 170, 0.08);
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-2);
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+    }
+
+    .button {
+      border: 1px solid rgba(233, 201, 142, 0.18);
+      border-radius: 999px;
+      min-height: 40px;
+      padding: 10px 18px;
+      background: linear-gradient(180deg, rgba(72, 52, 39, 0.98), rgba(34, 24, 18, 0.98));
+      color: var(--text);
+      font: inherit;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .button.primary,
+    .button.generate {
+      background: linear-gradient(180deg, rgba(205, 145, 73, 0.98), rgba(130, 75, 32, 0.98));
+      color: #fff6e6;
+      border-color: rgba(249, 223, 174, 0.26);
+    }
+
+    .button.generate {
+      width: 100%;
+      min-height: 56px;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: inset 0 1px 0 rgba(255, 251, 239, 0.15), 0 14px 22px rgba(106, 53, 16, 0.26);
+    }
+
+    .button.danger {
+      background: linear-gradient(180deg, rgba(130, 60, 51, 0.98), rgba(74, 31, 26, 0.98));
+      color: #fbe1db;
+    }
+
+    .button.secondary {
+      background: linear-gradient(180deg, rgba(88, 66, 50, 0.98), rgba(39, 28, 21, 0.98));
+    }
+
+    .button.hotload {
+      background: linear-gradient(180deg, rgba(164, 111, 47, 0.98), rgba(91, 55, 24, 0.98));
+      border-color: rgba(244, 198, 128, 0.28);
+      color: #fff4e3;
+    }
+
+    .button.overflow {
+      min-width: 40px;
+      padding: 10px 14px;
+      letter-spacing: 0.16em;
+    }
+
+    .button.quiet-danger {
+      background: linear-gradient(180deg, rgba(92, 45, 40, 0.98), rgba(54, 23, 20, 0.98));
+      color: #f6d7d2;
+    }
+
+    .button.emphasis-cancel {
+      background: linear-gradient(180deg, rgba(205, 145, 73, 0.98), rgba(130, 75, 32, 0.98));
+      color: #fff6e6;
+      border-color: rgba(249, 223, 174, 0.26);
+    }
+
+    .zone-overflow-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      min-width: 240px;
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid rgba(244, 198, 128, 0.16);
+      background: linear-gradient(180deg, rgba(39, 28, 21, 0.98), rgba(18, 12, 9, 0.99));
+      box-shadow: var(--shadow);
+      z-index: 15;
+    }
+
+    .zone-overflow-menu[hidden] {
+      display: none;
+    }
+
+    .menu-item {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+    }
+
+    .menu-item:hover,
+    .menu-item:focus-visible {
+      background: rgba(214, 166, 102, 0.12);
+      outline: none;
+    }
+
+    .menu-item.danger-item {
+      color: #f0b7ae;
+    }
+
+    .menu-divider {
+      height: 1px;
+      margin: 8px 4px;
+      background: rgba(244, 198, 128, 0.12);
+    }
+
+    .toast-stack {
+      position: fixed;
+      top: 28px;
+      right: 28px;
+      display: grid;
+      gap: 10px;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .toast {
+      min-width: 320px;
+      max-width: 420px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(244, 198, 128, 0.18);
+      background: linear-gradient(180deg, rgba(39, 28, 21, 0.98), rgba(18, 12, 9, 0.99));
+      color: #fff0d0;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(8, 5, 4, 0.72);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+    }
+
+    .modal-overlay[hidden] {
+      display: none;
+    }
+
+    .modal-card {
+      width: min(100%, 480px);
+      padding: 28px;
+      border-radius: 24px;
+      border: 1px solid rgba(244, 198, 128, 0.18);
+      background: linear-gradient(180deg, rgba(48, 34, 25, 0.98), rgba(20, 14, 10, 0.99));
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 18px;
+    }
+
+    .modal-kicker {
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 11px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 28px;
+      line-height: 1.1;
+      color: #fff2d8;
+    }
+
+    .modal-body {
+      display: grid;
+      gap: 12px;
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+
+    .modal-body p {
+      margin: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modal-input {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(244, 198, 128, 0.18);
+      background: rgba(16, 12, 9, 0.96);
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+    }
+
+    .modal-warning {
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(181, 77, 64, 0.22);
+      background: rgba(83, 34, 28, 0.28);
+      color: #f6d7d2;
+    }
+
+    .room-tab-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 233, 196, 0.06);
+      box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.03);
+    }
+
+    .tab-toggle {
+      cursor: pointer;
+      min-height: 38px;
+      padding: 8px 16px;
+      background: transparent;
+      color: var(--text-soft);
+      position: relative;
+      border: 1px solid transparent;
+    }
+
+    .tab-toggle.is-active {
+      background: linear-gradient(180deg, rgba(171, 116, 57, 0.3), rgba(104, 63, 28, 0.32));
+      color: #fff0d0;
+      border-color: rgba(244, 198, 128, 0.24);
+      box-shadow: inset 0 -4px 0 rgba(224, 154, 65, 0.92);
+    }
+
+    .tab-panel {
+      display: none;
+      padding-top: var(--space-3);
+    }
+
+    .tab-panel.is-active {
+      display: block;
+    }
+
+    .section-block {
+      margin-bottom: var(--space-3);
+      padding: var(--space-2);
+      border-radius: 18px;
+      border: 1px solid rgba(246, 220, 178, 0.08);
+      background:
+        linear-gradient(180deg, rgba(37, 27, 21, 0.92), rgba(24, 18, 14, 0.98));
+      box-shadow: inset 0 1px 0 rgba(255, 251, 243, 0.03);
+    }
+
+    .section-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-2);
+      align-items: center;
+      margin-bottom: var(--space-2);
+    }
+
+    .section-title {
+      font-size: 18px;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: var(--space-2);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field-grid.identity-grid .span-2,
+    .field.span-2 {
+      grid-column: span 2;
+    }
+
+    .coord-grid,
+    .inline-three,
+    .compact-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .field,
+    .checkbox-row,
+    .stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: var(--text-soft);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    .field-label-row {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-1);
+      align-items: center;
+      color: var(--text-soft);
+      font-size: 13px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(245, 216, 172, 0.14);
+      background: linear-gradient(180deg, rgba(18, 13, 10, 0.95), rgba(31, 22, 17, 0.95));
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+      color-scheme: dark;
+      outline: none;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 247, 232, 0.015);
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(212, 155, 82, 0.48);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 3px rgba(190, 123, 60, 0.12);
+    }
+
+    select option {
+      background: var(--panel);
+      color: var(--text);
+      padding: 8px 12px;
+    }
+
+    select option:checked,
+    select option:hover,
+    select option:focus {
+      background: var(--accent-deep);
+      color: #fff6e6;
+    }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .textarea-small {
+      min-height: 92px;
+    }
+
+    .pill-cloud,
+    .readonly-pill-row,
+    .status-pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .option-pill {
+      cursor: pointer;
+      background: linear-gradient(180deg, rgba(58, 43, 33, 0.98), rgba(29, 21, 16, 0.98));
+      color: var(--text-soft);
+      text-transform: none;
+      letter-spacing: 0.02em;
+      min-height: 38px;
+      padding: 9px 14px;
+      font-size: 13px;
+      border-color: rgba(245, 220, 182, 0.1);
+    }
+
+    .option-pill.is-selected {
+      text-transform: none;
+      letter-spacing: 0.02em;
+      background: linear-gradient(180deg, rgba(181, 120, 54, 0.98), rgba(96, 58, 24, 0.98));
+      color: #fff4df;
+      border-color: rgba(255, 224, 177, 0.28);
+    }
+
+    .readonly-pill,
+    .status-pill,
+    .custom-state-pill {
+      text-transform: none;
+      letter-spacing: 0.02em;
+      font-size: 13px;
+      min-height: 34px;
+      padding: 8px 12px;
+    }
+
+    .readonly-pill {
+      background: rgba(120, 117, 109, 0.15);
+      color: #d0c0a8;
+      border-color: rgba(210, 204, 189, 0.1);
+    }
+
+    .status-pill {
+      background: linear-gradient(180deg, rgba(97, 75, 52, 0.96), rgba(53, 40, 28, 0.98));
+      border-color: rgba(221, 191, 136, 0.18);
+      color: #f5e8d0;
+    }
+
+    .status-pill.warn {
+      background: linear-gradient(180deg, rgba(130, 77, 36, 0.98), rgba(80, 44, 18, 0.98));
+    }
+
+    .status-pill.info {
+      background: linear-gradient(180deg, rgba(76, 88, 108, 0.95), rgba(41, 49, 62, 0.98));
+    }
+
+    .status-copy {
+      color: var(--text-soft);
+      line-height: 1.55;
+      margin: 10px 0 0;
+    }
+
+    .preview-grid {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .preview-card,
+    .render-card,
+    .callout,
+    .empty-card,
+    .mini-summary {
+      border-radius: 16px;
+      padding: var(--space-2);
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(242, 214, 173, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 248, 235, 0.02);
+    }
+
+    .preview-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-2);
+    }
+
+    .preview-copy,
+    .render-copy {
+      margin: 0;
+      color: #f2e4ca;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .markup-fragment {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 10px;
+      margin: 0 2px;
+      border-radius: 999px;
+      border: 1px solid rgba(223, 182, 119, 0.18);
+      background: linear-gradient(180deg, rgba(71, 52, 36, 0.96), rgba(42, 29, 21, 0.98));
+      color: #ebcfaa;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .markup-state {
+      color: #f8d79d;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+    }
+
+    .markup-content {
+      color: #d7b78a;
+    }
+
+    .mini-note {
+      margin: 0;
+      color: var(--text-dim);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .small-status {
+      margin: 6px 0 0;
+      color: rgba(216, 193, 157, 0.72);
+      font-size: 12px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    .accordion-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    details.accordion {
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(242, 214, 173, 0.06);
+      overflow: hidden;
+    }
+
+    .accordion-summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      padding: 14px 16px;
+      color: #f5e7cf;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      transition: background 0.18s ease;
+    }
+
+    .accordion-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .accordion-summary-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .summary-selection {
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .accordion-body {
+      padding: 0 16px 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .chevron {
+      color: var(--text-dim);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    details[open] .chevron {
+      transform: rotate(90deg);
+    }
+
+    .row-card,
+    .list-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: minmax(110px, 140px) minmax(0, 1fr) auto;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(240, 214, 170, 0.06);
+    }
+
+    .list-row.empty {
+      grid-template-columns: minmax(0, 1fr);
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .direction-badge,
+    .type-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 7px 12px;
+      min-height: 32px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(239, 214, 171, 0.1);
+      color: #f4e8d3;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stack-note {
+      margin: 0;
+      color: var(--text-soft);
+      line-height: 1.55;
+    }
+
+    .edit-link-row {
+      padding-top: 4px;
+    }
+
+    .text-link {
+      color: rgba(206, 189, 163, 0.72);
+      font-size: 12px;
+      font-style: italic;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .text-link:hover {
+      color: #e7d7bb;
+      border-color: rgba(231, 215, 187, 0.48);
+    }
+
+    .icon-button {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid rgba(233, 201, 142, 0.18);
+      background: linear-gradient(180deg, rgba(72, 52, 39, 0.98), rgba(34, 24, 18, 0.98));
+      color: #f6d8d2;
+      font: inherit;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.18s ease;
+    }
+
+    .icon-button:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(180deg, rgba(130, 60, 51, 0.98), rgba(74, 31, 26, 0.98));
+    }
+
+    .checkbox-inline {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(242, 214, 173, 0.06);
+    }
+
+    .checkbox-inline input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--accent-bright);
+      box-shadow: none;
+    }
+
+    .mode-heading {
+      font-size: 28px;
+      margin-bottom: 4px;
+    }
+
+    .sub-grid {
+      display: grid;
+      gap: var(--space-2);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .footer-note {
+      margin-top: var(--space-3);
+      color: rgba(255, 232, 201, 0.36);
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    @media (max-width: 1200px) {
+      html, body {
+        overflow: auto;
+      }
+
+      body {
+        height: auto;
+      }
+
+      .mockup-page {
+        height: auto;
+      }
+
+      .mockup-shell {
+        grid-template-columns: 1fr;
+        overflow: visible;
+      }
+
+      .zone-editor-shell {
+        min-height: auto;
+      }
+
+      .map-placeholder-shell {
+        min-height: 360px;
+      }
+
+      .zone-editor-shell,
+      .map-placeholder-shell,
+      .room-editor-shell {
+        height: auto;
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: var(--space-2);
+      }
+
+      .app-header,
+      .page-banner,
+      .zone-editor-shell,
+      .room-editor-shell,
+      .context-preview {
+        padding: var(--space-2);
+      }
+
+      .field-grid,
+      .zone-card-grid,
+      .mini-room-grid,
+      .sub-grid,
+      .coord-grid,
+      .inline-three,
+      .compact-grid,
+      .row-card,
+      .list-row {
+        grid-template-columns: 1fr;
+      }
+
+      .field-grid.identity-grid .span-2,
+      .field.span-2 {
+        grid-column: auto;
+      }
+
+      .top-actions,
+      .app-header,
+      .editor-heading-row,
+      .zone-title-row,
+      .preview-toolbar,
+      .page-banner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .editor-meta {
+        margin-left: 0;
+      }
+
+      .zone-title-actions {
+        margin-left: 0;
+      }
+
+      .header-zone-switcher select {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .toast-stack {
+        left: 16px;
+        right: 16px;
+        top: 16px;
+      }
+
+      .toast {
+        min-width: 0;
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="modal-overlay" id="modal-overlay" hidden>
+    <div class="modal-card" id="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title"></div>
+  </div>
+
+  <div class="mockup-page">
+    <header class="app-header">
+      <div class="app-header-copy">
+        <h1 class="app-title">DireBuilder</h1>
+        <label class="header-zone-switcher" for="header-zone-select">
+          <span>Editing: Builder2 Zone</span>
+          <select id="header-zone-select">
+            <option selected>builder2</option>
+            <option>Bramblefold</option>
+            <option>Roetcave</option>
+            <option>Caerwall Keep</option>
+            <option>The Old Bridge</option>
+            <option disabled>--- Archived ---</option>
+            <option>Old Outpost (archived)</option>
+            <option>Cliffside Ruins (archived)</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <div class="mockup-shell">
+      <section class="zone-editor-shell" aria-label="Redesigned builder left column">
+        <div class="zone-editor-header">
+          <div class="zone-title-row">
+            <div class="editor-heading-copy">
+              <div class="editor-kicker">Zone Editor</div>
+              <h2 class="editor-title">Builder2</h2>
+            </div>
+            <div class="zone-title-actions">
+              <button class="button primary" type="button">Save Zone</button>
+              <button class="button hotload" type="button" id="hot-load-button" title="Push saved zone to live game">&#9889; Hot Load</button>
+              <button class="button secondary overflow" type="button" id="zone-overflow-button" aria-haspopup="true" aria-expanded="false" aria-controls="zone-overflow-menu">...</button>
+              <div class="zone-overflow-menu" id="zone-overflow-menu" hidden>
+                <button class="menu-item" type="button" id="new-zone-menu-item">New Zone</button>
+                <button class="menu-item" type="button" id="discard-changes-menu-item">Discard Changes</button>
+                <div class="menu-divider" aria-hidden="true"></div>
+                <button class="menu-item danger-item" type="button" id="delete-zone-menu-item">Delete Zone</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="zone-properties">
+          <div class="accordion-list">
+            <details class="accordion">
+              <summary class="accordion-summary">
+                <span class="accordion-summary-copy"><span>Setting Type</span><span class="summary-selection">&bull; Late-medieval</span></span>
+                <span class="chevron">&rsaquo;</span>
+              </summary>
+              <div class="accordion-body">
+                <div class="pill-cloud">
+                  <button class="option-pill is-selected" type="button">Late-medieval</button>
+                  <button class="option-pill" type="button">Renaissance</button>
+                  <button class="option-pill" type="button">Early modern</button>
+                  <button class="option-pill" type="button">Ancient</button>
+                  <button class="option-pill" type="button">Bronze age</button>
+                  <button class="option-pill" type="button">Iron age</button>
+                  <button class="option-pill" type="button">Pre-modern</button>
+                  <button class="option-pill" type="button">Industrial revolution</button>
+                </div>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary">
+                <span class="accordion-summary-copy"><span>Era</span><span class="summary-selection">&bull; (none)</span></span>
+                <span class="chevron">&rsaquo;</span>
+              </summary>
+              <div class="accordion-body">
+                <div class="pill-cloud">
+                  <button class="option-pill" type="button">Peaceful</button>
+                  <button class="option-pill" type="button">Wartime</button>
+                  <button class="option-pill" type="button">Recovering</button>
+                  <button class="option-pill" type="button">Decline</button>
+                  <button class="option-pill" type="button">Renaissance</button>
+                  <button class="option-pill" type="button">Frontier</button>
+                  <button class="option-pill" type="button">Imperial</button>
+                </div>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary">
+                <span class="accordion-summary-copy"><span>Cultural Palette</span><span class="summary-selection">&bull; Eastern</span></span>
+                <span class="chevron">&rsaquo;</span>
+              </summary>
+              <div class="accordion-body">
+                <div class="pill-cloud">
+                  <button class="option-pill" type="button">Generic Fantasy</button>
+                  <button class="option-pill" type="button">Norse Inspired</button>
+                  <button class="option-pill" type="button">Mediterranean</button>
+                  <button class="option-pill is-selected" type="button">Eastern</button>
+                  <button class="option-pill" type="button">Desert Kingdom</button>
+                  <button class="option-pill" type="button">Swampland</button>
+                  <button class="option-pill" type="button">Forest Elven</button>
+                  <button class="option-pill" type="button">Dwarven Hold</button>
+                  <button class="option-pill" type="button">Multicultural</button>
+                </div>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary">
+                <span class="accordion-summary-copy"><span>Mood</span><span class="summary-selection">&bull; Bustling, Tense</span></span>
+                <span class="chevron">&rsaquo;</span>
+              </summary>
+              <div class="accordion-body">
+                <div class="pill-cloud">
+                  <button class="option-pill is-selected" type="button">Bustling</button>
+                  <button class="option-pill" type="button">Quiet</button>
+                  <button class="option-pill is-selected" type="button">Tense</button>
+                  <button class="option-pill" type="button">Oppressive</button>
+                  <button class="option-pill" type="button">Cheerful</button>
+                  <button class="option-pill" type="button">Haunted</button>
+                  <button class="option-pill" type="button">Sacred</button>
+                </div>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary">
+                <span class="accordion-summary-copy"><span>Climate</span><span class="summary-selection">&bull; Temperate</span></span>
+                <span class="chevron">&rsaquo;</span>
+              </summary>
+              <div class="accordion-body">
+                <div class="pill-cloud">
+                  <button class="option-pill" type="button">Tropical</button>
+                  <button class="option-pill is-selected" type="button">Temperate</button>
+                  <button class="option-pill" type="button">Arid</button>
+                  <button class="option-pill" type="button">Cold</button>
+                  <button class="option-pill" type="button">Mountain</button>
+                  <button class="option-pill" type="button">Coastal</button>
+                  <button class="option-pill" type="button">Polar</button>
+                </div>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary">
+                <span class="accordion-summary-copy"><span>Voice Notes</span><span class="summary-selection">&bull; (set)</span></span>
+                <span class="chevron">&rsaquo;</span>
+              </summary>
+              <div class="accordion-body">
+                <label class="field">
+                  <span>Voice Notes</span>
+                  <textarea>Late-medieval Eastern trade city. Mood is bustling along the river docks, tense in the high quarter where the lord's hall faces unrest. Voice should reflect mercantile bustle, foreign-quarter cosmopolitanism, and the undercurrent of political anxiety.</textarea>
+                </label>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary">
+                <span class="accordion-summary-copy"><span>Zone Browser</span><span class="summary-selection">&bull; Builder2 + 4 others</span></span>
+                <span class="chevron">&rsaquo;</span>
+              </summary>
+              <div class="accordion-body">
+                <div class="zone-browser-list">
+                  <div class="zone-browser-row is-active">
+                    <div class="zone-browser-name"><strong>Builder2</strong></div>
+                    <span class="small-badge">Editing</span>
+                  </div>
+                  <div class="zone-browser-row">
+                    <div class="zone-browser-name">Bramblefold</div>
+                  </div>
+                  <div class="zone-browser-row">
+                    <div class="zone-browser-name">Roetcave</div>
+                  </div>
+                  <div class="zone-browser-row">
+                    <div class="zone-browser-name">Caerwall Keep</div>
+                  </div>
+                  <div class="zone-browser-row">
+                    <div class="zone-browser-name">The Old Bridge</div>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="map-placeholder-shell" aria-label="Map workspace placeholder">
+        <div class="map-placeholder-copy">MAP WORKSPACE<br>(map graph and tools shown here in production)</div>
+      </section>
+
+      <section class="room-editor-shell" aria-label="Redesigned builder right column">
+        <div class="mode-switcher" role="tablist" aria-label="Editor mode switcher">
+          <span class="mode-switcher-label">Mockup: switch mode</span>
+          <button class="mode-toggle is-active" type="button" data-mode-target="room-mode" aria-selected="true">Room Editing</button>
+          <button class="mode-toggle" type="button" data-mode-target="npc-mode" aria-selected="false">NPC Editing</button>
+          <button class="mode-toggle" type="button" data-mode-target="item-mode" aria-selected="false">Item Editing</button>
+          <button class="mode-toggle" type="button" data-mode-target="edge-mode" aria-selected="false">Edge Editing</button>
+        </div>
+
+        <section id="room-mode" class="editor-mode is-active" data-mode-panel>
+          <div class="sticky-room-actions">
+            <div class="editor-header">
+              <div class="editor-heading-row">
+                <div class="editor-heading-copy">
+                  <div class="editor-kicker">Room Editor</div>
+                  <h2 class="editor-title">CRO_550_350</h2>
+                </div>
+                <div class="editor-meta">
+                  <span class="readonly-pill">Landing</span>
+                  <span class="readonly-pill">City</span>
+                </div>
+                <div class="button-row">
+                  <button class="button primary" type="button">Save Room</button>
+                  <button class="button danger" type="button">Delete Room</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="room-tab-bar" role="tablist" aria-label="Room editor tabs">
+              <button class="tab-toggle" type="button" data-room-tab="identity">Identity</button>
+              <button class="tab-toggle is-active" type="button" data-room-tab="description">Description</button>
+              <button class="tab-toggle" type="button" data-room-tab="tags">Tags</button>
+              <button class="tab-toggle" type="button" data-room-tab="stateful">Stateful</button>
+              <button class="tab-toggle" type="button" data-room-tab="connections">Connections</button>
+              <button class="tab-toggle" type="button" data-room-tab="population">Population</button>
+            </div>
+          </div>
+
+          <section id="identity" class="tab-panel" data-room-panel>
+            <div class="section-block">
+              <div class="field-grid identity-grid">
+                <label class="field">
+                  <span>Name</span>
+                  <input type="text" value="CRO_550_350">
+                </label>
+                <label class="field">
+                  <span>Short Description</span>
+                  <input type="text" value="A merchant quarter street">
+                </label>
+                <label class="field">
+                  <span>Environment</span>
+                  <select>
+                    <option selected>City</option>
+                    <option>Wilderness</option>
+                    <option>Interior</option>
+                    <option>Cave</option>
+                    <option>Threshold</option>
+                    <option>Bridge</option>
+                    <option>Temple</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Zone</span>
+                  <select>
+                    <option selected>Landing</option>
+                    <option>Bramblefold</option>
+                    <option>Roetcave</option>
+                    <option>Caerwall Keep</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Room Color</span>
+                  <select>
+                    <option selected>Standard</option>
+                    <option>Shop</option>
+                    <option>District Hub</option>
+                    <option>Danger</option>
+                  </select>
+                </label>
+                <div class="field span-2">
+                  <span>Map coordinates</span>
+                  <div class="coord-grid">
+                    <label class="field">
+                      <span>Map X</span>
+                      <input type="number" value="550">
+                    </label>
+                    <label class="field">
+                      <span>Map Y</span>
+                      <input type="number" value="350">
+                    </label>
+                    <label class="field">
+                      <span>Map Layer</span>
+                      <input type="number" value="0">
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="description" class="tab-panel is-active" data-room-panel>
+            <div class="section-block preview-grid">
+              <button class="button generate" type="button">Generate Description</button>
+
+              <div class="preview-card">
+                <div class="preview-toolbar">
+                  <div>
+                    <div class="section-title">Generated markup preview</div>
+                    <p class="small-status">AI-generated</p>
+                  </div>
+                </div>
+                <p class="preview-copy">
+                  Stone Lane runs between fitted cobbles and close-set merchant fronts, its worn surface shaped by steady foot traffic.
+                  The lane smells faintly of spice, tar, and river damp
+                  <span class="markup-fragment"><span class="markup-state">morning</span><span class="markup-content">with bakers opening shutters and first carts rattling in</span></span>
+                  <span class="markup-fragment"><span class="markup-state">evening</span><span class="markup-content">as lamps flare one by one over the shop signs</span></span>
+                  <span class="markup-fragment"><span class="markup-state">night</span><span class="markup-content">with trade quieted to the scrape of a late handcart</span></span>.
+                  Underfoot, the stones keep their smooth wear
+                  <span class="markup-fragment"><span class="markup-state">rain</span><span class="markup-content">and gloss dark with rainwater gathered in the seams</span></span>
+                  <span class="markup-fragment"><span class="markup-state">snow</span><span class="markup-content">with white caught in the shallow joins between them</span></span>
+                  <span class="markup-fragment"><span class="markup-state">winter</span><span class="markup-content">and hold a brittle frost where the buildings block the sun</span></span>.
+                  Storefronts lean close on both sides
+                  <span class="markup-fragment"><span class="markup-state">invasion</span><span class="markup-content">with several shutters barred and trade chatter held low</span></span>.
+                </p>
+              </div>
+
+              <div class="render-card">
+                <div class="preview-toolbar">
+                  <label class="field" style="min-width: 220px; margin: 0;">
+                    <span>Preview as:</span>
+                    <select id="state-preview-select">
+                      <option>Default</option>
+                      <option>Morning + Clear</option>
+                      <option>Winter Night + Snow</option>
+                      <option selected>Evening + Rain</option>
+                      <option>Night + Invasion</option>
+                    </select>
+                  </label>
+                  <p class="mini-note">Rendered preview with active world state applied.</p>
+                </div>
+                <p class="render-copy" id="rendered-preview-copy">Stone Lane runs between fitted cobbles and close-set merchant fronts, its worn surface shaped by steady foot traffic. The lane smells faintly of spice, tar, and river damp as lamps flare one by one over the shop signs. Underfoot, the stones keep their smooth wear and gloss dark with rainwater gathered in the seams. Storefronts lean close on both sides.</p>
+              </div>
+
+              <div class="edit-link-row">
+                <a class="text-link" href="#manual-description">Edit description manually</a>
+              </div>
+            </div>
+          </section>
+
+          <section id="tags" class="tab-panel" data-room-panel>
+            <div class="section-block">
+              <div class="section-title-row">
+                <h4 class="section-title">Inherited Tags</h4>
+              </div>
+              <div class="readonly-pill-row">
+                <span class="readonly-pill">merchant-quarter</span>
+                <span class="readonly-pill">trade-city</span>
+                <span class="readonly-pill">late-medieval</span>
+              </div>
+            </div>
+
+            <div class="accordion-list">
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Structure</span><span class="summary-selection">&bull; Street</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill is-selected" type="button">Street</button>
+                    <button class="option-pill" type="button">Square</button>
+                    <button class="option-pill" type="button">Intersection</button>
+                    <button class="option-pill" type="button">Plaza</button>
+                    <button class="option-pill" type="button">Alley</button>
+                    <button class="option-pill" type="button">Courtyard</button>
+                    <button class="option-pill" type="button">Building Interior</button>
+                    <button class="option-pill" type="button">Threshold</button>
+                    <button class="option-pill" type="button">Bridge</button>
+                    <button class="option-pill" type="button">Dock</button>
+                    <button class="option-pill" type="button">Stair</button>
+                    <button class="option-pill" type="button">Hallway</button>
+                    <button class="option-pill" type="button">Chamber</button>
+                    <button class="option-pill" type="button">Entrance</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Function</span><span class="summary-selection">&bull; Market Stall</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill" type="button">Shop</button>
+                    <button class="option-pill" type="button">Tavern</button>
+                    <button class="option-pill" type="button">Inn</button>
+                    <button class="option-pill" type="button">Temple</button>
+                    <button class="option-pill" type="button">Guild Hall</button>
+                    <button class="option-pill" type="button">Forge</button>
+                    <button class="option-pill" type="button">Bakery</button>
+                    <button class="option-pill" type="button">Brothel</button>
+                    <button class="option-pill" type="button">Jail</button>
+                    <button class="option-pill" type="button">Residence</button>
+                    <button class="option-pill" type="button">Barracks</button>
+                    <button class="option-pill" type="button">Library</button>
+                    <button class="option-pill" type="button">Warehouse</button>
+                    <button class="option-pill is-selected" type="button">Market Stall</button>
+                    <button class="option-pill" type="button">Kitchen</button>
+                    <button class="option-pill" type="button">Cellar</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Feature</span><span class="summary-selection">&bull; (none)</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill" type="button">Fountain</button>
+                    <button class="option-pill" type="button">Statue</button>
+                    <button class="option-pill" type="button">Well</button>
+                    <button class="option-pill" type="button">Signpost</button>
+                    <button class="option-pill" type="button">Gibbet</button>
+                    <button class="option-pill" type="button">Shrine</button>
+                    <button class="option-pill" type="button">Well House</button>
+                    <button class="option-pill" type="button">Firepit</button>
+                    <button class="option-pill" type="button">Altar</button>
+                    <button class="option-pill" type="button">Pulpit</button>
+                    <button class="option-pill" type="button">Throne</button>
+                    <button class="option-pill" type="button">Hearth</button>
+                    <button class="option-pill" type="button">Workbench</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Condition</span><span class="summary-selection">&bull; Well Maintained</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill" type="button">Pristine</button>
+                    <button class="option-pill is-selected" type="button">Well Maintained</button>
+                    <button class="option-pill" type="button">Worn</button>
+                    <button class="option-pill" type="button">Crumbling</button>
+                    <button class="option-pill" type="button">Burnt Out</button>
+                    <button class="option-pill" type="button">Abandoned</button>
+                    <button class="option-pill" type="button">Refurbished</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Custom Tags</span><span class="summary-selection">&bull; (none)</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="button-row">
+                    <button class="ghost-pill" type="button">+ add custom</button>
+                  </div>
+                  <p class="mini-note">No custom tags attached yet.</p>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Atmosphere: Materials</span><span class="summary-selection">&bull; Fitted Cobbles, Stone Walls</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill is-selected" type="button">Fitted Cobbles</button>
+                    <button class="option-pill" type="button">Packed Dirt</button>
+                    <button class="option-pill" type="button">Timber Walls</button>
+                    <button class="option-pill is-selected" type="button">Stone Walls</button>
+                    <button class="option-pill" type="button">Thatched Roof</button>
+                    <button class="option-pill" type="button">Slate Roof</button>
+                    <button class="option-pill" type="button">Plaster Walls</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Atmosphere: Social Character</span><span class="summary-selection">&bull; Bustling, Watchful</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill is-selected" type="button">Bustling</button>
+                    <button class="option-pill" type="button">Quiet</button>
+                    <button class="option-pill is-selected" type="button">Watchful</button>
+                    <button class="option-pill" type="button">Affluent</button>
+                    <button class="option-pill" type="button">Threadbare</button>
+                    <button class="option-pill" type="button">Suspicious</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Atmosphere: Surroundings</span><span class="summary-selection">&bull; Shopfronts, Signboards</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill is-selected" type="button">Shopfronts</button>
+                    <button class="option-pill is-selected" type="button">Signboards</button>
+                    <button class="option-pill" type="button">Canopies</button>
+                    <button class="option-pill" type="button">Lantern Poles</button>
+                    <button class="option-pill" type="button">Stall Awnings</button>
+                    <button class="option-pill" type="button">Alley Mouths</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Atmosphere: Sensory</span><span class="summary-selection">&bull; Spice, Tar, River Damp</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill is-selected" type="button">Spice</button>
+                    <button class="option-pill is-selected" type="button">Tar</button>
+                    <button class="option-pill is-selected" type="button">River Damp</button>
+                    <button class="option-pill" type="button">Horse Sweat</button>
+                    <button class="option-pill" type="button">Bread Smoke</button>
+                    <button class="option-pill" type="button">Fish Brine</button>
+                  </div>
+                </div>
+              </details>
+
+              <details class="accordion">
+                <summary class="accordion-summary">
+                  <span class="accordion-summary-copy"><span>Atmosphere: Upkeep</span><span class="summary-selection">&bull; Well Maintained</span></span>
+                  <span class="chevron">&rsaquo;</span>
+                </summary>
+                <div class="accordion-body">
+                  <div class="pill-cloud">
+                    <button class="option-pill" type="button">Pristine</button>
+                    <button class="option-pill is-selected" type="button">Well Maintained</button>
+                    <button class="option-pill" type="button">Patch-Repaired</button>
+                    <button class="option-pill" type="button">Neglected</button>
+                    <button class="option-pill" type="button">Falling Apart</button>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </section>
+
+          <section id="stateful" class="tab-panel" data-room-panel>
+            <div class="section-block">
+              <div class="section-title-row"><h4 class="section-title">Active Room States</h4></div>
+              <div class="status-pill-row">
+                <span class="status-pill warn">burning</span>
+                <span class="status-pill info">foggy</span>
+                <span class="status-pill">flooded</span>
+              </div>
+              <p class="status-copy">Currently active states inferred from world engine. These are shown here so the builder can quickly sanity-check how inline markup will behave in live conditions.</p>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title-row">
+                <h4 class="section-title">Custom States</h4>
+                <button class="ghost-pill" type="button">Add Custom State</button>
+              </div>
+              <div class="empty-card">
+                <p class="mini-note">No custom states defined for this room.</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="connections" class="tab-panel" data-room-panel>
+            <div class="section-block">
+              <div class="section-title-row">
+                <h4 class="section-title">Exits</h4>
+                <span class="ghost-pill">3 active</span>
+              </div>
+              <div class="stack">
+                <div class="row-card">
+                  <span class="direction-badge">west</span>
+                  <select>
+                    <option selected>Normal</option>
+                    <option>Door</option>
+                    <option>Gate</option>
+                    <option>Climb</option>
+                  </select>
+                  <button class="icon-button" type="button" aria-label="Delete west exit">&times;</button>
+                </div>
+                <div class="row-card">
+                  <span class="direction-badge">northwest</span>
+                  <select>
+                    <option selected>Normal</option>
+                    <option>Door</option>
+                    <option>Gate</option>
+                    <option>Climb</option>
+                  </select>
+                  <button class="icon-button" type="button" aria-label="Delete northwest exit">&times;</button>
+                </div>
+                <div class="row-card">
+                  <span class="direction-badge">southwest</span>
+                  <select>
+                    <option selected>Normal</option>
+                    <option>Door</option>
+                    <option>Gate</option>
+                    <option>Climb</option>
+                  </select>
+                  <button class="icon-button" type="button" aria-label="Delete southwest exit">&times;</button>
+                </div>
+              </div>
+              <div class="button-row" style="margin-top: 16px;">
+                <button class="button secondary" type="button">Add Exit</button>
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title-row">
+                <h4 class="section-title">Details (look targets)</h4>
+                <button class="ghost-pill" type="button">Add Detail</button>
+              </div>
+              <div class="list-row empty">No details attached yet.</div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title-row"><h4 class="section-title">Ambient Messages</h4></div>
+              <div class="field-grid">
+                <label class="field">
+                  <span>Message Rate</span>
+                  <input type="number" value="0">
+                </label>
+                <label class="field span-2">
+                  <span>Messages</span>
+                  <textarea class="textarea-small" placeholder="No ambient messages configured."></textarea>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section id="population" class="tab-panel" data-room-panel>
+            <div class="section-block">
+              <div class="section-title-row"><h4 class="section-title">Assigned NPCs</h4></div>
+              <p class="stack-note">No NPCs assigned.</p>
+              <div class="row-card" style="grid-template-columns: minmax(0, 1fr) auto;">
+                <select>
+                  <option selected>Select NPC...</option>
+                  <option>Dock Runner</option>
+                  <option>Lamplighter</option>
+                  <option>Watch Sergeant</option>
+                </select>
+                <button class="button secondary" type="button">Assign NPC</button>
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title-row"><h4 class="section-title">Assigned Items</h4></div>
+              <p class="stack-note">No items assigned.</p>
+              <div class="row-card" style="grid-template-columns: minmax(0, 1fr) auto;">
+                <select>
+                  <option selected>Select item...</option>
+                  <option>Lantern</option>
+                  <option>Crate of spice</option>
+                  <option>Merchant signboard</option>
+                </select>
+                <button class="button secondary" type="button">Add Item</button>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="npc-mode" class="editor-mode" data-mode-panel>
+          <div class="editor-header">
+            <div class="editor-kicker">NPC Editor</div>
+            <h2 class="mode-heading">Dock Runner</h2>
+            <p class="tab-intro">Only NPC controls show up when an NPC is selected. Room-only sections disappear entirely instead of remaining as irrelevant clutter below the fold.</p>
+          </div>
+
+          <div class="section-block">
+            <div class="field-grid">
+              <label class="field">
+                <span>Name</span>
+                <input type="text" value="Dock Runner">
+              </label>
+              <label class="field">
+                <span>Type</span>
+                <select>
+                  <option>civilian</option>
+                  <option selected>hostile</option>
+                  <option>vendor</option>
+                  <option>quest</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="accordion-list">
+            <details class="accordion" open>
+              <summary class="accordion-summary"><span>Stats</span><span class="chevron">&rsaquo;</span></summary>
+              <div class="accordion-body compact-grid">
+                <label class="field"><span>Level</span><input type="number" value="7"></label>
+                <label class="field"><span>Health</span><input type="number" value="84"></label>
+                <label class="field"><span>Damage</span><input type="number" value="12"></label>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary"><span>Behavior</span><span class="chevron">&rsaquo;</span></summary>
+              <div class="accordion-body">
+                <p class="mini-note">Behavior package placeholder for patrol, aggro radius, and movement rules.</p>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary"><span>Vendor</span><span class="chevron">&rsaquo;</span></summary>
+              <div class="accordion-body">
+                <p class="mini-note">Vendor inventory controls collapsed in mockup mode.</p>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary"><span>Dialogue</span><span class="chevron">&rsaquo;</span></summary>
+              <div class="accordion-body">
+                <p class="mini-note">Dialogue tree and bark editing placeholder.</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="button-row" style="margin-top: 24px;">
+            <button class="button primary" type="button">Save NPC</button>
+            <button class="button danger" type="button">Delete NPC</button>
+          </div>
+        </section>
+
+        <section id="item-mode" class="editor-mode" data-mode-panel>
+          <div class="editor-header">
+            <div class="editor-kicker">Item Editor</div>
+            <h2 class="mode-heading">Brass-bound cudgel</h2>
+            <p class="tab-intro">Item editing gets its own compact inspector instead of sharing vertical space with room tags, room states, NPC forms, and edge metadata.</p>
+          </div>
+
+          <div class="section-block">
+            <div class="field-grid">
+              <label class="field">
+                <span>Name</span>
+                <input type="text" value="Brass-bound cudgel">
+              </label>
+              <label class="field">
+                <span>Category</span>
+                <select>
+                  <option>armor</option>
+                  <option selected>weapon</option>
+                  <option>consumable</option>
+                  <option>container</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Value</span>
+                <input type="number" value="42">
+              </label>
+              <label class="field">
+                <span>Weight</span>
+                <input type="number" value="6">
+              </label>
+            </div>
+            <div class="checkbox-row" style="margin-top: 16px;">
+              <label class="checkbox-inline"><input type="checkbox"><span>Stackable</span></label>
+            </div>
+          </div>
+
+          <div class="accordion-list">
+            <details class="accordion" open>
+              <summary class="accordion-summary"><span>Equipment</span><span class="chevron">&rsaquo;</span></summary>
+              <div class="accordion-body compact-grid">
+                <label class="field"><span>Slot</span><select><option selected>main hand</option></select></label>
+                <label class="field"><span>Damage</span><input type="number" value="5"></label>
+                <label class="field"><span>Speed</span><input type="number" value="2"></label>
+              </div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary"><span>Consumable</span><span class="chevron">&rsaquo;</span></summary>
+              <div class="accordion-body"><p class="mini-note">Consumable settings placeholder.</p></div>
+            </details>
+
+            <details class="accordion">
+              <summary class="accordion-summary"><span>Container</span><span class="chevron">&rsaquo;</span></summary>
+              <div class="accordion-body"><p class="mini-note">Container settings placeholder.</p></div>
+            </details>
+          </div>
+
+          <div class="button-row" style="margin-top: 24px;">
+            <button class="button primary" type="button">Save Item</button>
+            <button class="button danger" type="button">Delete Item</button>
+          </div>
+        </section>
+
+        <section id="edge-mode" class="editor-mode" data-mode-panel>
+          <div class="editor-header">
+            <div class="editor-kicker">Edge Editor</div>
+            <h2 class="mode-heading">west connection</h2>
+            <p class="tab-intro">Edge editing is intentionally tiny. When a connection is selected, the right column should stop pretending it is still a room inspector.</p>
+          </div>
+
+          <div class="section-block">
+            <div class="field-grid">
+              <label class="field">
+                <span>Edge Type</span>
+                <select>
+                  <option selected>Spatial</option>
+                  <option>Special</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Special Label</span>
+                <input type="text" placeholder="gate">
+              </label>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="button primary" type="button">Apply Edge</button>
+            <button class="button danger" type="button">Delete Edge</button>
+          </div>
+        </section>
+      </section>
+    </div>
+
+    <p class="footer-note">Static HTML mockup only. No real builder wiring, no live data, no framework runtime.</p>
+  </div>
+
+  <script>
+    (function () {
+      const modeButtons = Array.from(document.querySelectorAll('[data-mode-target]'));
+      const modePanels = Array.from(document.querySelectorAll('[data-mode-panel]'));
+      const roomTabs = Array.from(document.querySelectorAll('[data-room-tab]'));
+      const roomPanels = Array.from(document.querySelectorAll('[data-room-panel]'));
+      const previewSelect = document.getElementById('state-preview-select');
+      const previewCopy = document.getElementById('rendered-preview-copy');
+      const toastStack = document.getElementById('toast-stack');
+      const modalOverlay = document.getElementById('modal-overlay');
+      const modalCard = document.getElementById('modal-card');
+      const overflowButton = document.getElementById('zone-overflow-button');
+      const overflowMenu = document.getElementById('zone-overflow-menu');
+      const hotLoadButton = document.getElementById('hot-load-button');
+      const discardChangesMenuItem = document.getElementById('discard-changes-menu-item');
+      const deleteZoneMenuItem = document.getElementById('delete-zone-menu-item');
+      const zoneName = 'Builder2';
+      let activeModal = null;
+
+      const previewStates = {
+        'Default': 'Stone Lane runs between fitted cobbles and close-set merchant fronts, its worn surface shaped by steady foot traffic. The lane smells faintly of spice, tar, and river damp. Underfoot, the stones keep their smooth wear. Storefronts lean close on both sides.',
+        'Morning + Clear': 'Stone Lane runs between fitted cobbles and close-set merchant fronts, its worn surface shaped by steady foot traffic. The lane smells faintly of spice, tar, and river damp with bakers opening shutters and first carts rattling in. Underfoot, the stones keep their smooth wear. Storefronts lean close on both sides.',
+        'Winter Night + Snow': 'Stone Lane runs between fitted cobbles and close-set merchant fronts, its worn surface shaped by steady foot traffic. The lane smells faintly of spice, tar, and river damp with trade quieted to the scrape of a late handcart. Underfoot, the stones keep their smooth wear with white caught in the shallow joins between them and hold a brittle frost where the buildings block the sun. Storefronts lean close on both sides.',
+        'Evening + Rain': 'Stone Lane runs between fitted cobbles and close-set merchant fronts, its worn surface shaped by steady foot traffic. The lane smells faintly of spice, tar, and river damp as lamps flare one by one over the shop signs. Underfoot, the stones keep their smooth wear and gloss dark with rainwater gathered in the seams. Storefronts lean close on both sides.',
+        'Night + Invasion': 'Stone Lane runs between fitted cobbles and close-set merchant fronts, its worn surface shaped by steady foot traffic. The lane smells faintly of spice, tar, and river damp with trade quieted to the scrape of a late handcart. Underfoot, the stones keep their smooth wear. Storefronts lean close on both sides with several shutters barred and trade chatter held low.'
+      };
+
+      function setMode(targetId) {
+        modeButtons.forEach((button) => {
+          const active = button.dataset.modeTarget === targetId;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        modePanels.forEach((panel) => {
+          panel.classList.toggle('is-active', panel.id === targetId);
+        });
+      }
+
+      function setRoomTab(targetId) {
+        roomTabs.forEach((button) => {
+          button.classList.toggle('is-active', button.dataset.roomTab === targetId);
+        });
+        roomPanels.forEach((panel) => {
+          panel.classList.toggle('is-active', panel.id === targetId);
+        });
+      }
+
+      function showToast(message) {
+        if (!toastStack) {
+          return;
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        toastStack.appendChild(toast);
+        requestAnimationFrame(() => {
+          toast.classList.add('is-visible');
+        });
+        window.setTimeout(() => {
+          toast.classList.remove('is-visible');
+          window.setTimeout(() => {
+            toast.remove();
+          }, 180);
+        }, 2600);
+      }
+
+      function closeOverflowMenu() {
+        if (!overflowMenu || !overflowButton) {
+          return;
+        }
+        overflowMenu.hidden = true;
+        overflowButton.setAttribute('aria-expanded', 'false');
+      }
+
+      function openOverflowMenu() {
+        if (!overflowMenu || !overflowButton) {
+          return;
+        }
+        overflowMenu.hidden = false;
+        overflowButton.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeModal() {
+        if (!modalOverlay || !modalCard) {
+          return;
+        }
+        modalOverlay.hidden = true;
+        modalCard.innerHTML = '';
+        activeModal = null;
+      }
+
+      function showModal(config) {
+        if (!modalOverlay || !modalCard) {
+          return;
+        }
+        activeModal = config;
+        modalCard.innerHTML = '';
+
+        if (config.kicker) {
+          const kicker = document.createElement('div');
+          kicker.className = 'modal-kicker';
+          kicker.textContent = config.kicker;
+          modalCard.appendChild(kicker);
+        }
+
+        const title = document.createElement('h3');
+        title.className = 'modal-title';
+        title.id = 'modal-title';
+        title.textContent = config.title;
+        modalCard.appendChild(title);
+
+        const body = document.createElement('div');
+        body.className = 'modal-body';
+        (config.body || []).forEach((entry) => {
+          const paragraph = document.createElement('p');
+          paragraph.textContent = entry;
+          body.appendChild(paragraph);
+        });
+
+        if (config.warning) {
+          const warning = document.createElement('div');
+          warning.className = 'modal-warning';
+          warning.textContent = config.warning;
+          body.appendChild(warning);
+        }
+
+        let confirmInput = null;
+        let confirmActionButton = null;
+        if (config.confirmInput) {
+          const label = document.createElement('label');
+          label.className = 'field';
+
+          const text = document.createElement('span');
+          text.textContent = config.confirmInput.label;
+          label.appendChild(text);
+
+          confirmInput = document.createElement('input');
+          confirmInput.className = 'modal-input';
+          confirmInput.type = 'text';
+          confirmInput.autocomplete = 'off';
+          label.appendChild(confirmInput);
+          body.appendChild(label);
+        }
+
+        modalCard.appendChild(body);
+
+        const actions = document.createElement('div');
+        actions.className = 'modal-actions';
+
+        const cancelButton = document.createElement('button');
+        cancelButton.type = 'button';
+        cancelButton.className = 'button emphasis-cancel';
+        cancelButton.textContent = config.cancelText || 'Cancel';
+        cancelButton.addEventListener('click', closeModal);
+        actions.appendChild(cancelButton);
+
+        (config.actions || []).forEach((actionConfig) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `button ${actionConfig.className || 'secondary'}`;
+          button.textContent = actionConfig.label;
+          if (actionConfig.disabled) {
+            button.disabled = true;
+          }
+          button.addEventListener('click', function () {
+            actionConfig.onClick();
+          });
+          if (actionConfig.isPrimaryAction) {
+            confirmActionButton = button;
+          }
+          actions.appendChild(button);
+        });
+
+        modalCard.appendChild(actions);
+        modalOverlay.hidden = false;
+        window.setTimeout(() => cancelButton.focus(), 0);
+
+        if (confirmInput && confirmActionButton && config.confirmInput) {
+          const expectedValue = config.confirmInput.expected;
+          confirmInput.addEventListener('input', function () {
+            confirmActionButton.disabled = confirmInput.value !== expectedValue;
+          });
+        }
+      }
+
+      function showHotLoadModal() {
+        showModal({
+          kicker: 'Hot Load To Live Game',
+          title: 'Push the saved version of Builder2 to the live running game?',
+          body: [
+            'Players currently in this zone will see the updated content immediately on their next look.',
+            'Any unsaved in-browser changes are NOT included - only what is currently saved to disk.'
+          ],
+          actions: [
+            {
+              label: 'Push to Live',
+              className: 'secondary',
+              onClick: function () {
+                closeModal();
+              }
+            }
+          ]
+        });
+      }
+
+      function showDiscardChangesModal() {
+        showModal({
+          kicker: 'Discard Unsaved Changes?',
+          title: 'Reload Builder2 from disk?',
+          body: [
+            'All unsaved in-browser edits will be lost.',
+            'The live game will not be affected.'
+          ],
+          actions: [
+            {
+              label: 'Discard Changes',
+              className: 'quiet-danger',
+              onClick: function () {
+                closeModal();
+              }
+            }
+          ]
+        });
+      }
+
+      function showDeleteStepTwo() {
+        showModal({
+          kicker: 'Confirm Permanent Deletion',
+          title: 'This action cannot be undone.',
+          body: [
+            'All rooms, NPCs, items, and connections in zone Builder2 will be permanently deleted from disk.'
+          ],
+          confirmInput: {
+            label: 'Type the zone name "Builder2" to confirm:',
+            expected: zoneName
+          },
+          actions: [
+            {
+              label: 'Permanently Delete',
+              className: 'danger',
+              disabled: true,
+              isPrimaryAction: true,
+              onClick: function () {
+                closeModal();
+                showToast('Builder2 deleted. (Mockup only, no real action taken.)');
+              }
+            }
+          ]
+        });
+      }
+
+      function showDeleteStepOne() {
+        showModal({
+          kicker: 'Remove Zone: Builder2',
+          title: 'How would you like to remove this zone?',
+          body: [
+            'ARCHIVE keeps the zone data and removes it from the live world. You can restore archived zones later.',
+            'DELETE permanently removes the zone and all its data. This cannot be undone.'
+          ],
+          actions: [
+            {
+              label: 'Archive Zone',
+              className: 'secondary',
+              onClick: function () {
+                closeModal();
+                showToast('Builder2 archived. (Mockup only, no real action taken.)');
+              }
+            },
+            {
+              label: 'Delete Zone',
+              className: 'quiet-danger',
+              onClick: showDeleteStepTwo
+            }
+          ]
+        });
+      }
+
+      modeButtons.forEach((button) => {
+        button.addEventListener('click', function () {
+          setMode(button.dataset.modeTarget);
+        });
+      });
+
+      roomTabs.forEach((button) => {
+        button.addEventListener('click', function () {
+          setRoomTab(button.dataset.roomTab);
+        });
+      });
+
+      if (previewSelect && previewCopy) {
+        previewSelect.addEventListener('change', function () {
+          previewCopy.textContent = previewStates[previewSelect.value] || previewStates['Default'];
+        });
+      }
+
+      if (overflowButton && overflowMenu) {
+        overflowButton.addEventListener('click', function () {
+          if (overflowMenu.hidden) {
+            openOverflowMenu();
+          } else {
+            closeOverflowMenu();
+          }
+        });
+      }
+
+      if (hotLoadButton) {
+        hotLoadButton.addEventListener('click', function () {
+          closeOverflowMenu();
+          showHotLoadModal();
+        });
+      }
+
+      if (discardChangesMenuItem) {
+        discardChangesMenuItem.addEventListener('click', function () {
+          closeOverflowMenu();
+          showDiscardChangesModal();
+        });
+      }
+
+      if (deleteZoneMenuItem) {
+        deleteZoneMenuItem.addEventListener('click', function () {
+          closeOverflowMenu();
+          showDeleteStepOne();
+        });
+      }
+
+      document.addEventListener('click', function (event) {
+        if (!overflowMenu || !overflowButton) {
+          return;
+        }
+        if (overflowMenu.hidden) {
+          return;
+        }
+        if (!overflowMenu.contains(event.target) && !overflowButton.contains(event.target)) {
+          closeOverflowMenu();
+        }
+      });
+
+      if (modalOverlay) {
+        modalOverlay.addEventListener('click', function (event) {
+          if (event.target === modalOverlay) {
+            closeModal();
+          }
+        });
+      }
+
+      document.addEventListener('keydown', function (event) {
+        if (!activeModal) {
+          if (event.key === 'Escape') {
+            closeOverflowMenu();
+          }
+          return;
+        }
+
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeModal();
+          return;
+        }
+
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          closeModal();
+        }
+      });
+
+      setMode('room-mode');
+      setRoomTab('description');
+    }());
+  </script>
+</body>
+</html>

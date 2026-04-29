@@ -1,0 +1,28 @@
+MT-502 Stateful Fragment Test
+Prompt version: v8_diremud_required_stateful_fragments
+Model: qwen2.5-14b-instruct
+Temperature: 0.5
+
+[Room: crossingV2_192_132]
+Zone: crossingV2
+Applicable state groups: season, time, weather, invasion
+Applicable states: spring, summer, autumn, winter, morning, midday, evening, night, rain, snow, fog, invasion
+Description:
+The narrow lane ends abruptly here against a high stone wall to the east, with its sole exit leading west toward the bustling heart of the city. Cobblestones underfoot are well-worn from constant traffic, darkened and slick in spots where vendors once set up their stalls. The air carries faint traces of river water mixed with distant market clamor, which$state(invasion, grows tense with distant shouts)$state(rain, is dampened by the sound of raindrops).
+---
+
+[Room: crossingV2_178_132]
+Zone: crossingV2
+Applicable state groups: season, time, invasion
+Applicable states: spring, summer, autumn, winter, morning, midday, evening, night, invasion
+Description:
+A narrow hallway in a bustling tavern runs east and south, its earthen floor showing signs of wear from steady traffic. A hearth at the center casts flickering light over the worn surfaces, casting shadows that dance with each shift in flame. Outside, the sounds of river trade mix with the murmur of conversation within the hall.
+---
+
+[Room: CRO_500_100]
+Zone: demo1
+Applicable state groups: season
+Applicable states: spring, summer, autumn, winter
+Description:
+A narrow passage runs west and descends to the south through rough earthen walls. The floor is uneven, marked by occasional footprints that suggest sporadic use. During spring, the air feels slightly cooler as it carries a hint of moisture from beyond the passage’s boundaries.
+---

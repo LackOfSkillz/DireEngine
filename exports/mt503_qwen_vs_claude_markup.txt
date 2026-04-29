@@ -1,0 +1,51 @@
+MT-503 - Qwen vs Claude markup comparison
+============================================================
+
+## crossingV2_192_132
+
+Applicable groups: season, time, weather, invasion
+Applicable states: spring, summer, autumn, winter, morning, midday, evening, night, rain, snow, fog, invasion
+
+### Pass 1 (Qwen prose, baseline):
+The narrow lane ends abruptly here against a high stone wall to the east, with its sole exit leading west toward the bustling heart of the city. Cobblestones underfoot are well-worn from constant traffic, darkened and slick in spots where vendors once set up their stalls. The air carries faint traces of river water mixed with distant market clamor.
+
+### Pass 2a (Qwen markup):
+The narrow lane ends abruptly here against a high stone wall to the east, with its sole exit leading west toward the bustling heart of the city. Cobblestones underfoot are well-worn from constant traffic, darkened and slick in spots where vendors once set up their stalls$state(rain, and even more so now)$state(snow, with patches of white)$state(winter, showing signs of frost). The air carries faint traces of river water mixed with distant market clamor$state(morning, beginning to grow louder as the day progresses)$state(midday, at its peak volume)$state(evening, gradually fading into a quieter hum)$state(night, reduced to occasional echoes and whispers)$state(invasion, now filled with the sounds of marching feet and shouted commands).
+
+### Pass 2b (Claude markup):
+The narrow lane ends abruptly here against a high stone wall to the east, with its sole exit leading west toward the bustling heart of the city. Cobblestones underfoot are well-worn from constant traffic, darkened and slick in spots where vendors once set up their stalls$state(rain, with rainwater pooling)$state(snow, beneath a layer of white)$state(fog, and nearly invisible in the mist). The air carries faint traces of river water mixed with distant market clamor$state(morning, now tinged with fresh baking bread)$state(midday, overlaid with the heat shimmer of noon)$state(evening, growing quieter as vendors close their stalls)$state(night, now eerily silent and distant)$state(invasion, and the acrid smell of smoke).
+
+------------------------------------------------------------
+
+## crossingV2_178_132
+
+Applicable groups: season, time, invasion
+Applicable states: spring, summer, autumn, winter, morning, midday, evening, night, invasion
+
+### Pass 1 (Qwen prose, baseline):
+A narrow hallway in a bustling tavern runs east and south, its earthen floor showing signs of wear from steady traffic. A hearth at the center casts flickering light over the worn surfaces. Outside, the sounds of river trade mix with the murmur of conversation within the hall.
+
+### Pass 2a (Qwen markup):
+A narrow hallway in a bustling tavern runs east and south, its earthen floor showing signs of wear from steady traffic. A hearth at the center casts flickering light$state(morning, warm and bright)$state(midday, strong and golden)$state(evening, dimming as shadows lengthen)$state(night, weakly illuminating the space) over the worn surfaces. Outside, the sounds of river trade mix with the murmur of conversation within the hall$state(spring, interspersed with birdsong)$state(summer, punctuated by distant laughter)$state(autumn, occasionally interrupted by rustling leaves)$state(winter, muffled by a blanket of snow).
+
+### Pass 2b (Claude markup):
+A narrow hallway in a bustling tavern runs east and south, its earthen floor showing signs of wear from steady traffic. A hearth at the center casts$state(morning, pale)$state(midday, bright)$state(evening, amber)$state(night, dancing) flickering light over the worn surfaces. Outside, the sounds of$state(invasion, alarm and clashing steel mixed with) river trade mix with the murmur of conversation within the hall$state(invasion, now edged with urgency).
+
+------------------------------------------------------------
+
+## CRO_500_100
+
+Applicable groups: season
+Applicable states: spring, summer, autumn, winter
+
+### Pass 1 (Qwen prose, baseline):
+A narrow passage runs west and descends to the south through rough earthen walls. The floor is uneven, marked by occasional footprints that suggest sporadic use. The air carries a faint hint of moisture from beyond the passage's boundaries.
+
+### Pass 2a (Qwen markup):
+A narrow passage runs west and descends to the south through rough earthen walls. The floor is uneven, marked by occasional footprints that suggest sporadic use. The air carries a faint hint of moisture$state(spring, with a fresh earth scent)$state(summer, warm and humid)$state(autumn, crisp and cool)$state(winter, cold and dry) from beyond the passage's boundaries.
+
+### Pass 2b (Claude markup):
+A narrow passage runs west and descends to the south through rough earthen walls. The floor is uneven, marked by occasional footprints that suggest sporadic use. The air carries a faint hint of moisture$state(spring, mixed with the scent of thawing earth)$state(summer, heavy and warm)$state(autumn, tinged with decay)$state(winter, cold and crystalline) from beyond the passage's boundaries.
+
+------------------------------------------------------------
+

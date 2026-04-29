@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import yaml
 from django.db import transaction
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -361,8 +361,111 @@ def _normalize_builder_direction(direction):
     return BUILDER_DIRECTION_ALIASES.get(text, text)
 
 
+def _direbuilder_label(value):
+    text = str(value or "").strip()
+    if not text:
+        return "(not set)"
+    return re.sub(r"[_\-]+", " ", text).strip().title()
+
+
+def _direbuilder_summary_list(values):
+    cleaned = [
+        _direbuilder_label(value)
+        for value in (list(values or []) if isinstance(values, (list, tuple)) else [values])
+        if str(value or "").strip()
+    ]
+    return cleaned or ["(not set)"]
+
+
+def _direbuilder_room_exits(room):
+    exits = []
+    for direction, spec in dict(room.get("exits") or {}).items():
+        payload = dict(spec or {}) if isinstance(spec, dict) else {"target": spec}
+        target = str(payload.get("target") or payload.get("target_id") or "").strip()
+        if not target:
+            continue
+        exits.append(
+            {
+                "direction": _direbuilder_label(direction),
+                "target": target,
+                "type": _direbuilder_label(payload.get("label") or payload.get("typeclass") or "spatial"),
+            }
+        )
+    return exits
+
+
+def _direbuilder_room_tag_sections(room):
+    tags = dict(room.get("tags") or {})
+    atmosphere = dict(tags.get("atmosphere") or {})
+    return [
+        {"title": "Structure", "values": _direbuilder_summary_list(tags.get("structure") or "")},
+        {"title": "Function", "values": _direbuilder_summary_list(tags.get("specific_function") or "")},
+        {"title": "Feature", "values": _direbuilder_summary_list(tags.get("named_feature") or "")},
+        {"title": "Condition", "values": _direbuilder_summary_list(tags.get("condition") or "")},
+        {"title": "Custom Tags", "values": _direbuilder_summary_list(tags.get("custom") or [])},
+        {"title": "Atmosphere: Materials", "values": _direbuilder_summary_list(atmosphere.get("materials") or [])},
+        {"title": "Atmosphere: Social Character", "values": _direbuilder_summary_list(atmosphere.get("social_character") or [])},
+        {"title": "Atmosphere: Surroundings", "values": _direbuilder_summary_list(atmosphere.get("surroundings") or [])},
+        {"title": "Atmosphere: Sensory", "values": _direbuilder_summary_list(atmosphere.get("sensory") or [])},
+        {"title": "Atmosphere: Upkeep", "values": _direbuilder_summary_list(atmosphere.get("upkeep") or "")},
+    ]
+
+
+def _build_direbuilder_context(request):
+    zones = _serialize_yaml_builder_zones()
+    zone_lookup = {str(zone.get("id") or "").strip(): zone for zone in zones}
+    requested_zone_id = _normalize_zone_id(request.GET.get("zone") or "")
+    current_zone_id = requested_zone_id if requested_zone_id in zone_lookup else ""
+    if not current_zone_id and zones:
+        current_zone_id = str(zones[0].get("id") or "").strip()
+
+    current_zone = _load_builder_zone_yaml(current_zone_id) if current_zone_id else None
+    generation_context = dict((current_zone or {}).get("generation_context") or {})
+    sample_room = dict(((current_zone or {}).get("rooms") or [None])[0] or {}) if current_zone else None
+
+    if sample_room:
+        sample_room.setdefault("short_desc", sample_room.get("name") or sample_room.get("id") or "")
+        sample_room.setdefault("desc", "")
+        sample_room.setdefault("details", {})
+        sample_room.setdefault("stateful_descs", {})
+        sample_room.setdefault("room_states", [])
+        sample_room.setdefault("ambient", {"rate": 0, "messages": []})
+        sample_room.setdefault("items", [])
+        sample_room.setdefault("npcs", [])
+
+    return {
+        "application_name": "DireBuilder",
+        "zones": zones,
+        "current_zone": current_zone,
+        "current_zone_id": current_zone_id,
+        "current_zone_prefix": str(current_zone_id or "ZONE").upper(),
+        "zone_context": {
+            "setting_type": _direbuilder_label(generation_context.get("setting_type") or ""),
+            "era_feel": _direbuilder_label(generation_context.get("era_feel") or ""),
+            "culture": _direbuilder_summary_list(generation_context.get("culture") or []),
+            "mood": _direbuilder_summary_list(generation_context.get("mood") or []),
+            "climate": _direbuilder_label(generation_context.get("climate") or ""),
+            "voice": str(generation_context.get("voice") or "").strip(),
+        },
+        "sample_room": sample_room,
+        "sample_room_exits": _direbuilder_room_exits(sample_room or {}),
+        "sample_room_tag_sections": _direbuilder_room_tag_sections(sample_room or {}),
+    }
+
+
 def builder_view(request):
     return render(request, "webclient/builder.html", {})
+
+
+def direbuilder_view(request):
+    return render(request, "webclient/direbuilder.html", _build_direbuilder_context(request))
+
+
+def test_builder_mockup_view(request):
+    mockup_path = _repo_root() / "tmp" / "mt507_builder_mockup.html"
+    if not mockup_path.exists():
+        raise Http404("Builder mockup not found")
+    return HttpResponse(mockup_path.read_text(encoding="utf-8"), content_type="text/html")
 
 
 def _room_queryset():

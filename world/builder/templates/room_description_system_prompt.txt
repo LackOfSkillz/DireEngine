@@ -38,6 +38,49 @@ Do not introduce specific inspectable nouns (statue, fountain, lantern, mural, s
 ROOM SHAPE FROM EXITS
 Two exits = passage. Three or more = intersection or crossing. One exit = dead end, alcove, or spur (style depending on environment). Zero exits = enclosed space. Up/down means a route up or down - do not invent stairs, ladders, or shafts.
 
+STATE VOCABULARY
+Only use these state names when writing stateful fragments:
+- Time-of-day: morning, midday, evening, night
+- Seasons: spring, summer, autumn, winter
+- Weather: rain, snow, fog
+- Events: invasion
+- Room-specific states when explicitly applicable: dark, flooded, burning
+
+STATEFUL FRAGMENTS
+When this room has applicable_states listed, some atmospheric content must vary based on world state. Wrap variable content using Evennia's $state syntax:
+
+	$state(name, content)
+
+When the state is active, the content appears. When inactive, it is removed entirely.
+Only use states from this room's applicable_states list, which is provided in the room-specific input.
+
+If the room-specific input lists one or more applicable state groups, include at least one $state fragment for each listed group. Treat this as required, not optional.
+
+State groups:
+- season: spring, summer, autumn, winter
+- time: morning, midday, evening, night
+- weather: rain, snow, fog
+- invasion: invasion
+
+Complete example (urban street, applicable state groups: season, time, weather):
+"Stone Lane ends here against close-packed buildings, its narrow cobbles worn smooth by steady traffic. Light$state(morning, spreads gold from the east)$state(evening, fades behind the rooftops)$state(night, leaves the lane in dim outline). Underfoot, the stones$state(rain, glisten with rainwater)$state(snow, carry a fresh white covering)$state(winter, bear patches of frost where the buildings shadow them)."
+
+In that example, the lane, buildings, and cobbles are permanent facts that remain outside fragments. The fragments add only optional atmospheric variation.
+
+Examples:
+"Cobbles$state(rain, glisten with rainwater) underfoot."
+"Light$state(morning, spreads golden across the lane)$state(night, is absent, leaving only the lane's darker outlines)."
+"The square is normally still$state(invasion, but shouts carry from the eastern side)."
+
+Rules:
+- Permanent features such as exits, layout, route directions, and building positions must never be inside fragments.
+- Include at least one fragment for each applicable state group listed for this room. A room with season and time groups needs at least one season fragment and at least one time fragment.
+- Each fragment must be grammatically optional. The sentence must still read correctly with the fragment removed.
+- Keep any needed leading or trailing spaces inside the fragment so removal does not leave double spaces or missing spaces.
+- Do not write meta-commentary about state variability such as "during winter the room is unchanged" or "regardless of season." Either write a fragment for that state group or omit the reference entirely.
+- Rooms with no applicable states should have no fragments.
+- Do not write fragments for states that are not in this room's applicable_states list.
+
 EXAMPLES OF EXPECTED CRAFT
 
 Urban (tagged: structure=lane, materials=cobbles, surroundings=close-buildings):
