@@ -1,0 +1,134 @@
+=== Zone: demo1 ===
+
+[Room: CRO_500_100]
+A wide chamber stretches before you, its shape defined by four straight walls that meet at right angles. The floor is smooth underfoot, worn from constant use, suggesting a high volume of traffic through this space. Two exits are clearly visible: one to the north and another to the east, both offering clear pathways out of the room without any obstructions or narrowing passages.
+
+---
+
+[Room: CRO_500_150]
+A wide chamber stretches before you, its four walls meeting at right angles to form a square room. The floor is made of rough stone tiles that have been worn down by constant use, revealing patches of smoother surface where feet have trodden frequently. At the north end of the room, an open archway leads out, while two additional exits are located on the east and west walls.
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_192_132]
+A spacious chamber opens before you, its four walls extending straight upwards to a high ceiling not visible from the ground level. The room is rectangular with no visible furnishings or decorations; only the worn stone surface of the floor hints at frequent use over time. Four exits are clearly marked: one each in the north, south, east, and west walls, providing easy passage in all cardinal directions.
+
+---
+
+[Room: crossingV2_178_132]
+A narrow passage winds between towering stone walls, its surface worn by time but free of debris. The air is cool and dry, carrying faint traces of earth and moss from the nearby forest. This corridor branches to the east after a short distance, narrowing slightly as it continues westward, suggesting an intersection ahead.
+
+---
+
+
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+This room is a simple chamber with four exits: north, east, south, and west. The floor is made of rough stone, uneven and worn in places where it meets the walls. To the east, the passage widens slightly before continuing on, while to the west, it remains steady and straight without any changes in width or direction. The air here feels still, with no noticeable smells or sounds except for an occasional echo from one of the distant corridors.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+A large chamber opens up before you, its dimensions stretching out into shadowy recesses at the far end. The floor is a rough-hewn stone surface, uneven underfoot but free of debris or obstructions. To your left, a narrow passageway branches off from the main room, while to your right, another corridor continues straight ahead without interruption.
+
+---
+
+Repeated phrases:
+- "before you its" (4)
+- "the floor is" (4)
+- "to the east" (3)
+- "a wide chamber stretches before" (2)
+- "before you its four walls" (2)
+- "chamber stretches before you its" (2)
+- "floor is made of rough" (2)
+- "is made of rough stone" (2)
+- "the floor is made of" (2)
+- "wide chamber stretches before you" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 1
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 5
+- "corridor": 2
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 1
+- "ruins": 0
+Noun violations: 8
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 6
+Player-assumption violations: 0
+Safe samples: 5/6
+Useful samples: 4/6
+Useful acceptance rate: 66.7%
+Average words: 65.00
+Under 45 words: 0
+45 to 90 words: 6
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.17
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 1
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 1
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 2
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 1
+- "the walls are": 0
+- "the floor is": 4
+Repeated sentence start total: 5

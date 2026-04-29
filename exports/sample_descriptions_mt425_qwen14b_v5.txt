@@ -1,0 +1,130 @@
+=== Zone: demo1 ===
+
+[Room: CRO_500_100]
+A narrow passage runs through this space, extending downward and to the west. The earthen floor is worn smooth where frequent footfalls have passed, with the western edge showing more signs of use. Downward sloping ground marks the route leading further below, while the walls remain close and unadorned throughout.
+
+---
+
+[Room: CRO_500_150]
+A narrow passage ends here with a rough earthen floor and close boundaries on all sides except to the north where it opens into CRO_500_100. The walls show signs of wear from occasional use, though no other features mark this dead-end space. The air is still, carrying no sounds beyond.
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_192_132]
+At the end of this narrow lane, the worn cobblestones slope gently toward the river’s edge to the east, where a faint mist rises from the water. To the west, the lane continues through crossingV2_178_132, leading deeper into the bustling heart of the trade city. The air carries the mingled scents of fresh fish and baking bread, with occasional shouts of merchants echoing off the nearby buildings.
+
+---
+
+[Room: crossingV2_178_132]
+The narrow hallway of the bustling tavern runs east and south, its floor showing signs of steady wear from frequent traffic. A hearth set against the north wall casts a warm glow over the passage, its smoke curling up towards the ceiling. The air carries hints of cooking food and ale, mingling with the faint scent of river mist that seeps in from outside.
+
+---
+
+
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+Amberwick Lane forms an intersection here, with cobbled paths running east and west through the narrow lane. To the southwest, another route branches off from the main thoroughfare. The fitted stones show wear where traffic frequently passes between these directions, maintaining a clear path for travelers moving along the well-trodden street.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+Saltward Street runs west from here, narrowing into Amberwick Lane to the south. The cobbled surface shows steady wear along the passage, with scuff marks indicating frequent travel between these two routes. Building fronts press in close on either side, their stone facades marking the boundaries of this urban thoroughfare.
+
+---
+
+Repeated phrases:
+- "to the west the" (2)
+- "a narrow passage" (2)
+- "lane to the" (2)
+- "the air carries" (2)
+- "the west the" (2)
+- "to the west" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 1
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 2
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 2
+Geometry flags:
+- "slopes": 0
+- "rises": 1
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 1
+Second-person violations: 0
+Player-assumption violations: 0
+Safe samples: 3/6
+Useful samples: 2/6
+Useful acceptance rate: 33.3%
+Average words: 56.50
+Under 45 words: 0
+45 to 90 words: 6
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.00
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 1
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 2
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 2
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 0
+Repeated sentence start total: 0

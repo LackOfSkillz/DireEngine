@@ -1,0 +1,134 @@
+=== Zone: demo1 ===
+
+[Room: CRO_500_100]
+A narrow passage runs down and to the west between worn stone walls. The earthen floor is uneven, with slight depressions marking the path's wear from foot traffic. The boundaries press close, leaving little room for deviation as it continues in both directions.
+
+---
+
+[Room: CRO_500_150]
+A narrow passage ends here with the walls closing in around you. The floor beneath your feet shows signs of regular use and wear. An upward route beckons from this dead-end, leading to what lies above.
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_192_132]
+At the western edge of Market Square, a narrow alley dead-ends in a tangle of wooden crates and discarded barrels. The cobbled path narrows here, worn smooth by years of foot traffic and occasional cart wheels. To the west, the alley opens into the main thoroughfare, where the murmur of distant traders and the scent of river fish mingle with the city's usual bustle.
+
+---
+
+[Room: crossingV2_178_132]
+The narrow hallway of the bustling tavern runs east and south between worn stone walls. A hearth at the eastern end casts a warm glow across the space, its smoke curling up through a vent in the ceiling. The earthen floor is marked by steady wear from frequent traffic, hinting at the lively trade that passes through this riverside city.
+
+---
+
+
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+Amberwick Lane intersects here within the new_landing area, offering three routes to explore: continuing east, turning southwest, or heading west. The cobbled surface shows steady wear from frequent travel, marking paths where pedestrians and possibly carts often traverse. Building fronts line the lane on both sides, though no specific doorways or intersections interrupt its flow.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+Saltward Street intersects with Amberwick Lane in a narrow passage that runs south and west from this point. The cobbled surface shows signs of regular use, particularly near the center where foot traffic has worn it smooth. Building fronts press closely on either side, offering little space for anything beyond steady pedestrian movement through the lane.
+
+---
+
+Repeated phrases:
+- "a narrow passage" (3)
+- "shows signs of regular use" (2)
+- "between worn stone walls" (2)
+- "shows signs of regular" (2)
+- "signs of regular use" (2)
+- "steady wear from frequent" (2)
+- "the cobbled surface shows" (2)
+- "the earthen floor is" (2)
+- "between worn stone" (2)
+- "cobbled surface shows" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 2
+Player-assumption violations: 0
+Safe samples: 6/6
+Useful samples: 3/6
+Useful acceptance rate: 50.0%
+Average words: 52.83
+Under 45 words: 2
+45 to 90 words: 4
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.00
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 3
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 0
+Repeated sentence start total: 0

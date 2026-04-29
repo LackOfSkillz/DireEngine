@@ -53,6 +53,40 @@ class RoomDescriptionGenerationTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertNotEqual(_input_hash(base_room, zone), _input_hash(changed_room, zone))
 
+    def test_input_hash_changes_when_room_atmosphere_changes(self):
+        zone = {"name": "Harbor Ward", "generation_context": {"setting_type": "city"}}
+        base_room = {
+            "id": "lantern_market",
+            "name": "Lantern Market",
+            "exits": {"west": {"target": "canal_walk"}},
+            "tags": {
+                "structure": "street",
+                "specific_function": None,
+                "named_feature": None,
+                "condition": None,
+                "custom": [],
+                "atmosphere": {
+                    "materials": ["cobbled-floor"],
+                    "social_character": [],
+                    "surroundings": [],
+                    "sensory": [],
+                    "upkeep": None,
+                },
+            },
+        }
+        changed_room = {
+            **base_room,
+            "tags": {
+                **base_room["tags"],
+                "atmosphere": {
+                    **base_room["tags"]["atmosphere"],
+                    "sensory": ["sounds-of-commerce"],
+                },
+            },
+        }
+
+        self.assertNotEqual(_input_hash(base_room, zone), _input_hash(changed_room, zone))
+
     async def test_generate_room_description_degrades_gracefully_when_llm_fails(self):
         client = _StubClient(error=RuntimeError("connection refused"))
         config = SimpleNamespace(llm_enabled=True, llm_model="mistral-nemo", llm_temperature=0.75)

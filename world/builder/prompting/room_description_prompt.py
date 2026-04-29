@@ -4,10 +4,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from world.builder.schemas.room_tag_schema import normalize_room_tags
+from world.builder.schemas.typed_generation_input_schema import resolve_typed_generation_input
 
 
 _SYSTEM_PROMPT_PATH = Path(__file__).resolve().parent.parent / "templates" / "room_description_system_prompt.txt"
-PROMPT_VERSION = "v3_grounded_rich"
+PROMPT_VERSION = "v6_diremud_condensed_zone_scrub"
 
 # ORIGINAL_PROMPT_BASELINE
 # System:
@@ -81,6 +82,21 @@ def _trim_lines(lines: list[str], max_chars: int) -> tuple[list[str], bool]:
     return lines, trimmed
 
 
+def _natural_join(items: list[str]) -> str:
+    cleaned = [str(item or "").strip() for item in items if str(item or "").strip()]
+    if not cleaned:
+        return ""
+    if len(cleaned) == 1:
+        return cleaned[0]
+    if len(cleaned) == 2:
+        return f"{cleaned[0]} and {cleaned[1]}"
+    return f"{', '.join(cleaned[:-1])}, and {cleaned[-1]}"
+
+
+def _context_key(value: object) -> str:
+    return str(value or "").strip().rstrip(".").casefold()
+
+
 def _normalized_exit_directions(room_payload: dict) -> list[str]:
     exits = room_payload.get("exits") or room_payload.get("exitMap") or {}
     directions = []
@@ -119,6 +135,34 @@ def _shape_hint(shape: str) -> str:
 
 def _nonempty_text(value: object) -> str:
     return str(value or "").strip()
+
+
+def _human_room_name(room_name: str, room_id: str) -> str:
+    if not room_name:
+        return ""
+    if room_name == room_id:
+        return ""
+    return room_name
+
+
+def _is_code_like_identifier(value: str) -> bool:
+    if not value:
+        return False
+    if any(character.isdigit() for character in value):
+        return True
+    if "_" in value:
+        return True
+    return value.lower() == value and " " not in value
+
+
+def _human_zone_name(zone_name: str, zone_id: str) -> str:
+    if not zone_name:
+        return ""
+    if zone_name == zone_id and _is_code_like_identifier(zone_name):
+        return ""
+    if _is_code_like_identifier(zone_name):
+        return ""
+    return zone_name
 
 
 def _room_tag_clause(field: str, value: str) -> str:
@@ -160,6 +204,27 @@ def _room_tag_clause(field: str, value: str) -> str:
     return ""
 
 
+def _atmosphere_clause(field: str, values: list[str]) -> str:
+    labeled_values = [_label(value).lower() for value in values if value]
+    if not labeled_values:
+        return ""
+    if field == "materials":
+        return f"Licensed materials: {', '.join(labeled_values)}."
+    if field == "social_character":
+        return f"Licensed social character: {', '.join(labeled_values)}."
+    if field == "surroundings":
+        return f"Licensed surroundings: {', '.join(labeled_values)}."
+    if field == "sensory":
+        return f"Licensed sensory cues: {', '.join(labeled_values)}."
+    return ""
+
+
+def _atmosphere_upkeep_clause(value: str | None) -> str:
+    if not value:
+        return ""
+    return f"Licensed upkeep: {_label(value).lower()}."
+
+
 def _build_room_tag_sections(room_payload: dict) -> list[str]:
     room_tags = normalize_room_tags(room_payload.get("tags"))
     tag_lines = [
@@ -192,6 +257,26 @@ def _build_room_tag_sections(room_payload: dict) -> list[str]:
     ]
 
 
+def _build_room_atmosphere_sections(room_payload: dict) -> list[str]:
+    room_tags = normalize_room_tags(room_payload.get("tags"))
+    atmosphere = dict(room_tags.get("atmosphere") or {})
+    atmosphere_lines: list[str] = []
+    for field in ("materials", "social_character", "surroundings", "sensory"):
+        values = [str(value).strip() for value in list(atmosphere.get(field) or []) if str(value).strip()]
+        if not values:
+            continue
+        atmosphere_lines.append(f"{_label(field)}: {', '.join(_label(value) for value in values)}.")
+    upkeep = str(atmosphere.get("upkeep") or "").strip()
+    if upkeep:
+        atmosphere_lines.append(f"Upkeep: {_label(upkeep)}.")
+    if not atmosphere_lines:
+        return []
+    return [
+        "=== ATMOSPHERE ===",
+        *atmosphere_lines,
+    ]
+
+
 def _build_zone_context_sections(zone_name: str, generation_context: dict) -> list[str]:
     culture_values = ", ".join(_label(value) for value in _normalize_list(generation_context.get("culture")))
     mood_values = ", ".join(_label(value) for value in _normalize_list(generation_context.get("mood")))
@@ -220,10 +305,208 @@ def _build_zone_context_sections(zone_name: str, generation_context: dict) -> li
     return sections
 
 
-def assemble_room_description_prompt(room: dict | None, zone: dict | None, *, max_prompt_chars: int = 5000) -> RoomDescriptionPrompt:
+def _extract_area_payload(room_payload: dict, zone_payload: dict) -> dict | None:
+    for candidate in (room_payload.get("area"), zone_payload.get("area")):
+        if isinstance(candidate, dict):
+            return dict(candidate)
+    return None
+
+
+def _build_typed_generation_sections(room_payload: dict, zone_payload: dict) -> list[str]:
+    area_payload = _extract_area_payload(room_payload, zone_payload)
+    typed_payload = resolve_typed_generation_input(room_payload, zone_payload, area_payload)
+    sections: list[str] = []
+
+    def append_section(title: str, items: list[str]) -> None:
+        cleaned = [str(item or "").strip() for item in items if str(item or "").strip()]
+        if not cleaned:
+            return
+        sections.extend([f"=== {title} ===", *[f"- {item}" for item in cleaned]])
+
+    append_section("REQUIRED ROOM FACTS", list(typed_payload.get("required_room_facts") or []))
+    append_section("ALLOWED BUT NOT REQUIRED DETAILS", list(typed_payload.get("allowed_but_not_required") or []))
+    append_section("SOFT ROOM CONTEXT", list(typed_payload.get("soft_room_context") or []))
+    append_section("SOFT AREA CONTEXT", list(typed_payload.get("soft_area_context") or []))
+    append_section("SOFT ZONE CONTEXT", list(typed_payload.get("soft_zone_context") or []))
+    append_section("FORBIDDEN FEATURES", list(typed_payload.get("forbidden_features") or []))
+
+    allowed_exits = list(typed_payload.get("allowed_exits") or [])
+    sections.append("=== ALLOWED EXITS ===")
+    sections.append("Only these exits may be mentioned:")
+    if allowed_exits:
+        for item in allowed_exits:
+            direction = str(item.get("direction") or "").strip()
+            description = str(item.get("description") or item.get("type") or item.get("target") or "").strip()
+            if description:
+                sections.append(f"- {direction}: {description}")
+            else:
+                sections.append(f"- {direction}")
+    else:
+        sections.append("- none")
+    sections.append("Do not invent exits beyond this list.")
+
+    interactive_objects = [str(item or "").strip() for item in list(typed_payload.get("interactive_objects") or []) if str(item or "").strip()]
+    sections.append("=== INTERACTIVE OBJECTS ===")
+    if interactive_objects:
+        sections.append("Only these objects may receive look text:")
+        sections.extend(f"- {item}" for item in interactive_objects)
+    else:
+        sections.append("No object look targets may be generated.")
+
+    return sections
+
+
+def _build_model_prompt_lines(room_payload: dict, zone_payload: dict, generation_context: dict, room_id: str, room_name: str, zone_name: str, shape: str, shape_hint: str, exit_directions: list[str]) -> list[str]:
+    area_payload = _extract_area_payload(room_payload, zone_payload)
+    typed_payload = resolve_typed_generation_input(room_payload, zone_payload, area_payload)
+    display_room_name = _human_room_name(room_name, room_id)
+    display_zone_name = _human_zone_name(zone_name, str(zone_payload.get("zone_id") or "").strip())
+    lines = [
+        "Write one player-facing DireMud room description.",
+        "Use only the known facts below.",
+    ]
+
+    if display_room_name:
+        lines.append(f"The room is named {display_room_name}.")
+    if display_zone_name:
+        lines.append(f"It is in {display_zone_name}.")
+
+    setting_type = _nonempty_text(generation_context.get("setting_type") or room_payload.get("environment"))
+    if setting_type:
+        lines.append(f"The broader environment is {setting_type}.")
+    era_feel = _nonempty_text(generation_context.get("era_feel"))
+    if era_feel:
+        lines.append(f"The era feel is {era_feel}.")
+    culture = _natural_join([_label(value) for value in _normalize_list(generation_context.get("culture"))])
+    if culture:
+        lines.append(f"Cultural cues include {culture}.")
+    mood = _natural_join([_label(value) for value in _normalize_list(generation_context.get("mood"))])
+    if mood:
+        lines.append(f"Mood cues include {mood}.")
+    climate = _nonempty_text(generation_context.get("climate"))
+    if climate:
+        lines.append(f"The climate is {climate}.")
+    voice = _nonempty_text(generation_context.get("voice"))
+    if voice:
+        lines.append(f"Voice guidance is {voice.rstrip('.')}.")
+    banned_phrases = _normalize_list(generation_context.get("banned_phrases"), preserve_case=True)
+    if banned_phrases:
+        lines.append(f"Avoid these phrases: {_natural_join(banned_phrases)}.")
+
+    lines.append(f"The room shape is {shape}. {shape_hint}")
+    if exit_directions:
+        lines.append(f"The listed exits run {_natural_join(exit_directions)}.")
+    else:
+        lines.append("No exits are listed for this room.")
+
+    room_tags = normalize_room_tags(room_payload.get("tags"))
+    for field, value in (
+        ("structure", room_tags.get("structure")),
+        ("specific_function", room_tags.get("specific_function")),
+        ("named_feature", room_tags.get("named_feature")),
+        ("condition", room_tags.get("condition")),
+    ):
+        if value:
+            clause = _room_tag_clause(field, value)
+            if clause:
+                lines.append(clause)
+    custom_tags = [str(tag).strip() for tag in room_tags.get("custom") or [] if str(tag).strip()]
+    if custom_tags:
+        lines.append(f"Additional custom cues include {_natural_join(custom_tags)}.")
+
+    atmosphere = dict(room_tags.get("atmosphere") or {})
+    materials = [_label(value).lower() for value in list(atmosphere.get("materials") or []) if str(value).strip()]
+    if materials:
+        lines.append(f"Allowed materials include {_natural_join(materials)}.")
+    social = [_label(value).lower() for value in list(atmosphere.get("social_character") or []) if str(value).strip()]
+    if social:
+        lines.append(f"Allowed social character cues include {_natural_join(social)}.")
+    surroundings = [_label(value).lower() for value in list(atmosphere.get("surroundings") or []) if str(value).strip()]
+    if surroundings:
+        lines.append(f"Allowed surrounding cues include {_natural_join(surroundings)}.")
+    sensory = [_label(value).lower() for value in list(atmosphere.get("sensory") or []) if str(value).strip()]
+    if sensory:
+        lines.append(f"Allowed sensory cues include {_natural_join(sensory)}.")
+    upkeep = _nonempty_text(atmosphere.get("upkeep"))
+    if upkeep:
+        lines.append(f"Allowed upkeep cues include {_label(upkeep).lower()}.")
+
+    required_facts = [str(item).strip() for item in list(typed_payload.get("required_room_facts") or []) if str(item).strip()]
+    if required_facts:
+        lines.append(f"Required room facts include {_natural_join(required_facts)}.")
+    optional_facts = [str(item).strip() for item in list(typed_payload.get("allowed_but_not_required") or []) if str(item).strip()]
+    if optional_facts:
+        lines.append(f"Allowed but optional details include {_natural_join(optional_facts)}.")
+    soft_room = [str(item).strip() for item in list(typed_payload.get("soft_room_context") or []) if str(item).strip()]
+    if soft_room:
+        lines.append(f"Soft room context includes {_natural_join(soft_room)}.")
+    soft_area = [str(item).strip() for item in list(typed_payload.get("soft_area_context") or []) if str(item).strip()]
+    area_name = _nonempty_text((area_payload or {}).get("name"))
+    if area_name:
+        lines.append(f"The area is {area_name}.")
+        soft_area = [item for item in soft_area if _context_key(item) != _context_key(area_name)]
+    if soft_area:
+        lines.append(f"Area context includes {_natural_join(soft_area)}.")
+    soft_zone = [str(item).strip() for item in list(typed_payload.get("soft_zone_context") or []) if str(item).strip()]
+    zone_duplicates = {
+        _context_key(value)
+        for value in [
+            zone_name,
+            setting_type or "",
+            era_feel or "",
+            climate or "",
+            voice.rstrip(".") if voice else "",
+            *[_label(value) for value in _normalize_list(generation_context.get("culture"))],
+            *[_label(value) for value in _normalize_list(generation_context.get("mood"))],
+        ]
+        if str(value).strip()
+    }
+    soft_zone = [item for item in soft_zone if _context_key(item) not in zone_duplicates]
+    if soft_zone:
+        lines.append(f"Zone context includes {_natural_join(soft_zone)}.")
+    forbidden = [str(item).strip() for item in list(typed_payload.get("forbidden_features") or []) if str(item).strip()]
+    if forbidden:
+        lines.append(f"Forbidden features include {_natural_join(forbidden)}.")
+
+    allowed_exits = list(typed_payload.get("allowed_exits") or [])
+    if allowed_exits:
+        allowed_exit_text = []
+        for item in allowed_exits:
+            direction = str(item.get("direction") or "").strip()
+            if not direction:
+                continue
+            description = str(item.get("description") or item.get("type") or "").strip()
+            if description:
+                allowed_exit_text.append(f"{direction} via {description}")
+            else:
+                allowed_exit_text.append(direction)
+        if allowed_exit_text:
+            lines.append(f"If exits are mentioned, only {_natural_join(allowed_exit_text)} may appear.")
+    else:
+        lines.append("No exits may be mentioned in the description.")
+
+    interactive_objects = [str(item).strip() for item in list(typed_payload.get("interactive_objects") or []) if str(item).strip()]
+    if interactive_objects:
+        lines.append(f"Only these objects may receive look text: {_natural_join(interactive_objects)}.")
+    else:
+        lines.append("No object look targets may be generated.")
+
+    lines.append("Use only those facts. Return one plain paragraph only.")
+    return lines
+
+
+def assemble_room_description_prompt(room: dict | None, zone: dict | None, *, max_prompt_chars: int = 10000) -> RoomDescriptionPrompt:
     room_payload = room or {}
     zone_payload = zone or {}
     generation_context = zone_payload.get("generation_context") or {}
+    system_prompt = load_room_description_system_prompt()
+
+    if max_prompt_chars < len(system_prompt) + 2000:
+        raise ValueError(
+            f"max_prompt_chars ({max_prompt_chars}) is too small to fit "
+            f"the system prompt ({len(system_prompt)} chars) plus minimum "
+            f"room context."
+        )
 
     room_id = str(room_payload.get("id") or room_payload.get("name") or "unnamed_room").strip() or "unnamed_room"
     room_name = str(room_payload.get("name") or "").strip()
@@ -231,8 +514,6 @@ def assemble_room_description_prompt(room: dict | None, zone: dict | None, *, ma
     exit_directions = _normalized_exit_directions(room_payload)
     shape = _derive_shape(exit_directions)
     shape_hint = _shape_hint(shape)
-    zone_context_sections = _build_zone_context_sections(zone_name, generation_context)
-    room_tag_sections = _build_room_tag_sections(room_payload)
     legacy_exit_lines = []
     exits = room_payload.get("exits") or room_payload.get("exitMap") or {}
     for direction, spec in sorted(dict(exits).items()):
@@ -267,71 +548,23 @@ def assemble_room_description_prompt(room: dict | None, zone: dict | None, *, ma
         *(detail_lines or ["- none"]),
     ]
 
-    model_user_lines = [
-        "Write a room description for Dragonsire.",
-        f"Prompt version: {PROMPT_VERSION}",
-        f"Room id: {room_id}",
-    ]
-    if room_name and room_name != room_id:
-        model_user_lines.append(f"Room name: {room_name}")
-    if zone_context_sections:
-        model_user_lines.extend(zone_context_sections)
-    if room_tag_sections:
-        model_user_lines.extend(room_tag_sections)
-    model_user_lines.extend([
-        f"Zone: {zone_name}",
-        f"Room shape: {shape}",
-        f"Number of exits: {len(exit_directions)}",
-        f"Shape hint: {shape_hint}",
-        "Exits:",
-        *([f"- {direction}" for direction in exit_directions] or ["- none"]),
-        "Constraints:",
-        "- You must only describe what is directly supported by the provided room data.",
-        "- If a detail is not present in the input, you must omit it.",
-        "- Do not infer or fill in missing scene details.",
-        "- Do not invent structures, lighting, weather, materials, history, lore, or environmental features not explicitly present.",
-        "- Write 3 to 5 sentences.",
-        "- Do not write fewer than 3 sentences.",
-        "- Do not exceed 5 sentences.",
-        "- Structure your description as: sentence 1 immediate spatial context; sentences 2 and 3 grounded physical details or layout; sentences 4 and 5 optional condition, wear, or spatial relationship to exits.",
-        "- Descriptions shorter than 3 sentences are invalid.",
-        "- You may expand only on elements that already exist in the input.",
-        "- Allowed expansions: condition, scale, surface detail only when a surface is already present, and spatial relationships tied to exits.",
-        "- You may describe how exits branch, narrow, open, or continue from the space.",
-        "- You may NOT introduce any physical objects not explicitly present in the input.",
-        "- This includes doors, windows, structures, furniture, vegetation, and architectural elements.",
-        "- If an object is not listed in the input, it must not appear in the description.",
-        "- Do not infer or imply the existence of objects from context. A passage does not imply doors. A room does not imply walls unless you keep to the neutral noun set below.",
-        "- Do not invent spatial properties such as slope, elevation, curvature, or enclosure. Describe only spatial relationships directly supported by exits and shape.",
-        "- You may only use physical nouns from the input data or this neutral set: floor, walls, space, passage, path.",
-        "- Do not describe intent or purpose. Avoid phrases like designed for, meant for, used for, or intended for.",
-        "- If room data is sparse, still produce 3 sentences and expand only using layout, exits, spatial confinement or openness, directional flow, and surface wear.",
-        "- Do not produce mechanical or system-style descriptions such as 'Enclosed room, no exits.'",
-        "- Always anchor the description to exit count, exit directions, and room shape.",
-        "- Use neutral descriptive language. Avoid poetic, dramatic, or narrative phrasing.",
-        "- Avoid metaphor and personification.",
-        "- You may include basic sensory detail only if directly implied by the input, limited to texture or spatial feel such as rough, smooth, tight, or open.",
-        "- Avoid vague filler such as 'there is a sense of', 'suggests', or 'appears to be'.",
-        "- Do not start every sentence with 'The room', 'The space', 'The walls', or 'The floor'. Vary sentence openings naturally.",
-        "- Use varied sentence structures across spatial statement, exit relationship, surface detail, and spatial transition.",
-        "- Prioritize describing layout, exits, and spatial relationships before any surface detail.",
-        "- Surface descriptions should be minimal and used no more than once per description.",
-        "- Do not restate the same spatial fact in multiple ways.",
-        "- Do not use these phrases: in the heart of, the air is thick with, whispers secrets, forgotten, ancient, shrouded, mysterious, hidden, long-abandoned.",
-        "- Return one plain paragraph only.",
-        "- Do not mention game mechanics, YAML, metadata, or the player.",
-    ])
+    model_user_lines = _build_model_prompt_lines(
+        room_payload,
+        zone_payload,
+        generation_context,
+        room_id,
+        room_name,
+        zone_name,
+        shape,
+        shape_hint,
+        exit_directions,
+    )
 
-    system_prompt = load_room_description_system_prompt()
     base_prompt = f"{system_prompt}\n\n" + "\n".join(model_user_lines)
     if len(base_prompt) <= max_prompt_chars:
         return RoomDescriptionPrompt(system_prompt=system_prompt, user_prompt="\n".join(legacy_user_lines), prompt=base_prompt, trimmed=False)
 
     trimmed = False
-    compact_exit_lines = [f"- {direction}" for direction in exit_directions]
-    if compact_exit_lines:
-        compact_exit_lines, exit_trimmed = _trim_lines(compact_exit_lines, max(1, max_prompt_chars - len(system_prompt) - 300))
-        trimmed = trimmed or exit_trimmed
     if legacy_exit_lines:
         legacy_exit_lines, legacy_exit_trimmed = _trim_lines(legacy_exit_lines, max(1, max_prompt_chars - len(system_prompt) - 300))
         trimmed = trimmed or legacy_exit_trimmed
@@ -351,43 +584,19 @@ def assemble_room_description_prompt(room: dict | None, zone: dict | None, *, ma
         *(detail_lines or ["- none"]),
     ]
 
-    model_user_lines = [
-        "Write a room description for Dragonsire.",
-        f"Prompt version: {PROMPT_VERSION}",
-        f"Room id: {room_id}",
-    ]
-    if room_name and room_name != room_id:
-        model_user_lines.append(f"Room name: {room_name}")
-    if zone_context_sections:
-        model_user_lines.extend(zone_context_sections)
-    if room_tag_sections:
-        model_user_lines.extend(room_tag_sections)
-    model_user_lines.extend([
-        f"Zone: {zone_name}",
-        f"Room shape: {shape}",
-        f"Number of exits: {len(exit_directions)}",
-        f"Shape hint: {shape_hint}",
-        "Exits:",
-        *(compact_exit_lines or ["- none"]),
-        "Constraints:",
-        "- Use only directly supported room data.",
-        "- Omit any detail not present in the input.",
-        "- Write 3 to 5 neutral descriptive sentences.",
-        "- Anchor to exits and room shape.",
-        "- Expand only with condition, scale, one minimal surface detail when supported, and exit relationships.",
-        "- For sparse rooms, still produce 3 sentences without introducing new features.",
-        "- Do not introduce new physical nouns or implied objects.",
-        "- Use only input nouns plus floor, walls, space, passage, or path.",
-        "- Do not invent slope, elevation, curvature, or enclosure.",
-        "- Do not describe purpose or intent.",
-        "- Do not produce mechanical or system-style wording.",
-        "- Use plain, concrete language only.",
-        "- Vary sentence openings.",
-        "- Prioritize layout, exits, and spatial relationships before surface detail.",
-        "- Do not restate the same spatial fact twice.",
-        "- Do not use banned fantasy filler phrases.",
-        "- Do not mention game mechanics, YAML, metadata, or the player.",
-    ])
+    model_user_lines = _build_model_prompt_lines(
+        room_payload,
+        zone_payload,
+        generation_context,
+        room_id,
+        room_name,
+        zone_name,
+        shape,
+        shape_hint,
+        exit_directions,
+    )
+    model_user_lines, model_trimmed = _trim_lines(model_user_lines, max(1, max_prompt_chars - len(system_prompt) - 2))
+    trimmed = trimmed or model_trimmed
     user_prompt = "\n".join(legacy_user_lines)
     prompt = f"{system_prompt}\n\n" + "\n".join(model_user_lines)
     if len(prompt) > max_prompt_chars:

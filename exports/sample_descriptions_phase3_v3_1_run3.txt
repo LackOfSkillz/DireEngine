@@ -1,0 +1,334 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_686_294]
+**Room Data:**
+- Structure: cave-tunnel
+- Exits: 2 (North, South)
+- Atmospheric Tags: materials: earthen-floor, earthen-walls, sensory: echoing, surroundings: underground-nearby
+
+The tunnel narrows, its earthen walls closing in as you move deeper. The floor, packed earth underfoot, slopes gently downwards. Each footstep echoes off the close walls, announcing your progress through the darkness. A faint draft from the South hints at a larger space beyond.
+
+---
+
+[Room: crossingV2_204_360]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: earthen-floor, rocky-walls
+  - Sensory: damp-air
+
+**Description:**
+The narrow cave passage arches low overhead, a ribcage of rock pressing down. The earthen floor is slick with moisture, reflecting the dim glow from your light source. A trickle of water echoes through the passage, its steady drip punctuating the otherwise silent darkness. The air is heavy with dampness, each breath drawing in the cool, musty scent of the earth.
+
+---
+
+[Room: crossingV2_350_362]
+**Room Data:**
+
+- Structure: cave-passage
+- Exit Count: 2
+- Exits: north, east
+- Materials: earthen-floor
+
+**Atmospheric Tags (present):**
+
+- Sensory: damp-musty
+- Surroundings: water-nearby
+
+---
+
+The cave passage narrows, the earthen floor slick underfoot. A faint, musty smell hangs heavy in the air, mingling with a hint of subterranean water. The walls glisten with moisture, beads of water trickling down like tiny, glittering veins. The passage continues northward, opening into a wider space to the east.
+
+---
+
+[Room: crossingV2_456_402]
+**Room Data:**
+
+- Structure: cave-tunnel
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: earthen-floor, rocky-walls
+  - Sensory: damp-air
+
+**Description:**
+
+The air grows colder as the cave tunnel narrows, squeezing between rough, earth-stained walls. The damp floor is slick with moisture, reflecting the dim glow of your light. A distant drip echoes through the passage, each drop marking time in the otherwise silent darkness.
+
+---
+
+[Room: crossingV2_640_546]
+**Room Data:**
+
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Materials: damp-walls
+
+**Atmospheric Tags:**
+- Sensory: dripping-water
+- Surroundings: water-nearby
+
+**Description:**
+
+The passage narrows as it winds northward, damp walls glistening with moisture. Water drips rhythmically from above, echoing in the confined space. The air is heavy with humidity, carrying a faint scent of minerals and algae from the nearby water source. The floor slopes gently eastward towards the exit, reflecting the dim light that filters in from that direction.
+
+---
+
+[Room: crossingV2_228_706]
+**Room Data:**
+- Structure: cave-passage
+- Exit Count: 2
+- Exits: north, east
+
+**Atmospheric Tags:**
+- Materials: moist-rock
+- Sensory: dripping-water
+- Surroundings: underground-nearby
+
+**Description:**
+The passage narrows, forcing a hunched stance as the ceiling presses low. The walls glisten with moisture, each drip echoing in the confined space. A cold, damp scent fills the air, punctuated by the rhythmic plink of water on stone. The path continues north, while an opening to the east hints at a wider chamber ahead.
+
+---
+
+[Room: crossingV2_552_238]
+**Room Data:**
+
+- Structure: cave-tunnel
+- Exits: 2 (north, east)
+- Shape: straight
+
+**Atmospheric Tags:**
+- Materials: damp-stone
+- Sensory: dripping-water
+- Surroundings: underground-nearby
+
+**Description:**
+
+A narrow, damp stone tunnel stretches out before you. The ceiling is low enough to brush with an outstretched hand, its surface glistening with moisture. Water drips rhythmically into a small pool at your feet, the echo of each drop resonating in the confined space. The air is heavy with the scent of earth and wet stone. To the north, the tunnel continues
+
+---
+
+[Room: crossingV2_318_564]
+**Room Data:**
+
+- Structure: cave-passage
+- Exit Count: 2
+- Exits: north, east
+
+**Atmospheric Tags:**
+
+- Materials: earthen-floor, rocky-walls
+- Sensory: damp-air
+- Surroundings: water-nearby
+
+**Description:**
+
+The cave passage narrows as it winds northward, the earthen floor sloping gently underfoot. Rocky walls, slick with moisture, press close on either side, their jagged surfaces glistening in the faint light. The air grows heavy and damp, carrying a subtle hint of mineral water. A distant drip echoes from unseen depths, marking time in the silent
+
+---
+
+[Room: crossingV2_120_702]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: earthen-floor
+  - Sensory: damp-air
+
+**Description:**
+The cave passage narrows, the rough, earthen floor sloping gently downward. Water drips steadily from above, echoing in the confined space. The air is thick with dampness, each breath drawing in the cool, musty scent of the underground. To the north, the passage opens slightly, hinting at a larger chamber beyond.
+
+---
+
+[Room: crossingV2_96_918]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (North, East)
+- Atmospheric Tags:
+  - Materials: stone-walls, earth-floor
+  - Sensory: damp-air, dripping-water
+  - Upkeep: neglected
+
+The passage narrows, forcing a stooped posture. Stone walls, slick with moisture, press close on either side. A faint, earthy scent mingles with the cool, damp air. Drops of water fall rhythmically from the ceiling, echoing in the confined space. The floor, soft and uneven underfoot, bears the imprints of recent passage.
+
+---
+
+[Room: crossingV2_352_326]
+**Room Data:**
+- Structure: cave-passage
+- Exits: north, south
+- Atmospheric Tags:
+  - Materials: earthen-floor
+  - Sensory: dripping-water
+  - Surroundings: tunnel-nearby
+
+The cave passage narrows as it stretches north and south, its walls glistening with moisture. The earthen floor squelches underfoot, each step echoing in the confined space. A steady drip of water punctuates the silence, the droplets echoing like tiny pebbles falling into a unseen pool further ahead.
+
+---
+
+[Room: crossingV2_456_430]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Materials: stone-floor, earthen-walls
+
+**Description:**
+A narrow, low-ceilinged tunnel stretches out before you. The rough-hewn walls, damp to the touch, hint at the weight of earth above. The air is cool and heavy with a faint, musty scent, unlike the drier passages further south. A faint echo of dripping water marks time as you move forward, guided by the glimmer of light from the northern exit.
+
+---
+
+[Room: crossingV2_606_546]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: earthen-floor, rocky-walls
+  - Sensory: dripping-water
+
+**Description:**
+A narrow passageway stretches out before you, hemmed in by rough, damp walls that glisten with moisture. The earthen floor is uneven underfoot, pockmarked by centuries of water droplets. A steady drip echoes through the passage, each drop punctuating the silence and leaving behind a small, temporary puddle on the stone. The air is cool and heavy with the scent of damp earth.
+
+---
+
+[Room: crossingV2_650_576]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (North, East)
+- Atmospheric Tags: materials: earthen-floor, earthen-walls; sensory: echoing; surroundings: tunnel-nearby
+
+The cave passage narrows to the North, its earthen floor and walls glistening with damp. The air is heavy with a cool, mineral scent, and each footstep echoes sharply off the close walls. A trickle of water runs along the East wall, its steady drip punctuating the otherwise silent tunnel.
+
+---
+
+[Room: crossingV2_472_564]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags: materials: rock-walls, earth-floor, sensory: damp-air
+
+**Description:**
+The cave passage narrows, its rough rock walls pressing in from both sides. The earthen floor slopes gently downward, visible only by the glint of water reflecting the distant torchlight. A chill drips from the ceiling, beads of moisture tracing cold paths down the stone. The air grows damper as you proceed eastward, a faint musty scent clinging to it.
+
+---
+
+[Room: crossingV2_556_616]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: rock-walls, earthen-floor
+  - Sensory: dripping-water
+  - Upkeep: neglected
+
+The narrow passage twists between rough-hewn rock walls, their damp surfaces glistening in the faint light. The earthen floor slopes gently downwards, leading deeper into the cave system. Dripping water echoes through the confined space, each droplet resonating like a tiny bell against the hard-packed earth.
+
+---
+
+[Room: crossingV2_520_642]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmosphere: materials: damp-walls, sensory: dripping-water
+
+The cave passage narrows to a tight crawl, forcing one to go on hands and knees. The walls are slick with condensation, reflecting the dim glow of the torchlight. A steady drip-drip echoes through the confined space, each drop resonating like a tiny drumbeat against the damp earthen floor.
+
+---
+
+[Room: crossingV2_64_698]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: earthen-floor, rocky-walls
+  - Sensory: damp-air
+
+**Description:**
+A narrow cave passage stretches out before you, hemmed in by rough, moist walls that glisten under the distant glow of your torch. The earthen floor is uneven and spongy with dampness, squelching slightly as you shift your weight. A cool, musty scent hangs heavy in the air, punctuated by the occasional drip of water echoing through the passage. To the north, the tunnel opens up
+
+---
+
+[Room: crossingV2_66_734]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: damp-stone
+  - Sensory: dripping-water
+
+**Description:**
+The passage narrows, forcing a hunched posture as it winds north. Water drips from the ceiling, each drop echoing briefly before disappearing into the damp stone floor. The air is heavy with moisture and the scent of earth. To the east, the tunnel opens slightly, hinting at a larger space beyond.
+
+---
+
+[Room: crossingV2_252_536]
+**Room Data:**
+- Structure: cave-passage
+- Exits: north, east
+
+**Atmospheric Tags:**
+- Materials: damp-stones, earthen-floor
+- Sensory: dripping-water
+- Surroundings: underground-nearby
+- Upkeep: neglected
+
+**Description:**
+The cave passage narrows as it stretches out to the north and east. Water drips steadily from above, their echoes resonating in the confined space. The earthen floor is slick underfoot, reflecting the dim glow of distant light. A faint, musty smell clings to the damp stones, hinting at the subterranean depths nearby.
+
+---
+
+Repeated phrases:
+- "room data structure cave" (20)
+- "data structure cave" (20)
+- "room data structure" (20)
+- "room data structure cave passage" (17)
+- "data structure cave passage" (17)
+- "structure cave passage" (17)
+- "atmospheric tags materials" (16)
+- "exits 2 north" (15)
+- "data structure cave passage exits" (14)
+- "exits 2 north east" (14)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 8
+- "the air is thick with": 1
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 2
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 2
+Geometry flags:
+- "slopes": 4
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 4
+Second-person violations: 14
+Player-assumption violations: 0
+Over 80 words: 5
+Average words: 75.15
+Sentence count flags: 0
+Average sentences: 3.85
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 1
+- "the floor is": 0
+Repeated sentence start total: 1

@@ -1,0 +1,156 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_686_294]
+At the intersection, four paths branch out, each leading in a different direction. The worn signpost stands tall at the center, its surface smoothed by time and touch. The space is open, the paths continuing unimpeded into the cityscape.
+
+---
+
+[Room: crossingV2_204_360]
+At the intersection, four paths converge, each leading away at different angles. The space is open, defined by cobblestone underfoot and rough stone walls to either side. A worn signpost stands tall in the center, its wooden surface bearing faded marks of use. The air carries a mix of dust and enticing cooking smells from nearby shops and markets, while the sounds of commerce hum around you. Despite the traffic, this space is well-maintained, showing signs of regular upkeep.
+
+---
+
+[Room: crossingV2_350_362]
+The intersection sprawls, three paths branching from a central point. A worn signpost stands at its heart, weathered by time and river winds. The space is open, with a clear view of the city's bustling streets in each direction.
+
+---
+
+[Room: crossingV2_456_402]
+In the heart of bustling, late-medieval crossingV2, a worn alley serves as a market stall. Three paths branch out from this intersection: one leads east, another north, and a third south. A signpost stands here, weathered by time, guiding traders along the trade lane.
+
+---
+
+[Room: crossingV2_640_546]
+In this worn intersection, four paths branch out from a central point. The space is open, with each exit leading to a different direction: east, north, south, and west. The floor bears the marks of time, smooth from countless footsteps.
+
+---
+
+[Room: crossingV2_228_706]
+At the intersection, three streets converge. The worn cobblestones bear evidence of countless passing feet and carts. A weathered signpost stands at the center, its surface scarred by time and use. Exits branch east, north, and west, each path lined with market stalls that edge onto the street.
+
+---
+
+[Room: crossingV2_552_238]
+The dock is an enclosed, crumbling stone structure, its once-solid walls now marred by time and neglect. A sturdy workbench dominates the space, hinting at past industry. There's no immediate exit; the room is sealed tight. The slipway, a telltale sign of its purpose, lies dormant, awaiting water's touch.
+
+---
+
+[Room: crossingV2_318_564]
+The room is a worn guild hall, a dead-end space within a bustling river trade city. Its single exit leads east. The walls are rough to the touch, their timber-walls bearing the marks of time and use. The floor, made of uneven flagstones, slopes slightly towards the center, hinting at years of foot traffic. The room's open space is confined by the walls, creating a tight atmosphere despite its size.
+
+---
+
+[Room: crossingV2_120_702]
+In the heart of Riverpine's temple district lies a well-maintained shrine room. The space is rectangular, bounded by four stone walls that rise to a vaulted ceiling, supported by sturdy columns. A flagstone floor, smooth from years of use, stretches out in all directions. Three exits lead from this devotional space: one to the north, where quiet murmurs hint at nearby worshippers; another to the east, through which the gentle sound of flowing water can be heard; and a final exit to the south, where a heavy curtain hangs, concealing whatever lies beyond. The air is still, undisturbed by any breeze, and filled with a soft, ambient quiet
+
+---
+
+[Room: crossingV2_96_918]
+In the heart of crossingV2's bustling river trade city, a worn tavern, Te'ravern, opens its doors to the late-medieval streets. The space unfolds as a rectangular building interior, dominated by a central hearth that casts flickering shadows on the timber walls and planked floor. The room is long and narrow, with a tight feel despite the high ceiling, and shows signs of wear from years of working-class patrons and commercial activity. A passage to the north leads deeper into the tavern, while a path to the east opens onto the riverfront, where sounds of commerce mingle with the aroma of cooking food wafting from nearby taverns
+
+---
+
+[Room: crossingV2_352_326]
+In the heart of bustling crossingV2, this room is a busy intersection, four paths converging in a tight, square space. Cobbled floor, worn smooth by countless feet and carts, meets plaster walls, their surfaces marked with faint, faded posters. Sounds of traffic and commerce echo from nearby shops and markets, the air thick with dust and the scent of distant cooking fires. The room is well-maintained, its corners clean despite the constant flow of people and goods through its four exits.
+
+---
+
+[Room: crossingV2_456_430]
+In a bustling river trade city, you find yourself in an open, dead-end space. The area is tight, bounded by rough walls that rise to either side, their surfaces worn from years of use and weather. A single path leads north out of this confined space, hinting at the city's ever-present flow.
+
+---
+
+[Room: crossingV2_606_546]
+The space ends abruptly here. A single path leads eastwards. The walls are close, confining the area. The floor is worn smooth underfoot from countless passing feet.
+
+---
+
+[Room: crossingV2_650_576]
+The space opens up into a broad, northward-facing dead end. Two walls converge at the far end, creating a tight, enclosed feel. The floor is smooth underfoot, worn from years of use. A single, sturdy door stands to the north, hinting at a continuation beyond.
+
+---
+
+[Room: crossingV2_472_564]
+In this bustling intersection of crossingV2, four paths converge. The space is open, allowing a clear view of the branching passages leading east, north, south, and west. The floor here is worn smooth by countless feet, showing signs of its heavy use in this late-medieval river trade city. The air carries a mix of river dampness and the ever-present aroma of distant smoke from countless hearths and forges.
+
+---
+
+[Room: crossingV2_556_616]
+The space here is an intersection, three paths branching out. The floor is hard-packed earth, worn smooth by countless feet. To the east, a narrow path winds between timber-walled buildings, while to the south and west, wider cobbled streets lead onwards. The air carries a mix of river-mist and the scent of roasting meats from nearby stalls.
+
+---
+
+[Room: crossingV2_520_642]
+The space opens into a bustling intersection. Three paths diverge from this point: one leads north, another south, and a third west. The floor is worn smooth by countless footsteps. The passage narrows slightly as it branches out, each path continuing onwards with purpose.
+
+---
+
+[Room: crossingV2_64_698]
+The space opens into a three-way intersection. Two paths branch off from the central cobbled floor, while a passage continues straight ahead. The plaster walls are rough to the touch and bear signs of wear. The rain's scent wafts in from the open path to the east, accompanied by distant children's laughter.
+
+---
+
+[Room: crossingV2_66_734]
+A narrow path stretches out, connecting east and west. The space is open overhead but confined between high walls, their rough surfaces worn by time and traffic. The path continues unbroken in both directions, leading directly to the exits.
+
+---
+
+[Room: crossingV2_252_536]
+In the heart of CrossingV2's river valley, Cottage Mor Al is a quiet, residential sanctuary amidst the city's bustling trade. The room is rectangular, defined by timber walls that bear the marks of time and use. Planked floor creaks underfoot, each board worn smooth by countless steps. The space is open, with three exits - north, east, and south - leading to adjacent homes, their quiet ambiance softened by the distant hum of city life. A faint cooking smell wafts from the eastern passage, hinting at a neighbor's evening meal.
+
+---
+
+Repeated phrases:
+- "the space is" (8)
+- "the space is open" (7)
+- "space is open" (7)
+- "in the heart of" (5)
+- "worn smooth by countless" (5)
+- "by time and" (5)
+- "in the heart" (5)
+- "smooth by countless" (5)
+- "the heart of" (5)
+- "the room is" (5)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 5
+- "the air is": 1
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 1
+- "window": 0
+- "stairs": 0
+- "hall": 1
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 1
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 3
+Geometry flags:
+- "slopes": 1
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 1
+Over 80 words: 4
+Average words: 59.65
+Sentence count flags: 0
+Average sentences: 3.90
+Dead outputs: 0
+Repeated sentence starts:
+- "the room is": 4
+- "the walls are": 2
+- "the floor is": 4
+Repeated sentence start total: 10

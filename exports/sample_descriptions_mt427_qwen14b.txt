@@ -1,0 +1,133 @@
+=== Zone: demo1 ===
+
+[Room: CRO_500_100]
+A narrow passage stretches from the west to the east, with a downward path leading south at its eastern end. The earthen floor is uneven and marked by occasional footprints, indicating frequent travel through this corridor. At the far end, the passage narrows slightly before opening to a descent heading south.
+
+---
+
+[Room: CRO_500_150]
+A narrow passage leads upward from this dead-end space, its rough walls and floor indicating frequent use. The ceiling looms close above, suggesting the route continues vertically rather than horizontally. With no other exits, the focus is on the ascent ahead.
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_192_132]
+At the western edge of Market Lane, a dead-end alley narrows between two stone buildings, their facades showing signs of wear from years of use. Cobblestones pave the ground, worn smooth by constant foot traffic leading west back towards the heart of the market district. The air carries faint hints of river mist and distant shouts of merchants hawking goods, underscoring the bustling nature of this late-medieval trade city.
+
+---
+
+[Room: crossingV2_178_132]
+The narrow hallway of the bustling tavern runs east and south between worn stone walls. A hearth at the eastern end casts a warm glow across the space, its faint smoke mingling with the scent of roasting meats from nearby kitchens. The floor shows steady wear where patrons frequently tread, marking well-worn paths through this riverside establishment.
+
+---
+
+
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+Amberwick Lane intersects here in Western Run, with pathways branching out to the east, southwest, and west. The worn cobbles indicate frequent traffic at this busy intersection, particularly towards the eastern and southwestern exits. Building fronts press closely around the lane, framing its narrow path without encroaching on the open space needed for movement.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+Saltward Street runs as a narrow passage to the south and west from Amberwick Lane. The fitted cobbles underfoot show steady wear, indicating frequent travel through this thoroughfare. To the south, Saltward Street narrows slightly before continuing on, while to the west, it widens marginally as it approaches an intersection.
+
+---
+
+Repeated phrases:
+- "a narrow passage" (3)
+- "indicating frequent travel through this" (2)
+- "frequent travel through this" (2)
+- "indicating frequent travel through" (2)
+- "frequent travel through" (2)
+- "indicating frequent travel" (2)
+- "narrows slightly before" (2)
+- "to the east" (2)
+- "travel through this" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 1
+- "gate": 0
+- "arch": 0
+- "mist": 1
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 2
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 0
+Player-assumption violations: 0
+Safe samples: 5/6
+Useful samples: 2/6
+Useful acceptance rate: 33.3%
+Average words: 54.33
+Under 45 words: 1
+45 to 90 words: 5
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.00
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 1
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 3
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 0
+Repeated sentence start total: 0

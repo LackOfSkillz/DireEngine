@@ -1,0 +1,171 @@
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_178_132]
+**Room Data:**
+- Structure: Cave-Tunnel
+- Exits: North, South
+
+**Atmospheric Tags:**
+- Materials: Rock-Walls, Dirt-Floor
+- Sensory: Echoing-Noises
+- Upkeep: Unkempt
+
+**Description:**
+The cave tunnel stretches out in a narrow, winding path, hewn from the earth's solid embrace. The rough, jagged walls of weathered rock close in on all sides, their damp surfaces glistening under the dim light. The floor is uneven, a patchwork of loose stones and compacted dirt, each step echoing loudly in the confined space. The air is thick with the scent of
+
+---
+
+[Room: crossingV2_192_132]
+**Room Data:**
+
+- Structure: cave-passage
+- Exits: north, east
+
+**Atmospheric Tags:**
+
+- Materials: earthen-floor
+- Sensory: damp-air
+- Upkeep: neglected
+
+**Description:**
+
+The passage narrows to the north, its earthen floor uneven and damp underfoot. Water drips from above, echoing in the confined space. A faint, musty smell clings to the walls, growing stronger as one moves eastward into the darkness.
+
+---
+
+[Room: crossingV2_200_132]
+**Room Description:**
+
+This rectangular chamber is bathed in a soft, earthy aroma. The walls, made of packed clay, are cool to the touch, their rough texture visible even in the dim light filtering through the single southern exit. A narrow passage leads eastward, its floor worn smooth by countless footsteps over time. The room's northern wall bears faint, faded markings, remnants of a past era.
+
+---
+
+[Room: crossingV2_214_132]
+**Room Data:**
+- Structure: cave-passage
+- Exit Count: 2
+- Exit Directions: north, east
+
+**Atmospheric Tags (present):**
+- Materials: earthen-floor
+- Sensory: echoing-ambient
+- Surroundings: water-nearby
+
+**Description:**
+The cave passage narrows, the earthen floor sloping gently downwards. Water drips rhythmically from above, each drop echoing off the damp walls. The air is cool and heavy with the scent of wet stone. The sound of rushing water grows louder as you proceed eastward.
+
+---
+
+[Room: crossingV2_222_132]
+**Room Description:**
+
+The room is square, with four exits leading north, south, east, and west. The walls are bare, their gray stone surfaces cold to the touch. A faint draft whispers through the room, carrying a hint of dampness from somewhere unseen. The floor is uneven, worn smooth by years of use, its surface marked by countless footsteps.
+
+---
+
+[Room: crossingV2_236_132]
+**Room Data:**
+- Structure: Cavern
+- Exits: 3 (North, East, West)
+- Atmospheric Tags: materials: stone-walls, sensory: echoing, upkeep: neglected
+
+The cavern opens into a wide, roughly circular chamber, its walls glistening with damp. The air is heavy with the scent of earth and the distant drip of water echoes through the space. Patches of lichen cling to the uneven stone floor, their soft greens contrasting with the cold gray of the surrounding rock.
+
+---
+
+Repeated phrases:
+- "room data structure" (4)
+- "room data structure cave" (3)
+- "with the scent of" (3)
+- "atmospheric tags materials" (3)
+- "data structure cave" (3)
+- "the air is" (3)
+- "the scent of" (3)
+- "with the scent" (3)
+- "heavy with the scent of" (2)
+- "room data structure cave passage" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 3
+- "the air is thick with": 1
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 2
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 2
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 1
+Player-assumption violations: 0
+Safe samples: 0/6
+Useful samples: 0/6
+Useful acceptance rate: 0.0%
+Average words: 68.00
+Under 45 words: 0
+45 to 90 words: 6
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.67
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 3
+- "the air is thick with": 1
+- "whispers": 1
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 1
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 1
+- "the floor is": 2
+Repeated sentence start total: 3

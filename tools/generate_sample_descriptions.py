@@ -25,6 +25,20 @@ EXPLICIT_REPETITION_PHRASES = (
     "the air is",
     "the air is thick with",
 )
+POETIC_FILLER_PHRASES = (
+    "in the heart of",
+    "the air is",
+    "the air is thick with",
+    "whispers",
+    "secrets",
+    "sentinel",
+    "symphony",
+    "dance of",
+    "as if",
+    "awaits",
+    "unfurls",
+    "pulsating",
+)
 FABRICATION_FLAG_TERMS = (
     "lantern",
     "tower",
@@ -44,6 +58,100 @@ FABRICATION_FLAG_TERMS = (
     "forest",
     "ruins",
 )
+FABRICATION_WATCHLIST_TERMS = (
+    "lantern",
+    "tower",
+    "staircase",
+    "mist",
+    "fog",
+    "cobweb",
+    "peaks",
+    "forest",
+    "ruins",
+    "fountain",
+    "statue",
+    "market stall",
+)
+STUB_PHRASES = (
+    "enclosed room, no exits",
+    "a room with no exits",
+    "a narrow passage",
+    "an empty room",
+    "there is nothing here",
+)
+META_MECHANICS_PATTERNS = (
+    r"\byaml\b",
+    r"\bmetadata\b",
+    r"\bmechanic\b",
+    r"\bmechanics\b",
+    r"\bplayer\b",
+)
+WRAPPER_LEAKAGE_PATTERNS = (
+    r"\broom description\b",
+    r"(?:^|\n)\s*description:\s*",
+    r"\broom data\b",
+    r"\batmospheric tags\b",
+    r"(?:^|\n)\s*structure:\s*",
+    r"(?:^|\n)\s*exits?:\s*",
+    r"(?:^|\n)\s*materials:\s*",
+    r"(?:^|\n)\s*tags?:\s*",
+    r"(?:^|\n)\s*#{1,6}\s+",
+    r"(?:^|\n)\s*\*\*[^\n*]+\*\*:?\s*",
+    r"(?:^|\n)\s*[-*]\s+",
+)
+STRUCTURAL_FABRICATION_TERMS = (
+    "door",
+    "doors",
+    "window",
+    "windows",
+    "arch",
+    "archway",
+    "archways",
+    "gate",
+    "gates",
+    "ceiling",
+    "ceilings",
+    "vaulted",
+    "stair",
+    "stairs",
+    "staircase",
+    "staircases",
+    "balcony",
+    "balconies",
+    "alcove",
+    "alcoves",
+)
+STRUCTURAL_SHAPE_TERMS = (
+    "rectangular",
+    "rectangle",
+    "square",
+    "triangular",
+    "triangle",
+    "circular",
+    "circle",
+    "irregular",
+    "vaulted",
+    "loft",
+)
+EXIT_MENTION_PATTERNS = (
+    r"\b(exit|exits)\b",
+    r"\bpath leads\b",
+    r"\bpaths lead\b",
+    r"\bpassage leads\b",
+    r"\bpassages lead\b",
+)
+CARDINAL_DIRECTIONS = (
+    "north",
+    "south",
+    "east",
+    "west",
+    "up",
+    "down",
+    "northeast",
+    "northwest",
+    "southeast",
+    "southwest",
+)
 GEOMETRY_FLAG_TERMS = (
     "slopes",
     "rises",
@@ -58,11 +166,32 @@ SENTENCE_START_PATTERNS = (
     "the floor is",
 )
 MAX_DESCRIPTION_WORDS = 80
+USEFUL_MIN_WORDS = 45
+USEFUL_MAX_WORDS = 90
 DEAD_OUTPUT_PATTERNS = (
     r"^enclosed room, no exits\.?$",
     r"^no exits\.?$",
     r"^plain space\.?$",
     r"^dead end\.?$",
+)
+SECOND_PERSON_PATTERNS = (
+    r"\byou\b",
+    r"\byour\b",
+    r"\byours\b",
+)
+PLAYER_ASSUMPTION_PATTERNS = (
+    r"\byou decide\b",
+    r"\byou feel\b",
+    r"\byou notice\b",
+    r"\byou hear\b",
+    r"\byou see\b",
+    r"\byou smell\b",
+    r"\byou enter\b",
+    r"\byou step\b",
+    r"\byou walk\b",
+    r"\bas you walk\b",
+    r"\bas you step\b",
+    r"\bas you enter\b",
 )
 
 
@@ -335,6 +464,18 @@ def count_fabrication_flags(texts: list[str], terms: tuple[str, ...] = FABRICATI
     return counts
 
 
+def count_phrase_group(texts: list[str], phrases: tuple[str, ...]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    normalized_texts = [str(text or "").lower() for text in texts]
+    for phrase in phrases:
+        if " " in phrase:
+            counts[phrase] = sum(text.count(phrase) for text in normalized_texts)
+        else:
+            pattern = re.compile(rf"\b{re.escape(phrase)}\b")
+            counts[phrase] = sum(len(pattern.findall(text)) for text in normalized_texts)
+    return counts
+
+
 def count_geometry_flags(texts: list[str], terms: tuple[str, ...] = GEOMETRY_FLAG_TERMS) -> dict[str, int]:
     counts: dict[str, int] = {}
     normalized_texts = [str(text or "").lower() for text in texts]
@@ -342,6 +483,63 @@ def count_geometry_flags(texts: list[str], terms: tuple[str, ...] = GEOMETRY_FLA
         pattern = re.compile(rf"\b{re.escape(term)}\b")
         counts[term] = sum(len(pattern.findall(text)) for text in normalized_texts)
     return counts
+
+
+def extract_actual_exit_directions(room: dict[str, Any]) -> list[str]:
+    exits = room.get("exits") or room.get("exitMap") or {}
+    directions: list[str] = []
+    for direction, spec in dict(exits).items():
+        normalized_direction = str(direction or "").strip().lower()
+        if not normalized_direction:
+            continue
+        if isinstance(spec, dict):
+            target = str(spec.get("target") or spec.get("target_id") or "").strip()
+            if not target:
+                continue
+        directions.append(normalized_direction)
+    return sorted(set(directions))
+
+
+def detect_structural_fabrication(text: str, room: dict[str, Any]) -> dict[str, Any]:
+    normalized_text = str(text or "").strip().lower()
+    actual_exit_directions = extract_actual_exit_directions(room)
+    actual_exit_count = len(actual_exit_directions)
+
+    mentioned_directions = []
+    for direction in CARDINAL_DIRECTIONS:
+        if re.search(rf"\b{re.escape(direction)}\b", normalized_text):
+            mentioned_directions.append(direction)
+    mentioned_directions = sorted(set(mentioned_directions))
+
+    architectural_terms = []
+    for term in STRUCTURAL_FABRICATION_TERMS:
+        if re.search(rf"\b{re.escape(term)}\b", normalized_text):
+            architectural_terms.append(term)
+
+    shape_terms = []
+    for term in STRUCTURAL_SHAPE_TERMS:
+        if re.search(rf"\b{re.escape(term)}\b", normalized_text):
+            shape_terms.append(term)
+
+    explicit_exit_mentions = 0
+    for pattern in EXIT_MENTION_PATTERNS:
+        explicit_exit_mentions += len(re.findall(pattern, normalized_text))
+
+    invented_directions = [direction for direction in mentioned_directions if direction not in actual_exit_directions]
+    exit_count_overflow = max(0, len(mentioned_directions) - actual_exit_count) if actual_exit_count else len(mentioned_directions)
+
+    findings = {
+        "actual_exit_count": actual_exit_count,
+        "actual_exit_directions": actual_exit_directions,
+        "mentioned_directions": mentioned_directions,
+        "invented_directions": invented_directions,
+        "exit_count_overflow": exit_count_overflow,
+        "explicit_exit_mentions": explicit_exit_mentions,
+        "architectural_terms": architectural_terms,
+        "shape_terms": shape_terms,
+        "has_structural_fabrication": bool(invented_directions or exit_count_overflow > 0 or architectural_terms or shape_terms),
+    }
+    return findings
 
 
 def word_count(text: str) -> int:
@@ -355,6 +553,59 @@ def count_length_flags(texts: list[str], max_words: int = MAX_DESCRIPTION_WORDS)
 def sentence_count(text: str) -> int:
     chunks = [chunk.strip() for chunk in re.split(r"(?<=[.!?])\s+", str(text or "").strip()) if chunk.strip()]
     return len(chunks)
+
+
+def is_single_paragraph(text: str) -> bool:
+    normalized = str(text or "").strip()
+    if not normalized:
+        return False
+    return "\n\n" not in normalized
+
+
+def classify_word_count_bucket(text: str, *, minimum: int = USEFUL_MIN_WORDS, maximum: int = USEFUL_MAX_WORDS) -> str:
+    total_words = word_count(text)
+    if total_words < minimum:
+        return "under_45_words"
+    if total_words <= maximum:
+        return "45_to_90_words"
+    return "over_90_words"
+
+
+def classify_sentence_count_bucket(text: str, *, minimum: int = 3, maximum: int = 5) -> str:
+    total_sentences = sentence_count(text)
+    if total_sentences < minimum:
+        return "under_3_sentences"
+    if total_sentences <= maximum:
+        return "3_to_5_sentences"
+    return "over_5_sentences"
+
+
+def sample_is_safe(text: str) -> bool:
+    normalized = str(text or "").strip()
+    if not normalized or not is_single_paragraph(normalized):
+        return False
+    if count_pattern_violations([normalized], WRAPPER_LEAKAGE_PATTERNS) > 0:
+        return False
+    if sum(count_phrase_group([normalized], POETIC_FILLER_PHRASES).values()) > 0:
+        return False
+    if sum(count_phrase_group([normalized], FABRICATION_WATCHLIST_TERMS).values()) > 0:
+        return False
+    if count_pattern_violations([normalized], META_MECHANICS_PATTERNS) > 0:
+        return False
+    return True
+
+
+def sample_is_useful(text: str) -> bool:
+    normalized = str(text or "").strip()
+    if not sample_is_safe(normalized):
+        return False
+    if classify_word_count_bucket(normalized) != "45_to_90_words":
+        return False
+    if classify_sentence_count_bucket(normalized) != "3_to_5_sentences":
+        return False
+    if sum(count_phrase_group([normalized], STUB_PHRASES).values()) > 0:
+        return False
+    return True
 
 
 def average_sentence_count(texts: list[str]) -> float:
@@ -389,6 +640,22 @@ def count_repeated_sentence_starts(texts: list[str], starts: tuple[str, ...] = S
     return counts
 
 
+def count_pattern_violations(texts: list[str], patterns: tuple[str, ...]) -> int:
+    total = 0
+    ordered_patterns = sorted(patterns, key=len, reverse=True)
+    for text in texts:
+        normalized = str(text or "").strip().lower()
+        matched_spans: list[tuple[int, int]] = []
+        for pattern in ordered_patterns:
+            for match in re.finditer(pattern, normalized):
+                span = match.span()
+                if any(not (span[1] <= existing[0] or span[0] >= existing[1]) for existing in matched_spans):
+                    continue
+                matched_spans.append(span)
+                total += 1
+    return total
+
+
 def average_word_count(texts: list[str]) -> float:
     if not texts:
         return 0.0
@@ -400,19 +667,53 @@ def build_evaluation_counts(samples: list[SampleDescription]) -> dict[str, Any]:
     fabrication_counts = count_fabrication_flags(texts)
     geometry_counts = count_geometry_flags(texts)
     sentence_start_counts = count_repeated_sentence_starts(texts)
+    second_person_violations = count_pattern_violations(texts, SECOND_PERSON_PATTERNS)
+    player_assumption_violations = count_pattern_violations(texts, PLAYER_ASSUMPTION_PATTERNS)
+    poetic_filler_counts = count_phrase_group(texts, POETIC_FILLER_PHRASES)
+    fabrication_watchlist_counts = count_phrase_group(texts, FABRICATION_WATCHLIST_TERMS)
+    stub_phrase_counts = count_phrase_group(texts, STUB_PHRASES)
+    word_buckets = {
+        "under_45_words": 0,
+        "45_to_90_words": 0,
+        "over_90_words": 0,
+    }
+    sentence_buckets = {
+        "under_3_sentences": 0,
+        "3_to_5_sentences": 0,
+        "over_5_sentences": 0,
+    }
+    safe_samples = 0
+    useful_samples = 0
+    for text in texts:
+        word_buckets[classify_word_count_bucket(text)] += 1
+        sentence_buckets[classify_sentence_count_bucket(text)] += 1
+        if sample_is_safe(text):
+            safe_samples += 1
+        if sample_is_useful(text):
+            useful_samples += 1
+    useful_acceptance_rate = round((useful_samples / len(texts)) * 100, 1) if texts else 0.0
     return {
         "explicit_repetition": count_phrase_occurrences(texts),
         "fabrication_flags": fabrication_counts,
         "noun_violations": sum(fabrication_counts.values()),
         "geometry_flags": geometry_counts,
         "geometry_violations": sum(geometry_counts.values()),
-        "over_80_words": count_length_flags(texts),
+        "second_person_violations": second_person_violations,
+        "player_assumption_violations": player_assumption_violations,
+        "safe_samples": safe_samples,
+        "useful_samples": useful_samples,
+        "useful_acceptance_rate": useful_acceptance_rate,
         "average_words": round(average_word_count(texts), 2),
+        **word_buckets,
         "sentence_count_flags": count_sentence_flags(texts),
         "average_sentences": round(average_sentence_count(texts), 2),
+        **sentence_buckets,
         "dead_outputs": count_dead_outputs(texts),
         "repeated_sentence_starts": sentence_start_counts,
         "repeated_sentence_start_total": sum(sentence_start_counts.values()),
+        "poetic_filler_counts": poetic_filler_counts,
+        "fabrication_watchlist_counts": fabrication_watchlist_counts,
+        "stub_phrase_counts": stub_phrase_counts,
     }
 
 
@@ -457,11 +758,31 @@ def format_export(samples: list[SampleDescription], repeated_phrases: PhraseList
     for term, count in dict(evaluation_counts.get("geometry_flags") or {}).items():
         lines.append(f"- \"{term}\": {count}")
     lines.append(f"Geometry violations: {int(evaluation_counts.get('geometry_violations') or 0)}")
-    lines.append(f"Over 80 words: {int(evaluation_counts.get('over_80_words') or 0)}")
+    lines.append(f"Second-person violations: {int(evaluation_counts.get('second_person_violations') or 0)}")
+    lines.append(f"Player-assumption violations: {int(evaluation_counts.get('player_assumption_violations') or 0)}")
+    sample_count = sum(1 for sample in samples if sample.text)
+    lines.append(f"Safe samples: {int(evaluation_counts.get('safe_samples') or 0)}/{sample_count}")
+    lines.append(f"Useful samples: {int(evaluation_counts.get('useful_samples') or 0)}/{sample_count}")
+    lines.append(f"Useful acceptance rate: {float(evaluation_counts.get('useful_acceptance_rate') or 0.0):.1f}%")
     lines.append(f"Average words: {float(evaluation_counts.get('average_words') or 0.0):.2f}")
+    lines.append(f"Under 45 words: {int(evaluation_counts.get('under_45_words') or 0)}")
+    lines.append(f"45 to 90 words: {int(evaluation_counts.get('45_to_90_words') or 0)}")
+    lines.append(f"Over 90 words: {int(evaluation_counts.get('over_90_words') or 0)}")
     lines.append(f"Sentence count flags: {int(evaluation_counts.get('sentence_count_flags') or 0)}")
     lines.append(f"Average sentences: {float(evaluation_counts.get('average_sentences') or 0.0):.2f}")
+    lines.append(f"Under 3 sentences: {int(evaluation_counts.get('under_3_sentences') or 0)}")
+    lines.append(f"3 to 5 sentences: {int(evaluation_counts.get('3_to_5_sentences') or 0)}")
+    lines.append(f"Over 5 sentences: {int(evaluation_counts.get('over_5_sentences') or 0)}")
     lines.append(f"Dead outputs: {int(evaluation_counts.get('dead_outputs') or 0)}")
+    lines.append("Poetic filler counts:")
+    for phrase, count in dict(evaluation_counts.get("poetic_filler_counts") or {}).items():
+        lines.append(f"- \"{phrase}\": {count}")
+    lines.append("Fabrication watchlist counts:")
+    for phrase, count in dict(evaluation_counts.get("fabrication_watchlist_counts") or {}).items():
+        lines.append(f"- \"{phrase}\": {count}")
+    lines.append("Stub phrase counts:")
+    for phrase, count in dict(evaluation_counts.get("stub_phrase_counts") or {}).items():
+        lines.append(f"- \"{phrase}\": {count}")
     lines.append("Repeated sentence starts:")
     for start, count in dict(evaluation_counts.get("repeated_sentence_starts") or {}).items():
         lines.append(f"- \"{start}\": {count}")
@@ -545,11 +866,31 @@ def main(argv: list[str] | None = None) -> int:
         for term, count in dict(evaluation_counts.get("geometry_flags") or {}).items():
             print(f'- "{term}": {count}')
         print(f"Geometry violations: {int(evaluation_counts.get('geometry_violations') or 0)}")
-        print(f"Over 80 words: {int(evaluation_counts.get('over_80_words') or 0)}")
+        print(f"Second-person violations: {int(evaluation_counts.get('second_person_violations') or 0)}")
+        print(f"Player-assumption violations: {int(evaluation_counts.get('player_assumption_violations') or 0)}")
+        sample_count = sum(1 for sample in samples if sample.text)
+        print(f"Safe samples: {int(evaluation_counts.get('safe_samples') or 0)}/{sample_count}")
+        print(f"Useful samples: {int(evaluation_counts.get('useful_samples') or 0)}/{sample_count}")
+        print(f"Useful acceptance rate: {float(evaluation_counts.get('useful_acceptance_rate') or 0.0):.1f}%")
         print(f"Average words: {float(evaluation_counts.get('average_words') or 0.0):.2f}")
+        print(f"Under 45 words: {int(evaluation_counts.get('under_45_words') or 0)}")
+        print(f"45 to 90 words: {int(evaluation_counts.get('45_to_90_words') or 0)}")
+        print(f"Over 90 words: {int(evaluation_counts.get('over_90_words') or 0)}")
         print(f"Sentence count flags: {int(evaluation_counts.get('sentence_count_flags') or 0)}")
         print(f"Average sentences: {float(evaluation_counts.get('average_sentences') or 0.0):.2f}")
+        print(f"Under 3 sentences: {int(evaluation_counts.get('under_3_sentences') or 0)}")
+        print(f"3 to 5 sentences: {int(evaluation_counts.get('3_to_5_sentences') or 0)}")
+        print(f"Over 5 sentences: {int(evaluation_counts.get('over_5_sentences') or 0)}")
         print(f"Dead outputs: {int(evaluation_counts.get('dead_outputs') or 0)}")
+        print("Poetic filler counts:")
+        for phrase, count in dict(evaluation_counts.get("poetic_filler_counts") or {}).items():
+            print(f'- "{phrase}": {count}')
+        print("Fabrication watchlist counts:")
+        for phrase, count in dict(evaluation_counts.get("fabrication_watchlist_counts") or {}).items():
+            print(f'- "{phrase}": {count}')
+        print("Stub phrase counts:")
+        for phrase, count in dict(evaluation_counts.get("stub_phrase_counts") or {}).items():
+            print(f'- "{phrase}": {count}')
         print("Repeated sentence starts:")
         for start, count in dict(evaluation_counts.get("repeated_sentence_starts") or {}).items():
             print(f'- "{start}": {count}')

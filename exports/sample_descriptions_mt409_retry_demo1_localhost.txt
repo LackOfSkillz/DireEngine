@@ -1,0 +1,96 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+**Room Description:**
+
+This rectangular room is enclosed by four solid walls, with exits leading north and east. The floor is a smooth, worn stone surface, cool to the touch. A faint scent of damp earth lingers in the air, hinting at recent rainfall. The western wall bears remnants of peeling paint, revealing glimpses of the original brick beneath.
+
+---
+
+Repeated phrases:
+- none
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 0
+Player-assumption violations: 0
+Safe samples: 0/1
+Useful samples: 0/1
+Useful acceptance rate: 0.0%
+Average words: 58.00
+Under 45 words: 0
+45 to 90 words: 1
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 4.00
+Under 3 sentences: 0
+3 to 5 sentences: 1
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 0
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 1
+Repeated sentence start total: 1

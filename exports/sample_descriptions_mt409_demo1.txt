@@ -1,0 +1,155 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+**Room Data:**
+- Structure: cave-passage
+- Exit Count: 2
+- Exits: north, east
+
+**Atmospheric Tags:**
+- Materials: earthen-floor, rocky-walls
+- Sensory: damp-air
+- Surroundings: water-nearby
+
+**Description:**
+The narrow passage twists between earthen walls, their rough surfaces glistening with damp. The air is heavy and cool, carrying a faint scent of wet stone. A trickle of water seeps from the north wall, its steady drip echoing through the confined space. The passage widens slightly to the east, revealing a hint of brighter light ahead.
+
+---
+
+[Room: CRO_500_100]
+**Room Data:**
+
+- Structure: cave-tunnel
+- Exits: 2 (north, east)
+- Materials: stone-walls
+
+**Description:**
+
+The tunnel narrows as it stretches northward, the cold stone walls pressing close on either side. The air grows colder and damper with each step, carrying a faint whiff of earth and minerals. A trickle of water runs along the uneven floor, its steady drip echoing through the confined space.
+
+---
+
+[Room: CRO_400_150]
+**Room Description:**
+
+The rectangular room is bounded by rough stone walls, their surfaces cool to the touch. Two exits lead out - one to the north and another to the east. The floor is a worn, uneven flagstone, dusty from disuse. A faint, musty scent lingers in the air, hinting at the room's long abandonment.
+
+---
+
+[Room: CRO_450_150]
+**Room Description:**
+
+This rectangular chamber is bounded by three solid walls, with a fourth wall open to another room. The floor is smooth underfoot, worn by countless footsteps over time. A faint scent of damp stone lingers in the air, distinct from the dry smell of the adjacent room. The ceiling, unseen above, feels high and distant.
+
+---
+
+[Room: CRO_500_150]
+**Room Data:**
+
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Materials: earthen-floor
+- Atmospheric Tags: sensory: damp-air
+
+**Description:**
+
+The earthen floor is cool and slightly spongy underfoot, hinting at the dampness that permeates this narrow cave passage. The air is heavy with a musty scent, as if the very walls are breathing moisture. A faint drip echoes from somewhere ahead, punctuating the otherwise silent journey north or east.
+
+---
+
+Repeated phrases:
+- "room data structure cave" (3)
+- "data structure cave" (3)
+- "room data structure" (3)
+- "drip echoing through the confined" (2)
+- "echoing through the confined space" (2)
+- "exits 2 north east materials" (2)
+- "its steady drip echoing through" (2)
+- "room data structure cave passage" (2)
+- "steady drip echoing through the" (2)
+- "2 north east materials" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 2
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 1
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 0
+Player-assumption violations: 0
+Safe samples: 0/5
+Useful samples: 0/5
+Useful acceptance rate: 0.0%
+Average words: 64.80
+Under 45 words: 0
+45 to 90 words: 5
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.60
+Under 3 sentences: 0
+3 to 5 sentences: 5
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 2
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 1
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 0
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 2
+Repeated sentence start total: 2

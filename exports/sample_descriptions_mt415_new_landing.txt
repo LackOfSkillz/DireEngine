@@ -1,0 +1,163 @@
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+**Room Description:**
+
+This rectangular room is bounded by bare stone walls, cold to the touch. The ceiling, unseen above, hints at vast openness. Two exits lead out: one northwards, the other east. The floor, worn smooth from countless footsteps, slopes gently towards a central drain, its metal grate rusted with age. A faint, musty smell lingers in the air, suggesting long-forgotten dampness.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+**Room Description:**
+
+This rectangular room is enclosed on four sides, with exits leading north, east, south, and west. The floor is smooth and cool to the touch, made of worn stone slabs that fit together seamlessly. A faint draft whispers through the room, carrying a subtle scent of damp earth from the southern exit. The walls are bare, their surface rough under fingertips, bearing no visible marks or decorations.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+**Room Data:**
+
+- Structure: cave-passage
+- Exits: north, south
+- Materials: rocky-walls, uneven-floor
+
+**Atmospheric Tags (present):**
+
+- Sensory: damp-air, dripping-water
+- Upkeep: worn-out
+
+**Description:**
+
+The cave passage narrows to the north, its rough walls glistening with moisture. The air is heavy and damp, punctuated by the steady drip of unseen water. The uneven floor slopes gently downward, worn smooth by countless footsteps over time.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+**Room Data:**
+
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Upkeep: neglected
+
+**Description:**
+
+A narrow, earthen tunnel stretches out before you, its walls damp and rough to the touch. The air is heavy with the scent of moist soil and a faint, musty undertone. A trickle of water runs along one side, its steady drip echoing in the confined space. The passage continues northwards, while another opening leads off to the east, shrouded in deeper shadows.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+**Room Data:**
+
+- Structural Tags: structure: cave-passage, shape: curved
+- Exit Data: exits: 2 (north, east)
+- Atmospheric Tags: materials: rocky-walls, sensory: echoing-sound
+
+**Description:**
+
+The passage curves gently ahead, its walls glistening with moisture. The ceiling arches high above, lost in shadow. Each footstep echoes loudly against the hard-packed earthen floor, announcing your progress through the cave.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+**Room Description:**
+
+A narrow tunnel, barely tall enough to stand upright, stretches out before you. The rough-hewn walls glisten with moisture, reflecting the dim light from your lone lantern. A faint, earthy scent hangs heavy in the air, mingling with the distant drip of water echoing through the passage. The floor is uneven underfoot, sloping gently downwards as it continues eastward into darkness.
+
+---
+
+Repeated phrases:
+- "structure cave passage" (3)
+- "to the touch" (3)
+- "data structure cave passage exits" (2)
+- "description this rectangular room is" (2)
+- "room data structure cave passage" (2)
+- "room description this rectangular room" (2)
+- "walls glistening with moisture the" (2)
+- "data structure cave passage" (2)
+- "description this rectangular room" (2)
+- "exits 2 north east" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 2
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 1
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 2
+- "rises": 0
+- "falls": 0
+- "curves": 1
+- "bends": 0
+- "tilts": 0
+Geometry violations: 3
+Second-person violations: 4
+Player-assumption violations: 0
+Safe samples: 0/6
+Useful samples: 0/6
+Useful acceptance rate: 0.0%
+Average words: 65.67
+Under 45 words: 0
+45 to 90 words: 6
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.83
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 2
+- "the air is thick with": 0
+- "whispers": 1
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 1
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 0
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 1
+- "the floor is": 2
+Repeated sentence start total: 3

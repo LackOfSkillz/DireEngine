@@ -1,0 +1,76 @@
+materials:
+  - stone-walls
+  - timber-walls
+  - plaster-walls
+  - brick-walls
+  - mud-walls
+  - log-walls
+  - flagstone-floor
+  - cobbled-floor
+  - planked-floor
+  - dirt-floor
+  - earthen-floor
+  - thatched-roof
+  - tile-roof
+  - slate-roof
+  - timber-beams
+
+social_character:
+  - affluent
+  - prosperous
+  - middle-class
+  - working-class
+  - impoverished
+  - destitute
+  - mixed-class
+  - residential
+  - commercial
+  - industrial
+  - civic
+  - religious
+  - rough
+  - genteel
+
+surroundings:
+  - shops-nearby
+  - housing-nearby
+  - taverns-nearby
+  - market-nearby
+  - temples-nearby
+  - guilds-nearby
+  - workshops-nearby
+  - warehouses-nearby
+  - docks-nearby
+  - city-wall-nearby
+  - water-nearby
+  - fields-nearby
+  - forest-nearby
+  - quiet-area
+  - busy-area
+
+sensory:
+  - smoke-smell
+  - cooking-smell
+  - fish-smell
+  - rope-tar-smell
+  - dung-smell
+  - flowers-smell
+  - sea-smell
+  - rain-smell
+  - dust-smell
+  - sounds-of-traffic
+  - sounds-of-commerce
+  - sounds-of-water
+  - sounds-of-bells
+  - sounds-of-children
+  - quiet-ambient
+  - bustling-ambient
+
+upkeep:
+  - pristine-upkeep
+  - well-maintained
+  - lived-in
+  - shabby
+  - neglected
+  - decaying
+  - abandoned

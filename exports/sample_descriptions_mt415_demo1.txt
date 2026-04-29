@@ -1,0 +1,140 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: earthen-floor
+  - Sensory: damp-air
+  - Upkeep: neglected
+
+**Description:**
+The passage narrows to the north, its earthen floor uneven and slick with moisture. Water drips rhythmically from above, echoing off the low ceiling. The air is heavy with a musty dampness that clings to the skin. To the east, the tunnel opens slightly, hinting at a wider space beyond.
+
+---
+
+[Room: CRO_500_100]
+**Room Description:**
+
+The room is a compact square, its four walls close enough to reach out and touch from the center. The ceiling, barely visible above, presses down slightly, creating an intimate atmosphere. Two exits lead off to the north and east, their dark openings stark against the rough stone surfaces. The air here is damp and heavy with a faint metallic tang, hinting at the mining activity nearby. The floor, worn smooth by years of passage, bears deep grooves from countless carts laden with ore.
+
+---
+
+[Room: CRO_400_150]
+**Room Description:**
+
+The room is a square, roughly four paces across each side. Three exits lead out: north, east, and south. The floor is smooth, worn stone, cool to the touch. A faint, musty smell lingers, hinting at long-forgotten dampness. The walls are bare, their surfaces chilled by the drafts that whisper through the unseen corridors beyond.
+
+---
+
+[Room: CRO_450_150]
+**Room Description:**
+
+The room is rectangular, with four exits leading north, south, east, and west. The floor is a smooth, worn stone, cool to the touch. The walls are bare, made of rough-hewn rock, damp to the feel. A faint, earthy scent lingers in the air, reminiscent of old stone and distant rain.
+
+---
+
+[Room: CRO_500_150]
+**Room Description:**
+
+This room is rectangular, with three exits leading north, east, and west. The floor is cold stone, worn smooth by time rather than use. A faint scent of damp permeates the air, hinting at the nearby water source to the south. The walls are bare, their rough texture visible even in the dim light filtering from the sole lantern hanging from the ceiling. The room feels vast and echoing, despite its simple layout.
+
+---
+
+Repeated phrases:
+- "room description the room is" (3)
+- "description the room is" (3)
+- "room description the room" (3)
+- "the walls are bare" (3)
+- "description the room" (3)
+- "room description the" (3)
+- "the floor is" (3)
+- "the room is" (3)
+- "the walls are" (3)
+- "walls are bare" (3)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 1
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 1
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 0
+Player-assumption violations: 0
+Safe samples: 0/5
+Useful samples: 0/5
+Useful acceptance rate: 0.0%
+Average words: 68.60
+Under 45 words: 0
+45 to 90 words: 5
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 4.60
+Under 3 sentences: 0
+3 to 5 sentences: 5
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 1
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 1
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 0
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 3
+- "the floor is": 3
+Repeated sentence start total: 6

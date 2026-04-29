@@ -1,0 +1,132 @@
+=== Zone: demo1 ===
+
+[Room: CRO_500_100]
+The narrow passage winds downward and stretches to the west, its rough-hewn walls bearing the marks of ancient tools. The floor is uneven underfoot, with occasional small stones jutting out from the worn surface. As you move westward, the passage gradually narrows slightly, suggesting a more confined space ahead.
+
+---
+
+[Room: CRO_500_150]
+This narrow passage ends abruptly here, leaving only the way up visible ahead. The stone walls press in tightly on either side, their surfaces rough and uneven under the dim light that filters from above. As you stand at this dead end, the sound of distant footsteps echoes faintly from the path leading upward, hinting at its continuation through CRO_500_100.
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_192_132]
+This narrow alleyway serves as a dead-end intersection within the bustling heart of the late-medieval river trade city. Cobblestones worn by constant foot traffic crunch underfoot, and the scent of fish and spices mingles in the air. To the west, the alley opens up into a wider street, where the sounds of merchants hawking their wares and carts clattering along cobblestone paths echo through the narrow passage.
+
+---
+
+[Room: crossingV2_178_132]
+The narrow hallway of the tavern winds through the bustling late-medieval city, its stone floor worn by frequent foot traffic. A hearth set into the southern wall casts flickering light across the passage, filling it with the scent of roasting meat and ale. The space opens slightly to the east and continues southward, maintaining a steady flow of people moving through this riverside thoroughfare.
+
+---
+
+
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+Amberwick Lane forms an intersection here, with the path branching in three directions. To the east and west, the lane continues straight, while a southwestward turn leads to Kingshade Street. The worn stone surface of the pathway feels rough underfoot, hinting at frequent use by travelers. The space opens up slightly around the intersections, allowing for easy movement between the different directions.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+Saltward Street stretches ahead, narrowing slightly as it continues to the south. To the west, Amberwick Lane offers a parallel passage that diverges from this path. The surface of the dirt road is uneven, with small stones and pebbles scattered about, making each step require careful footing. The air here feels open, with no immediate boundary or obstruction save for the continuation of these two paths.
+
+---
+
+Repeated phrases:
+- "to the west" (3)
+- "to the east and" (2)
+- "surface of the" (2)
+- "the east and" (2)
+- "the narrow passage" (2)
+- "the scent of" (2)
+- "the space opens" (2)
+- "to the east" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 2
+Player-assumption violations: 0
+Safe samples: 6/6
+Useful samples: 6/6
+Useful acceptance rate: 100.0%
+Average words: 62.33
+Under 45 words: 0
+45 to 90 words: 6
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.33
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 0
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 1
+Repeated sentence start total: 1

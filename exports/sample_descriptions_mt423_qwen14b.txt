@@ -1,0 +1,126 @@
+=== Zone: demo1 ===
+
+[Room: CRO_500_100]
+[ERROR] LLM request timed out [2f03e1acb8f7]:
+
+---
+
+[Room: CRO_500_150]
+[ERROR] LLM API error [f2f8564208a4]: Model reloaded.
+
+---
+
+
+=== Zone: crossingV2 ===
+
+[Room: crossingV2_192_132]
+[ERROR] LLM request timed out [4d660484411f]:
+
+---
+
+[Room: crossingV2_178_132]
+[ERROR] LLM request timed out [dfb936477e8d]:
+
+---
+
+
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+Amberwick Lane forms an intersection here, with the road branching east and southwest from this point. To the west, Kingshade Street connects to Amberwick Lane at a steady pace of traffic wear along the cobbles. The space is defined by its crossing shape and the routes that lead through it, offering clear paths in multiple directions without any notable permanent fixtures to draw attention.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+Saltward Street runs south from here, narrowing the passage as it continues beyond. To the west, Amberwick Lane stretches further, maintaining a steady path between close-set buildings. The space feels like a simple crossing, defined by its routes and the pressure of nearby structures pressing in around the exits.
+
+---
+
+Repeated phrases:
+- "defined by its" (2)
+- "to the west" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 0
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 0
+Player-assumption violations: 0
+Safe samples: 2/2
+Useful samples: 2/2
+Useful acceptance rate: 100.0%
+Average words: 57.00
+Under 45 words: 0
+45 to 90 words: 2
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.00
+Under 3 sentences: 0
+3 to 5 sentences: 2
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 0
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 0
+Repeated sentence start total: 0

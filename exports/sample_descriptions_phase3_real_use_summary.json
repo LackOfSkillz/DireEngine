@@ -1,0 +1,1135 @@
+{
+  "evaluation_set": {
+    "baseline_export": "exports\\sample_descriptions_phase2_real_use_run1.txt",
+    "phase3_exports": [
+      "exports\\sample_descriptions_phase3_real_use_run1.txt",
+      "exports\\sample_descriptions_phase3_real_use_run2.txt",
+      "exports\\sample_descriptions_phase3_real_use_run3.txt",
+      "exports\\sample_descriptions_phase3_real_use_run4.txt"
+    ],
+    "all_room_ids": [
+      "crossingV2_686_294",
+      "crossingV2_204_360",
+      "crossingV2_350_362",
+      "crossingV2_456_402",
+      "crossingV2_640_546",
+      "crossingV2_228_706",
+      "crossingV2_552_238",
+      "crossingV2_318_564",
+      "crossingV2_120_702",
+      "crossingV2_96_918",
+      "crossingV2_352_326",
+      "crossingV2_456_430",
+      "crossingV2_606_546",
+      "crossingV2_650_576",
+      "crossingV2_472_564",
+      "crossingV2_556_616",
+      "crossingV2_520_642",
+      "crossingV2_64_698",
+      "crossingV2_66_734",
+      "crossingV2_252_536"
+    ],
+    "atmosphere_tagged_room_ids": [
+      "crossingV2_204_360",
+      "crossingV2_120_702",
+      "crossingV2_96_918",
+      "crossingV2_352_326",
+      "crossingV2_252_536",
+      "crossingV2_64_698"
+    ],
+    "unchanged_room_ids": [
+      "crossingV2_686_294",
+      "crossingV2_350_362",
+      "crossingV2_456_402",
+      "crossingV2_640_546",
+      "crossingV2_228_706",
+      "crossingV2_552_238",
+      "crossingV2_318_564",
+      "crossingV2_456_430",
+      "crossingV2_606_546",
+      "crossingV2_650_576",
+      "crossingV2_472_564",
+      "crossingV2_556_616",
+      "crossingV2_520_642",
+      "crossingV2_66_734"
+    ],
+    "untagged_comparison_sample_room_ids": [
+      "crossingV2_350_362",
+      "crossingV2_472_564",
+      "crossingV2_686_294"
+    ]
+  },
+  "method_notes": {
+    "identity_term_distribution": "Counts place-identity nouns and phrases across each run using a fixed heuristic lexicon because the repo documents the metric but does not define an implementation.",
+    "untagged_regression_check": "Flags drift when a sampled unchanged room picks up more atmosphere-cue mentions in a Phase 3 run than in the Phase 2 baseline.",
+    "tagged_quality_check": "Compares tag-derived atmosphere keyword hits in each tagged room against the Phase 2 baseline."
+  },
+  "section_1_per_run_metrics": {
+    "runs": [
+      {
+        "run": "run1",
+        "noun_violations": 3,
+        "banned_noun_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {
+              "door": 1,
+              "hall": 2
+            },
+            "total": 3
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "geometry_violations": 0,
+        "geometry_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "identity_term_distribution": {
+          "room": 8,
+          "space": 22,
+          "intersection": 12,
+          "passage": 4,
+          "street": 1,
+          "alley": 3,
+          "dock": 1,
+          "hall": 2,
+          "guild hall": 1,
+          "temple": 1,
+          "shrine": 1,
+          "tavern": 1,
+          "market": 3,
+          "stall": 1,
+          "dead end": 1,
+          "path": 7,
+          "lane": 1
+        },
+        "identity_term_total": 70,
+        "repeated_sentence_starts": {
+          "the room is": 1,
+          "the walls are": 1,
+          "the floor is": 5
+        },
+        "the_floor_is_sentence_start_count": 5,
+        "average_words": 59.75,
+        "average_sentences": 4.1,
+        "dead_outputs": 0
+      },
+      {
+        "run": "run2",
+        "noun_violations": 3,
+        "banned_noun_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {
+              "mist": 1
+            },
+            "total": 1
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {
+              "door": 1,
+              "hall": 1
+            },
+            "total": 2
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "geometry_violations": 0,
+        "geometry_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "identity_term_distribution": {
+          "room": 8,
+          "space": 17,
+          "intersection": 10,
+          "passage": 4,
+          "street": 2,
+          "alley": 1,
+          "dock": 1,
+          "hall": 1,
+          "temple": 1,
+          "shrine": 2,
+          "tavern": 1,
+          "market": 2,
+          "interior": 1,
+          "dead end": 3,
+          "path": 9
+        },
+        "identity_term_total": 63,
+        "repeated_sentence_starts": {
+          "the room is": 3,
+          "the walls are": 1,
+          "the floor is": 4
+        },
+        "the_floor_is_sentence_start_count": 4,
+        "average_words": 57.9,
+        "average_sentences": 3.9,
+        "dead_outputs": 0
+      },
+      {
+        "run": "run3",
+        "noun_violations": 1,
+        "banned_noun_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {
+              "hall": 1
+            },
+            "total": 1
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "geometry_violations": 0,
+        "geometry_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "identity_term_distribution": {
+          "room": 5,
+          "space": 19,
+          "intersection": 11,
+          "passage": 5,
+          "street": 2,
+          "dock": 1,
+          "hall": 1,
+          "guild hall": 1,
+          "temple": 1,
+          "shrine": 2,
+          "tavern": 1,
+          "market": 2,
+          "stall": 1,
+          "interior": 1,
+          "dead end": 2,
+          "path": 5
+        },
+        "identity_term_total": 60,
+        "repeated_sentence_starts": {
+          "the room is": 3,
+          "the walls are": 0,
+          "the floor is": 5
+        },
+        "the_floor_is_sentence_start_count": 5,
+        "average_words": 56.85,
+        "average_sentences": 3.75,
+        "dead_outputs": 0
+      },
+      {
+        "run": "run4",
+        "noun_violations": 3,
+        "banned_noun_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {
+              "hall": 1
+            },
+            "total": 1
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {
+              "door": 1
+            },
+            "total": 1
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {
+              "mist": 1
+            },
+            "total": 1
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "geometry_violations": 1,
+        "geometry_violations_per_room": {
+          "crossingV2_686_294": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_204_360": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_350_362": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_402": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_640_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_228_706": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_552_238": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_318_564": {
+            "terms": {
+              "slopes": 1
+            },
+            "total": 1
+          },
+          "crossingV2_120_702": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_96_918": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_352_326": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_456_430": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_606_546": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_650_576": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_472_564": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_556_616": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_520_642": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_64_698": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_66_734": {
+            "terms": {},
+            "total": 0
+          },
+          "crossingV2_252_536": {
+            "terms": {},
+            "total": 0
+          }
+        },
+        "identity_term_distribution": {
+          "room": 8,
+          "space": 22,
+          "intersection": 11,
+          "passage": 4,
+          "street": 1,
+          "alley": 1,
+          "dock": 1,
+          "hall": 1,
+          "guild hall": 1,
+          "temple": 1,
+          "shrine": 1,
+          "tavern": 2,
+          "market": 2,
+          "stall": 1,
+          "interior": 1,
+          "dead end": 1,
+          "path": 9,
+          "lane": 1
+        },
+        "identity_term_total": 69,
+        "repeated_sentence_starts": {
+          "the room is": 4,
+          "the walls are": 2,
+          "the floor is": 4
+        },
+        "the_floor_is_sentence_start_count": 4,
+        "average_words": 59.65,
+        "average_sentences": 3.9,
+        "dead_outputs": 0
+      }
+    ],
+    "repeated_phrases_top_10_across_all_4_runs": [
+      {
+        "phrase": "the space is",
+        "count": 28
+      },
+      {
+        "phrase": "worn smooth by",
+        "count": 23
+      },
+      {
+        "phrase": "the space is open",
+        "count": 19
+      },
+      {
+        "phrase": "worn smooth by countless",
+        "count": 19
+      },
+      {
+        "phrase": "smooth by countless",
+        "count": 19
+      },
+      {
+        "phrase": "space is open",
+        "count": 19
+      },
+      {
+        "phrase": "is worn smooth",
+        "count": 18
+      },
+      {
+        "phrase": "the floor is",
+        "count": 18
+      },
+      {
+        "phrase": "in the heart of",
+        "count": 15
+      },
+      {
+        "phrase": "in the heart",
+        "count": 15
+      }
+    ],
+    "identity_term_total_stats": {
+      "min": 60,
+      "max": 70,
+      "average": 65.5
+    }
+  },
+  "section_2_tagged_room_before_after_pairs": [
+    {
+      "room_id": "crossingV2_204_360",
+      "baseline": "At the intersection, three paths diverge. A worn signpost stands central, its arms pointing east, south, and west. The space is open, weathered by time and traffic.",
+      "phase3_runs": {
+        "run1": "At the intersection, three paths converge, each leading in different directions. The space is open, defined by tall stone walls that enclose it on two sides. A worn signpost stands at the center, its surface rough to the touch from years of use and weathering. The cobblestone floor bears the marks of countless feet and wagon wheels, smooth in some places, uneven in others. Sounds of commerce echo through the intersection, mingling with the aroma of cooking food wafting from nearby shops and markets. Despite the wear, the space is well-maintained, giving a sense of order amidst the bustle.",
+        "run2": "At the intersection, three paths converge, each leading to different parts of the bustling city. The cobbled floor, worn smooth by countless footsteps, bears testament to the crossing's heavy use. Stone walls, well-maintained but showing age, enclose the space on two sides, while a signpost stands at the center, its faded letters directing towards various markets and shops nearby. A mix of sounds - merchants' calls, cart wheels rumbling, and distant laughter - fills the air, accompanied by a blend of cooking smells and dust from the cobbled path.",
+        "run3": "At the intersection, four paths converge, each leading in a different direction. The space is open yet defined by tall stone walls that rise around it. A worn signpost stands at the center, its surface rough to the touch, bearing faded markings pointing towards various parts of the city. The cobbled floor beneath is well-maintained but shows signs of use, with small gaps filled with weeds. Sounds of commerce - hawkers' cries, cart wheels on stone - fill the air, mingling with the aroma of cooking food and a faint dusty scent.",
+        "run4": "At the intersection, four paths converge, each leading away at different angles. The space is open, defined by cobblestone underfoot and rough stone walls to either side. A worn signpost stands tall in the center, its wooden surface bearing faded marks of use. The air carries a mix of dust and enticing cooking smells from nearby shops and markets, while the sounds of commerce hum around you. Despite the traffic, this space is well-maintained, showing signs of regular upkeep."
+      },
+      "baseline_atmosphere_keyword_hits": 0,
+      "phase3_atmosphere_keyword_hits": {
+        "run1": 3,
+        "run2": 5,
+        "run3": 5,
+        "run4": 4
+      },
+      "phase3_average_hits": 4.25,
+      "verdict": "better"
+    },
+    {
+      "room_id": "crossingV2_120_702",
+      "baseline": "In the heart of He Shrine Riverpine, a well-maintained temple interior encloses a devotional space. The room is entirely enclosed, with no exits listed for this space. The shrine stands as the central focus, surrounded by smooth walls that curve gently inward, hinting at a circular layout. The floor beneath is even and solid, supporting the weight of the structure above.",
+      "phase3_runs": {
+        "run1": "In the heart of Riverpine's temple district, this room is a quiet sanctuary. It's a square space, defined by stone walls that rise to meet a high, vaulted ceiling. A large shrine dominates the center, its surface worn smooth by countless devout hands. The floor is laid with cool flagstone, each step echoing softly in the hushed atmosphere. The only exit leads north, towards the sound of distant water.",
+        "run2": "In the heart of crossingV2's bustling late-medieval river trade city, the He Shrine Riverpine presents as a well-maintained temple interior. The space is defined by stone walls that enclose a quiet area, broken only by two exits - one to the north and another to the east. A flagstone floor grounds the room, its smooth surface reflecting the gentle ambient sounds of water nearby. The shrine, a focal point of the room's religious character, sits central, drawing the eye with its genteel aura.",
+        "run3": "In the heart of the bustling city of crossingV2, the He Shrine Riverpine lies tucked away in a quiet area near the river's edge. The room is a well-maintained building interior, serving as a temple with a devotional focus on a shrine. The space is open, defined by stone walls and a flagstone floor that echoes the sounds of nearby water. The atmosphere is peaceful yet filled with an undercurrent of gentle devotion, reflecting its religious, genteel character.",
+        "run4": "In the heart of Riverpine's temple district lies a well-maintained shrine room. The space is rectangular, bounded by four stone walls that rise to a vaulted ceiling, supported by sturdy columns. A flagstone floor, smooth from years of use, stretches out in all directions. Three exits lead from this devotional space: one to the north, where quiet murmurs hint at nearby worshippers; another to the east, through which the gentle sound of flowing water can be heard; and a final exit to the south, where a heavy curtain hangs, concealing whatever lies beyond. The air is still, undisturbed by any breeze, and filled with a soft, ambient quiet"
+      },
+      "baseline_atmosphere_keyword_hits": 0,
+      "phase3_atmosphere_keyword_hits": {
+        "run1": 4,
+        "run2": 7,
+        "run3": 7,
+        "run4": 5
+      },
+      "phase3_average_hits": 5.75,
+      "verdict": "better"
+    },
+    {
+      "room_id": "crossingV2_96_918",
+      "baseline": "The room is a compact, worn tavern interior, shaped like a dead end. A single exit leads eastward. The space is anchored by a hearth at the far wall, its rough texture and heat hinting at countless nights of warmth and merriment. The walls bear the marks of time and use, their surface smooth from years of wear.",
+      "phase3_runs": {
+        "run1": "In the heart of crossingV2's bustling cityscape, the tavern, known as \"Tearaven,\" unfolds within a sturdy timber-framed building. The space stretches out in an irregular rectangle, with three exits branching off from its worn planked floor - one to the north, another to the west, and a narrow passage leading southwards towards the riverfront. A hearth, central and well-used, anchors the room, casting warm, flickering light across the space. The air is filled with the mingling scents of cooking food and the distant hum of commerce from neighboring taverns and housing.",
+        "run2": "The tavern opens into a bustling, worn space, timber walls enclosing a rectangular room. The floor, planks rough with use, stretches out in a long rectangle, narrowing slightly as it continues towards the hearth at the far end. Three exits branch off - one to the north, another to the east, and a wider passage leading southwards to the riverfront. The air is filled with the aroma of cooking and the hum of commerce from nearby taverns and housing.",
+        "run3": "In the bustling tavern, four exits lead out in different directions. The room is roughly rectangular, with a worn plank floor creaking underfoot. Timber walls, rough and aged, enclose the space, while a central hearth casts flickering light across the wooden surfaces. The air carries a blend of cooking smells and distant sounds of commerce from nearby taverns and housing.",
+        "run4": "In the heart of crossingV2's bustling river trade city, a worn tavern, Te'ravern, opens its doors to the late-medieval streets. The space unfolds as a rectangular building interior, dominated by a central hearth that casts flickering shadows on the timber walls and planked floor. The room is long and narrow, with a tight feel despite the high ceiling, and shows signs of wear from years of working-class patrons and commercial activity. A passage to the north leads deeper into the tavern, while a path to the east opens onto the riverfront, where sounds of commerce mingle with the aroma of cooking food wafting from nearby taverns"
+      },
+      "baseline_atmosphere_keyword_hits": 1,
+      "phase3_atmosphere_keyword_hits": {
+        "run1": 6,
+        "run2": 5,
+        "run3": 5,
+        "run4": 8
+      },
+      "phase3_average_hits": 6,
+      "verdict": "better"
+    },
+    {
+      "room_id": "crossingV2_352_326",
+      "baseline": "At this intersection, three paths diverge. The space is open, branching east, north, and south. The floor here is worn smooth by countless footsteps.",
+      "phase3_runs": {
+        "run1": "The space is a bustling intersection, four paths converging. Two cobblestone streets meet at right angles, the floor worn smooth by countless feet. Plaster walls line the streets, their surfaces chipped from time and traffic. The air hums with the sounds of commerce - carts rumbling, vendors hawking wares, distant river traffic. A thin layer of dust coats everything, testament to the city's constant activity. Exits lead north and east along the cobbled paths, south into a narrow alleyway, and west through an archway into a busy market square.",
+        "run2": "The room is a bustling intersection, four exits leading in different directions. The space is open and rectangular, defined by plaster walls that meet at right angles. The floor is a grid of well-maintained cobbles, worn smooth by countless feet. The air is filled with the sounds of nearby shops and markets, punctuated by the rumble of carts over cobblestones. A thin layer of dust covers everything, testament to the constant flow of commerce.",
+        "run3": "In the heart of bustling crossingV2, a late-medieval river trade city, you find yourself in a well-maintained room with four exits leading north, east, south, and west. The space is rectangular, defined by smooth plaster walls that rise to a high ceiling, allowing for an open feel despite its size. The floor is a grid of worn cobbles, their surfaces rough underfoot from years of commerce-driven traffic. The air is filled with the hum of nearby shops and the distant cries of market vendors, while a thin layer of dust clings to everything, testament to the city's ever-present activity.",
+        "run4": "In the heart of bustling crossingV2, this room is a busy intersection, four paths converging in a tight, square space. Cobbled floor, worn smooth by countless feet and carts, meets plaster walls, their surfaces marked with faint, faded posters. Sounds of traffic and commerce echo from nearby shops and markets, the air thick with dust and the scent of distant cooking fires. The room is well-maintained, its corners clean despite the constant flow of people and goods through its four exits."
+      },
+      "baseline_atmosphere_keyword_hits": 0,
+      "phase3_atmosphere_keyword_hits": {
+        "run1": 7,
+        "run2": 3,
+        "run3": 5,
+        "run4": 5
+      },
+      "phase3_average_hits": 5,
+      "verdict": "better"
+    },
+    {
+      "room_id": "crossingV2_252_536",
+      "baseline": "The space is enclosed, with no visible exits. The walls are bare, their surfaces smooth from age or wear. The room's scale is modest, its boundaries tight and confining.",
+      "phase3_runs": {
+        "run1": "In the heart of crossingV2, Cottage mor al unfolds as a timber-walled room. The space is rectangular, with three passages branching out from its center like spokes on a wheel. The floor, made of worn planks, creaks softly underfoot, echoing the quiet ambiance of the residential area nearby. A warm cooking smell wafts in from one of the exits, hinting at life beyond the timber beams overhead.",
+        "run2": "The room is rectangular, with a smooth, worn planked floor. Timber walls line the space, their rough texture hinting at age and use. Three exits lead out: one to the north, another to the east, and a third, narrower passage to the south. The room feels lived-in, with a quiet ambient hum and a faint scent of cooking wafting through from nearby residences.",
+        "run3": "In the heart of Crossing V2's bustling river valley, Cottage Mor Al stands quiet yet lived-in. Three timber-walled rooms converge here, their planked floors worn smooth by time and use. Rough-hewn timber beams crisscross overhead, supporting a sloped ceiling that opens into a small loft space. A tight passage leads north to the main dwelling, while a wider path continues east towards a larger communal area. The cooking smell wafting from the west hints at recent activity in the adjacent kitchen.",
+        "run4": "In the heart of CrossingV2's river valley, Cottage Mor Al is a quiet, residential sanctuary amidst the city's bustling trade. The room is rectangular, defined by timber walls that bear the marks of time and use. Planked floor creaks underfoot, each board worn smooth by countless steps. The space is open, with three exits - north, east, and south - leading to adjacent homes, their quiet ambiance softened by the distant hum of city life. A faint cooking smell wafts from the eastern passage, hinting at a neighbor's evening meal."
+      },
+      "baseline_atmosphere_keyword_hits": 0,
+      "phase3_atmosphere_keyword_hits": {
+        "run1": 5,
+        "run2": 4,
+        "run3": 5,
+        "run4": 6
+      },
+      "phase3_average_hits": 5,
+      "verdict": "better"
+    },
+    {
+      "room_id": "crossingV2_64_698",
+      "baseline": "In this space, three passages diverge. Two paths lead north and south respectively, while a third opens to the west. The room is roughly square in shape, with each exit centered on a side. The floor is smooth underfoot, worn by countless traversals.",
+      "phase3_runs": {
+        "run1": "The room is an intersection, a bustling nexus where three paths converge. The space is defined by the meeting of two narrow, cobbled passages that continue on, branching out from this central point. A tight, plaster-walled passage leads off to the north, its walls bearing signs of wear and damp from the recent rain. The room itself is open, with no barriers or structures breaking up the flow of traffic along these paths.",
+        "run2": "In the heart of crossingV2, a cobbled floor meets at an intersection. Plaster walls rise on either side, worn and damp from the recent rain. The space opens to three paths, each leading in different directions. One path narrows, continuing between two close-set buildings, while another opens wider, revealing more housing nearby. A quiet area, despite the sounds of children playing faintly echoing off the walls.",
+        "run3": "The space opens into a bustling intersection, three paths branching out. Two walls meet at a sharp angle, the third open to the quiet residential housing nearby. The cobbled floor is worn smooth underfoot, reflecting the steady drip-drip of rain, its scent carried on the gentle breeze. Plaster walls, chipped and faded, bear the marks of time and use, their shabby state a testament to the working-class neighborhood they contain. Children's laughter echoes from nearby, their play punctuated by the occasional call of a parent. The intersection continues in three directions, each path leading deeper into the residential area.",
+        "run4": "The space opens into a three-way intersection. Two paths branch off from the central cobbled floor, while a passage continues straight ahead. The plaster walls are rough to the touch and bear signs of wear. The rain's scent wafts in from the open path to the east, accompanied by distant children's laughter."
+      },
+      "baseline_atmosphere_keyword_hits": 0,
+      "phase3_atmosphere_keyword_hits": {
+        "run1": 3,
+        "run2": 5,
+        "run3": 8,
+        "run4": 4
+      },
+      "phase3_average_hits": 5,
+      "verdict": "better"
+    }
+  ],
+  "section_3_untagged_room_before_after_pairs": [
+    {
+      "room_id": "crossingV2_350_362",
+      "baseline": "At the intersection, three paths diverge from this worn space. A signpost stands here, its surface rough with age. The east path leads straight ahead, while the north and west passages branch off at sharp angles.",
+      "baseline_unauthorized_atmosphere_cues": {},
+      "phase3_runs": {
+        "run1": "The intersection opens into a bustling crossroads, three paths branching out from this worn central space. A signpost stands at its heart, weathered by time and traffic. The east path stretches wide, while the north and west routes narrow as they disappear around corners.",
+        "run2": "The intersection opens into a worn, multi-forked space. Three paths diverge from this point: one leads east, another north, and a third west. A weathered signpost stands at the center, its surface bearing faint marks of time. The ground is well-trodden, reflecting the bustling nature of the city that surrounds it.",
+        "run3": "In this worn intersection, three paths diverge. A signpost stands at its center, weathered by time. The space opens eastward, narrows northwards, and continues westward.",
+        "run4": "The intersection sprawls, three paths branching from a central point. A worn signpost stands at its heart, weathered by time and river winds. The space is open, with a clear view of the city's bustling streets in each direction."
+      },
+      "phase3_unauthorized_atmosphere_cues": {
+        "run1": {},
+        "run2": {},
+        "run3": {},
+        "run4": {}
+      },
+      "regression_verdict": "stable"
+    },
+    {
+      "room_id": "crossingV2_472_564",
+      "baseline": "At this intersection, four paths branch out from a central space. Two passages lead north and south, while another two extend east and west. The space is open, with no barriers to movement in any direction.",
+      "baseline_unauthorized_atmosphere_cues": {},
+      "phase3_runs": {
+        "run1": "In this bustling river trade city, you find yourself at a busy intersection. Four paths branch out from this central space, each leading in different directions - east, north, south, and west. The space is open, allowing for the free flow of people and goods, while the rough cobbles beneath your feet bear the marks of countless carts and boots. The air hums with activity, carrying whispers of various languages and the distant cries of vendors.",
+        "run2": "In this bustling intersection of crossingV2, four paths converge. The space is open, allowing easy flow between directions. Exits lead east, north, south, and west, each path branching out from the central point. The floor is worn smooth by countless footsteps, reflecting the city's constant activity.",
+        "run3": "The space here is an intersection, branching out in four directions. Four paths converge at this point, each leading away towards the east, north, south, and west. The floor underfoot is worn smooth by countless footsteps, a testament to the bustling activity of this river trade city.",
+        "run4": "In this bustling intersection of crossingV2, four paths converge. The space is open, allowing a clear view of the branching passages leading east, north, south, and west. The floor here is worn smooth by countless feet, showing signs of its heavy use in this late-medieval river trade city. The air carries a mix of river dampness and the ever-present aroma of distant smoke from countless hearths and forges."
+      },
+      "phase3_unauthorized_atmosphere_cues": {
+        "run1": {},
+        "run2": {},
+        "run3": {},
+        "run4": {
+          "smoke": 1
+        }
+      },
+      "regression_verdict": "drifted"
+    },
+    {
+      "room_id": "crossingV2_686_294",
+      "baseline": "At the heart of this bustling intersection, four paths converge. The space is worn from countless feet and carts, with a central signpost standing as the sole feature. Four exits branch out in different directions: east, north, south, and west.",
+      "baseline_unauthorized_atmosphere_cues": {},
+      "phase3_runs": {
+        "run1": "At the intersection, paths converge, branching out in four directions. The worn signpost stands central, its wooden surface bearing faded markings. This bustling market-crossing sees much foot traffic, evident in the well-trodden dirt floor. Exits lead east, north, south, and west.",
+        "run2": "In H, a worn market intersection, four paths branch out from a central signpost. The space is open, with exits leading east, north, south, and west. The floor bears signs of heavy use, reflecting its role as a bustling city crossroads.",
+        "run3": "At the intersection, four paths converge, each leading away into the bustling city. The worn signpost stands at the center, its wooden surface rough under fingertips, bearing faded markings pointing east, north, south, and west. The space is open, the flow of people and carts weaving around it, a tight knot in the city's pulse.",
+        "run4": "At the intersection, four paths branch out, each leading in a different direction. The worn signpost stands tall at the center, its surface smoothed by time and touch. The space is open, the paths continuing unimpeded into the cityscape."
+      },
+      "phase3_unauthorized_atmosphere_cues": {
+        "run1": {
+          "market": 1
+        },
+        "run2": {
+          "market": 1
+        },
+        "run3": {},
+        "run4": {}
+      },
+      "regression_verdict": "drifted"
+    }
+  ],
+  "verdicts": {
+    "atmospheric_quality_on_tagged_rooms": "better",
+    "tagged_rooms_improved_count": 6,
+    "compliance": {
+      "banned_noun_leak_rate": "4/4",
+      "geometry_violation_runs": [
+        "run4"
+      ],
+      "untagged_regression_sample_drifted_rooms": [
+        "crossingV2_472_564",
+        "crossingV2_686_294"
+      ]
+    },
+    "tagged_rooms_material_difference_from_phase2": true,
+    "untagged_rooms_drifted_from_phase2": true
+  },
+  "stop_conditions": {
+    "banned_noun_leak_rate_above_2_of_4": true,
+    "runs_with_banned_noun_leaks": [
+      "run1",
+      "run2",
+      "run3",
+      "run4"
+    ],
+    "untagged_comparison_sample_fabrication_detected": true,
+    "untagged_rooms_with_drift_in_sample": [
+      "crossingV2_472_564",
+      "crossingV2_686_294"
+    ],
+    "vocab_gap_detected": false
+  }
+}

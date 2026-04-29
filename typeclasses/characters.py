@@ -13,7 +13,7 @@ creation commands.
 """
 
 import copy
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 import logging
 import math
 import re
@@ -1059,6 +1059,25 @@ def _copy_default_equipment():
         slot: value.copy() if isinstance(value, list) else value
         for slot, value in DEFAULT_EQUIPMENT.items()
     }
+
+
+def _normalize_equipment_stack(value):
+    normalized = []
+
+    def _visit(candidate):
+        if candidate in (None, ""):
+            return
+        if isinstance(candidate, Mapping):
+            return
+        if isinstance(candidate, Sequence) and not isinstance(candidate, (str, bytes)):
+            for nested in list(candidate):
+                _visit(nested)
+            return
+        if any(hasattr(candidate, attr) for attr in ("db", "key", "id")):
+            normalized.append(candidate)
+
+    _visit(value)
+    return normalized
 
 
 def is_quiver(item):
@@ -2281,27 +2300,15 @@ class Character(ObjectParent, DefaultCharacter):
             if slot not in equipment:
                 continue
             value = equipment.get(slot)
-            if value is None:
-                normalized[slot] = []
-            elif isinstance(value, list):
-                normalized[slot] = list(value)
-            elif isinstance(value, tuple):
-                normalized[slot] = list(value)
-            else:
-                normalized[slot] = [value]
+            normalized[slot] = _normalize_equipment_stack(value)
 
         legacy_belt_item = equipment.get("belt")
         if not normalized["waist"] and legacy_belt_item is not None:
-            normalized["waist"] = [legacy_belt_item]
+            normalized["waist"] = _normalize_equipment_stack(legacy_belt_item)
 
         legacy_torso_items = equipment.get("torso")
         if not normalized["chest"] and legacy_torso_items is not None:
-            if isinstance(legacy_torso_items, list):
-                normalized["chest"] = list(legacy_torso_items)
-            elif isinstance(legacy_torso_items, tuple):
-                normalized["chest"] = list(legacy_torso_items)
-            else:
-                normalized["chest"] = [legacy_torso_items]
+            normalized["chest"] = _normalize_equipment_stack(legacy_torso_items)
 
         if not isinstance(current_equipment, Mapping) or dict(current_equipment) != normalized:
             self.db.equipment = normalized
@@ -10120,6 +10127,10 @@ class Character(ObjectParent, DefaultCharacter):
     def get_object_total_weight(self, obj, depth=0, seen=None):
         if not obj:
             return 0.0
+        if isinstance(obj, Mapping):
+            return 0.0
+        if isinstance(obj, Sequence) and not isinstance(obj, (str, bytes)):
+            return sum(self.get_object_total_weight(item, depth=depth, seen=seen) for item in list(obj))
         seen = set(seen or set())
         object_id = int(getattr(obj, "id", 0) or 0)
         if object_id and object_id in seen:
@@ -10143,9 +10154,10 @@ class Character(ObjectParent, DefaultCharacter):
 
         weight = getattr(getattr(obj, "db", None), "weight", None)
         if weight is None:
-            if not getattr(getattr(obj, "ndb", None), "missing_weight_logged", False):
+            ndb = getattr(obj, "ndb", None)
+            if ndb is not None and not getattr(ndb, "missing_weight_logged", False):
                 LOGGER.error("Missing weight on object %s", obj)
-                obj.ndb.missing_weight_logged = True
+                ndb.missing_weight_logged = True
             return 0.0
         try:
             return max(0.0, float(weight))

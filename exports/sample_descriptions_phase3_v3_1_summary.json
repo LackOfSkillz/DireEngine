@@ -1,0 +1,1475 @@
+{
+  "inputs": {
+    "phase2": "exports\\sample_descriptions_phase2_real_use_run1.txt",
+    "phase3_batch1_runs": [
+      "exports\\sample_descriptions_phase3_real_use_run1.txt",
+      "exports\\sample_descriptions_phase3_real_use_run2.txt",
+      "exports\\sample_descriptions_phase3_real_use_run3.txt",
+      "exports\\sample_descriptions_phase3_real_use_run4.txt"
+    ],
+    "phase3_v3_1_runs": [
+      "exports\\sample_descriptions_phase3_v3_1_run1.txt",
+      "exports\\sample_descriptions_phase3_v3_1_run2.txt",
+      "exports\\sample_descriptions_phase3_v3_1_run3.txt",
+      "exports\\sample_descriptions_phase3_v3_1_run4.txt"
+    ],
+    "tagged_rooms": [
+      "crossingV2_204_360",
+      "crossingV2_120_702",
+      "crossingV2_96_918",
+      "crossingV2_352_326",
+      "crossingV2_252_536",
+      "crossingV2_64_698"
+    ],
+    "untagged_sample_rooms": [
+      "crossingV2_472_564",
+      "crossingV2_686_294",
+      "crossingV2_350_362"
+    ],
+    "spotcheck_rooms": [
+      "crossingV2_252_536",
+      "crossingV2_96_918",
+      "crossingV2_204_360",
+      "crossingV2_472_564",
+      "crossingV2_318_564"
+    ]
+  },
+  "comparison": {
+    "banned_noun_leak_rate": {
+      "phase3_batch1": "4/4",
+      "phase3_v3_1": "4/4"
+    },
+    "geometry_violation_runs": {
+      "phase3_batch1": [
+        "run4"
+      ],
+      "phase3_v3_1": [
+        "run1",
+        "run2",
+        "run3",
+        "run4"
+      ]
+    },
+    "tagged_room_atmosphere_keyword_hits_average": {
+      "crossingV2_204_360": {
+        "phase3_batch1": 4.25,
+        "phase3_v3_1": 0.25
+      },
+      "crossingV2_120_702": {
+        "phase3_batch1": 5.75,
+        "phase3_v3_1": 0.75
+      },
+      "crossingV2_96_918": {
+        "phase3_batch1": 6,
+        "phase3_v3_1": 0
+      },
+      "crossingV2_352_326": {
+        "phase3_batch1": 5,
+        "phase3_v3_1": 0
+      },
+      "crossingV2_252_536": {
+        "phase3_batch1": 5,
+        "phase3_v3_1": 0
+      },
+      "crossingV2_64_698": {
+        "phase3_batch1": 5,
+        "phase3_v3_1": 0
+      }
+    },
+    "untagged_drift": {
+      "crossingV2_472_564": {
+        "phase3_batch1": {
+          "baseline": 0,
+          "runs": {
+            "run1": 0,
+            "run2": 0,
+            "run3": 0,
+            "run4": 1
+          },
+          "drifted": true
+        },
+        "phase3_v3_1": {
+          "baseline": 0,
+          "runs": {
+            "run1": 2,
+            "run2": 3,
+            "run3": 3,
+            "run4": 2
+          },
+          "drifted": true
+        }
+      },
+      "crossingV2_686_294": {
+        "phase3_batch1": {
+          "baseline": 0,
+          "runs": {
+            "run1": 1,
+            "run2": 1,
+            "run3": 0,
+            "run4": 0
+          },
+          "drifted": true
+        },
+        "phase3_v3_1": {
+          "baseline": 0,
+          "runs": {
+            "run1": 0,
+            "run2": 2,
+            "run3": 3,
+            "run4": 2
+          },
+          "drifted": true
+        }
+      },
+      "crossingV2_350_362": {
+        "phase3_batch1": {
+          "baseline": 0,
+          "runs": {
+            "run1": 0,
+            "run2": 0,
+            "run3": 0,
+            "run4": 0
+          },
+          "drifted": false
+        },
+        "phase3_v3_1": {
+          "baseline": 0,
+          "runs": {
+            "run1": 3,
+            "run2": 2,
+            "run3": 2,
+            "run4": 2
+          },
+          "drifted": true
+        }
+      }
+    }
+  },
+  "structural_fabrication_per_room": {
+    "run1": {
+      "crossingV2_204_360": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_120_702": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east",
+          "north"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_96_918": {
+        "actual_exit_count": 1,
+        "actual_exit_directions": [
+          "east"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 1,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_352_326": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "north",
+          "south"
+        ],
+        "mentioned_directions": [],
+        "invented_directions": [],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 0,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": false
+      },
+      "crossingV2_252_536": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east",
+          "north"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_64_698": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "north",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [
+          "ceiling"
+        ],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      }
+    },
+    "run2": {
+      "crossingV2_204_360": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "north",
+          "west"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [
+          "ceiling"
+        ],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_120_702": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east",
+          "north"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_96_918": {
+        "actual_exit_count": 1,
+        "actual_exit_directions": [
+          "east"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 1,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [
+          "ceiling"
+        ],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_352_326": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "north",
+          "south"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": false
+      },
+      "crossingV2_252_536": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "north",
+          "south"
+        ],
+        "invented_directions": [
+          "north",
+          "south"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_64_698": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "north",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north",
+          "up"
+        ],
+        "invented_directions": [
+          "east",
+          "up"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      }
+    },
+    "run3": {
+      "crossingV2_204_360": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "down",
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "down",
+          "north"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_120_702": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east",
+          "north"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_96_918": {
+        "actual_exit_count": 1,
+        "actual_exit_directions": [
+          "east"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 1,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [
+          "ceiling"
+        ],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_352_326": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "north",
+          "south"
+        ],
+        "mentioned_directions": [
+          "north",
+          "south"
+        ],
+        "invented_directions": [],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": false
+      },
+      "crossingV2_252_536": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east",
+          "north"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_64_698": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "north",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north",
+          "up"
+        ],
+        "invented_directions": [
+          "east",
+          "up"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      }
+    },
+    "run4": {
+      "crossingV2_204_360": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north",
+          "up"
+        ],
+        "invented_directions": [
+          "north",
+          "up"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_120_702": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north",
+          "south"
+        ],
+        "invented_directions": [
+          "east",
+          "north",
+          "south"
+        ],
+        "exit_count_overflow": 3,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [
+          "rectangular"
+        ],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_96_918": {
+        "actual_exit_count": 1,
+        "actual_exit_directions": [
+          "east"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 1,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_352_326": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "north",
+          "south"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 2,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": false
+      },
+      "crossingV2_252_536": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east",
+          "north"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "crossingV2_64_698": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "north",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north",
+          "up"
+        ],
+        "invented_directions": [
+          "east",
+          "up"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 2,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      }
+    }
+  },
+  "second_person_violations_per_run": {
+    "run1": 6,
+    "run2": 9,
+    "run3": 14,
+    "run4": 5
+  },
+  "player_assumption_violations_per_run": {
+    "run1": 0,
+    "run2": 0,
+    "run3": 0,
+    "run4": 0
+  },
+  "phase3_v3_1_runs": [
+    {
+      "run": "run1",
+      "evaluation_counts": {
+        "explicit_repetition": {
+          "in the heart of": 0,
+          "the air is": 10,
+          "the air is thick with": 2
+        },
+        "fabrication_flags": {
+          "lantern": 0,
+          "tower": 0,
+          "staircase": 0,
+          "door": 1,
+          "window": 0,
+          "stairs": 0,
+          "hall": 0,
+          "chamber": 5,
+          "corridor": 2,
+          "gate": 0,
+          "arch": 1,
+          "mist": 0,
+          "fog": 0,
+          "cobweb": 0,
+          "peaks": 0,
+          "forest": 0,
+          "ruins": 0
+        },
+        "noun_violations": 9,
+        "geometry_flags": {
+          "slopes": 3,
+          "rises": 0,
+          "falls": 0,
+          "curves": 1,
+          "bends": 0,
+          "tilts": 0
+        },
+        "geometry_violations": 4,
+        "second_person_violations": 6,
+        "player_assumption_violations": 0,
+        "over_80_words": 4,
+        "average_words": 67.4,
+        "sentence_count_flags": 0,
+        "average_sentences": 3.45,
+        "dead_outputs": 0,
+        "repeated_sentence_starts": {
+          "the room is": 0,
+          "the walls are": 1,
+          "the floor is": 2
+        },
+        "repeated_sentence_start_total": 3
+      },
+      "structural_fabrication_per_room": {
+        "crossingV2_204_360": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "north"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_120_702": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "east",
+            "north"
+          ],
+          "exit_count_overflow": 2,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_96_918": {
+          "actual_exit_count": 1,
+          "actual_exit_directions": [
+            "east"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "north"
+          ],
+          "exit_count_overflow": 1,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_352_326": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "north",
+            "south"
+          ],
+          "mentioned_directions": [],
+          "invented_directions": [],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 0,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": false
+        },
+        "crossingV2_252_536": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "east",
+            "north"
+          ],
+          "exit_count_overflow": 2,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_64_698": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "north",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "east"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [
+            "ceiling"
+          ],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        }
+      }
+    },
+    {
+      "run": "run2",
+      "evaluation_counts": {
+        "explicit_repetition": {
+          "in the heart of": 0,
+          "the air is": 9,
+          "the air is thick with": 0
+        },
+        "fabrication_flags": {
+          "lantern": 0,
+          "tower": 0,
+          "staircase": 0,
+          "door": 0,
+          "window": 0,
+          "stairs": 0,
+          "hall": 0,
+          "chamber": 2,
+          "corridor": 0,
+          "gate": 0,
+          "arch": 0,
+          "mist": 0,
+          "fog": 0,
+          "cobweb": 0,
+          "peaks": 0,
+          "forest": 0,
+          "ruins": 0
+        },
+        "noun_violations": 2,
+        "geometry_flags": {
+          "slopes": 2,
+          "rises": 0,
+          "falls": 0,
+          "curves": 0,
+          "bends": 0,
+          "tilts": 0
+        },
+        "geometry_violations": 2,
+        "second_person_violations": 9,
+        "player_assumption_violations": 0,
+        "over_80_words": 7,
+        "average_words": 74.85,
+        "sentence_count_flags": 0,
+        "average_sentences": 3.7,
+        "dead_outputs": 0,
+        "repeated_sentence_starts": {
+          "the room is": 0,
+          "the walls are": 0,
+          "the floor is": 1
+        },
+        "repeated_sentence_start_total": 1
+      },
+      "structural_fabrication_per_room": {
+        "crossingV2_204_360": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "north",
+            "west"
+          ],
+          "invented_directions": [
+            "north"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [
+            "ceiling"
+          ],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_120_702": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "east",
+            "north"
+          ],
+          "exit_count_overflow": 2,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_96_918": {
+          "actual_exit_count": 1,
+          "actual_exit_directions": [
+            "east"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "north"
+          ],
+          "exit_count_overflow": 1,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [
+            "ceiling"
+          ],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_352_326": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "north",
+            "south"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": false
+        },
+        "crossingV2_252_536": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "north",
+            "south"
+          ],
+          "invented_directions": [
+            "north",
+            "south"
+          ],
+          "exit_count_overflow": 2,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_64_698": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "north",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north",
+            "up"
+          ],
+          "invented_directions": [
+            "east",
+            "up"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        }
+      }
+    },
+    {
+      "run": "run3",
+      "evaluation_counts": {
+        "explicit_repetition": {
+          "in the heart of": 0,
+          "the air is": 8,
+          "the air is thick with": 1
+        },
+        "fabrication_flags": {
+          "lantern": 0,
+          "tower": 0,
+          "staircase": 0,
+          "door": 0,
+          "window": 0,
+          "stairs": 0,
+          "hall": 0,
+          "chamber": 2,
+          "corridor": 0,
+          "gate": 0,
+          "arch": 0,
+          "mist": 0,
+          "fog": 0,
+          "cobweb": 0,
+          "peaks": 0,
+          "forest": 0,
+          "ruins": 0
+        },
+        "noun_violations": 2,
+        "geometry_flags": {
+          "slopes": 4,
+          "rises": 0,
+          "falls": 0,
+          "curves": 0,
+          "bends": 0,
+          "tilts": 0
+        },
+        "geometry_violations": 4,
+        "second_person_violations": 14,
+        "player_assumption_violations": 0,
+        "over_80_words": 5,
+        "average_words": 72.6,
+        "sentence_count_flags": 1,
+        "average_sentences": 3.7,
+        "dead_outputs": 0,
+        "repeated_sentence_starts": {
+          "the room is": 0,
+          "the walls are": 1,
+          "the floor is": 0
+        },
+        "repeated_sentence_start_total": 1
+      },
+      "structural_fabrication_per_room": {
+        "crossingV2_204_360": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "down",
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "down",
+            "north"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_120_702": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "east",
+            "north"
+          ],
+          "exit_count_overflow": 2,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_96_918": {
+          "actual_exit_count": 1,
+          "actual_exit_directions": [
+            "east"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "north"
+          ],
+          "exit_count_overflow": 1,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [
+            "ceiling"
+          ],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_352_326": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "north",
+            "south"
+          ],
+          "mentioned_directions": [
+            "north",
+            "south"
+          ],
+          "invented_directions": [],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": false
+        },
+        "crossingV2_252_536": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "east",
+            "north"
+          ],
+          "exit_count_overflow": 2,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_64_698": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "north",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north",
+            "up"
+          ],
+          "invented_directions": [
+            "east",
+            "up"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        }
+      }
+    },
+    {
+      "run": "run4",
+      "evaluation_counts": {
+        "explicit_repetition": {
+          "in the heart of": 0,
+          "the air is": 6,
+          "the air is thick with": 1
+        },
+        "fabrication_flags": {
+          "lantern": 0,
+          "tower": 0,
+          "staircase": 0,
+          "door": 0,
+          "window": 0,
+          "stairs": 0,
+          "hall": 0,
+          "chamber": 3,
+          "corridor": 0,
+          "gate": 0,
+          "arch": 0,
+          "mist": 0,
+          "fog": 0,
+          "cobweb": 0,
+          "peaks": 0,
+          "forest": 0,
+          "ruins": 0
+        },
+        "noun_violations": 3,
+        "geometry_flags": {
+          "slopes": 1,
+          "rises": 0,
+          "falls": 0,
+          "curves": 1,
+          "bends": 0,
+          "tilts": 0
+        },
+        "geometry_violations": 2,
+        "second_person_violations": 5,
+        "player_assumption_violations": 0,
+        "over_80_words": 6,
+        "average_words": 73.9,
+        "sentence_count_flags": 0,
+        "average_sentences": 3.55,
+        "dead_outputs": 0,
+        "repeated_sentence_starts": {
+          "the room is": 0,
+          "the walls are": 2,
+          "the floor is": 2
+        },
+        "repeated_sentence_start_total": 4
+      },
+      "structural_fabrication_per_room": {
+        "crossingV2_204_360": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north",
+            "up"
+          ],
+          "invented_directions": [
+            "north",
+            "up"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_120_702": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "east",
+            "north",
+            "south"
+          ],
+          "invented_directions": [
+            "east",
+            "north",
+            "south"
+          ],
+          "exit_count_overflow": 3,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [
+            "rectangular"
+          ],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_96_918": {
+          "actual_exit_count": 1,
+          "actual_exit_directions": [
+            "east"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "north"
+          ],
+          "exit_count_overflow": 1,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_352_326": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "east",
+            "north",
+            "south"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 2,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": false
+        },
+        "crossingV2_252_536": {
+          "actual_exit_count": 0,
+          "actual_exit_directions": [],
+          "mentioned_directions": [
+            "east",
+            "north"
+          ],
+          "invented_directions": [
+            "east",
+            "north"
+          ],
+          "exit_count_overflow": 2,
+          "explicit_exit_mentions": 1,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        },
+        "crossingV2_64_698": {
+          "actual_exit_count": 3,
+          "actual_exit_directions": [
+            "north",
+            "south",
+            "west"
+          ],
+          "mentioned_directions": [
+            "east",
+            "north",
+            "up"
+          ],
+          "invented_directions": [
+            "east",
+            "up"
+          ],
+          "exit_count_overflow": 0,
+          "explicit_exit_mentions": 2,
+          "architectural_terms": [],
+          "shape_terms": [],
+          "has_structural_fabrication": true
+        }
+      }
+    }
+  ],
+  "repeated_phrases_top_10": [
+    {
+      "phrase": "room data structure",
+      "count": 75
+    },
+    {
+      "phrase": "room data structure cave",
+      "count": 71
+    },
+    {
+      "phrase": "data structure cave",
+      "count": 71
+    },
+    {
+      "phrase": "room data structure cave passage",
+      "count": 59
+    },
+    {
+      "phrase": "data structure cave passage",
+      "count": 59
+    },
+    {
+      "phrase": "exits 2 north",
+      "count": 59
+    },
+    {
+      "phrase": "structure cave passage",
+      "count": 59
+    },
+    {
+      "phrase": "atmospheric tags materials",
+      "count": 54
+    },
+    {
+      "phrase": "exits 2 north east",
+      "count": 53
+    },
+    {
+      "phrase": "2 north east",
+      "count": 53
+    }
+  ],
+  "spotchecks": {
+    "crossingV2_252_536": {
+      "phase2": "The space is enclosed, with no visible exits. The walls are bare, their surfaces smooth from age or wear. The room's scale is modest, its boundaries tight and confining.",
+      "v31_run1": "**Room Data:**\n- Structure: cave-passage\n- Exits: 2 (north, east)\n- Atmospheric Tags: materials: rock-walls, sensory: echoing-sounds\n\nThe cave passage narrows as you move north, the rough texture of the rock walls scraping against your shoulders. The sound of dripping water echoes off the cold stone, each drip amplifying in the confined space before fading away. The air grows colder and damper with every step eastward, the scent of damp earth filling your nostrils.",
+      "v31_run1_structural": {
+        "actual_exit_count": 0,
+        "actual_exit_directions": [],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "east",
+          "north"
+        ],
+        "exit_count_overflow": 2,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "verdict": "failed: still invents structure or exits"
+    },
+    "crossingV2_96_918": {
+      "phase2": "The room is a compact, worn tavern interior, shaped like a dead end. A single exit leads eastward. The space is anchored by a hearth at the far wall, its rough texture and heat hinting at countless nights of warmth and merriment. The walls bear the marks of time and use, their surface smooth from years of wear.",
+      "v31_run1": "**Room Data:**\n- Structure: cave-tunnel\n- Exits: 2 (north, east)\n- Atmospheric Tags: materials: earthen-walls, sensory: echoing\n\nA narrow tunnel stretches out, its walls raw and earthen. The air is damp and heavy with the scent of moist soil. Each footstep echoes loudly off the hard-packed dirt floor, announcing your presence in the silence.",
+      "v31_run1_structural": {
+        "actual_exit_count": 1,
+        "actual_exit_directions": [
+          "east"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 1,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "verdict": "failed: still invents exits or room shape"
+    },
+    "crossingV2_204_360": {
+      "phase2": "At the intersection, three paths diverge. A worn signpost stands central, its arms pointing east, south, and west. The space is open, weathered by time and traffic.",
+      "v31_run1": "**Room Data:**\n- Structure: cave-passage\n- Exits: 2 (north, east)\n- Atmospheric Tags:\n  - Materials: earthen-floor, rocky-walls\n  - Sensory: dripping-water\n  - Upkeep: worn\n\nThe narrow cave passage curves gently to the north and east. The earthen floor is damp underfoot, marked by shallow indentations from countless travelers' boots. Rocky walls glisten with moisture, their jagged surfaces catching the faint light filtering in from unseen sources. A steady drip-drip echoes through the passage, punctuating the otherwise silent journey deeper into the earth.",
+      "v31_run1_structural": {
+        "actual_exit_count": 3,
+        "actual_exit_directions": [
+          "east",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "verdict": "mixed: retains some atmosphere but still fabricates structure"
+    },
+    "crossingV2_472_564": {
+      "phase2": "At this intersection, four paths branch out from a central space. Two passages lead north and south, while another two extend east and west. The space is open, with no barriers to movement in any direction.",
+      "v31_run1": "**Room Data:**\n- Structure: cave-passage\n- Exits: 2 (north, east)\n- Atmospheric Tags: materials: damp-walls, sensory: dripping-water\n\nThe cave passage narrows as it slopes downwards, the walls glistening with condensation. A steady drip-drip from above echoes through the confined space, each droplet's impact resonating in the cool air. The earthy scent of wet soil fills the passage, punctuated by the occasional musty whiff of stagnant water.",
+      "v31_run1_structural": {
+        "actual_exit_count": 4,
+        "actual_exit_directions": [
+          "east",
+          "north",
+          "south",
+          "west"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [],
+        "exit_count_overflow": 0,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": false
+      },
+      "verdict": "failed: untagged drift remains"
+    },
+    "crossingV2_318_564": {
+      "phase2": "The room opens to the east. It's a worn guild hall, a dead-end space within a building interior. The floor is smooth underfoot, well-trodden by time and use. The walls are bare, their surfaces rough with age. A single exit leads eastward, the passage narrows as it disappears into shadow.",
+      "v31_run1": "**Room Data:**\n- Structure: cave-passage\n- Exits: 2 (north, east)\n- Atmospheric Tags: materials: earthen-floor, earthen-walls, sensory: musty-smell\n\nThe passage narrows here, the earthen walls closing in from either side. The floor is uneven, packed dirt giving way to occasional loose stones underfoot. A musty scent lingers, damp and heavy, distinct from the fresher air of the last chamber.",
+      "v31_run1_structural": {
+        "actual_exit_count": 1,
+        "actual_exit_directions": [
+          "east"
+        ],
+        "mentioned_directions": [
+          "east",
+          "north"
+        ],
+        "invented_directions": [
+          "north"
+        ],
+        "exit_count_overflow": 1,
+        "explicit_exit_mentions": 1,
+        "architectural_terms": [],
+        "shape_terms": [],
+        "has_structural_fabrication": true
+      },
+      "verdict": "passed: banned-noun leak removed"
+    }
+  },
+  "stop_conditions": {
+    "banned_noun_leak_rate_above_2_of_4": true,
+    "structural_fabrication_still_present_on_252_536": true,
+    "structural_fabrication_still_present_on_96_918": true,
+    "tagged_room_keyword_drop_more_than_50_percent": true,
+    "second_person_violations_present": true
+  },
+  "overall_verdict": "Approach not viable at this model size"
+}

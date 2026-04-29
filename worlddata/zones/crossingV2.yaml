@@ -848,11 +848,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
+    structure: dock
     specific_function: null
-    named_feature: null
-    condition: null
-    custom: []
+    named_feature: workbench
+    condition: crumbling
+    custom:
+    - slipway
   items: []
   zone_id: crossingv2
   map:
@@ -926,11 +927,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
+    structure: threshold
     specific_function: null
     named_feature: null
-    condition: null
-    custom: []
+    condition: abandoned
+    custom:
+    - edge-lot
   items: []
   zone_id: crossingv2
   map:
@@ -983,11 +985,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
-    specific_function: null
+    structure: dock
+    specific_function: warehouse
     named_feature: null
-    condition: null
-    custom: []
+    condition: worn
+    custom:
+    - loading-lane
   items: []
   zone_id: crossingv2
   map:
@@ -1019,11 +1022,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
-    specific_function: null
-    named_feature: null
-    condition: null
-    custom: []
+      structure: intersection
+      specific_function: null
+      named_feature: signpost
+      condition: worn
+      custom:
+      - market-crossing
   items: []
   zone_id: crossingv2
   map:
@@ -1188,6 +1192,21 @@ rooms:
     named_feature: null
     condition: null
     custom: []
+    atmosphere:
+      materials:
+      - cobbled-floor
+      - plaster-walls
+      social_character:
+      - commercial
+      - mixed-class
+      surroundings:
+      - shops-nearby
+      - market-nearby
+      sensory:
+      - sounds-of-traffic
+      - sounds-of-commerce
+      - dust-smell
+      upkeep: well-maintained
   items: []
   zone_id: crossingv2
   map:
@@ -1533,11 +1552,26 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
+    structure: intersection
     specific_function: null
-    named_feature: null
-    condition: null
+    named_feature: signpost
+    condition: worn
     custom: []
+    atmosphere:
+      materials:
+      - cobbled-floor
+      - stone-walls
+      social_character:
+      - commercial
+      - mixed-class
+      surroundings:
+      - shops-nearby
+      - market-nearby
+      sensory:
+      - sounds-of-commerce
+      - cooking-smell
+      - dust-smell
+      upkeep: well-maintained
   items: []
   zone_id: crossingv2
   map:
@@ -1718,11 +1752,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
+    structure: alley
     specific_function: null
     named_feature: null
-    condition: null
-    custom: []
+    condition: worn
+    custom:
+    - service-lane
   items: []
   zone_id: crossingv2
   map:
@@ -1754,10 +1789,10 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
+    structure: intersection
     specific_function: null
-    named_feature: null
-    condition: null
+    named_feature: signpost
+    condition: worn
     custom: []
   items: []
   zone_id: crossingv2
@@ -2300,11 +2335,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
-    specific_function: null
-    named_feature: null
-    condition: null
-    custom: []
+    structure: alley
+    specific_function: market-stall
+    named_feature: signpost
+    condition: worn
+    custom:
+    - trade-lane
   items: []
   zone_id: crossingv2
   map:
@@ -3447,6 +3483,21 @@ rooms:
     named_feature: null
     condition: null
     custom: []
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - residential
+      - working-class
+      surroundings:
+      - housing-nearby
+      - quiet-area
+      sensory:
+      - cooking-smell
+      - quiet-ambient
+      upkeep: lived-in
   items: []
   zone_id: crossingv2
   map:
@@ -3535,10 +3586,10 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
+    structure: intersection
     specific_function: null
     named_feature: null
-    condition: null
+    condition: worn
     custom: []
   items: []
   zone_id: crossingv2
@@ -3679,11 +3730,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
-    specific_function: null
+    structure: building-interior
+    specific_function: guild-hall
     named_feature: null
-    condition: null
-    custom: []
+    condition: worn
+    custom:
+    - meeting-hall
   items: []
   zone_id: crossingv2
   map:
@@ -4420,11 +4472,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
+    structure: entrance
     specific_function: null
-    named_feature: null
-    condition: null
-    custom: []
+    named_feature: signpost
+    condition: worn
+    custom:
+    - eastward-road
   items: []
   zone_id: crossingv2
   map:
@@ -4992,6 +5045,20 @@ rooms:
     named_feature: null
     condition: null
     custom: []
+    atmosphere:
+      materials:
+      - cobbled-floor
+      - plaster-walls
+      social_character:
+      - working-class
+      - residential
+      surroundings:
+      - housing-nearby
+      - quiet-area
+      sensory:
+      - sounds-of-children
+      - rain-smell
+      upkeep: shabby
   items: []
   zone_id: crossingv2
   map:
@@ -5131,11 +5198,26 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
-    specific_function: null
-    named_feature: null
-    condition: null
-    custom: []
+    structure: building-interior
+    specific_function: temple
+    named_feature: shrine
+    condition: well-maintained
+    custom:
+    - riverpine
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      social_character:
+      - religious
+      - genteel
+      surroundings:
+      - quiet-area
+      - water-nearby
+      sensory:
+      - quiet-ambient
+      - sounds-of-water
+      upkeep: well-maintained
   items: []
   zone_id: crossingv2
   map:
@@ -5425,11 +5507,12 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
-    specific_function: null
-    named_feature: null
-    condition: null
-    custom: []
+    structure: street
+    specific_function: market-stall
+    named_feature: signpost
+    condition: worn
+    custom:
+    - bazaar-edge
   items: []
   zone_id: crossingv2
   map:
@@ -6739,11 +6822,27 @@ rooms:
   environment: city
   npcs: []
   tags:
-    structure: null
-    specific_function: null
-    named_feature: null
-    condition: null
-    custom: []
+    structure: building-interior
+    specific_function: tavern
+    named_feature: hearth
+    condition: worn
+    custom:
+    - taproom
+    - riverfront
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      social_character:
+      - working-class
+      - commercial
+      surroundings:
+      - taverns-nearby
+      - housing-nearby
+      sensory:
+      - cooking-smell
+      - sounds-of-commerce
+      upkeep: lived-in
   items: []
   zone_id: crossingv2
   map:

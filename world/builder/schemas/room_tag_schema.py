@@ -8,7 +8,10 @@ import yaml
 
 
 _ROOM_VOCAB_PATH = Path(__file__).resolve().parent.parent / "vocab" / "room_vocab.yaml"
+_ATMOSPHERE_VOCAB_PATH = Path(__file__).resolve().parent.parent / "vocab" / "atmosphere_vocab.yaml"
 _SINGLE_VALUE_FIELDS = ("structure", "specific_function", "named_feature", "condition")
+_ATMOSPHERE_MULTI_VALUE_FIELDS = ("materials", "social_character", "surroundings", "sensory")
+_ATMOSPHERE_SINGLE_VALUE_FIELDS = ("upkeep",)
 
 
 def _require_mapping(data: object, label: str) -> Mapping:
@@ -53,6 +56,49 @@ def load_room_vocab() -> dict[str, list[str]]:
     return normalized
 
 
+@lru_cache(maxsize=1)
+def load_atmosphere_vocab() -> dict[str, list[str]]:
+    with _ATMOSPHERE_VOCAB_PATH.open(encoding="utf-8") as handle:
+        payload = yaml.safe_load(handle) or {}
+    if not isinstance(payload, dict):
+        raise ValueError("atmosphere vocab must be a mapping.")
+    normalized: dict[str, list[str]] = {}
+    for key, value in payload.items():
+        normalized[str(key or "").strip()] = _normalize_string_list(value, f"atmosphere vocab '{key}'")
+    for required_key in (*_ATMOSPHERE_MULTI_VALUE_FIELDS, *_ATMOSPHERE_SINGLE_VALUE_FIELDS):
+        if required_key not in normalized:
+            raise ValueError(f"atmosphere vocab missing '{required_key}'.")
+    return normalized
+
+
+def normalize_room_atmosphere(data: object) -> dict[str, object]:
+    if data in (None, ""):
+        return {
+            "materials": [],
+            "social_character": [],
+            "surroundings": [],
+            "sensory": [],
+            "upkeep": None,
+        }
+
+    payload = _require_mapping(data, "room atmosphere")
+    vocab = load_atmosphere_vocab()
+    normalized: dict[str, object] = {
+        field: _normalize_string_list(payload.get(field), f"room_tags.atmosphere.{field}")
+        for field in _ATMOSPHERE_MULTI_VALUE_FIELDS
+    }
+    normalized["upkeep"] = _normalize_optional_string(payload.get("upkeep"))
+
+    for field in _ATMOSPHERE_MULTI_VALUE_FIELDS:
+        for value in normalized[field]:
+            if value not in vocab[field]:
+                raise ValueError(f"room_tags.atmosphere.{field} must be one of: {', '.join(vocab[field])}")
+    upkeep = normalized["upkeep"]
+    if upkeep is not None and upkeep not in vocab["upkeep"]:
+        raise ValueError(f"room_tags.atmosphere.upkeep must be one of: {', '.join(vocab['upkeep'])}")
+    return normalized
+
+
 def normalize_room_tags(data: object) -> dict[str, object]:
     if data in (None, ""):
         return {
@@ -61,6 +107,7 @@ def normalize_room_tags(data: object) -> dict[str, object]:
             "named_feature": None,
             "condition": None,
             "custom": [],
+            "atmosphere": normalize_room_atmosphere(None),
         }
 
     payload = _require_mapping(data, "room tags")
@@ -70,6 +117,7 @@ def normalize_room_tags(data: object) -> dict[str, object]:
         for field in _SINGLE_VALUE_FIELDS
     }
     normalized["custom"] = _normalize_string_list(payload.get("custom"), "room_tags.custom")
+    normalized["atmosphere"] = normalize_room_atmosphere(payload.get("atmosphere"))
 
     for field in _SINGLE_VALUE_FIELDS:
         value = normalized[field]

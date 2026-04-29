@@ -1,0 +1,100 @@
+=== Zone: demo1 ===
+
+[Room: CRO_450_100]
+A narrow passage winds through a series of stone arches, its walls worn smooth by time. The floor is uneven and slippery with water from an unknown source trickling down the middle. Sparse torchlight flickers from sconces along the walls, casting long shadows that dance across the damp stones. The air here feels heavy and still, thick with the musty scent of damp earth and ancient stone.
+
+---
+
+[Room: CRO_500_100]
+A narrow stone corridor stretches straight ahead, flanked by smooth walls on both sides. The floor is worn but even underfoot, polished from constant traffic over the years. At the end of this passage, a single torch flickers weakly, casting long shadows and barely illuminating the continuation beyond.
+
+---
+
+Repeated phrases:
+- "casting long shadows" (2)
+- "the floor is" (2)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 0
+- "corridor": 1
+- "gate": 0
+- "arch": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 1
+Geometry flags:
+- "slopes": 0
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 0
+Second-person violations: 0
+Player-assumption violations: 0
+Safe samples: 2/2
+Useful samples: 1/2
+Useful acceptance rate: 50.0%
+Average words: 57.50
+Under 45 words: 0
+45 to 90 words: 2
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 3.50
+Under 3 sentences: 0
+3 to 5 sentences: 2
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 0
+- "the air is thick with": 0
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 0
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 1
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 0
+- "the floor is": 2
+Repeated sentence start total: 2

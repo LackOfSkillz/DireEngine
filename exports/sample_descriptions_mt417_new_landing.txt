@@ -1,0 +1,173 @@
+=== Zone: new_landing ===
+
+[Room: amberwick-lane-western-run-4213-4213-4213]
+**Room Data:**
+
+- Structure: cave-passage
+- Exits: 2 (North, East)
+- Materials: stone-walls
+
+**Atmospheric Tags:**
+
+- Sensory: damp-air
+- Upkeep: worn
+
+**Description:**
+
+The passage narrows to the North, its rough stone walls glistening with moisture. The air grows heavy and damp as you proceed, each breath drawing in the scent of wet earth. To the East, the tunnel widens slightly, revealing a faint hint of light from an unseen source. The ground beneath is uneven, worn smooth by time rather than feet, leading deeper into the cave system.
+
+---
+
+[Room: amberwick-lane-midway-4214-4214]
+**Room Description:**
+
+The room is square, with four exits leading north, south, east, and west. The floor is cold stone, worn smooth by time rather than use. A faint musty smell lingers, hinting at long-forgotten dampness. The walls are bare, their once-smooth surfaces now pitted and rough to the touch.
+
+---
+
+[Room: amberwick-lane-eastern-run-4215-4215]
+**Room Description:**
+
+This square chamber is bounded by rough-hewn stone walls, their surfaces worn smooth by time rather than use. The room's three exits are aligned with the cardinal directions: north, east, and south. The western wall bears remnants of faded murals, their colors long since leeched away by age. A faint, musty scent lingers in the air, hinting at the passage of time and a lack of recent visitors.
+
+---
+
+[Room: amberwick-lane-east-reach-4216-4216-4216]
+**Room Data:**
+
+- Structural Tags: structure: cave-passage, materials: rock-walls
+- Exit Data: exits: 2 (north, east)
+- Atmospheric Tags: sensory: dripping-water
+
+**Description:**
+
+The narrow passage twists sharply northward, its rough rock walls glistening with damp. The drip-drip of water echoes through the confined space, each drop a metronome ticking off time in the otherwise silent cave. The air is thick and cool, carrying a faint earthy scent. As you move deeper into the passage, the ceiling slopes lower, forcing a slight crouch to continue eastward.
+
+---
+
+[Room: saltward-street-and-amberwick-lane-4217-4217]
+**Room Data:**
+
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Atmospheric Tags:
+  - Materials: earthen-floor, rocky-walls
+  - Sensory: damp-air
+
+**Description:**
+
+The passage narrows as it stretches northward, the earthen floor sloping gently beneath your feet. The walls, rough and damp to the touch, close in on either side, their jagged surfaces glistening with moisture. A chill hangs heavy in the air, carrying a faint, musty scent of wet earth. The passage opens up slightly to the east, revealing a hint of the exit's direction.
+
+---
+
+[Room: kingshade-street-and-amberwick-lane-4212-4212]
+**Room Data:**
+- Structure: cave-passage
+- Exits: 2 (north, east)
+- Materials: stone-walls
+
+**Atmospheric Tags:**
+- Sensory: damp-air
+- Upkeep: worn
+
+**Description:**
+The narrow cave passage winds northward, its rough stone walls glistening with moisture. The air is thick with dampness, each breath leaving a faint mist on the cool walls. The ground slopes gently upward, worn smooth by countless footsteps over time. A faint echo of dripping water resonates through the passage, growing louder as it nears the eastern exit.
+
+---
+
+Repeated phrases:
+- "exits 2 north east" (4)
+- "2 north east" (4)
+- "exits 2 north" (4)
+- "structure cave passage" (4)
+- "worn smooth by" (4)
+- "cave passage exits 2 north" (3)
+- "data structure cave passage exits" (3)
+- "passage exits 2 north east" (3)
+- "room data structure cave passage" (3)
+- "smooth by time rather than" (3)
+
+Evaluation counts:
+Explicit repetition:
+- "in the heart of": 0
+- "the air is": 2
+- "the air is thick with": 1
+Fabrication flags:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "door": 0
+- "window": 0
+- "stairs": 0
+- "hall": 0
+- "chamber": 1
+- "corridor": 0
+- "gate": 0
+- "arch": 0
+- "mist": 1
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+Noun violations: 2
+Geometry flags:
+- "slopes": 2
+- "rises": 0
+- "falls": 0
+- "curves": 0
+- "bends": 0
+- "tilts": 0
+Geometry violations: 2
+Second-person violations: 3
+Player-assumption violations: 0
+Safe samples: 0/6
+Useful samples: 0/6
+Useful acceptance rate: 0.0%
+Average words: 76.33
+Under 45 words: 0
+45 to 90 words: 6
+Over 90 words: 0
+Sentence count flags: 0
+Average sentences: 4.00
+Under 3 sentences: 0
+3 to 5 sentences: 6
+Over 5 sentences: 0
+Dead outputs: 0
+Poetic filler counts:
+- "in the heart of": 0
+- "the air is": 2
+- "the air is thick with": 1
+- "whispers": 0
+- "secrets": 0
+- "sentinel": 0
+- "symphony": 0
+- "dance of": 0
+- "as if": 0
+- "awaits": 0
+- "unfurls": 0
+- "pulsating": 0
+Fabrication watchlist counts:
+- "lantern": 0
+- "tower": 0
+- "staircase": 0
+- "mist": 1
+- "fog": 0
+- "cobweb": 0
+- "peaks": 0
+- "forest": 0
+- "ruins": 0
+- "fountain": 0
+- "statue": 0
+- "market stall": 0
+Stub phrase counts:
+- "enclosed room, no exits": 0
+- "a room with no exits": 0
+- "a narrow passage": 0
+- "an empty room": 0
+- "there is nothing here": 0
+Repeated sentence starts:
+- "the room is": 0
+- "the walls are": 1
+- "the floor is": 1
+Repeated sentence start total: 2

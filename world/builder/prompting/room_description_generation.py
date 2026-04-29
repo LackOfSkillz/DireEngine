@@ -39,7 +39,7 @@ def _input_hash(room: dict | None, zone: dict | None) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-async def generate_room_description(room: dict | None, zone: dict | None, *, client: Any, llm_config: Any, max_prompt_chars: int = 5000, max_tokens: int = 250) -> RoomDescriptionGenerationResult:
+async def generate_room_description(room: dict | None, zone: dict | None, *, client: Any, llm_config: Any, max_prompt_chars: int = 22000, max_tokens: int = 250) -> RoomDescriptionGenerationResult:
     prompt = assemble_room_description_prompt(room, zone, max_prompt_chars=max_prompt_chars)
     llm_enabled = bool(getattr(llm_config, "llm_enabled", False))
     model = str(getattr(llm_config, "llm_model", "")).strip()

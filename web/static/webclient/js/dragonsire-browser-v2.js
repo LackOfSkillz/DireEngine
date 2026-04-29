@@ -174,6 +174,13 @@
     named_feature: ["fountain", "statue", "well", "signpost", "gibbet", "shrine", "well-house", "firepit", "altar", "pulpit", "throne", "hearth", "workbench"],
     condition: ["pristine", "well-maintained", "worn", "crumbling", "burnt-out", "abandoned", "refurbished"],
   };
+  const BUILDER_ATMOSPHERE_TAG_VOCAB = {
+    materials: ["stone-walls", "timber-walls", "plaster-walls", "brick-walls", "mud-walls", "log-walls", "flagstone-floor", "cobbled-floor", "planked-floor", "dirt-floor", "earthen-floor", "thatched-roof", "tile-roof", "slate-roof", "timber-beams"],
+    social_character: ["affluent", "prosperous", "middle-class", "working-class", "impoverished", "destitute", "mixed-class", "residential", "commercial", "industrial", "civic", "religious", "rough", "genteel"],
+    surroundings: ["shops-nearby", "housing-nearby", "taverns-nearby", "market-nearby", "temples-nearby", "guilds-nearby", "workshops-nearby", "warehouses-nearby", "docks-nearby", "city-wall-nearby", "water-nearby", "fields-nearby", "forest-nearby", "quiet-area", "busy-area"],
+    sensory: ["smoke-smell", "cooking-smell", "fish-smell", "rope-tar-smell", "dung-smell", "flowers-smell", "sea-smell", "rain-smell", "dust-smell", "sounds-of-traffic", "sounds-of-commerce", "sounds-of-water", "sounds-of-bells", "sounds-of-children", "quiet-ambient", "bustling-ambient"],
+    upkeep: ["pristine-upkeep", "well-maintained", "lived-in", "shabby", "neglected", "decaying", "abandoned"],
+  };
   const builderState = {
     currentRoomId: null,
     selectedRoom: null,
@@ -535,12 +542,37 @@
       seenCustom.add(key);
       custom.push(text);
     });
+    const atmospherePayload = payload.atmosphere && typeof payload.atmosphere === "object" && !Array.isArray(payload.atmosphere) ? payload.atmosphere : {};
+    const normalizeAtmosphereList = (fieldName) => {
+      const values = [];
+      const seen = new Set();
+      (Array.isArray(atmospherePayload[fieldName]) ? atmospherePayload[fieldName] : []).forEach((item) => {
+        const text = String(item || "").trim().toLowerCase();
+        if (!text || seen.has(text) || !BUILDER_ATMOSPHERE_TAG_VOCAB[fieldName].includes(text)) {
+          return;
+        }
+        seen.add(text);
+        values.push(text);
+      });
+      return values;
+    };
+    const normalizeAtmosphereSingle = (fieldName) => {
+      const text = String(atmospherePayload[fieldName] || "").trim().toLowerCase();
+      return BUILDER_ATMOSPHERE_TAG_VOCAB[fieldName].includes(text) ? text : "";
+    };
     return {
       structure: normalizeSingle("structure"),
       specific_function: normalizeSingle("specific_function"),
       named_feature: normalizeSingle("named_feature"),
       condition: normalizeSingle("condition"),
       custom,
+      atmosphere: {
+        materials: normalizeAtmosphereList("materials"),
+        social_character: normalizeAtmosphereList("social_character"),
+        surroundings: normalizeAtmosphereList("surroundings"),
+        sensory: normalizeAtmosphereList("sensory"),
+        upkeep: normalizeAtmosphereSingle("upkeep"),
+      },
     };
   }
 
@@ -1531,12 +1563,22 @@
       return;
     }
     const disabled = Boolean(options.disabled);
-    const selectedValue = String(value || "").trim().toLowerCase();
+    const multiSelect = Boolean(options.multiSelect);
+    const selectedValues = multiSelect
+      ? new Set((Array.isArray(value) ? value : []).map((entry) => String(entry || "").trim().toLowerCase()).filter(Boolean))
+      : null;
+    const selectedValue = multiSelect ? "" : String(value || "").trim().toLowerCase();
     container.innerHTML = vocabulary.map((entry) => {
-      const isSelected = entry === selectedValue;
+      const isSelected = multiSelect ? selectedValues.has(entry) : entry === selectedValue;
       const disabledAttr = disabled ? " disabled" : "";
-      return `<button type="button" class="builder-chip${isSelected ? " is-selected" : ""}" data-room-tag-field="${escapeHtml(fieldName)}" data-room-tag-value="${escapeHtml(entry)}" aria-pressed="${isSelected ? "true" : "false"}"${disabledAttr}>${escapeHtml(builderGenerationLabel(entry))}</button>`;
+      return `<button type="button" class="builder-chip${isSelected ? " is-selected" : ""}" data-room-tag-field="${escapeHtml(fieldName)}" data-room-tag-value="${escapeHtml(entry)}" data-room-tag-mode="${multiSelect ? "multi" : "single"}" aria-pressed="${isSelected ? "true" : "false"}"${disabledAttr}>${escapeHtml(builderGenerationLabel(entry))}</button>`;
     }).join("");
+  }
+
+  function collectSelectedRoomTagValues(containerId) {
+    return Array.from(document.querySelectorAll(`#${containerId} .builder-chip.is-selected`))
+      .map((chip) => String(chip.dataset.roomTagValue || "").trim().toLowerCase())
+      .filter(Boolean);
   }
 
   function renderInheritedRoomTagChips() {
@@ -1598,6 +1640,11 @@
     renderTagChipGroup("room-tag-named-feature", "named_feature", BUILDER_ROOM_TAG_VOCAB.named_feature, tags.named_feature, { disabled });
     renderTagChipGroup("room-tag-condition", "condition", BUILDER_ROOM_TAG_VOCAB.condition, tags.condition, { disabled });
     renderCustomRoomTagGroup(tags.custom, disabled);
+    renderTagChipGroup("room-tag-atmosphere-materials", "atmosphere.materials", BUILDER_ATMOSPHERE_TAG_VOCAB.materials, tags.atmosphere.materials, { disabled, multiSelect: true });
+    renderTagChipGroup("room-tag-atmosphere-social-character", "atmosphere.social_character", BUILDER_ATMOSPHERE_TAG_VOCAB.social_character, tags.atmosphere.social_character, { disabled, multiSelect: true });
+    renderTagChipGroup("room-tag-atmosphere-surroundings", "atmosphere.surroundings", BUILDER_ATMOSPHERE_TAG_VOCAB.surroundings, tags.atmosphere.surroundings, { disabled, multiSelect: true });
+    renderTagChipGroup("room-tag-atmosphere-sensory", "atmosphere.sensory", BUILDER_ATMOSPHERE_TAG_VOCAB.sensory, tags.atmosphere.sensory, { disabled, multiSelect: true });
+    renderTagChipGroup("room-tag-atmosphere-upkeep", "atmosphere.upkeep", BUILDER_ATMOSPHERE_TAG_VOCAB.upkeep, tags.atmosphere.upkeep, { disabled });
   }
 
   function collectBuilderRoomTagDraft() {
@@ -1609,6 +1656,13 @@
       custom: Array.from(document.querySelectorAll("#room-tag-custom [data-room-custom-tag]"))
         .map((chip) => String(chip.dataset.roomCustomTag || "").trim())
         .filter(Boolean),
+      atmosphere: {
+        materials: collectSelectedRoomTagValues("room-tag-atmosphere-materials"),
+        social_character: collectSelectedRoomTagValues("room-tag-atmosphere-social-character"),
+        surroundings: collectSelectedRoomTagValues("room-tag-atmosphere-surroundings"),
+        sensory: collectSelectedRoomTagValues("room-tag-atmosphere-sensory"),
+        upkeep: document.querySelector("#room-tag-atmosphere-upkeep .builder-chip.is-selected")?.dataset.roomTagValue || "",
+      },
     });
   }
 
@@ -4059,7 +4113,7 @@
       stateful_descs: overrides.stateful_descs ?? baseRoom.stateful_descs ?? {},
       details: overrides.details ?? baseRoom.details ?? {},
       room_states: overrides.room_states ?? baseRoom.room_states ?? [],
-      tags: overrides.tags ?? baseRoom.tags ?? { structure: "", specific_function: "", named_feature: "", condition: "", custom: [] },
+      tags: overrides.tags ?? baseRoom.tags ?? { structure: "", specific_function: "", named_feature: "", condition: "", custom: [], atmosphere: { materials: [], social_character: [], surroundings: [], sensory: [], upkeep: "" } },
       ambient: overrides.ambient ?? baseRoom.ambient ?? { rate: 0, messages: [] },
       environment: overrides.environment ?? baseRoom.environment ?? "city",
       color: overrides.color ?? baseRoom.color ?? "standard",
@@ -5995,7 +6049,7 @@
         stateful_descs: {},
         details: {},
         room_states: [],
-        tags: { structure: "", specific_function: "", named_feature: "", condition: "", custom: [] },
+        tags: { structure: "", specific_function: "", named_feature: "", condition: "", custom: [], atmosphere: { materials: [], social_character: [], surroundings: [], sensory: [], upkeep: "" } },
         ambient: { rate: 0, messages: [] },
         environment,
         zone_id: zoneId,
@@ -6177,7 +6231,21 @@
         const fieldName = String(tagChip.dataset.roomTagField || "").trim();
         const nextTags = collectBuilderRoomTagDraft();
         const value = String(tagChip.dataset.roomTagValue || "").trim().toLowerCase();
-        nextTags[fieldName] = nextTags[fieldName] === value ? "" : value;
+        const mode = String(tagChip.dataset.roomTagMode || "single").trim().toLowerCase();
+        if (fieldName.includes(".")) {
+          const [rootField, nestedField] = fieldName.split(".");
+          nextTags[rootField] = nextTags[rootField] && typeof nextTags[rootField] === "object" ? nextTags[rootField] : {};
+          if (mode === "multi") {
+            const currentValues = Array.isArray(nextTags[rootField][nestedField]) ? [...nextTags[rootField][nestedField]] : [];
+            nextTags[rootField][nestedField] = currentValues.includes(value)
+              ? currentValues.filter((entry) => entry !== value)
+              : currentValues.concat([value]);
+          } else {
+            nextTags[rootField][nestedField] = nextTags[rootField][nestedField] === value ? "" : value;
+          }
+        } else {
+          nextTags[fieldName] = nextTags[fieldName] === value ? "" : value;
+        }
         renderBuilderRoomTagsEditor({ ...(builderState.currentRoom || currentBuilderDraft()), tags: nextTags });
         scheduleBuilderPreviewUpdate();
         return;
