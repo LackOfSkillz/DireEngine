@@ -8,6 +8,7 @@ from world.builder.schemas.typed_generation_input_schema import resolve_typed_ge
 
 
 _SYSTEM_PROMPT_PATH = Path(__file__).resolve().parent.parent / "templates" / "room_description_system_prompt.txt"
+_STATE_MARKUP_PROMPT_PATH = Path(__file__).resolve().parent.parent / "templates" / "room_description_state_markup_prompt.txt"
 PROMPT_VERSION = "v8_diremud_required_stateful_fragments"
 
 _STATE_GROUP_VOCABULARY = {
@@ -37,6 +38,14 @@ _INTERIOR_FUNCTIONS = {
     "cellar",
 }
 _INTERIOR_FEATURES = {"hearth", "altar", "pulpit", "throne", "workbench"}
+_UNDERGROUND_STRUCTURES = {"cave-passage", "cave-chamber", "cellar", "crypt", "dungeon", "tunnel", "mine"}
+_BUILDING_INTERIOR_ENVIRONMENTS = {"interior", "temple"}
+_BUILDING_INTERIOR_STRUCTURES = {"hall", "chamber", "corridor", "workshop", "shop-interior", "tavern-interior", "sanctuary"}
+_THRESHOLD_STRUCTURES = {"cave-entrance", "doorway", "gateway", "threshold"}
+_URBAN_EXTERIOR_ENVIRONMENTS = {"urban", "street", "plaza"}
+_URBAN_EXTERIOR_STRUCTURES = {"street", "avenue", "square", "plaza", "lane", "alley", "bridge-span", "terrace", "green", "road", "crossroads", "threshold-outdoor"}
+_WILDERNESS_ENVIRONMENTS = {"wilderness", "forest", "plain", "mountain", "coast", "desert"}
+_WILDERNESS_STRUCTURES = {"path", "trail", "switchback", "crossroads-rural"}
 
 # ORIGINAL_PROMPT_BASELINE
 # System:
@@ -79,6 +88,10 @@ class RoomDescriptionPrompt:
 
 def load_room_description_system_prompt() -> str:
     return _SYSTEM_PROMPT_PATH.read_text(encoding="utf-8").strip()
+
+
+def load_room_description_state_markup_prompt() -> str:
+    return _STATE_MARKUP_PROMPT_PATH.read_text(encoding="utf-8").strip()
 
 
 def _label(value: str) -> str:
@@ -165,6 +178,28 @@ def _nonempty_text(value: object) -> str:
     return str(value or "").strip()
 
 
+def _normalize_prompt_atmosphere(data: object) -> dict[str, object]:
+    payload = data if isinstance(data, dict) else {}
+    return {
+        "materials": _normalize_list(payload.get("materials"), preserve_case=True),
+        "social_character": _normalize_list(payload.get("social_character"), preserve_case=True),
+        "surroundings": _normalize_list(payload.get("surroundings"), preserve_case=True),
+        "sensory": _normalize_list(payload.get("sensory"), preserve_case=True),
+        "upkeep": _nonempty_text(payload.get("upkeep")) or None,
+    }
+
+
+def _normalize_prompt_room_tags(data: object) -> dict[str, object]:
+    try:
+        return normalize_room_tags(data)
+    except ValueError as error:
+        if "room_tags.atmosphere." not in str(error) or not isinstance(data, dict):
+            raise
+        normalized = normalize_room_tags({key: value for key, value in data.items() if key != "atmosphere"})
+        normalized["atmosphere"] = _normalize_prompt_atmosphere(data.get("atmosphere"))
+        return normalized
+
+
 def _has_vertical_exit(exit_directions: list[str]) -> bool:
     return any(direction in {"up", "down"} for direction in exit_directions)
 
@@ -177,47 +212,97 @@ def determine_applicable_state_groups(
     room_data = room_payload or {}
     zone_data = zone_payload or {}
     context = generation_context or zone_data.get("generation_context") or {}
-    room_tags = normalize_room_tags(room_data.get("tags"))
+    room_tags = _normalize_prompt_room_tags(room_data.get("tags"))
     structure = str(room_tags.get("structure") or "").strip().lower()
-    specific_function = str(room_tags.get("specific_function") or "").strip().lower()
-    named_feature = str(room_tags.get("named_feature") or "").strip().lower()
-    setting_type = _nonempty_text(context.get("setting_type") or room_data.get("environment")).lower()
-    room_id = str(room_data.get("id") or "").strip().upper()
-    exit_directions = _normalized_exit_directions(room_data)
+    environment = _nonempty_text(room_data.get("environment") or context.get("setting_type")).lower()
 
-    is_interior = (
-        structure in _INTERIOR_STRUCTURES
-        or specific_function in _INTERIOR_FUNCTIONS
-        or named_feature in _INTERIOR_FEATURES
-    )
-    is_urban_exterior = structure in _URBAN_EXTERIOR_STRUCTURES or (setting_type == "city" and not is_interior)
-    # Legacy cave rooms can arrive without structure tags. Prefer tags first, but keep a
-    # narrow fallback so current underground rooms still get sane state applicability.
-    is_underground = (
-        setting_type in {"cave", "underground"}
-        or structure in {"cave", "cave-passage", "cave-tunnel", "tunnel"}
-        or (not setting_type and _has_vertical_exit(exit_directions))
-        or room_id.startswith("CRO_")
-    )
-
-    if is_underground:
+    if structure in _UNDERGROUND_STRUCTURES:
         return ["season"]
-    if is_interior:
+    if environment in _BUILDING_INTERIOR_ENVIRONMENTS or structure in _BUILDING_INTERIOR_STRUCTURES:
         return ["season", "time", "invasion"]
-    if is_urban_exterior:
+    if structure in _THRESHOLD_STRUCTURES:
+        return ["season", "time", "invasion"]
+    if environment in _URBAN_EXTERIOR_ENVIRONMENTS or structure in _URBAN_EXTERIOR_STRUCTURES:
         return ["season", "time", "weather", "invasion"]
-    return ["season", "time", "weather"]
+    if environment in _WILDERNESS_ENVIRONMENTS or structure in _WILDERNESS_STRUCTURES:
+        return ["season", "time", "weather"]
+    return ["season", "time"]
 
 
 def determine_applicable_states(
-    room_payload: dict | None,
-    zone_payload: dict | None,
+    applicable_groups_or_room: list[str] | dict | None,
+    zone_payload: dict | None = None,
     generation_context: dict | None = None,
 ) -> list[str]:
+    applicable_groups = (
+        applicable_groups_or_room
+        if isinstance(applicable_groups_or_room, list)
+        else determine_applicable_state_groups(applicable_groups_or_room, zone_payload, generation_context)
+    )
     states: list[str] = []
-    for group in determine_applicable_state_groups(room_payload, zone_payload, generation_context):
-        states.extend(_STATE_GROUP_VOCABULARY[group])
+    for group in applicable_groups:
+        values = _STATE_GROUP_VOCABULARY.get(str(group or "").strip())
+        if values:
+            states.extend(values)
     return states
+
+
+def build_room_description_user_message(room: dict | None, generation_context: dict | None) -> str:
+    room_payload = dict(room or {})
+    context = dict(generation_context or {})
+    room_tags = _normalize_prompt_room_tags(room_payload.get("tags"))
+    atmosphere = dict(room_tags.get("atmosphere") or {})
+
+    lines = [
+        "Write one grounded DireMud room description in plain prose.",
+        "Do not use $state markup in this pass.",
+        "",
+        f"Room name: {str(room_payload.get('name') or '').strip()}",
+        f"Short description: {str(room_payload.get('short_desc') or '').strip()}",
+        f"Environment: {str(room_payload.get('environment') or '').strip()}",
+    ]
+
+    tags = [
+        ("Structure", room_tags.get("structure")),
+        ("Specific function", room_tags.get("specific_function")),
+        ("Named feature", room_tags.get("named_feature")),
+        ("Condition", room_tags.get("condition")),
+    ]
+    custom_tags = [str(tag).strip() for tag in list(room_tags.get("custom") or []) if str(tag).strip()]
+    lines.append("Tags:")
+    for label, value in tags:
+        if value:
+            lines.append(f"- {label}: {value}")
+    lines.append(f"- Custom: {', '.join(custom_tags) if custom_tags else '(none)'}")
+    for axis in ("materials", "social_character", "surroundings", "sensory"):
+        values = [str(value).strip() for value in list(atmosphere.get(axis) or []) if str(value).strip()]
+        lines.append(f"- Atmosphere {axis}: {', '.join(values) if values else '(none)'}")
+    lines.append(f"- Atmosphere upkeep: {str(atmosphere.get('upkeep') or '').strip() or '(none)'}")
+
+    lines.extend([
+        "",
+        "Zone context:",
+        f"- Setting type: {str(context.get('setting_type') or '').strip() or '(none)'}",
+        f"- Era feel: {str(context.get('era_feel') or '').strip() or '(none)'}",
+        f"- Culture: {', '.join(_normalize_list(context.get('culture'), preserve_case=True)) or '(none)'}",
+        f"- Mood: {', '.join(_normalize_list(context.get('mood'), preserve_case=True)) or '(none)'}",
+        f"- Climate: {str(context.get('climate') or '').strip() or '(none)'}",
+    ])
+    voice = str(context.get("voice") or "").strip()
+    if voice:
+        lines.append(f"- Voice: {voice}")
+    return "\n".join(lines).strip()
+
+
+def build_room_description_markup_user_message(pass_1_output: str, applicable_groups: list[str], applicable_states: list[str]) -> str:
+    groups = ", ".join(str(group).strip() for group in applicable_groups if str(group).strip()) or "(none)"
+    states = ", ".join(str(state).strip() for state in applicable_states if str(state).strip()) or "(none)"
+    return (
+        f"Description:\n{str(pass_1_output or '').strip()}\n\n"
+        f"Applicable state groups: {groups}\n"
+        f"Applicable states: {states}\n\n"
+        "Add $state(...) markup per the rules above. Each applicable state group needs at least one fragment."
+    )
 
 
 def _human_room_name(room_name: str, room_id: str) -> str:
@@ -309,7 +394,7 @@ def _atmosphere_upkeep_clause(value: str | None) -> str:
 
 
 def _build_room_tag_sections(room_payload: dict) -> list[str]:
-    room_tags = normalize_room_tags(room_payload.get("tags"))
+    room_tags = _normalize_prompt_room_tags(room_payload.get("tags"))
     tag_lines = [
         ("Structure", room_tags.get("structure")),
         ("Function", room_tags.get("specific_function")),
@@ -341,7 +426,7 @@ def _build_room_tag_sections(room_payload: dict) -> list[str]:
 
 
 def _build_room_atmosphere_sections(room_payload: dict) -> list[str]:
-    room_tags = normalize_room_tags(room_payload.get("tags"))
+    room_tags = _normalize_prompt_room_tags(room_payload.get("tags"))
     atmosphere = dict(room_tags.get("atmosphere") or {})
     atmosphere_lines: list[str] = []
     for field in ("materials", "social_character", "surroundings", "sensory"):
@@ -443,7 +528,7 @@ def _build_model_prompt_lines(room_payload: dict, zone_payload: dict, generation
     area_payload = _extract_area_payload(room_payload, zone_payload)
     typed_payload = resolve_typed_generation_input(room_payload, zone_payload, area_payload)
     applicable_state_groups = determine_applicable_state_groups(room_payload, zone_payload, generation_context)
-    applicable_states = determine_applicable_states(room_payload, zone_payload, generation_context)
+    applicable_states = determine_applicable_states(applicable_state_groups)
     display_room_name = _human_room_name(room_name, room_id)
     display_zone_name = _human_zone_name(zone_name, str(zone_payload.get("zone_id") or "").strip())
     lines = [
@@ -484,7 +569,7 @@ def _build_model_prompt_lines(room_payload: dict, zone_payload: dict, generation
     else:
         lines.append("No exits are listed for this room.")
 
-    room_tags = normalize_room_tags(room_payload.get("tags"))
+    room_tags = _normalize_prompt_room_tags(room_payload.get("tags"))
     for field, value in (
         ("structure", room_tags.get("structure")),
         ("specific_function", room_tags.get("specific_function")),

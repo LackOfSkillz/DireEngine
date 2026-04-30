@@ -1,0 +1,264 @@
+"zone.setting_type":
+  purpose: "Setting Type tells the builder what broad kind of place this zone is, so the rest of the content stays in the right genre lane."
+  examples:
+    - "town"
+    - "city"
+    - "village"
+    - "wilderness"
+  ai_note: "AI uses this as one of the top-level signals for what kinds of places, details, and atmosphere belong in the zone."
+
+"zone.era_feel":
+  purpose: "Era Feel sets the historical or cultural mood the zone should suggest, even when the exact setting is fictional."
+  examples:
+    - "medieval"
+    - "late-medieval"
+    - "ancient"
+    - "early-renaissance"
+  ai_note: "AI uses this to choose fitting architecture, objects, and tone instead of drifting into the wrong period feel."
+
+"zone.cultural_palette":
+  purpose: "Cultural Palette names the traditions or influences that should shape the zone's look, habits, and built environment."
+  examples:
+    - "generic-fantasy"
+    - "multicultural"
+    - "frontier"
+    - "river-trade"
+  ai_note: "AI treats these values as style cues for naming, material choices, social details, and recurring local flavor."
+
+"zone.mood":
+  purpose: "Mood tells the builder what emotional tone the zone should give off at a glance."
+  examples:
+    - "tense"
+    - "busy"
+    - "somber"
+    - "welcoming"
+  ai_note: "AI uses mood to decide whether a place should feel lively, uneasy, calm, harsh, or otherwise emotionally colored."
+
+"zone.climate":
+  purpose: "Climate gives the zone a baseline weather pattern and seasonal feel."
+  examples:
+    - "temperate"
+    - "arid"
+    - "cold"
+    - "coastal"
+  ai_note: "AI uses climate to choose plausible surfaces, seasonal details, weather effects, and outdoor atmosphere."
+
+"zone.voice_notes":
+  purpose: "Voice Notes are freeform guidance about how the zone should sound on the page when descriptions are written."
+  examples:
+    - "Grounded and practical, not poetic"
+    - "A little grim, but not hopeless"
+    - "Short, plain sentences with market detail"
+  ai_note: "AI reads these notes as tone guidance, especially when several valid description choices would all fit the room data."
+
+"room.name":
+  purpose: "Name is the room's player-facing title, so it should tell people what place they have entered in a clear, flavorful way."
+  examples:
+    - "Saltward Street, Midway"
+    - "The Cartwright's Workshop"
+    - "A Narrow River-Side Alley"
+
+"room.room_id":
+  purpose: "Room ID is the stable internal key that links this room to exits, saves, and other room references."
+  examples:
+    - "saltward-street-midway-4219-4219-4219"
+    - "guild-workshop"
+    - "CRO_500_350"
+
+"room.environment":
+  purpose: "Environment tells the builder what kind of physical place this room is, such as a city street, forest trail, cave, or interior chamber."
+  examples:
+    - "city"
+    - "forest"
+    - "swamp"
+    - "tavern"
+  ai_note: "AI uses environment to decide which state groups apply to the room, so it directly affects weather, time, and other stateful description rules."
+
+"room.short_desc":
+  purpose: "Short Description is the quick summary players see before they read the full room text."
+  examples:
+    - "A lived-in lane of shopfronts and close-built eaves"
+    - "A quiet stone corridor inside the keep"
+    - "A windswept trail on an exposed slope"
+  ai_note: "AI can use the short description as a compact grounding cue when generating or refining room prose."
+
+"room.manual_desc":
+  purpose: "Manual Description is the room text the builder writes directly when they want exact wording instead of generated output."
+  examples:
+    - "Amberwick Lane threads east and west through the district, a lived-in lane of shopfronts, side doors, and close-built eaves."
+    - "A narrow corridor runs beneath the keep, cool and still in the dim light."
+    - "The bridge span hums with cart wheels and river wind."
+  ai_note: "AI generation can be compared against this text, and stateful layers should still respect the permanent facts it establishes."
+
+"room.generated_preview":
+  purpose: "Generated Preview shows what the current room description output looks like, but it is read-only in this panel."
+  examples:
+    - "Preview the current generated room text"
+    - "Check whether tags are producing the right atmosphere"
+    - "Compare rendered state variants"
+
+"room.preview_state_dropdown":
+  purpose: "Preview State lets the builder see how the description reads under different room-state combinations without changing the saved text."
+  examples:
+    - "default"
+    - "morning_clear"
+    - "evening_snow"
+    - "night_invasion"
+
+"room.tags.structure":
+  purpose: "Structure answers what kind of physical layout this room is at the broadest level."
+  examples:
+    - "street"
+    - "alley"
+    - "hallway"
+    - "bridge"
+  ai_note: "AI uses structure to keep the room's geometry and movement logic consistent, such as whether it should read like a lane, chamber, threshold, or crossing."
+
+"room.tags.specific_function":
+  purpose: "Specific Function says what this place is used for beyond its raw shape."
+  examples:
+    - "shop"
+    - "tavern"
+    - "temple"
+    - "warehouse"
+  ai_note: "AI uses function to decide what kinds of activity, props, and social cues belong in the room."
+
+"room.tags.named_feature":
+  purpose: "Named Feature marks the standout fixture or landmark players are likely to notice first."
+  examples:
+    - "fountain"
+    - "well"
+    - "shrine"
+    - "hearth"
+  ai_note: "AI uses named features as anchors for memorable room details instead of describing every room as a generic version of its structure."
+
+"room.tags.condition":
+  purpose: "Condition tells the builder how worn, intact, or damaged the room feels overall."
+  examples:
+    - "pristine"
+    - "well-maintained"
+    - "worn"
+    - "crumbling"
+  ai_note: "AI uses condition to choose whether surfaces, fixtures, and mood should read as cared for, exhausted, ruined, or somewhere between."
+
+"room.tags.custom":
+  purpose: "Custom Tags are the escape hatch for one-off concepts that matter to this room but do not belong in the shared vocabulary yet."
+  examples:
+    - "canal-overlook"
+    - "watch-post"
+    - "guild-rivalry"
+    - "lamp-blackened-arch"
+
+"room.tags.atmosphere.materials":
+  purpose: "Atmosphere Materials describe the surfaces and building substances players would notice in the room."
+  examples:
+    - "stone-walls"
+    - "cobbled-floor"
+    - "planked-floor"
+    - "timber-beams"
+  ai_note: "AI uses materials to ground descriptions in concrete texture and construction instead of drifting into vague scenery."
+
+"room.tags.atmosphere.social_character":
+  purpose: "Atmosphere Social Character describes who this place seems built for or shaped by."
+  examples:
+    - "working-class"
+    - "commercial"
+    - "affluent"
+    - "religious"
+  ai_note: "AI uses social character to pick fitting habits, traffic, tone, and implied human presence without inventing a whole scene."
+
+"room.tags.atmosphere.surroundings":
+  purpose: "Atmosphere Surroundings describe what lies nearby and what larger setting presses in on this room."
+  examples:
+    - "shops-nearby"
+    - "housing-nearby"
+    - "market-nearby"
+    - "water-nearby"
+  ai_note: "AI uses surroundings to mention adjacency and district feel, which helps rooms sound connected to a real neighborhood instead of floating in isolation."
+
+"room.tags.atmosphere.sensory":
+  purpose: "Atmosphere Sensory captures the smells, sounds, and ambient phenomena that define the room's immediate feel."
+  examples:
+    - "cooking-smell"
+    - "sounds-of-water"
+    - "sounds-of-commerce"
+    - "quiet-ambient"
+  ai_note: "AI uses sensory tags to decide what players hear, smell, or otherwise sense before smaller visual details are named."
+
+"room.tags.atmosphere.upkeep":
+  purpose: "Atmosphere Upkeep describes how actively this place seems cared for from day to day."
+  examples:
+    - "pristine-upkeep"
+    - "well-maintained"
+    - "lived-in"
+    - "shabby"
+  ai_note: "AI uses upkeep to separate clean, tended spaces from places that feel neglected, decayed, or merely endured."
+
+"room.room_states":
+  purpose: "Room States are the named conditions this room can react to, such as time of day, season, weather, or invasion status."
+  examples:
+    - "morning"
+    - "night"
+    - "winter"
+    - "invasion"
+  ai_note: "AI stateful descriptions rely on these states, because `$state(...)` fragments only appear when the matching room state is active."
+
+"room.stateful_descs":
+  purpose: "Stateful Descriptions are optional text layers that only appear when a matching room state is active."
+  examples:
+    - "night: Moonlight pools across the empty paving stones."
+    - "rain: Water runs down the walls in thin dark lines."
+    - "invasion: Doors are barred and the lane is unnaturally still."
+  ai_note: "These layers map directly to `$state(name, content)` style output, so they are one of the main tools for state-aware AI room text."
+
+"room.exits":
+  purpose: "Exits define where players can travel from this room and what each route connects to."
+  examples:
+    - "north to market-square"
+    - "down to cellar"
+    - "west to dockside-street"
+
+"room.exit_typeclass":
+  purpose: "Exit Typeclass controls what kind of exit object is created for this route, such as a normal exit or a slower travel exit."
+  examples:
+    - "typeclasses.exits.Exit"
+    - "typeclasses.exits_slow.SlowDireExit"
+    - "Default fast exit for ordinary movement"
+  ai_note: "AI does not usually read this field directly, but exit behavior can still affect how movement and pacing are represented in the live game."
+
+"room.details":
+  purpose: "Details are the extra things players can examine with commands like `look sign`, `look wall`, or `look hearth`."
+  examples:
+    - "sign: The painted board creaks on iron chains."
+    - "wall: The plaster is cracked and smoke-stained."
+    - "hearth: Old ash still lies in the stone basin."
+  ai_note: "AI can use details as additional grounding if you later generate or revise room prose around the same objects."
+
+"room.ambient_messages":
+  purpose: "Ambient Messages are short flavor lines the room can broadcast on its own from time to time."
+  examples:
+    - "A draft curls through the passage."
+    - "Somewhere below, water drips into darkness."
+    - "A wagon rattles past outside."
+
+"room.ambient_rate":
+  purpose: "Ambient Rate sets how many seconds the game waits between ambient message broadcasts, and `0` means ambient output is disabled."
+  examples:
+    - "0 for disabled"
+    - "45 for occasional flavor"
+    - "120 for sparse background atmosphere"
+
+"room.npcs":
+  purpose: "NPCs lists which non-player characters should be placed in this room."
+  examples:
+    - "dock_laborer"
+    - "night_watchman"
+    - "guild_apprentice"
+
+"room.items":
+  purpose: "Items lists which objects should be placed in this room and, where supported, how many copies should appear."
+  examples:
+    - "wooden_crate"
+    - "chain_greaves"
+    - "market_lantern"
+    - "2x grain_sack"

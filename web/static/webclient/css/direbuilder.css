@@ -77,6 +77,39 @@ select option:focus-visible {
   box-shadow: var(--shadow);
 }
 
+#direbuilder-page .direbuilder-banner {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(210, 109, 73, 0.45);
+  background: linear-gradient(180deg, rgba(88, 34, 25, 0.98), rgba(44, 18, 14, 0.99));
+  box-shadow: var(--shadow);
+}
+
+#direbuilder-page .direbuilder-banner[hidden] {
+  display: none !important;
+}
+
+#direbuilder-page .direbuilder-banner-copy {
+  display: grid;
+  gap: 6px;
+}
+
+#direbuilder-page .direbuilder-banner-kicker {
+  color: #ffcfaa;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+}
+
+#direbuilder-page .direbuilder-banner-message {
+  color: #fff0d0;
+  line-height: 1.5;
+}
+
 #direbuilder-page .direbuilder-header {
   display: flex;
   align-items: center;
@@ -141,6 +174,15 @@ select option:focus-visible {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-size: 11px;
+}
+
+#direbuilder-page .direbuilder-zone-switcher.is-dirty span::after {
+  content: ' •';
+  color: var(--accent-bright);
+}
+
+#direbuilder-page .direbuilder-zone-switcher.is-locked {
+  opacity: 0.7;
 }
 
 #direbuilder-page .direbuilder-zone-switcher select,
@@ -274,9 +316,67 @@ select option:focus-visible {
   color: #fff6e6;
 }
 
+#direbuilder-page .direbuilder-generate-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#direbuilder-page .direbuilder-button-primary.is-dirty {
+  box-shadow: 0 0 0 1px rgba(255, 214, 150, 0.38), 0 0 22px rgba(184, 112, 46, 0.28);
+}
+
+#direbuilder-page .direbuilder-button-primary.is-saving {
+  box-shadow: 0 0 0 1px rgba(255, 214, 150, 0.38), 0 0 18px rgba(184, 112, 46, 0.22);
+  opacity: 0.88;
+}
+
+#direbuilder-page .direbuilder-button:disabled,
+#direbuilder-page .direbuilder-menu-item:disabled,
+#direbuilder-page input:disabled,
+#direbuilder-page select:disabled,
+#direbuilder-page textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+#direbuilder-page .direbuilder-description-telemetry {
+  margin: 8px 0 0;
+  color: var(--text-dim);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+#direbuilder-page .direbuilder-button-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: direbuilder-spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+#direbuilder-page #builder-map-panel.is-generation-locked {
+  pointer-events: none;
+}
+
+@keyframes direbuilder-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 #direbuilder-page .direbuilder-button-hotload {
   background: linear-gradient(180deg, rgba(164, 111, 47, 0.98), rgba(91, 55, 24, 0.98));
   color: #fff3df;
+}
+
+#direbuilder-page .direbuilder-button-hotload.is-hot-loading {
+  box-shadow: 0 0 0 1px rgba(255, 214, 150, 0.34), 0 0 18px rgba(184, 112, 46, 0.2);
+  opacity: 0.88;
 }
 
 #direbuilder-page .direbuilder-button-secondary,
@@ -343,6 +443,11 @@ select option:focus-visible {
   overflow: hidden;
 }
 
+#direbuilder-page.is-ui-locked .direbuilder-accordion summary {
+  pointer-events: none;
+  opacity: 0.58;
+}
+
 .direbuilder-accordion summary {
   list-style: none;
   cursor: pointer;
@@ -384,6 +489,71 @@ select option:focus-visible {
   letter-spacing: 0.06em;
 }
 
+#direbuilder-page .direbuilder-pill-button {
+  cursor: pointer;
+}
+
+#direbuilder-page .direbuilder-pill-button.is-selected {
+  background: linear-gradient(180deg, rgba(171, 116, 57, 0.34), rgba(104, 63, 28, 0.38));
+  border-color: rgba(244, 198, 128, 0.34);
+  color: #fff0d0;
+}
+
+#direbuilder-page .direbuilder-pill-custom {
+  border-color: rgba(155, 201, 184, 0.42);
+  background: linear-gradient(180deg, rgba(53, 75, 66, 0.95), rgba(28, 42, 36, 0.98));
+  color: #e6f2ea;
+}
+
+#direbuilder-page .direbuilder-pill-custom-marker {
+  margin-right: 4px;
+  color: #a7d2be;
+}
+
+#direbuilder-page .direbuilder-pill-remove {
+  margin-left: 8px;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+#direbuilder-page .direbuilder-inline-editor {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+#direbuilder-page .direbuilder-custom-chip-row {
+  margin-top: 10px;
+}
+
+#direbuilder-page .direbuilder-custom-chip-input {
+  min-width: 0;
+}
+
+#direbuilder-page .direbuilder-custom-chip-add {
+  min-height: 34px;
+  padding: 8px 14px;
+  font-size: 11px;
+}
+
+#direbuilder-page .direbuilder-compact-input {
+  flex: 1 1 180px;
+  min-width: 140px;
+  border-radius: 12px;
+  border: 1px solid rgba(233, 201, 142, 0.24);
+  background: linear-gradient(180deg, rgba(70, 51, 39, 0.92), rgba(35, 25, 19, 0.98));
+  color: #fff0d0;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+#direbuilder-page .direbuilder-mini-button {
+  min-height: 36px;
+  padding: 8px 14px;
+}
+
 .direbuilder-list {
   display: grid;
   gap: 10px;
@@ -398,6 +568,15 @@ select option:focus-visible {
   border: 1px solid rgba(242, 214, 173, 0.08);
   background: rgba(255, 255, 255, 0.03);
   color: #decbae;
+}
+
+#direbuilder-page .direbuilder-editor-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: center;
+}
+
+#direbuilder-page .direbuilder-editor-row {
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr) auto;
 }
 
 .direbuilder-list-row.align-start {
@@ -526,6 +705,79 @@ body #direbuilder-page #builder-reactflow-root {
   color: #ccb693;
 }
 
+#direbuilder-page .direbuilder-tooltip-anchor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#direbuilder-page .direbuilder-tooltip-icon {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: rgba(244, 198, 128, 0.9);
+  cursor: help;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  min-width: 14px;
+  min-height: 14px;
+}
+
+#direbuilder-page .direbuilder-tooltip-icon:hover,
+#direbuilder-page .direbuilder-tooltip-icon:focus-visible {
+  color: #fff0d0;
+  outline: none;
+}
+
+.direbuilder-tooltip-popover {
+  position: fixed;
+  z-index: 60;
+  width: min(320px, calc(100vw - 32px));
+  max-width: 320px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(244, 198, 128, 0.18);
+  background: linear-gradient(180deg, rgba(48, 34, 25, 0.98), rgba(20, 14, 10, 0.99));
+  color: #f2e4ca;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 10px;
+}
+
+.direbuilder-tooltip-popover[hidden] {
+  display: none !important;
+}
+
+.direbuilder-tooltip-purpose,
+.direbuilder-tooltip-examples,
+.direbuilder-tooltip-ai-note {
+  line-height: 1.55;
+}
+
+.direbuilder-tooltip-label {
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+}
+
+.direbuilder-editor-header-row {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #ccb693;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.direbuilder-editor-header-row.direbuilder-editor-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: center;
+}
+
 .direbuilder-textarea {
   min-height: 120px;
   resize: vertical;
@@ -555,6 +807,7 @@ body #direbuilder-page #builder-reactflow-root {
   background: linear-gradient(180deg, rgba(39, 28, 21, 0.98), rgba(18, 12, 9, 0.99));
   color: #fff0d0;
   box-shadow: var(--shadow);
+  white-space: pre-line;
 }
 
 .direbuilder-modal-overlay {

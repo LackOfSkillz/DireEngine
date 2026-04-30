@@ -2,12 +2,19 @@
 {% load static %}
 
 {% block head_extras %}
-<link rel="stylesheet" href="{% static 'webclient/css/direbuilder.css' %}?v=7">
+<link rel="stylesheet" href="{% static 'webclient/css/direbuilder.css' %}?v=14">
 <link rel="stylesheet" href="{% static 'webclient/js/builder-reactflow.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
 <div id="direbuilder-page" data-current-zone-id="{{ current_zone_id|default:'' }}">
+  <div class="direbuilder-banner" id="direbuilder-save-error-banner" hidden>
+    <div class="direbuilder-banner-copy">
+      <div class="direbuilder-banner-kicker" id="direbuilder-save-error-kicker">Save Error</div>
+      <div class="direbuilder-banner-message" id="direbuilder-save-error-message"></div>
+    </div>
+    <button class="direbuilder-button direbuilder-button-secondary direbuilder-mini-button" type="button" id="direbuilder-save-error-dismiss">Dismiss</button>
+  </div>
   <header class="direbuilder-header">
     <div class="direbuilder-header-copy">
       <h1 class="direbuilder-title">{{ application_name }}</h1>
@@ -37,7 +44,7 @@
             <h2 class="direbuilder-panel-title">{% if current_zone %}{{ current_zone.name|title }}{% else %}No Active Zone{% endif %}</h2>
           </div>
           <div class="direbuilder-action-row">
-            <button class="direbuilder-button direbuilder-button-primary" type="button">Save Zone</button>
+            <button class="direbuilder-button direbuilder-button-primary" type="button" id="direbuilder-save-zone">Save Zone</button>
             <button class="direbuilder-button direbuilder-button-hotload" type="button" id="direbuilder-hot-load">&#9889; Hot Load</button>
             <div class="direbuilder-overflow-shell">
               <button class="direbuilder-button direbuilder-button-secondary direbuilder-overflow-trigger" type="button" id="direbuilder-overflow-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="direbuilder-overflow-menu">...</button>
@@ -53,28 +60,28 @@
 
         <div class="direbuilder-accordion-list">
           <details class="direbuilder-accordion">
-            <summary><span>Setting Type</span><span class="direbuilder-summary-value">{{ zone_context.setting_type }}</span></summary>
-            <div class="direbuilder-accordion-body"><p class="direbuilder-note">Current scaffold value for zone-level generation context.</p></div>
+            <summary><span data-tooltip-field="zone.setting_type">Setting Type</span><span class="direbuilder-summary-value" id="direbuilder-zone-setting-summary">{{ zone_context.setting_type }}</span></summary>
+            <div class="direbuilder-accordion-body" id="direbuilder-zone-setting-body"></div>
           </details>
           <details class="direbuilder-accordion">
-            <summary><span>Era</span><span class="direbuilder-summary-value">{{ zone_context.era_feel }}</span></summary>
-            <div class="direbuilder-accordion-body"><p class="direbuilder-note">Current era guidance loaded from the zone YAML.</p></div>
+            <summary><span data-tooltip-field="zone.era_feel">Era</span><span class="direbuilder-summary-value" id="direbuilder-zone-era-summary">{{ zone_context.era_feel }}</span></summary>
+            <div class="direbuilder-accordion-body" id="direbuilder-zone-era-body"></div>
           </details>
           <details class="direbuilder-accordion">
-            <summary><span>Cultural Palette</span><span class="direbuilder-summary-value">{{ zone_context.culture|join:", " }}</span></summary>
-            <div class="direbuilder-accordion-body"><div class="direbuilder-pill-row">{% for value in zone_context.culture %}<span class="direbuilder-pill">{{ value }}</span>{% endfor %}</div></div>
+            <summary><span data-tooltip-field="zone.cultural_palette">Cultural Palette</span><span class="direbuilder-summary-value" id="direbuilder-zone-culture-summary">{{ zone_context.culture|join:", " }}</span></summary>
+            <div class="direbuilder-accordion-body" id="direbuilder-zone-culture-body"></div>
           </details>
           <details class="direbuilder-accordion">
-            <summary><span>Mood</span><span class="direbuilder-summary-value">{{ zone_context.mood|join:", " }}</span></summary>
-            <div class="direbuilder-accordion-body"><div class="direbuilder-pill-row">{% for value in zone_context.mood %}<span class="direbuilder-pill">{{ value }}</span>{% endfor %}</div></div>
+            <summary><span data-tooltip-field="zone.mood">Mood</span><span class="direbuilder-summary-value" id="direbuilder-zone-mood-summary">{{ zone_context.mood|join:", " }}</span></summary>
+            <div class="direbuilder-accordion-body" id="direbuilder-zone-mood-body"></div>
           </details>
           <details class="direbuilder-accordion">
-            <summary><span>Climate</span><span class="direbuilder-summary-value">{{ zone_context.climate }}</span></summary>
-            <div class="direbuilder-accordion-body"><p class="direbuilder-note">Climate informs the room description pipeline in later phases.</p></div>
+            <summary><span data-tooltip-field="zone.climate">Climate</span><span class="direbuilder-summary-value" id="direbuilder-zone-climate-summary">{{ zone_context.climate }}</span></summary>
+            <div class="direbuilder-accordion-body" id="direbuilder-zone-climate-body"></div>
           </details>
           <details class="direbuilder-accordion">
-            <summary><span>Voice Notes</span><span class="direbuilder-summary-value">{% if zone_context.voice %}(set){% else %}(not set){% endif %}</span></summary>
-            <div class="direbuilder-accordion-body"><textarea class="direbuilder-textarea" readonly>{% if zone_context.voice %}{{ zone_context.voice }}{% else %}No voice notes are saved for this zone yet.{% endif %}</textarea></div>
+            <summary><span data-tooltip-field="zone.voice_notes">Voice Notes</span><span class="direbuilder-summary-value">{% if zone_context.voice %}(set){% else %}(not set){% endif %}</span></summary>
+            <div class="direbuilder-accordion-body"><textarea class="direbuilder-textarea" id="direbuilder-zone-voice-notes">{% if zone_context.voice %}{{ zone_context.voice }}{% else %}No voice notes are saved for this zone yet.{% endif %}</textarea></div>
           </details>
           <details class="direbuilder-accordion">
             <summary><span>Zone Browser</span><span class="direbuilder-summary-value">{% if current_zone %}{{ current_zone.name }} + {{ current_zone.rooms|length|add:"-1"|default:0 }} others{% else %}No zones{% endif %}</span></summary>
@@ -114,11 +121,11 @@
           <div class="direbuilder-panel-header direbuilder-room-header">
             <div>
               <div class="direbuilder-kicker">Room Editor</div>
-              <h2 class="direbuilder-panel-title">{% if sample_room %}{{ sample_room.name }}{% else %}No Sample Room{% endif %}</h2>
+              <h2 class="direbuilder-panel-title" id="direbuilder-room-title">Select a room on the map</h2>
             </div>
             <div class="direbuilder-room-meta">
-              <span>{{ sample_room.environment|default:"Unknown"|title }}</span>
-              <span>{% if sample_room %}{{ sample_room.zone_id }}{% else %}No zone{% endif %}</span>
+              <span id="direbuilder-room-environment">No selection</span>
+              <span id="direbuilder-room-zone">No zone</span>
             </div>
           </div>
           <div class="direbuilder-tab-row" role="tablist" aria-label="Room editor tabs">
@@ -131,68 +138,64 @@
           </div>
         </div>
 
-        <section class="direbuilder-tab-panel is-active" data-direbuilder-panel="identity">
-          <div class="direbuilder-field-grid">
-            <label class="direbuilder-field"><span>Name</span><input type="text" value="{{ sample_room.name|default:'' }}" readonly></label>
-            <label class="direbuilder-field"><span>Room Id</span><input type="text" value="{{ sample_room.id|default:'' }}" readonly></label>
-            <label class="direbuilder-field"><span>Environment</span><input type="text" value="{{ sample_room.environment|default:''|title }}" readonly></label>
-            <label class="direbuilder-field"><span>Short Description</span><input type="text" value="{{ sample_room.short_desc|default:'' }}" readonly></label>
-          </div>
-        </section>
+        <div class="direbuilder-room-empty" id="direbuilder-room-empty" hidden>
+          <div class="direbuilder-empty-state">Select a room on the map to edit it.</div>
+        </div>
 
-        <section class="direbuilder-tab-panel" data-direbuilder-panel="description">
-          <button class="direbuilder-button direbuilder-button-primary direbuilder-generate-button" type="button">Generate Description</button>
-          <div class="direbuilder-section-block">
-            <label class="direbuilder-field"><span>Preview As</span>
-              <select id="direbuilder-preview-state">
-                <option value="default">Default</option>
-                <option value="morning">Morning + Clear</option>
-                <option value="winter">Winter Night + Snow</option>
-                <option value="evening">Evening + Rain</option>
-                <option value="night">Night + Invasion</option>
-              </select>
-            </label>
-            <p class="direbuilder-render-copy" id="direbuilder-rendered-preview">{% if sample_room and sample_room.desc %}{{ sample_room.desc }}{% else %}{{ sample_room.name|default:'This room' }} has not been described yet. Phase 2 will connect this panel to the real generation and save pipeline.{% endif %}</p>
-          </div>
-          <label class="direbuilder-field"><span>Manual Description</span><textarea class="direbuilder-textarea" readonly>{% if sample_room and sample_room.desc %}{{ sample_room.desc }}{% else %}No saved room description yet.{% endif %}</textarea></label>
-        </section>
+        <div id="direbuilder-room-editor-content">
+          <section class="direbuilder-tab-panel is-active" data-direbuilder-panel="identity">
+            <div class="direbuilder-field-grid" id="direbuilder-identity-fields"></div>
+          </section>
 
-        <section class="direbuilder-tab-panel" data-direbuilder-panel="tags">
-          <div class="direbuilder-accordion-list">
-            {% for section in sample_room_tag_sections %}
-            <details class="direbuilder-accordion">
-              <summary><span>{{ section.title }}</span><span class="direbuilder-summary-value">{{ section.values|join:", " }}</span></summary>
-              <div class="direbuilder-accordion-body"><div class="direbuilder-pill-row">{% for value in section.values %}<span class="direbuilder-pill">{{ value }}</span>{% endfor %}</div></div>
-            </details>
-            {% endfor %}
-          </div>
-        </section>
+          <section class="direbuilder-tab-panel" data-direbuilder-panel="description">
+            <button class="direbuilder-button direbuilder-button-primary direbuilder-generate-button" id="direbuilder-generate-description" type="button">Generate Description</button>
+            <div class="direbuilder-section-block">
+              <label class="direbuilder-field"><span data-tooltip-field="room.preview_state_dropdown">Preview As</span>
+                <select id="direbuilder-preview-state">
+                  <option value="default">Default</option>
+                  <option value="morning">Morning + Clear</option>
+                  <option value="winter">Winter Night + Snow</option>
+                  <option value="evening">Evening + Rain</option>
+                  <option value="night">Night + Invasion</option>
+                </select>
+              </label>
+              <div class="direbuilder-field"><span data-tooltip-field="room.generated_preview">Generated Preview</span></div>
+              <p class="direbuilder-render-copy" id="direbuilder-rendered-preview">Select a room on the map to inspect its description.</p>
+            </div>
+            <label class="direbuilder-field"><span data-tooltip-field="room.manual_desc">Manual Description</span><textarea class="direbuilder-textarea" id="direbuilder-manual-description" readonly>Select a room on the map to inspect its description.</textarea></label>
+            <p class="direbuilder-description-telemetry" id="direbuilder-description-telemetry">No generation run yet.</p>
+          </section>
 
-        <section class="direbuilder-tab-panel" data-direbuilder-panel="stateful">
-          <div class="direbuilder-section-block">
-            <h3 class="direbuilder-section-title">Room States</h3>
-            <div class="direbuilder-pill-row">{% for state in sample_room.room_states %}<span class="direbuilder-pill">{{ state|title }}</span>{% empty %}<span class="direbuilder-note">No room states saved.</span>{% endfor %}</div>
-          </div>
-          <div class="direbuilder-section-block">
-            <h3 class="direbuilder-section-title">Stateful Descriptions</h3>
-            <div class="direbuilder-list">{% for key, value in sample_room.stateful_descs.items %}<div class="direbuilder-list-row align-start"><strong>{{ key|title }}</strong><span>{{ value|default:"No text saved." }}</span></div>{% empty %}<div class="direbuilder-note">No stateful descriptions are defined yet.</div>{% endfor %}</div>
-          </div>
-        </section>
+          <section class="direbuilder-tab-panel" data-direbuilder-panel="tags">
+            <div class="direbuilder-accordion-list" id="direbuilder-tags-list"></div>
+          </section>
 
-        <section class="direbuilder-tab-panel" data-direbuilder-panel="connections">
-          <div class="direbuilder-list">{% for exit in sample_room_exits %}<div class="direbuilder-list-row"><span>{{ exit.direction }}</span><span>{{ exit.target }}</span><span>{{ exit.type }}</span></div>{% empty %}<div class="direbuilder-note">This room has no saved exits.</div>{% endfor %}</div>
-        </section>
+          <section class="direbuilder-tab-panel" data-direbuilder-panel="stateful">
+            <div class="direbuilder-section-block">
+              <h3 class="direbuilder-section-title"><span data-tooltip-field="room.room_states">Room States</span></h3>
+              <div class="direbuilder-pill-row" id="direbuilder-room-states"></div>
+            </div>
+            <div class="direbuilder-section-block">
+              <h3 class="direbuilder-section-title"><span data-tooltip-field="room.stateful_descs">Stateful Descriptions</span></h3>
+              <div class="direbuilder-list" id="direbuilder-stateful-descriptions"></div>
+            </div>
+          </section>
 
-        <section class="direbuilder-tab-panel" data-direbuilder-panel="population">
-          <div class="direbuilder-section-block">
-            <h3 class="direbuilder-section-title">NPCs</h3>
-            <div class="direbuilder-pill-row">{% for npc in sample_room.npcs %}<span class="direbuilder-pill">{{ npc }}</span>{% empty %}<span class="direbuilder-note">No NPC placements in this room.</span>{% endfor %}</div>
-          </div>
-          <div class="direbuilder-section-block">
-            <h3 class="direbuilder-section-title">Items</h3>
-            <div class="direbuilder-list">{% for item in sample_room.items %}<div class="direbuilder-list-row"><span>{{ item.id }}</span><span>x{{ item.count }}</span></div>{% empty %}<div class="direbuilder-note">No item placements in this room.</div>{% endfor %}</div>
-          </div>
-        </section>
+          <section class="direbuilder-tab-panel" data-direbuilder-panel="connections">
+            <div class="direbuilder-list" id="direbuilder-connections-list"></div>
+          </section>
+
+          <section class="direbuilder-tab-panel" data-direbuilder-panel="population">
+            <div class="direbuilder-section-block">
+              <h3 class="direbuilder-section-title"><span data-tooltip-field="room.npcs">NPCs</span></h3>
+              <div class="direbuilder-pill-row" id="direbuilder-population-npcs"></div>
+            </div>
+            <div class="direbuilder-section-block">
+              <h3 class="direbuilder-section-title"><span data-tooltip-field="room.items">Items</span></h3>
+              <div class="direbuilder-list" id="direbuilder-population-items"></div>
+            </div>
+          </section>
+        </div>
       </section>
     </aside>
   </div>
@@ -204,9 +207,13 @@
 </div>
 
 {{ current_zone|json_script:"direbuilder-zone-data" }}
+{{ zone_context_raw|json_script:"direbuilder-zone-context-data" }}
+{{ zone_vocab_raw|json_script:"direbuilder-zone-vocab-data" }}
+{{ room_tag_vocab_raw|json_script:"direbuilder-room-tag-vocab-data" }}
+<script id="direbuilder-tooltips-data" type="application/json">{{ tooltips_data|safe }}</script>
 {% endblock %}
 
 {% block scripts %}
 <script src="{% static 'webclient/js/builder-reactflow.js' %}?v=6"></script>
-<script src="{% static 'webclient/js/direbuilder.js' %}?v=2"></script>
+<script src="{% static 'webclient/js/direbuilder.js' %}?v=17"></script>
 {% endblock %}

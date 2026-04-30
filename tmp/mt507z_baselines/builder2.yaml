@@ -17,16 +17,7 @@ rooms:
   name: CRO_450_300 TEMP CHECK
   typeclass: typeclasses.rooms_extended.ExtendedDireRoom
   short_desc: ''
-  desc: The narrow lane runs between weathered brick buildings, their stone foundations
-    showing dark tide marks where water has risen and receded. Freshly swept cobbles
-    lead past shuttered stalls, their copper fittings gone green with salt air$state(spring,  and
-    gleaming with morning dew)$state(summer,  warm beneath the midday sun)$state(autumn,  scattered
-    with fallen leaves from window boxes above)$state(winter,  slick with frost in
-    the shadows between buildings). Building fronts press close on both sides, with
-    neighbors visible at upper windows keeping watch over the street below$state(morning,  some
-    calling greetings down to early vendors)$state(evening,  lamplight beginning to
-    glow behind their shutters)$state(night,  their silhouettes barely visible in
-    the dim light of street lanterns).
+  desc: ''
   stateful_descs: {}
   details: {}
   room_states: []
