@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block head_extras %}
-<link rel="stylesheet" href="{% static 'webclient/css/direbuilder.css' %}?v=14">
+<link rel="stylesheet" href="{% static 'webclient/css/direbuilder.css' %}?v=21">
 <link rel="stylesheet" href="{% static 'webclient/js/builder-reactflow.css' %}?v=2">
 {% endblock %}
 
@@ -29,9 +29,40 @@
         </select>
       </label>
     </div>
-    <div class="direbuilder-header-promo" aria-label="Upcoming DireBuilder feature teaser">
-      <div class="direbuilder-promo-line-1">Coming soon: DireBuilder Zone Score</div>
-      <div class="direbuilder-promo-line-2">We build better builders.</div>
+    <div class="direbuilder-header-promo" aria-label="DireEngine ZoneScore">
+      <div class="direbuilder-zone-score-tagline" data-tooltip-field="zone_score.header">
+        <span class="direbuilder-zone-score-tagline-prefix">DireEngine ZoneScore</span> <em>We build better zones by building better builders.</em>
+      </div>
+    </div>
+    <div class="direbuilder-header-score" aria-label="DireBuilder Zone Score">
+      <div class="direbuilder-zone-score" data-direbuilder-zone-score>
+        <button class="direbuilder-zone-score-toggle" data-zone-score-toggle aria-expanded="false" aria-haspopup="dialog" aria-label="Toggle Zone Score breakdown" type="button">
+          <span class="direbuilder-zone-score-strip">
+            <span class="direbuilder-zone-score-composite" data-zone-score-composite>
+              <span class="direbuilder-zone-score-number" data-zone-score-number>&mdash;</span>
+              <span class="direbuilder-zone-score-tier" data-zone-score-tier>Loading</span>
+            </span>
+            <span class="direbuilder-zone-score-chevron">&#9662;</span>
+          </span>
+          <span class="direbuilder-zone-score-subs">
+            <span class="direbuilder-zone-score-sub" data-sub="completeness">
+              <span class="label">Completeness</span>
+              <span class="value" data-zone-score-completeness>&mdash;</span>
+            </span>
+            <span class="direbuilder-zone-score-sub" data-sub="depth">
+              <span class="label">Depth</span>
+              <span class="value" data-zone-score-depth>&mdash;</span>
+            </span>
+            <span class="direbuilder-zone-score-sub" data-sub="engagement">
+              <span class="label">Engagement</span>
+              <span class="value" data-zone-score-engagement>&mdash;</span>
+            </span>
+          </span>
+          <span class="direbuilder-zone-score-stale" data-zone-score-stale hidden>Stale (save to refresh)</span>
+          <span class="direbuilder-zone-score-error" data-zone-score-error hidden>Score unavailable</span>
+        </button>
+        <div class="direbuilder-zone-score-panel" data-zone-score-panel role="dialog" aria-label="Zone Score breakdown" hidden></div>
+      </div>
     </div>
   </header>
 
@@ -145,6 +176,22 @@
         <div id="direbuilder-room-editor-content">
           <section class="direbuilder-tab-panel is-active" data-direbuilder-panel="identity">
             <div class="direbuilder-field-grid" id="direbuilder-identity-fields"></div>
+            <div class="direbuilder-accordion-list">
+              <details class="direbuilder-accordion">
+                <summary><span>Terrain</span><span class="direbuilder-summary-value" id="direbuilder-terrain-summary">(not set)</span></summary>
+                <div class="direbuilder-accordion-body">
+                  <label class="direbuilder-field">
+                    <span data-tooltip-field="room.terrain_primary">Primary</span>
+                    <div class="direbuilder-pill-row" id="direbuilder-terrain-primary-body"></div>
+                  </label>
+                  <label class="direbuilder-field">
+                    <span data-tooltip-field="room.terrain_secondary">Specific</span>
+                    <div class="direbuilder-pill-row" id="direbuilder-terrain-secondary-body"></div>
+                    <div class="direbuilder-terrain-preview" id="direbuilder-terrain-preview" hidden></div>
+                  </label>
+                </div>
+              </details>
+            </div>
           </section>
 
           <section class="direbuilder-tab-panel" data-direbuilder-panel="description">
@@ -210,10 +257,12 @@
 {{ zone_context_raw|json_script:"direbuilder-zone-context-data" }}
 {{ zone_vocab_raw|json_script:"direbuilder-zone-vocab-data" }}
 {{ room_tag_vocab_raw|json_script:"direbuilder-room-tag-vocab-data" }}
+<script id="direbuilder-terrain-vocab-data" type="application/json">{{ terrain_vocab_data|safe }}</script>
+<script id="direbuilder-forage-catalog-summary" type="application/json">{{ forage_catalog_summary|safe }}</script>
 <script id="direbuilder-tooltips-data" type="application/json">{{ tooltips_data|safe }}</script>
 {% endblock %}
 
 {% block scripts %}
 <script src="{% static 'webclient/js/builder-reactflow.js' %}?v=6"></script>
-<script src="{% static 'webclient/js/direbuilder.js' %}?v=17"></script>
+  <script src="{% static 'webclient/js/direbuilder.js' %}?v=23"></script>
 {% endblock %}

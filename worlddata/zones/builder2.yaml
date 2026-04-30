@@ -34,6 +34,10 @@ rooms:
     rate: 0
     messages: []
   environment: city
+  terrain:
+    primary: null
+    secondary: null
+  quest_hooks: []
   npcs:
   - training_goblin
   tags:
@@ -75,6 +79,10 @@ rooms:
     rate: 0
     messages: []
   environment: city
+  terrain:
+    primary: null
+    secondary: null
+  quest_hooks: []
   npcs: []
   tags:
     structure: null
@@ -122,6 +130,10 @@ rooms:
     rate: 0
     messages: []
   environment: city
+  terrain:
+    primary: null
+    secondary: null
+  quest_hooks: []
   npcs: []
   tags:
     structure: null
@@ -174,6 +186,10 @@ rooms:
     rate: 0
     messages: []
   environment: city
+  terrain:
+    primary: null
+    secondary: null
+  quest_hooks: []
   npcs: []
   tags:
     structure: null
@@ -226,6 +242,10 @@ rooms:
     rate: 0
     messages: []
   environment: city
+  terrain:
+    primary: null
+    secondary: null
+  quest_hooks: []
   npcs: []
   tags:
     structure: null
@@ -273,6 +293,10 @@ rooms:
     rate: 0
     messages: []
   environment: city
+  terrain:
+    primary: null
+    secondary: null
+  quest_hooks: []
   npcs: []
   tags:
     structure: null

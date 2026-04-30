@@ -25,6 +25,7 @@ urlpatterns = [
     path("builder/", views.builder_view, name="builder"),
     path("direbuilder/", views.direbuilder_view, name="direbuilder"),
     path("direbuilder/api/zone/<str:zone_id>/", views.direbuilder_zone_detail, name="direbuilder-zone-detail"),
+    path("direbuilder/api/zone/<str:zone_id>/score/", views.direbuilder_zone_score, name="direbuilder-zone-score"),
     path("direbuilder/api/zone/<str:zone_id>/room/<str:room_id>/generate-description/", views.direbuilder_generate_description, name="direbuilder-generate-description"),
     path("direbuilder/api/zone/<str:zone_id>/save/", views.direbuilder_zone_save, name="direbuilder-zone-save"),
     path("direbuilder/api/zone/<str:zone_id>/hot-load/", views.direbuilder_zone_hot_load, name="direbuilder-zone-hot-load"),

@@ -23,9 +23,14 @@ from world.area_forge import map_api
 from world.area_forge.paths import artifact_paths
 from world.area_forge.serializer import load_review_graph, save_review_graph
 from world.builder.schemas.generation_context_schema import load_zone_vocab, normalize_generation_context
-from world.builder.schemas.room_tag_schema import load_atmosphere_vocab, load_room_vocab, normalize_room_tags
+from world.builder.schemas.room_tag_schema import load_atmosphere_vocab, load_room_vocab, normalize_room_quest_hooks, normalize_room_tags
+from world.builder.scoring.zone_scorer import score_zone
+from world.builder.schemas.terrain_schema import load_terrain_vocab as _schema_load_terrain_vocab, normalize_room_terrain
 from world.builder.services import exit_service, zone_service
 from world.worlddata.services.import_zone_service import DEFAULT_ROOM_TYPECLASS, load_zone
+
+
+YAML_SAFE_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
 
 ROOM_TYPECLASS = DEFAULT_ROOM_TYPECLASS
@@ -75,6 +80,10 @@ BUILDER_DIRECTIONS = (
     "veranda",
     "yard",
 )
+
+
+def _yaml_safe_load(source):
+    return yaml.load(source, Loader=YAML_SAFE_LOADER) or {}
 
 
 def _worlddata_zones_dir() -> Path:
@@ -311,6 +320,8 @@ def _normalize_builder_yaml_room(room_data, fallback_index=0):
             ],
         },
         "environment": str(room_data.get("environment") or "city").strip().lower() or "city",
+        "terrain": normalize_room_terrain(room_data.get("terrain")),
+        "quest_hooks": normalize_room_quest_hooks(room_data.get("quest_hooks")),
         "npcs": normalize_builder_reference_ids(room_data.get("npcs") or []),
         "tags": _normalize_builder_room_tags(room_data.get("tags")),
         "items": normalize_room_item_entries(room_data.get("items") or []),
@@ -387,7 +398,7 @@ def _load_builder_zone_yaml(zone_id):
     if not file_path.exists():
         raise Http404("Zone not found")
     with file_path.open(encoding="utf-8") as file_handle:
-        data = yaml.safe_load(file_handle) or {}
+        data = _yaml_safe_load(file_handle)
     payload = _normalize_builder_zone_payload(
         data,
         fallback_zone_id=zone_id,
@@ -436,7 +447,7 @@ def _serialize_yaml_builder_zones():
         if file_path.name.endswith(".raw.yaml"):
             continue
         with file_path.open(encoding="utf-8") as file_handle:
-            data = yaml.safe_load(file_handle) or {}
+            data = _yaml_safe_load(file_handle)
         payload = _normalize_builder_zone_payload(data, fallback_zone_id=file_path.stem)
         zones.append(
             {
@@ -514,7 +525,7 @@ def _load_direbuilder_tooltips() -> dict[str, dict[str, object]]:
     path = _repo_root() / "world" / "builder" / "content" / "tooltips.yaml"
     if not path.exists():
         return {}
-    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    payload = _yaml_safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         return {}
     normalized: dict[str, dict[str, object]] = {}
@@ -523,6 +534,58 @@ def _load_direbuilder_tooltips() -> dict[str, dict[str, object]]:
         if not field_path or not isinstance(value, dict):
             continue
         normalized[field_path] = value
+    return normalized
+
+
+@lru_cache(maxsize=1)
+def _load_terrain_vocab() -> dict[str, list[str]]:
+    return _schema_load_terrain_vocab()
+
+
+@lru_cache(maxsize=1)
+def _load_forage_catalog() -> dict[str, object]:
+    path = _repo_root() / "world" / "builder" / "content" / "forage_catalog.yaml"
+    with path.open(encoding="utf-8") as handle:
+        payload = _yaml_safe_load(handle)
+    if not isinstance(payload, dict):
+        raise ValueError("forage catalog must be a mapping.")
+    return payload
+
+
+@lru_cache(maxsize=1)
+def _build_terrain_summary() -> dict[str, dict[str, object]]:
+    terrain_vocab = _load_terrain_vocab()
+    summary_keys = [*terrain_vocab.get("primary", []), *terrain_vocab.get("secondary", [])]
+    summaries: dict[str, dict[str, object]] = {
+        key: {"total": 0, "healing": 0, "items": [], "_healing_items": []}
+        for key in summary_keys
+    }
+
+    for group_entries in _load_forage_catalog().values():
+        if not isinstance(group_entries, dict):
+            continue
+        for payload in group_entries.values():
+            if not isinstance(payload, dict) or not str(payload.get("display_name") or "").strip():
+                continue
+            display_name = str(payload.get("display_name") or "").strip()
+            healing = bool(payload.get("healing"))
+            for terrain_key in [str(value or "").strip() for value in list(payload.get("terrain") or []) if str(value or "").strip()]:
+                if terrain_key not in summaries:
+                    continue
+                summaries[terrain_key]["total"] += 1
+                summaries[terrain_key]["items"].append(display_name)
+                if healing:
+                    summaries[terrain_key]["healing"] += 1
+                    summaries[terrain_key]["_healing_items"].append(display_name)
+
+    normalized: dict[str, dict[str, object]] = {}
+    for key, value in summaries.items():
+        preferred_items = value["_healing_items"] or value["items"]
+        normalized[key] = {
+            "total": value["total"],
+            "healing": value["healing"],
+            "items": preferred_items[:5],
+        }
     return normalized
 
 
@@ -562,6 +625,8 @@ def _build_direbuilder_context(request):
         "zone_context_raw": normalize_generation_context(generation_context),
         "zone_vocab_raw": zone_vocab,
         "room_tag_vocab_raw": room_tag_vocab,
+        "terrain_vocab_data": json.dumps(_load_terrain_vocab()),
+        "forage_catalog_summary": json.dumps(_build_terrain_summary()),
         "tooltips_data": json.dumps(_load_direbuilder_tooltips()),
         "zone_context": {
             "setting_type": _direbuilder_label(generation_context.get("setting_type") or ""),
@@ -1109,7 +1174,7 @@ def _load_direbuilder_hot_load_target(zone_id):
     if not file_path.exists():
         raise Http404("Zone not found")
     with file_path.open(encoding="utf-8") as file_handle:
-        data = yaml.safe_load(file_handle)
+        data = _yaml_safe_load(file_handle)
     if not isinstance(data, dict):
         raise ValueError("Zone YAML must load to a mapping.")
 
@@ -1170,6 +1235,22 @@ def direbuilder_zone_detail(request, zone_id):
         return _direbuilder_error_response("internal_error", "Couldn't reload this zone from disk. Try again. If this persists, check the server logs.", 500)
 
     return JsonResponse(payload)
+
+
+@require_http_methods(["GET"])
+def direbuilder_zone_score(request, zone_id):
+    requested_zone_id = _normalize_zone_id(zone_id)
+    if not requested_zone_id:
+        return JsonResponse({"error": "This zone no longer exists on disk. Reload the page to recover."}, status=500)
+
+    try:
+        payload = _load_builder_zone_yaml(requested_zone_id)
+        return JsonResponse(score_zone(payload))
+    except Http404:
+        return JsonResponse({"error": "This zone no longer exists on disk. Reload the page to recover."}, status=500)
+    except Exception as error:
+        message = str(error).strip() or "Zone score failed unexpectedly. Try again. If this persists, check the server logs."
+        return JsonResponse({"error": message}, status=500)
 
 
 @csrf_exempt
@@ -1258,8 +1339,8 @@ def direbuilder_zone_save(request, zone_id):
         canonical_payload = _write_builder_zone_yaml(requested_zone_id, {**data, "zone_id": requested_zone_id})
     except Http404:
         return _direbuilder_error_response("zone_not_found", "This zone no longer exists on disk. Reload the page to recover.", 404)
-    except ValueError:
-        return _direbuilder_error_response("validation_failed", "Save was rejected. Some fields may be invalid. Please check your edits and try again.", 400)
+    except ValueError as error:
+        return _direbuilder_error_response("validation_failed", str(error) or "Save was rejected. Some fields may be invalid. Please check your edits and try again.", 400)
     except OSError:
         return _direbuilder_error_response("write_failed", "Couldn't write to disk. Try again, or check the server logs.", 500)
     except Exception:

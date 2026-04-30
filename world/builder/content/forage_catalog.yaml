@@ -1,0 +1,2306 @@
+# Forage Catalog — DragonRealms-style resource taxonomy
+#
+# Source: Elanthipedia Foraging compendium and Healing herbs pages,
+# captured 2026-04-30. Lists are intended as the canonical resource
+# taxonomy for DireBuilder room.resources tagging and engine forage
+# tables. Builders pick from this catalog when tagging rooms.
+#
+# Schema:
+#   resources:
+#     <slug>:
+#       display_name: human-readable name
+#       category: one of (general | wood | herb | healing_herb | food |
+#                         flora | mushroom | seashell | mineral_misc |
+#                         fauna_part | indoor_misc)
+#       skill_ranks: outdoorsmanship rank threshold (0 = no skill required)
+#       healing: true if listed on the Healing herbs page
+#       seasonal: list of seasons when findable, or [all]
+#       time_of_day: [all] | [day] | [night]
+#       terrain: list of terrain tags where it natively appears
+#                (post-2020 update, most non-water-restricted herbs are
+#                broadly findable; terrain here reflects original/canonical
+#                association as catalogued in Elanthipedia)
+#       indoor: true if findable indoors
+#       restrictions: free-text restriction note (climate, special zones)
+#       crafting_tags: subsystems this resource feeds
+#                (foraging | brewing | alchemy | engineering |
+#                 mechanical_lore | candlemaking | oil_pressing |
+#                 ranger_companion_food | thief | cleric | role_play |
+#                 fire_starter | currency)
+#       healed_part: body part (for healing herbs) or null
+#       heal_route: internal | external | internal/external | null
+#       heal_type: wounds | scars | null
+
+# ===========================================================================
+# TIER 0 — Universal materials, no skill required
+# ===========================================================================
+
+general:
+  branch:
+    display_name: branch
+    category: wood
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Random wood-type branch. Anyone can find regardless of skill."
+
+  bread_crumb:
+    display_name: bread crumb
+    category: indoor_misc
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  broken_shell:
+    display_name: broken shell
+    category: seashell
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  dust_bunny:
+    display_name: dust bunny
+    category: indoor_misc
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [indoor]
+    indoor: true
+    restrictions: "Indoors only"
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Burns in portable stove (short duration)."
+
+  tiny_fish_bone:
+    display_name: tiny fish bone
+    category: fauna_part
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal, freshwater_wetland]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, role_play]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Possibly used in Eluned's Scry enchantment."
+
+  grass:
+    display_name: grass
+    category: flora
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, engineering]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Can BRAID to learn Engineering up to skill 50."
+
+  leaf:
+    display_name: leaf
+    category: flora
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  rock:
+    display_name: rock
+    category: mineral_misc
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  root:
+    display_name: root
+    category: flora
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  shell:
+    display_name: shell
+    category: seashell
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  stick:
+    display_name: stick
+    category: wood
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Random wood-type stick."
+
+  twig:
+    display_name: twig
+    category: wood
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  wood_chip:
+    display_name: wood chip
+    category: wood
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Burns in portable stove (short duration)."
+
+  wood_splinter:
+    display_name: wood splinter
+    category: wood
+    skill_ranks: 0
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [indoor]
+    indoor: true
+    restrictions: "Indoors only"
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Burns in portable stove (short duration)."
+
+  berries:
+    display_name: berries
+    category: food
+    skill_ranks: 0
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+# ===========================================================================
+# TIER 10 — Trivial skill required
+# ===========================================================================
+
+tier_10:
+  acorn:
+    display_name: acorn
+    category: food
+    skill_ranks: 10
+    healing: false
+    seasonal: [autumn]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: "autumn only"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  cattail:
+    display_name: cattail
+    category: flora
+    skill_ranks: 10
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [day]
+    terrain: [freshwater_wetland]
+    indoor: false
+    restrictions: "daytime; not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  dirt:
+    display_name: dirt
+    category: mineral_misc
+    skill_ranks: 10
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, thief]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Special use for Thieves."
+
+  sea_shell:
+    display_name: sea shell
+    category: seashell
+    skill_ranks: 10
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Random color (white, black, etc)."
+
+  shoe_tack:
+    display_name: shoe tack
+    category: indoor_misc
+    skill_ranks: 10
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [indoor]
+    indoor: true
+    restrictions: "Indoors only"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  torch:
+    display_name: torch
+    category: indoor_misc
+    skill_ranks: 10
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+# ===========================================================================
+# TIER 20
+# ===========================================================================
+
+tier_20:
+  wild_corn:
+    display_name: wild corn
+    category: food
+    skill_ranks: 20
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, ranger_companion_food]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Food for Ranger companions."
+
+  grungy_feather:
+    display_name: grungy feather
+    category: fauna_part
+    skill_ranks: 20
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  jadice_flower:
+    display_name: Jadice flower
+    category: healing_herb
+    skill_ranks: 20
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [badland, desert, rainforest, rural_cultivated, urban_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: limb
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  limb:
+    display_name: limb
+    category: wood
+    skill_ranks: 20
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Random wood-type limb."
+
+  peat:
+    display_name: peat
+    category: mineral_misc
+    skill_ranks: 20
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [freshwater_wetland]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Burns very hot in portable stove."
+
+  rusty_nail:
+    display_name: rusty nail
+    category: indoor_misc
+    skill_ranks: 20
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  sap:
+    display_name: sap
+    category: flora
+    skill_ranks: 20
+    healing: false
+    seasonal: [summer]
+    time_of_day: [all]
+    terrain: [boreal_forest, deciduous_forest]
+    indoor: false
+    restrictions: "summer only"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  scallion:
+    display_name: scallion
+    category: food
+    skill_ranks: 20
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [day]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "daytime; not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  seaweed:
+    display_name: seaweed
+    category: flora
+    skill_ranks: 20
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal, marine]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  stem:
+    display_name: stem
+    category: flora
+    skill_ranks: 20
+    healing: false
+    seasonal: [spring]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "spring only"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+# ===========================================================================
+# TIER 30
+# ===========================================================================
+
+tier_30:
+  blue_flower:
+    display_name: blue flower
+    category: healing_herb
+    skill_ranks: 30
+    healing: true
+    seasonal: [winter]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "Winter"
+    crafting_tags: [foraging, alchemy]
+    healed_part: null
+    heal_route: internal
+    heal_type: null
+    notes: "Healing herbs page lists at rank 42; compendium lists at 30."
+
+  blueberries:
+    display_name: blueberries
+    category: food
+    skill_ranks: 30
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [boreal_forest, deciduous_forest]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  cherry:
+    display_name: cherry
+    category: food
+    skill_ranks: 30
+    healing: false
+    seasonal: [summer, autumn]
+    time_of_day: [all]
+    terrain: [deciduous_forest, rural_cultivated]
+    indoor: false
+    restrictions: "summer, autumn"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  clam_shell:
+    display_name: clam shell
+    category: seashell
+    skill_ranks: 30
+    healing: false
+    seasonal: [spring]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: "spring only"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  georin_grass:
+    display_name: Georin grass
+    category: healing_herb
+    skill_ranks: 30
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal, rural_cultivated, savannah]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: neck
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  red_flower:
+    display_name: red flower
+    category: healing_herb
+    skill_ranks: 30
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: null
+    heal_route: external
+    heal_type: null
+    notes: "Healing herbs page lists at rank 50; compendium lists at 30."
+
+  snail_shell:
+    display_name: snail shell
+    category: seashell
+    skill_ranks: 30
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  strawberry:
+    display_name: strawberry
+    category: food
+    skill_ranks: 30
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  taffelberries:
+    display_name: taffelberries
+    category: food
+    skill_ranks: 30
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  torn_cloth:
+    display_name: torn cloth
+    category: indoor_misc
+    skill_ranks: 30
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [indoor]
+    indoor: true
+    restrictions: "Indoors only"
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Burns in portable stove (short duration)."
+
+  tree_root:
+    display_name: tree root
+    category: flora
+    skill_ranks: 30
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, deciduous_forest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  vine:
+    display_name: vine
+    category: flora
+    skill_ranks: 30
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, mechanical_lore, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Can BRAID for Mechanical Lore. Burns in portable stove (short duration)."
+
+  weed:
+    display_name: weed
+    category: flora
+    skill_ranks: 30
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+# ===========================================================================
+# TIER 40
+# ===========================================================================
+
+tier_40:
+  fana_shell:
+    display_name: fana shell
+    category: seashell
+    skill_ranks: 40
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  jasmine_blossom:
+    display_name: jasmine blossom
+    category: flora
+    skill_ranks: 40
+    healing: false
+    seasonal: [summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "summer, autumn"
+    crafting_tags: [foraging, oil_pressing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Used to make jasmine oil."
+
+  nedoren_shell:
+    display_name: nedoren shell
+    category: seashell
+    skill_ranks: 40
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  shark_tooth:
+    display_name: shark tooth
+    category: fauna_part
+    skill_ranks: 40
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+# ===========================================================================
+# TIER 50–70
+# ===========================================================================
+
+tier_50_70:
+  aloe_leaves:
+    display_name: aloe leaves
+    category: healing_herb
+    skill_ranks: 50
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [badland, desert, scrub_and_thorn]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: skinnerve
+    heal_route: internal/external
+    heal_type: wounds
+    notes: ""
+
+  asarwuden_shell:
+    display_name: asarwuden shell
+    category: seashell
+    skill_ranks: 60
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  briarberries:
+    display_name: briarberries
+    category: food
+    skill_ranks: 60
+    healing: false
+    seasonal: [spring, summer]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "spring, summer"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  nemoih_root:
+    display_name: Nemoih root
+    category: healing_herb
+    skill_ranks: 60
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated, steppe, urban_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: head
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  phelim_shell:
+    display_name: Phelim shell
+    category: seashell
+    skill_ranks: 60
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  yelith_root:
+    display_name: Yelith root
+    category: healing_herb
+    skill_ranks: 60
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [chaparral, scrub_and_thorn, steppe]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: limb
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+  apple:
+    display_name: apple
+    category: food
+    skill_ranks: 65
+    healing: false
+    seasonal: [autumn, winter]
+    time_of_day: [all]
+    terrain: [deciduous_forest, rural_cultivated]
+    indoor: false
+    restrictions: "autumn, winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  clam:
+    display_name: clam
+    category: food
+    skill_ranks: 65
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  lemon:
+    display_name: lemon
+    category: food
+    skill_ranks: 65
+    healing: false
+    seasonal: [summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "summer, autumn"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  wild_carrot:
+    display_name: wild carrot
+    category: food
+    skill_ranks: 65
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  clover:
+    display_name: clover
+    category: flora
+    skill_ranks: 70
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  orange:
+    display_name: orange
+    category: food
+    skill_ranks: 70
+    healing: false
+    seasonal: [summer]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "summer only"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  rose:
+    display_name: rose
+    category: flora
+    skill_ranks: 70
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated, urban_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  seolarn_weed:
+    display_name: seolarn weed
+    category: healing_herb
+    skill_ranks: 70
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  toadstool:
+    display_name: toadstool
+    category: mushroom
+    skill_ranks: 70
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [boreal_forest, deciduous_forest]
+    indoor: false
+    restrictions: "very hard in winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+# ===========================================================================
+# TIER 80–100
+# ===========================================================================
+
+tier_80_100:
+  chamomile:
+    display_name: chamomile
+    category: flora
+    skill_ranks: 80
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  draconaeia_blossom:
+    display_name: draconaeia blossom
+    category: flora
+    skill_ranks: 80
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, oil_pressing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Used to make draconaeia oil / dracon crystals."
+
+  turnip:
+    display_name: turnip
+    category: food
+    skill_ranks: 80
+    healing: false
+    seasonal: [summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "summer, autumn"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  gooseberries:
+    display_name: gooseberries
+    category: food
+    skill_ranks: 80
+    healing: false
+    seasonal: [summer, autumn]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "summer, autumn"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  lavender:
+    display_name: lavender
+    category: flora
+    skill_ranks: 80
+    healing: false
+    seasonal: [summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "summer, autumn"
+    crafting_tags: [foraging, cleric]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Special use for Clerics."
+
+  moss:
+    display_name: moss
+    category: flora
+    skill_ranks: 80
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  almond:
+    display_name: almond
+    category: food
+    skill_ranks: 90
+    healing: false
+    seasonal: [autumn]
+    time_of_day: [all]
+    terrain: [deciduous_forest]
+    indoor: false
+    restrictions: "autumn only"
+    crafting_tags: [foraging, oil_pressing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Used to make almond oil."
+
+  nilos_grass:
+    display_name: Nilos grass
+    category: healing_herb
+    skill_ranks: 90
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, chaparral, coastal, deciduous_forest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: abdomen
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  old_button:
+    display_name: old button
+    category: indoor_misc
+    skill_ranks: 90
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Burns in portable stove (short duration)."
+
+  plovik_leaves:
+    display_name: Plovik leaves
+    category: healing_herb
+    skill_ranks: 90
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, freshwater_wetland, rainforest, savannah]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: chest
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  sage:
+    display_name: sage
+    category: flora
+    skill_ranks: 90
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  tea_leaf:
+    display_name: tea leaf
+    category: flora
+    skill_ranks: 90
+    healing: false
+    seasonal: [spring]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "spring only"
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  white_rose:
+    display_name: white rose
+    category: flora
+    skill_ranks: 90
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated, urban_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, brewing, oil_pressing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Used to make rose oil."
+
+  green_moss:
+    display_name: green moss
+    category: flora
+    skill_ranks: 100
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, deciduous_forest, freshwater_wetland]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  hulnik_grass:
+    display_name: Hulnik grass
+    category: healing_herb
+    skill_ranks: 100
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated, savannah, steppe, urban_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: back
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  riolur_leaves:
+    display_name: Riolur leaves
+    category: healing_herb
+    skill_ranks: 100
+    healing: true
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [boreal_forest, deciduous_forest, steppe]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: neck
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+# ===========================================================================
+# TIER 110–175
+# ===========================================================================
+
+tier_110_175:
+  briarberry_root:
+    display_name: briarberry root
+    category: flora
+    skill_ranks: 110
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  pig_root:
+    display_name: pig root
+    category: flora
+    skill_ranks: 110
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, oil_pressing, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Used to make pig root oil. Burns moderately in portable stove."
+
+  blocil_berries:
+    display_name: Blocil berries
+    category: healing_herb
+    skill_ranks: 120
+    healing: true
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [freshwater_wetland, rural_cultivated, urban_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: limb
+    heal_route: external
+    heal_type: scars
+    notes: ""
+
+  glaysker_flower:
+    display_name: glaysker flower
+    category: flora
+    skill_ranks: 120
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  red_rose:
+    display_name: red rose
+    category: flora
+    skill_ranks: 120
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [rural_cultivated, urban_cultivated]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging, brewing, oil_pressing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Used to make rose oil."
+
+  sufil_sap:
+    display_name: Sufil sap
+    category: healing_herb
+    skill_ranks: 120
+    healing: true
+    seasonal: [all]
+    time_of_day: [day]
+    terrain: [chaparral, coastal, scrub_and_thorn]
+    indoor: false
+    restrictions: "daytime"
+    crafting_tags: [foraging, alchemy]
+    healed_part: eye
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  mistletoe:
+    display_name: mistletoe
+    category: flora
+    skill_ranks: 150
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [deciduous_forest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, role_play]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Verby role-play device."
+
+  coffee_bean:
+    display_name: coffee bean
+    category: food
+    skill_ranks: 175
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated, rainforest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  eghmok_moss:
+    display_name: Eghmok moss
+    category: healing_herb
+    skill_ranks: 175
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, deciduous_forest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: head
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+  muljin_sap:
+    display_name: Muljin sap
+    category: healing_herb
+    skill_ranks: 175
+    healing: true
+    seasonal: [all]
+    time_of_day: [day]
+    terrain: [freshwater_wetland, rural_cultivated]
+    indoor: false
+    restrictions: "daytime; higher difficulty in winter"
+    crafting_tags: [foraging, alchemy]
+    healed_part: abdomen
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+  wild_orchid:
+    display_name: wild orchid
+    category: flora
+    skill_ranks: 175
+    healing: false
+    seasonal: [spring, summer]
+    time_of_day: [all]
+    terrain: [rainforest]
+    indoor: false
+    restrictions: "very hard in autumn-winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+# ===========================================================================
+# TIER 180–275
+# ===========================================================================
+
+tier_180_275:
+  ojhenik_root:
+    display_name: Ojhenik root
+    category: healing_herb
+    skill_ranks: 181
+    healing: true
+    seasonal: [all]
+    time_of_day: [day]
+    terrain: [chaparral, coastal, scrub_and_thorn]
+    indoor: false
+    restrictions: "daytime; higher difficulty in winter"
+    crafting_tags: [foraging, alchemy]
+    healed_part: chest
+    heal_route: internal
+    heal_type: scars
+    notes: ""
+
+  honey_comb:
+    display_name: honey comb
+    category: food
+    skill_ranks: 200
+    healing: false
+    seasonal: [all]
+    time_of_day: [day]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "daytime"
+    crafting_tags: [foraging, brewing, candlemaking]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  butterfly_orchid:
+    display_name: butterfly orchid
+    category: flora
+    skill_ranks: 240
+    healing: false
+    seasonal: [spring, summer]
+    time_of_day: [all]
+    terrain: [rainforest]
+    indoor: false
+    restrictions: "very hard in autumn-winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  hisan_flower:
+    display_name: Hisan flower
+    category: healing_herb
+    skill_ranks: 250
+    healing: true
+    seasonal: [spring, summer, autumn]
+    time_of_day: [day]
+    terrain: [freshwater_wetland, rural_cultivated]
+    indoor: false
+    restrictions: "daytime"
+    crafting_tags: [foraging, alchemy]
+    healed_part: skinnerve
+    heal_route: internal/external
+    heal_type: scars
+    notes: ""
+
+  dustanjis_flower:
+    display_name: dustanjis flower
+    category: flora
+    skill_ranks: 250
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  cebi_root:
+    display_name: Cebi root
+    category: healing_herb
+    skill_ranks: 275
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated, steppe, urban_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: skinnerve
+    heal_route: internal/external
+    heal_type: scars
+    notes: ""
+
+  genich_stem:
+    display_name: Genich stem
+    category: healing_herb
+    skill_ranks: 275
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [coastal, freshwater_wetland, marine, rainforest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: torso
+    heal_route: external
+    heal_type: scars
+    notes: ""
+
+  jadice_pollen:
+    display_name: Jadice pollen
+    category: healing_herb
+    skill_ranks: 275
+    healing: true
+    seasonal: [all]
+    time_of_day: [day]
+    terrain: [badland, desert, rainforest, rural_cultivated, urban_cultivated]
+    indoor: false
+    restrictions: "daytime"
+    crafting_tags: [foraging, alchemy]
+    healed_part: limb
+    heal_route: external
+    heal_type: scars
+    notes: ""
+
+  nuloe_stem:
+    display_name: Nuloe stem
+    category: healing_herb
+    skill_ranks: 275
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, chaparral, coastal, deciduous_forest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: limb
+    heal_route: internal
+    heal_type: scars
+    notes: ""
+
+  qun_pollen:
+    display_name: Qun pollen
+    category: healing_herb
+    skill_ranks: 275
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [desert, ice_cap, steppe]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: face
+    heal_route: external
+    heal_type: scars
+    notes: ""
+
+# ===========================================================================
+# TIER 300+ — Rare and exotic
+# ===========================================================================
+
+tier_300_plus:
+  coin:
+    display_name: coin
+    category: indoor_misc
+    skill_ranks: 300
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging, currency]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  belradi_moss:
+    display_name: Belradi moss
+    category: healing_herb
+    skill_ranks: 330
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [freshwater_wetland, subterranean]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: all
+    heal_route: internal
+    heal_type: scars
+    notes: ""
+
+  hulij_leaves:
+    display_name: Hulij leaves
+    category: healing_herb
+    skill_ranks: 335
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, freshwater_wetland, rainforest, steppe]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: face
+    heal_route: internal
+    heal_type: scars
+    notes: ""
+
+  junliar_stem:
+    display_name: Junliar stem
+    category: healing_herb
+    skill_ranks: 335
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, chaparral, coastal, deciduous_forest, highland_mountain]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: back
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+  dirdel_flower:
+    display_name: dirdel flower
+    category: flora
+    skill_ranks: 325
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [day]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "daytime; not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  red_fox_blossom:
+    display_name: red fox blossom
+    category: flora
+    skill_ranks: 325
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  red_lily:
+    display_name: red lily
+    category: flora
+    skill_ranks: 325
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  sniper_lily:
+    display_name: sniper lily
+    category: flora
+    skill_ranks: 325
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  viper_grass:
+    display_name: viper grass
+    category: flora
+    skill_ranks: 335
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, brewing]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  lujeakave_root:
+    display_name: Lujeakave root
+    category: healing_herb
+    skill_ranks: 335
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated, steppe, urban_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: skinnerve
+    heal_route: internal/external
+    heal_type: wounds
+    notes: ""
+
+  ithor_root:
+    display_name: Ithor root
+    category: healing_herb
+    skill_ranks: 335
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [deciduous_forest, highland_mountain]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: chest
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+  aevaes_leaves:
+    display_name: Aevaes leaves
+    category: healing_herb
+    skill_ranks: 335
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [boreal_forest, chaparral, coastal, deciduous_forest]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: eye
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+  purple_iris:
+    display_name: purple iris
+    category: flora
+    skill_ranks: 345
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  scorpion_flower:
+    display_name: scorpion flower
+    category: flora
+    skill_ranks: 345
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  valerian_blossom:
+    display_name: valerian blossom
+    category: flora
+    skill_ranks: 345
+    healing: false
+    seasonal: [spring, summer]
+    time_of_day: [day]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "daytime; spring, summer"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  dioica_sap:
+    display_name: Dioica sap
+    category: healing_herb
+    skill_ranks: 380
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [desert, ice_cap, steppe]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: all
+    heal_route: external
+    heal_type: scars
+    notes: ""
+
+  blue_iris:
+    display_name: blue iris
+    category: flora
+    skill_ranks: 425
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  beetroot:
+    display_name: beetroot
+    category: food
+    skill_ranks: 436
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  cocoon:
+    display_name: cocoon
+    category: fauna_part
+    skill_ranks: 475
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  white_carrot:
+    display_name: white carrot
+    category: food
+    skill_ranks: 475
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  boar_bristle_blade:
+    display_name: boar-bristle blade
+    category: fauna_part
+    skill_ranks: 475
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  wild_berries:
+    display_name: wild berries
+    category: food
+    skill_ranks: 600
+    healing: false
+    seasonal: [spring, summer, autumn]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: "Not winter"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  blue_larkspur:
+    display_name: blue larkspur
+    category: flora
+    skill_ranks: 625
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  wine_cork:
+    display_name: wine cork
+    category: indoor_misc
+    skill_ranks: 625
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor, indoor]
+    indoor: true
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  ashen_flamestalk:
+    display_name: ashen flamestalk
+    category: healing_herb
+    skill_ranks: 625
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [photophobic, subterranean]
+    indoor: false
+    restrictions: "subterranean / photophobic"
+    crafting_tags: [foraging, alchemy]
+    healed_part: all
+    heal_route: internal
+    heal_type: wounds
+    notes: ""
+
+  shining_clubmoss:
+    display_name: shining clubmoss
+    category: healing_herb
+    skill_ranks: 625
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [badland, deciduous_forest, freshwater_wetland, scrub_and_thorn]
+    indoor: false
+    restrictions: "higher difficulty in winter, lower in fall"
+    crafting_tags: [foraging, alchemy]
+    healed_part: all
+    heal_route: internal/external
+    heal_type: scars
+    notes: ""
+
+  red_clover:
+    display_name: red clover
+    category: flora
+    skill_ranks: 650
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  runestone_fragment:
+    display_name: runestone fragment
+    category: mineral_misc
+    skill_ranks: 650
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, role_play]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  flint:
+    display_name: flint
+    category: mineral_misc
+    skill_ranks: 650
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, fire_starter]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Can be used to light items."
+
+  marram_grass:
+    display_name: marram grass
+    category: healing_herb
+    skill_ranks: 650
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [badland, coastal, desert]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: all
+    heal_route: external
+    heal_type: wounds
+    notes: ""
+
+  white_larkspur:
+    display_name: white larkspur
+    category: flora
+    skill_ranks: 650
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  purple_larkspur:
+    display_name: purple larkspur
+    category: flora
+    skill_ranks: 750
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  white_clover:
+    display_name: white clover
+    category: flora
+    skill_ranks: 750
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  pink_larkspur:
+    display_name: pink larkspur
+    category: flora
+    skill_ranks: 750
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  marsh_woundwort:
+    display_name: marsh woundwort
+    category: healing_herb
+    skill_ranks: 750
+    healing: true
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [freshwater_wetland, highland_mountain]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, alchemy]
+    healed_part: all
+    heal_route: internal/external
+    heal_type: wounds
+    notes: ""
+
+  yellow_larkspur:
+    display_name: yellow larkspur
+    category: flora
+    skill_ranks: 1000
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [outdoor]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  grapefruit:
+    display_name: grapefruit
+    category: food
+    skill_ranks: 1000
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  four_leafed_clover:
+    display_name: four-leafed clover
+    category: flora
+    skill_ranks: 1000
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: ""
+    crafting_tags: [foraging, role_play]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: ""
+
+  pink_clover:
+    display_name: pink clover
+    category: flora
+    skill_ranks: 1500
+    healing: false
+    seasonal: [all]
+    time_of_day: [all]
+    terrain: [rural_cultivated]
+    indoor: false
+    restrictions: "agility 140+ required, very rare"
+    crafting_tags: [foraging]
+    healed_part: null
+    heal_route: null
+    heal_type: null
+    notes: "Randomly found at 1500+ ranks 140+ agility, can't target at 1720."

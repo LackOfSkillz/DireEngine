@@ -27,6 +27,8 @@
   const zoneContextScript = document.getElementById('direbuilder-zone-context-data');
   const zoneVocabScript = document.getElementById('direbuilder-zone-vocab-data');
   const roomTagVocabScript = document.getElementById('direbuilder-room-tag-vocab-data');
+  const terrainVocabScript = document.getElementById('direbuilder-terrain-vocab-data');
+  const forageCatalogSummaryScript = document.getElementById('direbuilder-forage-catalog-summary');
   const tooltipsScript = document.getElementById('direbuilder-tooltips-data');
   const roomTitle = document.getElementById('direbuilder-room-title');
   const roomEnvironment = document.getElementById('direbuilder-room-environment');
@@ -34,6 +36,21 @@
   const roomEmpty = document.getElementById('direbuilder-room-empty');
   const roomEditorContent = document.getElementById('direbuilder-room-editor-content');
   const identityFields = document.getElementById('direbuilder-identity-fields');
+  const terrainSummary = document.getElementById('direbuilder-terrain-summary');
+  const terrainPrimaryBody = document.getElementById('direbuilder-terrain-primary-body');
+  const terrainSecondaryBody = document.getElementById('direbuilder-terrain-secondary-body');
+  const terrainPreview = document.getElementById('direbuilder-terrain-preview');
+  const zoneScoreRoot = document.querySelector('[data-direbuilder-zone-score]');
+  const zoneScoreComposite = document.querySelector('[data-zone-score-composite]');
+  const zoneScoreNumber = document.querySelector('[data-zone-score-number]');
+  const zoneScoreTier = document.querySelector('[data-zone-score-tier]');
+  const zoneScoreCompleteness = document.querySelector('[data-zone-score-completeness]');
+  const zoneScoreDepth = document.querySelector('[data-zone-score-depth]');
+  const zoneScoreEngagement = document.querySelector('[data-zone-score-engagement]');
+  const zoneScoreToggle = document.querySelector('[data-zone-score-toggle]');
+  const zoneScoreStale = document.querySelector('[data-zone-score-stale]');
+  const zoneScoreError = document.querySelector('[data-zone-score-error]');
+  const zoneScorePanel = document.querySelector('[data-zone-score-panel]');
   const manualDescription = document.getElementById('direbuilder-manual-description');
   const descriptionTelemetry = document.getElementById('direbuilder-description-telemetry');
   const tagsList = document.getElementById('direbuilder-tags-list');
@@ -57,6 +74,8 @@
   const serverZoneContext = zoneContextScript ? JSON.parse(zoneContextScript.textContent || 'null') : null;
   const zoneVocab = zoneVocabScript ? JSON.parse(zoneVocabScript.textContent || '{}') : {};
   const roomTagVocab = roomTagVocabScript ? JSON.parse(roomTagVocabScript.textContent || '{}') : {};
+  const terrainVocab = terrainVocabScript ? JSON.parse(terrainVocabScript.textContent || '{}') : {};
+  const forageCatalogSummary = forageCatalogSummaryScript ? JSON.parse(forageCatalogSummaryScript.textContent || '{}') : {};
   const tooltips = tooltipsScript ? JSON.parse(tooltipsScript.textContent || '{}') : {};
 
   const EXIT_DIRECTION_OPTIONS = [
@@ -302,6 +321,10 @@
       nextRoom.short_desc = String(nextRoom.short_desc || '');
       nextRoom.desc = String(nextRoom.desc || '');
       nextRoom.environment = String(nextRoom.environment || 'city').trim().toLowerCase();
+      nextRoom.terrain = ensureObject(nextRoom.terrain);
+      nextRoom.terrain.primary = String(nextRoom.terrain.primary || '').trim();
+      nextRoom.terrain.secondary = String(nextRoom.terrain.secondary || '').trim();
+      nextRoom.quest_hooks = normalizeList(nextRoom.quest_hooks);
       nextRoom.tags = ensureObject(nextRoom.tags);
       nextRoom.tags.custom = normalizeList(nextRoom.tags.custom);
       nextRoom.tags.atmosphere = ensureObject(nextRoom.tags.atmosphere);
@@ -343,6 +366,11 @@
     generationPromise: null,
     generationRoomId: null,
     lastGenerationTelemetryByRoom: {},
+    zoneScore: null,
+    zoneScoreError: null,
+    zoneScoreFetchPromise: null,
+    zoneScorePanelOpen: false,
+    zoneScoreShowAllRooms: false,
   };
 
   function getRoomsById() {
@@ -351,6 +379,11 @@
 
   function getCurrentRoom(roomId = state.currentRoomId) {
     return roomId ? getRoomsById().get(String(roomId)) || null : null;
+  }
+
+  function selectRoom(roomId) {
+    renderRoomEditor(roomId || null);
+    mountMap();
   }
 
   function computeZoneDiff(original, working) {
@@ -431,6 +464,9 @@
     }
     zoneSelect?.closest('.direbuilder-zone-switcher')?.classList.toggle('is-dirty', dirty);
     zoneSelect?.closest('.direbuilder-zone-switcher')?.classList.toggle('is-locked', isOperationInProgress());
+    if (zoneScoreStale) {
+      zoneScoreStale.hidden = !dirty;
+    }
   }
 
   function getGenerationContext() {
@@ -718,6 +754,10 @@
     return `/direbuilder/api/zone/${encodeURIComponent(zoneId)}/`;
   }
 
+  function buildZoneScoreUrl(zoneId) {
+    return `/direbuilder/api/zone/${encodeURIComponent(zoneId)}/score/`;
+  }
+
   function buildHotLoadUrl(zoneId) {
     return `/direbuilder/api/zone/${encodeURIComponent(zoneId)}/hot-load/`;
   }
@@ -743,6 +783,254 @@
       saveErrorKicker.textContent = 'Save Error';
     }
     saveErrorMessage.textContent = '';
+  }
+
+  function formatCountPair(entry) {
+    const satisfied = Number(entry?.satisfied || 0);
+    const total = Number(entry?.total || 0);
+    const displaySatisfied = Number.isInteger(satisfied) ? String(satisfied) : satisfied.toFixed(1);
+    const displayTotal = Number.isInteger(total) ? String(total) : total.toFixed(1);
+    return `${displaySatisfied}/${displayTotal}`;
+  }
+
+  function formatPercentFromRatio(value) {
+    return `${Math.round(Number(value || 0) * 100)}%`;
+  }
+
+  function getZoneScoreToneKey(score) {
+    const numericScore = Number(score);
+    if (!Number.isFinite(numericScore)) {
+      return '';
+    }
+    if (numericScore >= 80) {
+      return 'top';
+    }
+    if (numericScore >= 60) {
+      return 'mid';
+    }
+    return 'low';
+  }
+
+  function setZoneScoreTone(score) {
+    if (!zoneScoreComposite) {
+      return;
+    }
+    zoneScoreComposite.dataset.zoneScoreTier = getZoneScoreToneKey(score);
+  }
+
+  function positionZoneScorePanel() {
+    if (!zoneScorePanel || zoneScorePanel.hidden || !zoneScoreRoot) {
+      return;
+    }
+    const anchorRect = zoneScoreRoot.getBoundingClientRect();
+    const preferredWidth = Math.min(Math.max(anchorRect.width + 32, 560), 760, window.innerWidth - 32);
+    zoneScorePanel.style.width = `${preferredWidth}px`;
+    const panelRect = zoneScorePanel.getBoundingClientRect();
+    let left = Math.min(anchorRect.right - panelRect.width, window.innerWidth - panelRect.width - 16);
+    left = Math.max(16, left);
+    const top = Math.max(16, anchorRect.bottom + 10);
+    zoneScorePanel.style.left = `${left}px`;
+    zoneScorePanel.style.top = `${top}px`;
+    zoneScorePanel.style.maxHeight = `${Math.max(200, window.innerHeight - top - 16)}px`;
+  }
+
+  function closeZoneScorePanel(options = {}) {
+    if (!state.zoneScorePanelOpen) {
+      return;
+    }
+    state.zoneScorePanelOpen = false;
+    renderZoneScorePanel();
+    if (options.returnFocus) {
+      zoneScoreToggle?.focus();
+    }
+  }
+
+  function renderZoneScorePanel() {
+    if (!zoneScorePanel) {
+      return;
+    }
+    const isExpanded = Boolean(state.zoneScorePanelOpen);
+    zoneScorePanel.hidden = !isExpanded;
+    zoneScoreToggle?.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+    zoneScoreRoot?.classList.toggle('is-open', isExpanded);
+    if (!isExpanded) {
+      return;
+    }
+
+    const score = state.zoneScore;
+    if (!score) {
+      zoneScorePanel.innerHTML = '<div class="direbuilder-note">Zone score is unavailable until the saved zone can be scored successfully.</div>';
+      return;
+    }
+
+    const completeness = score.completeness || {};
+    const depth = score.depth || {};
+    const engagement = score.engagement || {};
+    const completenessBreakdown = completeness.breakdown || {};
+    const depthBreakdown = depth.breakdown || {};
+    const engagementBreakdown = engagement.breakdown || {};
+    const roomScores = Array.isArray(score.room_scores) ? score.room_scores : [];
+    const attentionRows = state.zoneScoreShowAllRooms ? roomScores : (Array.isArray(score.rooms_needing_attention) ? score.rooms_needing_attention : []);
+    const toggleLabel = state.zoneScoreShowAllRooms ? 'Show fewer rooms' : 'Show all rooms';
+
+    zoneScorePanel.innerHTML = `
+      <div class="direbuilder-zone-score-panel-content">
+        <div class="direbuilder-zone-score-section">
+          <h3>Completeness - <span>${escapeHtml(String(completeness.score ?? '—'))}</span></h3>
+          <ul class="direbuilder-zone-score-breakdown">
+            <li>Zone fields: ${escapeHtml(formatCountPair(completenessBreakdown.zone_fields))}</li>
+            <li>Voice notes bonus: ${escapeHtml(formatCountPair(completenessBreakdown.voice_notes_bonus))}</li>
+            <li>Room names: ${escapeHtml(formatCountPair(completenessBreakdown.room_names))}</li>
+            <li>Room environments: ${escapeHtml(formatCountPair(completenessBreakdown.room_environments))}</li>
+            <li>Terrain (primary): ${escapeHtml(formatCountPair(completenessBreakdown.room_terrain_primary))}</li>
+            <li>Room descriptions: ${escapeHtml(formatCountPair(completenessBreakdown.room_descriptions))}</li>
+            <li>Room identity tags: ${escapeHtml(formatCountPair(completenessBreakdown.room_identity_tags))}</li>
+            <li>Exit validity: ${escapeHtml(formatCountPair(completenessBreakdown.exit_validity))}</li>
+            <li>NPC declarations: ${escapeHtml(formatCountPair(completenessBreakdown.npc_declarations))}</li>
+          </ul>
+        </div>
+        <div class="direbuilder-zone-score-section">
+          <h3>Depth - <span>${escapeHtml(String(depth.score ?? '—'))}</span></h3>
+          <ul class="direbuilder-zone-score-breakdown">
+            <li>Atmosphere coverage (avg): ${escapeHtml(formatPercentFromRatio(depthBreakdown.atmosphere_avg))}</li>
+            <li>Tag density (avg): ${escapeHtml(formatPercentFromRatio(depthBreakdown.tag_density_avg))}</li>
+            <li>Generated descriptions: ${escapeHtml(formatPercentFromRatio(depthBreakdown.generated_pct))}</li>
+            <li>Stateful descriptions: ${escapeHtml(formatPercentFromRatio(depthBreakdown.stateful_pct))}</li>
+          </ul>
+        </div>
+        <div class="direbuilder-zone-score-section">
+          <h3>Engagement - <span>${escapeHtml(String(engagement.score ?? '—'))}</span></h3>
+          <ul class="direbuilder-zone-score-breakdown">
+            <li>Rooms with NPCs: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.npcs_pct))}</li>
+            <li>Rooms with items: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.items_pct))}</li>
+            <li>Rooms with details: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.details_pct))}</li>
+            <li>Ambient messages: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.ambient_pct))}</li>
+            <li>Stateful: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.stateful_pct))}</li>
+            <li>Shops: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.shops_pct))}</li>
+            <li>Hostile: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.hostile_pct))}</li>
+            <li>Resource terrain: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.resources_pct))}</li>
+            <li>Healing herbs: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.healing_pct))}</li>
+            <li>Quest hooks: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.quests_pct))}</li>
+            <li>Engagement coverage: ${escapeHtml(formatPercentFromRatio(engagementBreakdown.any_engagement_pct))} (target ${escapeHtml(formatPercentFromRatio(engagementBreakdown.target))})</li>
+          </ul>
+        </div>
+        <div class="direbuilder-zone-score-section">
+          <h3>${state.zoneScoreShowAllRooms ? 'All Rooms' : 'Needs Attention'}</h3>
+          <ul class="direbuilder-zone-score-attention">
+            ${attentionRows.map((entry) => `
+              <li>
+                <button type="button" class="direbuilder-zone-score-room" data-zone-score-room-id="${escapeHtml(String(entry.room_id || ''))}">
+                  <span class="room-name">${escapeHtml(String(entry.name || entry.room_id || 'Unnamed room'))}</span>
+                  <span class="room-score">${escapeHtml(String(entry.composite ?? '—'))} · ${escapeHtml(String(entry.tier || ''))}</span>
+                  <span class="room-gap">${escapeHtml(String(entry.biggest_gap || 'needs polish'))}</span>
+                </button>
+              </li>
+            `).join('')}
+          </ul>
+          <button class="direbuilder-zone-score-show-all" data-zone-score-show-all type="button">${toggleLabel}</button>
+        </div>
+      </div>
+    `;
+
+    zoneScorePanel.querySelector('[data-zone-score-show-all]')?.addEventListener('click', function () {
+      state.zoneScoreShowAllRooms = !state.zoneScoreShowAllRooms;
+      renderZoneScorePanel();
+    });
+    zoneScorePanel.querySelectorAll('[data-zone-score-room-id]').forEach((button) => {
+      button.addEventListener('click', function () {
+        selectRoom(button.dataset.zoneScoreRoomId || null);
+      });
+    });
+    positionZoneScorePanel();
+  }
+
+  function renderZoneScore() {
+    const score = state.zoneScore;
+    const hasError = Boolean(state.zoneScoreError);
+    zoneScoreRoot?.classList.toggle('is-error', hasError);
+    if (zoneScoreError) {
+      zoneScoreError.hidden = !hasError;
+    }
+    if (!score) {
+      if (zoneScoreNumber) {
+        zoneScoreNumber.textContent = 'ZoneScore: —';
+      }
+      if (zoneScoreTier) {
+        zoneScoreTier.textContent = hasError ? 'Unavailable' : 'Loading';
+      }
+      if (zoneScoreCompleteness) {
+        zoneScoreCompleteness.textContent = '—';
+      }
+      if (zoneScoreDepth) {
+        zoneScoreDepth.textContent = '—';
+      }
+      if (zoneScoreEngagement) {
+        zoneScoreEngagement.textContent = '—';
+      }
+      setZoneScoreTone(null);
+      renderZoneScorePanel();
+      return;
+    }
+    if (zoneScoreNumber) {
+      zoneScoreNumber.textContent = `ZoneScore: ${String(score.composite ?? '—')}`;
+    }
+    if (zoneScoreTier) {
+      zoneScoreTier.textContent = String(score.tier || 'Unrated');
+    }
+    if (zoneScoreCompleteness) {
+      zoneScoreCompleteness.textContent = String(score.completeness?.score ?? '—');
+    }
+    if (zoneScoreDepth) {
+      zoneScoreDepth.textContent = String(score.depth?.score ?? '—');
+    }
+    if (zoneScoreEngagement) {
+      zoneScoreEngagement.textContent = String(score.engagement?.score ?? '—');
+    }
+    setZoneScoreTone(score.composite);
+    renderZoneScorePanel();
+  }
+
+  async function fetchZoneScore(options = {}) {
+    const zoneId = String(workingZone?.zone_id || page.dataset.currentZoneId || '').trim();
+    if (!zoneId) {
+      state.zoneScore = null;
+      state.zoneScoreError = 'Zone score unavailable.';
+      renderZoneScore();
+      return null;
+    }
+    if (state.zoneScoreFetchPromise && !options.force) {
+      return state.zoneScoreFetchPromise;
+    }
+    if (!options.preserveRoomListMode) {
+      state.zoneScoreShowAllRooms = false;
+    }
+    state.zoneScoreError = null;
+    if (!state.zoneScore) {
+      renderZoneScore();
+    }
+    state.zoneScoreFetchPromise = fetchWithTimeout(buildZoneScoreUrl(zoneId), {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    }, 15000).then(async (response) => {
+      const payload = await readJsonSafely(response);
+      if (!response.ok) {
+        throw new Error(String(payload?.error || 'Zone score failed unexpectedly.'));
+      }
+      state.zoneScore = payload;
+      state.zoneScoreError = null;
+      renderZoneScore();
+      return payload;
+    }).catch((error) => {
+      state.zoneScore = null;
+      state.zoneScoreError = String(error?.message || 'Zone score failed unexpectedly.');
+      renderZoneScore();
+      return null;
+    }).finally(() => {
+      state.zoneScoreFetchPromise = null;
+    });
+    return state.zoneScoreFetchPromise;
   }
 
   function getGenerationFailureMessage(payload, fallbackCode = 'internal_error') {
@@ -907,6 +1195,7 @@
       state.lastSaveError = null;
       clearSaveErrorBanner();
       const canonicalZone = syncCanonicalZone(savedZone);
+      fetchZoneScore({ preserveRoomListMode: true }).catch(() => {});
       if (!options.silentSuccessToast) {
         showToast('Zone saved.');
       }
@@ -964,6 +1253,7 @@
       state.lastSaveError = null;
       state.discardState = 'succeeded';
       state.lastDiscardError = null;
+      fetchZoneScore({ preserveRoomListMode: true }).catch(() => {});
       if (!options.silentSuccessToast) {
         showToast('Unsaved changes discarded.');
       }
@@ -1114,6 +1404,10 @@
     return normalizeList(roomTagVocab?.room?.[key]);
   }
 
+  function getTerrainVocabOptions(key) {
+    return normalizeList(terrainVocab?.[key]);
+  }
+
   function previewBaseForRoom(room) {
     if (!room) {
       return 'Select a room on the map to inspect its description.';
@@ -1184,6 +1478,72 @@
         updateDirtyIndicator();
       });
     });
+  }
+
+  function renderTerrainPreview(room) {
+    if (!terrainPreview) {
+      return;
+    }
+    const primary = String(room?.terrain?.primary || '').trim();
+    const secondary = String(room?.terrain?.secondary || '').trim();
+    const previewData = (secondary && forageCatalogSummary?.[secondary]) || (!secondary && primary ? forageCatalogSummary?.[primary] : null);
+    if (!previewData) {
+      terrainPreview.textContent = '';
+      terrainPreview.hidden = true;
+      return;
+    }
+    const items = normalizeList(previewData.items).slice(0, 3);
+    terrainPreview.textContent = `${Number(previewData.total || 0)} resources available · ${Number(previewData.healing || 0)} healing${items.length ? `: ${items.join(', ')}` : ''}`;
+    terrainPreview.hidden = false;
+  }
+
+  function renderTerrain(room) {
+    if (!terrainPrimaryBody || !terrainSecondaryBody) {
+      return;
+    }
+    const terrain = ensureObject(room?.terrain);
+    room.terrain = terrain;
+    terrain.primary = String(terrain.primary || '').trim();
+    terrain.secondary = String(terrain.secondary || '').trim();
+
+    if (terrainSummary) {
+      terrainSummary.textContent = summarizeValues([terrain.primary, terrain.secondary], '(not set)');
+    }
+
+    renderChipEditor(terrainPrimaryBody, {
+      values: terrain.primary,
+      availableOptions: getTerrainVocabOptions('primary'),
+      allowMultiple: false,
+      onChange(nextValues) {
+        const currentRoom = getCurrentRoom();
+        if (!currentRoom) {
+          return;
+        }
+        currentRoom.terrain = ensureObject(currentRoom.terrain);
+        currentRoom.terrain.primary = nextValues[0] || '';
+        renderTerrain(currentRoom);
+        updateDirtyIndicator();
+      },
+    });
+
+    renderChipEditor(terrainSecondaryBody, {
+      values: terrain.secondary,
+      availableOptions: getTerrainVocabOptions('secondary'),
+      allowMultiple: false,
+      onChange(nextValues) {
+        const currentRoom = getCurrentRoom();
+        if (!currentRoom) {
+          return;
+        }
+        currentRoom.terrain = ensureObject(currentRoom.terrain);
+        currentRoom.terrain.secondary = nextValues[0] || '';
+        renderTerrain(currentRoom);
+        updateDirtyIndicator();
+      },
+    });
+
+    renderTerrainPreview(room);
+    attachTooltipIconsIn(page);
   }
 
   function renderTags(room) {
@@ -1616,6 +1976,7 @@
     }
 
     renderIdentity(room);
+    renderTerrain(room);
     renderTags(room);
     renderStateful(room);
     renderConnections(room);
@@ -1847,11 +2208,17 @@
         if (isGeneratingDescription()) {
           return;
         }
-        renderRoomEditor(selectedRoomId || null);
+        selectRoom(selectedRoomId || null);
       },
       onRoomActivate: () => false,
     });
   }
+
+  zoneScoreToggle?.addEventListener('click', function (event) {
+    event.preventDefault();
+    state.zoneScorePanelOpen = !state.zoneScorePanelOpen;
+    renderZoneScorePanel();
+  });
 
   tabButtons.forEach((button) => {
     button.addEventListener('click', function () {
@@ -1982,6 +2349,9 @@
   });
 
   document.addEventListener('click', function (event) {
+    if (state.zoneScorePanelOpen && !zoneScorePanel?.contains(event.target) && !zoneScoreToggle?.contains(event.target)) {
+      closeZoneScorePanel();
+    }
     if (!overflowMenu || !overflowTrigger || overflowMenu.hidden) {
       return;
     }
@@ -2000,6 +2370,11 @@
   });
 
   document.addEventListener('keydown', function (event) {
+    if (state.zoneScorePanelOpen && event.key === 'Escape') {
+      event.preventDefault();
+      closeZoneScorePanel({ returnFocus: true });
+      return;
+    }
     if (modalOverlay?.hidden) {
       if (event.key === 'Escape') {
         closeOverflow();
@@ -2019,6 +2394,18 @@
     modalOverlay.hidden = true;
     modalOverlay.style.display = 'none';
   }
+
+  window.addEventListener('resize', () => {
+    if (state.zoneScorePanelOpen) {
+      positionZoneScorePanel();
+    }
+  });
+
+  document.addEventListener('scroll', () => {
+    if (state.zoneScorePanelOpen) {
+      positionZoneScorePanel();
+    }
+  }, true);
 
   window.DireBuilderPageApi = {
     attemptZoneSwitch,
@@ -2050,6 +2437,9 @@
     getDirtyState() {
       return isDirty();
     },
+    getZoneScore() {
+      return state.zoneScore;
+    },
   };
 
   setTab('identity');
@@ -2059,4 +2449,5 @@
   updateDescriptionGenerationUi(getCurrentRoom());
   updateDirtyIndicator();
   mountMap();
+  fetchZoneScore().catch(() => {});
 }());

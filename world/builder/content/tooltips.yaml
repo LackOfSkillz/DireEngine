@@ -51,6 +51,15 @@
     - "Short, plain sentences with market detail"
   ai_note: "AI reads these notes as tone guidance, especially when several valid description choices would all fit the room data."
 
+"zone_score.header":
+  purpose: "DireEngine ZoneScore measures how complete, atmospheric, and engaging your zone is. Higher scores mean a richer player experience."
+  examples:
+    - "Composite: weighted average of three sub-scores"
+    - "Completeness (40%): are required fields filled?"
+    - "Depth (30%): is each room atmospherically rich?"
+    - "Engagement (30%): is there enough for players to do?"
+  ai_note: "Score updates after each successful save. The bottom 5-10 rooms are surfaced as 'needs attention' to guide where to spend effort next."
+
 "room.name":
   purpose: "Name is the room's player-facing title, so it should tell people what place they have entered in a clear, flavorful way."
   examples:
@@ -262,3 +271,19 @@
     - "chain_greaves"
     - "market_lantern"
     - "2x grain_sack"
+
+"room.terrain_primary":
+  purpose: "Is this room indoors or outdoors? Drives which broad category of foragable resources are available to players using forage and gather."
+  examples:
+    - "outdoor — any non-water non-restricted outdoor space"
+    - "indoor — building interiors, taverns, shops, halls"
+  ai_note: "Currently informational only. Future engine integration will use this to populate room-specific forage tables."
+
+"room.terrain_secondary":
+  purpose: "What specific terrain type does this room represent? Drives terrain-specific resources available to players using forage and gather. Optional — leave blank for generic outdoor or indoor rooms."
+  examples:
+    - "coastal — 21 resources, 9 healing herbs"
+    - "boreal_forest — 13 resources, 8 healing herbs"
+    - "subterranean — rare healing herbs only (Belradi moss, ashen flamestalk)"
+    - "urban_cultivated — 10 resources, 7 healing herbs"
+  ai_note: "Currently informational only. Future engine integration will populate forage tables based on this terrain."

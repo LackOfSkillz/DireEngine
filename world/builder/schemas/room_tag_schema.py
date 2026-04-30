@@ -124,3 +124,7 @@ def normalize_room_tags(data: object) -> dict[str, object]:
         if value is not None and value not in vocab[field]:
             raise ValueError(f"room_tags.{field} must be one of: {', '.join(vocab[field])}")
     return normalized
+
+
+def normalize_room_quest_hooks(data: object) -> list[str]:
+    return _normalize_string_list(data, "room.quest_hooks")

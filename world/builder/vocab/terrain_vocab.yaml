@@ -1,0 +1,23 @@
+primary:
+  - outdoor
+  - indoor
+
+secondary:
+  - boreal_forest
+  - chaparral
+  - coastal
+  - deciduous_forest
+  - desert
+  - badland
+  - freshwater_wetland
+  - highland_mountain
+  - ice_cap
+  - marine
+  - photophobic
+  - rainforest
+  - rural_cultivated
+  - savannah
+  - scrub_and_thorn
+  - steppe
+  - subterranean
+  - urban_cultivated
