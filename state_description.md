@@ -28,7 +28,7 @@ The state vocabulary is fixed in `world/builder/prompting/room_description_promp
 
 ```python
 _STATE_GROUP_VOCABULARY = {
-    "time": ("morning", "midday", "evening", "night"),
+    "time": ("night", "morning", "afternoon", "evening"),
     "season": ("spring", "summer", "autumn", "winter"),
     "weather": ("rain", "snow", "fog"),
     "invasion": ("invasion",),
@@ -64,7 +64,7 @@ def determine_applicable_states(...):
 For an urban exterior, that usually becomes:
 
 ```text
-spring, summer, autumn, winter, morning, midday, evening, night, rain, snow, fog, invasion
+spring, summer, autumn, winter, night, morning, afternoon, evening, rain, snow, fog, invasion
 ```
 
 ## Step 3: Inject Those States Into the Prompt
@@ -156,7 +156,7 @@ That only became reliable once we did all of the following together:
 Real outputs now look like this:
 
 ```text
-A narrow alley runs between rough stone walls, its packed dirt floor worn smooth by steady foot traffic$state(rain,  and slick with muddy runoff)$state(snow,  with a thin layer of trampled slush)$state(fog,  the walls fading into grey murk). The heavy smell of river water and fish carries from the nearby docks$state(morning,  mixed with the scent of cook-fires as workers break their fast)$state(midday,  thick in the still air as laborers pass through on their way to and from the wharves)$state(evening,  mingling with the smell of cheap stew from nearby tenements)$state(night,  hanging heavy in the quiet darkness)...
+A narrow alley runs between rough stone walls, its packed dirt floor worn smooth by steady foot traffic$state(rain,  and slick with muddy runoff)$state(snow,  with a thin layer of trampled slush)$state(fog,  the walls fading into grey murk). The heavy smell of river water and fish carries from the nearby docks$state(morning,  mixed with the scent of cook-fires as workers break their fast)$state(afternoon,  thick in the still air as laborers pass through on their way to and from the wharves)$state(evening,  mingling with the smell of cheap stew from nearby tenements)$state(night,  hanging heavy in the quiet darkness)...
 ```
 
 That example comes from `exports/mt505_state_renders.md` and shows the model producing one base description with multiple optional fragments layered into it.

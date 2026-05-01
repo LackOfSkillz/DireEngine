@@ -40,7 +40,7 @@ Two exits = passage. Three or more = intersection or crossing. One exit = dead e
 
 STATE VOCABULARY
 Only use these state names when writing stateful fragments:
-- Time-of-day: morning, midday, evening, night
+- Time-of-day: night, morning, afternoon, evening
 - Seasons: spring, summer, autumn, winter
 - Weather: rain, snow, fog
 - Events: invasion
@@ -58,12 +58,12 @@ If the room-specific input lists one or more applicable state groups, include at
 
 State groups:
 - season: spring, summer, autumn, winter
-- time: morning, midday, evening, night
+- time: night, morning, afternoon, evening
 - weather: rain, snow, fog
 - invasion: invasion
 
 Complete example (urban street, applicable state groups: season, time, weather):
-"Stone Lane ends here against close-packed buildings, its narrow cobbles worn smooth by steady traffic. Light$state(morning, spreads gold from the east)$state(evening, fades behind the rooftops)$state(night, leaves the lane in dim outline). Underfoot, the stones$state(rain, glisten with rainwater)$state(snow, carry a fresh white covering)$state(winter, bear patches of frost where the buildings shadow them)."
+"Stone Lane ends here against close-packed buildings, its narrow cobbles worn smooth by steady traffic. Light$state(morning, spreads gold from the east)$state(afternoon, falls hard across the open lane)$state(evening, fades behind the rooftops)$state(night, leaves the lane in dim outline). Underfoot, the stones$state(rain, glisten with rainwater)$state(snow, carry a fresh white covering)$state(winter, bear patches of frost where the buildings shadow them)."
 
 In that example, the lane, buildings, and cobbles are permanent facts that remain outside fragments. The fragments add only optional atmospheric variation.
 

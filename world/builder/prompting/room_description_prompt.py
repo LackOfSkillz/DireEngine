@@ -12,7 +12,7 @@ _STATE_MARKUP_PROMPT_PATH = Path(__file__).resolve().parent.parent / "templates"
 PROMPT_VERSION = "v8_diremud_required_stateful_fragments"
 
 _STATE_GROUP_VOCABULARY = {
-    "time": ("morning", "midday", "evening", "night"),
+    "time": ("night", "morning", "afternoon", "evening"),
     "season": ("spring", "summer", "autumn", "winter"),
     "weather": ("rain", "snow", "fog"),
     "invasion": ("invasion",),
@@ -40,10 +40,38 @@ _INTERIOR_FUNCTIONS = {
 _INTERIOR_FEATURES = {"hearth", "altar", "pulpit", "throne", "workbench"}
 _UNDERGROUND_STRUCTURES = {"cave-passage", "cave-chamber", "cellar", "crypt", "dungeon", "tunnel", "mine"}
 _BUILDING_INTERIOR_ENVIRONMENTS = {"interior", "temple"}
-_BUILDING_INTERIOR_STRUCTURES = {"hall", "chamber", "corridor", "workshop", "shop-interior", "tavern-interior", "sanctuary"}
+_BUILDING_INTERIOR_STRUCTURES = {
+    "building-interior",
+    "hall",
+    "hallway",
+    "chamber",
+    "corridor",
+    "workshop",
+    "shop-interior",
+    "tavern-interior",
+    "sanctuary",
+    "entrance",
+}
 _THRESHOLD_STRUCTURES = {"cave-entrance", "doorway", "gateway", "threshold"}
-_URBAN_EXTERIOR_ENVIRONMENTS = {"urban", "street", "plaza"}
-_URBAN_EXTERIOR_STRUCTURES = {"street", "avenue", "square", "plaza", "lane", "alley", "bridge-span", "terrace", "green", "road", "crossroads", "threshold-outdoor"}
+_URBAN_EXTERIOR_ENVIRONMENTS = {"urban", "street", "plaza", "city"}
+_URBAN_EXTERIOR_STRUCTURES = {
+    "street",
+    "avenue",
+    "square",
+    "intersection",
+    "plaza",
+    "lane",
+    "alley",
+    "courtyard",
+    "bridge",
+    "bridge-span",
+    "dock",
+    "terrace",
+    "green",
+    "road",
+    "crossroads",
+    "threshold-outdoor",
+}
 _WILDERNESS_ENVIRONMENTS = {"wilderness", "forest", "plain", "mountain", "coast", "desert"}
 _WILDERNESS_STRUCTURES = {"path", "trail", "switchback", "crossroads-rural"}
 

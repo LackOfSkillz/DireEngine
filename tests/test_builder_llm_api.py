@@ -13,6 +13,7 @@ django.setup()
 from django.test import RequestFactory, SimpleTestCase
 
 from web.api.llm_api import llm_generate_room_description, llm_health, room_generate_description
+from world.builder.prompting.room_description_prompt import PROMPT_VERSION
 from world.builder.prompting.room_description_generation import RoomDescriptionGenerationResult
 from world.builder.services.llm_client import BuilderLLMConfig, LLMError
 
@@ -232,12 +233,14 @@ class BuilderLLMApiTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         payload = json.loads(response.content)
-        self.assertEqual(payload["prompt_version"], "v3_grounded_rich")
-        self.assertIn("=== ZONE CONTEXT ===", payload["prompt"])
-        self.assertIn("You are in crossingV2.", payload["prompt"])
-        self.assertIn("Setting type: city.", payload["prompt"])
-        self.assertIn("=== VOICE ===", payload["prompt"])
-        self.assertIn("Gritty, pragmatic. Present tense.", payload["prompt"])
+        self.assertEqual(payload["prompt_version"], PROMPT_VERSION)
+        self.assertIn("Write one player-facing DireMud room description.", payload["prompt"])
+        self.assertIn("Use only the known facts below.", payload["prompt"])
+        self.assertIn("The broader environment is city.", payload["prompt"])
+        self.assertIn("The era feel is late-medieval.", payload["prompt"])
+        self.assertIn("Mood cues include Bustling.", payload["prompt"])
+        self.assertIn("The climate is river-valley.", payload["prompt"])
+        self.assertIn("Voice guidance is Gritty, pragmatic. Present tense.", payload["prompt"])
         self.assertEqual(payload["hash"], hashlib.sha256(payload["prompt"].encode("utf-8")).hexdigest())
 
     @patch("web.api.llm_api.resolve_builder_zone_room")

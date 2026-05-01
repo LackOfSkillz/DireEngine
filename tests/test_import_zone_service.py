@@ -89,6 +89,13 @@ class ImportZoneServiceTests(unittest.TestCase):
                 "named_feature": None,
                 "condition": None,
                 "custom": [],
+                "atmosphere": {
+                    "materials": [],
+                    "social_character": [],
+                    "surroundings": [],
+                    "sensory": [],
+                    "upkeep": None,
+                },
             },
         )
 
@@ -127,5 +134,12 @@ class ImportZoneServiceTests(unittest.TestCase):
                 "named_feature": "fountain",
                 "condition": "worn",
                 "custom": ["awning", "crowded"],
+                "atmosphere": {
+                    "materials": [],
+                    "social_character": [],
+                    "surroundings": [],
+                    "sensory": [],
+                    "upkeep": None,
+                },
             },
         )

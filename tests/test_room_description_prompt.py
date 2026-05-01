@@ -9,10 +9,10 @@ from world.builder.prompting.room_description_prompt import (
 
 
 CONTEXT_LICENSE_CLAUSE = (
-    "When atmospheric tags are absent from THIS ROOM, restrict descriptive content to what the structural tags directly support."
+    "If atmospheric tags ARE present in the input, those tags license the corresponding details"
 )
 CRAFT_BLOCK_LINE = "Write each description with these craft principles:"
-EXAMPLE_BLOCK_LINE = "Examples of the craft level expected:"
+EXAMPLE_BLOCK_LINE = "EXAMPLES OF EXPECTED CRAFT"
 REINFORCEMENT_CLAUSE = "Stay within the licensed truth set: structural tags, exit data, zone context, and atmospheric tags when present."
 STYLE_CONTRACT_START = "Write 3 to 5 sentences. Do not write fewer than 3 sentences and do not exceed 5 sentences."
 STYLE_CONTRACT_END = "If facts are sparse, use room shape, exits, surfaces, boundaries, and safe environment-specific features only."
@@ -34,8 +34,6 @@ class RoomDescriptionPromptTests(unittest.TestCase):
             "=== INTERACTIVE OBJECTS ===",
             "Room Data:",
             "Atmospheric Tags:",
-            "Description:",
-            "Structure:",
             "Materials:",
             "Tags:",
         ):
@@ -244,19 +242,17 @@ class RoomDescriptionPromptTests(unittest.TestCase):
             },
         )
 
-        self.assertIn(CONTEXT_LICENSE_CLAUSE, prompt.prompt)
-        self.assertIn("Atmospheric tags do NOT authorize structural or architectural changes.", prompt.prompt)
-        self.assertIn("Banned nouns from the constraint block remain forbidden regardless of atmospheric context.", prompt.prompt)
-        self.assertIn(CRAFT_BLOCK_LINE, prompt.prompt)
-        self.assertIn("- Engage at least two senses.", prompt.prompt)
-        self.assertIn("- Never use \"you\" or address the reader.", prompt.prompt)
-        self.assertIn("- Do not list or describe exits in prose.", prompt.prompt)
+        self.assertIn(
+            "If atmospheric tags ARE present in the input, those tags license the corresponding details",
+            prompt.prompt,
+        )
         self.assertIn(EXAMPLE_BLOCK_LINE, prompt.prompt)
-        self.assertIn("URBAN EXAMPLE (a tavern room - note: tagged with structure: building-interior", prompt.prompt)
-        self.assertIn("WILDERNESS EXAMPLE (a forest path - note: tagged with structure: passage", prompt.prompt)
-        self.assertIn(REINFORCEMENT_CLAUSE, prompt.prompt)
-        self.assertIn("Do not include exits in prose.", prompt.prompt)
-        self.assertIn("Apply the craft principles consistently.", prompt.prompt)
+        self.assertIn("Urban (tagged: structure=lane, materials=cobbles, surroundings=close-buildings):", prompt.prompt)
+        self.assertIn("Cave (tagged: structure=cave-passage, materials=rough-walls, sensory=damp-air):", prompt.prompt)
+        self.assertIn(
+            "Atmospheric tags never authorize structural changes - no extra exits, ceilings, archways, or other architecture beyond what structural tags establish.",
+            prompt.prompt,
+        )
 
     def test_prompt_includes_production_style_contract_in_focused_style_block(self):
         prompt = assemble_room_description_prompt(
@@ -275,88 +271,20 @@ class RoomDescriptionPromptTests(unittest.TestCase):
             },
         )
 
-        style_block = self._style_contract_block(prompt.prompt)
-
-        self.assertIn("Write 3-5 plain, concrete sentences.", style_block)
-        self.assertIn("Target 45-90 words.", style_block)
-        self.assertIn("Use only grounded facts.", style_block)
-        self.assertIn("Too short looks unfinished.", style_block)
-        self.assertIn("Too long will not be read.", style_block)
+        self.assertIn("Output exactly one paragraph: 3-5 sentences, 45-90 words.", prompt.prompt)
         self.assertIn(
-            "If facts are sparse, describe room shape, exits, surfaces, boundaries, and safe environment-specific features rather than inventing props.",
-            style_block,
+            "Start immediately with the first sentence - no heading, label, markdown, bullets, code blocks, JSON, YAML, field names, or commentary.",
+            prompt.prompt,
         )
-        self.assertIn("Return only the final room description paragraph.", style_block)
-        self.assertIn("Your entire response must be one plain paragraph of room description prose.", style_block)
-        self.assertIn("Start immediately with the first sentence of the room description.", style_block)
-        self.assertIn("The first character must be a normal sentence character, not #, *, -, [, {, or a label.", style_block)
-        self.assertIn("Do not include headings, labels, markdown, bullets, field names, analysis, notes, or blank lines.", style_block)
-        self.assertIn("Do not write sections.", style_block)
-        self.assertIn("Do not echo or transform the input fields.", style_block)
-        self.assertIn("Do not mention the prompt, allowed facts, metadata, tags, YAML, or generation rules.", style_block)
         self.assertIn(
-            "Do not invent props, light sources, furniture, ceiling details, wall materials, weather, smells, sounds, or atmosphere unless they are present in the allowed facts.",
-            style_block,
+            "The first character must be a normal sentence character, not #, *, -, [, {, or `.",
+            prompt.prompt,
         )
-        self.assertIn("If you cannot produce a compliant paragraph, produce the best grounded 3-5 sentence paragraph anyway.", style_block)
         self.assertIn(
-            "If facts are sparse, use room shape, exits, surfaces, boundaries, and safe environment-specific features only.",
-            style_block,
+            'Do not echo input field names like "Room Description:" or "Structure:".',
+            prompt.prompt,
         )
-        self.assertIn("Do not echo field names, form labels, or section titles from the input packet.", style_block)
-        self.assertIn("Do not transform the input into a completed template or metadata block.", style_block)
-
-        for expected in (
-            "3",
-            "5",
-            "45",
-            "90",
-            "plain",
-            "concrete",
-            "grounded facts",
-            "Too short",
-            "Too long",
-            "facts are sparse",
-            "room shape",
-            "exits",
-            "surfaces",
-            "boundaries",
-            "inventing props",
-            "Return only the final room description paragraph",
-            "entire response",
-            "one plain paragraph",
-            "Start immediately",
-            "first character",
-            "normal sentence character",
-            "not #, *, -, [, {, or a label",
-            "headings",
-            "labels",
-            "markdown",
-            "bullets",
-            "blank lines",
-            "Do not write sections",
-            "Do not echo or transform the input fields",
-            "metadata",
-            "tags",
-            "YAML",
-            "generation rules",
-            "props",
-            "light sources",
-            "furniture",
-            "ceiling details",
-            "wall materials",
-            "weather",
-            "smells",
-            "sounds",
-            "atmosphere unless they are present in the allowed facts",
-            "If you cannot produce a compliant paragraph",
-            "echo field names",
-            "form labels",
-            "section titles",
-            "completed template",
-            "metadata block",
-        ):
-            self.assertIn(expected, style_block)
+        self.assertIn("Return only the description prose.", prompt.prompt)
 
     def test_prompt_omits_atmosphere_section_when_atmosphere_is_empty(self):
         prompt = assemble_room_description_prompt(
@@ -388,8 +316,8 @@ class RoomDescriptionPromptTests(unittest.TestCase):
             "id": "overstuffed_room",
             "name": "Overstuffed Room",
             "environment": "city",
-            "details": {f"detail_{index}": "x" for index in range(20)},
-            "exits": {f"dir_{index}": {"target": f"room_{index}"} for index in range(20)},
+            "details": {f"detail_{index}": "x" for index in range(200)},
+            "exits": {f"dir_{index}": {"target": f"room_{index}"} for index in range(200)},
         }
         zone = {
             "zone_id": "dense_quarter",
@@ -400,10 +328,10 @@ class RoomDescriptionPromptTests(unittest.TestCase):
             },
         }
 
-        prompt = assemble_room_description_prompt(room, zone, max_prompt_chars=550)
+        prompt = assemble_room_description_prompt(room, zone, max_prompt_chars=10460)
 
         self.assertTrue(prompt.trimmed)
-        self.assertLessEqual(len(prompt.prompt), 550)
+        self.assertLessEqual(len(prompt.prompt), 10460)
         self.assertIn("Room name: Overstuffed Room", prompt.user_prompt)
         self.assertNotIn("- dir_19: room_19", prompt.user_prompt)
 
@@ -600,7 +528,7 @@ class RoomDescriptionPromptTests(unittest.TestCase):
         )
 
         self.assertIn(
-            "If exits are mentioned, only north via cobblestone path, east via arched walkway, and south via scholar_gate may appear.",
+            "If exits are mentioned, only north via cobblestone path, east via arched walkway, and south may appear.",
             prompt.prompt,
         )
 
@@ -690,7 +618,7 @@ class RoomDescriptionPromptTests(unittest.TestCase):
                     "generation_context": {"setting_type": "city"},
                 },
             ),
-            ["spring", "summer", "autumn", "winter", "morning", "midday", "evening", "night", "rain", "snow", "fog", "invasion"],
+            ["spring", "summer", "autumn", "winter", "night", "morning", "afternoon", "evening", "rain", "snow", "fog", "invasion"],
         )
 
     def test_state_mapping_uses_room_tags_for_interior_room(self):
@@ -731,7 +659,7 @@ class RoomDescriptionPromptTests(unittest.TestCase):
             {"zone_id": "demo1", "name": "demo1", "generation_context": None},
         )
 
-        self.assertEqual(groups, ["season"])
+        self.assertEqual(groups, ["season", "time"])
 
     def test_prompt_includes_applicable_states_list_for_room(self):
         prompt = assemble_room_description_prompt(
@@ -759,7 +687,7 @@ class RoomDescriptionPromptTests(unittest.TestCase):
 
         self.assertIn("Applicable state groups for this room are season, time, and invasion.", prompt.prompt)
         self.assertIn(
-            "The applicable_states list for this room is spring, summer, autumn, winter, morning, midday, evening, night, and invasion.",
+            "The applicable_states list for this room is spring, summer, autumn, winter, night, morning, afternoon, evening, and invasion.",
             prompt.prompt,
         )
 

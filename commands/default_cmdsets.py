@@ -20,6 +20,7 @@ from evennia.contrib.grid.slow_exit import slow_exit
 from commands.cmd_analyze import CmdAnalyze
 from commands.cmd_admin_identity import CmdCheckIdentityIntegrity, CmdHealIdentityIntegrity
 from commands.cmd_appraise import CmdAppraise
+from commands.cmd_calendar import CmdCalendar
 from commands.cmd_shift import CmdShift
 from commands.cmd_ask import CmdAsk
 from commands.cmd_talk import CmdTalk
@@ -259,6 +260,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(slow_exit.SlowExitCmdSet())
         self.add(CmdAnalyze())
         self.add(CmdZone())
+        self.add(CmdCalendar())
         self.add(CmdCheckIdentityIntegrity())
         self.add(CmdHealIdentityIntegrity())
         self.add(CmdAppraise())

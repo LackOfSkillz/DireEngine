@@ -1,7 +1,5 @@
-import datetime
 import random
 
-from evennia import gametime
 from evennia.utils.utils import repeat
 
 from .rooms import Room
@@ -14,20 +12,6 @@ class ExtendedDireRoom(Room):
     """
 
     room_state_tag_category = "room_state"
-    months_per_year = 12
-    hours_per_day = 24
-    seasons_per_year = {
-        "spring": (3 / months_per_year, 6 / months_per_year),
-        "summer": (6 / months_per_year, 9 / months_per_year),
-        "autumn": (9 / months_per_year, 12 / months_per_year),
-        "winter": (12 / months_per_year, 3 / months_per_year),
-    }
-    times_of_day = {
-        "night": (0, 6 / hours_per_day),
-        "morning": (6 / hours_per_day, 12 / hours_per_day),
-        "afternoon": (12 / hours_per_day, 18 / hours_per_day),
-        "evening": (18 / hours_per_day, 0),
-    }
     fallback_desc = "You see nothing special."
 
     def at_init(self):
@@ -76,27 +60,21 @@ class ExtendedDireRoom(Room):
         return descriptions
 
     def get_time_of_day(self):
-        timestamp = gametime.gametime(absolute=True)
-        datestamp = datetime.datetime.fromtimestamp(timestamp)
-        timeslot = float(datestamp.hour) / self.hours_per_day
-        for time_of_day, (start, end) in self.times_of_day.items():
-            if start < end and start <= timeslot < end:
-                return time_of_day
-        return time_of_day
+        from world.calendar import get_current_time_of_day
+
+        return get_current_time_of_day()
 
     def get_season(self):
-        timestamp = gametime.gametime(absolute=True)
-        datestamp = datetime.datetime.fromtimestamp(timestamp)
-        timeslot = float(datestamp.month) / self.months_per_year
-        for season, (start, end) in self.seasons_per_year.items():
-            if start < end and start <= timeslot < end:
-                return season
-        return season
+        from world.calendar import get_current_season
+
+        return get_current_season()
 
     def get_stateful_desc(self):
+        from world.calendar import SEASONS
+
         descriptions = self.all_desc()
         room_states = self.room_states
-        seasons = set(self.seasons_per_year.keys())
+        seasons = set(SEASONS)
 
         for room_state in room_states:
             if room_state not in seasons and descriptions.get(room_state):

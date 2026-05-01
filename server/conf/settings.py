@@ -91,6 +91,23 @@ LOG_LLM_CALLS = True
 
 
 ######################################################################
+# Game-time calendar
+######################################################################
+# Game time runs at TIME_FACTOR x real time. With 4.0, four game days
+# pass per one real-world day, giving a single 6-hour real-world play
+# session a full day/night cycle in-game.
+TIME_FACTOR = 4.0
+# Game time pauses while the server is offline. This keeps time-of-day
+# continuous across reloads from the player's perspective. Season is
+# anchored separately to real-world wall-clock time so it does not
+# drift during outages.
+TIME_IGNORE_DOWNTIMES = False
+# Real-world timezone used to compute the current season. Festivals
+# and seasonal content align with this timezone's calendar months.
+CALENDAR_TIMEZONE = "America/New_York"
+
+
+######################################################################
 # Settings given in secret_settings.py override those in this file.
 ######################################################################
 try:

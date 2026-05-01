@@ -36,7 +36,8 @@ class RoomDescriptionGenerationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result.provenance["model"], "mistral-nemo")
         self.assertIn("input_hash", result.provenance)
         self.assertEqual(client.calls[0]["temperature"], 0.55)
-        self.assertIn("Lantern Market", client.calls[0]["prompt"])
+        self.assertIn("It is in Harbor Ward.", client.calls[0]["prompt"])
+        self.assertIn("The broader environment is city.", client.calls[0]["prompt"])
 
     def test_input_hash_changes_when_room_tags_change(self):
         zone = {"name": "Harbor Ward", "generation_context": {"setting_type": "city"}}
@@ -44,11 +45,37 @@ class RoomDescriptionGenerationTests(unittest.IsolatedAsyncioTestCase):
             "id": "lantern_market",
             "name": "Lantern Market",
             "exits": {"west": {"target": "canal_walk"}},
-            "tags": {"structure": "street", "specific_function": None, "named_feature": None, "condition": None, "custom": []},
+            "tags": {
+                "structure": "street",
+                "specific_function": None,
+                "named_feature": None,
+                "condition": None,
+                "custom": [],
+                "atmosphere": {
+                    "materials": [],
+                    "social_character": [],
+                    "surroundings": [],
+                    "sensory": [],
+                    "upkeep": None,
+                },
+            },
         }
         changed_room = {
             **base_room,
-            "tags": {"structure": "bridge", "specific_function": None, "named_feature": None, "condition": None, "custom": []},
+            "tags": {
+                "structure": "bridge",
+                "specific_function": None,
+                "named_feature": None,
+                "condition": None,
+                "custom": [],
+                "atmosphere": {
+                    "materials": [],
+                    "social_character": [],
+                    "surroundings": [],
+                    "sensory": [],
+                    "upkeep": None,
+                },
+            },
         }
 
         self.assertNotEqual(_input_hash(base_room, zone), _input_hash(changed_room, zone))
