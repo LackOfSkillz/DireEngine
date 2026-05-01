@@ -108,6 +108,21 @@ CALENDAR_TIMEZONE = "America/New_York"
 
 
 ######################################################################
+# Weather system
+######################################################################
+# How often the weather progression evaluates each zone.
+# Expressed in game-seconds. At TIME_FACTOR=4.0, 15 game-minutes
+# (900 game-seconds) = 225 real seconds = 3.75 real minutes.
+WEATHER_TICK_INTERVAL_GAME_SECONDS = 900
+
+# Probability per tick that a zone in `storm` state produces a
+# lightning/thunder atmospheric event. Tick is 15 game-minutes,
+# so probability of ~0.5 means roughly one event per 30 game-minutes
+# of storm.
+WEATHER_LIGHTNING_PROBABILITY_PER_TICK = 0.5
+
+
+######################################################################
 # Settings given in secret_settings.py override those in this file.
 ######################################################################
 try:

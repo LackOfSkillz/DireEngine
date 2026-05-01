@@ -32,7 +32,8 @@ CRITICAL RULES
    one fragment with name spring, summer, autumn, or winter. If the
    group is "time" you must have at least one fragment with name
   night, morning, afternoon, or evening. If the group is "weather" you
-   must have at least one with rain, snow, or fog. If the group is
+  must have at least one with clear, cloudy, light_rain, heavy_rain,
+  storm, fog, light_snow, heavy_snow, blizzard, or sandstorm. If the group is
    "invasion" you must have at least one invasion fragment. Missing a
    required group is a failure.
 
@@ -88,7 +89,8 @@ marking small storefronts on the ground floors."
 
 Applicable groups: season, time, weather, invasion
 Applicable states: spring, summer, autumn, winter, night, morning,
-afternoon, evening, rain, snow, fog, invasion
+afternoon, evening, clear, cloudy, light_rain, heavy_rain, storm,
+fog, light_snow, heavy_snow, blizzard, sandstorm, invasion
 
 Output:
 Stone Lane ends here against close-packed buildings of the merchant

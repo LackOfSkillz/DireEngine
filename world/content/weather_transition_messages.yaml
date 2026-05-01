@@ -1,0 +1,63 @@
+clear__cloudy:
+  outdoor: "A few clouds drift in, slowly graying the sky."
+  threshold: "The light outside dims as clouds gather."
+clear__fog:
+  outdoor: "Tendrils of fog begin to creep across the ground."
+  threshold: "A bank of fog rolls in from outside."
+cloudy__light_rain:
+  outdoor: "Light rain begins to fall from the sky."
+  threshold: "You hear rain start to patter outside."
+light_rain__heavy_rain:
+  outdoor: "The rain begins to come down even more heavily."
+  threshold: "The rain outside intensifies."
+heavy_rain__storm:
+  outdoor: "The steady rains turn into a driving storm."
+  threshold: "A storm breaks outside."
+storm__heavy_rain:
+  outdoor: "The heavy rains lessen to a steady shower."
+  threshold: "The storm outside slackens."
+heavy_rain__light_rain:
+  outdoor: "The rain slackens off to a heavy downpour."
+  threshold: "The rain outside softens."
+light_rain__cloudy:
+  outdoor: "The rain stops, leaving only an overcast sky."
+  threshold: "The rain outside stops."
+heavy_rain__cloudy:
+  outdoor: "The heavy rains taper off, leaving the sky overcast."
+  threshold: "The rain outside ends abruptly."
+cloudy__clear:
+  outdoor: "Most of the clouds blow away on a cool, gentle breeze."
+  threshold: "The sky outside clears."
+cloudy__light_snow:
+  outdoor: "Light snow begins to fall from the sky."
+  threshold: "You see snow beginning to fall outside."
+light_snow__heavy_snow:
+  outdoor: "The snow begins to fall more heavily."
+  threshold: "The snowfall outside thickens."
+heavy_snow__blizzard:
+  outdoor: "The snow increases in severity and is now a blizzard."
+  threshold: "The snow outside has become a blizzard."
+blizzard__heavy_snow:
+  outdoor: "The blizzard slackens to heavy snow."
+  threshold: "The blizzard outside lessens."
+heavy_snow__light_snow:
+  outdoor: "The snow slackens to a moderate flurry."
+  threshold: "The snow outside lightens."
+light_snow__cloudy:
+  outdoor: "The snow stops, leaving only an overcast sky of grey."
+  threshold: "The snow outside stops."
+cloudy__fog:
+  outdoor: "A heavy fog settles in around you."
+  threshold: "Fog rolls in from outside."
+fog__cloudy:
+  outdoor: "The fog slowly thins and dissipates."
+  threshold: "The fog outside lifts."
+fog__clear:
+  outdoor: "The fog burns away, revealing clear skies."
+  threshold: "The fog outside clears."
+cloudy__sandstorm:
+  outdoor: "A wall of swirling sand sweeps in, biting and stinging."
+  threshold: "A sandstorm rises outside, the wind howling against the walls."
+sandstorm__cloudy:
+  outdoor: "The sandstorm subsides, leaving a hazy, gritty sky."
+  threshold: "The sandstorm outside subsides."

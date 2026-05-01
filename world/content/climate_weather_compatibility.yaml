@@ -1,0 +1,71 @@
+temperate:
+  - clear
+  - cloudy
+  - light_rain
+  - heavy_rain
+  - storm
+  - fog
+  - light_snow
+  - heavy_snow
+
+coastal:
+  - clear
+  - cloudy
+  - light_rain
+  - heavy_rain
+  - storm
+  - fog
+  - light_snow
+
+tropical:
+  - clear
+  - cloudy
+  - light_rain
+  - heavy_rain
+  - storm
+  - fog
+
+arid:
+  - clear
+  - cloudy
+  - sandstorm
+  - fog
+
+boreal:
+  - clear
+  - cloudy
+  - light_rain
+  - heavy_rain
+  - light_snow
+  - heavy_snow
+  - blizzard
+  - fog
+
+alpine:
+  - clear
+  - cloudy
+  - light_rain
+  - storm
+  - light_snow
+  - heavy_snow
+  - blizzard
+  - fog
+
+subarctic:
+  - clear
+  - cloudy
+  - light_snow
+  - heavy_snow
+  - blizzard
+  - fog
+
+continental:
+  - clear
+  - cloudy
+  - light_rain
+  - heavy_rain
+  - storm
+  - light_snow
+  - heavy_snow
+  - blizzard
+  - fog

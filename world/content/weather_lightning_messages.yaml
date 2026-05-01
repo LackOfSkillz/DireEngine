@@ -1,0 +1,17 @@
+flashes:
+  - "A bright flash of lightning illuminates the rain."
+  - "Lightning crackles across the sky to the east."
+  - "A jagged streak of lightning splits the storm."
+  - "The sky flashes white with distant lightning."
+  - "Lightning flickers within the heavy clouds overhead."
+
+thunderclaps:
+  - "Thunder rolls across the sky."
+  - "A peal of thunder echoes through the storm."
+  - "Distant thunder rumbles ominously."
+  - "Sudden thunder cracks overhead, sharp as breaking timber."
+  - "The thunder grows louder, closer."
+
+flash_then_thunder:
+  - "Lightning flashes, followed seconds later by a roll of thunder."
+  - "A bright flash splits the sky, and thunder follows close behind."

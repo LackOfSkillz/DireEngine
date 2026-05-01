@@ -328,10 +328,10 @@ class RoomDescriptionPromptTests(unittest.TestCase):
             },
         }
 
-        prompt = assemble_room_description_prompt(room, zone, max_prompt_chars=10460)
+        prompt = assemble_room_description_prompt(room, zone, max_prompt_chars=10650)
 
         self.assertTrue(prompt.trimmed)
-        self.assertLessEqual(len(prompt.prompt), 10460)
+        self.assertLessEqual(len(prompt.prompt), 10650)
         self.assertIn("Room name: Overstuffed Room", prompt.user_prompt)
         self.assertNotIn("- dir_19: room_19", prompt.user_prompt)
 
@@ -618,7 +618,27 @@ class RoomDescriptionPromptTests(unittest.TestCase):
                     "generation_context": {"setting_type": "city"},
                 },
             ),
-            ["spring", "summer", "autumn", "winter", "night", "morning", "afternoon", "evening", "rain", "snow", "fog", "invasion"],
+            [
+                "spring",
+                "summer",
+                "autumn",
+                "winter",
+                "night",
+                "morning",
+                "afternoon",
+                "evening",
+                "clear",
+                "cloudy",
+                "light_rain",
+                "heavy_rain",
+                "storm",
+                "fog",
+                "light_snow",
+                "heavy_snow",
+                "blizzard",
+                "sandstorm",
+                "invasion",
+            ],
         )
 
     def test_state_mapping_uses_room_tags_for_interior_room(self):

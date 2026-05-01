@@ -14,7 +14,18 @@ PROMPT_VERSION = "v8_diremud_required_stateful_fragments"
 _STATE_GROUP_VOCABULARY = {
     "time": ("night", "morning", "afternoon", "evening"),
     "season": ("spring", "summer", "autumn", "winter"),
-    "weather": ("rain", "snow", "fog"),
+    "weather": (
+        "clear",
+        "cloudy",
+        "light_rain",
+        "heavy_rain",
+        "storm",
+        "fog",
+        "light_snow",
+        "heavy_snow",
+        "blizzard",
+        "sandstorm",
+    ),
     "invasion": ("invasion",),
 }
 _INTERIOR_STRUCTURES = {"building-interior", "hallway", "chamber", "threshold", "entrance"}

@@ -1,0 +1,50 @@
+tropical:
+  - tropical
+  - rainforest
+  - jungle
+  - equatorial
+
+arid:
+  - arid
+  - desert
+  - parched
+  - dry
+
+coastal:
+  - coastal
+  - seaside
+  - maritime
+  - littoral
+  - oceanic
+  - river-valley
+  - river valley
+
+boreal:
+  - boreal
+  - taiga
+  - cold forest
+
+alpine:
+  - alpine
+  - mountain
+  - highland
+  - peak
+
+subarctic:
+  - subarctic
+  - arctic
+  - polar
+  - tundra
+  - frozen
+
+continental:
+  - continental
+  - inland
+  - prairie
+  - steppe
+  - plains
+
+temperate:
+  - temperate
+  - mild
+  - moderate

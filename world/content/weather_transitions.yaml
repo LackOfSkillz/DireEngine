@@ -1,0 +1,295 @@
+# Relative-weight Markov transition matrices for ambient zone weather.
+# Heuristics:
+# - High inertia: current state usually persists with weight 50-75.
+# - Adjacent intensities are common; skips are uncommon.
+# - Recovery from extremes is gradual.
+# - Summer warms rain/storm weighting; winter shifts toward snow.
+# - Sandstorms are rare and brief in arid climates.
+
+temperate__spring:
+  clear: {clear: 68, cloudy: 22, fog: 10}
+  cloudy: {cloudy: 48, clear: 18, light_rain: 22, fog: 12}
+  light_rain: {light_rain: 50, cloudy: 22, heavy_rain: 20, fog: 8}
+  heavy_rain: {heavy_rain: 48, light_rain: 24, storm: 16, cloudy: 12}
+  storm: {storm: 42, heavy_rain: 34, cloudy: 18, light_rain: 6}
+  fog: {fog: 48, cloudy: 32, clear: 20}
+  light_snow: {light_snow: 45, cloudy: 30, heavy_snow: 15, fog: 10}
+  heavy_snow: {heavy_snow: 44, light_snow: 28, cloudy: 18, fog: 10}
+
+temperate__summer:
+  clear: {clear: 72, cloudy: 20, fog: 8}
+  cloudy: {cloudy: 46, clear: 22, light_rain: 18, storm: 8, fog: 6}
+  light_rain: {light_rain: 46, cloudy: 24, heavy_rain: 18, storm: 12}
+  heavy_rain: {heavy_rain: 44, light_rain: 24, storm: 22, cloudy: 10}
+  storm: {storm: 40, heavy_rain: 34, light_rain: 12, cloudy: 14}
+  fog: {fog: 42, clear: 30, cloudy: 28}
+  light_snow: {light_snow: 70, cloudy: 20, heavy_snow: 10}
+  heavy_snow: {heavy_snow: 65, light_snow: 20, cloudy: 15}
+
+temperate__autumn:
+  clear: {clear: 60, cloudy: 28, fog: 12}
+  cloudy: {cloudy: 52, clear: 16, light_rain: 22, fog: 10}
+  light_rain: {light_rain: 52, cloudy: 22, heavy_rain: 18, fog: 8}
+  heavy_rain: {heavy_rain: 46, light_rain: 24, cloudy: 18, storm: 12}
+  storm: {storm: 36, heavy_rain: 36, cloudy: 18, light_rain: 10}
+  fog: {fog: 52, cloudy: 28, clear: 20}
+  light_snow: {light_snow: 42, cloudy: 32, heavy_snow: 18, fog: 8}
+  heavy_snow: {heavy_snow: 40, light_snow: 30, cloudy: 20, fog: 10}
+
+temperate__winter:
+  clear: {clear: 56, cloudy: 26, fog: 8, light_snow: 10}
+  cloudy: {cloudy: 46, clear: 14, light_snow: 24, fog: 10, light_rain: 6}
+  light_rain: {light_rain: 36, cloudy: 28, heavy_rain: 14, fog: 10, light_snow: 12}
+  heavy_rain: {heavy_rain: 34, light_rain: 24, cloudy: 20, storm: 10, light_snow: 12}
+  storm: {storm: 24, heavy_rain: 30, cloudy: 20, light_snow: 26}
+  fog: {fog: 50, cloudy: 26, clear: 12, light_snow: 12}
+  light_snow: {light_snow: 50, cloudy: 20, heavy_snow: 20, fog: 10}
+  heavy_snow: {heavy_snow: 46, light_snow: 28, cloudy: 18, fog: 8}
+
+coastal__spring:
+  clear: {clear: 64, cloudy: 24, fog: 12}
+  cloudy: {cloudy: 48, clear: 16, light_rain: 22, fog: 14}
+  light_rain: {light_rain: 52, cloudy: 20, heavy_rain: 20, fog: 8}
+  heavy_rain: {heavy_rain: 48, light_rain: 26, storm: 18, cloudy: 8}
+  storm: {storm: 40, heavy_rain: 34, cloudy: 18, light_rain: 8}
+  fog: {fog: 54, cloudy: 28, clear: 18}
+  light_snow: {light_snow: 34, cloudy: 36, fog: 18, clear: 12}
+
+coastal__summer:
+  clear: {clear: 68, cloudy: 20, fog: 12}
+  cloudy: {cloudy: 44, clear: 20, light_rain: 18, storm: 10, fog: 8}
+  light_rain: {light_rain: 46, cloudy: 24, heavy_rain: 18, storm: 12}
+  heavy_rain: {heavy_rain: 42, light_rain: 24, storm: 24, cloudy: 10}
+  storm: {storm: 42, heavy_rain: 32, light_rain: 12, cloudy: 14}
+  fog: {fog: 52, cloudy: 26, clear: 22}
+  light_snow: {light_snow: 70, cloudy: 20, clear: 10}
+
+coastal__autumn:
+  clear: {clear: 58, cloudy: 28, fog: 14}
+  cloudy: {cloudy: 50, clear: 14, light_rain: 22, fog: 14}
+  light_rain: {light_rain: 50, cloudy: 22, heavy_rain: 20, fog: 8}
+  heavy_rain: {heavy_rain: 48, light_rain: 24, storm: 18, cloudy: 10}
+  storm: {storm: 38, heavy_rain: 34, cloudy: 20, light_rain: 8}
+  fog: {fog: 56, cloudy: 26, clear: 18}
+  light_snow: {light_snow: 36, cloudy: 34, fog: 18, clear: 12}
+
+coastal__winter:
+  clear: {clear: 54, cloudy: 28, fog: 12, light_snow: 6}
+  cloudy: {cloudy: 48, clear: 12, light_rain: 16, fog: 16, light_snow: 8}
+  light_rain: {light_rain: 42, cloudy: 26, heavy_rain: 18, fog: 8, light_snow: 6}
+  heavy_rain: {heavy_rain: 38, light_rain: 28, storm: 14, cloudy: 14, light_snow: 6}
+  storm: {storm: 28, heavy_rain: 34, cloudy: 18, light_rain: 12, fog: 8}
+  fog: {fog: 58, cloudy: 24, clear: 18}
+  light_snow: {light_snow: 42, cloudy: 28, fog: 18, clear: 12}
+
+tropical__spring:
+  clear: {clear: 62, cloudy: 24, fog: 14}
+  cloudy: {cloudy: 44, clear: 18, light_rain: 24, storm: 8, fog: 6}
+  light_rain: {light_rain: 48, cloudy: 22, heavy_rain: 20, storm: 10}
+  heavy_rain: {heavy_rain: 44, light_rain: 24, storm: 22, cloudy: 10}
+  storm: {storm: 42, heavy_rain: 32, light_rain: 14, cloudy: 12}
+  fog: {fog: 44, cloudy: 30, clear: 26}
+
+tropical__summer:
+  clear: {clear: 56, cloudy: 26, fog: 18}
+  cloudy: {cloudy: 42, clear: 14, light_rain: 24, storm: 14, fog: 6}
+  light_rain: {light_rain: 44, cloudy: 20, heavy_rain: 22, storm: 14}
+  heavy_rain: {heavy_rain: 42, light_rain: 20, storm: 28, cloudy: 10}
+  storm: {storm: 48, heavy_rain: 28, light_rain: 12, cloudy: 12}
+  fog: {fog: 42, cloudy: 28, clear: 30}
+
+tropical__autumn:
+  clear: {clear: 60, cloudy: 24, fog: 16}
+  cloudy: {cloudy: 44, clear: 18, light_rain: 24, storm: 8, fog: 6}
+  light_rain: {light_rain: 48, cloudy: 22, heavy_rain: 20, storm: 10}
+  heavy_rain: {heavy_rain: 44, light_rain: 24, storm: 22, cloudy: 10}
+  storm: {storm: 44, heavy_rain: 30, light_rain: 12, cloudy: 14}
+  fog: {fog: 42, cloudy: 30, clear: 28}
+
+tropical__winter:
+  clear: {clear: 64, cloudy: 22, fog: 14}
+  cloudy: {cloudy: 46, clear: 20, light_rain: 22, storm: 6, fog: 6}
+  light_rain: {light_rain: 48, cloudy: 24, heavy_rain: 18, storm: 10}
+  heavy_rain: {heavy_rain: 44, light_rain: 26, storm: 18, cloudy: 12}
+  storm: {storm: 40, heavy_rain: 32, light_rain: 14, cloudy: 14}
+  fog: {fog: 44, cloudy: 28, clear: 28}
+
+arid__spring:
+  clear: {clear: 76, cloudy: 18, fog: 6}
+  cloudy: {cloudy: 46, clear: 42, sandstorm: 6, fog: 6}
+  sandstorm: {sandstorm: 34, cloudy: 40, clear: 26}
+  fog: {fog: 36, clear: 42, cloudy: 22}
+
+arid__summer:
+  clear: {clear: 72, cloudy: 18, sandstorm: 10}
+  cloudy: {cloudy: 40, clear: 34, sandstorm: 20, fog: 6}
+  sandstorm: {sandstorm: 40, cloudy: 34, clear: 26}
+  fog: {fog: 30, clear: 48, cloudy: 22}
+
+arid__autumn:
+  clear: {clear: 78, cloudy: 16, fog: 6}
+  cloudy: {cloudy: 44, clear: 42, sandstorm: 8, fog: 6}
+  sandstorm: {sandstorm: 34, cloudy: 40, clear: 26}
+  fog: {fog: 34, clear: 44, cloudy: 22}
+
+arid__winter:
+  clear: {clear: 80, cloudy: 12, fog: 8}
+  cloudy: {cloudy: 42, clear: 44, sandstorm: 4, fog: 10}
+  sandstorm: {sandstorm: 26, cloudy: 42, clear: 32}
+  fog: {fog: 42, clear: 38, cloudy: 20}
+
+boreal__spring:
+  clear: {clear: 60, cloudy: 24, fog: 10, light_rain: 6}
+  cloudy: {cloudy: 46, clear: 18, light_rain: 18, light_snow: 10, fog: 8}
+  light_rain: {light_rain: 44, cloudy: 24, heavy_rain: 18, fog: 14}
+  heavy_rain: {heavy_rain: 40, light_rain: 28, cloudy: 18, fog: 14}
+  light_snow: {light_snow: 42, cloudy: 24, heavy_snow: 20, fog: 14}
+  heavy_snow: {heavy_snow: 40, light_snow: 28, cloudy: 18, blizzard: 8, fog: 6}
+  blizzard: {blizzard: 24, heavy_snow: 40, light_snow: 20, cloudy: 16}
+  fog: {fog: 48, cloudy: 28, clear: 24}
+
+boreal__summer:
+  clear: {clear: 66, cloudy: 22, fog: 8, light_rain: 4}
+  cloudy: {cloudy: 46, clear: 20, light_rain: 22, fog: 12}
+  light_rain: {light_rain: 46, cloudy: 24, heavy_rain: 20, fog: 10}
+  heavy_rain: {heavy_rain: 44, light_rain: 28, cloudy: 18, fog: 10}
+  light_snow: {light_snow: 54, cloudy: 22, heavy_snow: 14, fog: 10}
+  heavy_snow: {heavy_snow: 52, light_snow: 24, cloudy: 16, fog: 8}
+  blizzard: {blizzard: 36, heavy_snow: 34, light_snow: 18, cloudy: 12}
+  fog: {fog: 46, cloudy: 28, clear: 26}
+
+boreal__autumn:
+  clear: {clear: 56, cloudy: 26, fog: 10, light_rain: 8}
+  cloudy: {cloudy: 46, clear: 16, light_rain: 18, light_snow: 12, fog: 8}
+  light_rain: {light_rain: 44, cloudy: 24, heavy_rain: 18, light_snow: 8, fog: 6}
+  heavy_rain: {heavy_rain: 42, light_rain: 26, cloudy: 18, light_snow: 8, fog: 6}
+  light_snow: {light_snow: 44, cloudy: 24, heavy_snow: 18, fog: 14}
+  heavy_snow: {heavy_snow: 42, light_snow: 28, cloudy: 16, blizzard: 8, fog: 6}
+  blizzard: {blizzard: 28, heavy_snow: 36, light_snow: 18, cloudy: 18}
+  fog: {fog: 52, cloudy: 26, clear: 22}
+
+boreal__winter:
+  clear: {clear: 48, cloudy: 26, fog: 10, light_snow: 16}
+  cloudy: {cloudy: 44, clear: 12, light_snow: 22, heavy_snow: 12, fog: 10}
+  light_rain: {light_rain: 30, cloudy: 24, heavy_rain: 12, light_snow: 22, fog: 12}
+  heavy_rain: {heavy_rain: 26, light_rain: 20, cloudy: 16, light_snow: 24, fog: 14}
+  light_snow: {light_snow: 48, cloudy: 20, heavy_snow: 22, fog: 10}
+  heavy_snow: {heavy_snow: 46, light_snow: 24, blizzard: 20, cloudy: 10}
+  blizzard: {blizzard: 42, heavy_snow: 34, light_snow: 16, cloudy: 8}
+  fog: {fog: 48, cloudy: 24, light_snow: 16, clear: 12}
+
+alpine__spring:
+  clear: {clear: 60, cloudy: 24, fog: 10, light_rain: 6}
+  cloudy: {cloudy: 46, clear: 18, light_rain: 18, light_snow: 10, fog: 8}
+  light_rain: {light_rain: 40, cloudy: 22, storm: 18, light_snow: 10, fog: 10}
+  storm: {storm: 34, light_rain: 24, cloudy: 20, light_snow: 12, fog: 10}
+  light_snow: {light_snow: 44, cloudy: 24, heavy_snow: 18, fog: 14}
+  heavy_snow: {heavy_snow: 42, light_snow: 28, blizzard: 10, cloudy: 14, fog: 6}
+  blizzard: {blizzard: 26, heavy_snow: 38, light_snow: 20, cloudy: 16}
+  fog: {fog: 50, cloudy: 28, clear: 22}
+
+alpine__summer:
+  clear: {clear: 64, cloudy: 22, fog: 8, light_rain: 6}
+  cloudy: {cloudy: 46, clear: 18, light_rain: 22, storm: 8, fog: 6}
+  light_rain: {light_rain: 42, cloudy: 24, storm: 22, fog: 12}
+  storm: {storm: 38, light_rain: 30, cloudy: 18, fog: 14}
+  light_snow: {light_snow: 52, cloudy: 24, heavy_snow: 14, fog: 10}
+  heavy_snow: {heavy_snow: 48, light_snow: 26, cloudy: 16, blizzard: 10}
+  blizzard: {blizzard: 30, heavy_snow: 34, light_snow: 20, cloudy: 16}
+  fog: {fog: 44, cloudy: 28, clear: 28}
+
+alpine__autumn:
+  clear: {clear: 54, cloudy: 26, fog: 10, light_rain: 10}
+  cloudy: {cloudy: 46, clear: 14, light_rain: 20, light_snow: 12, fog: 8}
+  light_rain: {light_rain: 40, cloudy: 24, storm: 18, light_snow: 10, fog: 8}
+  storm: {storm: 34, light_rain: 28, cloudy: 18, light_snow: 12, fog: 8}
+  light_snow: {light_snow: 46, cloudy: 24, heavy_snow: 18, fog: 12}
+  heavy_snow: {heavy_snow: 44, light_snow: 28, blizzard: 12, cloudy: 10, fog: 6}
+  blizzard: {blizzard: 34, heavy_snow: 34, light_snow: 18, cloudy: 14}
+  fog: {fog: 48, cloudy: 28, clear: 24}
+
+alpine__winter:
+  clear: {clear: 46, cloudy: 24, fog: 10, light_snow: 20}
+  cloudy: {cloudy: 42, clear: 12, light_snow: 24, heavy_snow: 14, fog: 8}
+  light_rain: {light_rain: 28, cloudy: 24, storm: 12, light_snow: 22, fog: 14}
+  storm: {storm: 28, light_rain: 20, cloudy: 18, light_snow: 20, fog: 14}
+  light_snow: {light_snow: 48, cloudy: 18, heavy_snow: 24, fog: 10}
+  heavy_snow: {heavy_snow: 46, light_snow: 22, blizzard: 22, cloudy: 10}
+  blizzard: {blizzard: 44, heavy_snow: 34, light_snow: 14, cloudy: 8}
+  fog: {fog: 44, cloudy: 24, light_snow: 18, clear: 14}
+
+subarctic__spring:
+  clear: {clear: 56, cloudy: 24, fog: 10, light_snow: 10}
+  cloudy: {cloudy: 44, clear: 14, light_snow: 22, heavy_snow: 10, fog: 10}
+  light_snow: {light_snow: 48, cloudy: 20, heavy_snow: 22, fog: 10}
+  heavy_snow: {heavy_snow: 46, light_snow: 24, blizzard: 18, cloudy: 12}
+  blizzard: {blizzard: 38, heavy_snow: 34, light_snow: 18, cloudy: 10}
+  fog: {fog: 48, cloudy: 28, clear: 24}
+
+subarctic__summer:
+  clear: {clear: 64, cloudy: 22, fog: 8, light_snow: 6}
+  cloudy: {cloudy: 44, clear: 20, light_snow: 18, heavy_snow: 8, fog: 10}
+  light_snow: {light_snow: 42, cloudy: 24, heavy_snow: 16, fog: 10, clear: 8}
+  heavy_snow: {heavy_snow: 38, light_snow: 26, cloudy: 20, blizzard: 8, fog: 8}
+  blizzard: {blizzard: 24, heavy_snow: 36, light_snow: 24, cloudy: 16}
+  fog: {fog: 46, cloudy: 28, clear: 26}
+
+subarctic__autumn:
+  clear: {clear: 52, cloudy: 26, fog: 10, light_snow: 12}
+  cloudy: {cloudy: 44, clear: 14, light_snow: 22, heavy_snow: 10, fog: 10}
+  light_snow: {light_snow: 46, cloudy: 22, heavy_snow: 20, fog: 12}
+  heavy_snow: {heavy_snow: 44, light_snow: 24, blizzard: 18, cloudy: 14}
+  blizzard: {blizzard: 40, heavy_snow: 34, light_snow: 16, cloudy: 10}
+  fog: {fog: 50, cloudy: 28, clear: 22}
+
+subarctic__winter:
+  clear: {clear: 40, cloudy: 24, fog: 10, light_snow: 26}
+  cloudy: {cloudy: 40, clear: 10, light_snow: 26, heavy_snow: 14, fog: 10}
+  light_snow: {light_snow: 46, cloudy: 16, heavy_snow: 26, fog: 12}
+  heavy_snow: {heavy_snow: 44, light_snow: 20, blizzard: 28, cloudy: 8}
+  blizzard: {blizzard: 48, heavy_snow: 30, light_snow: 14, cloudy: 8}
+  fog: {fog: 42, cloudy: 24, light_snow: 20, clear: 14}
+
+continental__spring:
+  clear: {clear: 62, cloudy: 24, fog: 8, light_rain: 6}
+  cloudy: {cloudy: 46, clear: 18, light_rain: 20, light_snow: 8, fog: 8}
+  light_rain: {light_rain: 46, cloudy: 24, heavy_rain: 18, storm: 8, fog: 4}
+  heavy_rain: {heavy_rain: 42, light_rain: 28, storm: 18, cloudy: 12}
+  storm: {storm: 34, heavy_rain: 34, light_rain: 14, cloudy: 18}
+  light_snow: {light_snow: 42, cloudy: 24, heavy_snow: 18, fog: 16}
+  heavy_snow: {heavy_snow: 40, light_snow: 26, blizzard: 12, cloudy: 14, fog: 8}
+  blizzard: {blizzard: 24, heavy_snow: 38, light_snow: 20, cloudy: 18}
+  fog: {fog: 46, cloudy: 30, clear: 24}
+
+continental__summer:
+  clear: {clear: 68, cloudy: 22, fog: 6, light_rain: 4}
+  cloudy: {cloudy: 44, clear: 22, light_rain: 18, storm: 10, fog: 6}
+  light_rain: {light_rain: 44, cloudy: 24, heavy_rain: 20, storm: 12}
+  heavy_rain: {heavy_rain: 42, light_rain: 24, storm: 24, cloudy: 10}
+  storm: {storm: 40, heavy_rain: 34, light_rain: 12, cloudy: 14}
+  light_snow: {light_snow: 54, cloudy: 20, heavy_snow: 16, fog: 10}
+  heavy_snow: {heavy_snow: 48, light_snow: 24, cloudy: 18, blizzard: 10}
+  blizzard: {blizzard: 30, heavy_snow: 34, light_snow: 20, cloudy: 16}
+  fog: {fog: 42, cloudy: 28, clear: 30}
+
+continental__autumn:
+  clear: {clear: 56, cloudy: 28, fog: 8, light_rain: 8}
+  cloudy: {cloudy: 48, clear: 16, light_rain: 20, light_snow: 8, fog: 8}
+  light_rain: {light_rain: 46, cloudy: 24, heavy_rain: 18, storm: 8, fog: 4}
+  heavy_rain: {heavy_rain: 42, light_rain: 26, cloudy: 18, storm: 14}
+  storm: {storm: 34, heavy_rain: 34, light_rain: 14, cloudy: 18}
+  light_snow: {light_snow: 44, cloudy: 24, heavy_snow: 18, fog: 14}
+  heavy_snow: {heavy_snow: 42, light_snow: 26, blizzard: 14, cloudy: 12, fog: 6}
+  blizzard: {blizzard: 30, heavy_snow: 36, light_snow: 18, cloudy: 16}
+  fog: {fog: 48, cloudy: 28, clear: 24}
+
+continental__winter:
+  clear: {clear: 48, cloudy: 26, fog: 8, light_snow: 18}
+  cloudy: {cloudy: 42, clear: 12, light_snow: 24, heavy_snow: 12, fog: 10}
+  light_rain: {light_rain: 28, cloudy: 24, heavy_rain: 14, light_snow: 20, fog: 14}
+  heavy_rain: {heavy_rain: 26, light_rain: 22, cloudy: 18, light_snow: 22, storm: 6, fog: 6}
+  storm: {storm: 24, heavy_rain: 28, cloudy: 18, light_snow: 18, heavy_snow: 12}
+  light_snow: {light_snow: 48, cloudy: 18, heavy_snow: 24, fog: 10}
+  heavy_snow: {heavy_snow: 46, light_snow: 22, blizzard: 22, cloudy: 10}
+  blizzard: {blizzard: 44, heavy_snow: 32, light_snow: 16, cloudy: 8}
+  fog: {fog: 44, cloudy: 24, light_snow: 16, clear: 16}
