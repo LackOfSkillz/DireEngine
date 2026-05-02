@@ -22,7 +22,16 @@ class CmdPerceive(Command):
             if not args:
                 caller.msg("Perceive what? Try a corpse.")
                 return
-            target = caller.search(args, location=caller.location)
+            target, matches, base_query, index, _scope = self.resolve_target(
+                args,
+                scopes=("room",),
+                default_first=True,
+            )
+            if not target and matches and index is not None:
+                self.msg_target_matches(base_query, matches)
+                return
+            if not target:
+                target = caller.search(args, location=caller.location)
             if not target:
                 return
             ok, lines = caller.perceive_cleric_corpse(target) if hasattr(caller, "perceive_cleric_corpse") else (False, ["You sense nothing useful."])
@@ -43,7 +52,16 @@ class CmdPerceive(Command):
             if ok:
                 caller.db.last_perceive_time = time.time()
             return
-        target = caller.search(args, location=caller.location)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            args,
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(args, location=caller.location)
         if not target:
             return
         ok, lines = caller.perceive_empath_target(target) if hasattr(caller, "perceive_empath_target") else (False, ["You cannot make sense of that life force."])

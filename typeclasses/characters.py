@@ -407,29 +407,6 @@ HIGH_HIDE_RARE_SUCCESS_MESSAGE = "You shouldn't have made that climb-but you did
 CLIMB_PRACTICE_STEP = 3
 CLIMB_PRACTICE_CAP = 9
 
-RANGER_RESOURCE_PROFILES = {
-    "grass": {
-        "room_label": "a patch of tall grass",
-        "action": "gather grass",
-        "key": "grass",
-        "desc": "A handful of tall grass gathered for braiding or bundling.",
-        "item_type": "raw_resource",
-        "value": 1,
-        "weight": 0.2,
-        "gather_message": "You gather a workable length of tall grass.",
-    },
-    "stick": {
-        "room_label": "a fallen branch",
-        "action": "gather stick",
-        "key": "stick",
-        "desc": "A straight, workable stick cut down to a portable length.",
-        "item_type": "raw_resource",
-        "value": 1,
-        "weight": 0.4,
-        "gather_message": "You pick out a usable stick from the branchfall.",
-    },
-}
-
 RANGER_RESOURCE_RECIPES = {
     "bundle": {
         "input": "stick",
@@ -1751,9 +1728,51 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_object_receive(self, moved_obj, source_location, **kwargs):
         super().at_object_receive(moved_obj, source_location, **kwargs)
+        if moved_obj and hasattr(moved_obj, "is_stackable"):
+            from world.helpers.target_resolver import mark_item_arrival
+
+            mark_item_arrival(moved_obj)
+            self.merge_stackable_inventory(preferred=moved_obj)
         if getattr(moved_obj, "destination", None) is None:
             self.db.encumbrance_dirty = True
             self.sync_client_state()
+
+    def merge_stackable_inventory(self, preferred=None):
+        contents = [
+            item for item in list(getattr(self, "contents", []) or [])
+            if getattr(getattr(item, "db", None), "worn_by", None) != self
+        ]
+        groups = {}
+        for item in contents:
+            if not hasattr(item, "is_stackable") or not item.is_stackable():
+                continue
+            if not hasattr(item, "get_stack_identity"):
+                continue
+            identity = item.get_stack_identity()
+            groups.setdefault(identity, []).append(item)
+
+        changed = False
+        for group in groups.values():
+            if len(group) <= 1:
+                continue
+            primary = None
+            if preferred is not None and preferred in group:
+                primary = preferred
+            else:
+                primary = max(
+                    group,
+                    key=lambda item: (
+                        int(getattr(item, "get_stack_quantity", lambda: 1)() or 1),
+                        float(getattr(getattr(item, "db", None), "mt516_arrived_at", 0.0) or 0.0),
+                        int(getattr(item, "id", 0) or 0),
+                    ),
+                )
+            for item in group:
+                if item == primary:
+                    continue
+                if hasattr(primary, "merge_stack_from") and primary.merge_stack_from(item):
+                    changed = True
+        return changed
 
     def at_object_leave(self, moved_obj, target_location, **kwargs):
         super().at_object_leave(moved_obj, target_location, **kwargs)
@@ -14382,93 +14401,6 @@ class Character(ObjectParent, DefaultCharacter):
                 if alias_text:
                     known_names.add(alias_text)
         return normalized in known_names
-
-    def _get_ranger_resource_state(self):
-        state = getattr(getattr(self, "ndb", None), "ranger_resource_state", None)
-        if not isinstance(state, dict):
-            state = {}
-            self.ndb.ranger_resource_state = state
-        return state
-
-    def _get_ranger_resource_state_key(self, room, resource_key):
-        room_id = getattr(room, "id", None) or str(getattr(room, "key", "room") or "room")
-        return f"{room_id}:{str(resource_key or '').strip().lower()}"
-
-    def get_room_ranger_resources(self, room=None):
-        room = room or getattr(self, "location", None)
-        resources = list(getattr(getattr(room, "db", None), "ranger_resources", []) or [])
-        normalized = []
-        for entry in resources:
-            key = str(entry or "").strip().lower()
-            if key in RANGER_RESOURCE_PROFILES and key not in normalized:
-                normalized.append(key)
-        return normalized
-
-    def get_available_ranger_resources(self, room=None):
-        room = room or getattr(self, "location", None)
-        if not room or not self.is_profession("ranger"):
-            return []
-        state = self._get_ranger_resource_state()
-        available = []
-        for resource_key in self.get_room_ranger_resources(room):
-            if state.get(self._get_ranger_resource_state_key(room, resource_key)):
-                continue
-            available.append(resource_key)
-        return available
-
-    def get_ranger_room_render_lines(self, room=None):
-        room = room or getattr(self, "location", None)
-        if not room:
-            return []
-
-        lines = []
-        for resource_key in self.get_available_ranger_resources(room):
-            label = str(RANGER_RESOURCE_PROFILES.get(resource_key, {}).get("room_label", "") or "").strip()
-            if label:
-                lines.append(label)
-
-        return lines
-
-    def get_ranger_room_action_entries(self, room=None):
-        room = room or getattr(self, "location", None)
-        entries = []
-        for resource_key in self.get_available_ranger_resources(room):
-            command = str(RANGER_RESOURCE_PROFILES.get(resource_key, {}).get("action", "") or "").strip()
-            if command:
-                entries.append({"command": command, "label": command})
-        return entries
-
-    def gather_ranger_resource(self, resource_name):
-        room = getattr(self, "location", None)
-        normalized = str(resource_name or "").strip().lower()
-        profile = RANGER_RESOURCE_PROFILES.get(normalized)
-        if not room or not profile:
-            self.msg("You don't find that here.")
-            return False
-        if normalized not in self.get_available_ranger_resources(room):
-            self.msg("You don't find that here.")
-            return False
-
-        create_simple_item(
-            self,
-            key=profile["key"],
-            desc=profile["desc"],
-            item_type=profile["item_type"],
-            ranger_resource_kind=normalized,
-            item_value=profile["value"],
-            value=profile["value"],
-            weight=profile["weight"],
-            forage_kind=normalized,
-        )
-        state = self._get_ranger_resource_state()
-        state[self._get_ranger_resource_state_key(room, normalized)] = True
-        self.ndb.ranger_resource_state = state
-        self.db.forage_uses = int(getattr(self.db, "forage_uses", 0) or 0) + 1
-        self.msg(profile["gather_message"])
-        if self.location:
-            self.location.msg_contents(f"{self.key} gathers {profile['key']}.", exclude=[self])
-        self.use_skill("outdoorsmanship", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=10)
-        return True
 
     def _match_ranger_resource_item(self, item, resource_key):
         if not item:

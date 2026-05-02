@@ -18,7 +18,13 @@ class CmdSkin(Command):
             self.caller.msg("Skin what?")
             return
 
-        target = self.caller.search(self.args.strip())
+        candidates = [obj for obj in list(getattr(getattr(self.caller, "location", None), "contents", []) or []) if obj != self.caller]
+        target, matches, base_query, index = self.resolve_item_target(self.args.strip(), candidates, default_first=True)
+        if not target and matches and index is not None:
+            self.msg_item_matches(base_query, matches)
+            return
+        if not target:
+            target = self.caller.search(self.args.strip())
         if not target:
             return
 

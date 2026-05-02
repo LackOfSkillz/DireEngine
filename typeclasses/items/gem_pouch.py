@@ -1,4 +1,5 @@
 from typeclasses.objects import Object
+from world.helpers.display_aggregation import aggregate_object_labels
 
 
 class GemPouch(Object):
@@ -21,8 +22,8 @@ class GemPouch(Object):
         stored = list(self.contents)
         if stored:
             lines.append("It currently holds:")
-            for item in stored:
-                lines.append(f"  {item.key}")
+            for label in aggregate_object_labels(stored, looker=looker):
+                lines.append(f"  {label}")
         else:
             lines.append("It currently holds: empty.")
         return "\n".join(lines)

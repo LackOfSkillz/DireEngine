@@ -1,0 +1,111 @@
+temperate:
+  clear:
+    - "[PLACEHOLDER] A gentle breeze stirs the air."
+    - "[PLACEHOLDER] Sunlight settles warmly over the ground."
+  cloudy:
+    - "[PLACEHOLDER] Grey clouds drift slowly across the sky."
+    - "[PLACEHOLDER] The overcast sky feels close and heavy."
+  light_rain:
+    - "[PLACEHOLDER] Steady rain patters on every surface."
+    - "[PLACEHOLDER] Droplets tap quietly against stone and wood."
+  heavy_rain:
+    - "[PLACEHOLDER] Rain hammers down in relentless sheets."
+    - "[PLACEHOLDER] Water streams across every surface."
+  storm:
+    - "[PLACEHOLDER] Thunder rumbles ominously overhead."
+    - "[PLACEHOLDER] The storm churns with driving rain and wind."
+  fog:
+    - "[PLACEHOLDER] Mist swirls in lazy tendrils around everything nearby."
+    - "[PLACEHOLDER] The fog presses close, muffling the distance."
+  light_snow:
+    - "[PLACEHOLDER] Small flakes drift steadily through the air."
+    - "[PLACEHOLDER] Light snow dusts every exposed surface."
+  heavy_snow:
+    - "[PLACEHOLDER] Snow falls thick and steady from the grey sky."
+    - "[PLACEHOLDER] Heavy flakes gather in fast-forming drifts."
+  blizzard:
+    - "[PLACEHOLDER] Wind-driven snow lashes across the open ground."
+    - "[PLACEHOLDER] The blizzard howls hard enough to swallow the horizon."
+  sandstorm:
+    - "[PLACEHOLDER] Dust skirls in rough eddies despite the strange climate."
+    - "[PLACEHOLDER] Grit rasps across exposed stone in the shifting wind."
+
+coastal:
+  clear:
+    - "[PLACEHOLDER] Salt wind rolls in clean and cool from the water."
+    - "[PLACEHOLDER] Sunlight glints off the distant waterline."
+  cloudy:
+    - "[PLACEHOLDER] Low clouds hang over the coast in a grey mass."
+    - "[PLACEHOLDER] The sea-borne overcast presses inland."
+  light_rain:
+    - "[PLACEHOLDER] A light coastal drizzle settles over everything."
+    - "[PLACEHOLDER] Rain mingles with the salt air in a fine mist."
+  heavy_rain:
+    - "[PLACEHOLDER] Wind-lashed rain drives in from the coast."
+    - "[PLACEHOLDER] Sheets of rain sweep across the shoreline air."
+  storm:
+    - "[PLACEHOLDER] Thunder rolls above the churning coastal sky."
+    - "[PLACEHOLDER] The storm surges in with hard rain and harsh wind."
+  fog:
+    - "[PLACEHOLDER] Sea fog creeps inland in thick pale banks."
+    - "[PLACEHOLDER] Damp fog blurs the coast into a pale smear."
+  light_snow:
+    - "[PLACEHOLDER] Wet flakes drift down through the coastal air."
+    - "[PLACEHOLDER] Light snow mixes with briny wind."
+  heavy_snow:
+    - "[PLACEHOLDER] Heavy wet snow falls in broad clumps."
+    - "[PLACEHOLDER] Snow gathers fast under the coastal gale."
+  blizzard:
+    - "[PLACEHOLDER] A white coastal squall tears through with blinding force."
+    - "[PLACEHOLDER] Snow and wind fuse into a bitter coastal blizzard."
+  sandstorm:
+    - "[PLACEHOLDER] Salt grit and dust whip strangely through the air."
+    - "[PLACEHOLDER] The wind drives stinging grit along the coast."
+
+tropical:
+  clear:
+    - "[PLACEHOLDER] Warm air hangs heavy beneath bright tropical skies."
+    - "[PLACEHOLDER] Heat shimmers softly in the still tropical air."
+  light_rain:
+    - "[PLACEHOLDER] A warm tropical shower passes overhead."
+    - "[PLACEHOLDER] Rain falls warm and quick through the humid air."
+
+arid:
+  clear:
+    - "[PLACEHOLDER] Dry heat radiates off every sun-struck surface."
+    - "[PLACEHOLDER] The air is stark and dry beneath the open sky."
+  sandstorm:
+    - "[PLACEHOLDER] Sand scrapes and hisses in the rising wind."
+    - "[PLACEHOLDER] A wall of grit rolls across the arid expanse."
+
+boreal:
+  clear:
+    - "[PLACEHOLDER] Cold air hangs crisp beneath pale northern light."
+    - "[PLACEHOLDER] The boreal air feels sharp and still."
+  light_snow:
+    - "[PLACEHOLDER] Fine northern snow drifts down in thin veils."
+    - "[PLACEHOLDER] Light snow powders the cold ground."
+
+alpine:
+  clear:
+    - "[PLACEHOLDER] Thin mountain air carries every sound farther than it should."
+    - "[PLACEHOLDER] The alpine sky feels bright, cold, and close."
+  heavy_snow:
+    - "[PLACEHOLDER] Mountain snow comes down thick and fast."
+    - "[PLACEHOLDER] Heavy flakes sweep over the heights."
+
+subarctic:
+  clear:
+    - "[PLACEHOLDER] Bitter air cuts cleanly through the stillness."
+    - "[PLACEHOLDER] The subarctic sky hangs hard and pale overhead."
+  heavy_snow:
+    - "[PLACEHOLDER] Dense snow falls through the brutal cold."
+    - "[PLACEHOLDER] Snow drives steadily across the frozen air."
+
+continental:
+  clear:
+    - "[PLACEHOLDER] The air feels broad and open under the clear sky."
+    - "[PLACEHOLDER] A steady breeze moves across the continental plain."
+  cloudy:
+    - "[PLACEHOLDER] Thick cloud cover spreads from horizon to horizon."
+    - "[PLACEHOLDER] The sky settles into a long, dull overcast."

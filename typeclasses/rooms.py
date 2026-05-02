@@ -15,6 +15,8 @@ from evennia.objects.objects import DefaultRoom
 from evennia.utils.search import search_object
 from evennia.utils.utils import iter_to_str
 from server.systems.ammo_runtime import format_ammo_label, merge_ammo_stacks
+from world.helpers.display_aggregation import aggregate_object_labels
+from world.helpers.target_resolver import mark_item_arrival
 from world.law import LAW_NONE, LAW_STANDARD
 from world.systems.ranger import (
     TRAIL_DECAY_SECONDS,
@@ -428,6 +430,11 @@ class Room(ObjectParent, DefaultRoom):
             bond_strength -= int(cover_data.get("strength_penalty", 25) or 25)
         self.add_trail_entry(moved_obj, direction, strength=max(5, min(100, bond_strength)))
 
+    def at_object_receive(self, moved_obj, source_location, **kwargs):
+        super().at_object_receive(moved_obj, source_location, **kwargs)
+        if moved_obj is not None:
+            mark_item_arrival(moved_obj)
+
     def allows_profession(self, profession_name):
         allowed = [
             str(entry).strip().lower().replace("-", "_").replace(" ", "_")
@@ -470,6 +477,26 @@ class Room(ObjectParent, DefaultRoom):
 
         names = ", ".join(rendered)
         return f"Characters: {names}"
+
+    def get_display_things(self, looker, **kwargs):
+        visible = []
+        for obj in self.contents:
+            if obj == looker:
+                continue
+            is_character = False
+            is_exit = False
+            if hasattr(obj, "is_typeclass"):
+                is_character = obj.is_typeclass("typeclasses.characters.Character", exact=False)
+                is_exit = obj.is_typeclass("typeclasses.exits.Exit", exact=False)
+            if is_character or is_exit:
+                continue
+            visible.append(obj)
+
+        rendered = aggregate_object_labels(visible, looker=looker, **kwargs)
+        rendered.extend(self.get_loose_ammo_display_lines())
+        if not rendered:
+            return ""
+        return f"You see: {', '.join(rendered)}"
 
     def get_display_exits(self, looker, **kwargs):
         try:

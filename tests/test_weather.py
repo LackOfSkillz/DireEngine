@@ -49,7 +49,7 @@ class _StubScript:
     def __init__(self):
         self.attributes = _AttrStore()
         self.db_attributes = _AttrBackend(self.attributes._store)
-        self.db = SimpleNamespace(last_tick_iso=None)
+        self.db = SimpleNamespace(last_tick_iso=None, atmospheric_tick_counter=0)
 
     def time_until_next_repeat(self):
         return 10.0
@@ -116,6 +116,13 @@ class WeatherLogicTests(unittest.TestCase):
         second = weather._pick_next_state("clear", "temperate", "spring", rng=random.Random(9))
         self.assertEqual(first, second)
 
+    def test_ambient_messages_load(self):
+        self.assertTrue(weather.get_ambient_message("temperate", "clear", rng=random.Random(1)).startswith("[PLACEHOLDER]"))
+
+    def test_ambient_message_falls_back_to_empty(self):
+        self.assertEqual(weather.get_ambient_message("nonexistent", "clear"), "")
+        self.assertEqual(weather.get_ambient_message("temperate", "nonexistent"), "")
+
 
 class WeatherScriptedTests(unittest.TestCase):
     def setUp(self):
@@ -132,6 +139,12 @@ class WeatherScriptedTests(unittest.TestCase):
     def test_set_current_weather_persists_in_script_store(self):
         with mock.patch("world.weather._get_weather_script", return_value=self.script):
             weather.set_current_weather("crossingV2", "heavy_rain")
+            self.assertEqual(weather.get_current_weather("crossingV2"), "heavy_rain")
+
+    def test_set_current_weather_updates_state_cache(self):
+        with mock.patch("world.weather._get_weather_script", return_value=self.script):
+            weather.set_current_weather("crossingV2", "heavy_rain")
+            self.script.attributes._store[weather._state_key("crossingV2")] = "clear"
             self.assertEqual(weather.get_current_weather("crossingV2"), "heavy_rain")
 
     def test_tick_weather_evaluates_all_known_zones(self):
@@ -172,6 +185,9 @@ class WeatherScriptedTests(unittest.TestCase):
 
 
 class WeatherMessagingTests(unittest.TestCase):
+    def setUp(self):
+        weather.invalidate_zone_caches()
+
     def test_run_weather_cycle_broadcasts_tick_side_effects(self):
         rng = mock.Mock()
         rng.random.return_value = 0.0
@@ -230,6 +246,173 @@ class WeatherMessagingTests(unittest.TestCase):
             weather.set_current_weather("crossingV2", "clear")
             self.assertFalse(weather._broadcast_storm_lightning("crossingV2", rng=random.Random(1)))
         self.assertFalse(room.messages)
+
+    def test_run_atmospheric_tick_broadcasts_outdoor_not_indoor(self):
+        outdoor = _StubRoom("Square", structure="street")
+        interior = _StubRoom("Hall", structure="hallway")
+        script = _StubScript()
+        zone_payload = {"zone_id": "crossingV2", "generation_context": {"climate": "temperate", "setting_type": "city"}}
+        rng = mock.Mock()
+        rng.random.return_value = 0.0
+        rng.choice.side_effect = lambda values: values[0]
+
+        with (
+            mock.patch("world.weather._get_weather_script", return_value=script),
+            mock.patch("world.weather._iter_zone_payloads", return_value=[zone_payload]),
+            mock.patch("world.weather._get_zone_payload", return_value=zone_payload),
+            mock.patch("world.weather._rooms_for_zone", return_value=[outdoor, interior]),
+        ):
+            weather.set_current_weather("crossingV2", "storm")
+            broadcasted = weather.run_atmospheric_tick(rng=rng)
+
+        self.assertEqual(broadcasted, ["crossingV2"])
+        self.assertTrue(outdoor.messages)
+        self.assertFalse(interior.messages)
+
+
+class WeatherPerformanceTests(unittest.TestCase):
+    def setUp(self):
+        weather.invalidate_zone_caches()
+
+    def test_zone_payload_cache_reuses_loaded_yaml_until_invalidated(self):
+        fake_path = SimpleNamespace(name="crossingV2.yaml", stem="crossingV2")
+        payload = {"zone_id": "crossingV2", "generation_context": {"climate": "temperate"}}
+        fake_zone_dir = SimpleNamespace(glob=mock.Mock(return_value=[fake_path]))
+
+        with (
+            mock.patch("world.weather._ZONE_DIR", fake_zone_dir),
+            mock.patch("world.weather._load_yaml", return_value=payload) as mock_load_yaml,
+        ):
+            first = weather._iter_zone_payloads()
+            second = weather._iter_zone_payloads()
+            weather.invalidate_zone_caches("crossingV2")
+            third = weather._iter_zone_payloads()
+
+        self.assertEqual(first[0]["zone_id"], "crossingV2")
+        self.assertEqual(second[0]["zone_id"], "crossingV2")
+        self.assertEqual(third[0]["zone_id"], "crossingV2")
+        self.assertEqual(mock_load_yaml.call_count, 2)
+
+    def test_run_weather_cycle_completes_within_bounded_time(self):
+        import time
+
+        script = _StubScript()
+        room = _StubRoom("Square", structure="street")
+        zone_payload = {
+            "zone_id": "crossingV2",
+            "name": "The Crossing",
+            "generation_context": {"climate": "temperate", "setting_type": "city"},
+        }
+
+        def pick_next_state(current, _climate, _season, rng=None):
+            return "cloudy" if current == "clear" else current
+
+        with (
+            mock.patch("world.weather._get_weather_script", return_value=script),
+            mock.patch("world.weather._iter_zone_payloads", return_value=[zone_payload]),
+            mock.patch("world.weather._get_zone_payload", return_value=zone_payload),
+            mock.patch("world.weather._query_rooms_for_zone", return_value=[room]) as mock_room_query,
+            mock.patch("world.weather._pick_next_state", side_effect=pick_next_state),
+        ):
+            weather.run_weather_cycle()
+            start = time.monotonic()
+            weather.run_weather_cycle()
+            elapsed = time.monotonic() - start
+
+        self.assertLess(
+            elapsed,
+            2.0,
+            f"run_weather_cycle() took {elapsed:.3f}s, expected < 2.0s",
+        )
+        self.assertEqual(mock_room_query.call_count, 1)
+
+    def test_run_atmospheric_tick_completes_within_bounded_time(self):
+        import time
+
+        script = _StubScript()
+        room = _StubRoom("Square", structure="street")
+        zone_payload = {
+            "zone_id": "crossingV2",
+            "name": "The Crossing",
+            "generation_context": {"climate": "temperate", "setting_type": "city"},
+        }
+        rng = mock.Mock()
+        rng.random.return_value = 0.0
+        rng.choice.side_effect = lambda values: values[0]
+
+        with (
+            mock.patch("world.weather._get_weather_script", return_value=script),
+            mock.patch("world.weather._iter_zone_payloads", return_value=[zone_payload]),
+            mock.patch("world.weather._get_zone_payload", return_value=zone_payload),
+            mock.patch("world.weather._query_rooms_for_zone", return_value=[room]) as mock_room_query,
+        ):
+            weather.set_current_weather("crossingV2", "storm")
+            weather.run_atmospheric_tick(rng=rng)
+            start = time.monotonic()
+            weather.run_atmospheric_tick(rng=rng)
+            elapsed = time.monotonic() - start
+
+        self.assertLess(
+            elapsed,
+            1.0,
+            f"run_atmospheric_tick() took {elapsed:.3f}s, expected < 1.0s",
+        )
+        self.assertEqual(mock_room_query.call_count, 1)
+
+
+class WeatherTieredTickTests(unittest.TestCase):
+    def test_atmospheric_tick_does_not_advance_state(self):
+        script = _StubScript()
+        zone_payload = {"zone_id": "crossingV2", "generation_context": {"climate": "temperate", "setting_type": "city"}}
+        room = _StubRoom("Square", structure="street")
+        rng = mock.Mock()
+        rng.random.return_value = 0.0
+        rng.choice.side_effect = lambda values: values[0]
+
+        with (
+            mock.patch("world.weather._get_weather_script", return_value=script),
+            mock.patch("world.weather._iter_zone_payloads", return_value=[zone_payload]),
+            mock.patch("world.weather._get_zone_payload", return_value=zone_payload),
+            mock.patch("world.weather._rooms_for_zone", return_value=[room]),
+        ):
+            weather.set_current_weather("crossingV2", "storm")
+            before = weather.get_current_weather("crossingV2")
+            weather.run_atmospheric_tick(rng=rng)
+            after = weather.get_current_weather("crossingV2")
+
+        self.assertEqual(before, after)
+        self.assertTrue(room.messages)
+
+    def test_state_tick_fires_every_n_atmospheric_ticks(self):
+        fake_script = SimpleNamespace(db=SimpleNamespace(atmospheric_tick_counter=0))
+
+        with (
+            mock.patch.object(weather.settings, "WEATHER_AUTOTICK_ENABLED", True, create=True),
+            mock.patch.object(weather.settings, "WEATHER_STATE_TICK_RATIO", 3, create=True),
+            mock.patch("world.weather.run_weather_cycle", return_value={"crossingV2": ("clear", "cloudy")}) as mock_cycle,
+            mock.patch("world.weather.run_atmospheric_tick", return_value=[]) as mock_atmospheric,
+        ):
+            weather.WeatherScript.at_repeat(fake_script)
+            weather.WeatherScript.at_repeat(fake_script)
+            weather.WeatherScript.at_repeat(fake_script)
+
+        self.assertEqual(mock_cycle.call_count, 1)
+        self.assertEqual(mock_atmospheric.call_count, 3)
+        self.assertEqual(mock_atmospheric.call_args_list[-1].kwargs.get("skip_zone_ids"), {"crossingV2"})
+        self.assertEqual(fake_script.db.atmospheric_tick_counter, 0)
+
+    def test_atmospheric_tick_respects_autotick_flag(self):
+        fake_script = SimpleNamespace(db=SimpleNamespace(atmospheric_tick_counter=0))
+
+        with (
+            mock.patch.object(weather.settings, "WEATHER_AUTOTICK_ENABLED", False, create=True),
+            mock.patch("world.weather.run_weather_cycle") as mock_cycle,
+            mock.patch("world.weather.run_atmospheric_tick") as mock_atmospheric,
+        ):
+            weather.WeatherScript.at_repeat(fake_script)
+
+        mock_cycle.assert_not_called()
+        mock_atmospheric.assert_not_called()
 
 
 class WeatherVocabularyTests(unittest.TestCase):

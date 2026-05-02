@@ -29,22 +29,22 @@ class CmdStow(Command):
             container = self.caller.get_worn_container_by_name(container_name)
             if not container:
                 fish_strings = [obj for obj in list(getattr(self.caller, "contents", []) or []) if fishing_economy.is_fish_string(obj)]
-                container, matches, base_query, index = self.caller.resolve_numbered_candidate(container_name, fish_strings, default_first=True)
+                container, matches, base_query, index = self.resolve_item_target(container_name, fish_strings, default_first=True)
                 if not container and matches and index is not None:
-                    self.caller.msg_numbered_matches(base_query, matches)
+                    self.msg_item_matches(base_query, matches)
                     return
             if not container:
                 self.caller.msg(f"You are not wearing {container_name}.")
                 return
 
-        item, matches, base_query, index = self.caller.resolve_numbered_candidate(
+        item, matches, base_query, index = self.resolve_item_target(
             item_name,
             self.caller.get_visible_carried_items(),
             default_first=True,
         )
         if not item:
             if matches and index is not None:
-                self.caller.msg_numbered_matches(base_query, matches)
+                self.msg_item_matches(base_query, matches)
             else:
                 self.caller.search(base_query or item_name)
             return

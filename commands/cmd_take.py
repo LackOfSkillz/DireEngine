@@ -34,7 +34,16 @@ class CmdTake(Command):
                 caller.msg("Usage: take shock <target>")
                 return
             target_name = " ".join(parts[1:]).strip()
-            target = caller.search(target_name, location=caller.location)
+            target, matches, base_query, index, _scope = self.resolve_target(
+                target_name,
+                scopes=("characters",),
+                default_first=True,
+            )
+            if not target and matches and index is not None:
+                self.msg_target_matches(base_query, matches)
+                return
+            if not target:
+                target = caller.search(target_name, location=caller.location)
             if not target:
                 return
             ok, message = caller.take_empath_shock(target) if hasattr(caller, "take_empath_shock") else (False, "You cannot take that burden right now.")

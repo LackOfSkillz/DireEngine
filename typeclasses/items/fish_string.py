@@ -1,6 +1,7 @@
 from typeclasses.wearable_containers import WearableContainer
 
 from world.systems import fishing_economy
+from world.helpers.display_aggregation import aggregate_object_labels
 
 
 class FishString(WearableContainer):
@@ -50,8 +51,8 @@ class FishString(WearableContainer):
         stored = self.get_stored_items()
         if stored:
             lines.append("It currently holds:")
-            for item in stored:
-                lines.append(f"  {item.key}")
+            for label in aggregate_object_labels(stored, looker=looker):
+                lines.append(f"  {label}")
         else:
             lines.append("It currently holds: empty.")
         return "\n".join(lines)

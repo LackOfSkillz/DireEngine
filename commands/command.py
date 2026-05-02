@@ -7,6 +7,8 @@ Commands describe the input the account can do to the game.
 
 from evennia.commands.command import Command as BaseCommand
 
+from world.helpers.target_resolver import format_item_matches, resolve_item_target, resolve_target
+
 # from evennia import default_cmds
 
 
@@ -68,6 +70,20 @@ class Command(BaseCommand):
 
         caller.msg("You are dead. You can still look, speak, check your state, depart, or wait for resurrection.")
         return True
+
+    def resolve_item_target(self, query, candidates, default_first=True):
+        return resolve_item_target(query, candidates, default_first=default_first)
+
+    def resolve_target(self, query, scopes=("characters", "room", "inventory"), default_first=True):
+        return resolve_target(query, getattr(self, "caller", None), scopes=scopes, default_first=default_first)
+
+    def msg_item_matches(self, query, matches):
+        message = format_item_matches(query, matches, looker=getattr(self, "caller", None))
+        if message:
+            self.caller.msg(message)
+
+    def msg_target_matches(self, query, matches):
+        self.msg_item_matches(query, matches)
 
 
 # -------------------------------------------------------------

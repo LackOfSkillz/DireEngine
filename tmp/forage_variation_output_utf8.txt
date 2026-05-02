@@ -1,0 +1,21 @@
+﻿c:/Users/gary/dragonsire/.venv/Scripts/python.exe : DireTest seed: 945251300
+At line:1 char:182
++ ... oding utf8; c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretes ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (DireTest seed: 945251300:String)  
+   [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+{
+  "detail": "resource_kinds=['berries', 'branch', 'bread_crumb', 'dirt', 'grungy_feather', 'jadice_flower', 'leaf', 'rock', 'stem', 'wood_chip']",
+  "ok": true,
+  "scenario": "ranger-forage-variation"
+}
+{
+  "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\ranger-forage-variation_direct_945251300",
+  "exit_code": 0,
+  "failure_type": null,
+  "scenario": "ranger-forage-variation",
+  "seed": 945251300,
+  "traceback": ""
+}

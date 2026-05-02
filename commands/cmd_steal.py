@@ -42,13 +42,29 @@ class CmdSteal(Command):
                 "source_label": getattr(container, "key", "container"),
             }
         if hasattr(room, "is_shop") and room.is_shop():
-            direct = caller.search(query, location=room, quiet=True)
-            if direct:
-                return direct[0], {"requested_item": query}
+            direct, matches, base_query, index, _scope = self.resolve_target(
+                query,
+                scopes=("room",),
+                default_first=True,
+            )
+            if direct is not None:
+                return direct, {"requested_item": query}
+            if matches and index is not None:
+                self.msg_target_matches(base_query, matches)
+                return None, None
             shopkeeper = room.get_shopkeeper() if hasattr(room, "get_shopkeeper") else None
             if shopkeeper:
                 return shopkeeper, {"requested_item": query}
-        target = caller.search(query, location=room)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            query,
+            scopes=("characters", "room"),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return None, None
+        if not target:
+            target = caller.search(query, location=room)
         if not target:
             return None, None
         return target, {"requested_item": query}
@@ -69,13 +85,12 @@ class CmdSteal(Command):
             for nested in list(getattr(obj, "contents", []) or []):
                 if bool(getattr(getattr(nested, "db", None), "is_container", False)):
                     candidates.append(nested)
-        if hasattr(caller, "resolve_numbered_candidate"):
-            container, matches, _, _ = caller.resolve_numbered_candidate(query, candidates, default_first=False)
-            if container:
-                return container
-            if matches and len(matches) > 1 and hasattr(caller, "msg_numbered_matches"):
-                caller.msg_numbered_matches(query, matches)
-                return None
+        container, matches, base_query, index = self.resolve_item_target(query, candidates, default_first=False)
+        if container:
+            return container
+        if matches and index is not None:
+            self.msg_item_matches(base_query or query, matches)
+            return None
         lowered = str(query or "").strip().lower()
         for candidate in candidates:
             if str(getattr(candidate, "key", "") or "").strip().lower() == lowered:

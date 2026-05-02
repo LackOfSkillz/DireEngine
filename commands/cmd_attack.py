@@ -24,16 +24,12 @@ class CmdAttack(Command):
     def _resolve_target(self):
         if not self.args:
             return self.caller.get_target() if hasattr(self.caller, "get_target") else None
-        room = self.caller.location
-        if not room:
-            return None
         target_name = self.args.strip()
-        candidates = [obj for obj in room.contents if obj != self.caller]
-        target, matches, base_query, index = self.caller.resolve_numbered_candidate(
+        target, matches, base_query, index, _scope = self.resolve_target(
             target_name,
-            candidates,
+            scopes=("characters",),
             default_first=True,
         )
         if not target and matches and index is not None:
-            self.caller.msg_numbered_matches(base_query, matches)
+            self.msg_target_matches(base_query, matches)
         return target

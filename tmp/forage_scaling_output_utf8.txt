@@ -1,0 +1,21 @@
+﻿c:/Users/gary/dragonsire/.venv/Scripts/python.exe : DireTest seed: 91711800
+At line:1 char:5
++ & { c:/Users/gary/dragonsire/.venv/Scripts/python.exe diretest.py sce ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (DireTest seed: 91711800:String) [ 
+   ], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+{
+  "detail": "before=0 after=4 items=['high-quality twig', 'high-quality twig', 'high-quality twig', 'high-quality twig']",
+  "ok": true,
+  "scenario": "ranger-forage-scaling"
+}
+{
+  "artifact_dir": "C:\\Users\\gary\\dragonsire\\artifacts\\ranger-forage-scaling_direct_91711800",
+  "exit_code": 0,
+  "failure_type": null,
+  "scenario": "ranger-forage-scaling",
+  "seed": 91711800,
+  "traceback": ""
+}

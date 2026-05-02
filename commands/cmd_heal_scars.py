@@ -24,7 +24,16 @@ class CmdHealScars(Command):
         args = str(self.args or "").strip()
         target = caller
         if args and args.lower() not in {"self", "me"}:
-            target = caller.search(args, location=caller.location)
+            target, matches, base_query, index, _scope = self.resolve_target(
+                args,
+                scopes=("characters",),
+                default_first=True,
+            )
+            if not target and matches and index is not None:
+                self.msg_target_matches(base_query, matches)
+                return
+            if not target:
+                target = caller.search(args, location=caller.location)
             if not target:
                 return
         elif not args and hasattr(caller, "get_empath_link_state"):

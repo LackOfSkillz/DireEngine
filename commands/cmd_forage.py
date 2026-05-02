@@ -10,6 +10,7 @@ class CmdForage(Command):
     """
 
     key = "forage"
+    aliases = ["gather"]
     locks = "cmd:all()"
     help_category = "Survival"
 

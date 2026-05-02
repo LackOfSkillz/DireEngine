@@ -15332,8 +15332,7 @@ def run_ranger_forage_scaling_scenario(args):
     _setup_django()
 
     from evennia.objects.models import ObjectDB
-    from server.conf.at_server_startstop import _ensure_new_player_tutorial
-    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+    from typeclasses.abilities_survival import ForageAbility
 
     created_character = None
     temp_room_name = None
@@ -15341,13 +15340,14 @@ def run_ranger_forage_scaling_scenario(args):
     try:
         from evennia.utils.create import create_object
 
-        _ensure_new_player_tutorial()
         guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
         if not guild_room:
             raise RuntimeError("Ranger Guild room is missing.")
 
         temp_room_name, temp_room = _create_temp_room("diretest_ranger_forage_scaling")
         temp_room.db.forage_difficulty = 1
+        temp_room.db.terrain_primary = "forest"
+        temp_room.db.terrain_type = "forest"
 
         created_character = create_object(
             "typeclasses.characters.Character",
@@ -15356,14 +15356,13 @@ def run_ranger_forage_scaling_scenario(args):
             home=guild_room,
         )
         created_character.ensure_core_defaults()
-        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
-            created_character.set_stat(stat_name, minimum)
-        created_character.execute_cmd("join ranger")
-        created_character.learn_skill("outdoorsmanship", {"rank": 10, "mindstate": 0})
+        created_character.db.profession = "ranger"
+        created_character.set_stat("wisdom", 30)
+        created_character.set_stat("intelligence", 30)
         created_character.move_to(temp_room, quiet=True, use_destination=False)
 
         before = len(list(created_character.get_visible_carried_items()))
-        created_character.execute_cmd("forage")
+        ForageAbility().execute(created_character)
         after_items = list(created_character.get_visible_carried_items())
         after = len(after_items)
         ok = after > before and (after - before) >= 2
@@ -15395,8 +15394,7 @@ def run_ranger_forage_variation_scenario(args):
     _setup_django()
 
     from evennia.objects.models import ObjectDB
-    from server.conf.at_server_startstop import _ensure_new_player_tutorial
-    from typeclasses.characters import RANGER_JOIN_REQUIREMENTS
+    from typeclasses.abilities_survival import ForageAbility
 
     created_character = None
     temp_room_name = None
@@ -15404,13 +15402,15 @@ def run_ranger_forage_variation_scenario(args):
     try:
         from evennia.utils.create import create_object
 
-        _ensure_new_player_tutorial()
         guild_room = ObjectDB.objects.filter(db_key__iexact="Ranger Guild", db_typeclass_path="typeclasses.rooms.Room").first()
         if not guild_room:
             raise RuntimeError("Ranger Guild room is missing.")
 
         temp_room_name, temp_room = _create_temp_room("diretest_ranger_forage_variation")
         temp_room.db.forage_difficulty = 1
+        temp_room.db.terrain_primary = "forest"
+        temp_room.db.terrain_secondary = "coastal"
+        temp_room.db.terrain_type = "forest"
 
         created_character = create_object(
             "typeclasses.characters.Character",
@@ -15419,15 +15419,14 @@ def run_ranger_forage_variation_scenario(args):
             home=guild_room,
         )
         created_character.ensure_core_defaults()
-        for stat_name, minimum, _label in RANGER_JOIN_REQUIREMENTS:
-            created_character.set_stat(stat_name, minimum)
-        created_character.execute_cmd("join ranger")
-        created_character.learn_skill("outdoorsmanship", {"rank": 20, "mindstate": 0})
+        created_character.db.profession = "ranger"
+        created_character.set_stat("wisdom", 30)
+        created_character.set_stat("intelligence", 30)
         created_character.move_to(temp_room, quiet=True, use_destination=False)
 
         results = set()
         for _index in range(12):
-            created_character.execute_cmd("forage")
+            ForageAbility().execute(created_character)
             created_character.set_roundtime(0)
         for item in list(created_character.get_visible_carried_items()):
             kind = str(getattr(item.db, "forage_kind", "") or "").strip().lower()
@@ -18202,12 +18201,12 @@ def run_ranger_resource_visibility_scenario(args):
 
         ranger_appearance = ctx.room.return_appearance(ranger)
         outsider_appearance = ctx.room.return_appearance(outsider)
-        if "a patch of tall grass" not in ranger_appearance or "a fallen branch" not in ranger_appearance:
-            raise AssertionError(f"Ranger could not see the room resources: {ranger_appearance}")
-        if "gather grass" not in ranger_appearance or "gather stick" not in ranger_appearance:
-            raise AssertionError(f"Ranger did not receive clickable gather actions: {ranger_appearance}")
+        if "a patch of tall grass" in ranger_appearance or "a fallen branch" in ranger_appearance:
+            raise AssertionError(f"Legacy ranger room resource lines should no longer render: {ranger_appearance}")
+        if "gather grass" in ranger_appearance or "gather stick" in ranger_appearance:
+            raise AssertionError(f"Legacy ranger room gather actions should no longer render: {ranger_appearance}")
         if "a patch of tall grass" in outsider_appearance or "gather grass" in outsider_appearance:
-            raise AssertionError(f"Non-ranger should not see Ranger-only resources: {outsider_appearance}")
+            raise AssertionError(f"Legacy ranger room resources leaked to non-ranger view: {outsider_appearance}")
 
         return {
             "commands": list(ctx.command_log),
@@ -18229,11 +18228,11 @@ def run_ranger_resource_sell_loop_scenario(args):
 
     def scenario(ctx):
         from evennia.utils.create import create_object
+        from utils.survival_loot import create_simple_item
 
         ranger = _build_exp_test_character(ctx, key="TEST_RANGER_LOOP")
         ranger.db.profession = "ranger"
         ranger.move_to(ctx.room, move_hooks=True)
-        ctx.room.db.ranger_resources = ["grass", "stick"]
 
         buyer = create_object("typeclasses.vendor.Vendor", key="Field Buyer", location=ctx.room, home=ctx.room)
         buyer.db.is_vendor = True
@@ -18243,11 +18242,28 @@ def run_ranger_resource_sell_loop_scenario(args):
 
         starting_coins = int(getattr(ranger.db, "coins", 0) or 0)
 
-        ranger.gather_ranger_resource("stick")
-        ranger.gather_ranger_resource("grass")
-        after_gather = ctx.room.return_appearance(ranger)
-        if "gather stick" in after_gather or "gather grass" in after_gather:
-            raise AssertionError("Gathered resources should disappear for the Ranger after use.")
+        create_simple_item(
+            ranger,
+            key="stick",
+            desc="A usable foraged stick.",
+            item_type="resource",
+            ranger_resource_kind="stick",
+            forage_kind="stick",
+            item_value=1,
+            value=1,
+            weight=0.2,
+        )
+        create_simple_item(
+            ranger,
+            key="grass",
+            desc="A usable bundle of grass.",
+            item_type="resource",
+            ranger_resource_kind="grass",
+            forage_kind="grass",
+            item_value=1,
+            value=1,
+            weight=0.1,
+        )
 
         bundle_item = ranger.transform_ranger_resource("bundle", "sticks")
         braid_item = ranger.transform_ranger_resource("braid", "grass")

@@ -13,8 +13,11 @@ import re
 
 from django.utils.text import slugify
 from evennia.objects.objects import DefaultObject
+from evennia.utils.create import create_object
 
 from systems.chargen.mirror import MIRROR_KEY, is_chargen_active, render_mirror
+from world.helpers.display_aggregation import format_stack_label
+from world.helpers.target_resolver import mark_item_arrival
 
 
 LOGGER = logging.getLogger(__name__)
@@ -121,6 +124,106 @@ class Object(ObjectParent, DefaultObject):
         self.db.entry_open = False
         self.db.last_burgled_at = 0
         self.db.burgle_heat = 0
+        self.db.stack_quantity = max(1, int(getattr(self.db, "stack_quantity", 1) or 1))
+
+    def get_stack_quantity(self):
+        quantity = getattr(self.db, "stack_quantity", None)
+        if quantity is None:
+            quantity = getattr(self.db, "stack_count", 1)
+        try:
+            return max(1, int(quantity or 1))
+        except (TypeError, ValueError):
+            return 1
+
+    def set_stack_quantity(self, quantity):
+        normalized = max(1, int(quantity or 1))
+        self.db.stack_quantity = normalized
+        self.db.stack_count = normalized
+        return normalized
+
+    def is_stackable(self):
+        explicit = getattr(self.db, "stackable", None)
+        if explicit is not None:
+            return bool(explicit)
+        if bool(getattr(self.db, "is_container", False)):
+            return False
+        item_type = str(getattr(self.db, "item_type", "") or "").strip().lower()
+        return item_type in {"raw_resource", "foraged_material"}
+
+    def get_stack_identity(self):
+        explicit = str(getattr(self.db, "stack_identity", "") or "").strip()
+        if explicit:
+            return explicit.lower()
+        parts = [
+            str(self.__class__.__module__),
+            str(self.__class__.__name__),
+            str(self.key or "").strip().lower(),
+            str(getattr(self.db, "item_type", "") or "").strip().lower(),
+            str(getattr(self.db, "material_quality", "") or "").strip().lower(),
+            str(getattr(self.db, "forage_kind", "") or "").strip().lower(),
+            str(getattr(self.db, "catalog_category", "") or "").strip().lower(),
+        ]
+        return "|".join(parts)
+
+    def can_stack_with(self, other):
+        if other is None or other == self:
+            return False
+        if not hasattr(other, "is_stackable") or not hasattr(other, "get_stack_identity"):
+            return False
+        return self.is_stackable() and other.is_stackable() and self.get_stack_identity() == other.get_stack_identity()
+
+    def merge_stack_from(self, other):
+        if not self.can_stack_with(other):
+            return False
+        self.set_stack_quantity(self.get_stack_quantity() + other.get_stack_quantity())
+        other.delete()
+        return True
+
+    def split_stack(self, quantity, destination=None):
+        requested = max(1, int(quantity or 1))
+        total = self.get_stack_quantity()
+        if not self.is_stackable() or requested >= total:
+            return None
+        split_obj = create_object(type(self), key=self.key, location=destination)
+        for attr in list(self.db_attributes.all()):
+            if str(getattr(attr, "db_key", "") or "") in {"stack_quantity", "stack_count", "mt516_arrived_at"}:
+                continue
+            split_obj.attributes.add(attr.db_key, attr.value, category=attr.db_category)
+        aliases = getattr(self, "aliases", None)
+        if aliases and hasattr(aliases, "all"):
+            for alias in aliases.all():
+                split_obj.aliases.add(alias)
+        split_obj.set_stack_quantity(requested)
+        self.set_stack_quantity(total - requested)
+        return split_obj
+
+    def find_stack_merge_target(self, contents):
+        for candidate in list(contents or []):
+            if candidate == self:
+                continue
+            if hasattr(candidate, "can_stack_with") and candidate.can_stack_with(self):
+                return candidate
+        return None
+
+    def at_object_receive(self, moved_obj, source_location, **kwargs):
+        super().at_object_receive(moved_obj, source_location, **kwargs)
+        if moved_obj and hasattr(moved_obj, "is_stackable"):
+            mark_item_arrival(moved_obj)
+            target = moved_obj.find_stack_merge_target(getattr(self, "contents", [])) if hasattr(moved_obj, "find_stack_merge_target") else None
+            if target is not None:
+                target.merge_stack_from(moved_obj)
+
+    def get_inventory_display_name(self, looker=None, **kwargs):
+        label = self.get_display_name(looker, **kwargs)
+        if not self.is_stackable():
+            return label
+        return format_stack_label(label, self.get_stack_quantity())
+
+    def return_appearance(self, looker, **kwargs):
+        appearance = super().return_appearance(looker, **kwargs)
+        if not self.is_stackable() or self.get_stack_quantity() <= 1:
+            return appearance
+        return f"{appearance}\nQuantity: {self.get_stack_quantity()}"
 
     def get_base_weight(self):
         weight = getattr(self.db, "weight", None)

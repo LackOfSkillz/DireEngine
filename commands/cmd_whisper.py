@@ -35,7 +35,16 @@ class CmdWhisper(Command):
             caller.msg("Usage: whisper <target> = <message>")
             return
 
-        target = caller.search(self.target_name)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            self.target_name,
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(self.target_name)
         if not target:
             return
         if target == caller:

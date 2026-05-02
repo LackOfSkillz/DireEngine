@@ -1736,6 +1736,36 @@ def _ensure_global_weather_script():
     return script
 
 
+def _ensure_global_invasion_script():
+    existing = []
+    for script in _find_scripts_by_key("global_invasion"):
+        if getattr(script, "typeclass_path", "") == "world.invasion.InvasionScript":
+            existing.append(script)
+
+    keeper = existing[0] if existing else None
+    for duplicate in existing[1:]:
+        try:
+            duplicate.delete()
+        except Exception:
+            pass
+
+    if keeper is not None:
+        try:
+            if not bool(getattr(keeper, "is_active", False)):
+                keeper.start()
+        except Exception as error:
+            logger.log_trace(f"_ensure_global_invasion_script failed to start existing script: {error}")
+        return keeper
+
+    script = create_script("world.invasion.InvasionScript", key="global_invasion")
+    try:
+        if not bool(getattr(script, "is_active", False)):
+            script.start()
+    except Exception as error:
+        logger.log_trace(f"_ensure_global_invasion_script failed to start new script: {error}")
+    return script
+
+
 def _get_guard_patrol_owner():
     owner = str(getattr(settings, "GUARD_PATROL_OWNER", "global_script") or "global_script").strip().lower()
     if owner not in _VALID_GUARD_PATROL_OWNERS:
@@ -2214,6 +2244,7 @@ def at_server_start():
                 )
 
         _append_guard_startup_trace("at_server_start", "post_tick_setup")
+        _ensure_global_invasion_script()
         _ensure_global_weather_script()
         _log_guard_patrol_owner_state()
         _bootstrap_guard_patrols("at_server_start", phase_label="early")

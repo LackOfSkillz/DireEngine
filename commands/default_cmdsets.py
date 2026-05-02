@@ -21,6 +21,7 @@ from commands.cmd_analyze import CmdAnalyze
 from commands.cmd_admin_identity import CmdCheckIdentityIntegrity, CmdHealIdentityIntegrity
 from commands.cmd_appraise import CmdAppraise
 from commands.cmd_calendar import CmdCalendar
+from commands.cmd_invasion import CmdInvasion
 from commands.cmd_weather import CmdWeather
 from commands.cmd_shift import CmdShift
 from commands.cmd_ask import CmdAsk
@@ -88,7 +89,7 @@ from commands.cmd_favor import CmdFavor
 from commands.cmd_focus import CmdFocus
 from commands.cmd_followtrail import CmdFollowTrail
 from commands.cmd_forage import CmdForage
-from commands.cmd_rangercraft import CmdBraid, CmdBundle, CmdGather
+from commands.cmd_rangercraft import CmdBraid, CmdBundle
 from commands.cmd_get import CmdGet
 from commands.cmd_go import CmdGo
 from commands.cmd_guild import CmdGuild
@@ -124,6 +125,7 @@ from commands.cmd_load import CmdLoad
 from commands.cmd_loot import CmdLoot
 from commands.cmd_lootdebug import CmdLootDebug
 from commands.cmd_link import CmdLink
+from commands.cmd_look import CmdLook
 from commands.cmd_manipulate import CmdManipulate
 from commands.cmd_mark import CmdMark
 from commands.cmd_mend import CmdMend
@@ -262,6 +264,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdAnalyze())
         self.add(CmdZone())
         self.add(CmdCalendar())
+        self.add(CmdInvasion())
         self.add(CmdWeather())
         self.add(CmdCheckIdentityIntegrity())
         self.add(CmdHealIdentityIntegrity())
@@ -335,7 +338,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdRig())
         self.add(CmdFocus())
         self.add(CmdForage())
-        self.add(CmdGather())
         self.add(CmdBundle())
         self.add(CmdBraid())
         self.add(CmdFindPassage())
@@ -359,6 +361,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdLanguage())
         self.add(CmdLayLow())
         self.add(CmdLink())
+        self.add(CmdLook())
         self.add(CmdLoad())
         self.add(CmdLoot())
         self.add(CmdLootDebug())

@@ -2,6 +2,8 @@ import random
 
 from evennia.utils.utils import repeat
 
+from engine.render.state_markup import build_render_context, render_state_markup
+
 from .rooms import Room
 
 
@@ -69,7 +71,7 @@ class ExtendedDireRoom(Room):
 
         return get_current_season()
 
-    def get_stateful_desc(self):
+    def _select_stateful_desc(self):
         from world.calendar import SEASONS
 
         descriptions = self.all_desc()
@@ -90,8 +92,13 @@ class ExtendedDireRoom(Room):
 
         return descriptions.get(None) or self.fallback_desc
 
+    def get_stateful_desc(self, looker=None):
+        description = self._select_stateful_desc()
+        context = build_render_context(self, looker=looker)
+        return render_state_markup(description, context)
+
     def get_display_desc(self, looker, **kwargs):
-        return self.get_stateful_desc()
+        return self.get_stateful_desc(looker=looker)
 
     def get_detail(self, key, looker=None):
         normalized = str(key or "").strip().lower()

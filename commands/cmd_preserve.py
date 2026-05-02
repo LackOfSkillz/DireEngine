@@ -22,7 +22,13 @@ class CmdPreserve(Command):
         if not args:
             caller.msg("Preserve what?")
             return
-        target = caller.search(args, location=caller.location)
+        candidates = [obj for obj in list(getattr(getattr(caller, "location", None), "contents", []) or []) if obj != caller]
+        target, matches, base_query, index = self.resolve_item_target(args, candidates, default_first=True)
+        if not target and matches and index is not None:
+            self.msg_item_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(args, location=caller.location)
         if not target:
             return
         ok, message = caller.preserve_corpse(target) if hasattr(caller, "preserve_corpse") else (False, "You cannot preserve that.")

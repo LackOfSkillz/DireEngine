@@ -18,9 +18,15 @@ class CmdLoot(Command):
         if not self.args:
             caller.msg("Loot what?")
             return
-        target = caller.search(self.args.strip(), location=caller.location)
+        candidates = [obj for obj in list(getattr(caller.location, "contents", []) or []) if obj != caller]
+        target, matches, base_query, index = self.resolve_item_target(self.args.strip(), candidates, default_first=True)
         if not target:
-            return
+            if matches and index is not None:
+                self.msg_item_matches(base_query, matches)
+            else:
+                target = caller.search(self.args.strip(), location=caller.location)
+            if not target:
+                return
         if not hasattr(caller, "loot_target"):
             caller.msg("You cannot loot that.")
             return

@@ -31,8 +31,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -87,8 +87,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -138,8 +138,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -188,8 +188,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -244,8 +244,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -295,8 +295,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -347,8 +347,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -404,8 +404,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -459,8 +459,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -504,8 +504,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -555,8 +555,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -600,8 +600,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -646,8 +646,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -686,8 +686,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -726,8 +726,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -770,8 +770,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -810,8 +810,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -860,8 +860,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -905,8 +905,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -955,8 +955,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1010,8 +1010,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1059,8 +1059,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1099,8 +1099,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1144,8 +1144,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1188,8 +1188,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1228,8 +1228,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1278,8 +1278,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1333,8 +1333,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1379,8 +1379,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1429,8 +1429,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1474,8 +1474,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1534,8 +1534,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1579,8 +1579,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1629,8 +1629,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1675,8 +1675,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1726,8 +1726,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1778,8 +1778,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1828,8 +1828,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1878,8 +1878,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1933,8 +1933,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -1988,8 +1988,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2040,8 +2040,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2085,8 +2085,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2140,8 +2140,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2195,8 +2195,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2240,8 +2240,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2286,8 +2286,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2336,8 +2336,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2392,8 +2392,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2438,8 +2438,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2478,8 +2478,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2519,8 +2519,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2565,8 +2565,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2621,8 +2621,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2676,8 +2676,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2732,8 +2732,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2788,8 +2788,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2833,8 +2833,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2883,8 +2883,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2933,8 +2933,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -2973,8 +2973,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3023,8 +3023,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3068,8 +3068,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3119,8 +3119,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3169,8 +3169,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3230,8 +3230,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3282,8 +3282,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3333,8 +3333,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3389,8 +3389,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3449,8 +3449,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3505,8 +3505,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3550,8 +3550,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3600,8 +3600,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3645,8 +3645,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3685,8 +3685,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3736,8 +3736,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3796,8 +3796,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3836,8 +3836,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3887,8 +3887,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3937,8 +3937,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -3987,8 +3987,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4037,8 +4037,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4083,8 +4083,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4127,8 +4127,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4167,8 +4167,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4212,8 +4212,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4262,8 +4262,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4317,8 +4317,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4378,8 +4378,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4424,8 +4424,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4468,8 +4468,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4509,8 +4509,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4569,8 +4569,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4619,8 +4619,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4659,8 +4659,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4699,8 +4699,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4744,8 +4744,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4785,8 +4785,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4844,8 +4844,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4900,8 +4900,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4950,8 +4950,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -4991,8 +4991,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5043,8 +5043,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5094,8 +5094,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5155,8 +5155,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5217,8 +5217,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5262,8 +5262,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5303,8 +5303,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5353,8 +5353,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5400,8 +5400,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5450,8 +5450,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5500,8 +5500,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5550,8 +5550,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5600,8 +5600,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5640,8 +5640,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5680,8 +5680,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5731,8 +5731,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5782,8 +5782,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5838,8 +5838,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5903,8 +5903,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -5958,8 +5958,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6009,8 +6009,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6060,8 +6060,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6105,8 +6105,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6145,8 +6145,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6195,8 +6195,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6246,8 +6246,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6297,8 +6297,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6348,8 +6348,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6399,8 +6399,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6454,8 +6454,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6500,8 +6500,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6551,8 +6551,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6602,8 +6602,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6653,8 +6653,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6704,8 +6704,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6754,8 +6754,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6804,8 +6804,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6855,8 +6855,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6911,8 +6911,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -6956,8 +6956,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7012,8 +7012,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7063,8 +7063,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7114,8 +7114,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7159,8 +7159,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7201,8 +7201,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7256,8 +7256,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7301,8 +7301,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7342,8 +7342,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7397,8 +7397,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7442,8 +7442,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7484,8 +7484,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7535,8 +7535,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7585,8 +7585,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7641,8 +7641,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7692,8 +7692,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7742,8 +7742,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7798,8 +7798,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7849,8 +7849,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7905,8 +7905,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -7956,8 +7956,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8001,8 +8001,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8052,8 +8052,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8108,8 +8108,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8158,8 +8158,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8218,8 +8218,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8269,8 +8269,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8316,8 +8316,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8371,8 +8371,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8421,8 +8421,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8476,8 +8476,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8526,8 +8526,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8577,8 +8577,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8627,8 +8627,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8672,8 +8672,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8717,8 +8717,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8763,8 +8763,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8808,8 +8808,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8858,8 +8858,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8909,8 +8909,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -8958,8 +8958,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9008,8 +9008,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9058,8 +9058,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9107,8 +9107,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9157,8 +9157,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9201,8 +9201,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9275,8 +9275,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9315,8 +9315,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9365,8 +9365,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9410,8 +9410,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9455,8 +9455,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9505,8 +9505,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9551,8 +9551,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9595,8 +9595,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9645,8 +9645,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9691,8 +9691,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9737,8 +9737,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9797,8 +9797,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9847,8 +9847,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9897,8 +9897,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9947,8 +9947,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -9997,8 +9997,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10047,8 +10047,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10086,8 +10086,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10137,8 +10137,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10193,8 +10193,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10244,8 +10244,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10294,8 +10294,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10344,8 +10344,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10389,8 +10389,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null
@@ -10435,8 +10435,8 @@ rooms:
     messages: []
   environment: city
   terrain:
-    primary: null
-    secondary: null
+    primary: outdoor
+    secondary: urban_cultivated
   quest_hooks: []
   tags:
     structure: null

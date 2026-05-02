@@ -20,14 +20,14 @@ class CmdWear(Command):
             self.caller.msg("What do you want to wear?")
             return
 
-        obj, matches, base_query, index = self.caller.resolve_numbered_candidate(
+        obj, matches, base_query, index = self.resolve_item_target(
             self.args,
             self.caller.get_visible_carried_items(),
             default_first=True,
         )
         if not obj:
             if matches and index is not None:
-                self.caller.msg_numbered_matches(base_query, matches)
+                self.msg_item_matches(base_query, matches)
             else:
                 self.caller.search(base_query or self.args)
             return

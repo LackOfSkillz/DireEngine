@@ -31,7 +31,16 @@ class CmdAsk(Command):
             target_name = raw[:marker_index].strip()
             topic = raw[marker_index + len(marker):].strip()
 
-        target = self.caller.search(target_name.strip())
+        target, matches, base_query, index, _scope = self.resolve_target(
+            target_name.strip(),
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if not target:
+            target = self.caller.search(target_name.strip())
         if not target:
             return
 

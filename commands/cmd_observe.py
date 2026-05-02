@@ -40,7 +40,16 @@ class CmdObserve(Command):
             caller.msg("There is no one here to observe.")
             return
 
-        target = caller.search(args, location=room)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            args,
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(args, location=room)
         if not target:
             return
 

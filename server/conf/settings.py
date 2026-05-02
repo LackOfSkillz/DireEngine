@@ -111,9 +111,30 @@ CALENDAR_TIMEZONE = "America/New_York"
 # Weather system
 ######################################################################
 # How often the weather progression evaluates each zone.
-# Expressed in game-seconds. At TIME_FACTOR=4.0, 15 game-minutes
-# (900 game-seconds) = 225 real seconds = 3.75 real minutes.
+# Expressed in game-seconds for public-state reporting compatibility.
+# State progression cadence is derived internally from the
+# atmospheric interval and the state-tick ratio below.
 WEATHER_TICK_INTERVAL_GAME_SECONDS = 900
+
+# MT-514b-ambient: fast rhythm for ambient weather broadcasts.
+# Default 240 seconds = 4 real minutes between atmospheric ticks.
+WEATHER_ATMOSPHERIC_TICK_INTERVAL_SECONDS = 240
+
+# State progression fires every Nth atmospheric tick.
+# Default 5 means weather state progression every 20 real minutes.
+WEATHER_STATE_TICK_RATIO = 5
+
+# Chance an atmospheric tick broadcasts an ambient message for a
+# holding weather state. Keeps weather lively without message spam.
+WEATHER_AMBIENT_BROADCAST_PROBABILITY = 0.4
+
+# MT-514b-perf-v4 mitigation: temporarily disable automatic weather
+# ticks while production cycle time exceeds acceptable bounds.
+# This flag is read by WeatherScript.at_repeat(). When False, the
+# script's repeat callback returns early without running the cycle.
+# Set to True (or remove the setting) only after live cycle time
+# is verified under 2 seconds in production.
+WEATHER_AUTOTICK_ENABLED = True
 
 # Probability per tick that a zone in `storm` state produces a
 # lightning/thunder atmospheric event. Tick is 15 game-minutes,

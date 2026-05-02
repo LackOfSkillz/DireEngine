@@ -21,7 +21,16 @@ class CmdBind(Command):
         if not self.args:
             caller.msg("Bind which corpse?")
             return
-        target = caller.search(self.args.strip(), location=caller.location)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            self.args.strip(),
+            scopes=("room",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(self.args.strip(), location=caller.location)
         if not target:
             return
         if not getattr(getattr(target, "db", None), "is_corpse", False):

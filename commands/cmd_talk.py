@@ -20,4 +20,15 @@ class CmdTalk(Command):
         if not target_name:
             self.caller.msg("Talk to whom?")
             return
+        target, matches, base_query, index, _scope = self.resolve_target(
+            target_name,
+            scopes=("npcs",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if target and hasattr(target, "handle_interaction"):
+            target.handle_interaction(self.caller)
+            return
         self.caller.open_interaction_with(target_name)

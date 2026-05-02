@@ -1,4 +1,5 @@
 from .wearables import Wearable
+from world.helpers.display_aggregation import aggregate_object_labels
 
 
 class WearableContainer(Wearable):
@@ -64,14 +65,16 @@ class WearableContainer(Wearable):
         if not owner:
             return False, None, "You do not have that stored."
 
-        item, matches, base_query, index = owner.resolve_numbered_candidate(
+        from world.helpers.target_resolver import resolve_item_target
+
+        item, matches, base_query, index = resolve_item_target(
             item_name,
             self.get_stored_items(),
             default_first=True,
         )
         if not item:
             if matches and index is not None:
-                owner.msg_numbered_matches(base_query, matches)
+                owner.msg(f"More than one match for '{base_query}'. Try 'first {base_query}', 'second {base_query}', or '2.{base_query}':")
             return False, None, "You do not have that stored."
 
         if not item.move_to(owner, quiet=True, use_destination=False):
@@ -104,8 +107,8 @@ class WearableContainer(Wearable):
             stored = self.get_stored_items()
             if stored:
                 lines.append("It currently holds:")
-                for item in stored:
-                    lines.append(f"  {item.key}")
+                for label in aggregate_object_labels(stored, looker=looker):
+                    lines.append(f"  {label}")
             else:
                 lines.append("It currently holds: empty.")
 

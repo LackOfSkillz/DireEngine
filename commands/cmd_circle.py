@@ -1,4 +1,5 @@
 ﻿from commands.command import Command
+from world.helpers.target_resolver import format_item_matches, resolve_target
 
 
 class CmdCircle(Command):
@@ -59,7 +60,17 @@ def run_empath_circle_command(caller, raw_args="", force_advance=False):
         if not remainder:
             caller.msg("Usage: circle invite <target>")
             return True
-        target = caller.search(remainder, location=caller.location)
+        target, matches, base_query, index, _scope = resolve_target(
+            remainder,
+            caller,
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            caller.msg(format_item_matches(base_query, matches, looker=caller))
+            return True
+        if not target:
+            target = caller.search(remainder, location=caller.location)
         if not target:
             return True
         ok, message = caller.invite_empath_circle_member(target) if hasattr(caller, "invite_empath_circle_member") else (False, "You cannot form a shock circle right now.")
@@ -69,7 +80,17 @@ def run_empath_circle_command(caller, raw_args="", force_advance=False):
         if not remainder:
             caller.msg("Usage: circle accept <target>")
             return True
-        target = caller.search(remainder, location=caller.location)
+        target, matches, base_query, index, _scope = resolve_target(
+            remainder,
+            caller,
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            caller.msg(format_item_matches(base_query, matches, looker=caller))
+            return True
+        if not target:
+            target = caller.search(remainder, location=caller.location)
         if not target:
             return True
         ok, message = caller.accept_empath_circle_invite(target) if hasattr(caller, "accept_empath_circle_invite") else (False, "You cannot join a shock circle right now.")

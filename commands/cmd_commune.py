@@ -30,7 +30,16 @@ class CmdCommune(Command):
         commune_name = parts[0].lower()
         target = None
         if len(parts) > 1:
-            target = caller.search(parts[1], location=caller.location)
+            target, matches, base_query, index, _scope = self.resolve_target(
+                parts[1],
+                scopes=("characters", "room"),
+                default_first=True,
+            )
+            if not target and matches and index is not None:
+                self.msg_target_matches(base_query, matches)
+                return
+            if not target:
+                target = caller.search(parts[1], location=caller.location)
             if not target:
                 return
 

@@ -21,7 +21,16 @@ class CmdUncurse(Command):
         if not self.args:
             caller.msg("Uncurse whom?")
             return
-        target = caller.search(self.args.strip(), location=caller.location)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            self.args.strip(),
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(self.args.strip(), location=caller.location)
         if not target:
             return
         power = max(10, int((caller.get_skill("attunement") + caller.get_skill("magic")) / 4)) if hasattr(caller, "get_skill") else 10

@@ -29,7 +29,13 @@ class CmdBurgle(Command):
             caller.msg("You are in no position to do that.")
             return
 
-        target = caller.search(self.args.strip(), location=room)
+        candidates = [obj for obj in list(getattr(room, "contents", []) or []) if obj != caller]
+        target, matches, base_query, index = self.resolve_item_target(self.args.strip(), candidates, default_first=True)
+        if not target and matches and index is not None:
+            self.msg_item_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(self.args.strip(), location=room)
         if not target:
             return
 

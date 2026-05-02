@@ -20,7 +20,16 @@ class CmdStudyAnatomy(Command):
         if not target_name:
             caller.msg("Study anatomy on what?")
             return
-        target = caller.search(target_name)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            target_name,
+            scopes=("characters", "room", "inventory"),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return
+        if not target:
+            target = caller.search(target_name)
         if not target:
             return
         if getattr(target.db, "is_study_item", False):

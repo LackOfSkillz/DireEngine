@@ -27,7 +27,16 @@ class CmdTarget(Command):
         part = self.args.strip().lower()
         valid = ["head", "chest", "arm", "leg"]
         if part not in valid:
-            target = self.caller.search(self.args.strip())
+            target, matches, base_query, index, _scope = self.resolve_target(
+                self.args.strip(),
+                scopes=("characters",),
+                default_first=True,
+            )
+            if not target and matches and index is not None:
+                self.msg_target_matches(base_query, matches)
+                return
+            if not target:
+                target = self.caller.search(self.args.strip())
             if not target:
                 return
             self.caller.set_target(target)

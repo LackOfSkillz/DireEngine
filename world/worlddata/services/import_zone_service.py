@@ -626,6 +626,10 @@ def _warm_load_zone(zone_id: str, plan: dict) -> dict:
     if stale_room_ids:
         warnings.append("Warm load preserved rooms no longer present in YAML: " + ", ".join(stale_room_ids))
 
+    from world.weather import invalidate_zone_caches
+
+    invalidate_zone_caches(zone_id)
+
     return {
         "zone_id": zone_id,
         "dry_run": False,
@@ -739,6 +743,10 @@ def load_zone(zone_id: str, dry_run: bool = False, preserve_existing: bool = Fal
     print(f"NPCs placed: {spawned_npcs}")
     print(f"Items placed: {spawned_items}")
     print(f"Containers linked: {plan['summary']['containers_linked']}")
+
+    from world.weather import invalidate_zone_caches
+
+    invalidate_zone_caches(normalized_zone_id)
 
     return {
         "zone_id": normalized_zone_id,

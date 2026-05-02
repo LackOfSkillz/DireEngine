@@ -27,15 +27,15 @@ import random
 
 import yaml
 from django.conf import settings
+from evennia.scripts.models import ScriptDB
 from evennia import search_script
 from evennia.utils import logger
-from evennia.utils.create import create_script
 from zoneinfo import ZoneInfo
 
 from typeclasses.scripts import Script
 from world.builder.prompting.room_description_prompt import _THRESHOLD_STRUCTURES, determine_applicable_state_groups
 from world.builder.schemas.room_tag_schema import normalize_room_tags
-from world.builder.services.map_exporter import _rooms_for_zone
+from world.builder.services.map_exporter import _rooms_for_zone as _query_rooms_for_zone
 from world.calendar import get_current_season
 
 
@@ -67,14 +67,35 @@ DEFAULT_WEATHER = "clear"
 WEATHER_SCRIPT_KEY = "global_weather"
 WEATHER_SCRIPT_PATH = "world.weather.WeatherScript"
 _WEATHER_STATE_PREFIX = "weather_state__"
+_WEATHER_META_PREFIX = "weather_meta__"
 _CONTENT_DIR = Path(__file__).resolve().parent / "content"
 _COMPATIBILITY_PATH = _CONTENT_DIR / "climate_weather_compatibility.yaml"
 _KEYWORDS_PATH = _CONTENT_DIR / "climate_keywords.yaml"
 _TRANSITIONS_PATH = _CONTENT_DIR / "weather_transitions.yaml"
 _TRANSITION_MESSAGES_PATH = _CONTENT_DIR / "weather_transition_messages.yaml"
 _LIGHTNING_MESSAGES_PATH = _CONTENT_DIR / "weather_lightning_messages.yaml"
+_AMBIENT_MESSAGES_PATH = _CONTENT_DIR / "weather_ambient_messages.yaml"
 _ZONE_DIR = Path(__file__).resolve().parents[1] / "worlddata" / "zones"
 _FALLBACK_WARNED_VALUES: set[str] = set()
+_ZONE_ROOM_CACHE: dict[str, list[object]] = {}
+_ZONE_ELIGIBLE_CACHE: dict[str, list[tuple[object, bool]]] = {}
+_ZONE_PAYLOAD_CACHE: dict[str, dict] = {}
+_ZONE_PAYLOAD_LIST_CACHE: list[dict] | None = None
+
+
+def invalidate_zone_caches(zone_id: str | None = None) -> None:
+    normalized_zone_id = str(zone_id or "").strip()
+    if not normalized_zone_id:
+        _ZONE_ROOM_CACHE.clear()
+        _ZONE_ELIGIBLE_CACHE.clear()
+        _ZONE_PAYLOAD_CACHE.clear()
+        global _ZONE_PAYLOAD_LIST_CACHE
+        _ZONE_PAYLOAD_LIST_CACHE = None
+        return
+    _ZONE_ROOM_CACHE.pop(normalized_zone_id, None)
+    _ZONE_ELIGIBLE_CACHE.pop(normalized_zone_id, None)
+    _ZONE_PAYLOAD_CACHE.pop(normalized_zone_id, None)
+    _ZONE_PAYLOAD_LIST_CACHE = None
 
 
 def _calendar_tz() -> ZoneInfo:
@@ -175,11 +196,59 @@ def _load_lightning_messages() -> dict[str, list[str]]:
     return messages
 
 
+def _load_ambient_messages() -> dict[str, dict[str, list[str]]]:
+    payload = _load_yaml(_AMBIENT_MESSAGES_PATH)
+    if not isinstance(payload, dict):
+        raise ValueError("weather ambient messages must be a mapping.")
+    messages: dict[str, dict[str, list[str]]] = {}
+    for raw_climate, raw_states in payload.items():
+        climate = str(raw_climate or "").strip().lower()
+        if climate not in CLIMATES:
+            continue
+        state_payload = dict(raw_states or {}) if isinstance(raw_states, dict) else {}
+        normalized_states: dict[str, list[str]] = {}
+        for raw_state, raw_messages in state_payload.items():
+            state = str(raw_state or "").strip().lower()
+            if state not in WEATHER_STATES:
+                continue
+            normalized_states[state] = [
+                str(value or "").strip() for value in list(raw_messages or []) if str(value or "").strip()
+            ]
+        messages[climate] = normalized_states
+    return messages
+
+
 _CLIMATE_COMPATIBILITY = _load_climate_compatibility()
 _CLIMATE_KEYWORDS = _load_climate_keywords()
 _TRANSITION_MATRICES = _load_transition_matrices()
 _TRANSITION_MESSAGES = _load_transition_messages()
 _LIGHTNING_MESSAGES = _load_lightning_messages()
+_AMBIENT_MESSAGES = _load_ambient_messages()
+
+
+def _atmospheric_tick_interval_seconds() -> float:
+    return max(1.0, float(getattr(settings, "WEATHER_ATMOSPHERIC_TICK_INTERVAL_SECONDS", 240) or 240))
+
+
+def _weather_state_tick_ratio() -> int:
+    try:
+        ratio = int(getattr(settings, "WEATHER_STATE_TICK_RATIO", 5) or 5)
+    except (TypeError, ValueError):
+        ratio = 5
+    return max(1, ratio)
+
+
+def _ambient_broadcast_probability() -> float:
+    try:
+        value = float(getattr(settings, "WEATHER_AMBIENT_BROADCAST_PROBABILITY", 0.4) or 0.4)
+    except (TypeError, ValueError):
+        value = 0.4
+    return max(0.0, min(1.0, value))
+
+
+def _state_tick_interval_game_seconds() -> int:
+    time_factor = max(0.0001, float(getattr(settings, "TIME_FACTOR", 1.0) or 1.0))
+    return int(round(_atmospheric_tick_interval_seconds() * _weather_state_tick_ratio() * time_factor))
 
 
 def resolve_climate(value: str | None) -> str:
@@ -246,7 +315,12 @@ def _pick_next_state(current: str, climate: str, season: str, *, rng=None) -> st
 
 
 def _iter_zone_payloads() -> list[dict]:
+    global _ZONE_PAYLOAD_LIST_CACHE
+    if _ZONE_PAYLOAD_LIST_CACHE is not None:
+        return list(_ZONE_PAYLOAD_LIST_CACHE)
+
     payloads: list[dict] = []
+    payload_map: dict[str, dict] = {}
     for file_path in sorted(_ZONE_DIR.glob("*.yaml")):
         try:
             payload = _load_yaml(file_path)
@@ -258,16 +332,24 @@ def _iter_zone_payloads() -> list[dict]:
         zone_id = str(payload.get("zone_id") or file_path.stem).strip()
         if not zone_id:
             continue
-        payloads.append({**payload, "zone_id": zone_id})
-    return payloads
+        normalized_payload = {**payload, "zone_id": zone_id}
+        payloads.append(normalized_payload)
+        payload_map[zone_id] = normalized_payload
+    _ZONE_PAYLOAD_LIST_CACHE = payloads
+    _ZONE_PAYLOAD_CACHE.clear()
+    _ZONE_PAYLOAD_CACHE.update(payload_map)
+    return list(payloads)
 
 
 def _get_zone_payload(zone_id: str) -> dict | None:
     normalized_zone_id = str(zone_id or "").strip()
-    for payload in _iter_zone_payloads():
-        if str(payload.get("zone_id") or "").strip() == normalized_zone_id:
-            return payload
-    return None
+    if not normalized_zone_id:
+        return None
+    cached = _ZONE_PAYLOAD_CACHE.get(normalized_zone_id)
+    if cached is not None:
+        return cached
+    _iter_zone_payloads()
+    return _ZONE_PAYLOAD_CACHE.get(normalized_zone_id)
 
 
 def _zone_climate_text(zone_payload: dict | None) -> str | None:
@@ -278,14 +360,23 @@ def _zone_climate_text(zone_payload: dict | None) -> str | None:
     return text or None
 
 
+def _zone_climate(zone_id: str) -> str:
+    return resolve_climate(_zone_climate_text(_get_zone_payload(zone_id)))
+
+
 def _find_scripts_by_key(script_key: str) -> list:
+    if callable(search_script):
+        try:
+            return list(search_script(script_key) or [])
+        except Exception:
+            pass
     try:
-        return list(search_script(script_key) or [])
+        return list(ScriptDB.objects.filter(db_key=script_key))
     except Exception:
         return []
 
 
-def _get_weather_script() -> WeatherScript:
+def _get_weather_script() -> WeatherScript | None:
     existing = []
     for script in _find_scripts_by_key(WEATHER_SCRIPT_KEY):
         if getattr(script, "typeclass_path", "") == WEATHER_SCRIPT_PATH:
@@ -300,32 +391,61 @@ def _get_weather_script() -> WeatherScript:
 
     if keeper is not None:
         try:
-            keeper.start()
+            if not bool(getattr(keeper, "is_active", False)):
+                keeper.start()
         except Exception as error:
             logger.log_trace(f"[Weather] Failed to start existing WeatherScript: {error}")
         return keeper
-
-    script = create_script(WEATHER_SCRIPT_PATH, key=WEATHER_SCRIPT_KEY)
-    try:
-        script.start()
-    except Exception as error:
-        logger.log_trace(f"[Weather] Failed to start new WeatherScript: {error}")
-    return script
+    return None
 
 
 def _recorded_weather_states(script) -> dict[str, str]:
-    states: dict[str, str] = {}
-    for attr in list(script.db_attributes.filter(db_key__startswith=_WEATHER_STATE_PREFIX).order_by("db_key")):
-        key = str(getattr(attr, "key", "") or getattr(attr, "db_key", "") or "")
-        zone_id = key[len(_WEATHER_STATE_PREFIX):].strip()
-        if not zone_id:
-            continue
-        states[zone_id] = str(getattr(attr, "value", DEFAULT_WEATHER) or DEFAULT_WEATHER).strip().lower() or DEFAULT_WEATHER
-    return states
+    _ensure_state_cache_loaded(script)
+    return dict(getattr(script, "_weather_state_cache", {}))
 
 
 def _state_key(zone_id: str) -> str:
     return f"{_WEATHER_STATE_PREFIX}{str(zone_id or '').strip()}"
+
+
+def _meta_key(zone_id: str) -> str:
+    return f"{_WEATHER_META_PREFIX}{str(zone_id or '').strip()}"
+
+
+def _load_script_attribute_map(script, prefix: str) -> dict[str, object]:
+    values: dict[str, object] = {}
+    rows = list(script.db_attributes.filter(db_key__startswith=prefix).order_by("db_key"))
+    for attr in rows:
+        key = str(getattr(attr, "key", "") or getattr(attr, "db_key", "") or "")
+        zone_id = key[len(prefix):].strip()
+        if not zone_id:
+            continue
+        values[zone_id] = getattr(attr, "value", None)
+    return values
+
+
+def _reset_state_cache(script) -> None:
+    setattr(script, "_weather_state_cache", {})
+    setattr(script, "_weather_meta_cache", {})
+    setattr(script, "_weather_state_cache_loaded", False)
+
+
+def _ensure_state_cache_loaded(script) -> None:
+    if bool(getattr(script, "_weather_state_cache_loaded", False)):
+        return
+
+    state_cache: dict[str, str] = {}
+    for zone_id, value in _load_script_attribute_map(script, _WEATHER_STATE_PREFIX).items():
+        normalized_value = str(value or DEFAULT_WEATHER).strip().lower() or DEFAULT_WEATHER
+        state_cache[zone_id] = normalized_value if normalized_value in WEATHER_STATES else DEFAULT_WEATHER
+
+    meta_cache: dict[str, dict] = {}
+    for zone_id, value in _load_script_attribute_map(script, _WEATHER_META_PREFIX).items():
+        meta_cache[zone_id] = dict(value) if isinstance(value, dict) else {}
+
+    setattr(script, "_weather_state_cache", state_cache)
+    setattr(script, "_weather_meta_cache", meta_cache)
+    setattr(script, "_weather_state_cache_loaded", True)
 
 
 def get_current_weather(zone_id: str) -> str:
@@ -333,8 +453,23 @@ def get_current_weather(zone_id: str) -> str:
     if not normalized_zone_id:
         return DEFAULT_WEATHER
     script = _get_weather_script()
-    value = str(script.attributes.get(_state_key(normalized_zone_id), DEFAULT_WEATHER) or DEFAULT_WEATHER).strip().lower()
+    if script is None:
+        return DEFAULT_WEATHER
+    _ensure_state_cache_loaded(script)
+    value = str(getattr(script, "_weather_state_cache", {}).get(normalized_zone_id, DEFAULT_WEATHER) or DEFAULT_WEATHER).strip().lower()
     return value if value in WEATHER_STATES else DEFAULT_WEATHER
+
+
+def get_ambient_message(climate: str, weather_state: str, *, rng=None) -> str:
+    normalized_climate = str(climate or "").strip().lower()
+    normalized_state = str(weather_state or "").strip().lower()
+    if normalized_climate not in CLIMATES:
+        return ""
+    messages = _AMBIENT_MESSAGES.get(normalized_climate, {}).get(normalized_state, [])
+    if not messages:
+        return ""
+    random_source = rng or random
+    return str(random_source.choice(messages) or "").strip()
 
 
 def set_current_weather(zone_id: str, value: str, *, source: str = "admin") -> None:
@@ -345,12 +480,32 @@ def set_current_weather(zone_id: str, value: str, *, source: str = "admin") -> N
     if normalized_value not in WEATHER_STATES:
         raise ValueError(f"Unknown weather state: {value}")
     script = _get_weather_script()
+    if script is None:
+        return
+    _ensure_state_cache_loaded(script)
+    getattr(script, "_weather_state_cache", {})[normalized_zone_id] = normalized_value
+    getattr(script, "_weather_meta_cache", {})[normalized_zone_id] = {
+        "source": str(source or "admin"),
+        "updated_at": _now_iso(),
+    }
     script.attributes.add(_state_key(normalized_zone_id), normalized_value)
-    script.attributes.add(f"weather_meta__{normalized_zone_id}", {"source": str(source or "admin"), "updated_at": _now_iso()})
+    script.attributes.add(_meta_key(normalized_zone_id), getattr(script, "_weather_meta_cache", {})[normalized_zone_id])
 
 
 def get_weather_state() -> dict:
     script = _get_weather_script()
+    if script is None:
+        return {
+            "zones": [],
+            "counts": {},
+            "tick_interval_game_seconds": _state_tick_interval_game_seconds(),
+            "lightning_probability": float(getattr(settings, "WEATHER_LIGHTNING_PROBABILITY_PER_TICK", 0.5) or 0.5),
+            "last_tick": None,
+            "next_tick": None,
+            "season": get_current_season(),
+            "climate_fallback_zones": [],
+        }
+    _ensure_state_cache_loaded(script)
     recorded_states = _recorded_weather_states(script)
     payloads = {str(payload.get("zone_id") or "").strip(): payload for payload in _iter_zone_payloads()}
     zone_ids = sorted({zone_id for zone_id in payloads.keys() if zone_id} | set(recorded_states.keys()))
@@ -385,24 +540,29 @@ def get_weather_state() -> dict:
     next_tick_iso = None
     if next_tick_seconds is not None:
         next_tick_iso = (_now() + datetime.timedelta(seconds=max(0.0, next_tick_seconds))).isoformat(timespec="seconds")
-    return {
+    result = {
         "zones": zones,
         "counts": dict(sorted(counts.items())),
-        "tick_interval_game_seconds": int(getattr(settings, "WEATHER_TICK_INTERVAL_GAME_SECONDS", 900) or 900),
+        "tick_interval_game_seconds": _state_tick_interval_game_seconds(),
         "lightning_probability": float(getattr(settings, "WEATHER_LIGHTNING_PROBABILITY_PER_TICK", 0.5) or 0.5),
         "last_tick": getattr(script.db, "last_tick_iso", None),
         "next_tick": next_tick_iso,
         "season": current_season,
         "climate_fallback_zones": fallback_zones,
     }
+    return result
 
 
 def tick_weather() -> dict[str, tuple[str, str]]:
     script = _get_weather_script()
+    if script is None:
+        return {}
     season = get_current_season()
     transitions: dict[str, tuple[str, str]] = {}
+    _ensure_state_cache_loaded(script)
     payloads = {str(payload.get("zone_id") or "").strip(): payload for payload in _iter_zone_payloads()}
-    zone_ids = sorted({zone_id for zone_id in payloads.keys() if zone_id} | set(_recorded_weather_states(script).keys()))
+    recorded_zone_ids = set(_recorded_weather_states(script).keys())
+    zone_ids = sorted({zone_id for zone_id in payloads.keys() if zone_id} | recorded_zone_ids)
     for zone_id in zone_ids:
         payload = payloads.get(zone_id)
         climate = resolve_climate(_zone_climate_text(payload))
@@ -417,6 +577,7 @@ def tick_weather() -> dict[str, tuple[str, str]]:
 
 def run_weather_cycle(*, rng=None) -> dict[str, tuple[str, str]]:
     transitions = tick_weather()
+
     for zone_id, (old, new) in transitions.items():
         _broadcast_weather_transition(zone_id, old, new)
 
@@ -427,8 +588,43 @@ def run_weather_cycle(*, rng=None) -> dict[str, tuple[str, str]]:
             continue
         if random_source.random() <= probability:
             _broadcast_storm_lightning(str(zone.get("zone_id") or ""), rng=rng)
-
     return transitions
+
+
+def _broadcast_weather_ambient(zone_id: str, message: str) -> bool:
+    sent = False
+    for room, _is_threshold in list(_eligible_rooms_for_zone(zone_id)):
+        _broadcast_message(room, message)
+        sent = True
+    return sent
+
+
+def run_atmospheric_tick(*, rng=None, skip_zone_ids: set[str] | None = None) -> list[str]:
+    script = _get_weather_script()
+    if script is None:
+        return []
+
+    _ensure_state_cache_loaded(script)
+    random_source = rng or random
+    skip = {str(zone_id or "").strip() for zone_id in (skip_zone_ids or set()) if str(zone_id or "").strip()}
+    ambient_probability = _ambient_broadcast_probability()
+    recorded_states = _recorded_weather_states(script)
+    payloads = {str(payload.get("zone_id") or "").strip(): payload for payload in _iter_zone_payloads()}
+    zone_ids = sorted({zone_id for zone_id in payloads.keys() if zone_id} | set(recorded_states.keys()))
+
+    broadcasted: list[str] = []
+    for zone_id in zone_ids:
+        if zone_id in skip:
+            continue
+        current_state = recorded_states.get(zone_id, DEFAULT_WEATHER)
+        message = get_ambient_message(_zone_climate(zone_id), current_state, rng=random_source)
+        if not message:
+            continue
+        if random_source.random() > ambient_probability:
+            continue
+        if _broadcast_weather_ambient(zone_id, message):
+            broadcasted.append(zone_id)
+    return broadcasted
 
 
 def _room_environment(room) -> str:
@@ -456,6 +652,40 @@ def _room_payload_from_live_room(room) -> dict:
     }
 
 
+def _rooms_for_zone(zone_id: str) -> list[object]:
+    normalized_zone_id = str(zone_id or "").strip()
+    if not normalized_zone_id:
+        return []
+    cached = _ZONE_ROOM_CACHE.get(normalized_zone_id)
+    if cached is not None:
+        return cached
+    rooms = list(_query_rooms_for_zone(normalized_zone_id))
+    _ZONE_ROOM_CACHE[normalized_zone_id] = rooms
+    return rooms
+
+
+def _eligible_rooms_for_zone(zone_id: str) -> list[tuple[object, bool]]:
+    normalized_zone_id = str(zone_id or "").strip()
+    if not normalized_zone_id:
+        return []
+    cached = _ZONE_ELIGIBLE_CACHE.get(normalized_zone_id)
+    if cached is not None:
+        return cached
+
+    zone_payload = _get_zone_payload(normalized_zone_id)
+    eligible: list[tuple[object, bool]] = []
+    for room in _rooms_for_zone(normalized_zone_id):
+        room_payload = _room_payload_from_live_room(room)
+        structure = str(((room_payload.get("tags") or {}).get("structure") or "")).strip().lower()
+        is_threshold = structure in _THRESHOLD_STRUCTURES
+        groups = determine_applicable_state_groups(room_payload, zone_payload)
+        if "weather" in groups or is_threshold:
+            eligible.append((room, is_threshold))
+
+    _ZONE_ELIGIBLE_CACHE[normalized_zone_id] = eligible
+    return eligible
+
+
 def _broadcast_message(room, message: str) -> None:
     if not str(message or "").strip():
         return
@@ -475,14 +705,8 @@ def _transition_message(old: str, new: str, *, threshold: bool) -> str:
 
 
 def _broadcast_weather_transition(zone_id: str, old: str, new: str) -> None:
-    zone_payload = _get_zone_payload(zone_id)
-    for room in _rooms_for_zone(zone_id):
-        room_payload = _room_payload_from_live_room(room)
-        structure = str(((room_payload.get("tags") or {}).get("structure") or "")).strip().lower()
-        groups = determine_applicable_state_groups(room_payload, zone_payload)
-        is_threshold = structure in _THRESHOLD_STRUCTURES
-        if "weather" not in groups and not is_threshold:
-            continue
+    rooms = list(_eligible_rooms_for_zone(zone_id))
+    for room, is_threshold in rooms:
         _broadcast_message(room, _transition_message(old, new, threshold=is_threshold))
 
 
@@ -505,14 +729,9 @@ def _broadcast_storm_lightning(zone_id: str, *, rng=None) -> bool:
     if get_current_weather(zone_id) != "storm":
         return False
     message = _pick_lightning_message(rng=rng)
-    zone_payload = _get_zone_payload(zone_id)
     sent = False
-    for room in _rooms_for_zone(zone_id):
-        room_payload = _room_payload_from_live_room(room)
-        structure = str(((room_payload.get("tags") or {}).get("structure") or "")).strip().lower()
-        groups = determine_applicable_state_groups(room_payload, zone_payload)
-        if "weather" not in groups and structure not in _THRESHOLD_STRUCTURES:
-            continue
+    rooms = list(_eligible_rooms_for_zone(zone_id))
+    for room, _is_threshold in rooms:
         _broadcast_message(room, message)
         sent = True
     return sent
@@ -521,15 +740,29 @@ def _broadcast_storm_lightning(zone_id: str, *, rng=None) -> bool:
 class WeatherScript(Script):
     def at_script_creation(self):
         self.key = WEATHER_SCRIPT_KEY
-        time_factor = float(getattr(settings, "TIME_FACTOR", 1.0) or 1.0)
-        game_seconds = float(getattr(settings, "WEATHER_TICK_INTERVAL_GAME_SECONDS", 900) or 900)
-        self.interval = max(1.0, game_seconds / max(0.0001, time_factor))
+        self.interval = _atmospheric_tick_interval_seconds()
         self.start_delay = True
         self.repeats = 0
         self.persistent = True
+        self.db.atmospheric_tick_counter = 0
 
     def at_start(self):
+        _reset_state_cache(self)
+        invalidate_zone_caches()
+        self.interval = _atmospheric_tick_interval_seconds()
+        if not isinstance(getattr(self.db, "atmospheric_tick_counter", None), int):
+            self.db.atmospheric_tick_counter = 0
         self.db.last_started_iso = _now_iso()
 
     def at_repeat(self):
-        run_weather_cycle()
+        if not getattr(settings, "WEATHER_AUTOTICK_ENABLED", True):
+            return
+        counter = int(getattr(self.db, "atmospheric_tick_counter", 0) or 0) + 1
+        ratio = _weather_state_tick_ratio()
+        transitioned_zones: set[str] = set()
+        if counter >= ratio:
+            self.db.atmospheric_tick_counter = 0
+            transitioned_zones = set(run_weather_cycle().keys())
+        else:
+            self.db.atmospheric_tick_counter = counter
+        run_atmospheric_tick(skip_zone_ids=transitioned_zones)

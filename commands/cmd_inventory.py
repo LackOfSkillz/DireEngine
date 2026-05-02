@@ -1,4 +1,5 @@
 from commands.command import Command
+from world.helpers.display_aggregation import aggregate_object_labels
 
 
 class CmdInventory(Command):
@@ -70,7 +71,9 @@ class CmdInventory(Command):
         if race_text:
             lines.append(race_text)
         for item in carried:
-            lines.append(f" {item.key}")
+            pass
+        for label in aggregate_object_labels(carried, looker=self.caller):
+            lines.append(f" {label}")
         self.caller.msg("\n".join(lines))
         if onboarding:
             try:

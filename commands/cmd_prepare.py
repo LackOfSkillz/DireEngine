@@ -18,7 +18,16 @@ class CmdPrepare(Command):
         caller = self.caller
         args = str(self.args or "").strip()
         if getattr(caller, "is_profession", lambda *_: False)("cleric") and args:
-            target = caller.search(args, location=caller.location)
+            target, matches, base_query, index, _scope = self.resolve_target(
+                args,
+                scopes=("room",),
+                default_first=True,
+            )
+            if not target and matches and index is not None:
+                self.msg_target_matches(base_query, matches)
+                return
+            if not target:
+                target = caller.search(args, location=caller.location)
             if target and getattr(getattr(target, "db", None), "is_corpse", False):
                 ok, message = caller.prepare_corpse(target) if hasattr(caller, "prepare_corpse") else (False, "You cannot prepare that corpse.")
                 caller.msg(message)

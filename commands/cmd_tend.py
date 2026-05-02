@@ -26,7 +26,16 @@ class CmdTend(Command):
         if query.lower() in {"self", "me", "myself"}:
             return self.caller
 
-        target = self.caller.search(query)
+        target, matches, base_query, index, _scope = self.resolve_target(
+            query,
+            scopes=("characters",),
+            default_first=True,
+        )
+        if not target and matches and index is not None:
+            self.msg_target_matches(base_query, matches)
+            return None
+        if not target:
+            target = self.caller.search(query)
         if not target:
             return None
 

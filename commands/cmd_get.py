@@ -7,7 +7,8 @@ class CmdGet(Command):
 
     Examples:
       get bow
-      get bow 3
+            get third bow
+            get 3.bow
     """
 
     key = "get"
@@ -39,7 +40,7 @@ class CmdGet(Command):
             return
 
         candidates = [obj for obj in room.contents if obj != caller]
-        obj, matches, base_query, index = caller.resolve_numbered_candidate(
+        obj, matches, base_query, index = self.resolve_item_target(
             self.args,
             candidates,
             default_first=True,
@@ -52,7 +53,7 @@ class CmdGet(Command):
                     room.msg_contents(f"$You() $conj(pick) up {message.removeprefix('You pick up ').rstrip('.')}.", from_obj=caller)
                     return
             if matches and index is not None:
-                caller.msg_numbered_matches(base_query, matches)
+                self.msg_item_matches(base_query, matches)
             else:
                 caller.search(base_query or self.args, location=room)
             return
