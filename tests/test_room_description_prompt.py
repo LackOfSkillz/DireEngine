@@ -2,6 +2,7 @@ import unittest
 
 from world.builder.prompting.room_description_prompt import (
     assemble_room_description_prompt,
+    build_room_description_user_message,
     determine_applicable_state_groups,
     determine_applicable_states,
     load_room_description_system_prompt,
@@ -64,6 +65,91 @@ class RoomDescriptionPromptTests(unittest.TestCase):
         self._assert_not_form_shaped(prompt.prompt)
         self.assertIn("It is in Harbor Ward.", prompt.prompt)
         self.assertFalse(prompt.trimmed)
+
+    def test_user_message_renders_geographic_context_emotional_tone_and_cultural_signature(self):
+        message = build_room_description_user_message(
+            {
+                "id": "market_square",
+                "name": "Market Square",
+                "environment": "city",
+                "tags": {"structure": "square", "specific_function": None, "named_feature": "fountain", "condition": "worn", "custom": [], "atmosphere": {}},
+            },
+            {
+                "setting_type": "city",
+                "emotional_tone": "bustling and prosperous",
+                "cultural_signature": "human frontier town",
+                "geographic_context": {
+                    "zone_type": "outdoor_city",
+                    "streets": [{"name": "Main Street", "runs": "north-south"}],
+                    "districts": [{"name": "Market District"}],
+                    "visible_landmarks": [{"name": "Old Bell Tower"}],
+                },
+            },
+        )
+
+        self.assertIn("Emotional tone: bustling and prosperous. The finished prose must clearly carry this atmosphere in its diction and sensory emphasis, and at least one sentence should make the tone legible rather than neutral.", message)
+        self.assertIn("Cultural signature: human frontier town. Make the architecture, materials, and civic texture feel specific to this culture.", message)
+        self.assertIn("This room is on Main Street.", message)
+        self.assertIn("If a street is listed above, name that street explicitly in the description.", message)
+        self.assertIn("Street character: north-south.", message)
+        self.assertIn("It lies in Market District.", message)
+        self.assertIn("If a district is listed above, name that district explicitly in the description.", message)
+        self.assertIn("Visible landmarks from here include Old Bell Tower.", message)
+        self.assertIn("mention the applicable names explicitly in the description text", message)
+        self.assertIn("do not invent new street, district, landmark", message)
+
+    def test_user_message_is_backward_compatible_without_new_fields(self):
+        message = build_room_description_user_message(
+            {
+                "id": "market_square",
+                "name": "Market Square",
+                "environment": "city",
+                "tags": {"structure": "square", "specific_function": None, "named_feature": None, "condition": None, "custom": [], "atmosphere": {}},
+            },
+            {"setting_type": "city", "voice": "Plainspoken and practical."},
+        )
+
+        self.assertIn("Voice: Plainspoken and practical.", message)
+        self.assertNotIn("Geographic context:", message)
+        self.assertNotIn("Emotional tone:", message)
+        self.assertNotIn("Cultural signature:", message)
+
+    def test_user_message_renders_state_context_when_present(self):
+        message = build_room_description_user_message(
+            {
+                "id": "market_square",
+                "name": "Market Square",
+                "environment": "city",
+                "tags": {"structure": "square", "specific_function": None, "named_feature": "fountain", "condition": "worn", "custom": [], "atmosphere": {}},
+            },
+            {
+                "setting_type": "city",
+                "state_context": {
+                    "group": "weather",
+                    "state": "storm",
+                    "narrative_hint": "heavy rain, wind, lightning, exposed surfaces, reduced visibility",
+                },
+            },
+        )
+
+        self.assertIn("State context:", message)
+        self.assertIn("Generate the storm variant for the weather state group.", message)
+        self.assertIn("State narrative guidance: heavy rain, wind, lightning, exposed surfaces, reduced visibility.", message)
+        self.assertIn("This output fully replaces the base description for that state", message)
+        self.assertIn("Make the active state legible in the prose", message)
+
+    def test_user_message_omits_state_context_when_absent(self):
+        message = build_room_description_user_message(
+            {
+                "id": "market_square",
+                "name": "Market Square",
+                "environment": "city",
+                "tags": {"structure": "square", "specific_function": None, "named_feature": None, "condition": None, "custom": [], "atmosphere": {}},
+            },
+            {"setting_type": "city"},
+        )
+
+        self.assertNotIn("State context:", message)
 
     def test_prompt_includes_fully_populated_zone_context_in_model_prompt(self):
         prompt = assemble_room_description_prompt(

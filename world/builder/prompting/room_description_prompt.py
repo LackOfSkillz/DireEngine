@@ -173,6 +173,128 @@ def _natural_join(items: list[str]) -> str:
     return f"{', '.join(cleaned[:-1])}, and {cleaned[-1]}"
 
 
+def _normalize_geographic_entries(value: object) -> list[dict[str, str]]:
+    if not isinstance(value, list):
+        return []
+    entries: list[dict[str, str]] = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        normalized = {
+            key: str(raw_value or "").strip()
+            for key, raw_value in item.items()
+            if str(raw_value or "").strip()
+        }
+        if normalized:
+            entries.append(normalized)
+    return entries
+
+
+def _geographic_names(entries: list[dict[str, str]]) -> list[str]:
+    names: list[str] = []
+    seen: set[str] = set()
+    for entry in entries:
+        name = str(entry.get("name") or entry.get("slug") or "").strip()
+        if not name:
+            continue
+        key = name.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        names.append(name)
+    return names
+
+
+def _build_geographic_context_lines(generation_context: dict[str, object]) -> list[str]:
+    payload = generation_context.get("geographic_context")
+    if not isinstance(payload, dict):
+        return []
+
+    zone_type = str(payload.get("zone_type") or "").strip()
+    streets = _normalize_geographic_entries(payload.get("streets"))
+    districts = _normalize_geographic_entries(payload.get("districts"))
+    visible_landmarks = _normalize_geographic_entries(payload.get("visible_landmarks"))
+    trails = _normalize_geographic_entries(payload.get("trails"))
+    rivers = _normalize_geographic_entries(payload.get("rivers"))
+    named_areas = _normalize_geographic_entries(payload.get("named_areas"))
+    ranges = _normalize_geographic_entries(payload.get("ranges"))
+    halls = _normalize_geographic_entries(payload.get("halls"))
+    wings = _normalize_geographic_entries(payload.get("wings"))
+    floors = _normalize_geographic_entries(payload.get("floors"))
+    named_chambers = _normalize_geographic_entries(payload.get("named_chambers"))
+    routes = _normalize_geographic_entries(payload.get("routes"))
+    waypoints = _normalize_geographic_entries(payload.get("waypoints"))
+
+    lines = ["", "Geographic context:"]
+    if streets:
+        street_names = _geographic_names(streets)
+        lines.append(f"- This room is on {_natural_join(street_names)}.")
+        lines.append("- If a street is listed above, name that street explicitly in the description.")
+        running_notes = [str(entry.get('runs') or '').strip() for entry in streets if str(entry.get('runs') or '').strip()]
+        if running_notes:
+            lines.append(f"- Street character: {_natural_join(running_notes)}.")
+    elif zone_type == "outdoor_city":
+        lines.append("- This room is not on a named street.")
+
+    if districts:
+        lines.append(f"- It lies in {_natural_join(_geographic_names(districts))}.")
+        lines.append("- If a district is listed above, name that district explicitly in the description.")
+    if visible_landmarks:
+        lines.append(f"- Visible landmarks from here include {_natural_join(_geographic_names(visible_landmarks))}.")
+    if trails:
+        lines.append(f"- This room belongs to trail routes named {_natural_join(_geographic_names(trails))}.")
+    if rivers:
+        lines.append(f"- Nearby waterways named {_natural_join(_geographic_names(rivers))} shape this location.")
+    if named_areas:
+        lines.append(f"- It falls within named areas {_natural_join(_geographic_names(named_areas))}.")
+    if ranges:
+        lines.append(f"- Surrounding ranges or regions include {_natural_join(_geographic_names(ranges))}.")
+    if halls:
+        lines.append(f"- This room belongs to {_natural_join(_geographic_names(halls))}.")
+    if wings:
+        lines.append(f"- It is within {_natural_join(_geographic_names(wings))}.")
+    if floors:
+        lines.append(f"- Floor assignments include {_natural_join(_geographic_names(floors))}.")
+    if named_chambers:
+        lines.append(f"- Named chambers here include {_natural_join(_geographic_names(named_chambers))}.")
+    if routes:
+        lines.append(f"- This room is on transit routes {_natural_join(_geographic_names(routes))}.")
+    if waypoints:
+        lines.append(f"- Nearby waypoints include {_natural_join(_geographic_names(waypoints))}.")
+
+    if len(lines) == 2:
+        return []
+
+    lines.append(
+        "- If a named street, district, landmark, trail, hall, wing, chamber, route, or area is listed above, mention the applicable names explicitly in the description text."
+    )
+    lines.append(
+        "- Reference these geographic names exactly and do not invent new street, district, landmark, trail, hall, wing, chamber, route, or area names."
+    )
+    return lines
+
+
+def _build_state_context_lines(generation_context: dict[str, object]) -> list[str]:
+    payload = generation_context.get("state_context")
+    if not isinstance(payload, dict):
+        return []
+
+    group = str(payload.get("group") or "").strip()
+    state = str(payload.get("state") or "").strip()
+    narrative_hint = str(payload.get("narrative_hint") or "").strip()
+    if not group or not state:
+        return []
+
+    lines = ["", "State context:"]
+    lines.append(f"- Generate the {state} variant for the {group} state group.")
+    if narrative_hint:
+        lines.append(f"- State narrative guidance: {narrative_hint}.")
+    lines.append("- This output fully replaces the base description for that state rather than describing a delta or writing markup.")
+    lines.append("- Preserve the previously supplied geographic context, emotional tone, cultural signature, and grounded room facts while adapting the prose to this state.")
+    lines.append("- Make the active state legible in the prose and do not write a neutral description that could fit every state.")
+    return lines
+
+
 def _context_key(value: object) -> str:
     return str(value or "").strip().rstrip(".").casefold()
 
@@ -327,9 +449,17 @@ def build_room_description_user_message(room: dict | None, generation_context: d
         f"- Mood: {', '.join(_normalize_list(context.get('mood'), preserve_case=True)) or '(none)'}",
         f"- Climate: {str(context.get('climate') or '').strip() or '(none)'}",
     ])
+    emotional_tone = str(context.get("emotional_tone") or "").strip()
+    if emotional_tone:
+        lines.append(f"- Emotional tone: {emotional_tone}. The finished prose must clearly carry this atmosphere in its diction and sensory emphasis, and at least one sentence should make the tone legible rather than neutral.")
+    cultural_signature = str(context.get("cultural_signature") or "").strip()
+    if cultural_signature:
+        lines.append(f"- Cultural signature: {cultural_signature}. Make the architecture, materials, and civic texture feel specific to this culture.")
     voice = str(context.get("voice") or "").strip()
     if voice:
         lines.append(f"- Voice: {voice}")
+    lines.extend(_build_geographic_context_lines(context))
+    lines.extend(_build_state_context_lines(context))
     return "\n".join(lines).strip()
 
 

@@ -1,4 +1,5 @@
 from commands.command import Command
+from world.helpers.skill_attempts import attempt_with_failure_learning
 
 
 class CmdStudyAnatomy(Command):
@@ -43,6 +44,19 @@ class CmdStudyAnatomy(Command):
             if hasattr(caller, "award_skill_experience"):
                 caller.award_skill_experience("scholarship", 10, success=True, outcome="success", event_key="study_anatomy", context_multiplier=1.0)
                 caller.award_skill_experience("first_aid", 8, success=True, outcome="success", event_key="study_anatomy", context_multiplier=0.5)
-                caller.award_skill_experience("empathy", 6, success=True, outcome="success", event_key="study_anatomy", context_multiplier=0.1)
+                if hasattr(caller, "is_empath") and caller.is_empath():
+                    empathy_rank = int(caller.get_skill("empathy") if hasattr(caller, "get_skill") else 0)
+                    if empathy_rank >= 6:
+                        caller.award_skill_experience("empathy", 6, success=True, outcome="success", event_key="study_anatomy", context_multiplier=0.1)
+                    else:
+                        attempt_with_failure_learning(
+                            caller,
+                            "empathy",
+                            6,
+                            success=False,
+                            failure_reason="skill_too_low",
+                            event_key="study_anatomy",
+                            failure_multiplier=0.25,
+                        )
             return
         caller.msg("You cannot make useful anatomical study of that.")

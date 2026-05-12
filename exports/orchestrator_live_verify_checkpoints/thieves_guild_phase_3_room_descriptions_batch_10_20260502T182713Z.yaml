@@ -1,0 +1,1287 @@
+schema_version: v1
+zone_id: thieves_guild
+name: The Thieves Guild
+generation_context:
+  setting_type: dungeon
+  era_feel: medieval
+  climate: temperate
+  voice: theatrical, ironic, communal, hardscrabble; spilled ale, rough humor, torchlit
+    defiance, and wary pride among rogues
+  emotional_tone: theatrical defiance, communal warmth and rough humor among rogues,
+    wary of outsiders
+  cultural_signature: a hidden underclass court where thieves invert the surface world's
+    hierarchy, making dignity from shared survival and mockery from stolen ceremony
+  culture:
+  - generic-fantasy
+  - multicultural
+  mood:
+  - bustling
+  - tense
+  - oppressive
+  banned_phrases: []
+zone_type: interior_large
+geographic_structure:
+  halls:
+  - name: Entry Stair
+    rooms:
+    - false_alley
+    - sewer_grate
+    - threshold
+    - watcher_nook
+    type: access
+  - name: Common Passage
+    rooms:
+    - common_hearth
+    - donation_shelf_room
+    - drinking_pit
+    - memorial_wall
+    type: communal
+  - name: Training Corridor
+    rooms:
+    - lockyard
+    - marks_walk
+    - shadowed_hall
+    - the_pit
+    type: training
+  - name: Commerce Row
+    rooms:
+    - honest_stall
+    - fences_curtain
+    - quartermaster_hold
+    type: commerce
+  - name: Leadership Stair
+    rooms:
+    - throne_in_tatters
+    - reliquary
+    - vault
+    type: leadership
+  wings:
+  - name: Entry Wing
+    rooms:
+    - false_alley
+    - sewer_grate
+    - threshold
+    - watcher_nook
+  - name: Common Wing
+    rooms:
+    - court_of_coins
+    - common_hearth
+    - donation_shelf_room
+    - drinking_pit
+    - memorial_wall
+  - name: Training Wing
+    rooms:
+    - lockyard
+    - marks_walk
+    - shadowed_hall
+    - the_pit
+  - name: Commerce Wing
+    rooms:
+    - honest_stall
+    - fences_curtain
+    - quartermaster_hold
+  - name: Leadership Wing
+    rooms:
+    - throne_in_tatters
+    - reliquary
+    - vault
+  - name: Atmospheric Wing
+    rooms:
+    - rookery
+  floors:
+  - name: Ground
+    rooms:
+    - false_alley
+    - sewer_grate
+    - threshold
+    - watcher_nook
+    - court_of_coins
+    - common_hearth
+    - donation_shelf_room
+    - drinking_pit
+    - memorial_wall
+    - lockyard
+    - marks_walk
+    - shadowed_hall
+    - the_pit
+    - honest_stall
+    - fences_curtain
+    - quartermaster_hold
+    - throne_in_tatters
+    - reliquary
+    - vault
+  - name: Upper
+    rooms:
+    - rookery
+  named_chambers:
+  - name: Court of Coins
+    room: court_of_coins
+  - name: Throne in Tatters
+    room: throne_in_tatters
+  - name: Sharing Shelves
+    room: donation_shelf_room
+  - name: Memorial Wall
+    room: memorial_wall
+  - name: Reliquary
+    room: reliquary
+  - name: Vault
+    room: vault
+  - name: Rookery
+    room: rookery
+  - name: Drinking Pit
+    room: drinking_pit
+  - name: Fence's Curtain
+    room: fences_curtain
+  exits_to_parent:
+  - name: False Alley Access
+    parent_zone: surface
+    parent_room: false_alley_surface
+    child_room: false_alley
+  - name: Sewer Grate Access
+    parent_zone: sewers
+    parent_room: sewer_grate_below
+    child_room: sewer_grate
+rooms:
+- id: false_alley
+  name: The False Alley
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: The False Alley ends abruptly against the city wall, its worn brick boundaries
+    pressing close on three sides. Cobbles underfoot are cracked and uneven, carrying
+    a faint layer of dust that marks the space as rarely swept. The alley's dead-end
+    shape and shabby upkeep suggest a place the working districts have half-forgotten,
+    where rough humor and wary silence share the same narrow ground. A single exit
+    leads back south, the only route away from the wall's looming presence.
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  terrain:
+    primary: outdoor
+    secondary: urban_cultivated
+  quest_hooks:
+  - find_hidden_entrance
+  npcs: []
+  items: []
+  tags:
+    structure: alley
+    specific_function: null
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - brick-walls
+      - cobbled-floor
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - city-wall-nearby
+      - quiet-area
+      sensory:
+      - dust-smell
+      - quiet-ambient
+      upkeep: shabby
+  zone_id: thieves_guild
+  map:
+    x: -1
+    y: 2
+    layer: 0
+  exits:
+    east: threshold
+  flags: {}
+- id: sewer_grate
+  name: The Sewer Grate
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: "The Entry Stair drops into a low cellar beneath worn stone walls, its earthen\
+    \ floor packed hard by years of traffic. Smoke smell clings to the neglected space,\
+    \ drifting from somewhere deeper in the Entry Wing, while the quiet presses close\
+    \ against the rough boundaries. A rusted iron grate overhead marks the surface\
+    \ world's floor, its bars crossed with old soot and the stains of discarded things\u2014\
+    what the streets above throw away becomes the ceiling here. The stair continues\
+    \ down into shadow, carrying with it the faint sound of voices that mock what\
+    \ they cannot have and claim what they can take."
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: entrance
+    specific_function: cellar
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - earthen-floor
+      social_character:
+      - rough
+      - impoverished
+      surroundings:
+      - quiet-area
+      sensory:
+      - smoke-smell
+      - quiet-ambient
+      upkeep: neglected
+  zone_id: thieves_guild
+  map:
+    x: 2
+    y: 2
+    layer: 0
+  exits:
+    west: threshold
+  flags: {}
+- id: threshold
+  name: The Threshold
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: "The Threshold opens into the Entry Stair, where flagstones worn smooth by\
+    \ countless boots meet timber beams overhead that sag under decades of weight.\
+    \ Stone walls bear the scars of rough use\u2014chipped corners, scratched mortar,\
+    \ and the faint char of old smoke that still hangs in the quiet air. The space\
+    \ carries the lived-in disorder of a place claimed rather than built, where rogues\
+    \ have made their own dignity from cast-off stone and salvaged timber, turning\
+    \ a forgotten threshold into their defiant entry court."
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: threshold
+    specific_function: null
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      - timber-beams
+      social_character:
+      - rough
+      - mixed-class
+      surroundings:
+      - quiet-area
+      sensory:
+      - smoke-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 1
+    y: 2
+    layer: 0
+  exits:
+    west: false_alley
+    east: sewer_grate
+    south: watcher_nook
+  flags: {}
+- id: watcher_nook
+  name: The Watcher's Nook
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: "The Watcher's Nook sits at the base of the Entry Stair, a low-ceilinged chamber\
+    \ where timber beams press close above worn planks. Stone walls bear the scuffs\
+    \ and stains of long occupation, and the faint smell of old smoke clings to the\
+    \ corners where guards have warmed themselves between shifts. Rough bunks line\
+    \ the walls in careless rows, their frames showing the marks of countless boots\
+    \ and elbows, while the floor between them is darkened by traffic and spilled\
+    \ drink. This is working space, not ceremony\u2014a place where the Guild's sentries\
+    \ rest with the same rough humor they bring to their watch, making dignity from\
+    \ shared exhaustion and stolen comfort."
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks:
+  - prove_yourself_to_guild
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: barracks
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - guilds-nearby
+      - quiet-area
+      sensory:
+      - smoke-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 1
+    y: 1
+    layer: 0
+  exits:
+    north: threshold
+    southwest: court_of_coins
+  flags: {}
+- id: court_of_coins
+  name: The Court of Coins
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: The Court of Coins sprawls beneath timber beams blackened by years of firepit
+    smoke, its flagstone floor worn smooth by countless boots and marked with old
+    stains no one bothers to scrub. Stone walls bear crude tallies and mockeries of
+    surface law, carved by hands that found dignity in defiance rather than coin.
+    The central firepit throws uneven light across benches and low tables where rogues
+    gather to settle disputes with rough ceremony, their laughter sharp-edged and
+    their silences watchful. Smoke hangs thick in the air, carrying the smell of cheap
+    ale and old timber, while the worn threshold shows how many have passed through
+    seeking justice that the world above would never grant them.
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: guild-hall
+    named_feature: firepit
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      - timber-beams
+      social_character:
+      - rough
+      - mixed-class
+      surroundings:
+      - guilds-nearby
+      - busy-area
+      sensory:
+      - smoke-smell
+      - bustling-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 0
+    y: 0
+    layer: 0
+  exits:
+    west: common_hearth
+    east: honest_stall
+    north: throne_in_tatters
+    south: lockyard
+    northeast: watcher_nook
+    up: rookery
+  flags: {}
+- id: common_hearth
+  name: The Common Hearth
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: The Common Hearth sits along Common Passage, its planked floor worn smooth
+    by constant traffic through the rough stone chamber. Timber beams cross overhead,
+    darkened by years of smoke from the central hearth where embers glow beneath ash.
+    Stone walls bear the marks of makeshift repairs and carved tallies, evidence of
+    shared survival among those who claim this space as their own. The smoke-smell
+    mingles with the sound of voices from nearby taverns, and scuff marks around the
+    hearth show where residents gather to trade stories and mock the world above with
+    hard-earned laughter.
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: building-interior
+    specific_function: residence
+    named_feature: hearth
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - rough
+      - impoverished
+      surroundings:
+      - taverns-nearby
+      - busy-area
+      sensory:
+      - smoke-smell
+      - bustling-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: -1
+    y: 0
+    layer: 0
+  exits:
+    east: court_of_coins
+    west: donation_shelf_room
+    north: drinking_pit
+    northwest: memorial_wall
+  flags: {}
+- id: donation_shelf_room
+  name: The Sharing Shelves
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: "The Sharing Shelves sits within the Common Wing, a rough timber chamber where\
+    \ planked floors bear the scuff and stain of constant traffic. Worn beams overhead\
+    \ frame walls lined with makeshift shelving, each plank crowded with mismatched\
+    \ goods\u2014dented cups, frayed rope, chipped crockery\u2014arranged with a defiant\
+    \ care that mocks the orderly storerooms above. A battered workbench stands against\
+    \ the far wall, its surface scarred by knife marks and spilled wax, while dust\
+    \ hangs faint in the still air. Here the discarded becomes currency, and what\
+    \ the surface world throws away is sorted, claimed, and shared with the gravity\
+    \ of a merchant's inventory."
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks:
+  - observe_guild_custom
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: warehouse
+    named_feature: workbench
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - rough
+      - impoverished
+      surroundings:
+      - quiet-area
+      sensory:
+      - dust-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: -2
+    y: 0
+    layer: 0
+  exits:
+    east: common_hearth
+  flags: {}
+- id: drinking_pit
+  name: The Drinking Pit
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: The Drinking Pit sits low beneath timber beams blackened by years of hearth
+    smoke, its stone walls bearing the scars of countless carved marks and rough repairs.
+    A dirt floor, packed hard by traffic, slopes slightly toward the center where
+    benches and makeshift tables crowd together in defiant disorder. The hearth throws
+    uneven light across faces turned toward each other rather than the room's shabby
+    edges, and the air carries smoke, spilled ale, and the low buzz of voices that
+    drop when strangers enter. This is the Common Passage's own hall, where working
+    hands and wary eyes claim space the surface world would deny them.
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: tavern
+    named_feature: hearth
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - dirt-floor
+      - timber-beams
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - busy-area
+      - taverns-nearby
+      sensory:
+      - smoke-smell
+      - bustling-ambient
+      upkeep: shabby
+  zone_id: thieves_guild
+  map:
+    x: -1
+    y: 1
+    layer: 0
+  exits:
+    south: common_hearth
+    west: memorial_wall
+  flags: {}
+- id: memorial_wall
+  name: The Memorial Wall
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: "The Memorial Wall stands at the end of Common Passage, a rough-hewn chamber\
+    \ where stone walls bear carved names and crude symbols marking those the underclass\
+    \ claims as their own. Timber beams overhead show smoke stains from years of candle\
+    \ offerings left at the low shrine set into the eastern wall, its surface worn\
+    \ smooth by countless hands. The flagstone floor is uneven, patched with mismatched\
+    \ stone where the living have made repairs in defiance of the dungeon's decay.\
+    \ Smoke hangs faint in the still air, carrying the scent of tallow and old incense,\
+    \ while the quiet presses close around the chamber's boundaries\u2014a stolen\
+    \ dignity carved from stone and memory."
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: temple
+    named_feature: shrine
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      - timber-beams
+      social_character:
+      - rough
+      - mixed-class
+      surroundings:
+      - quiet-area
+      sensory:
+      - smoke-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: -2
+    y: 1
+    layer: 0
+  exits:
+    east: drinking_pit
+    southeast: common_hearth
+  flags: {}
+- id: lockyard
+  name: The Lockyard
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: The Lockyard sits within the Training Corridor, its planked floor scuffed
+    and stained from years of rogues testing their craft at the long workbench that
+    runs along the stone wall. Timber beams overhead bear carved tallies and crude
+    jokes, each mark a small claim of dignity stolen from the surface world's order.
+    Dust hangs in the air, stirred by footsteps from the workshops nearby, and the
+    faint sounds of bustling work carry through the chamber's boundaries. The worn
+    bench shows generations of lockpicks, bent wires, and practice tumbler sets, evidence
+    of a trade passed hand to hand with rough humor and wary pride.
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: guild-hall
+    named_feature: workbench
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - workshops-nearby
+      - busy-area
+      sensory:
+      - dust-smell
+      - bustling-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 0
+    y: -1
+    layer: 0
+  exits:
+    north: court_of_coins
+    east: marks_walk
+    west: shadowed_hall
+    south: the_pit
+  flags: {}
+- id: marks_walk
+  name: The Mark's Walk
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: hallway
+    specific_function: guild-hall
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - workshops-nearby
+      - busy-area
+      sensory:
+      - dust-smell
+      - bustling-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 1
+    y: -1
+    layer: 0
+  exits:
+    west: lockyard
+  flags: {}
+- id: shadowed_hall
+  name: The Shadowed Hall
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: hallway
+    specific_function: guild-hall
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      - timber-beams
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - quiet-area
+      sensory:
+      - smoke-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: -1
+    y: -1
+    layer: 0
+  exits:
+    east: lockyard
+  flags: {}
+- id: the_pit
+  name: The Pit
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: barracks
+    named_feature: workbench
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - dirt-floor
+      - timber-beams
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - busy-area
+      sensory:
+      - dust-smell
+      - bustling-ambient
+      upkeep: shabby
+  zone_id: thieves_guild
+  map:
+    x: 0
+    y: -2
+    layer: 0
+  exits:
+    north: lockyard
+  flags: {}
+- id: honest_stall
+  name: The Honest Stall
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: building-interior
+    specific_function: shop
+    named_feature: signpost
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - commercial
+      - rough
+      surroundings:
+      - busy-area
+      - shops-nearby
+      sensory:
+      - smoke-smell
+      - bustling-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 1
+    y: 0
+    layer: 0
+  exits:
+    west: court_of_coins
+    east: fences_curtain
+  flags:
+    is_shop: true
+- id: fences_curtain
+  name: The Fence's Curtain
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks:
+  - first_fence_transaction
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: shop
+    named_feature: workbench
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - commercial
+      - rough
+      surroundings:
+      - quiet-area
+      - shops-nearby
+      sensory:
+      - dust-smell
+      - quiet-ambient
+      upkeep: shabby
+  zone_id: thieves_guild
+  map:
+    x: 2
+    y: 0
+    layer: 0
+  exits:
+    west: honest_stall
+    east: quartermaster_hold
+  flags:
+    is_shop: true
+- id: quartermaster_hold
+  name: The Quartermaster's Hold
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: warehouse
+    named_feature: workbench
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - commercial
+      - working-class
+      surroundings:
+      - warehouses-nearby
+      - quiet-area
+      sensory:
+      - dust-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 3
+    y: 0
+    layer: 0
+  exits:
+    west: fences_curtain
+  flags:
+    is_shop: true
+- id: throne_in_tatters
+  name: The Throne in Tatters
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks:
+  - audience_with_leader
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: guild-hall
+    named_feature: throne
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      - timber-beams
+      social_character:
+      - rough
+      - mixed-class
+      surroundings:
+      - guilds-nearby
+      - quiet-area
+      sensory:
+      - smoke-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 0
+    y: 1
+    layer: 0
+  exits:
+    south: court_of_coins
+    north: reliquary
+  flags: {}
+- id: reliquary
+  name: The Reliquary
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: temple
+    named_feature: shrine
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      - timber-beams
+      social_character:
+      - rough
+      - mixed-class
+      surroundings:
+      - quiet-area
+      sensory:
+      - smoke-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 0
+    y: 2
+    layer: 0
+  exits:
+    south: throne_in_tatters
+    north: vault
+  flags: {}
+- id: vault
+  name: The Vault
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: chamber
+    specific_function: warehouse
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - stone-walls
+      - flagstone-floor
+      - timber-beams
+      social_character:
+      - rough
+      - mixed-class
+      surroundings:
+      - quiet-area
+      sensory:
+      - dust-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 0
+    y: 3
+    layer: 0
+  exits:
+    south: reliquary
+  flags: {}
+- id: rookery
+  name: The Rookery
+  typeclass: typeclasses.rooms_extended.ExtendedDireRoom
+  short_desc: ''
+  desc: ''
+  stateful_descs: {}
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: interior
+  terrain:
+    primary: indoor
+    secondary: subterranean
+  quest_hooks: []
+  npcs: []
+  items: []
+  tags:
+    structure: stair
+    specific_function: guild-hall
+    named_feature: null
+    condition: worn
+    custom: []
+    atmosphere:
+      materials:
+      - timber-walls
+      - planked-floor
+      - timber-beams
+      social_character:
+      - rough
+      - working-class
+      surroundings:
+      - quiet-area
+      sensory:
+      - dust-smell
+      - quiet-ambient
+      upkeep: lived-in
+  zone_id: thieves_guild
+  map:
+    x: 1
+    y: 3
+    layer: 1
+  exits:
+    down: court_of_coins
+  flags: {}
+placements:
+  npcs:
+  - id: guild_leader
+    room: court_of_coins
+    typeclass: typeclasses.npcs.NPC
+    definition:
+      name: the guild leader
+      description:
+        short: A sharp-eyed rogue in ragged finery watches the hall like a crowned
+          conspirator.
+        long: The guild leader carries battered velvet and stolen lace with the confidence
+          of a monarch who built a throne from the city's refuse.
+  - id: guild_merchant
+    room: honest_stall
+    typeclass: typeclasses.vendor.Vendor
+    definition:
+      name: the guild merchant
+      description:
+        short: A pragmatic merchant weighs gear and coin with professional suspicion.
+        long: The guild merchant keeps a neat spread of practical gear beneath patched
+          awnings and candle smoke, ready to equip any thief who can pay.
+      vendor:
+        enabled: true
+        inventory: []
+  - id: fence
+    room: fences_curtain
+    typeclass: typeclasses.vendor.Vendor
+    definition:
+      name: the fence
+      description:
+        short: A narrow-eyed fence lounges behind a heavy curtain with one palm always
+          half open.
+        long: The fence sits behind thick curtain folds with a ledger, a knife, and
+          the expression of someone already discounting your story and your goods.
+      vendor:
+        enabled: true
+        inventory: []
+  - id: lockpick_trainer
+    room: lockyard
+    typeclass: typeclasses.npcs.NPC
+    definition:
+      name: the lockpick trainer
+      description:
+        short: A scarred thief works a row of practice locks by torchlight.
+        long: The lockpick trainer keeps a patient eye on misused picks and stubborn
+          tumblers, correcting fingers with dry insults and quicker hands.
+  - id: pickpocket_trainer
+    room: marks_walk
+    typeclass: typeclasses.npcs.NPC
+    definition:
+      name: the pickpocket trainer
+      description:
+        short: A wiry cutpurse paces beside pouch-hung dummies with a mocking grin.
+        long: The pickpocket trainer glides along the practice lane with empty hands
+          and busy eyes, teaching theft as rhythm more than speed.
+  - id: stealth_trainer
+    room: shadowed_hall
+    typeclass: typeclasses.npcs.NPC
+    definition:
+      name: the stealth trainer
+      description:
+        short: A hooded veteran watches the shadows harder than the light.
+        long: The stealth trainer stands in the dim with arms folded, measuring every
+          footfall by what it disturbs rather than what it reaches.
+  - id: combat_trainer
+    room: the_pit
+    typeclass: typeclasses.npcs.NPC
+    definition:
+      name: the combat trainer
+      description:
+        short: A broad-shouldered bruiser stands ankle-deep in churned sand.
+        long: The combat trainer treats the pit like a chapel of bruises, correcting
+          stance and timing with barked orders and blunt demonstrations.
+  - id: quartermaster
+    room: quartermaster_hold
+    typeclass: typeclasses.vendor.Vendor
+    definition:
+      name: the quartermaster
+      description:
+        short: A careful quartermaster checks stores against a grease-stained tally
+          board.
+        long: The quartermaster works among crates, rope bundles, and ration jars
+          with the suspicious focus of someone who has seen inventory vanish by friendly
+          hands.
+      vendor:
+        enabled: true
+        inventory: []
+  - id: watcher
+    room: watcher_nook
+    typeclass: typeclasses.npcs.guard.GuardNPC
+    definition:
+      name: the watcher
+      description:
+        short: A guild watcher leans in the nook with an easy posture and a hard stare.
+        long: The watcher keeps one shoulder to the wall above the threshold, reading
+          every arrival as though weighing whether they belong below the city at all.
+      behavior:
+        aggressive: false
+        assist: true
+  items:
+  - id: donation_shelf
+    room: donation_shelf_room
+    typeclass: typeclasses.objects.Object
+    definition:
+      name: the donation shelves
+  - id: weapon_rack_pit
+    room: the_pit
+    typeclass: typeclasses.objects.Object
+    definition:
+      name: a weapon rack
+  - id: lockpick_practice_set
+    room: lockyard
+    typeclass: typeclasses.objects.Object
+    definition:
+      name: a practice lockpick set

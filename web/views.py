@@ -378,7 +378,9 @@ def _normalize_builder_zone_payload(data, fallback_zone_id="", direbuilder_metad
         "schema_version": str(data.get("schema_version") or "v1"),
         "zone_id": zone_id,
         "name": str(data.get("name") or _titleize_zone_id(zone_id)),
+        "zone_type": str(data.get("zone_type") or "").strip() or None,
         "generation_context": normalize_generation_context(data.get("generation_context")),
+        "geographic_structure": dict(data.get("geographic_structure") or {}),
         "rooms": rooms,
         "placements": {
             "npcs": list(placements.get("npcs") or []),

@@ -9,7 +9,14 @@ import yaml
 
 _VOCAB_PATH = Path(__file__).resolve().parent.parent / "vocab" / "zone_vocab.yaml"
 _LIST_FIELDS = ("culture", "mood", "banned_phrases")
-_SCALAR_FIELDS = ("setting_type", "era_feel", "climate", "voice")
+_SCALAR_FIELDS = (
+    "setting_type",
+    "era_feel",
+    "climate",
+    "voice",
+    "emotional_tone",
+    "cultural_signature",
+)
 _CONTROLLED_LIST_FIELDS = {
     "culture": "cultures",
     "mood": "moods",

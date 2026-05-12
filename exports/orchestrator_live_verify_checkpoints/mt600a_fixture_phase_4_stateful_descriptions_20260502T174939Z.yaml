@@ -1,0 +1,482 @@
+schema_version: v1
+zone_id: mt600a_fixture
+name: MT-600A Fixture
+zone_type: outdoor_city
+generation_context:
+  setting_type: city
+  era_feel: medieval
+  climate: temperate
+  voice: grounded and civic
+  emotional_tone: bustling and hopeful
+  cultural_signature: human frontier port town
+  culture:
+  - generic-fantasy
+  - multicultural
+  mood:
+  - bustling
+  banned_phrases: []
+geographic_structure:
+  streets:
+  - name: Market Street
+    type: street
+    rooms:
+    - market_gate
+    - market_square
+    - smith_lane
+    runs: north-south
+    district: market_district
+  intersections:
+  - name: Market Square
+    rooms:
+    - market_square
+    streets:
+    - Market Street
+    - Harbor Road
+    type: plaza
+  districts:
+  - name: Market District
+    slug: market_district
+    rooms:
+    - market_gate
+    - market_square
+    - smith_lane
+    character: bustling, commercial, mid-quality
+  landmarks:
+  - name: Old Bell Tower
+    slug: old_bell_tower
+    visible_from_rooms:
+    - market_gate
+    - market_square
+    type: tower
+    description_seed: weathered stone belfry with silent bells
+    rooms: []
+  gates:
+  - name: North Gate
+    room: market_gate
+    cross_zone_destination: north_road
+  doorway_rooms:
+  - name: Sundrop Inn Doorway
+    parent_room: inn_door
+    child_zone: sundrop_inn
+    exit_verb: enter inn
+    rooms: []
+rooms:
+- id: market_gate
+  name: Market Gate
+  desc: A broad gate opens onto the town's market road.
+  stateful_descs:
+    season_winter: Market Gate stands where Market Street enters the Market District
+      from the south, its worn timber signpost marking the threshold with carved lettering
+      that names the district beyond. Cobbles underfoot show frost in the shadowed
+      corners where winter cold settles, while the open route north carries a biting
+      wind down from the district's interior. The Old Bell Tower rises visible to
+      the north, its stone outline sharp against the winter sky. Merchants' carts
+      have left wheel ruts along the street's center, and the steady traffic of a
+      working port town shows in the hardened, well-traveled ground.
+    time_night: Market Gate stands where Market Street opens into the Market District,
+      its worn timber signpost marking the threshold with carved directions toward
+      the Old Bell Tower and the harbor beyond. Lamplight pools at the base of the
+      post, casting long shadows across the packed earth where daytime crowds have
+      left their mark in scuffed ground and wheel ruts. The north-south route lies
+      quiet now, though the faint creak of shop shutters and distant footsteps promise
+      the district will wake again with morning. Timber-framed buildings press close
+      on either side, their plank walls and iron fittings showing the practical construction
+      of a working port town.
+    time_evening: Market Gate stands where Market Street opens into the Market District,
+      its worn timber archway marking the threshold between the port town's outer
+      lanes and the trading grounds beyond. A weathered signpost leans beside the
+      entrance, its painted arrows directing traffic toward the district's stalls
+      and the Old Bell Tower rising to the north. Evening light fades across the cobbles
+      as merchants secure their carts and lamplighters move through the crossing,
+      their torches catching on the archway's iron fittings. The steady flow of traders
+      and dock workers passing beneath the gate slows but does not stop, voices still
+      carrying the day's business as shadows stretch long across the worn stones.
+    invasion_invasion: Market Street meets the entrance to Market District here, where
+      a weathered signpost marks the crossing with routes carved for the Old Bell
+      Tower and the harbor beyond. Timber-framed buildings crowd the street's edges,
+      their plank fronts showing years of salt air and foot traffic. Shouts carry
+      from the north where figures run toward the district's interior, and fresh scorch
+      marks blacken the signpost's base where something recently burned. The cobbles
+      are scattered with dropped goods and overturned crates left in haste.
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  terrain:
+    primary: outdoor
+    secondary: urban_cultivated
+  quest_hooks: []
+  tags:
+    structure: entrance
+    specific_function: null
+    named_feature: signpost
+    condition: worn
+    custom: []
+    atmosphere:
+      materials: []
+      social_character: []
+      surroundings: []
+      sensory: []
+      upkeep: null
+  map:
+    x: 0
+    y: 0
+    layer: 0
+  exits:
+    south:
+      target: market_square
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: market_square
+  name: Market Square
+  desc: Market Square opens wide where Market Street runs north and south through
+    the Market District, its worn cobbles spreading around a central fountain whose
+    basin shows years of steady use. Market stalls line the square's edges, their
+    timber frames weathered but upright, and the Old Bell Tower rises visible to the
+    east above the rooftops. Foot traffic crosses the open space in all directions,
+    and the square's broad layout and active commerce give the district its working
+    center.
+  stateful_descs:
+    season_winter: "Market Square opens wide where Market Street runs north and south\
+      \ through the Market District, its worn cobbles marked by years of stall traffic\
+      \ and trade. A stone fountain stands at the center, its basin chipped and darkened\
+      \ with age, while frost gathers thick along the rim and across the paving where\
+      \ winter wind sweeps through. The Old Bell Tower rises visible to the north,\
+      \ its silhouette sharp against the cold sky. Despite the biting air, the square\
+      \ holds its working character\u2014scuff marks and wheel ruts show where merchants\
+      \ set their stalls even in hard weather, and the open space carries the promise\
+      \ of commerce returning with warmer days."
+    time_night: Market Square opens wide where Market Street runs north and south
+      through the Market District, its worn cobbles spreading around a central fountain
+      whose basin shows years of steady use. Wooden market stalls stand empty now,
+      their canvas covers tied down for the night, and lamplight from the surrounding
+      buildings casts long shadows across the open ground. The Old Bell Tower rises
+      dark against the sky to the north, its silhouette marking the district's edge.
+      The square holds a quiet hush after the day's trade, with only occasional footsteps
+      crossing between the stalls toward the northern and southern routes.
+    time_evening: Market Square opens wide where Market Street crosses through the
+      Market District, its worn cobbles marked by years of stall traffic and steady
+      trade. A stone fountain stands at the center, its basin chipped but still catching
+      the evening light as merchants fold canvas and secure their goods for the night.
+      The Old Bell Tower rises to the north, its silhouette darkening against the
+      fading sky while lamplighters move between the square's edges. Voices carry
+      easily across the open space, calling last prices and arrangements for tomorrow's
+      business with the easy confidence of a port town that expects another crowd
+      by morning.
+    weather_storm: Market Square opens wide where Market Street runs north and south
+      through the Market District, its worn cobbles marked by years of stall traffic
+      and the press of crowds. A stone fountain stands at the center, its basin chipped
+      and darkened by weather, water streaming hard under the storm's downpour. Rain
+      hammers the open space, wind driving sheets across the square and blurring the
+      outline of the Old Bell Tower that rises to the east. Merchants' canvas flaps
+      and strains at its moorings, and the cobbles run with water that pools in the
+      low spots where the paving has settled.
+    weather_heavy_rain: Market Square opens wide where Market Street runs north and
+      south through the Market District, its worn cobbles marked by years of stall
+      traffic and cart wheels. A stone fountain stands at the center, its basin darkened
+      by weather and constant use, water pooling across the uneven paving where drains
+      struggle with the steady rain. Timber-framed merchant stalls ring the square's
+      edges, their canvas awnings sagging under the downpour, runoff streaming from
+      every corner. The Old Bell Tower rises to the east beyond the square's boundary,
+      its stonework slick and darkened. Despite the rain, voices carry across the
+      open space as traders call out and footsteps splash through standing water,
+      the square's activity undimmed by the weather.
+    invasion_invasion: Market Square opens wide where Market Street runs north and
+      south through the Market District, its worn cobbles marked by years of stall
+      traffic and trade. The square's central fountain stands dry, its basin cracked
+      and tilted where something heavy struck it during the attack. Overturned market
+      stalls lie scattered across the cobbles, their canvas torn and goods trampled,
+      while smoke drifts south from fires still burning near the district's edge.
+      The Old Bell Tower rises to the east, its alarm bell silent now, and the square
+      that once held the district's busiest trade stands empty except for debris and
+      the occasional shout of defenders regrouping near the northern end.
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  terrain:
+    primary: outdoor
+    secondary: urban_cultivated
+  quest_hooks: []
+  tags:
+    structure: square
+    specific_function: market-stall
+    named_feature: fountain
+    condition: worn
+    custom: []
+    atmosphere:
+      materials: []
+      social_character: []
+      surroundings: []
+      sensory: []
+      upkeep: null
+  map:
+    x: 0
+    y: 1
+    layer: 0
+  exits:
+    north:
+      target: market_gate
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    east:
+      target: smith_lane
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    west:
+      target: harbor_road
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: smith_lane
+  name: Smith Lane
+  desc: Smith Lane cuts east from Market Street as a narrow alley between timber-framed
+    buildings, their upper stories leaning close enough to nearly meet overhead. The
+    packed earth underfoot shows steady traffic, worn smooth where carts and foot
+    traffic pass between the main thoroughfare and the workshops beyond. Voices and
+    the ring of hammers carry from the lane's eastern end, marking the working edge
+    of Market District.
+  stateful_descs:
+    season_winter: Smith Lane cuts north from Market Street as a narrow alley between
+      timber-framed buildings, their weathered planks showing the salt and wind of
+      the port town's winters. Frost clings to the shadowed corners where the close
+      walls block the sun, and the packed earth underfoot is hard with cold. The alley
+      opens onto the busier thoroughfare to the south, where the sounds of Market
+      District's trade carry even in the chill air.
+    time_night: Smith Lane cuts north from Market Street as a narrow alley between
+      timber-framed buildings, their upper stories leaning close enough to nearly
+      meet overhead. Lamplight from shuttered windows falls in thin bars across the
+      packed earth underfoot, leaving most of the alley in shadow. The lane runs straight
+      north into the Market District, quiet now but marked by the day's passage in
+      scuffed ground and the faint smell of forge smoke still hanging in the still
+      air.
+    time_evening: Smith Lane cuts east from Market Street as a narrow alley between
+      timber-framed buildings, their upper stories leaning close enough to cast the
+      passage into early shadow as evening settles over Market District. The packed
+      earth underfoot shows the day's traffic in scuffed patterns leading toward the
+      street. Lamplight begins to glow from doorways along the alley's length, marking
+      where smiths and craftsmen finish their work for the day.
+    weather_storm: Smith Lane cuts north from Market Street as a narrow alley between
+      timber-framed buildings, their upper stories leaning close enough to nearly
+      meet overhead. Rain hammers down in sheets, turning the packed earth underfoot
+      to slick mud and pooling against the building foundations. Wind drives the downpour
+      sideways through the confined space, rattling shutters and sending water streaming
+      from the eaves above. The storm reduces the Market District's usual traffic
+      to hurried shapes that duck through quickly, heads down against the weather.
+    weather_heavy_rain: Smith Lane cuts west from Market Street into the Market District,
+      a narrow alley squeezed between timber-fronted buildings whose eaves channel
+      steady rain onto the cobbles below. Water runs in quick streams along the center,
+      pooling where the stones dip, and the usual clatter of the district is muffled
+      beneath the downpour. Soaked planks darken the building fronts, and runoff drips
+      from doorframes and shutters in unbroken lines. The lane holds its purpose even
+      under rain, its worn path still marking the route traders and workers take between
+      the broader thoroughfare and the district's inner reaches.
+    invasion_invasion: Smith Lane cuts west from Market Street into a narrow alley
+      between timber-framed buildings, their upper stories leaning close enough to
+      nearly touch. Fresh planks patch sections of the cobbled ground where cart traffic
+      has worn through, and iron brackets jut from the building fronts where merchants
+      hang their trade signs during market hours. Shouts carry from Market Street
+      as townspeople hurry past the alley mouth, some glancing nervously toward the
+      harbor district where smoke rises dark against the sky.
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  terrain:
+    primary: outdoor
+    secondary: urban_cultivated
+  quest_hooks: []
+  tags:
+    structure: alley
+    specific_function: null
+    named_feature: null
+    condition: null
+    custom: []
+    atmosphere:
+      materials: []
+      social_character: []
+      surroundings: []
+      sensory: []
+      upkeep: null
+  map:
+    x: 1
+    y: 1
+    layer: 0
+  exits:
+    west:
+      target: market_square
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+    south:
+      target: inn_door
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: inn_door
+  name: Sundrop Inn Doorway
+  desc: The inn's carved archway casts a warm pool of shade over the lane.
+  stateful_descs:
+    season_winter: A broad threshold opens into the Sundrop Inn, its sturdy timber
+      frame and iron hinges built to withstand the steady press of travelers. A painted
+      signpost above the doorway shows a golden sun, its bright colors holding clear
+      despite winter's bite. Cold air sweeps across the threshold from the street,
+      carrying the muffled sounds of port traffic and the creak of frost-stiffened
+      wood. The worn planks underfoot bear scuff marks from countless boots, darkened
+      where melted snow has pooled and refrozen at the edges.
+    time_night: A broad threshold opens into the Sundrop Inn, its sturdy timber frame
+      and iron hinges marking the boundary between street and shelter. A painted signpost
+      swings gently overhead, its lettering still visible in the lamplight that spills
+      from the doorway onto the cobbles below. The well-kept entrance shows the steady
+      traffic of travelers passing through, with worn boards polished smooth by countless
+      boots and the faint warmth of hearthfire reaching outward into the night air.
+    time_evening: The threshold of the Sundrop Inn opens onto the street, its sturdy
+      timber frame fitted with iron hinges that show regular care. A painted signpost
+      swings from a bracket above, marking the inn's name in clear lettering that
+      catches the last of the evening light. Lamplight spills from the doorway as
+      dusk settles, and the sounds of conversation and footsteps carry outward from
+      the common room within.
+    invasion_invasion: The threshold of the Sundrop Inn stands open, its heavy door
+      pulled back against the wall. A painted signpost above the entrance shows a
+      golden sun against blue sky, the colors still bright despite steady weather.
+      Shouts carry from the street beyond as townsfolk hurry past with bundles and
+      children, their voices tight with alarm. Fresh gouges mark the doorframe where
+      something struck hard, and a broken lantern lies kicked aside near the step.
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  terrain:
+    primary: outdoor
+    secondary: urban_cultivated
+  quest_hooks:
+  - greet_innkeeper
+  tags:
+    structure: threshold
+    specific_function: inn
+    named_feature: signpost
+    condition: well-maintained
+    custom: []
+    atmosphere:
+      materials: []
+      social_character: []
+      surroundings: []
+      sensory: []
+      upkeep: null
+  map:
+    x: 1
+    y: 2
+    layer: 0
+  exits:
+    north:
+      target: smith_lane
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+- id: harbor_road
+  name: Harbor Road
+  desc: Harbor Road runs straight and wide between timber-framed buildings that lean
+    slightly toward the street, their plank siding weathered by salt air. The packed
+    earth shows wagon ruts and boot prints crossing in all directions, evidence of
+    steady traffic moving goods and travelers through the port district. Voices carry
+    from open doorways and the occasional clatter of cart wheels breaks the hum of
+    activity that marks the road as a working route rather than a quiet lane.
+  stateful_descs:
+    season_winter: "Harbor Road runs straight and wide between timber-framed buildings,\
+      \ their pitched roofs and shuttered windows marking the practical style of a\
+      \ working port district. Cold air moves steadily along the open street, carrying\
+      \ the salt tang from the docks and biting at exposed skin. The cobbles underfoot\
+      \ are hardened with frost, their worn centers showing white where ice has settled\
+      \ into the stone's uneven surface. Traffic moves with purpose despite the chill\u2014\
+      carts rattle past, and bundled figures cross between the building fronts where\
+      \ awnings offer brief shelter from the winter wind."
+    time_night: Harbor Road runs straight between timber-framed buildings whose upper
+      stories lean close enough to narrow the view of the night sky. Lamplight from
+      shuttered windows falls in uneven patches across the packed earth, leaving the
+      street's edges in shadow. The quiet is broken only by occasional footsteps and
+      the distant creak of ships at anchor, the day's bustle reduced to scattered
+      movement between the pools of light.
+    time_evening: "Harbor Road runs straight and wide between timber-framed buildings\
+      \ that lean slightly toward the street, their upper stories jutting out over\
+      \ the cobbles below. Lamplight begins to glow from doorways and windows as the\
+      \ day's trade winds down, casting warm patches across the worn stone paving.\
+      \ Voices carry easily in the open air\u2014merchants calling final prices, dock\
+      \ workers heading inland, travelers seeking lodging before full dark. The street\
+      \ shows its purpose in scuffed stone and cart ruts, a working route between\
+      \ the waterfront and the town's inner districts."
+    weather_storm: Harbor Road runs straight between timber-framed buildings that
+      lean close under the storm's weight, their shutters rattling against iron fittings.
+      Rain hammers the cobbles in sheets, pooling where the stones dip and streaming
+      toward the gutters in muddy channels. Wind drives the downpour sideways, soaking
+      the building fronts and sending loose planks clattering against doorways. Lightning
+      flashes briefly illuminate the empty street, showing where the road continues
+      north and south through the deluge.
+    weather_heavy_rain: Harbor Road runs straight between timber-framed buildings
+      whose steep roofs shed steady rain onto the cobbles below. Water streams along
+      the gutters and pools where the paving dips, darkening the stone and carrying
+      the smell of wet wood and salt from the docks. The street remains passable north
+      and south despite the downpour, its worn center showing where carts and foot
+      traffic push through even in heavy weather. Voices from doorways and the splash
+      of boots through puddles mark the port's refusal to halt for rain.
+    invasion_invasion: Harbor Road runs straight between timber-framed buildings that
+      lean close overhead, their upper stories jutting out above the cobbled street.
+      Smoke rises from a dozen chimneys along the roofline, and the steady sound of
+      hammering carries from an open workshop doorway to the west. Shouts echo from
+      the harbor direction to the south, sharp and urgent, and a cluster of townspeople
+      hurries north away from the docks, some carrying bundled belongings. Fresh scorch
+      marks blacken the corner of the nearest building, and broken crates lie scattered
+      across the cobbles where someone dropped them in haste.
+  details: {}
+  room_states: []
+  ambient:
+    rate: 0
+    messages: []
+  environment: city
+  terrain:
+    primary: outdoor
+    secondary: urban_cultivated
+  quest_hooks: []
+  tags:
+    structure: street
+    specific_function: null
+    named_feature: null
+    condition: null
+    custom: []
+    atmosphere:
+      materials: []
+      social_character: []
+      surroundings: []
+      sensory: []
+      upkeep: null
+  map:
+    x: -1
+    y: 1
+    layer: 0
+  exits:
+    east:
+      target: market_square
+      typeclass: typeclasses.exits.Exit
+      speed: ''
+      travel_time: 0
+placements:
+  npcs:
+  - id: town-guard
+    prototype: null
+    typeclass: typeclasses._guard_npc_impl.GuardNPC
+    room: market_gate
+  items:
+  - id: training-sword
+    prototype: null
+    typeclass: typeclasses.weapons.Weapon
+    room: harbor_road

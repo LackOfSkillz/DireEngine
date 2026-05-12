@@ -1,4 +1,5 @@
 from commands.command import Command
+from world.helpers.skill_attempts import attempt_with_failure_learning
 
 
 class CmdDiagnose(Command):
@@ -30,8 +31,25 @@ class CmdDiagnose(Command):
         if not target:
             return
 
+        if not (hasattr(self.caller, "is_empath") and self.caller.is_empath()):
+            self.caller.msg("You do not know how to diagnose injuries that way.")
+            return
+
         if hasattr(target, "format_empath_diagnosis"):
             for line in target.format_empath_diagnosis(precise=False):
                 self.caller.msg(line)
         if hasattr(self.caller, "use_skill") and hasattr(target, "get_empath_wounds"):
-            self.caller.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=max(10, sum(target.get_empath_wounds().values())))
+            difficulty = max(10, sum(target.get_empath_wounds().values()))
+            empathy_rank = int(self.caller.get_skill("empathy") if hasattr(self.caller, "get_skill") else 0)
+            if empathy_rank < difficulty:
+                attempt_with_failure_learning(
+                    self.caller,
+                    "empathy",
+                    difficulty,
+                    success=False,
+                    failure_reason="skill_too_low",
+                    event_key="diagnose",
+                    failure_multiplier=0.25,
+                )
+            else:
+                self.caller.use_skill("empathy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=difficulty)

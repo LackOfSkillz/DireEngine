@@ -138,6 +138,7 @@ from world.systems.interest import (
     sync_direct_interest,
     sync_subject_interest,
 )
+from world.helpers.skill_attempts import attempt_with_failure_learning
 from world.systems.skills import MINDSTATE_MAX, SkillHandler, TEMPLATE_EXP_SKILLS, is_active
 from world.systems.circles import (
     get_circle_requirements,
@@ -10029,6 +10030,7 @@ class Character(ObjectParent, DefaultCharacter):
 
         detected = []
         perception_total = self.get_skill("perception") + self.get_stat("wisdom")
+        highest_concealment = 0
         for obj in self.location.contents:
             if not getattr(obj.db, "is_trap_device", False):
                 continue
@@ -10038,6 +10040,7 @@ class Character(ObjectParent, DefaultCharacter):
                 continue
 
             concealment = int(obj.db.concealment or 0)
+            highest_concealment = max(highest_concealment, concealment)
             if perception_total <= concealment:
                 continue
 
@@ -10052,6 +10055,16 @@ class Character(ObjectParent, DefaultCharacter):
                 emit_placeholder=False,
                 require_known=False,
                 difficulty=max(10, max(int(obj.db.concealment or 0) for obj in detected)),
+            )
+        elif highest_concealment > 0:
+            attempt_with_failure_learning(
+                self,
+                "perception",
+                max(10, highest_concealment),
+                success=False,
+                failure_reason="skill_too_low",
+                event_key="detect_traps",
+                failure_multiplier=0.25,
             )
 
         return detected
@@ -12401,14 +12414,32 @@ class Character(ObjectParent, DefaultCharacter):
         self.msg(f"You try to recall what you know about {topic}.")
         if scholarship < 5:
             self.msg("You struggle to recall anything useful.")
+            attempt_with_failure_learning(
+                self,
+                "scholarship",
+                10,
+                success=False,
+                failure_reason="skill_too_low",
+                event_key="scholarship_recall",
+                failure_multiplier=0.25,
+            )
         elif scholarship < 15:
             self.msg("You vaguely recall something about it.")
+            attempt_with_failure_learning(
+                self,
+                "scholarship",
+                10,
+                success=False,
+                failure_reason="skill_too_low",
+                event_key="scholarship_recall",
+                failure_multiplier=0.25,
+            )
         elif scholarship < 30:
             self.msg("You recall some useful details.")
+            self.award_skill_experience("scholarship", max(10, scholarship), success=True, outcome="success", event_key="scholarship_recall", context_multiplier=0.5)
         else:
             self.msg("You recall detailed and useful knowledge.")
-
-        self.award_skill_experience("scholarship", max(10, scholarship), success=True, outcome="success", event_key="scholarship_recall", context_multiplier=0.5)
+            self.award_skill_experience("scholarship", max(10, scholarship), success=True, outcome="success", event_key="scholarship_recall", context_multiplier=0.5)
 
     def study_item(self, item):
         if not getattr(item.db, "is_study_item", False):
@@ -12427,6 +12458,16 @@ class Character(ObjectParent, DefaultCharacter):
         self.msg(f"You begin studying {item.key}.")
         if skill < difficulty:
             self.msg("You struggle to make sense of the material.")
+            if normalized_skill := str(skill_name or "scholarship").strip().lower().replace("-", "_").replace(" ", "_"):
+                attempt_with_failure_learning(
+                    self,
+                    normalized_skill,
+                    difficulty,
+                    success=False,
+                    failure_reason="skill_too_low",
+                    event_key="study",
+                    failure_multiplier=0.25,
+                )
             return False
 
         item.db.study_uses = study_uses + 1
@@ -12436,7 +12477,21 @@ class Character(ObjectParent, DefaultCharacter):
         if anatomy_study:
             self.award_skill_experience("scholarship", difficulty, success=True, outcome="success", event_key="study_anatomy", context_multiplier=1.0)
             self.award_skill_experience("first_aid", max(8, difficulty - 2), success=True, outcome="success", event_key="study_anatomy", context_multiplier=0.55)
-            self.award_skill_experience("empathy", max(6, difficulty - 4), success=True, outcome="success", event_key="empathy_study", context_multiplier=0.12)
+            if hasattr(self, "is_empath") and self.is_empath():
+                empathy_difficulty = max(6, difficulty - 4)
+                empathy_rank = int(self.get_skill("empathy") if hasattr(self, "get_skill") else 0)
+                if empathy_rank >= empathy_difficulty:
+                    self.award_skill_experience("empathy", empathy_difficulty, success=True, outcome="success", event_key="empathy_study", context_multiplier=0.12)
+                else:
+                    attempt_with_failure_learning(
+                        self,
+                        "empathy",
+                        empathy_difficulty,
+                        success=False,
+                        failure_reason="skill_too_low",
+                        event_key="empathy_study",
+                        failure_multiplier=0.25,
+                    )
         elif normalized_skill in {"scholarship", "first_aid"}:
             self.award_skill_experience(normalized_skill, difficulty, success=True, outcome="success", event_key="study", context_multiplier=1.0)
         else:
@@ -14352,12 +14407,32 @@ class Character(ObjectParent, DefaultCharacter):
 
         if tactics < 5:
             self.msg("You struggle to read their intentions.")
+            attempt_with_failure_learning(
+                self,
+                "tactics",
+                10,
+                success=False,
+                failure_reason="skill_too_low",
+                event_key="assess_stance",
+                failure_multiplier=0.25,
+            )
         elif tactics < 15:
             self.msg("You get a rough sense of how they carry themselves in combat.")
+            attempt_with_failure_learning(
+                self,
+                "tactics",
+                10,
+                success=False,
+                failure_reason="skill_too_low",
+                event_key="assess_stance",
+                failure_multiplier=0.25,
+            )
         elif tactics < 30:
             self.msg("You begin to recognize strengths and weaknesses in their stance.")
+            self.use_skill("tactics", apply_roundtime=False, emit_placeholder=False, require_known=False)
         else:
             self.msg("You read their stance with confidence, noting likely strengths and openings.")
+            self.use_skill("tactics", apply_roundtime=False, emit_placeholder=False, require_known=False)
 
         self.set_state(
             "tactics_prep",
@@ -14366,7 +14441,6 @@ class Character(ObjectParent, DefaultCharacter):
                 "bonus": min(10, 1 + self.get_skill("tactics") // 10),
             },
         )
-        self.use_skill("tactics", apply_roundtime=False, emit_placeholder=False, require_known=False)
 
     def get_weapon(self):
         self.ensure_core_defaults()

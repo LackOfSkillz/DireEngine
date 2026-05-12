@@ -3,6 +3,7 @@ import time
 
 from commands.command import Command
 from engine.services.skill_service import SkillService
+from world.helpers.skill_attempts import attempt_with_failure_learning
 from world.systems.theft import record_mark_attempt
 
 
@@ -70,7 +71,17 @@ class CmdMark(Command):
             except Exception:
                 perception_difficulty = 10
         SkillService.award_xp(caller, "appraisal", perception_difficulty, source={"mode": "difficulty"}, success=True, outcome="success", event_key="mark")
-        SkillService.award_xp(caller, "perception", max(10, perception_difficulty - 5), source={"mode": "difficulty"}, success=True, outcome="success", event_key="mark")
+        perception_training_difficulty = max(10, perception_difficulty - 5)
+        perception_rank = int(caller.get_skill("perception") if hasattr(caller, "get_skill") else 0)
+        attempt_with_failure_learning(
+            caller,
+            "perception",
+            perception_training_difficulty,
+            success=perception_rank >= perception_training_difficulty,
+            failure_reason="skill_too_low",
+            event_key="mark",
+            failure_multiplier=0.25,
+        )
 
         caller.msg(f"You assess {target.key}. Difficulty: {difficulty}")
         caller.msg("They seem wary of you." if memory else "They seem unsuspecting.")

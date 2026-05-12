@@ -1,0 +1,268 @@
+schema_version: v1
+zone_id: mt600a_fixture
+name: MT-600A Fixture
+zone_type: outdoor_city
+generation_context:
+  setting_type: city
+  era_feel: medieval
+  climate: temperate
+  voice: grounded and civic
+  culture:
+    - generic-fantasy
+    - multicultural
+  mood:
+    - bustling
+  banned_phrases: []
+  emotional_tone: bustling and hopeful
+  cultural_signature: human frontier port town
+geographic_structure:
+  streets:
+    - name: Market Street
+      type: street
+      rooms:
+        - market_gate
+        - market_square
+        - smith_lane
+      runs: north-south
+      district: market_district
+  intersections:
+    - name: Market Square
+      rooms:
+        - market_square
+      streets:
+        - Market Street
+        - Harbor Road
+      type: plaza
+  districts:
+    - name: Market District
+      slug: market_district
+      rooms:
+        - market_gate
+        - market_square
+        - smith_lane
+      character: bustling, commercial, mid-quality
+  landmarks:
+    - name: Old Bell Tower
+      slug: old_bell_tower
+      visible_from_rooms:
+        - market_gate
+        - market_square
+      type: tower
+      description_seed: weathered stone belfry with silent bells
+  gates:
+    - name: North Gate
+      room: market_gate
+      cross_zone_destination: north_road
+  doorway_rooms:
+    - name: Sundrop Inn Doorway
+      parent_room: inn_door
+      child_zone: sundrop_inn
+      exit_verb: enter inn
+rooms:
+  - id: market_gate
+    name: Market Gate
+    desc: A broad gate opens onto the town's market road.
+    stateful_descs: {}
+    details: {}
+    room_states: []
+    ambient:
+      rate: 0
+      messages: []
+    environment: city
+    terrain:
+      primary: outdoor
+      secondary: urban_cultivated
+    quest_hooks: []
+    tags:
+      structure: entrance
+      specific_function: null
+      named_feature: signpost
+      condition: worn
+      custom: []
+      atmosphere:
+        materials: []
+        social_character: []
+        surroundings: []
+        sensory: []
+        upkeep: null
+    map:
+      x: 0
+      y: 0
+      layer: 0
+    exits:
+      south:
+        target: market_square
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+  - id: market_square
+    name: Market Square
+    desc: ''
+    stateful_descs: {}
+    details: {}
+    room_states: []
+    ambient:
+      rate: 0
+      messages: []
+    environment: city
+    terrain:
+      primary: outdoor
+      secondary: urban_cultivated
+    quest_hooks: []
+    tags:
+      structure: square
+      specific_function: market-stall
+      named_feature: fountain
+      condition: worn
+      custom: []
+      atmosphere:
+        materials: []
+        social_character: []
+        surroundings: []
+        sensory: []
+        upkeep: null
+    map:
+      x: 0
+      y: 1
+      layer: 0
+    exits:
+      north:
+        target: market_gate
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+      east:
+        target: smith_lane
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+      west:
+        target: harbor_road
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+  - id: smith_lane
+    name: Smith Lane
+    desc: ''
+    stateful_descs: {}
+    details: {}
+    room_states: []
+    ambient:
+      rate: 0
+      messages: []
+    environment: city
+    terrain:
+      primary: outdoor
+      secondary: urban_cultivated
+    quest_hooks: []
+    tags:
+      structure: alley
+      specific_function: null
+      named_feature: null
+      condition: null
+      custom: []
+      atmosphere:
+        materials: []
+        social_character: []
+        surroundings: []
+        sensory: []
+        upkeep: null
+    map:
+      x: 1
+      y: 1
+      layer: 0
+    exits:
+      west:
+        target: market_square
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+      south:
+        target: inn_door
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+  - id: inn_door
+    name: Sundrop Inn Doorway
+    desc: The inn's carved archway casts a warm pool of shade over the lane.
+    stateful_descs: {}
+    details: {}
+    room_states: []
+    ambient:
+      rate: 0
+      messages: []
+    environment: city
+    terrain:
+      primary: outdoor
+      secondary: urban_cultivated
+    quest_hooks:
+      - greet_innkeeper
+    tags:
+      structure: threshold
+      specific_function: inn
+      named_feature: signpost
+      condition: well-maintained
+      custom: []
+      atmosphere:
+        materials: []
+        social_character: []
+        surroundings: []
+        sensory: []
+        upkeep: null
+    map:
+      x: 1
+      y: 2
+      layer: 0
+    exits:
+      north:
+        target: smith_lane
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+  - id: harbor_road
+    name: Harbor Road
+    desc: ''
+    stateful_descs: {}
+    details: {}
+    room_states: []
+    ambient:
+      rate: 0
+      messages: []
+    environment: city
+    terrain:
+      primary: outdoor
+      secondary: urban_cultivated
+    quest_hooks: []
+    tags:
+      structure: street
+      specific_function: null
+      named_feature: null
+      condition: null
+      custom: []
+      atmosphere:
+        materials: []
+        social_character: []
+        surroundings: []
+        sensory: []
+        upkeep: null
+    map:
+      x: -1
+      y: 1
+      layer: 0
+    exits:
+      east:
+        target: market_square
+        typeclass: typeclasses.exits.Exit
+        speed: ''
+        travel_time: 0
+placements:
+  npcs:
+    - id: town-guard
+      prototype: null
+      typeclass: typeclasses._guard_npc_impl.GuardNPC
+      room: market_gate
+  items:
+    - id: training-sword
+      prototype: null
+      typeclass: typeclasses.weapons.Weapon
+      room: harbor_road
