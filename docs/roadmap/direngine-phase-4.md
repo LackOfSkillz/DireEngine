@@ -141,7 +141,89 @@ Implications for every Phase 4 dispatch:
 6. Engine APIs must be stable, versioned, and documented. Bundles consume the API; engine doesn't reach into bundle code. The contract is one-directional.
 7. Graceful degradation. When a paid bundle is absent, the engine still works. A map referencing "Riverhaven" when that zone isn't installed shows "Riverhaven zone not installed" - it doesn't crash.
 
+**API contract:** `docs/architecture/bundle-extension-api.md` documents the registry interfaces, manifest format, loader behavior, boot sequence, and graceful-degradation rules for all downstream bundle work.
+
 This means DRG-022.5 - Bundle Extension Point Architecture - must ship before any profession or zone overhauls. Otherwise overhauled code can't cleanly extract into Tier 2 modules later. Designing the extension points first lets every per-system dispatch register correctly from day one.
+
+## Modernization principle — behavior fidelity, not implementation fidelity
+
+**GSL is the source of truth for WHAT the code does, not for HOW the code is structured.**
+
+DragonRealms's GSL is a proprietary scripting language from the early 1990s. It encodes the math, mechanics, and behavioral spec of a deep MUD in patterns that were idiomatic at the time: numeric variable slots (`$v0`, `$a0`), goto-style control flow, event-token string dispatch (`$DIE`, `$TARGET`), tightly coupled global state, and file-by-script-number organization.
+
+DireEngine is a modern Python/Evennia codebase. The architecture follows current idioms: typed services, named variables, clear control flow, object-oriented domain models, explicit interfaces, tests as first-class artifacts.
+
+These two facts are not in conflict. GSL gives us the FORMULA, the THRESHOLDS, the STATE MACHINE, and the EVENT ORDERING. Modern Python expresses all of it cleanly. The numerical output should match GSL exactly. The code structure should look nothing like GSL.
+
+### What carries forward from GSL (extracted faithfully)
+
+- Math formulas (damage, mana cost, prep time, skill check curves, contest resolution)
+- Threshold values (critical endroll, fumble endroll, RT modifiers, skill ranks for ability gates)
+- State machine transitions (stance progression, combat engagement, spell prep stages)
+- Event ordering (when `$DIE` fires relative to combat cleanup; when `$TARGET` evaluates vs `$ATTACK`)
+- RT values, cooldown durations, mana costs, prep times
+- Specific magic numbers that ARE the spec (e.g., `$TREASURE` seg 701006 → that exact treasure segment)
+
+### What does NOT carry forward from GSL
+
+| GSL pattern | DireEngine pattern |
+|---|---|
+| `$v0`, `$v9`, `$a0` numeric slots | Named typed variables |
+| `GOTO :label` flow | Function calls, method invocations, structured control flow |
+| `$DIE` / `$TARGET` / `$ATTACK` event token strings | Typed event dispatchers, signal/slot patterns, or method hooks |
+| Global mutable script vars | Service-owned state with explicit getters/setters |
+| File-by-script-number organization (`S00031.txt`) | Module/class organization by concern |
+| No type information | Type hints on every function signature |
+| String-keyed effect lookups (`$EFFECT,kissme`) | Enum-keyed or strongly-typed effect registries |
+| Linear procedural scripts | Object-oriented services + dataclass domain models |
+| Hardcoded constants buried in math | Named constants at module scope, docstring citing GSL source |
+| Embedded message strings in math logic | Math returns structured results; presentation layer formats |
+| No tests | Pytest with focused per-behavior tests verifying GSL parity |
+
+### Documentation pattern
+
+Every system that translates GSL math/mechanics carries a docstring citing the GSL source:
+
+```python
+def resolve_attack(attacker_score: int, defense_score: int, *, rng=random) -> CombatRoll:
+    """Resolve an attack via AS/DS endroll contest.
+
+    Math from GSL S00088 (CPDF combat hit). Critical threshold endroll >=101,
+    normal hit >=60, miss otherwise. Damage rolls and modifiers follow GSL
+    exactly; see tests/combat/test_resolve_attack.py for verified parity.
+
+    Related GSL: S00047 (hit area), S00048 (damage tier),
+    S00031-S00037 (attack verbs that call into this).
+    """
+```
+
+Provenance is part of the deliverable. Future readers can verify behavior against the cited script.
+
+### Test discipline reinforces this
+
+GSL parity is tested via numerical assertions. A typical combat math test:
+
+```python
+def test_endroll_101_yields_critical():
+    """GSL S00088 specifies endroll >=101 as critical threshold."""
+    rng = FixedRng([50])  # roll = 50, AS=100, DS=49 → endroll = 101
+    result = resolve_attack(attacker_score=100, defense_score=49, rng=rng)
+    assert result.result == HitResult.CRITICAL
+    assert result.endroll == 101
+```
+
+Test names cite GSL behavior. Assertions verify the numerical contract. The implementation can be refactored freely as long as tests pass.
+
+### Per-dispatch enforcement
+
+Every Phase 4 dispatch operates under this principle:
+
+1. Pull math/mechanics from GSL via DireLore. Read the script's `raw_content`. Extract formulas, thresholds, state transitions.
+2. Express them in modern Python — typed dataclasses, named constants, clean control flow, OO domain models, services for mutation.
+3. Cite the GSL source in docstrings.
+4. Test numerical parity — tests verify the math matches GSL; tests do NOT verify implementation structure.
+
+**The architecture is ours. The behavior is GSL's. Both matter; neither is negotiable.**
 
 ## Authority architecture (unchanged from DireEngine's current state)
 
@@ -181,6 +263,8 @@ Phase 4 preserves this. Bundle extension points fit inside this architecture - t
 - Skills registered through the extension API even though they're free engine concepts (proves the API)
 - Pre-GSL math left in place; this dispatch wires data only
 
+Status: complete for stats and skills. `stat_registry` and `skill_registry` now boot from DireLore through the extension API, with explicit fallback paths so Evennia still boots when DireLore is unavailable.
+
 ### Tier 0 overhaul phase
 
 Tier 0 sub-bundles follow DRG-011's strict dependency order. Group dispatches naturally:
@@ -188,10 +272,15 @@ Tier 0 sub-bundles follow DRG-011's strict dependency order. Group dispatches na
 **DRG-024 - Tier 0 Combat overhaul (sub-bundles 20-26)**
 
 - Combat core, weapons, armor, hit area (S00047), damage (S00048), attack verbs (S00031-S00037), defense (S00039-S00046)
-- AS vs DS contest with endroll mechanics from GSL
-- Critical hits from endroll thresholds, not flat 5%
-- Weapon class drives base roundtime
-- Migrate pre-GSL combat tests to GSL-aligned assertions
+- Canon-correct core model is the OF minus EDF subtractive contest from S00041, S00042, S00043, S00046, S00091, S00092, with S00265 combat RNG applied inside OF
+- DRG-024 completed the combat-core rewrite in place under `domain/combat/resolution.py` and added `domain/combat/rng.py`
+- DRG-024 preserved the existing `AttackResolution.details` payload contract so `combat_service`, combat XP, and presenters could keep working while the math changed underneath
+- Follow-up work remains split as:
+    - DRG-024a: hit area, damage tier, armor reduction, and wound-depth parity from S00047/S00048/S00066/S00072
+    - DRG-024b: attack verb routing and per-verb GSL parity for S00031-S00037
+    - DRG-024c: broader defense and equipment parity around richer parry/shield/weapon-force inputs
+
+Status: combat core complete and validated. Evennia restarted cleanly after the rewrite; focused combat tests and broader regression slices are green.
 
 **DRG-024.5 - Tier 0 Magic overhaul (sub-bundles 32-35)**
 

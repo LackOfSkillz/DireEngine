@@ -10,29 +10,43 @@ class CombatXP:
 
     @staticmethod
     def award(attacker, target, context, hit):
-        final_chance = context.get("final_chance")
-        if final_chance is None:
-            final_chance = 95
-        final_chance = int(final_chance)
-        difficulty_scale = max(CONTEST_XP_FLOOR, 1.0 - (final_chance / 100.0))
-        if final_chance < 95:
+        leftover_of = context.get("leftover_of")
+        offensive_total = context.get("offensive_factor_total", context.get("accuracy", 0))
+        defensive_total = context.get("evasion_defense_factor_total", context.get("evasion", 0))
+
+        if leftover_of is None:
+            final_chance = context.get("final_chance")
+            if final_chance is None:
+                final_chance = 95
+            final_chance = int(final_chance)
+            difficulty_scale = max(CONTEST_XP_FLOOR, 1.0 - (final_chance / 100.0))
+        else:
+            offensive_total = max(1, int(offensive_total or 0))
+            defensive_total = max(0, int(defensive_total or 0))
+            difficulty_scale = max(CONTEST_XP_FLOOR, min(2.0, defensive_total / offensive_total if offensive_total else 1.0))
+
+        should_award_defense = int(defensive_total or 0) > 0
+        if leftover_of is None:
+            should_award_defense = int(95 if final_chance is None else final_chance) < 95
+
+        if should_award_defense:
             SkillService.award_xp(
                 target,
                 "evasion",
-                max(10, int(context.get("accuracy", 0) or 0)),
+                max(10, int(offensive_total or 0)),
                 source={"mode": "difficulty"},
                 success=not bool(hit),
                 context_multiplier=DEFENSE_XP_MULT * difficulty_scale,
             )
 
-        if not hit or final_chance >= 95:
+        if not hit:
             return
 
         skill_name = str(context.get("skill_name", "") or "").strip().lower()
         if not skill_name:
             return
 
-        difficulty = target.get_stat("reflex") + target.get_stat("agility")
+        difficulty = max(int(defensive_total or 0), target.get_stat("reflex") + target.get_stat("agility"))
         if skill_name in {"brawling", "light_edge"}:
             SkillService.award_xp(
                 attacker,

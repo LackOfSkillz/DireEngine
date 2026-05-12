@@ -29,6 +29,27 @@ class CombatXPTests(unittest.TestCase):
             context_multiplier=DEFENSE_XP_MULT,
         )
 
+    @patch("engine.services.combat_xp.SkillService.award_xp")
+    def test_leftover_of_path_uses_offensive_factor_for_defense_xp(self, award_xp):
+        attacker = DummyActor()
+        target = DummyActor()
+
+        CombatXP.award(
+            attacker,
+            target,
+            {"leftover_of": -5, "offensive_factor_total": 80, "evasion_defense_factor_total": 100},
+            hit=False,
+        )
+
+        award_xp.assert_called_once_with(
+            target,
+            "evasion",
+            80,
+            source={"mode": "difficulty"},
+            success=True,
+            context_multiplier=DEFENSE_XP_MULT * 1.25,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

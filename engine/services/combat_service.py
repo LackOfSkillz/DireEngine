@@ -394,7 +394,7 @@ class CombatService:
             pressure_gain += 2
         if isinstance(details.get("offensive_roar"), dict):
             pressure_gain += 2
-        if int(details.get("hit_roll", 101) or 101) <= int(details.get("final_chance", 0) or 0):
+        if int(details.get("leftover_of", 0) or 0) > 0:
             pressure_gain += 3
         if pressure_gain and hasattr(target, "add_pressure"):
             target.add_pressure(pressure_gain)

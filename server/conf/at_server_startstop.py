@@ -31,6 +31,7 @@ from evennia.utils import logger
 from evennia.utils.create import create_object, create_script
 from twisted.internet import reactor
 
+from engine.bundles.boot import boot_bundles
 from engine.services.injury_service import InjuryService
 from engine.services.mana_service import ManaService
 from typeclasses.objects import BountyBoard
@@ -2115,6 +2116,10 @@ def at_server_init():
     """
     This is called first as the server is starting up, regardless of how.
     """
+    try:
+        boot_bundles()
+    except Exception as error:
+        logger.log_err(f"Bundle boot failed during at_server_init: {error}")
     try:
         from server.systems.loot import reload_loot_tables
 

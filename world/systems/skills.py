@@ -4,6 +4,9 @@ Skill system — core data structures (no logic yet)
 
 import time
 
+from engine.bundles.builtin_skills import LEGACY_SKILL_PULSE_GROUPS, normalize_skill_registry_key
+from engine.bundles.skill_registry import skill_registry
+
 
 VALID_SKILLSETS = ("primary", "secondary", "tertiary")
 MINDSTATE_MAX = 34
@@ -34,20 +37,9 @@ MINDSTATE_NAMES = {
     34: "mind lock",
 }
 
-SKILL_GROUPS = {
-    "evasion": 100,
-    "brawling": 100,
-    "athletics": 100,
-    "stealth": 120,
-    "perception": 120,
-    "locksmithing": 120,
-    "first_aid": 120,
-    "appraisal": 140,
-    "light_edge": 140,
-    "targeted_magic": 160,
-    "debilitation": 160,
-    "empathy": 180,
-    "scholarship": 180,
+LEGACY_SKILL_ALIASES = {
+    "hand_to_hand": "brawling",
+    "lockpicking": "locksmithing",
 }
 
 FIRST_WAVE_EXP_SKILLS = (
@@ -126,6 +118,52 @@ def normalize_skill_name(name):
     if not normalized:
         raise ValueError("Skill name cannot be empty.")
     return normalized
+
+
+def resolve_skill_registry_key(name):
+    normalized = normalize_skill_name(name)
+    return LEGACY_SKILL_ALIASES.get(normalized, normalize_skill_registry_key(normalized))
+
+
+def get_skill_definition(name):
+    try:
+        return skill_registry.get(resolve_skill_registry_key(name))
+    except ValueError:
+        return None
+
+
+def get_skill_display_name(name):
+    definition = get_skill_definition(name) or {}
+    display_name = str(definition.get("display_name") or "").strip()
+    if display_name:
+        return display_name
+    return normalize_skill_name(name).replace("_", " ").title()
+
+
+def list_skills_in_group(group):
+    normalized_group = str(group or "").strip().lower()
+    return sorted(
+        key
+        for key in skill_registry.list_keys()
+        if str((skill_registry.get(key) or {}).get("group") or "").strip().lower() == normalized_group
+    )
+
+
+def list_skill_groups():
+    return sorted(
+        {
+            str((skill_registry.get(key) or {}).get("group") or "").strip().lower()
+            for key in skill_registry.list_keys()
+            if str((skill_registry.get(key) or {}).get("group") or "").strip()
+        }
+    )
+
+
+def get_skill_pulse_group(name):
+    definition = get_skill_definition(name) or {}
+    if definition.get("pulse_group") is not None:
+        return int(definition.get("pulse_group") or 100)
+    return int(LEGACY_SKILL_PULSE_GROUPS.get(normalize_skill_name(name), 100) or 100)
 
 
 def normalize_event_key(event_key, skill_name=None):

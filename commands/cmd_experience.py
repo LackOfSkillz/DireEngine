@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 
 from commands.command import Command
-from world.systems.skills import MINDSTATE_MAX, base_pool, is_active, rank_cost
+from world.systems.skills import MINDSTATE_MAX, base_pool, get_skill_display_name, is_active, rank_cost
 
 
 DISPLAY_NAME_OVERRIDES = {
@@ -27,6 +27,9 @@ DISPLAY_NAME_OVERRIDES = {
 
 def format_skill_display_name(skill_name):
     normalized = str(skill_name or "").strip().lower().replace(" ", "_")
+    registry_name = get_skill_display_name(normalized)
+    if registry_name and registry_name != normalized.replace("_", " ").title():
+        return registry_name
     if normalized in DISPLAY_NAME_OVERRIDES:
         return DISPLAY_NAME_OVERRIDES[normalized]
     return normalized.replace("_", " ").title()

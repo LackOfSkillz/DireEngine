@@ -29,6 +29,7 @@ from domain.spells.spell_definitions import SPELLCASTING_PROFESSIONS, get_spell 
 from domain.wounds.constants import BODY_PART_ORDER as WOUND_BODY_PART_ORDER, DEFAULT_INJURIES as DEFAULT_WOUND_INJURIES
 from domain.wounds.models import copy_default_injuries as copy_default_wound_map
 from domain.wounds import rules as wound_rules
+from engine.bundles import get_default_stat_values, is_known_stat
 from engine.presenters.injury_presenter import InjuryPresenter
 from engine.presenters.mana_presenter import ManaPresenter
 from engine.presenters.spell_effect_presenter import SpellEffectPresenter
@@ -272,17 +273,11 @@ def _update_room_facts_for_actor_move(actor, source_location, destination_room):
             )
 
 
-DEFAULT_STATS = {
-    "strength": 10,
-    "stamina": 10,
-    "agility": 10,
-    "reflex": 10,
-    "discipline": 10,
-    "intelligence": 10,
-    "wisdom": 10,
-    "charisma": 10,
-    "magic_resistance": 10,
-}
+DEFAULT_STATS = get_default_stat_values()
+
+
+def _default_stats():
+    return get_default_stat_values()
 
 XP_TAKE = 5
 XP_TEND = 3
@@ -1236,7 +1231,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.post_ambush_grace_until = 0
         self.db.desc = "An unremarkable person."
         self.db.is_npc = False
-        self.db.stats = DEFAULT_STATS.copy()
+        self.db.stats = _default_stats().copy()
         self.db.max_hp = 100
         self.db.hp = 100
         self.db.balance = 100
@@ -2203,9 +2198,11 @@ class Character(ObjectParent, DefaultCharacter):
 
     def ensure_stat_defaults(self):
         current_stats = self.db.stats
-        stats = dict(DEFAULT_STATS)
+        defaults = _default_stats()
+        stats = dict(defaults)
         if isinstance(current_stats, Mapping):
-            stats.update({key: current_stats.get(key, value) for key, value in DEFAULT_STATS.items()})
+            stats.update({key: current_stats.get(key, value) for key, value in defaults.items()})
+            stats.update({key: value for key, value in current_stats.items() if key not in stats})
         if not isinstance(current_stats, Mapping) or dict(current_stats) != stats:
             self.db.stats = stats
 
@@ -8694,7 +8691,7 @@ class Character(ObjectParent, DefaultCharacter):
     def get_stat(self, name):
         self.ensure_all_defaults()
         stat_name = str(name or "").strip().lower()
-        default_value = DEFAULT_STATS.get(stat_name, 0)
+        default_value = _default_stats().get(stat_name, 0)
         current_value = int(self.db.stats.get(stat_name, default_value) or default_value)
         cap = self.get_race_stat_cap(stat_name)
         if cap is not None and current_value > int(cap):
@@ -8705,7 +8702,7 @@ class Character(ObjectParent, DefaultCharacter):
     def set_stat(self, name, value, emit_cap_message=False):
         self.ensure_all_defaults()
         stat_name = str(name or "").strip().lower()
-        if stat_name not in DEFAULT_STATS:
+        if not is_known_stat(stat_name):
             raise ValueError(f"Unknown stat: {name}")
 
         stats = dict(self.db.stats or {})
@@ -8915,9 +8912,10 @@ class Character(ObjectParent, DefaultCharacter):
     def clamp_stats_to_race(self, emit_messages=False):
         self.ensure_stat_defaults()
         stats = dict(self.db.stats or {})
+        defaults = _default_stats()
         changed = False
         for stat_name in RACE_STATS:
-            current_value = int(stats.get(stat_name, DEFAULT_STATS.get(stat_name, 10)) or DEFAULT_STATS.get(stat_name, 10))
+            current_value = int(stats.get(stat_name, defaults.get(stat_name, 10)) or defaults.get(stat_name, 10))
             cap = int(self.get_race_stat_cap(stat_name) or current_value)
             if current_value > cap:
                 stats[stat_name] = cap

@@ -1,4 +1,4 @@
-from world.systems.skills import SKILL_GROUPS, is_active, pulse
+from world.systems.skills import get_skill_pulse_group, is_active, pulse
 
 
 class PulseService:
@@ -19,7 +19,7 @@ class PulseService:
             if not is_active(skill):
                 continue
             if resolved_tick is not None:
-                group = SKILL_GROUPS.get(skill_name, 100)
+                group = get_skill_pulse_group(skill_name)
                 if resolved_tick != int(offsets.get(group, 0) or 0):
                     continue
             pulse(skill)
