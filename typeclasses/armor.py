@@ -22,6 +22,14 @@ class Armor(Wearable):
         self.db.coverage = ["torso"]
         self.db.covers = []
         self.db.skill_scaling = {}
+        self.db.punc_res = 210
+        self.db.slic_res = 210
+        self.db.impa_res = 210
+        self.db.fire_res = 0
+        self.db.cold_res = 0
+        self.db.elec_res = 0
+        self.db.damage = 0
+        self.db.strength = 100
         self.db.unlocks = {
             20: {"protection_bonus": 1},
             40: {"hindrance_reduction": 1},
@@ -36,6 +44,13 @@ class Armor(Wearable):
         self.db.weight = preset.get("weight", self.db.weight or 5.0)
         self.db.maneuver_hindrance = self.db.hindrance
         self.db.stealth_hindrance = self.db.hindrance
+        flat = max(0, int(self.db.protection or 0))
+        pct = max(0, int(round(float(self.db.absorption or 0.0) * 100)))
+        encoded = (flat * 100) + pct
+        # TODO(world-data-migration): re-seed armor from canon_items with explicit *_res fields.
+        self.db.punc_res = getattr(self.db, "punc_res", encoded) or encoded
+        self.db.slic_res = getattr(self.db, "slic_res", encoded) or encoded
+        self.db.impa_res = getattr(self.db, "impa_res", encoded) or encoded
 
     def get_armor_profile(self):
         return {
@@ -43,4 +58,12 @@ class Armor(Wearable):
             "protection": self.db.protection,
             "hindrance": self.db.hindrance,
             "coverage": list(self.db.coverage or self.db.covers or []),
+            "punc_res": int(getattr(self.db, "punc_res", 0) or 0),
+            "slic_res": int(getattr(self.db, "slic_res", 0) or 0),
+            "impa_res": int(getattr(self.db, "impa_res", 0) or 0),
+            "fire_res": int(getattr(self.db, "fire_res", 0) or 0),
+            "cold_res": int(getattr(self.db, "cold_res", 0) or 0),
+            "elec_res": int(getattr(self.db, "elec_res", 0) or 0),
+            "damage": int(getattr(self.db, "damage", 0) or 0),
+            "strength": int(getattr(self.db, "strength", 100) or 100),
         }

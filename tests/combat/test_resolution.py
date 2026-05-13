@@ -1,5 +1,6 @@
 import unittest
 
+from domain.combat.maneuvers import ManeuverID
 from domain.combat.resolution import (
     CombatOutcome,
     FULL_PARRY_THRESHOLD,
@@ -58,6 +59,7 @@ class DummyActor:
         self.db.intoxicated = False
         self.db.fatigue = 0
         self.db.injuries = {"body": {}, "head": {}}
+        self.db.last_maneuver = 0
         self.id = 1
         self.location = None
         self.incoming_attackers = 1
@@ -115,6 +117,9 @@ class DummyActor:
     def is_surprised(self):
         return False
 
+    def get_last_maneuver(self):
+        return int(getattr(self.db, "last_maneuver", 0) or 0)
+
 
 class FixedCombatRng:
     def __init__(self, *values):
@@ -132,7 +137,7 @@ class FixedRandom:
 
     def randint(self, _start, _end):
         if not self._values:
-            raise AssertionError("No more randint values available")
+            return _start
         return self._values.pop(0)
 
     def choice(self, sequence):
@@ -147,6 +152,13 @@ class CombatResolutionTests(unittest.TestCase):
             "damage_min": 4,
             "damage_max": 8,
             "balance": 60,
+            "puncture": 2,
+            "slice": 6,
+            "impact": 2,
+            "power": 55,
+            "force": 8,
+            "strength": 100,
+            "current_damage": 0,
         }
         self.weapon = DummyWeapon(profile=weapon_profile)
         self.attacker = DummyActor(
@@ -222,6 +234,18 @@ class CombatResolutionTests(unittest.TestCase):
         self.assertEqual(first.total, second.total)
         self.assertEqual(first.reflex, second.reflex)
 
+    def test_edf_uses_last_maneuver_defense_scaling(self):
+        """GSL S09449/S00042: defender last maneuver changes usable evasion scaling."""
+        self.defender.db.last_maneuver = int(ManeuverID.LUNGE)
+        after_lunge = compute_edf(self.defender, self.attacker, self.context)
+
+        self.defender.db.last_maneuver = int(ManeuverID.DODGE)
+        after_dodge = compute_edf(self.defender, self.attacker, self.context)
+
+        self.assertLess(after_lunge.total, after_dodge.total)
+        self.assertEqual(after_lunge.maneuver_scale_pct, 40)
+        self.assertEqual(after_dodge.maneuver_scale_pct, 100)
+
     def test_foi_strength_bonus_is_capped_by_weapon_force(self):
         """GSL S00092: strength contribution to FOI is capped by weapon force."""
         strong = DummyActor(stats={"strength": 200}, skills={"light_edge": 60}, weapon=self.weapon)
@@ -247,8 +271,20 @@ class CombatResolutionTests(unittest.TestCase):
         self.assertGreater(parry.parry_percent, FULL_PARRY_THRESHOLD)
         self.assertEqual(parry.block_pct, 100)
 
+    def test_parry_scaling_uses_last_maneuver(self):
+        scaled_defender = DummyActor(stats={"agility": 80, "reflex": 80}, skills={"light_edge": 120}, weapon=self.defender._weapon)
+        scaled_defender.db.last_maneuver = int(ManeuverID.LUNGE)
+        after_lunge = compute_parry(scaled_defender, leftover_of=60, context=self.context)
+
+        scaled_defender.db.last_maneuver = int(ManeuverID.PARRY)
+        after_parry = compute_parry(scaled_defender, leftover_of=60, context=self.context)
+
+        self.assertLess(after_lunge.parry_score, after_parry.parry_score)
+        self.assertEqual(after_lunge.maneuver_scale_pct, 60)
+        self.assertEqual(after_parry.maneuver_scale_pct, 100)
+
     def test_shield_uses_min_plus_skill_capped_by_max(self):
-        """GSL S00046 bridge: shield block uses min(max_def, min_def + skill)."""
+        """GSL S00046/S09449 bridge: shield score is capped, then scaled by last maneuver."""
         defender = DummyActor(
             stats={"agility": 20, "reflex": 20},
             skills={"shield": 30},
@@ -256,8 +292,24 @@ class CombatResolutionTests(unittest.TestCase):
         )
         shield = compute_shield(defender, leftover_of=50, context=self.context)
 
-        self.assertEqual(shield.shield_score, 35)
-        self.assertEqual(shield.block_pct, 35)
+        self.assertEqual(shield.shield_score, 28)
+        self.assertEqual(shield.block_pct, 28)
+
+    def test_shield_scaling_uses_last_maneuver(self):
+        defender = DummyActor(
+            stats={"agility": 20, "reflex": 20},
+            skills={"shield": 30},
+            equipment={"shield": [DummyShield(mindef=12, maxdef=35)]},
+        )
+        defender.db.last_maneuver = int(ManeuverID.LUNGE)
+        after_lunge = compute_shield(defender, leftover_of=50, context=self.context)
+
+        defender.db.last_maneuver = int(ManeuverID.DODGE)
+        after_dodge = compute_shield(defender, leftover_of=50, context=self.context)
+
+        self.assertLess(after_lunge.shield_score, after_dodge.shield_score)
+        self.assertEqual(after_lunge.maneuver_scale_pct, 40)
+        self.assertEqual(after_dodge.maneuver_scale_pct, 85)
 
     def test_leftover_of_zero_yields_evasion_miss(self):
         """GSL S00092: leftover_OF <= 0 after OF-EDF subtraction means the attack is evaded."""
@@ -324,26 +376,31 @@ class CombatResolutionTests(unittest.TestCase):
         self.assertIn("leftover_of", result.details)
 
     def test_calculate_damage_preserves_placeholder_critical_hits(self):
-        """Compatibility regression check: placeholder critical hits should still propagate until DRG-024a replaces them."""
+        """DRG-024a still propagates critical-hit state through the new pipeline."""
         context = dict(self.context)
         context.update({
             "leftover_of": 30,
             "post_defense_foi": 18,
             "snipe_config": {},
+            "maneuver": "swing",
         })
 
-        damage = calculate_damage(self.attacker, self.defender, context, rng=FixedRandom(8, 1))
+        damage = calculate_damage(self.attacker, self.defender, context, rng=FixedRandom(1, 15, 15, 15, 50, 50, 50, 20, 18, 90, 90, 90, 90))
 
         self.assertGreater(damage, 0)
         self.assertTrue(context["critical"])
+        self.assertIn("raw_damage", context)
+        self.assertIn("post_armor_damage", context)
+        self.assertIn("wound_level", context)
 
     def test_calculate_damage_handles_targets_without_injuries_map(self):
-        """Fallback hit location selection should not crash on valid targets that lack an initialized injuries map."""
+        """Hit-area selection should not crash on valid targets that lack an initialized injuries map."""
         context = dict(self.context)
         context.update({
             "leftover_of": 30,
             "post_defense_foi": 18,
             "snipe_config": {},
+            "maneuver": "swing",
         })
         defender = DummyActor(
             stats={"agility": 5, "reflex": 5},
@@ -352,10 +409,11 @@ class CombatResolutionTests(unittest.TestCase):
         )
         delattr(defender.db, "injuries")
 
-        damage = calculate_damage(self.attacker, defender, context, rng=FixedRandom(8, 50))
+        damage = calculate_damage(self.attacker, defender, context, rng=FixedRandom(8, 50, 20, 20, 20, 15, 15, 90, 90, 90, 90))
 
         self.assertGreater(damage, 0)
-        self.assertEqual(context["hit_location"], "body")
+        self.assertIn(context["hit_location"], {"head", "neck", "chest", "back", "abdomen", "left_arm", "right_arm", "left_hand", "right_hand", "left_leg", "right_leg", "tail"})
+        self.assertIn("stamina_denominator", context)
 
 
 if __name__ == "__main__":

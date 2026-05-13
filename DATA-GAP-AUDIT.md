@@ -139,3 +139,61 @@ Known deferred scope for DRG-024a and later:
 - damage tier parity from S00048 is still placeholder-driven
 - armor reduction and wound-depth parity from later combat scripts remain to be migrated
 - current FOI, parry, and shield inputs bridge through the existing object model because explicit weapon `force` / `power` and richer defense metadata are not yet fully exposed
+
+## DRG-024b - Attack Verb Routing (S00031-S00037)
+
+Filed: `domain/combat/verbs.py`, `engine/services/attack_verb_service.py`, `commands/cmd_attack_verbs.py`
+
+Summary:
+
+- added the canonical Tier 0 attack verb table for `thrust`, `lunge`, `slice`, `chop`, `sweep`, `feint`, and `jab`
+- routed the seven verbs through a shared service that reuses existing target resolution instead of cloning S00131 parser flow
+- threaded explicit `verb` and `verb_rt` into `CombatService.attack()` so combat presentation, hit-area bias, damage shaping, and roundtime all honor the selected maneuver
+- preserved the three canon-specific branches called out in DireLore verification: S00033 slice defender hook, S00034 chop terrain guard, S00036 feint engagement-target fallback
+- kept generic `attack` live as a sensible default attack path while removing conflicting `slice` and `jab` aliases from `cmd_attack.py`
+
+Validation:
+
+- mandatory DireLore verification passed for S00031-S00037 and S00131 before edits
+- focused verb-routing tests passed: `python -m unittest tests.combat.test_attack_verbs`
+- broader combat slice passed: `python -m unittest discover tests/combat`
+- nearby registry regression slice passed: `python -m unittest tests.bundles.test_skill_registry tests.bundles.test_stat_registry`
+- Evennia restarted cleanly after the dispatch
+- live browser smoke against `spawndummy armored` validated command load, explicit verb text for thrust/slice/chop, and the `chop trees` guard message
+- follow-up live browser smoke after DRG-INFRA-001 confirmed `lunge`, `sweep`, `jab`, and targetless `feint` on the routed verb path, with `feint` resolving through the existing engagement target as intended
+- the separate client-state sync investigation is now resolved: `combatreset` routes through an explicit `Character.sync_state_to_client()` wrapper over the structured browser sync path, and the Character-level dead-state allowlist now admits `combatreset` and `cmbreset`
+- live browser validation confirms a dead session can return to clean alive presentation without logout after admin reset, closing the earlier stale dead-state propagation note
+
+Residual harness note:
+
+- duplicated in-room armored dummy names created target-resolution friction for later smoke passes, so the final `sweep`, `jab`, and `feint` confirmations used unique live targets already present in-room rather than treating duplicate-name matching as part of the combat verb contract
+
+## DRG-024c - Player Defense Commands (S00039, S00040, S00042, S00043, S00046, S00092, S09449)
+
+Filed: `domain/combat/maneuvers.py`, `engine/services/defense_verb_service.py`, `commands/cmd_defense_verbs.py`
+
+Summary:
+
+- Step 0 canon audit resolved as finding `B`: the Python port already had a generic defense-XP bridge for `evasion`, but it did not yet persist `last_maneuver` or apply S09449 defender-maneuver scaling
+- added canonical maneuver IDs for player attack and defense verbs, including `parry=13` and `dodge=17`
+- persisted `Character.last_maneuver` and updated both attack and defense verb services to commit maneuver state when an action is accepted
+- added `parry` and `dodge` commands with canon-specific duplicate-stance messaging and defensive positioning RT
+- integrated S09449 scaling into evasion, parry, and shield calculations in `domain/combat/resolution.py`
+- added a small remedial parry-training bridge plus parry-success defense XP on top of the pre-existing evasion defense-XP path
+
+Validation:
+
+- mandatory DireLore verification passed for S00030, S00039, S00040, S00042, S00043, S00046, S00092, S00157, S00509, and S09449 before edits
+- focused combat tests passed: `python -m pytest tests/combat/test_defense_verbs.py tests/combat/test_resolution.py tests/services/test_combat_xp.py`
+- targeted editor diagnostics reported no errors on the touched files
+
+Honest residual scope:
+
+- the full S00509 defense-learning model is still not fully ported: shield-defense XP and armor-learning distribution remain follow-on work
+- the current dispatch intentionally stops at player-facing `parry` and `dodge`, last-maneuver state, S09449 defense scaling, and a minimal parry XP bridge instead of implying complete S00509 parity
+
+## Known Issue - Localhost Play Link Mismatch
+
+- `web/templates/website/index.html`, `web/templates/website/character_dashboard.html`, and `web/templates/base.html` still hardcode `localhost` play links while the local server config binds web and websocket interfaces to `127.0.0.1`.
+- This mismatch did not cause the DRG-024a browser smoke failure; the real issue was cross-process shell staging leaving the live websocket session with stale in-memory room contents.
+- Deferral reasoning: not causing the validated user-facing bug and not blocking DRG-024b, but it remains a deployment/configuration risk that should be cleaned up before any external deployment or host-sensitive packaging work.

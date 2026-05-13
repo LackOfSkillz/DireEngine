@@ -14,7 +14,7 @@ from world.systems.ranger import RANGER_SNIPE_CONFIG
 class CombatService:
 
     @staticmethod
-    def attack(attacker, target):
+    def attack(attacker, target, *, verb="thrust", verb_rt=None, verb_id=None):
         validation = CombatService._validate_attack(attacker, target)
         if validation is not None:
             return validation
@@ -23,12 +23,16 @@ class CombatService:
         if not preflight.success:
             return preflight
 
-        context = CombatService._build_context(attacker, target)
+        context = CombatService._build_context(attacker, target, verb=verb, verb_rt=verb_rt, verb_id=verb_id)
         if bool(context.get("is_ranged_weapon", False)):
             ammo = attacker.consume_loaded_ammo() if hasattr(attacker, "consume_loaded_ammo") else None
             if not ammo:
                 return ActionResult.fail(data={"error_code": "needs_ammo", "outcome": "blocked"})
             context["ammo"] = dict(ammo)
+        if hasattr(attacker, "set_last_maneuver"):
+            attacker.set_last_maneuver(verb_id)
+        else:
+            attacker.db.last_maneuver = int(verb_id or 0)
         resolution = resolve_attack(attacker, target, context=context)
         details = dict(resolution.details or {})
 
@@ -163,7 +167,7 @@ class CombatService:
         return ActionResult.ok(data={"outcome": "ready"})
 
     @staticmethod
-    def _build_context(attacker, target):
+    def _build_context(attacker, target, *, verb="thrust", verb_rt=None, verb_id=None):
         weapon = attacker.get_wielded_weapon() if hasattr(attacker, "get_wielded_weapon") else attacker.get_weapon()
         profile = attacker.get_weapon_profile()
         current_range = attacker.get_range(target)
@@ -223,6 +227,7 @@ class CombatService:
             StealthService.break_stealth(attacker)
 
         attacker.clear_aim()
+        normalized_verb = str(verb or profile.get("attack_verb") or profile.get("verb") or "thrust").strip().lower()
         return {
             "aimed_location": aimed_location,
             "aimed_part": aimed_part,
@@ -262,7 +267,12 @@ class CombatService:
             "surge_state": surge_state,
             "sweep_state": sweep_state,
             "target_name": getattr(target, "key", "someone"),
+            "verb": normalized_verb,
+            "verb_id": verb_id,
+            "verb_rt": verb_rt,
+            "maneuver": normalized_verb,
             "weapon": weapon,
+            "weapon_attack_verb": normalized_verb,
             "weapon_effects": weapon_effects,
             "weapon_name": weapon_name,
             "whirl_state": whirl_state,
@@ -340,6 +350,7 @@ class CombatService:
             target.apply_surprise()
         return {
             "ambush": True,
+                "verb": str(details.get("verb", details.get("maneuver", "")) or ""),
             "ambush_accuracy_bonus": ambush_accuracy_bonus,
             "ambush_announced": True,
             "ambush_damage_multiplier": ambush_damage_multiplier,
@@ -526,6 +537,7 @@ class CombatService:
             "target_alerted": bool(details.get("target_alerted", False)),
             "target_name": getattr(target, "key", "someone"),
             "target_regained_bearings": bool(details.get("target_regained_bearings", False)),
+            "verb": str(details.get("verb", details.get("maneuver", "")) or ""),
             "weapon_flavor": bool(details.get("weapon_flavor", False)),
             "weapon_name": str(details.get("weapon_name", "") or ""),
             "whirl_momentum": bool(details.get("whirl_momentum", False)),

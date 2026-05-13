@@ -70,6 +70,11 @@ Eight registries now exist:
 
 Only `stat_registry` is populated in DRG-022.5. The others exist as stable extension points and remain empty until downstream migrations register content.
 
+Tier 0 note after DRG-024b:
+
+- The seven base combat attack verbs (`thrust`, `lunge`, `slice`, `chop`, `sweep`, `feint`, `jab`) currently live in the engine-owned canonical table at `domain/combat/verbs.py` because they are part of the mandatory open-source combat substrate.
+- Future profession-specific attack verbs should not hardcode new command math directly into bundle code. They should register against a dedicated combat-verb extension surface when that API is introduced, parallel to the current profession/race/zone/trade registration model.
+
 ## Definition schemas
 
 Current minimum schema requirements:

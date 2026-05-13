@@ -309,6 +309,8 @@ LIFE_STATE_DEAD = "DEAD"
 LIFE_STATE_DEPARTED = "DEPARTED"
 
 DEAD_STATE_ALLOWED_COMMANDS = {
+    "cmbreset",
+    "combatreset",
     "consent",
     "death",
     "depart",
@@ -1722,6 +1724,21 @@ class Character(ObjectParent, DefaultCharacter):
         if include_character:
             send_character_update(self, session=session)
 
+    def sync_state_to_client(self, session=None):
+        """Push the full structured client state to attached web sessions.
+
+        Live gameplay surfaces already propagate through Character setters that
+        call sync_client_state(). This explicit wrapper is the canonical hook
+        for admin/dev tooling that mutates state out-of-band and needs the same
+        structured `map`, `subsystem`, and `character` payload refresh.
+        """
+        self.sync_client_state(
+            include_map=True,
+            include_subsystem=True,
+            include_character=True,
+            session=session,
+        )
+
     def at_object_receive(self, moved_obj, source_location, **kwargs):
         super().at_object_receive(moved_obj, source_location, **kwargs)
         if moved_obj and hasattr(moved_obj, "is_stackable"):
@@ -2278,6 +2295,8 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.in_combat = False
         if not self.attributes.has("target"):
             self.db.target = None
+        if not self.attributes.has("last_maneuver"):
+            self.db.last_maneuver = 0
         if not isinstance(self.db.combat_range, Mapping):
             self.db.combat_range = {}
         else:
@@ -2559,6 +2578,16 @@ class Character(ObjectParent, DefaultCharacter):
     def get_balance(self):
         self.ensure_all_defaults()
         return self.db.balance, self.db.max_balance
+
+    def get_last_maneuver(self):
+        self.ensure_all_defaults()
+        return int(getattr(self.db, "last_maneuver", 0) or 0)
+
+    def set_last_maneuver(self, maneuver_id):
+        self.ensure_all_defaults()
+        self.db.last_maneuver = max(0, int(maneuver_id or 0))
+        self.sync_client_state()
+        return self.db.last_maneuver
 
     # CANDIDATE_FOR_EXTRACTION
     # STATE_ONLY
@@ -8511,6 +8540,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.hp = self.db.max_hp
         self.db.balance = self.db.max_balance
         self.db.fatigue = 0
+        self.db.last_maneuver = 0
         self.db.attunement = self.db.max_attunement
         self.db.war_tempo = 0
         self.db.war_tempo_state = "calm"
@@ -8543,6 +8573,39 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.states = {}
         self.db.injuries = _copy_default_injuries()
         _clear_combat_link(self)
+
+    def combat_reset_state(self):
+        self.ensure_core_defaults()
+        self.renew_state()
+        self.db.wounds = _copy_default_empath_wounds()
+        self.db.death_type = None
+        self.db.death_timestamp = 0.0
+        self.db.death_location = None
+        self.db.last_death_time = 0.0
+        self.db.recovery_state = "none"
+        self.db.depart_confirm_mode = None
+        self.db.depart_confirm_expires_at = 0.0
+        self.db.last_critical_warning_at = 0.0
+        self.db.stabilized_until = 0.0
+        self.db.resurrection_vitality_cap_ratio = 1.0
+        self.db.res_stabilization = None
+        self.db.just_revived = False
+        self.db.revive_protection_ticks = 0
+        self.db.soul_state = None
+        self.clear_state("resurrection_fragility")
+        self.clear_state("resurrection_instability")
+        self.clear_death_corpse_link()
+        if hasattr(self, "ndb"):
+            for attr_name in ("combat_target", "queued_action", "pending_revive_action", "pending_cleric_ritual_action"):
+                if hasattr(self.ndb, attr_name):
+                    setattr(self.ndb, attr_name, None)
+        self.set_target(None)
+        self.sync_resources_from_empath_wounds()
+        self.set_hp(self.db.max_hp)
+        self.set_balance(self.db.max_balance)
+        self.set_fatigue(0)
+        self.set_roundtime(0)
+        self.sync_state_to_client()
 
     def is_alive(self):
         self.refresh_death_sting(emit_message=False)

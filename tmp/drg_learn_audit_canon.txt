@@ -1,0 +1,5183 @@
+=== S00074 ===
+S00074
+! Sleep  (s74)
+!
+! EPS 07-14-99 Took placeholder verb and wrote content!
+! psm 12-26-99 Modified messaging so that didn't think the moment they did something they'd wake up
+!
+if (np0:sleeping<>0) then
+  msgp "You are already resting your mind!  To awaken, type AWAKE!"
+else
+  msgp "You relax and allow your mind to enter a state of rest.  You$\"
+  msgp " will no longer gain new experience until you awaken!  However$\"
+  msgp " you will continue to absorb experience into new ranks.  If you$\"
+  !mspg " actively try to gain experience, you will awaken automatically."
+  msgp " become too active in your sleep, you will awaken automatically."
+  set np0:sleeping to 1
+.
+
+
+=== S00147 ===
+S00147
+!
+!S147
+!Sentient Being (EXP)  200 second Version
+!Called by 155
+!
+!11-22-94 Eric Slick (Zoha)
+!06-06-96 Broke the handling of each player out into a $MATCH marker to
+!         avoid seemingly infinite loops.  (GregA)
+!11-20-96 EPS Optimized code
+! SDShaver 01/14/97  Altered the bard section.  (Rowan)
+! SDShaver 02/08/97  Fixed a typo.  (manuvering)
+! SDShaver 03/10/97  Put in some error checking.
+!03-19-00 PSM Changed "heavy blunt" to "large blunt" to match description in 209
+!05-28-00 PSM Changed "TDP > ..." screamer from 2 to 3.
+!07-04-00 PSM Fixed Token that was causing an msggm error ($V2$ --> $V2)
+!01-22-00 PSM LOG of new ranks > 300
+!01-22-00 PSM Call to 412 if fat low & no 412 effect
+!02-11-01 PSM Added astrology
+!03-12-01 Wib Modified % pulsed and bits needed for next rank to better 
+!             handle 300+ exp gain
+!06-03-01 PSM Changed LOGMSG to include skill information
+!06-30-01 PSM code clean-up and tdp 
+!10-07-01 PSM added "your" to the front of a couple $GAINSKILL messages
+!07-01-02 Wib Added some pulse help at very low levels to help newbies
+!04-05-03 EIB Updated the +LIFEKEEPING check
+!05-06-03 MET Added check for the textbook bonuses.
+!05/30/03 MET Changed Musical Lore to Musical Theory
+!06/14/03 MET Changed Trans to Empathy
+!07/25/03 MET Added Necros and updated to else/ifs and callmatches
+!08/16/03 MET Added the regen effect back
+!08/30/03 MET Added WarMage SAF Call.
+!Executed every 20 seconds, it handles:
+!Converting Field to Perm experience
+!In 1 minute, this script is called 3 times by 155.  Each time it is called, it handles coverting
+!experience for 10 skills (including all unimiplemented skills, so future upgrades can be
+!implemented easily
+!
+if (a0=0) then
+  where np0 for nr9
+  if ((nr9 >= 9000) & (nr9 <= 9999)) then           ! Skip CM
+  else_if ((nr9 >= 90) & (nr9 <= 99)) then          ! Skip CM
+  else_if ((nr9 >= 599260) & (nr9 <= 599276)) then  ! Skip Jadewater Mansion Novice Hunting Grounds
+  else_if ((nr9 >= 3077274)&(nr9 <= 3077275)) then  ! Skip the Penal Colony Transport
+  else_if ((np0:lifekeeping = 1) && (np0:dead = 0)) then
+    if ((np0:gmtype >= 2)) then
+      if (np0:gmtype <> 5) then
+        msgp "[LIFEKEEPING CHECK] You are +lifekeeping and not playing an NPC; Please clear the$\"
+        msgp  " flag or let someone in Healing Systems know the reason it should be OK."
+      .
+    else
+      set v9 to nr9
+      msggm "GM[LIFEKEEPING CHECK] $P0 in r$V9 is +lifekeeping.  Please check to see if that's $\"
+      msggm "as it should be.  If it's not, please clear the flag.  Either way, please report $\"
+      msggm "this to someone in Healing Systems."
+    .
+  .
+.
+!
+set nr5 to 3010
+if (np0:mind>0) then
+  if (np0:decay<1) then
+    set np0:decay to 29
+  .
+  set np0:mind to (np0:mind-np0:decay)
+  if (np0:mind<0) then
+    clear np0:mind
+  .
+.
+! Check for regeneration
+if ((np0:fatigue<np0:maxfatigue)|(np0:cbhp<np0:mbhp)|(np0:harness<np0:maxharness)) then
+  fastpush
+    testeffect np0 code 412            ! See if the person is already regenerating
+    if $error then                     ! If not then
+      callmatch must_match "" in 412   ! Ensure the normal regeneration of stats
+    .
+  fastpop    
+.
+clear $error
+if ((ne0:edata1=2) || (ne0:edata1=7)) then
+  when np0:profession
+    is 0  !Paladin  every 10 minutes
+      if (NE0:edata2%10=0) then
+        set a4 to -1
+        callmatch must_match "$PALADIN" in 264
+      .
+    .
+    is 1  !Barbarian
+      set a4 to -1
+      callmatch must_match "$BARBARIAN" in 264
+    .
+    is 2  !Ranger
+      set a4 to -1
+      callmatch must_match "$RANGER" in 264
+    .
+    is 3  !Cleric  !Handled entirely by Cleric mechanics
+    .
+    is 4  !Empath
+      set a4 to -1
+      callmatch must_match "$EMPATH" in 264
+    .
+    is 5  !Warrior Mage 
+    .
+    is 6  !Thief
+      set a4 to -1
+      callmatch must_match "$THIEF" in 264
+    .
+    is 7  !Moon Mage
+      set a4 to -1
+      callmatch must_match "$MOONMAGE" in 264
+    .
+    is 8  !Bard         !Called every 2 minutes
+      set a4 to -1
+      callmatch must_match "$BARD" in 264
+    .
+    is 9  !Trader
+      if (ne0:edata1 >59) then     !60 minutes have passed
+        set a4 to -1
+        callmatch must_match "$TRADER" in 264
+      .
+    .
+    is 10  !Necro
+      ! Just blocking for now.
+    .
+  .
+.
+if (np0:profession=5) then  ! Removed from the 2 minute cycle because I need it quicker.
+  fastpush
+    callmatch must_match "$WARMAGE" in 264
+  fastpop
+.
+if ((ne0:edata5=-1) || (ne0:edata3=np0:index)) then
+  msgrgm nr5 mode 0 "$RConverting Field exp for * $P0 * for skills $A0 +10 "
+.
+!
+!
+!
+!msgrgm nr6 mode -1 "Before RP A0 = $A0"
+if (np0:rpaward) then  !
+  if (NE0:edata1=2) then
+    bitget np0:rpaward from 0 to 26 for a1  ! Expiration time
+    if ((ne0:edata5=-1) || (ne0:edata3=np0:index)) then
+      msgrgm nr5 mode 0 "  [RP award decrimenting time from $A1$\"
+    .
+    set a1 to (a1-4)
+    if ((ne0:edata5=-1) || (ne0:edata3=np0:index)) then
+      msgrgm nr5 mode 0 " to $A1]"
+    .
+    if (a1>0) then
+      set a3 to NP0:rpaward
+      bitset a1 from 0 to 26 for a3  !time
+      clear a1
+      bitset a1 from 30 to 30 for a3  !time
+      set np0:rpaward to a3
+    else
+      clear np0:rpaward
+      removevarfield rpaward from np0
+    .
+  .
+  bitget np0:rpaward from 27 to 29 for a2 ! RP level
+  clear $Error
+else
+  clear a2
+  clear $error
+.
+!msgrgm nr6 mode -1 "After RP A0 = $A0"
+!
+! ----------------------------------------------------------------------
+! Transfer field experience to real experience
+! ----------------------------------------------------------------------
+!
+!
+set np0:sentient to $time
+!
+!
+set a5 to ((np0:mind/200)*200)  !overall mind state penalty
+if (a5>1300) then   !  Overall mindstate
+  set a5 to 1300
+.
+clear v7
+loop (v7<10)
+  set v8 to (A0+v7)
+  !msgrgm nr6 mode -1 "I'm on skill $V8"
+  getskill v8 fieldexp of np0 for v1
+  if (v1 = 0) then
+    !  nothing going on  
+  else_if (v1 < 0) then
+    msggm "GM[S147] $P0 has $V1 field experience in skill $V8.$\"
+    msggm "  Resetting to 0.  Please monitor for possible problems."
+    setskill v8 fieldexp of np0 to 0
+    clear v1
+  else
+    ! ----------------------------------------------------------------
+    ! usage:
+    !  v1 = field to be converted
+    !  v2 = amount of field to be transfered to ranks
+    !  v3 = goal
+    !  v4 = actual current (unadjusted by bonuses or penalties)
+    !  v5 = rank
+    !  v9 = modified wisdom
+    ! ----------------------------------------------------------------
+    !
+    ! ** rank 
+    !
+    getskill v8 rank of np0 for v5
+    ! ** current
+    !
+    set v4 to (v5/1000000)  ! make sure current is accurate, unmodified
+    !
+    ! ** goal
+    !
+    getskill v8 goal of np0 for v3
+    if (v3>(v4+8)) then !Can be caused by decayed skill loss
+      set v3 to (v4+8) !temp fix
+    .
+    if (v3<=v4) then
+      FASTPUSH
+        callmatch must_match "$SETGOAL" in 147
+      FASTPOP
+    .
+    !
+    ! ** Modified Wisdom
+    !
+    set v9 to (np0:pwisdom*100)
+    callmatch must_match "$LN" in 3084
+    ! returns LN(v9) in b9 - b9 needs / 10000 when used.
+    !
+    ! ** calculate transfer amount
+    !
+    set v2 to ((V3-V4+1)*v1/50)
+    set v2 to ((v2*b9/1000)*((1300-a5)/130)/150)
+    !
+    if (v2 < 1) then
+      set v2 to 1            ! To get that last point
+    .
+    !
+    if (ne0:edata3=np0:index) then
+      msgrgm nr5 mode 0 "Skill: $V8 Current=$V4 Rank=$V5 Field: $V1 Goal: $V3 MWisd: $V9($B9)"
+      msgrgm nr5 mode 0 "      Amount Transfered = $V2"
+    .
+    if (v2>v1) then          ! Can happen if there is an exp overflow
+      setskill v8 fieldexp of np0 to 0
+    else
+      setskill v8 fieldexp of np0 to (v1-v2)
+    .
+    !
+    ! ** rp award impact
+    !
+    if (a2>0) then
+      set v2 to (v2*(10+(a2*2))/10)
+    .
+    ! Checking for Textbook Effect
+    clear b1
+    fastpush
+      clear $error
+      scaneffect np0 code 116610004 value2 v8
+      ifnot $error then
+        set b1 to v1
+        if (b1>18) then
+          set b1 to 18
+        .
+      .
+    fastpop
+    if b1 then
+      set v2 to (v2*(100+b1)/100)
+    .
+    clear b1
+    ! End Textbook Effect
+    !
+    ! *** newbie help - Wib - 07/01/02
+    !
+    if (np0:level < 20) then
+      if (v4 < 10) then
+        set v2 to (v2*2)
+      else_if (v4 < 20) then
+        set v2 to (v2*3/2)
+      else_if (v4 < 30) then
+        set v2 to (v2*4/3)
+      else_if (v4 < 40) then
+        set v2 to (v2*5/4)
+      .
+    .
+    !
+    ! *** determine how much total field exp in the rank
+    !
+    set v4 to (V4+1)
+    if (v4>1200) then
+      set v9 to (v4*100)
+      callmatch must_match "$LN" in 3084 ! returns LN(v9) in b9 : b9 needs / 10000
+      set b9 to (b9/10)
+      set v1 to ((b9*b9)/1000)
+      set v1 to ((v1*b9)/1000)
+      set v1 to ((v1*v4)/1000)
+      set v9 to ((35000 + v1 + v9)*5/6)
+    else_if (v4>900) then
+      set v9 to (v4*100)
+      callmatch must_match "$LN" in 3084 ! returns LN(v9) in b9 : b9 needs / 10000
+      set b9 to (b9/10)
+      set v1 to ((b9*b9)/1000)
+      set v1 to ((v1*b9)/1000)
+      set v1 to ((v1*v4)/1000)
+      set v9 to ((35000 + v1 + v9)*4/5)
+    else_if (v4>600) then
+      set v9 to (v4*100)
+      callmatch must_match "$LN" in 3084 ! returns LN(v9) in b9 : b9 needs / 10000
+      set b9 to (b9/10)
+      set v1 to ((b9*b9)/1000)
+      set v1 to ((v1*b9)/1000)
+      set v1 to ((v1*v4)/1000)
+      set v9 to ((35000 + v1 + v9)*3/4)
+    else_if (v4>300) then          ! use a different formula when current ranks > 300.
+      set v9 to (v4*100)
+      callmatch must_match "$LN" in 3084 ! returns LN(v9) in b9 : b9 needs / 10000
+      set b9 to (b9/10)
+      set v1 to ((b9*b9)/1000)
+      set v1 to ((v1*b9)/1000)
+      set v1 to ((v1*v4)/1000)
+      set v9 to ((35000 + v1 + v9)*2/3)
+    else
+      set v9 to (((v4*v4)+(100*v4))*2/3) 
+    .
+    if ($GAMECODE="DRF") then ! use additional rank criteria for TF
+      if (v4 > 250) then
+        set v9 to (v9 + (((v4 - 250)/250)*10000))
+      .
+    .
+    !
+    ! *** determine how RANK increase of field being transfered
+    !
+    set v1 to ((v2*1000000)/v9)    !figure decimal amount to add to rank
+!    set v1 to ((v2*100000)/(v9/10))    !figure decimal amount to add to rank
+    if ((v1/1000000) > 1) then   !Whoops, trying to gain more than 1 skill level
+      set v1 to ((v1%1000000)+1000000)
+    else_if (v1<0) then ! Overflowed.. recalc, losing a decimal place.
+!      msggm "GM[Sentient] $P0 with /RP $A2 has overflowed exp transfer 1$\"
+!      msggm " in skill $V8.  % transferred set to V1=$V1"
+      set v1 to ((v2*100000)/(v9/10))   !figure decimal amount to add to rank
+      if (v1<0) then ! If still less than 0, then overflowed again..
+        set v1 to ((v2*10000)/(v9/100))   !figure decimal amount to add to rank
+        msggm "GM[Sentient] $P0 with /RP $A2 has overflowed exp transfer 2$\"
+        msggm " in skill $V8.  % transferred set to V1=$V1"
+        if (v1<0) then ! If still less than 0, then overflowed again..
+          set v1 to ((v2*1000)/(v9/1000))   !figure decimal amount to add to rank
+          msggm "GM[Sentient] $P0 with /RP $A2 has overflowed exp transfer 3$\"
+          msggm " in skill $V8.  % transferred set to V1=$V1"
+      .
+      .
+      if (v1>1000000) then
+        set v1 to 1000000
+      .
+    .
+    if (v1>0) then
+      random -200 to 200 for a1
+      if (a1 > v1) then
+        set a1 to (v1-1)
+      .
+      if ((v1+a1) > 0) then
+        set v1 to (v1 + a1)
+      .
+    else
+      ! something quite wrong if getting here
+      msggm "GM[Sentient] $P0 with /RP $A2 has overflowed exp transfer 3$\"
+      msggm " in skill $V8.  % transferred set to V1=$V1"
+      clear v1
+    .
+    !
+    ! *** update RANK
+    !
+    set v6 to (v5+v1)
+    setskill v8 rank of np0 to v6
+    if (v6<0) then
+      fastpush
+        getskill v8 goal of np0 for v3
+        getskill v8 current of np0 for v4
+        getskill v8 rank of np0 for v5
+        getskill v8 fieldexp of np0 for v2
+        msggm "GM[Sentient] V6 was less than 0 on $P0 skill $V8  clearing that skill$\"
+        msggm "  Was rank=$V5  Current=$V4  Goal= $V3 Fieldexp=$V2"
+        setskill v8 rank of np0 to 0
+        setskill v8 current of np0 to 0
+        setskill v8 fieldexp of np0 to 0
+        setskill v8 goal of np0 to 0
+      fastpop
+    .
+    !
+    ! *** check to see if new level
+    !
+    set V4 to (v4*1000000)         !actual RANK value for next level
+    if (V6 >= V4) then  ! Gained a rank
+      !
+      !
+      set v1 to ((v6/1000000)-(v5/1000000)) !number of ranks gained
+      if (v1<1) then
+        set v1 to 1
+      .
+      getskill v8 current of np0 for v4   ! getskill in case of bonuses/penalties
+      set v4 to (v4+V1)
+      setskill v8 current of np0 to v4  
+      !
+      callmatch must_match "$GAINRANK" in 147
+      !
+      set v4 to (v6/1000000)    !make sure true rank is used
+      if (v4>=v3) then          !need to set new goal
+        callmatch must_match "$SETGOAL" in $thisscript
+      .
+      !
+      !
+    .
+    !
+    ! end of the line
+    !
+  .
+  set v7 to (v7+1)
+.
+if (np0:mind<0) then
+  clear np0:mind
+.
+!
+!
+!
+!
+! **************************************************************************
+: "$GAINRANK"
+!
+! **************************************************************************
+  when V8
+    is 0
+      set t9 to " shield use."
+    .
+    is 1
+      set t9 to " maneuvering in leather."
+    .
+    is 2
+      set t9 to " maneuvering in light chain."
+    .
+    is 3
+      set t9 to " maneuvering in heavy chain."
+    .
+    is 4
+      set t9 to " maneuvering in light plate."
+    .
+    is 5
+      set t9 to " maneuvering in heavy plate."
+    .
+    is 14
+      set t9 to " your ability to parry."
+    .
+    is 15
+      set t9 to " your ability to fight multiple opponents."
+    .
+    is 16
+      set t9 to " using light edged weapons."
+    .
+    is 17
+      set t9 to " using medium edged weapons."
+    .
+    is 18
+      set t9 to " using heavy edged weapons."
+    .
+    is 19
+      set t9 to " using twohanded edged weapons."
+    .
+    is 20
+      set t9 to " using light blunt weapons."
+    .
+    is 21
+      set t9 to " using medium blunt weapons."
+    .
+    is 22
+      set t9 to " using large blunt weapons."
+    .
+    is 23
+      set t9 to " using twohanded blunt weapons."
+    .
+    is 24
+      set t9 to " using slings."
+    .
+    is 25
+      set t9 to " using staff slings."
+    .
+    is 26
+      set t9 to " using short bows."
+    .
+    is 27
+      set t9 to " using long bows."
+    .
+    is 28
+      set t9 to " using composite bows."
+    .
+    is 29
+      set t9 to " using light crossbows."
+    .
+    is 30
+      set t9 to " using heavy crossbows."
+    .
+    is 31
+      set t9 to " using the short staff."
+    .
+    is 32
+      set t9 to " using the quarter staff."
+    .
+    is 33
+      set t9 to " using pikes."
+    .
+    is 34
+      set t9 to " using halberds."
+    .
+    is 35
+      set t9 to " using light thrown weapons."
+    .
+    is 36
+      set t9 to " using heavy thrown weapons."
+    .
+    is 37
+      set t9 to " using brawling."
+    .
+    is 44
+      set t9 to " your primary magic area."
+    .
+    is 45
+      set t9 to " your harness ability."
+    .
+    is 46
+      set t9 to " your power perception."
+    .
+    is 47
+      set t9 to " your ability with magical devices."
+    .
+    is 48
+      set t9 to " your ability to target magic."
+    .
+    is 57
+      set t9 to " your ability to evade."
+    .
+    is 58
+      set t9 to " your ability to climb."
+    .
+    is 59
+      set t9 to " your perception."
+    .
+    is 60
+      set t9 to " your scouting ability."
+    .
+    is 61
+      set t9 to " your ability to hide."
+    .
+    is 62
+      set t9 to " lockpicking."
+    .
+    is 63
+      set t9 to " your ability to disarm traps."
+    .
+    is 64
+      set t9 to " your ability to stalk."
+    .
+    is 65
+      set t9 to " your ability to steal."
+    .
+    is 66
+      set t9 to " first aid."
+    .
+    is 67
+      set t9 to " foraging."
+    .
+    is 68
+      set t9 to " your ability to escape."
+    .
+    is 69
+      set t9 to " backstabbing."
+    .
+    is 70
+      set t9 to " skinning."
+    .
+    is 71
+      set t9 to " swimming."
+    .
+    is 85
+      set t9 to " scholarship."
+    .
+    is 86
+      set t9 to " your mechanical lore."
+    .
+    is 87
+      set t9 to " your musical theory."
+    .
+    is 88
+      set t9 to " appraisal."
+    .
+    is 89
+      set t9 to " teaching."
+    .
+    is 90
+      set t9 to " trading."
+    .
+    is 91
+      set t9 to " animal lore."
+    .
+    is 92
+      set t9 to " percussion intruments."
+    .
+    is 93
+      set t9 to " stringed instruments."
+    .
+    is 94
+      set t9 to " wind instruments."
+    .
+    is 95
+      set t9 to " vocal instruments."
+    .
+    is 96
+      set t9 to " empathy."
+    .
+    is 97
+      set t9 to " astrology."
+    .
+    default
+      if ((v4<10) || (np0:gmmode=1)) then
+        setskill v8 fieldexp of np0 to 0
+        setskill v8 goal of np0 to 0
+        setskill v8 current of np0 to 0
+        setskill v8 rank of np0 to 0
+      else
+        msggm "GM[Sentient (s1)] $P0 has ranks in an unknown skill ($V8)$\"
+        msggm " Script 353 may be corrupted or a GM added the exp."
+      .
+      stop
+    .
+  .
+  set v9 to (v6/1000000)
+  if (v1>1) then
+    msgp "You've gained $V1 ranks in$T9"  !New Rank = $V9$R"
+  else
+    msgp "You've gained a new rank in$T9"  !New Rank = $V9$R"
+  .
+  set a8 to ((v9*(4+v1))*v1)  !add tdps rank*5*ranks just earned
+!  if (a8>3000) then
+!    msggm "GM[Sentient (s147)] TPDs awarded to $P0 > 3.000 ($A8)"
+!  .
+  logmsg "Gained $V1 ranks in skill $V8($Q$T9$Q), new rank $V9, granted $A8 TDPs$\"
+  set np0:tdp to (np0:tdp+((v9*(4+v1))*v1))  !add tdps rank*5*ranks just earned
+  set a8 to np0:tdp
+  logmsg " for new TDP total of $A8"
+  logto np0 code 66
+  if (v9 > 300) then
+    logmsg "[EXP>300] $P0 |$V8 ($T9) | $V9"
+    logto np0 code -66
+  .
+.
+!
+! **************************************************************************
+: "$SETGOAL"
+! --------------------------------------------------------------------------
+!v3=current goal
+!v4=current rank which may be equal to greater than v3
+!v8=current skill converting experience.
+!
+! **************************************************************************
+  when np0:profession
+    is 0  !Paladin
+      if ((v8>-1)&(v8<14)) then !Armor
+        set v3 to (V4+8)
+      else_if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+4)
+      else_if ((V8>13)&(v8<44)) then !Weapons
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 1  !Barbarian
+      if ((v8>13)&(v8<44)) then !Weapons
+        set v3 to (V4+8)
+      else_if ((v8>56)&(v8<85)) then !Survival
+        set v3 to (V4+4)
+      else_if ((V8>-1)&(v8<14)) then !Armor
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 2  !Ranger
+      if ((v8>56)&(v8<85)) then !Survival
+        set v3 to (V4+8)
+      else_if ((v8>13)&(v8<44)) then !Weapons
+        set v3 to (V4+4)
+      else_if ((V8>-1)&(v8<14)) then !Weapons
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 3  !Cleric
+      if ((v8>43)&(v8<57)) then !Magic
+        set v3 to (V4+8)
+      else_if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+4)
+      else_if ((V8>13)&(v8<44)) then !Weapons
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 4  !Empath
+      if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+8)
+      else_if ((v8>43)&(v8<57)) then !Magic
+        set v3 to (V4+4)
+      else_if ((V8>56)&(v8<85)) then !Survival
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 5  !Warrior Mage
+      if ((v8>43)&(v8<57)) then !Magic
+        set v3 to (V4+8)
+      else_if ((v8>13)&(v8<44)) then !Weapons
+        set v3 to (V4+4)
+      else_if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 6  !Thief
+      if ((v8>56)&(v8<85)) then !Survival
+        set v3 to (V4+8)
+      else_if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+4)
+      else_if ((V8>13)&(v8<44)) then !Weapons
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 7  !Moon Mage
+      if ((v8>43)&(v8<57)) then !Magic
+        set v3 to (V4+8)
+      else_if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+4)
+      else_if ((V8>56)&(v8<85)) then !Survival
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 8  !Bard
+      if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+8)
+      else_if ((v8>13)&(v8<44)) then !Weapons
+        set v3 to (V4+4)
+      else_if ((V8>43)&(v8<57)) then !Magic
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 9  !Trader
+      if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+8)
+      else_if ((v8>56)&(v8<85)) then !Survival
+        set v3 to (V4+4)
+      else_if ((V8>-1)&(v8<14)) then !Armor
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is 10 ! Necromancer
+      if ((v8>56)&(v8<85)) then !Survival
+        set v3 to (V4+8)
+      else_if ((v8>43)&(v8<57)) then !Magic
+        set v3 to (V4+4)
+      else_if ((v8>84)&(v8<100)) then !Lore
+        set v3 to (V4+4)
+      else
+        set v3 to (V4+2)
+      .
+    .
+    is -1
+      if (np0:level<1) then
+        set v3 to (v4+4)
+      else
+        set v3 to (v4+2)
+      .
+    .
+    default
+      msggm "GM[Sentient-Goals] $P0 has unknown profession ... stopping"
+      stop
+    .
+  .
+  setskill v8 goal of np0 to v3
+  if (NE0:edata4>0) then
+    msgrgm nr5 mode 0 " to $V3."
+  .
+.
+!
+!
+! end of file
+
+
+=== S00157 ===
+S00157
+!S157
+!Awarding Field Experience
+!Eric Slick (Zoha)
+!12-01-94
+!This Utility Script handles the assigning of field experience
+!
+!Set V0 to skill and A0 to amount to award
+!02-28-96 EPS Renown calculated at 10*A0 
+!             Exp (A0) multiplied * 2 to account for increased
+!             guild requirements
+!         EPS Reduce renow to exp actually earned and took out exp multiplier
+!05-23-96 EPS Made field exp "pools" dependent upon profession 
+!07-09-96 EPS Made it possible to override the "pools" by setting exp
+!             award to negative.  (ie, if a0<0 then if awarding the exp
+!             would exceed the pool, it will not be reduced, but the full
+!             award given.
+!11-08-96 SDS Put in a temp fix until Eric gets up in the morning.
+!01-11-97 SDS Cleared NC0 and NC1 before call 412, put a fastpush/pop around it.
+!03-31-97 EPS Took out level check and put in renown instead for allowing
+!             minds to go beyond full.
+!12-22-97 PSM changed "$a4" to "$A4"
+!01-28-00 PSM giving sleeping paladins a bit of steal exp
+!03-12-01 Wib Modified the pool size calc (also updated exp)
+!06-22-01 Wib Removed a msggm messaging
+!02-03-02 JMH Modified to stop experience gain in all homes for DR:The Fallen
+!02-23-02 PSM Modified to block exp in locked rooms (effect code 11019001
+!05-20-02 JMH Modified to block exp in vault chamber areas
+!11-04-02 JMH Modified to block exp in arena observation rooms
+!12-05-02 Wib Modified the max gain per call to s157 to 500 bits
+!12-16-02 Wib Decrease pool size increase due to ranks at 300 rank increments
+!12-26-02 Wib Removed the penalty for 'clear and tired but alert', etc
+!12-31-02 JMH Bypassed GM screamer for scripting monitor in Fallen
+!03-16-03 Wib Modified Music Lore to be bard-learnable only
+!06-12-03 MET Removed AES...I think (Cheer!)
+!06/23/03 Wib pools
+!07/14/03 MET Added monitor room and message for tracking down errant scripts
+!             teaching certain skills.
+!07/25/03 MET Added Necros to the skillsets and general cleanup
+!10-2-2003 JMH Disabled experience gain on player ships in DRF
+!
+!
+ifnot np0 then
+  fastpush
+    set v0 to $calledby
+    msggm "GM[Expaward] (157) Script $V0 called me but NP0 is null...stopping!"
+  fastpop
+  stop
+.
+if (np0:dead|np0:unconscious) then
+  stop
+.
+if (v0>99) then !assume effect went off
+  set a0 to v1
+  set v0 to (v0%100)
+.
+if ((v0<0)|(v0>99)) then
+  set v9 to $calledby
+  if (v9=-1) then
+    msggm "GM[EXP Award] (Called by Effect code $V0 (skill) Value1 $V1 (amount)$\"
+    msggm " Value2 $V2 (control value))$\"
+    msggm " Error Skill Out of Range V0=$V0 <0 or >99$\"
+    msggm " on $P0 ... Correcting to$\"
+  else
+    msggm "GM[EXP Award] (Called by Script $V9) Error: Skill Out of Range V0=$V0 <0 or >99$\"
+    msggm " on $P0"
+  .
+  stop
+.
+fastpush
+  set v9 to $calledby
+  set nr8 to 3010
+  if ((v0=nr8:xcoord)&nr8:inside) then
+    msgrgm nr8 mode -1 "[157] $P0P $P0 learned ($A0) in ($V0) called by script - $V9 "
+  .
+fastpop
+if ((A0=0)|(A0>1000)) then
+  fastpush
+    set v9 to $calledby
+    if (v9=-1) then
+      msggm "GM[EXP Award] (Called by Effect code $V0 (skill) Value1 $V1 (amount)$\"
+      msggm " Value2 $V2 (control value))$\"
+      msggm " Error Award Out of Range A0=$A0 <1 or >1000$\"
+      msggm " on $P0 ... Correcting to$\"
+    else
+      msggm "GM[EXP Award] (Called by Script $V9) Error Award Out of Range A0=$A0 <1 or >1000$\"
+      msggm " on $P0 for skill $V0 ... Correcting to$\"
+    .
+    if (A0<1) then
+      set A0 to 1
+    else
+      set A0 to 1000
+    .
+    msggm " -> $A0"
+  fastpop
+.
+fastpush
+if (a0<0) then
+  msggm "GM[EXP Award] (157) $P0 getting $A9"
+  set a8 to 1
+  set a0 to (a0*-1)
+else
+  clear a8
+.
+if (a0<5) then
+  set a0 to 5
+.
+if (np0:sleeping<>0) then
+  if s0 then  !assume they did something to get the exp
+    if ((np0:profession = 0)&&(v9=59)) then
+      msggm "GM[EXP Award] (157) sleeping $P0P $P0 getting stealing, giving $A9 exp"
+      !fastpop
+      if (a9 > 5) then
+        SET A9 TO 5
+      .
+      GOTO paladin_skip 
+      stop
+    .
+    set np0:sleeping to (np0:sleeping+a0)
+    if (np0:sleeping>2000) then
+      msgp "Your mind cannot rest while you are doing all these things$\"
+      msgp " and it awakens to learning new experiences again."
+      removevarfield sleeping from np0
+    else
+      fastpop
+      stop
+    .
+  else
+    fastpop
+    stop
+  .
+.
+@ paladin_skip
+set v1 to np0:pdiscipline
+set v2 to np0:pintelligence
+set v9 to v0
+! "$SETBONUS"  !get profession bonus to total mind can hold
+!v3=current goal
+!v4=current which may be equal to greater than v3
+!v9=current skill converting experience.
+!
+when np0:profession
+  is 0  !Paladin 
+    if ((v9>-1) && (v9<14)) then !Armor
+      set v3 to 8
+    else_if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 4
+    else_if ((v9>13) && (v9<44)) then !Weapons
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 1  !Barbarian
+    if ((v9>13) && (v9<44)) then !Weapons
+      set v3 to 8
+    else_if ((v9>56) && (v9<85)) then !Survival
+      set v3 to 4
+    else_if ((v9>-1) && (v9<14)) then !Armor
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 2  !Ranger
+    if ((v9>56) && (v9<85)) then !Survival
+      set v3 to 8
+    else_if ((v9>13) && (v9<44)) then !Weapons
+      set v3 to 4
+    else_if ((v9>-1) && (v9<14)) then !Weapons
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 3  !Cleric
+    if ((v9>43) && (v9<57)) then !Magic
+      set v3 to 8
+    else_if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 4
+    else_if ((v9>13) && (v9<44)) then !Weapons
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 4  !Empath
+    if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 8
+    else_if ((v9>43) && (v9<57)) then !Magic
+      set v3 to 4
+    else_if ((v9>56) && (v9<85)) then !Survival
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 5  !Warrior Mage 
+    if ((v9>43) && (v9<57)) then !Magic
+      set v3 to 8
+    else_if ((v9>13) && (v9<44)) then !Weapons
+      set v3 to 4
+    else_if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 6  !Thief
+    if ((v9>56) && (v9<85)) then !Survival
+      set v3 to 8
+    else_if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 4
+    else_if ((v9>13) && (v9<44)) then !Weapons
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 7  !Moon Mage
+    if ((v9>43) && (v9<57)) then !Magic
+      set v3 to 8
+    else_if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 4
+    else_if ((v9>56) && (v9<85)) then !Survival
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 8  !Bard        
+    if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 8
+    else_if ((v9>13) && (v9<44)) then !Weapons
+      set v3 to 4
+    else_if ((v9>43) && (v9<57)) then !Magic
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is 9  !Trader
+    if ((v9>84) && (v9<100)) then !Lore
+      set v3 to 8
+    else_if ((v9>56) && (v9<85)) then !Survival
+      set v3 to 4
+    else_if ((v9>-1) && (v9<14)) then !Armor
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+! 0-9 Armor
+! 10-39 Weapons
+! 40-49 Magic
+! 50-75 Survivals
+! 76-99 Lore
+  is 10  ! Necro
+    if ((v9>49) && (v9<76)) then !Survival
+      set v3 to 8
+    else_if ((v9>75) && (v9<100)) then !Lore
+      set v3 to 4
+    else_if ((v9>39) && (v9<50)) then !Magic
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  is -1
+    if (np0:level<1) then
+      set v3 to 4
+    else
+      set v3 to 2
+    .
+  .
+  default
+    msggm "GM[Exp Profession Bonus] $P0 has unknown profession ... stopping"
+    fastpop
+    stop
+  .
+.
+!
+set v6 to v3  !hold info on the size of their goal
+getskill v0 rank of np0 for v5
+set v5 to (v5/1000000)                  !next lines figure max size field exp pool can be
+!if this is altered, the one in EXP must be too
+if (v6=8) then
+  set v3 to 12
+else_if (v6=2) then
+  set v3 to 8
+else
+  set v3 to 10
+.
+if (v5>900) then
+  set v5 to 3600  ! 3600 = ((300*6)+(300*4)+(300*2))
+else_if (v5>600) then
+  set v5 to (3000+((v5-600)*2)) ! 3000 = ((300*6) + (300*4))
+else_if (v5>300) then
+  set v5 to (1800+((v5-300)*4)) ! 1800 = (300*6)
+else
+  set v5 to (v5*6)
+.
+set v3 to ((v5)+(((V2*V2)+(V2*V1))*v3/30)+(150*v6)) 
+getskill v0 fieldexp of np0 for a4
+if (a4<0) then
+  msggm "GM[Exp Award (157)] $P0 has $A4 field experience in$\"
+  msggm " skill $V0.  Resetting to 0.  Please monitor for$\"
+  msggm " possible problems."
+  setskill v0 fieldexp of np0 to 0
+  fastpop
+  stop
+.
+!set v9 to np0:flag
+!bitget v9 from 3 to 3 for v9
+!if (v9=1) then
+!  if (a0<200) then
+!    set a7 to b7
+!    PUSH
+!    call 6762
+!    POP
+!    set a0 to b7
+!    set b7 to a7  !important to reset this
+!  .
+!.
+if (a0<0) then
+  set a0 to 0
+.
+set a1 to a0 !renown is the amount of exp they gain.
+set nr9 to 700
+if ((np0:exptimer + 8) < $time) then    !only alter mind 1/10 seconds max
+  set np0:exptimer to $time
+  if (np0:mind<1200) then
+    set v1 to (100-(a4*100/v3))          !set to percentage full
+!    if (v1<(9-v6)) then
+!      set np0:mind to (np0:mind+35)
+!    else_if (v1<(17-v6)) then
+!      set np0:mind to (np0:mind+25)
+!    else_if (v1<(25-v6)) then
+!      set np0:mind to (np0:mind+20)
+!    else_if (v1<(33-v6)) then
+!      set np0:mind to (np0:mind+15)
+!    else_if (v1<(41-v6)) then
+!      set np0:mind to (np0:mind+10)
+!    else
+!      set np0:mind to (np0:mind+5)
+!    .
+    if (v1<(17-(v6*2))) then
+      set np0:mind to (np0:mind+(15*a0/200)+20)
+    else_if (v1<(25-(v6*2))) then
+      set np0:mind to (np0:mind+(10*a0/200)+15)
+    else_if (v1<(33-(v6*2))) then
+      set np0:mind to (np0:mind+(5*a0/200)+10)
+    else_if (v1<(41-(v6*2))) then
+      set np0:mind to (np0:mind+(2*a0/200)+5)
+    else_if (v1<(49-(v6*2))) then
+      set np0:mind to (np0:mind+5)
+    else
+      set np0:mind to (np0:mind+2)
+    .
+  .
+  set np0:mind to (np0:mind+1)
+.
+!Exp Tracking Effect Check
+if (a0>4) then
+  fastpush
+    checkeffect np0 code 157
+    set np0:resting to v1 !store last value1
+    ifnot $error then
+      set a9 to ((v2-(v3-v2))/60)
+      if (a9 > 5) then
+        set nr9 to 700
+        set v9 to $calledby
+        msg nr9 "[Exp Tracker Penalty] $P0 Skill $B0 Exp A0=$A0$\"
+        if (a9 > 10) then
+!          clear a0
+          msg nr9 " > 12 hours constant exp gain$\" ! so clearing$\"
+          msg nr9 " A0=$A0 (A9=$A9 $V2=$V2 V3=$V3)"
+          if (a9 > 12) then
+            if (np0:exptimer = $time) then  !
+              if ($gamecode = "DRF") then
+                msg nr9 "[Scripting Monitor]  This is DRF so who cares!"
+              else
+                msg nr9 "GM[Scripting Monitor (s157)] $P0 has been gaining exp > 16 hours.$\"
+                msg nr9 " Please check for scripting and take appropriate action.  This$\"
+                msg nr9 " message repeats no sooner than 180 seconds."
+              .
+              set np0:exptimer to ($time+1800)
+            .
+          .
+        else_if (a9 > 7) then
+          msg nr9 " > 7 hours constant exp gain$\" ! so reducing to 1/10th$\"
+!          set a0 to (a0/10)
+          msg nr9 " A0=$A0 (A9=$A9 V2=$V2 V3=$V3)"
+        else
+          msg nr9 " > 5 hours constant exp gain$\" ! so reducing to 1/3rd$\"
+!          set a0 to (a0/3)
+          msg nr9 " A0=$A0 (A9=$A9 V2=$V2 V3=$V3)"
+        .
+        if (a0<1) then
+          set a0 to 1
+        .
+      .    
+      if (v1 < 0) then
+        clear v1
+      .
+      remeffect code 157 from np0
+    else
+      clear a9
+      clear v1
+      set v2 to 2
+      set v3 to 2 !time the effect was put on them
+      set v5 to 120
+    .
+    addeffect code 157 value1 (v1+a0) value2 v2 flags v3 with np0 in v5 script 4816
+    set b0 to a0
+  fastpop
+  set a0 to b0
+.
+!
+!  End Exp Tracking Effect Check
+!
+if (a0 > 500) then
+  set nr9 to 700
+  set v9 to $calledby
+  msg nr9 "[s157] Script: $V9 Skill: $V0 Awarded: $A0 to: $P0 Reduce:$\"
+  set a0 to 500
+  msg nr9 " $A0$\"
+  getskill v0 current of np0 for v9
+  msg nr9 " Curr: $V9"
+.
+!
+!
+!
+set a0 to (a0+a4) !combine exp gained with field exp
+if ((a0>v3) && (np0:renown > 10000)) then !total>pool & not newbie
+  set A0 to v3     !set to max mind can hold
+.
+if ((nr0:script=5445)&&((nr0:fog=1)||($gamecode="DRF"))) then
+  clear a0
+  msgrgm nr0 mode 5 "[Home in DRF or w/blocked exp: $P0 Gets NO Experience or Renown]"
+else_if ((nr0:script == 1572)||(nr0:script == 1579)) then
+  clear a0
+  msgrgm nr0 mode 5 "[Vault area!  No experience gain here.]"
+else_if (nr0:script == 11354) then
+  clear a0
+  msgrgm nr0 mode 5 "[Arena observation area!  No experience gain here.]"
+else_if (nr0:script = 5655) then !Ship room script
+  set ne9 to nr0:ascend
+  if ((ne9)&&(ne9:script = 5654)&&(ne9:approved = 1)) then !Want to flag experience off
+    clear a0
+    msgrgm nr0 mode 5 "[Ship flagged for zero experience gain.]"
+  .
+else
+  set $error to -1
+  if ($gamecode = "DRF") then
+    fastpush
+      checkeffect nr0 code 11019001
+    fastpop
+  .  
+  if ($error=0) then
+    clear a0
+    msgrgm nr0 mode 5 "[Locked room in DRF: $P0 Gets NO Experience or Renown]"
+  .
+.
+if (a0) then
+  setskill V0 fieldexp of np0 to A0
+  !msgrgm nr9 mode 0 "[$P0--EXP earned (skill $V0) $a4 + $A9 = $A0  Renown: A1=$A1]"
+  set np0:renown to (np0:renown+a1) !uncomment when renown is figured out
+  set ne0 to -6219
+.
+testeffect np0 code 412
+if $error then
+  fastpush
+    clear nc0
+    callmatch must_match "" in 412
+  fastpop
+.
+fastpop
+!
+: "$RANK"  !call this to add 1 rank at a time.
+           !Set V0 to skill 
+           !Clear A0 or set A0 to the amount you want from 01 to 5000 (meaning
+           ! 0.1 to 500.0 ranks.  To award 1/2 of a rank, you'd set a0 to 5
+           !
+  if ((v0<0) || (v0>99)) then
+    set v9 to $calledby
+    msggm "GM[EXP Award Rank] (S157 Called by Script $V9) Error: Skill Out of Range$\"
+    msggm " V0=$V0 <0 or >99$\"
+    msggm " on $P0"
+    stop
+  .
+  if ((A0<0) || (A0>5000)) then
+    set v9 to $calledby
+    msggm "GM[EXP Award Rank] (S157 Called by Script $V9) Error Award Out$\"
+    msggm " of Range A0=$A0 < 0$\"
+    msggm " or > 5000$\"
+    msggm " on $P0 for skill $V0...Stopping!"
+    stop
+  .
+  fastpush
+    getskill v0 rank of np0 for v4
+    set v9 to (a0/10)
+    set v8 to (a0%10)    
+!    msggm "GM[EXP Award RANK] (S157) $P0 awarded $V9.$V8 ranks in skill $V0.$\"
+!    msggm "  OLD rank was $V4$\"
+    set v5 to (v4/1000000)
+    ifnot a0 then
+     set np0:renown to (np0:renown + (v5*v5+(50*v5))) !uncomment when renown is figured out
+    else
+      set t8 to np0:mail
+      substring t8 from 1 to 2 for t8
+      set v5 to (v5*v5+(5*v5)) 
+      set v5 to (v5*a0/10)
+      set np0:renown to (np0:renown + v5) !uncomment when renown is figured out
+    .
+    if a0 then      !partial rank
+      set v4 to (v4+(a0*100000))
+    else
+      set v4 to (v4+1000000)
+    .
+    setskill v0 rank of np0 to v4  
+    setskill v0 current of np0 to (v4/1000000)  
+!    msggm " and NEW rank is $V4.  $V5 awarded in renown."
+  fastpop
+.
+: "$RENOWN"
+!call this when all you want to add is renown"
+! set a1 to the amount you want to give out
+  set np0:renown to (np0:renown+a1) 
+.
+: "$SETBONUS"  !get profession bonus to total mind can hold
+!v3=current goal
+!v4=current rank which may be equal to greater than v3
+!v9=current skill converting experience.
+!
+  when np0:profession
+    is 0  !Paladin  every 10 minutes
+      if ((v9>-1)&(v9<14)) then !Armor
+        set v3 to 8
+      else_if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 4
+      else_if ((v9>13)&(v9<44)) then !Weapons
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 1  !Barbarian
+      if ((v9>13)&(v9<44)) then !Weapons
+        set v3 to 8
+      else_if ((v9>56)&(v9<85)) then !Survival
+        set v3 to 4
+      else_if ((v9>-1)&(v9<14)) then !Armor
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 2  !Ranger
+      if ((v9>56)&(v9<85)) then !Survival
+        set v3 to 8
+      else_if ((v9>13)&(v9<44)) then !Weapons
+        set v3 to 4
+      else_if ((v9>-1)&(v9<14)) then !Weapons
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 3  !Cleric
+      if ((v9>43)&(v9<57)) then !Magic
+        set v3 to 8
+      else_if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 4
+      else_if ((v9>13)&(v9<44)) then !Weapons
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 4  !Empath
+      if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 8
+      else_if ((v9>43)&(v9<57)) then !Magic
+        set v3 to 4
+      else_if ((v9>56)&(v9<85)) then !Survival
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 5  !Warrior Mage 
+      if ((v9>43)&(v9<57)) then !Magic
+        set v3 to 8
+      else_if ((v9>13)&(v9<44)) then !Weapons
+        set v3 to 4
+      else_if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 6  !Thief
+      if ((v9>56)&(v9<85)) then !Survival
+        set v3 to 8
+      else_if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 4
+      else_if ((v9>13)&(v9<44)) then !Weapons
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 7  !Moon Mage
+      if ((v9>43)&(v9<57)) then !Magic
+        set v3 to 8
+      else_if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 4
+      else_if ((v9>56)&(v9<85)) then !Survival
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 8  !Bard        
+      if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 8
+      else_if ((v9>13)&(v9<44)) then !Weapons
+        set v3 to 4
+      else_if ((v9>43)&(v9<57)) then !Magic
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 9  !Trader
+      if ((v9>84)&(v9<100)) then !Lore
+        set v3 to 8
+      else_if ((v9>56)&(v9<85)) then !Survival
+        set v3 to 4
+      else_if ((v9>-1)&(v9<14)) then !Armor
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is 10  ! Necro
+      if ((v9>49)&(v9<76)) then !Survival
+        set v3 to 8
+      else_if ((v9>75)&(v9<100)) then !Lore
+        set v3 to 4
+      else_if ((v9>39)&(v9<50)) then !Magic
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    is -1
+!
+      if (np0:level<1) then
+        set v3 to 4
+      else
+        set v3 to 2
+      .
+    .
+    default
+      msggm "GM[Exp Profession Bonus] $P0 has unknown profession ... stopping"
+      stop
+    .
+  .
+.
+!
+! Ende
+
+
+=== S00227 ===
+S00227
+!S227
+! /EXP Verb
+! Eric Slick (Zoha) 12-21-94
+!
+!setskill v8 fieldexp of np0 to v1
+!setskill brawling rank of np0 to 25
+!getskill brawling rank of np0 for v0
+!setskill brawling fieldexp of np0 to 102
+!setskill brawling goal of np0 to 200
+!getskill brawling fieldexp of np0 for v1
+!getskill brawling goal of np0 for v2
+!getskill brawling current of np0 for v3
+!
+! 2/17/95  JJD  Included ability to check another player's experience.
+! 3/18/97  EPS  Added in ability to check single skill# for all or one player
+! 5/04/97  SDS  Added in name of player being checked for /exp <player>
+! 8/08/99  BWL  Reformatted the Usage section at Elonka's Request.
+! 8/15/99  PSM  Added logging of changes, cleaned up Syntax info,
+!               Added ability to set a lower limit when checking 
+!                 all players for a certain skill
+!               Changed RANK option to also update current
+!               ADDED RANKONLY option to only update rank
+!               Changed to call 209 insted of 147 for skill name
+!               Added line to indicate if they are asleep or awake
+! 2/29/99  BCH  Changed max rank from 500 to 9999
+! 1/24/01  Cwiss Added screamers to changes of experience or level for access < 3 characters 
+!                not in DRD.  Framed in cwiss comments.
+! 1/25/01  Cwiss Added a check for zombie to avoid spamming my fellow gms on scripter warnings
+!
+! 01-Sep-10 PSM If Field Exp & no Ranks, list skill anyway
+!               Change Mind: message to match players message under EXP
+!               Add Mind # & decay rate
+!               Made Exp Track info a little clearer (I hope)
+!               Added list of skills under AES and values
+!
+ifnot S1 then
+  @ usage
+  call 7610
+  stop
+.
+!
+!
+!
+set NP1 to S1
+if ((NP1="") && (s1<>"all")) then
+  msgp "That person is not online."
+  goto usage
+.
+!
+if s2 then
+  lowercase s2
+  stov s2 for v0
+  if ((s2 = "0") | (( v0>0) & (v0 < 100))) then
+    goto continue
+  else
+    if ((s2 = "clear")|(s2 = "all")|(s2 = "level")|(s2 = "log")|(s2 = "zombie")) then
+      if (s2 = "zombie") then !cwiss
+        set s7 to s2
+        goto continue
+      else ! cwiss plus the closing period just below for this if
+        goto continue
+      . 
+    else
+      msgp "$Q$S2$Q isn't a good option, try again."
+      stop
+    .
+  .
+.
+@ continue
+!
+! /exp all <skill> <lower limit>
+!
+if (s1="all") then
+  if s2 then
+    stov s2 for v0   ! 
+    stov s3 for a1   ! lower limit
+    if ((v0 < 0) | (v0 > 99)) then
+      msgp "$V0 isn't a valid skill number."
+      stop
+    .
+    if ((a1 < 0)) then
+      msgp "$A1 isn't a valid lower limit."
+      stop
+    .
+    clear np1
+    clear $error
+    clear nr1
+!    set v8 to v0
+!    set $match to "$GAINRANK"
+!    call 147 !gets description of skill#
+!    substring t9 from 7 to 1024 for t9
+    SET V9 TO V0
+    CALL 209
+    msgp "All players in skill $V0 ($T9 ) greater than $A1"
+    msgp "       Name      Level   Skill Ranks  Field exp"
+    loop ($error=0)
+      nextnode ground nr1 for np1
+      ifnot $error then
+        if ((np1:onduty = 0)&&(np1:gmmode=0)) then
+          getskill v0 rank of np1 for v1
+          if (v1 >= (a1 * 1000000)) then
+            set v2 to (v1/1000000)
+            set v3 to (v1%1000000)
+            set v4 to np1:level
+            set s9 to np1:name
+            msgp "$K9 ($\"
+            if (v4<10) then
+              msgp " $V4)$\"
+            else
+              msgp "$V4)$\"
+            .      
+            msgp "$L2.$V3$\"
+            getskill v0 fieldexp of np1 for v1
+            vtos v3 for s3
+            set v2 to s3
+            set v2 to (7-v2)
+            substring "          " from 1 to v2 for t8
+            msgp "$T8$L1"
+          .
+        .
+      .
+    .        
+    msgp "$RDONE!"
+    stop
+  else
+    msgp "You need to specify a skill number for /EXP ALL."
+    stop
+!    goto usage
+  .
+.
+!
+!  log the experience tracking stuff
+!
+lowercase s2
+!
+if (s2 = "log") then
+  set $match to "$LOG_TRACKING"
+  call 227
+  stop
+.
+!
+!
+!
+if (s2 = "zombie") then
+  if (np1:sleeping <> 0) then
+    if (s3 <> "confirm") then
+      msgp "This option must be confirmed if the player is sleeping."
+      stop
+    .
+  .
+  set $match to "$LOG_TRACKING"
+  call 227
+  fastpush
+    clear $match
+    set s0 to "/rp"
+    set s1 to np1
+    set s2 to "tag"
+    call 829
+    set s0 to "/rp"
+    set s1 to np1
+    set s2 to "-2"
+    call 829
+  fastpop
+  set s2 to "all"
+  set s3 to "0"
+  set s4 to "field"
+.
+!
+!
+! Display skill in a single skill
+!
+if (s3="") then
+  if s2 then
+    stov s2 for v0
+!    set v8 to v0
+!    set $match to "$GAINRANK"
+!    call 147 !gets description of skill#
+!    substring t9 from 7 to 1024 for t9
+    set v9 to v0
+    call 209
+    set v4 to np1:level
+    msgp "$P1 (Level:$\"
+    if (v4<10) then
+      msgp "  $V4)$\"
+    else
+      msgp " $V4)$\"
+    .      
+    msgp " in skill $V0 ($T9 )"
+    getskill v0 rank of np1 for v1
+    set v2 to (v1/1000000)
+    set v3 to (v1%1000000)
+    set s9 to np1:name
+    msgp "Ranks =$L2.$V3"
+    stop
+  .
+.
+!
+! Set someone's level
+!
+if (s2="level") then
+  if s3 then
+    stov s3 for v0
+    set v1 to np1:level
+    msgp "***Warning:  Use level setting with caution***"
+    msgp "Changed $P1's level from $V1 to $V0"
+    if ($gamecode = "DRD") then !cwiss
+      !no screamer
+    else
+      if ((NP1:access < 3)&&(s7 != "zombie")) then
+       msggm "GM[/EXP]$P0 just changed $P1's level from $V1 to $V0.$\"
+       msggm "  $P1 is an access less than 3 character, please investigate."
+      .
+    . !cwiss
+    set np1:level to v0
+    LOGmsg "$P0 just changed $P1's level from $V1 to $V0"
+    logto np1 code 5
+    LOGmsg "$P0 just changed $P1's level from $V1 to $V0"
+    logto np1 code -1005
+    stop
+  else
+    msgp "You need to give me a level to set to."
+    stop
+!    goto usage
+  .
+.
+!
+! /exp <player> <something> <amount> <something>
+!  s0   s1         s2         s3       s4
+!
+! /exp <player>  CLEAR      CONFIRM 
+!  s0   s1         s2         s3  
+!
+!
+set t2 to s2   
+set t3 to s3
+lowercase S2
+lowercase S3
+lowercase s4
+lowercase s5
+STOV S2 for V0
+if (V0=0) then
+  set v9 to S2
+  if (V9>1) then
+    when s2
+      is "all"
+        set v0 to 0
+      .
+      is "clear"
+        if (s3<>"confirm") then
+          msgp "You must type $Qconfirm$Q after CLEAR"
+          stop
+        .
+        msgp "Clearing field..."
+        set t9 to "clear"
+        set s2 to "all"
+        set s3 to "0"
+        set s4 to "field"
+      .
+      default
+        msgp "Invalid field specified."
+        stop
+      .
+    .
+  .
+.
+!
+!
+!
+if ((V0<0) || (V0>99)) then
+  msgp "S2=$S2 Skill out of range (0 - 99)"
+  stop
+.
+!
+!  List the player's experience
+!  
+ifnot S3 then
+  set a1 to np1:level
+  msgp "$RSkills for $P1...."
+  msgp "Level: $A1"
+  clear v9
+  clear a3
+  clear a5
+  clear v5
+  loop (v9 < 100)
+    getskill v9 rank of np1 for v4
+    GETSKILL V9 FIELDEXP OF NP1 FOR B0
+!    set v4 to (v4 / 10000)
+    if ((v4 > 0) || ( B0> 0)) then
+      call 353
+      if (s9="unknown") then
+!        msgp "$P0 has experience in an $S9 skill ($V9)...clearing!"
+        setskill v9 rank of np1 to 0
+        setskill v9 current of np1 to 0
+        setskill v9 fieldexp of np1 to 0
+        setskill v9 goal of np1 to 0
+        goto skip
+      .
+      set v4 to (v4 / 1000000)
+      set v5 to (v5 + 1)
+      if (v5 = 1) then   ! first skill printed
+        set s8 to "SKILL"
+        msgp "$R$K8: Rank/Percent towards next rank/Amount learning$^"
+      .
+      set t9 to "$V9-$S9"
+      expand t9
+      set s9 to t9
+      msgp "$K9:$\"
+      vtos v4 for s4
+      set a4 to s4           ! the number of digits in A4
+      set a4 to (4 - a4)     ! Left justify to 4
+      loop (a4 > 0)
+        msgp " $\"
+        set a4 to (a4 - 1)
+      .
+      getskill v9 rank of np1 for a7
+      set a8 to ((a7 / 100000) % 10)
+      set a7 to ((a7 / 10000) % 10)
+      msgp "$V4  $A8$A7%$\"
+      if (a5 != 1) then
+        msgp "  $\"
+      else
+        msgp " $\"
+      .
+      getskill v9 fieldexp of np1 for a9
+      vtos a9 for s9
+      set a9 to s9
+      set a9 to (14 - a9)
+      msgp " ($S9)$\"
+      if (a5 != 1) then
+        loop (a9 > 0)
+          msgp " $\"
+          set a9 to (a9 - 1)
+        .
+      .
+      if (a5 = 1) then
+        msgp ""
+        clear a5
+      else
+        set a5 to (a5 + 1)
+      .
+    .
+@ skip
+    set v9 to (v9 + 1)
+  .
+  if a5 then
+    msgp "$R"
+  else
+    ifnot v5 then
+      msgp "$P1 has no skills thus far."
+    else
+      msgp ""
+    .
+  .
+  set v0 to (np1:tdp/1000)
+  msgp "Time Development Points: $V0"    
+  set v9 to (np1:mind/2)
+    msgp "Overall state of mind:$\"
+    if (v9 < 25) then
+      msgp " clear$\"
+    else
+      if (((v9%100) > 50) && (v9 > 99)) then
+        msgp " very$\"
+      .
+      when (v9/100)
+        is 0
+          msgp " fluid$\"
+        .
+        is 1
+          msgp " murky$\"
+        .
+        is 2
+          msgp " thick$\"
+        .
+        is 3
+          msgp " dense$\"
+        .
+        is 4
+          msgp " stagnant$\"
+        .
+        is 5
+          msgp " frozen$\"
+        .
+        default
+          msgp " frozen$\"
+        .
+      .
+    .
+    clear t1
+    checkeffect np1 code 157
+    ifnot $error then
+      set a9 to (v2-(v3-v2))
+      if (a9>65) then
+        set t1 to "tired but alert"
+      .
+      set a9 to ((v2-(v3-v2))/60)
+      if (a9>12) then
+        set t1 to "feeling like the wakeful dead"
+      else
+        if (a9>9) then
+          set t1 to "feeling like a zombie"
+        else
+          if (a9>7) then
+            set t1 to "very sleepy"
+          else
+            if (a9>5) then
+              set t1 to "sleepy"
+            .
+          .
+        .
+      .
+    .
+    if t1 then
+      if (v1<0) then
+        clear t2
+        if (v1<-60) then
+          set t2 to " while resting very well"
+        else
+          if (v1<-30) then
+            set t2 to " while resting well"
+          else
+            if (v1<-10) then
+              set t2 to " while resting"
+            .
+          .
+        .
+      .
+        msgp " and $T1$T2."
+    else
+      msgp ""
+    .
+  !
+  !
+  set v0 to np1:mind
+  set V9 to np1:decay
+  msgp "Mind state numbers: $V0 decaying by $V9 each learning cycle"
+  !
+  !
+  if np1:sleeping then
+    boldon np0
+    msgp "$P1 is asleep (not gaining any experience, just absorbing)."
+    boldoff np0
+    !altwinoff np0
+  else
+    msgp "$P1 is awake."
+  .
+  checkeffect np1 code 157
+  msgp "EXP TRACKER (tracked in 2 minute periods):"
+  if $error then
+    msgp "Not gaining exp."
+  else
+    !
+    set a1 to (v3/60)
+    set a2 to (v3%60)
+    set a3 to v3
+    set a4 to (v3 / 2)
+    msgp "  Tracking period     : $A3 min ($A1 hr $A2 min)"
+    !
+    set a1 to (v2/60)
+    set a2 to (v2%60)
+    set a3 to v2
+    set a4 to (v2*100/V3)
+    msgp "  Modified gain time  : $A3 min ($A1 hr $A2 min)  [$A4% of time]"
+    !
+    set a4 to (v3-v2)
+    !msgp "  Time resting        : $A4 mins$R"
+    !
+    if (v1>=0) then
+      set a4 to (120 - v5)
+      msgp "$R  Current 2 min period:  $V1 exp gained ($V5 secs remaining). "
+      if (v1 = 0) then
+        msgp "     If no exp gained this cycle, then gain time will be decreased."
+      .
+    else
+      set v1 to (v1*-1)
+      msgp "$P1G$^ has currently been resting for $V1 min."
+    .
+    !
+  .
+  !
+  !
+  !
+  clear a1
+  clear $error
+  nexteffect 157157 np1 for a1
+  if ($error=0) then
+    msgp "$RALT EXP INFO:"
+    loop ($error = 0) 
+      set a5 to (v5 / 60)
+      msgp "  Skill $V2, practiced $V1 times for $V3 exp, time left $A5 min ($V5)"
+      nexteffect 157157 np1 for a1
+    .
+  .
+  !
+  !
+  stop
+  !
+  !
+.                                                              
+!
+!
+!
+@ top_of_loop
+STOV S3 for V1    !  amount to set skill to
+!
+! Do some cross checking before continuing
+!
+if ((S4="") || (S4="field")) then 
+  set s4 to "field"
+  if ((V1<0) || (V1>1000000)) then
+    msgp "S3=$S3 out of range (0 - 1,000,000)"
+    stop
+  .
+.
+if ((S4="current")) then 
+  if ((V1<0) || (V1>9999)) then
+    msgp "S3=$S3 out of range (0-9999)"
+    msgp "Current Rank is not concerned with decimal values."
+    stop
+  .
+.
+if ((S4="rank")) then 
+  if ((V1>-1) && (V1<1000)) then
+    set v1 to (v1*1000000)
+  .
+  if ((v1<>0) && ((V1<1000000) || (V1>9999000000))) then
+    msgp "S3=$S3 out of range (1 - 9999) or (1000000 - 9999000000)"
+    msgp "The last six 0's are considered decimals, so that$\"
+    msgp " 1203450 = 1.203450"
+    stop
+  .
+.
+if ((S4="rankonly")) then 
+  if ((V1>-1) && (V1<1000)) then
+    set v1 to (v1*1000000)
+  .
+  if ((v1<>0) && ((V1<1000000) || (V1>9999000000))) then
+    msgp "S3=$S3 out of range (1 - 9999) or (1000000 - 9999000000)"
+    msgp "The last six 0's are considered decimals, so that$\"
+    msgp " 1203450 = 1.203450"
+    stop
+  .
+.
+if ((S4="goal")) then 
+  if ((V1<0) || (V1>9999)) then
+    msgp "S3=$S3 out of range (1 - 9999)"
+    stop
+  .
+.
+!
+if ($gamecode = "DRD") then !cwiss
+      !no screamer
+else
+  if ((NP1:access < 3)&&(s7 != "zombie")) then
+    msggm "GM[/EXP]$P0 just changed $P1's level or experience.$\"
+    msggm "  $P1 is an access less than 3 character, please investigate."
+  .
+. !cwiss
+logmsg "$P0 is changing $P1's $S4 $S2 to $V1" 
+logto np1 code -1005
+logmsg "$P0 setting $P1's $S4 to $V1; Skills were at: $\" 
+clear t8  ! used for tracking if we printed anything
+!
+if (s2 = "all") then
+  when s4
+    is "field"
+      msgp "Awarding $P1 $V1 in field experience in all skills."
+    .
+    is "current"
+      msgp "Making $P1's current rank in all skills = $V1"
+    .
+    is "goal"
+      msgp "Making $P1's goal in all skills = $V1"
+    .
+    is "rank"
+      msgp "Making $P1's rank in all skills = $V1"
+    .
+  .
+.
+!
+@ loop_it
+if (S4="field") then 
+  if (s2 <> "all") then
+    msgp "Awarding $P1 $V1 in field experience on skill $V0."
+  .
+  set $match to "$LOG_CHANGES"
+  call 227
+  setskill v0 fieldexp of np1 to v1
+.
+if (S4="current") then 
+  if (s2 <> "all") then
+    msgp "Making $P1's current rank in skill $V0 = $V1."
+  .
+  set $match to "$LOG_CHANGES"
+  call 227
+  setskill v0 current of np1 to v1
+.
+if (S4="rank") then 
+  if (s2 <> "all") then
+    msgp "Making $P1's rank in skill $V0 = $V1."
+  .
+  set $match to "$LOG_CHANGES"
+  call 227
+  setskill v0 rank of np1 to v1
+  setskill v0 current of np1 to (v1/1000000)
+.
+if (S4="rankonly") then 
+  if (s2 <> "all") then
+    msgp "Making $P1's rank in skill $V0 = $V1."
+  .
+  set $match to "$LOG_CHANGES"
+  call 227
+  setskill v0 rank of np1 to v1
+.
+if (S4="goal") then 
+  if (s2 <> "all") then
+    msgp "Making $P1's goal in skill $V0 = $V1."
+  .
+  set $match to "$LOG_CHANGES"
+  call 227
+  setskill v0 goal of np1 to v1
+.
+if (S2="all") then
+  set V0 to (V0+1)
+  if (v0>99) then
+    msgp "Done with $S4!$R"
+  else
+    goto loop_it
+  .
+.
+if (t9="clear") then
+  when s4
+    is "field"   !field is done, go to
+      logto np1 code 5
+      msgp "Clearing rank..."
+      set s4 to "rank"
+      set v0 to 0
+      goto top_of_loop
+    .
+    is "rank"
+      logto np1 code 5
+      msgp "Clearing current..."
+      set s4 to "current"
+      set v0 to 0
+      goto top_of_loop
+    .
+    is "current"
+      logto np1 code 5
+      msgp "Clearing goal..."
+      set s4 to "goal"
+      set v0 to 0
+      goto top_of_loop
+    .
+  .
+.
+ifnot t8 then
+  logmsg "no changes made"
+.
+logto np1 code 5
+stop
+!
+! & that's all she wrote
+!
+: "$LOG_CHANGES"
+! inputs:
+!  np1  - player being impacted
+!   v0  - skill impacted
+!   v1  - new amount
+!   s4  - rank or current or goal or field
+  if ($gamecode = "DRD") then
+    stop
+  .
+  fastpush
+    when s4
+      is "rank"
+        getskill v0 rank of np1 for b4
+      .
+      is "rankonly"
+        getskill v0 rank of np1 for b4
+      .
+      is "current"
+        getskill v0 current of np1 for b4
+      .
+      is "goal"
+        getskill v0 goal of np1 for b4
+      .
+      is "field"
+        getskill v0 fieldexp of np1 for b4
+      .
+      default
+        getskill v0 fieldexp of np1 for b4
+      .
+    .
+    if (b4 <> v1) then
+      if t8 then
+        logmsg "; $V0: $B4 $\"
+      else
+        set t8 to "used"
+        logmsg " $V0: $B4 $\"
+      .
+    .
+  fastpop
+.
+!
+: "$LOG_TRACKING"
+! inputs:
+!  np1  - player being impacted
+!   v0  - skill impacted
+!   v1  - new amount
+!   s4  - rank or current or goal or field
+!
+  logmsg "$P0 is checking on $P1: $\"
+!
+!
+  checkeffect np1 code 157
+  if $error then
+    logmsg " $P1 has not recently been gaining experience. $\"
+  else
+    set a1 to (v2/60)
+    set a2 to (v2%60)
+    set a3 to v2
+    logmsg " $P1 has has been gaining exp for $A3 consecutive minutes ($A1 hr $A2 min).$\"
+    set a1 to (v3/60)
+    set a2 to (v3%60)
+    set a3 to v3
+    logmsg "  Tracking period is $A3 minutes ($A1 hr $A2 min).$\"
+    set a4 to (a3-v2)
+    logmsg "  The've rested a total of $A4 minutes during the tracking period.$\"
+    set a4 to (v2*100/a3)
+    logmsg "  $A4% of their time is being spent gaining new experience."
+    if (v1>0) then
+      logmsg "  $P1G$^ has gained $V1 exp during the current 2 minute cycle."
+    else
+      set v1 to (v1*-1)
+      logmsg "  $P1G$^ has currently been resting for $V1 min."
+    .
+  .
+!
+!
+  clear a0
+  clear a1
+  loop (a0 < 100)
+    getskill a0 fieldexp of np1 for b4
+    if (b4 > 0) then
+      if (a1 = 0) then
+        logmsg "  $P1G has the following field exp: $\"
+        set a1 to 1
+      .
+      logmsg "$A0 = $B4;$\"
+    .
+    set a0 to (a0 + 1)
+  .
+  if (a1 = 0) then
+    logmsg " $P1 has no field experience."
+  else
+    logmsg " done."
+  .
+!
+!
+  set a0 to np1:flag
+  bitget a0 from 3 to 3 for a1
+  if (a1 = 1) then
+    logmsg "  $P1 is under the alternate experience system.$\"
+  else
+    logmsg "  $P1 is under the normal experience system.$\"
+  .
+!
+!
+  if (np1:sleeping <> 0) then
+    logmsg "  $P1 is asleep."
+  .
+!
+!
+  logto np1 code 5
+  msgp "$P1's experience tracking information has been logged."
+.
+!
+!
+! end of file
+
+
+=== S00352 ===
+S00352
+! Experience
+! The Experience Verb.  Whoah X 2.
+! JJD Feb 17, 1995
+!
+! EPS 08-18-95 Shortened learning message to fit in 80 columns
+! EPS 08-18-95 Shortened learning message to fit in 80 columns
+! EPS 05-23-96 Made exp messages based on a percentage of the 
+!              field exp pool the player has attained.
+! EPS 09-25-96 Removed loop to add spaces and put in substring to
+!              speed things up.  Also, redid the messaging so that
+!              it indicated greater confusion as the mind filled up
+!              in different subjects.  Also added ability to specify
+!              the minimum number of ranks to display.  Also added
+!              ability to display weapon/armor/lore/survival/magic
+!              skills separately plus a rank minimum option.  Added
+!              in overall MIND check.
+! SDS 08-18-97 Fixed a typo.  :)  -Steph-
+! EPS 12-23-97 Added ability to check exp by naming the skill
+! EPS 02-16-98 Added totals and averages for skills shown
+! PSM 10-25-00 Added in highest skill for armor & weapon; 
+!              comment on asleep/awake.
+! Wib 03-12-01 Modified the pool size calc (also updated s157)
+! PSM 05-01-01 With great protest, change "Level:" to "Circle:"
+! PSM 05-06-01 change EXP LORE message for bards
+! PSM 09-01-01 Changed Exp Lore Rounding 
+!              If skill has field exp but not ranks, show anyway
+!              Weapons check include % to next rank not just ranks
+!              Flag skills currently learned under AES
+! PSM 09-08-01 eScape stuff
+! PSM 10-28-01 more eScape stuff
+! pSM 08-11-02 Make them wait to remove exp alt, if pending appraisal exp
+! 12-16-02 Wib Modified pool size increase due to ranks at 300 rank increments
+! 05/13/03 MET Music lore to Music Theory
+! 06/14/03 MET Tinkered a bit with it for new skills, and adjusted the top x portion
+! 07/25/03 MET Added necros
+! 08/03/03 MET Removed music theory from the lore averages.
+!
+!
+callmatch must_match "$SET_MONOSPACE_FONT" in 10668
+!
+set a1 to -1
+set a2 to -1
+set a3 to -1
+set a4 to -1
+set a5 to -1
+set a6 to -1
+set a7 to -1
+set a8 to -1
+set a9 to -1
+set a0 to -1
+set v1 to -1
+set v2 to -1
+set v3 to -1
+set v4 to -1
+set v5 to -1
+set v6 to -1
+set v7 to -1
+set v8 to -1
+set v9 to -1
+set v0 to -1
+set b1 to -1
+set b2 to -1
+set b3 to -1
+set b4 to -1
+set b5 to -1
+set b6 to -1
+set b7 to -1
+set b8 to -1
+set b9 to -1
+set b0 to -1
+!
+!
+set np1 to np0
+set a1 to np1:level
+msgp "$RCircle: $A1"
+clear a6
+clear b9
+clear v9
+clear a3
+clear a5
+clear v5
+clear b6
+set v8 to 99   !default range
+if (s1="rp") then
+  if (s2="help") then
+    callmatch must_match "$RPHELP" in 5486
+    callmatch must_match "$SET_DEFAULT_FONT" in 10668
+    stop
+  .
+  set s6 to " roleplaying"
+  set s1 to s2
+  set s2 to s3
+.
+if s1 then
+  stov s1 for v6
+  if (v6>0) then
+    set v6 to ((v6*100)-1)
+    clear s1
+  else
+    if s2 then
+      stov s2 for v6
+      if (v6<0) then
+        clear v6
+      else
+        set v6 to ((v6*100)-1)
+      .
+    .
+    when s1
+!      is "alternate"
+!        if s2 then
+!          callmatch must_match "$ALTERNATE" in 7443
+!          callmatch must_match "$SET_DEFAULT_FONT" in 10668
+!          stop
+!        .
+!        set v9 to np0:flag
+!        bitget v9 from 3 to 3 for v8
+!        when v8
+!          is 0
+!            bitset 1 from 3 to 3 for v9
+!            msgp "Setting you to the alternate field experience method."
+!          .
+!          is 1
+!            clear $error
+!            clear v9
+!            clear b5
+!            clear b2
+!            loop ($error = 0)
+!@ getnext
+!              nexteffect 157157 np0 for v6
+!              ifnot ($error) then
+!                if (v0=157157) then
+!                  if (b2=v2) then !already got this one.
+!                    rem2effect code 157157 value2 v2 from np0
+!                    msggm "GM[Alt Exp Experience Verb] $P0 has duplicate effect$\"
+!                    msggm " 157157 on them in sckill $V2...removing."
+!                    goto getnext
+!                  .
+!                  set b2 to v2
+!                  if (v5>b5) then
+!                    set b5 to v5
+!                  .
+!                  set v5 to (((v5+30)/60))   ! round up to the next minute by adding 30 secs.
+!                  when v2
+!                    is 58
+!                      set s9 to "climbing"
+!                    .
+!                    is 59
+!                      set s9 to "perception"
+!                    .
+!                    is 60
+!                      set s9 to "scouting"
+!                    .
+!                    is 61
+!                      set s9 to "hiding"
+!                    .
+!                    is 64
+!                      set s9 to "stalking"
+!                    .
+!                    is 67
+!                      set s9 to "foraging"
+!                    .
+!                    is 68
+!                      set s9 to "escaping"
+!                    .
+!                    is 86
+!                      set s9 to "mech lore"
+!                    .
+!                    is 87
+!                      set s9 to "music theory"
+!                    .
+!                    is 88
+!                      set s9 to "appraisal"
+!                    .
+!                    default
+!                      set s9 to "unknown"
+!                    .
+!                  .
+!                  msgp "Your $S9 skill's wait is approx. $V5 minutes."
+!                .
+!              .
+!            .
+!            if b5 then
+!              set v5 to ((b5/60)+1)
+!              msgp "$RYou are still under the influence of gaining experience$\"
+!              msgp " using the alternate method and must wait another $V5$\"
+!              msgp " minutes (approx.) before you can$\"
+!              msgp " switch back.  To prevent yourself from gaining new$\"
+!              msgp " experience and resetting this timer you can use the$\"
+!              msgp " SLEEP command."
+!              ifnot np0:gmmode then
+!                callmatch must_match "$SET_DEFAULT_FONT" in 10668
+!                stop
+!              else
+!                msgp "[GM Bypass]"
+!              .
+!            .
+!            clear $error
+!            clear v9
+!            clear b5
+!            clear b2
+!            loop ($error = 0)
+!              nexteffect 3490088 np0 for v6
+!              ifnot ($error) then
+!                msgp "You need to let your recent appraisal sink in before switching. $\"
+!                set b5 to 1
+!              .
+!            .
+!            if b5 then
+!              msgp " To prevent yourself from gaining new$\"
+!              msgp " experience and resetting this timer you can use the$\"
+!              msgp " SLEEP command."
+!              ifnot np0:gmmode then
+!                callmatch must_match "$SET_DEFAULT_FONT" in 10668
+!                stop
+!              else
+!                msgp "[GM Bypass]"
+!              .
+!            .
+!            set v9 to np0:flag
+!            bitset 0 from 3 to 3 for v9
+!            msgp "Clearing your alternate field experience method."
+!          .
+!        .
+!        set np0:flag to v9
+!        callmatch must_match "$SET_DEFAULT_FONT" in 10668
+!        stop
+!      .
+      is "all"
+        clear s1
+      .
+      is "al"
+        clear s1
+      .
+      is "field"
+        set s1 to " field"
+      .
+      is "f"
+        set s1 to " field"
+      .
+      is "armor"
+        set s1 to " armor"
+        set v9 to 0
+        set v8 to 13
+        set b6 to 6 !number of skills in this group
+      .
+      is "ar"
+        set s1 to " armor"
+        set v9 to 0
+        set v8 to 13
+        set b6 to 6 !number of skills in this group
+      .
+      is "weapon"
+        set s1 to " weapon"
+        set v9 to 14
+        set v8 to 43
+!        set b6 to 22 !number of skills in this group
+      .
+      is "weapons"
+        set s1 to " weapon"
+        set v9 to 14
+        set v8 to 43
+!        set b6 to 22 !number of skills in this group
+      .
+      is "w"
+        set s1 to " weapon"
+        set v9 to 14
+        set v8 to 43
+!        set b6 to 22 !number of skills in this group
+      .
+      is "lore"
+        set s1 to " lore"
+        set v9 to 85
+        set v8 to 99
+        when NP1:profession
+          is 8             ! Bardie Plus Music T and the instruments
+            set b6 to 9 !number of skills in this group
+          .
+          is 4             ! Empath - Plus Empathy
+            set b6 to 5 !number of skills in this group
+          .
+          is 2             ! Ranger - Plus Animal Lore
+            set b6 to 5 !number of skills in this group
+          .
+          is 9             ! Trader - Plus Trading
+            set b6 to 5 !number of skills in this group
+          .
+          is 7             ! Moon Mage -Plus Astrology
+            set b6 to 5 !number of skills in this group
+          .
+          default          ! Default - Scholar, Mech, Appraisal, Teaching
+            set b6 to 4 !number of skills in this group
+          .
+        .
+      .
+      is "l"
+        set s1 to " lore"
+        set v9 to 85
+        set v8 to 99
+        when NP1:profession
+          is 8             ! Bardie Plus Music T and the instruments
+            set b6 to 9 !number of skills in this group
+          .
+          is 4             ! Empath - Plus Empathy
+            set b6 to 5 !number of skills in this group
+          .
+          is 2             ! Ranger - Plus Animal Lore
+            set b6 to 5 !number of skills in this group
+          .
+          is 9             ! Trader - Plus Trading
+            set b6 to 5 !number of skills in this group
+          .
+          is 7             ! Moon Mage -Plus Astrology
+            set b6 to 5 !number of skills in this group
+          .
+          default          ! Default - Scholar, Mech, Appraisal, Teaching
+            set b6 to 4 !number of skills in this group
+          .
+        .
+      .
+      is "magic"
+        set s1 to " magic"
+        set v9 to 44
+        set v8 to 56
+        set b6 to 5 !number of skills in this group
+      .
+      is "m"
+        set s1 to " magic"
+        set v9 to 44
+        set v8 to 56
+        set b6 to 5 !number of skills in this group
+      .
+      is "survival"
+        set s1 to " survival"
+        set v9 to 57
+        set v8 to 84
+        when (np1:profession) !out of 15 total skills
+          is 0 !Paladin
+            set b6 to 12 ! -scouting and stealing backstabbing
+          .
+          is 2 !ranger
+            set b6 to 14 ! -backstabbing
+          .
+          is 3 !thief
+            set b6 to 14 ! -scouting
+          .
+          default        ! -scouting and backstabbing
+            set b6 to 13
+          .
+        .
+      .
+      is "s"
+        set s1 to " survival"
+        set v9 to 57
+        set v8 to 84
+        when (np1:profession) !out of 15 total skills
+          is 0 !Paladin
+            set b6 to 12 ! -scouting and stealing backstabbing
+          .
+          is 2 !ranger
+            set b6 to 14 ! -backstabbing
+          .
+          is 3 !thief
+            set b6 to 14 ! -scouting
+          .
+          default        ! -scouting and backstabbing
+            set b6 to 13
+          .
+        .
+      .
+      default
+        if s2 then
+          set s5 to "$S1 $S2" !string instrument or pike
+          expand s5
+          set s1 to s5
+        . 
+        callmatch must_match "$MATCH" in 353
+        if s9 then
+          set v8 to v9
+          set s1 to s9
+          set a6 to 1
+        else
+          msgp "USAGE:  EXPERIENCE <value>"
+          msgp "        EXPERIENCE <group> <value>"
+          msgp "        EXPERIENCE <name of skill>"
+          msgp "        EXPERIENCE RP <value>"
+          msgp "        EXPERIENCE RP <group> <value>"
+          msgp "        EXPERIENCE RP HELP"
+          msgp "RP gives roleplaying messages instead of numbers."
+          msgp "RP HELP shows what the messages mean."
+          msgp "value=minimum skill ranks to display (optional)"
+          msgp "group= ARMOR, WEAPON, MAGIC, LORE, SURVIVAL, ALL, FIELD"
+          msgp "Defaults= $QFIELD$Q (Shows only skills with field experience [not clear])."
+          msgp ""
+!          msgp "        EXPERIENCE ALTERNATE (toggles alternate method"
+!          msgp "                   on and off.  For a complete explanation"
+!          msgp "                   type EXP ALTERNATE HELP"
+          msgp ""
+          callmatch must_match "$SET_DEFAULT_FONT" in 10668
+          stop
+        .
+      .
+    .
+  .
+  if v6 then
+    set b0 to ((v6+1)/100)
+    if (s1=" field") then
+      msgp "Showing only skills at or above rank $B0 with field experience."
+    else
+      if (a6=1) then
+        msgp "Showing $S1 (full detail)."
+      else
+        msgp "Showing$S1 skills at or above rank $B0."
+      .
+    .
+  else
+    ifnot s1 then
+      msgp "Showing all your skills above rank 0."
+    else
+      if (s1=" field") then
+        msgp "Showing only skills with field experience."
+      else
+        ifnot t9 then !not asking for individual skill by name
+          msgp "Showing$S1 skills (with ranks)."
+        .
+      .
+    .
+  .
+else
+  set s1 to " field"
+   clear v6
+  msgp "Showing only skills with field experience."
+  msgp "To see all your skills, type EXP ALL"
+.
+when np0:profession
+  is 0  !Paladin  every 10 minutes
+    set b1 to 8 !armor
+    set b2 to 4 !weapons
+    set b3 to 2 !magic
+    set b4 to 2 !survival
+    set b5 to 4 !lore
+  .
+  is 1  !Barbarian
+    set b1 to 4 !armor
+    set b2 to 8 !weapons
+    set b3 to 2 !magic
+    set b4 to 4 !survival
+    set b5 to 2 !lore
+  .
+  is 2  !Ranger
+    set b1 to 4 !armor
+    set b2 to 4 !weapons
+    set b3 to 2 !magic
+    set b4 to 8 !survival
+    set b5 to 2 !lore
+  .
+  is 3  !Cleric
+    set b1 to 2 !armor
+    set b2 to 4 !weapons
+    set b3 to 8 !magic
+    set b4 to 2 !survival
+    set b5 to 4 !lore
+  .
+  is 4  !Empath
+    set b1 to 2 !armor
+    set b2 to 2 !weapons
+    set b3 to 4 !magic
+    set b4 to 4 !survival
+    set b5 to 8 !lore
+  .
+  is 5  !Warrior Mage 
+    set b1 to 2 !armor
+    set b2 to 4 !weapons
+    set b3 to 8 !magic
+    set b4 to 2 !survival
+    set b5 to 4 !lore
+  .
+  is 6  !Thief
+    set b1 to 2 !armor
+    set b2 to 4 !weapons
+    set b3 to 2 !magic
+    set b4 to 8 !survival
+    set b5 to 4 !lore
+  .
+  is 7  !Moon Mage
+    set b1 to 2 !armor
+    set b2 to 2 !weapons
+    set b3 to 8 !magic
+    set b4 to 4 !survival
+    set b5 to 4 !lore
+  .
+  is 8  !Bard        
+    set b1 to 2 !armor
+    set b2 to 4 !weapons
+    set b3 to 4 !magic
+    set b4 to 2 !survival
+    set b5 to 8 !lore
+  .
+  is 9  !Trader
+    set b1 to 4 !armor
+    set b2 to 2 !weapons
+    set b3 to 2 !magic
+    set b4 to 4 !survival
+    set b5 to 8 !lore
+  .
+  is 10 ! Necromancers
+    set b1 to 2 ! armor
+    set b2 to 2 ! weapons
+    set b3 to 4 ! magic
+    set b4 to 8 ! survival
+    set b5 to 4 ! lore
+  .
+  is -1
+    set b1 to 4 !armor
+    set b2 to 4 !weapons
+    set b3 to 4 !magic
+    set b4 to 4 !survival
+    set b5 to 4 !lore
+  .
+  default
+    msggm "GM[Exp Profession Bonus] $P0 has unknown profession ... stopping"
+    callmatch must_match "$SET_DEFAULT_FONT" in 10668
+    stop
+  .
+.
+set t9 to "                "
+clear b7 !total of skill ranks
+!
+!
+set b0 to np0:flag
+bitget b0 from 3 to 3 for a0     ! A0: 1 = alt exp on, 0 = alt exp off
+!
+clear v5                         ! Number of skills printed
+clear a1                         ! Number of alt skills printed
+!
+loop (v9 <= v8)
+  if (s1=" field") then
+    getskill v9 fieldexp of np1 for v4
+    set b0 to v4
+    if v4 then
+      getskill v9 rank of np1 for v4
+      set a7 to v4
+      set v4 to (v4 / 10000)
+    else
+      clear v4
+    .
+  else
+   clear b0
+    getskill v9 rank of np1 for v4
+    set a7 to v4
+    set v4 to (v4 / 10000)
+  .
+  if ((v4 > v6) || ((V6 = 0) & (b0 > 0))) then
+    !
+    !
+    if (a0 = 1) then
+      fastpush
+        scaneffect np0 code 157157 value2 v9
+        if (($error = 0) && (v2 = v9)) then
+          set $break to 1
+        else
+          clear $break
+        .
+      fastpop
+      if ($break = 1) then
+        set s8 to "*"
+        set a1 to (a1 + 1)
+        clear $break
+      else
+        set s8 to " "
+      .
+    else
+      set s8 to " "
+    .
+    !
+    !
+    if (s6=" roleplaying") then
+      callmatch must_match "$RPSKILL" in 5486
+    else
+      set v4 to (v4 / 100)
+      set v5 to (v5 + 1)
+      if (v5 = 1) then   ! first skill printed
+        msgp "$R          SKILL: Rank/Percent towards next rank/Amount learning$^"
+      .
+      callmatch must_match "" in 353
+      if (s9 != "unknown") then
+        substring s9 from 1 to 15 for s9
+        msgp "$K9:$S8$\"
+        if (v4<10) then
+          msgp "  $\"
+        else
+          if (v4<100) then
+            msgp " $\"
+          else
+            msgp "$\"
+          .
+        .
+  !      getskill v9 rank of np1 for a7
+        !
+        !
+        set a8 to ((a7 / 100000) % 10)
+        if (a6<>0) then !displaying individual skill by name...expand out decimal
+          set a6 to ((a7 / 100) % 100)
+          set a7 to ((a7 / 10000) % 10)
+          if (a6<10) then
+            msgp "$V4 $A8$A7.0$A6% $\"
+          else
+            msgp "$V4 $A8$A7.$A6% $\"
+          .
+          set a6 to 1
+        else
+          set a7 to ((a7 / 10000) % 10)
+          msgp "$V4 $A8$A7% $\"
+        .
+        set b7 to (b7+v4)  !total of ranks
+        getskill v9 fieldexp of np1 for a9
+        set v1 to NP0:Pdiscipline
+        set v2 to NP0:Pintelligence
+        if (v9<14) then !armor
+          set v3 to b1
+        else_if (v9<44) then !weapons
+          set v3 to b2
+        else_if (v9<57) then !magic
+          set v3 to b3
+        else_if (v9<85) then !survival
+          set v3 to b4
+        else
+          set v3 to b5
+        .
+        ! if altered, the one 157 must be too
+        if (v3=8) then
+          set v7 to 12
+        else_if (v3=2) then
+          set v7 to 8
+        else
+          set v7 to 10
+        .
+        if (v4>900) then
+          set v4 to 3600
+        else_if (v4>600) then
+          set v4 to (3000+((v4-600)*2))
+        else_if (v4>300) then
+          set v4 to (1800+((v4-300)*4))
+        else
+          set v4 to (v4*6)
+        .
+        set v3 to ((v4)+(((V2*V2)+(V2*V1))*v7/30)+(150*v3)) 
+        set v3 to (a9*100/v3)        !set to percentage full
+        when (v3/10)
+          is 0
+            if a9 then
+              set s9 to "learning     "
+            else
+              set s9 to "clear        "
+            .
+          .
+          is 1
+            set s9 to "thoughtful   " 
+          .
+          is 2
+            set s9 to "pondering    "
+          .
+          is 3
+            set s9 to "concentrating"
+          .
+          is 4
+            set s9 to "muddled      " 
+          .
+          is 5
+            set s9 to "very muddled "
+          .
+          is 6
+            set s9 to "perplexing   "
+          .
+          is 7
+            set s9 to "perplexed    "
+          .
+          is 8
+            set s9 to "bewildering  "
+          .
+          is 9
+            if (v3<96) then
+              set s9 to "bewildered   "
+            else
+              set s9 to "dazed        "
+            .
+          .                  
+          is 10
+            set s9 to "mind lock    "
+          .
+          default
+            set s9 to "mind lock    "
+          .
+        .
+        set a9 to s9
+        set a9 to (12 - a9)
+        msgp "$S9$\"
+        if (a5 = 1) then
+          msgp ""
+          clear a5
+        else
+          set a5 to (a5 + 1)
+        .
+      .
+    .
+  .
+  set v9 to (v9 + 1)
+.
+!
+!
+!  Where any skills printed?
+!
+if v5 then
+  ! 
+  if a5 then  !  Finished the sides 
+    msgp "$R"
+  else
+    msgp ""
+  .
+  !
+  if a1 then  !  Were any alt skills printed?
+    msgp "* Skills recently learned under Alternate Experience$R"
+  .
+  !
+else
+  if v6 then    ! asked for a minimum ranks value
+    set v6 to ((v6/100)+1)
+    if (s1=" field") then
+      msgp "$RYou have no skills at or above rank $V6 with field experience.$R"
+    else
+      msgp "$RYou have no$S1 skills at or above rank $V6.$R"
+    .
+  else
+    if (s1=" field") then
+      msgp "$RYou currently have no field experience in any of your skills!$R"
+    else
+      if (a6<>0) then
+        msgp "$RYou don't have any ranks in that skill!$R"
+      else
+        msgp "$RYou have no skills thus far!$R"
+      .
+    .
+    if ((NP0:level=0) && (np0:profession > -1)) then !joined a guild but didn't wait around.
+      msgp "$RYou need to finish listening to your guild leader!$R"
+      msgp ""
+    else_if (np0:level = 0) then
+      msgp "$RYou should seek out a guild and join it.$\"
+      msgp "  The guild you join will give you some skills to start you out.$R"
+    .
+  .
+.
+!
+!
+!
+if (s6=" roleplaying") then
+  callmatch must_match "$SET_DEFAULT_FONT" in 10668
+  stop
+.
+if (np0:gmmode <> 9) then
+  if (s1 = " armor") then
+    fastpush
+      clear a3  ! rank in current skill
+      clear a7  ! rank in max skill
+      clear a1  ! max skill
+      set v9 to 0
+      set v8 to 9
+      loop (v9 <= v8)    
+        getskill v9 rank of np0 for a3
+        set a3 to (a3 / 1000000)
+        if (a3 > a7) then
+          set a7 to a3
+          set a1 to v9
+        .
+        set v9 to (v9 + 1)
+      .
+      if (a7 > 0) then
+        set v9 to a1
+        callmatch must_match "" in 353
+        msgp "Highest Armor: $A7 in $S9"
+      .
+    fastpop
+  .
+  if (s1 = " weapon") then
+    fastpush
+      clear a4  ! rank in current skill
+      clear a7  ! rank in max skill
+      clear a8  ! rank in 2nd highest skill
+      clear a9  ! rank in 2nd highest skill
+      clear a0  ! max skill
+      clear a1  ! 2nd highest skill
+      clear a2  ! 2nd highest skill
+      set v9 to 16
+      set v8 to 39
+      loop (v9 <= v8)    
+        getskill v9 rank of np0 for a4
+!        set a4 to (a4 / 1000000)
+        if (a4 > a7) then
+          set a9 to a8
+          set a8 to a7
+          set a7 to a4
+          set a2 to a1
+          set a1 to a0
+          set a0 to v9
+        else
+          if (a4 > a8) then
+            set a9 to a8
+            set a8 to a4
+            set a2 to a1
+            set a1 to v9
+          else
+            if (a4 > a9) then
+              set a9 to a4
+              set a2 to v9
+            .
+          .
+        .
+        set v9 to (v9 + 1)
+      .
+      if (a7 > 0) then
+        set v9 to a0
+        callmatch must_match "" in 353
+        set a7 to (a7 / 1000000)
+        msgp "    Highest Weapon: $A7 in $S9"
+        if (a8 > 0) then
+          set v9 to a1
+          callmatch must_match "" in 353
+          set a8 to (a8 / 1000000)
+          msgp "2nd Highest Weapon: $A8 in $S9"
+        .
+        if (a9 > 0) then
+          set v9 to a2
+          callmatch must_match "" in 353
+          set a9 to (a9 / 1000000)
+          msgp "3rd Highest Weapon: $A9 in $S9"
+        .
+      .        
+    fastpop
+  .
+  if (s1 = " magic") then
+    fastpush
+      set np9 to np0
+      callmatch must_match "$MAGIC_SUM" in 5139
+      SET A1 TO (A3 / A7)  !  RANKS IN GROUP / SKILLS IN GROUP
+      MSGP "Magic Average: $A1  (Total: $A3 in $A7 included skills)"
+    fastpop
+  .
+  if (s1 = " survival") then  
+    fastpush
+      set np9 to np0
+      callmatch must_match "$SURVIVAL_SUM" in 5139
+      SET A1 TO (A3 / A7)  !  RANKS IN GROUP / SKILLS IN GROUP
+      MSGP "Survival Average: $A1  (Total: $A3 in $A7 included skills)"
+    fastpop
+  .
+  if (s1 = " lore") then  
+    fastpush
+      set np9 to np0
+      callmatch must_match "$LORE_SUM" in 5139
+      SET A1 TO (A3 / A7)  !  RANKS IN GROUP / SKILLS IN GROUP
+      if (np0:profession = 8) then
+        MSGP "Lore Average: $A1 (Total: $A3 in 9 included skills, averaged as 8)"
+      else
+        MSGP "Lore Average: $A1 (Total: $A3 in $A7 included skills)"
+      .
+    fastpop
+  .
+.
+!
+!
+!
+set v0 to (np1:tdp/1000)
+set v1 to np1:favor
+set v2 to (np1:deaths)
+msgp "Time Development Points: $V0  Favors: $V1  Deaths: $V2"    
+!
+!
+!
+@ mind
+set v9 to (np1:mind/2)
+msgp "Overall state of mind:$\"
+if (v9 < 25) then
+  msgp " clear$\"
+else
+  if (((v9%100) > 50) && (v9 > 99)) then
+    msgp " very$\"
+  .
+  when (v9/100)
+    is 0
+      msgp " fluid$\"
+    .
+    is 1
+      msgp " murky$\"
+    .
+    is 2
+      msgp " thick$\"
+    .
+    is 3
+      msgp " dense$\"
+    .
+    is 4
+      msgp " stagnant$\"
+    .
+    is 5
+      msgp " frozen$\"
+    .
+    default
+      msgp " frozen$\"
+    .
+  .
+.
+clear t1
+!checkeffect np0 code 157
+!ifnot $error then
+!  set a9 to ((v2-(v3-v2))/60)
+!  if (a9>12) then
+!    set t1 to "feeling like the wakeful dead"
+!  else_if (a9>10) then
+!    set t1 to "feeling like a zombie"
+!  else_if (a9>7) then
+!    set t1 to "very sleepy"
+!  else_if (a9>5) then
+!    set t1 to "sleepy"
+!  else_if (a9>4) then
+!    set t1 to "tired but alert"
+!  .
+!.
+!if t1 then
+!  if (v1<0) then
+!    clear t2
+!    if (v1<-60) then
+!      set t2 to " while resting very well"
+!    else_if (v1<-30) then
+!      set t2 to " while resting well"
+!    else_if (v1<-10) then
+!      set t2 to " while resting"
+!    .
+!  .
+!  !
+!  msgp " and $T1$T2."
+!  !
+!else
+  msgp ""
+!.
+!
+!
+!
+!
+if np0:sleeping then
+  msgp "$RYou are relaxed and your mind has entered a state of rest.$\"
+  msgp "  To wake up and start learning again, type: AWAKEN$R"
+!else
+  !msgp "You are awake and learning."
+.
+!
+testeffect np0 code 412
+set ne0 to -6219
+if (($error=1) && (ne0:dormant=1)) then
+  callmatch must_match "" in 412
+.
+msgp "EXP HELP for more information"
+callmatch must_match "$SET_DEFAULT_FONT" in 10668
+stop
+!
+!
+!
+: "$MIND"
+  goto mind
+.
+
+
+=== S00509 ===
+S00509
+! S509 - Experience Gainer
+! 
+! Called when a creature attacks a players
+! This script is called every time a player is involved in an attack
+! and generates experience for them in the appropriate places.
+! JJD March 21, 1995
+! 
+! 10-03-95 EPS Added $match call for Armor
+! 02-96 EPS Updated/tweaked added in MULTI
+!
+! 10 Jan 01 - Wib- Implemented caps for all defenses.
+!
+! 14 Feb 01 - Wib- Modified Armor Learning.
+!
+! 20 Feb 01 - Wib- Implemented the use of table 1101
+! 07 Apr 2001 JMG  Updated ne9:ddata to ne9:edata for new compiler
+! 07 May 2001 Wib  Rearrange s509 to minimize the number of calls to s157
+! 08 Sept 01  Wib  Implemented a check in 'parry' to check weapon skill cap
+!                  before awarding weapon exp. 
+! 20 Sept 01  Wib  Added an 'if' statement to prevent learning from non-worn armors.
+! 20 Oct 01   Wib  Modified the difficulty calc (effectively reducing the caps).
+! 20 Oct 01   Wib  Implemented caps on armor exp.
+! Wib Jan 06 02    Added table 1220 utilization.
+! Wib Jan 14 03    Modified the order of the calls to s157
+! 09-10-03 MET     Consolidating Debug.
+! 05-16-04 EIB     Fixed the Debug output
+!
+: "$DEFENSES_EXP"  
+  fastpush
+    ! table 1101 15 0 0 - multi exp
+    ! table 1101 16 0 0 - evasion exp
+    ! table 1101 17 0 0 - parry exp
+    ! table 1101 18 0 0 - shield exp
+    ! table 1101 19 0 0 - armor exp
+    clear a9 ! used to hold total armor experience
+    callmatch must_match "$MULTI" in 509
+    callmatch must_match "$EVADE" in 509
+    gettable 1101 at 7 0 0 for a1
+    ifnot (a1=(-99)) then       ! attempted a parry
+      callmatch must_match "$PARRY" in 509
+    .
+    gettable 1101 at 10 0 0 for a1
+    ifnot (a1=(-99)) then       ! attempted a block
+      callmatch must_match "$SHIELD" in 509
+    .
+    settable 1101 at 19 0 0 to a9 ! total armor exp
+    set np0 to np1
+    gettable 1101 at 15 0 0 for a0
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509)EXP - Multi = $A0;"
+      if (a0>299) then
+        set a0 to 299
+      .
+      set v0 to 15
+      callmatch must_match "" in 157
+    .
+    gettable 1101 at 17 0 0 for a0
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509)EXP -  Parry = $A0;"
+      if (a0>299) then
+        set a0 to 299
+      .
+      set v0 to 14
+      callmatch must_match "" in 157
+    .
+    gettable 1101 at 18 0 0 for a0
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509)EXP -  Shield = $A0;"
+      if (a0>299) then
+        set a0 to 299
+      .
+      set v0 to 0
+      callmatch must_match "" in 157
+    .
+    gettable 1101 at 16 0 0 for a0
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509)EXP -  Evasion = $A0;"
+      if (a0>299) then
+        set a0 to 299
+      .
+      set v0 to 57
+      callmatch must_match "" in 157
+    .
+    gettable 1101 at 19 0 0 for a0
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509)EXP -  Armor = $A0]"
+      callmatch must_match "$ARMOR" in 509
+    .
+    clear $MATCH
+    clear np0
+  fastpop
+.
+: "$MULTI" !called when multiple opponent skill exp is needed
+  ifnot ((np1:index) && (nc0)) then
+    stop
+  .
+!  getskill multiple_opponent_skill rank of np1 for a8
+!  set a8 to (a8/1000000)  
+  gettable 1101 at 14 0 0 for b7 ! base penalty
+  !b7=total penalty
+  msgrgm nr0 mode 5 "[(s509) Multi Foe Penalty = $B7 |$\"
+  ! Calc the penalty using base ranks for the purpose of exp gain
+  getskill multiple_opponent_skill rank of np1 for a8
+  set a8 to (a8/1000000)  
+  set b7 to (b7-a8)
+  msgrgm nr0 mode 5 " Multi B7 = $B7, A8 = $A8]"
+  if (b7<(-30)) then     ! no penalty
+    stop
+  .
+  set a0 to ((b7/4) + (nc0:clevel/3) + 1)
+  if (a0<1) then
+    set a0 to 1
+  .
+  set a9 to (a9 + (a0/8)) ! armor exp
+  set a6 to a8
+  if (b7 > 0) then
+    set a6 to (a6 - (b7/11))
+  .
+  if (a6 < 1) then
+    set a6 to 1
+  .
+  callmatch must_match "$DIFFICULTY" in 509
+  if (v7>0) then
+    set a0 to (v7*a0/100)
+    if (a0<1) then
+      set a0 to 1
+    .
+    msgrgm nr0 mode 5 "[(s509) Multi EXP - $A0 Difficulty = $V7.]"
+    settable 1101 at 15 0 0 to a0
+  .
+.
+: "$EVADE"     ! Player evaded an attack
+  fastpush
+    set a1 to $calledby
+    ifnot (a1=509) then
+      msggm "GM[EVADE Exp Script 509] Called by $A1 for $P1.  Alert Wib."
+    .
+  fastpop
+@ evade
+  ifnot (np1:index & nc0) then
+    stop
+  .
+!  msggm "GM[Evade] Exp 509 called for $P1"
+  gettable 1101 at 1 0 0 for a4 ! OF
+  set a0 to ((a4/4) + 8 + (nc0:clevel/4))
+  gettable 1101 at 4 0 0 for v2               ! % Dodged
+  msgrgm nr0 mode 5 "[(s509) % evaded = $V2]"
+  if (v2 > 100) then
+    set v2 to 100
+  .
+  set a0 to (a0*v2/100) !modify exp by % dodged
+  ! this allows for *some* experience in the case where
+  ! % dodged * base exp < 1
+  if (a0 < 1) then
+    set a0 to 1
+  .
+  set a9 to (a9 + (a0/5)) ! armor exp
+  getskill 57 rank of np1 for a6
+  set a6 to (a6/1000000 + 1)
+  ! find the initial difficulty
+  callmatch must_match "$DIFFICULTY" in 509
+  if (v7 > (-17)) then
+    ! adjust skill based on the multi situation
+    if ne9:edata1 then
+      gettable (ne9:edata1) at 3 15 0 for a7
+    else
+      fastpush
+        set a7 to $calledby
+        set v9 to ne9   !Some other throw-away var
+        msggm "GM[EVADE, s509] Called by s$A7 with ne9($V9) or ne9:edata1 null for $P1."
+      fastpop
+      set a7 to -99
+    .
+    ifnot (a7=-99) then
+      set a7 to ((100-a7)/5)
+      set a7 to (100-a7)
+      set a6 to (((a6*a7)/100)+1)
+    .
+    ! find the difficulty
+    callmatch must_match "$DIFFICULTY" in 509
+    msgrgm nr0 mode 5 "[(s509) - Base evasion EXP = $A4, % Difficulty = $V7"
+    if (v7>0) then
+      set a0 to ((a0*v7)/100)    !adjusted exp
+      msgrgm nr0 mode 5 "[(s509) - % Difficulty = $V7.]"
+      settable 1101 at 16 0 0 to a0
+    .
+  .
+  clear $match
+.
+: "$PARRY"  
+  fastpush
+    set a1 to $calledby
+    ifnot (a1=509) then
+      msggm "GM[Parry Exp Script 509] Called by $A1 for $P1.  Alert Wib."
+    .
+  fastpop
+@ parry
+  ifnot (np1:index & nc0) then
+    stop
+  .
+  gettable 1101 at 1 0 0 for a4 ! OF
+  gettable 1101 at 3 0 0 for a3 ! EDF
+  set a0 to ((a4 - a3) + 4 + (nc0:clevel/2))
+  gettable 1101 at 7 0 0 for v3               ! % Parried
+  if (v3 > 100) then
+    set v3 to 100
+  else
+    set v3 to ((100+v3)/2)
+  .
+  set a0 to ((a0*v3)/100) !modify exp by % parried
+  msgrgm nr0 mode 5 "[(s509) Parry EXP = $A0, % Parried = $V3: $A4, $A3]"
+  if (a0 < 1) then
+    set a0 to 1
+  .
+  set a9 to (a9 + (a0*2/3))
+  getskill 14 rank of np1 for a6
+  set a6 to (a6/1000000 + 1)
+  callmatch must_match "$DIFFICULTY" in 509
+  if (v7>(-17)) then
+    ! adjust skill based on the multi situation
+    gettable (ne9:edata1) at 3 16 0 for a7
+    ifnot (a7=-99) then
+      set a7 to ((100-a7)/5)
+      set a7 to (100-a7)
+      set a6 to (((a6*a7)/100)+1)
+    .
+    msgrgm nr0 mode 5 "[(s509) $A6 adjusted ranks in parry skill.]"
+    callmatch must_match "$DIFFICULTY" in 509
+    if (v7>0) then
+      msgrgm nr0 mode 5 "[(s509) % Difficulty = $V7. A0 = $A0]"
+      set a0 to (a0 * v7 / 100)
+      settable 1101 at 17 0 0 to a0
+      if (a0>0) then
+        if (a0>299) then
+          set a0 to 299
+        .
+        set np0 to np1
+        set no2 to no1
+        set no1 to np1:righthand
+        clear v9
+        callmatch must_match "$WEAPON" in 211
+        if ((v9<37) && (v9>15)) then
+          ! check difficulty for the weapon skill
+          getskill v9 rank of np1 for a6
+          set a6 to (a6/1000000 + 1)
+          callmatch must_match "$DIFFICULTY" in 509
+          if (v7>0) then
+            set a0 to ((a0/10)+1)
+            if (a0>0) then
+              set v0 to v9
+              fastpush
+                callmatch must_match "" in 157
+              fastpop
+            .
+          .
+        .
+        set no1 to no2
+        clear np0
+      .
+    .
+  .
+  clear $match
+.
+: "$SHIELD"
+@ shield
+  ifnot ((np1:index) && (nc0)) then
+    stop
+  .
+  ifnot no7 then
+    stop
+  .
+  !NO7 should never be anything but a shield at this point but...
+  if (((no7:profile/100)<>14) && (no7:profile<>16)) then !not a shield
+    msggm "GM[Combat EXP] (509) Shield use called but NO7 ($O7D) is not a shield."
+    set a8 to nr0
+    msggm "NR0: $A8; NO6: $O6D; NC0: $C0D; NP1: $P1; NO6: $O6D; NO7: $O7D" 
+    stop
+  .
+  if (no7<>np1:lefthand) then !a shield but not in the left hand
+    msggm "GM[ExpGain] Shield $O7D not in $P1's left hand...stopping"
+    stop
+  .
+  whereitem no7 for s5
+  when s5
+    is "p"
+!      where no7 for np9
+    .
+    is "o"
+      where no7 for nc9
+      msggm "GM[ExpGain] Shield $O7D is in $C9D's inventory but$\"
+      msggm " It should be the shield in $P9's inventory!"
+    .
+  .
+  gettable 1101 at 1 0 0 for a4 ! OF
+  gettable 1101 at 3 0 0 for a3 ! EDF
+  set a4 to ((a4 - a3) + 4 + (nc0:clevel/2))
+  msgrgm nr0 mode 5 "[(s509) - Shield EXP = $A4]"
+  gettable 1101 at 10 0 0 for v4  ! % blocked
+  if (v4 > 100) then
+    set v4 to 100
+  else
+    set v4 to ((100 + v4)/2)
+  .
+  set a0 to ((a4*v4)/100) !modify exp by % blocked
+  if (a0 < 1) then
+    set a0 to 1
+  .
+  ! Give 3/4 the amount of shield exp as armor exp
+  set a9 to (a9 + (a0*3/4))
+  getskill 0 rank of np1 for a6
+  set a6 to (a6/1000000 + 1)
+  callmatch must_match "$DIFFICULTY" in 509
+  if (v7>(-17)) then
+    ! adjust skill based on the multi situation
+    gettable (ne9:edata1) at 3 17 0 for a7
+    ifnot (a7=-99) then
+      set a7 to ((100-a7)/5)
+      set a7 to (100-a7)
+      set a6 to (((a6*a7)/100)+1)
+    .
+    msgrgm nr0 mode 5 "[$A5 normal ranks in that skill.]"
+    callmatch must_match "$DIFFICULTY" in 509
+    if (v7>0) then
+      msgrgm nr0 mode 5 "[(s509) Shield % Difficulty = $V7.]"
+      set a4 to (a4*v7/100)
+      settable 1101 at 18 0 0 to a0
+    .
+  .
+  clear $match
+.
+: "$ARMOR"
+  ! Ensure that the player is wearing a piece of armor
+  ifnot np1:index then
+    stop
+  .
+  gettable 1220 at 1 4 0 for a6
+  ifnot (a6 = np1:index) then
+    fastpush
+      set nr8 to 3300
+      set v9 to $calledby
+      set v8 to nr0
+      msgrgm NR8 mode 5 "(s509) Called by $V9 in $V8 without setting up the armor table!"
+      callmatch must_match "$ARMOR_SETUP" in 10562
+    fastpop
+  .
+  set np0 to np1
+  clear a1
+  clear a2
+  clear a3
+  clear a4
+  clear v5
+  clear a6
+  clear no6
+  set a7 to a0
+  clear no9
+  set a6 to 1
+  gettable 1220 at a6 1 0 for no6
+  loop (no6)
+    callmatch must_match "$ARMOR_TYPE" in 66
+      msgrgm nr0 mode 5 "[(s509) - Armor no6 = $O6D - V0 = $V0]"
+      msgrgm nr0 mode 5 "[(s509) - Armor A8 = $A8; $A1, $A2, $A3, $A4, $V5]"
+    ! returns armor type in v0
+    when (v0)
+      is 1
+        set a1 to (a1 + no6:evas_pen + 1)
+      . 
+      is 2
+        set a2 to (a2 + no6:evas_pen + 1)
+      . 
+      is 3
+        set a3 to (a3 + no6:evas_pen + 1)
+      . 
+      is 4
+        set a4 to (a4 + no6:evas_pen + 1) 
+      . 
+      is 5
+        set v5 to (v5 + no6:evas_pen + 1)
+      . 
+      default
+        msgrgm nr0 mode 5 "[(s509) - Armor $O6D is not a proper armor type.]"
+      .
+    .
+    set a6 to (a6+1)
+    if (a6=17) then
+      clear no6
+    else
+      gettable 1220 at a6 1 0 for no6
+    .
+  .
+  set a8 to (a1+a2+a3+a4+v5)
+  msgrgm nr0 mode 5 "[(s509) - Armor A8 = $A8; Exp = $A7; $A1, $A2, $A3, $A4, $V5]"
+  clear a6
+  if (v5) then
+    set a0 to ((a7*v5/a8))
+    if (a0 < 1) then
+      set a0 to 1
+    .
+    if (a0 > 300) then
+      set a0 to 300
+    .
+    ! Make the call to 157 to award the experience with v0 (skill) and a0 (amount)
+    set v0 to 5
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509) - Heavy Plate Armor EXP = $A0]"
+      getskill v0 rank of np1 for a6
+      set a6 to ((a6/1000000)+1)
+      ! find the difficulty
+      callmatch must_match "$DIFFICULTY" in 509
+      msgrgm nr0 mode 5 "[(s509) - Heavy Plate Armor EXP = $A0; V7 = $V7]"
+      if (v7 > (-18)) then
+        ! adjust skill based on the multi situation
+        gettable (ne9:edata1) at 3 18 0 for b7
+        ifnot (b7=-99) then
+          set a6 to (a6 - (b7/3)) ! multi penalty to armor
+          if (a6 < 1) then
+            set a6 to 1
+          .
+        .
+        ! find the difficulty
+        callmatch must_match "$DIFFICULTY" in 509
+        msgrgm nr0 mode 5 "[(s509) - Heavy Plate Armor EXP = $A0; A6 = $A6; V7 = $V7]"
+        if (v7>0) then
+              msgrgm nr0 mode 5 "[(s509) - % Difficulty = $V7.]"
+          set a0 to ((a0*v7/100)+1)
+          if (a0 > 299) then
+            set a0 to 299
+          .
+          msgrgm nr0 mode 5 "[(s509) - Heavy Plate Armor EXP = $A0]"
+          fastpush
+            callmatch must_match "" in 157
+          fastpop
+        .
+      .
+      clear $match
+    .
+  .
+  if (a4) then
+    set a0 to ((a7*a4/a8))
+    if (a0 < 1) then
+      set a0 to 1
+    .
+    if (a0 > 300) then
+      set a0 to 300
+    .
+    ! Make the call to 157 to award the experience with v0 (skill) and a0 (amount)
+    set v0 to 4
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509) - Light Plate Armor EXP = $A0]"
+      getskill v0 rank of np1 for a6
+      set a6 to ((a6/1000000)+1)
+      ! find the difficulty
+      callmatch must_match "$DIFFICULTY" in 509
+      if (v7 > (-18)) then
+        ! adjust skill based on the multi situation
+        gettable (ne9:edata1) at 3 18 0 for b7
+        ifnot (b7=-99) then
+          set a6 to (a6 - (b7/3)) ! multi penalty to armor
+          if (a6 < 1) then
+            set a6 to 1
+          .
+        .
+        ! find the difficulty
+        callmatch must_match "$DIFFICULTY" in 509
+        if (v7>0) then
+              msgrgm nr0 mode 5 "[(s509) - % Difficulty = $V7.]"
+          set a0 to ((a0*v7/100)+1)
+          if (a0 > 299) then
+            set a0 to 299
+          .
+          fastpush
+            callmatch must_match "" in 157
+          fastpop
+        .
+      .
+      clear $match
+    .
+  .
+  if (a3) then
+    set a0 to ((a7*a3/a8))
+    if (a0 < 1) then
+      set a0 to 1
+    .
+    if (a0 > 300) then
+      set a0 to 300
+    .
+    ! Make the call to 157 to award the experience with v0 (skill) and a0 (amount)
+    set v0 to 3
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509) - Heavy Chain Armor EXP = $A0]"
+      getskill v0 rank of np1 for a6
+      set a6 to ((a6/1000000)+1)
+      ! find the difficulty
+      callmatch must_match "$DIFFICULTY" in 509
+      if (v7 > (-18)) then
+        ! adjust skill based on the multi situation
+        gettable (ne9:edata1) at 3 18 0 for b7
+        ifnot (b7=-99) then
+          set a6 to (a6 - (b7/3)) ! multi penalty to armor
+          if (a6 < 1) then
+            set a6 to 1
+          .
+        .
+        ! find the difficulty
+        callmatch must_match "$DIFFICULTY" in 509
+        if (v7>0) then
+              msgrgm nr0 mode 5 "[(s509) - % Difficulty = $V7.]"
+          set a0 to ((a0*v7/100)+1)
+          if (a0 > 299) then
+            set a0 to 299
+          .
+          fastpush
+            callmatch must_match "" in 157
+          fastpop
+        .
+      .
+      clear $match
+    .
+  .
+  if (a2) then
+    set a0 to ((a7*a2/a8))
+    ! Make the call to 157 to award the experience with v0 (skill) and a0 (amount)
+    set v0 to 2
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509) - Light Chain Armor EXP = $A0]"
+      getskill v0 rank of np1 for a6
+      set a6 to ((a6/1000000)+1)
+      ! find the difficulty
+      callmatch must_match "$DIFFICULTY" in 509
+      if (v7 > (-18)) then
+        ! adjust skill based on the multi situation
+        gettable (ne9:edata1) at 3 18 0 for b7
+        ifnot (b7=-99) then
+          set a6 to (a6 - (b7/3)) ! multi penalty to armor
+          if (a6 < 1) then
+            set a6 to 1
+          .
+        .
+        ! find the difficulty
+        callmatch must_match "$DIFFICULTY" in 509
+        if (v7>0) then
+              msgrgm nr0 mode 5 "[(s509) - % Difficulty = $V7.]"
+          set a0 to ((a0*v7/100)+1)
+          if (a0 > 299) then
+            set a0 to 299
+          .
+          fastpush
+            callmatch must_match "" in 157
+          fastpop
+        .
+      .
+      clear $match
+    .
+  .
+  if (a1) then
+    set a0 to ((a7*a1/a8))
+    ! Make the call to 157 to award the experience with v0 (skill) and a0 (amount)
+    set v0 to 1
+    if (a0>0) then
+      msgrgm nr0 mode 5 "[(s509) - Leather Armor EXP = $A0]"
+      getskill v0 rank of np1 for a6
+      set a6 to ((a6/1000000)+1)
+      ! find the difficulty
+      callmatch must_match "$DIFFICULTY" in 509
+      if (v7 > (-18)) then
+        ! adjust skill based on the multi situation
+        gettable (ne9:edata1) at 3 18 0 for b7
+        ifnot (b7=-99) then
+          set a6 to (a6 - (b7/3)) ! multi penalty to armor
+          if (a6 < 1) then
+            set a6 to 1
+          .
+        .
+        ! find the difficulty
+        callmatch must_match "$DIFFICULTY" in 509
+        if (v7>0) then
+          !    msgrgm nr0 mode 5 "[(s509) - % Difficulty = $V7. Too Easy]"
+          set a0 to ((a0*v7/100)+1)
+          if (a0 > 299) then
+            set a0 to 299
+          .
+          fastpush
+            callmatch must_match "" in 157
+          fastpop
+        .
+      .
+      clear $match
+    .
+  .
+  msgrgm nr0 mode 5 "[(s509) - Armor A8 = $A8; Exp = $A7; $A1, $A2, $A3, $A4, $V5]"
+  clear np0
+.
+: "$DIFFICULTY"
+  ! Needs skill in A6
+  ! returns % difficulty in v7
+  ! get the attack skill of the creature
+  gettable 1101 at 0 0 0 for a5
+  msgrgm nr0 mode 5 "[(s509) - s509 - Creature Attack Skill = $A5]"
+  ! Until we are certain that Table 1101 is completely implemented
+  ! we back up the gettable with a call to 348
+  ! This will also allow s509 to be called by special abilites with 
+  ! no actual 'attack skill' and will use evasion to reward the exp
+  if (a5 = -99) then
+    push
+!     set nr0 to 3250
+!     callmatch must_match "" in 11
+      info script $CALLEDBY
+      ifnot (nc1) then
+        if (nc0) then
+          set nc1 to nc0
+        .
+      .
+      ifnot (nc1) then
+        ifnot (np1) then
+          if (np0) then
+            set np1 to np0
+          .
+        .
+      .
+      clear a7
+      clear nr9
+      if (nc1) then
+        set a7 to nc1
+        where nc1 for nr9
+      else_if (np1) then
+        set a7 to np1:index
+        where np1 for nr9
+      .
+      set a8 to nr9
+      msggm "GM[Combat Exp (s509)] Table 1101 not set.  Called in r$A8$\"
+      msggm " by $X1 ($A7) using s$V0 ($T0).  Please alert (account$\"
+      if (t1=t2) then
+        msggm (": "+t1+") to fix this ASAP.")
+      else
+        msggm ("s: "+t1+" and "+t2+") to fix this ASAP.")
+      .
+    pop
+    set nc1 to nc0
+    callmatch must_match "$EVASION" in 348
+    set a5 to v1
+    clear nc1
+  .
+  set a5 to (a5 + (nc0:clevel/5) + 20)
+  msgrgm nr0 mode 5 "[(s509) - s509 - A5 = $A5. A6 = $A6]"
+  set v7 to (a5*100/a6)    ! Difficulty rating in percent 0-200%
+  ! If the difficulty is less than 100, compute then % to decrease the exp
+  msgrgm nr0 mode 5 "[(s509) - s509 - %Difficulty = $V7]"
+  if (v7<100) then
+    set v7 to ((4*v7) - 300)
+  .
+  msgrgm nr0 mode 5 "[(s509) - s509 - %Difficulty = $V7]"
+  ! Set the bounds for the % difficulty
+  if (v7>100) then
+    set v7 to 100
+  .
+.
+
+
+=== S00868 ===
+S00868
+! s868
+!
+! Handles Exiting the GSL portion of the Character
+! Manager.
+!
+! 08-26-95 EPS     Created.
+! ??-??-95 T.Hill  Put in clothing stuff
+! 02-27-96 SDS     Put in a check for features.
+! 03-04-96 SDS     Put in a check for featureset.
+! 05-03-96 DMS     A player with PS 1257 (WARN reroll) will not get clothed
+! 05-10-96 JKP     Added messaging for new exit rooms as we expand
+! 06/20/96 SDS     Added in a check for race = -1
+! 11/24/96 SDShavr Put in new features stuff
+! 01/07/97 SDShavr Put in a check for sitting/prone.
+! 03-19-97 EPS     Tweaked arrival messaging
+! 12/06/97 SDShavr Put in checks for ages < 13.
+! 02-22-98 DMS     Added problem PS adder to new characters
+! 02/27/98 Johnny  Added protege arrival messaging to mentors.
+! 03/23/98 Johnny  Moving arrival messages to the familiar window
+! 10/21/98 Johnny  Corrected protege arrival messages for new mentor system.
+! 02/19/99 Johnny  Added the prefix to identify new players from the Zone to
+!                  the mentors. Also forcing the startdate to set for Zone
+!                  players if they get through the char manager and it's null.
+! 03/16/99 Linda  Added code to explicitely set player birthday/age if it's
+!                 out of range, instead of calling /age
+! 07/14/99 Dave3  Fastpush/Fastpop around the call to make clothing, to prevent
+!                 NO1's volume from getting reset to 16021.
+! 04/14/01 Linda  Changed birthday to be represented as 7YYYmmm, to allow birthdays
+!                  prior to the victory of lanival the redeemer.
+! 11/17/01 Linda  Cleared LIFEKEEPING and HALTBLOODLOSS flags as player exits CM
+! 02-12-02 Linda  Added multiple destinations (Crossing/Riverhaven)
+! 02-23-02 Linda  Added new player protection PS (11007)
+! 02-28-02 Evan   Updated to set non-NDAed players to access level 1 outside of Prime
+! 03-11-02 Linda  Updated to allow non-NDAed hosts out of the CM.  <cough>
+! 04-06-04 Linda  Updated to allow event GMs to disable exit to a starting city
+!
+!
+: "go"
+  if (NP0:gmmode) then
+    boldon np0
+    msgp "$R(Skipping features and stat refiguring due to GM mode.)$R"
+    boldoff np0
+    goto skipdown
+  .
+  if ((NP0:prone)||(NP0:sitting)) then
+    msgp "You need to stand, first."
+    set $break to 1
+    STOP
+  .
+  if (NP0:race=-1) then
+    msgp "You have not yet chosen your race.  To do so, go SOUTH one$\"
+    msgp " and then choose one of the figures on the dais."
+    set $break to 1
+    STOP
+  .
+  if (NP0:featureset<>222) then
+    set $match to "$HELLO"
+    call 863
+    set $break to 1
+    STOP
+  .
+!---------------
+! LSH, 2/12/2002
+!
+! Each exit room in the CM has synobjs pointing to the exit arch.  One is called
+! Riverhaven, one is the Crossing.  While no1 will point to the archway, s1/s2/s3
+! will still contain the input from the player, so we can see which city they pick.
+!---------------
+  ! go through silver archway
+  ! go through archway
+  ! go silver archway
+  ! go archway
+  if (s3="") then
+    set s3 to s2
+    if (s3="") then
+      set s3 to s1
+    .
+  .
+  set no9 to -28439       ! LSH 04/06/04
+  if ((no9!=0) && (no9:profile=15)) then
+    if ((no9:ddata1=1) && (no9:ddata2=1)) then
+      msggm "GM[NewArrivals] (s868) PID -28439 is used to block new player arrivals$\"
+      msggm " in various cities but is currently blocking arrivals in all cities.$\"
+      msggm "  Resetting to allow players to arrive in all cities."
+      clear no9:ddata1
+      clear no9:ddata2
+    .
+  else
+    msggm "GM[NewArrivals] (s868) Can't find PID -28439 or PID is not a dataprop.$\"
+    msggm " Please use /FPID to find it (should be in room 9000) or port it in from$\"
+    msggm " Dev using room 400."
+    clear no9
+  .                       ! end LSH 04/06/04
+  lowercase s3
+  clear a1
+  clear a2
+  clear a3
+  scan "archway" match s3 for a1
+  scan "riverhaven" match s3 for a2
+  scan "crossing" match s3 for a3
+  if (np0:premium | np0:internal | np0:freeflagged | ($GAMECODE="DRX")) then
+    if (a1=1) then
+      if (no9!=0) then      ! arrival controller - have we disabled arrivals?
+        msgp "$RFaenella stops you and whispers, $QAs an Estate Holder, you are$\"
+        msgp " allowed to choose where you wish to begin your life.  The Crossing$\"
+        msgp " is a bustling metropolis that thousands of people call their$\"
+        msgp " home.  The town of Riverhaven is somewhat smaller, offering a$\"
+        msgp " cozier atmosphere, but you may find it lacks some of the amenities$\"
+        msgp " of the large town.  To choose your destination, simply GO CROSSING$\"
+        msgp " or GO RIVERHAVEN.$Q"
+        set $BREAK to 1
+        stop
+      .
+    else_if (a2=1) then       ! Riverhaven
+      if ((no9=0) || (no9:ddata2=0)) then    ! LSH 04/06/04
+        if (np0:clueless) then
+          set nr8 to 1019028
+        else
+          set nr8 to 1019035    ! Aldamus Guesthouse, Dormitory
+        .
+      else                                   ! LSH 04/06/04
+        boldon np0
+        msgp "$RFaenella stops you with a worried frown.  $QThat city is too dangerous$\"
+        msgp " to the young right now.  For your own safety, I must put you elsewhere.$Q"
+        boldoff np0
+        if (np0:clueless) then
+          set nr8 to 16202
+        else
+          set nr8 to 16201        ! Crossing
+        .
+      .                                     ! end LSH 04/06/04
+    else
+      if ((no9=0) || (no9:ddata1=0)) then   ! LSH 04/06/04
+        if (np0:clueless) then
+          set nr8 to 16202
+        else
+          set nr8 to 16201        ! Crossing
+        .
+      else                                  ! LSH 04/06/04
+        boldon np0
+        msgp "$RFaenella stops you with a worried frown.  $QThat city is too dangerous$\"
+        msgp " to the young right now.  For your own safety, I must put you elsewhere.$Q"
+        boldoff np0
+        if (np0:clueless) then
+          set nr8 to 1019028
+        else
+          set nr8 to 1019035    ! Aldamus Guesthouse, Dormitory
+        .
+      .                                    ! end LSH 04/06/04
+    .
+  else
+    if (a1!=1) then           ! trying to pick a specific city
+      msgp "$RFaenella stops you and murmurs, $QOnly Estate Holders are allowed$\"
+      msgp " to choose their destinations -- simply go through the archway.$Q"
+      set $BREAK to 1
+      stop
+    else
+      random 1 to 3 for a9
+!msgrgm nr0 mode -1 "[debug] not premie, setting a destination at random"
+      if (no9!=0) then                  !! LSH 04/06/04
+        if (no9:ddata2!=0) then         ! haven shut down, send to crossing
+          set a9 to 0
+        else_if (no9:ddata1!=0) then    ! crossing shut down, send to haven
+          set a9 to 1
+        .
+      .                                 !! end LSH 04/06/04
+      if (a9=1) then
+        if (np0:clueless) then
+          set nr8 to 1019028
+        else
+          set nr8 to 1019035
+        .
+      else
+        if (np0:clueless) then
+          set nr8 to 16202
+        else
+          set nr8 to 16201
+        .
+      .
+    .
+  .
+  set b9 to nr8
+!msgrgm nr0 mode -1 "[debug] nr8=$B9"
+!---------------  End LSH 2-12-2002 --------------
+  ifnot (NP0:features) then    ! No features yet
+    set $match to "$FEATURES"  ! Choose 'em randomly
+    call 1516
+    clear $match
+  .
+  if (np0:tdp=0) then
+    set $match to "$SETREST"
+    call 863
+  .
+  if (NP0:age<13) then
+    set v0 to np0:age
+    !msggm "GM[AGE] $P0 was coming out of the CMgr with an age of $V0$\"
+    random 18 to 28 for v1
+    if (np0:race=2) then    ! elven
+      set v1 to (v1+30)
+    .
+    set np0:age to v1
+    random 1 to 400 for v2
+    set ne1 to -117
+    set v0 to (ne1:edata4-np0:age)
+    set np0:birthday to (7000000+(v0*1000)+v2)
+    !msggm " so I set it to $V1 (birthday $V2 day of $V0 year)."
+    clear v1
+    clear v2
+    clear v0
+  .
+@ skipdown
+  getps NP0                       !PS 1257 will return what they had before
+  if ((V0 !=1257)&(V1 !=1257)&(V2 !=1257)&(V3 !=1257)&(V4 !=1257)&(V5 !=1257)) then
+    Fastpush
+      clear $match
+      call 1351 !give them clothes
+    Fastpop
+  .
+  removevarfield featureset from np0
+  removevarfield featurechoose from np0
+  if (np0:tdp=0) then
+    set np0:tdp to 600000 ! in 1/1000ths
+    logmsg "Granted Initial 600.000 TDPs"
+    logto np0 code 6
+  .
+  !
+  !Add problem PS to all new characters
+  !
+  getps NP0
+  if ((V0!=1656)&(V1!=1656)&(V2!=1656)&(V3!=1656)&(V4!=1656)) then
+    glue 1656 to NP0
+    set NP0:saytrap to 1
+    set V9 to ($TIME/100)
+    clear V8
+    if (NP0:warning) then
+      if (NP0:warning > 9999) then
+        set V8 to (NP0:warning - 10000)
+      else
+        set V8 to NP0:warning
+      .
+      set V9 to ((V9 * 100) + v8)
+    else
+      set V9 to (V9 * 100)
+    .
+    set NP0:problem to V9
+    set NO9 to -8003
+    if (NO9) then
+      set NO9:ddata1 to (NO9:ddata1 + 1)
+    .
+    !msggm "GM[PROBLEM] (s868) $P0 leaving CMGR.  Adding problem PS and$\"
+    !msggm " timestamping problem varfield to $V9."
+  .
+  !
+  !----end Derek code-----
+  !
+  fastpush
+    set $match to "$FIND_MAIL"
+    call 5588
+  fastpop
+  where NP0 for NR9
+  if (NR9 = 14) then
+    stop
+  .
+  !set v0 to 10001       ! Starting room
+  !set nr0 to v0
+  !random 1 to 3 for v0
+  set v0 to 4
+! when v0
+!   is 1
+!     set nr0 to 10001
+!     msgp "$RAfter a long sea voyage, your vessel finally arrived$\"
+!     msgp " at the mouth of the mighty Segoltha River.$\"
+!     msgp "  Somewhat fatigued, but elated and buoyed$\"
+!     msgp " by hopes and dreams, you disembark at one of the docks.  As$\"
+!     msgp " you make your way through the bustling town for the first time, you$\"
+!     msgp " pause at a quiet spot to get your bearings, remembering$\"
+!     msgp " the advice a fellow voyager had given you:$R"
+!     msgp "$R$QSeek out the nine great guilds$\"
+!     msgp " soon after you arrive at the Crossing.  Choose one you like$\"
+!     msgp " and join it or you will find your ability to advance in the$\"
+!     msgp " world severely limited.$Q"
+!     msgp "$RNow, you wonder, where are these guilds?$R"
+!   .
+!   is 2  !Outside Taelbert's Inn
+!     set nr0 to 10055
+!     msgp "$RYou arrived after a long travel from your home Clan,$\"
+!     msgp " seeking the great, wisdom-rich capital of Zoluren,$\"
+!     msgp " the city known as $QThe Crossing$Q.$\"
+!     msgp "  At last you arrived, and stopping outside of a$\"
+!     msgp " friendly tavern was greeted by a bit of advice$\"
+!     msgp " from a Trader who said,$\"
+!     msgp " $QThis is a big town$\"
+!     msgp " and it can be nasty to untutored strangers.  Best ye$\"
+!     msgp " seek one of the nine guilds here and take$\"
+!     msgp " up a profession 'afore ye go out to make a name for$\"
+!     msgp " yourself.  Talk to 'em all first, you can change your$\"
+!     msgp " mind and try several, but ye won't get any f'ther than$\"
+!     msgp " a lame camel without ye joinin' one or another.$Q"
+!     msgp "$RNow, you wonder, where are these guilds?$R"
+!   .
+!   is 3   !Just inside the Eastern Gate at The Crossing
+!     set nr0 to 10014
+!     msgp "$RBored with simple common life, you left for$\"
+!     msgp " The Crossing with some coins you had saved and$\"
+!     msgp " the clothes on your back.  Once you arrived in the$\"
+!     msgp " city, however, you realized just why The Crossing$\"
+!     msgp " was synonymous with wisdom and knowledge -- it was huge!"
+!     msgp "$RYou wandered aimlessly until a woman, seeing you lost$\"
+!     msgp " and no little dazed, spied you and offered some advice.$R"
+!     msgp "$QThere are nine Guilds in this town,$Q she said.  $QEach offers$\"
+!     msgp " many advantages and skills.  Consider them well and$\"
+!     msgp " then join the one that suits you.  You may change your$\"
+!     msgp " mind while you are young, but join one you must if you$\"
+!     msgp " truly intend to make your fortune.$Q"
+!     msgp "$RShe handed you a map and then swept off into the$\"
+!     msgp " passing throngs, leaving only a curious cat that watches$\"
+!     msgp " you for a time before trotting after her.$R"
+!     msgp "Now, you wonder, where are these guilds?$R"
+!   .
+!   is 4
+@ default
+      if np0:clueless then
+        msgp "$RYou have arrived at the town called$\"
+        set a3 to (1+(nr8/1000000))   ! which province are we in?
+        when a3
+          is 1
+            msgp " $QThe Crossing.$Q$\"
+          .
+          is 2
+            msgp " Riverhaven.$\"
+          .
+          is 3
+            msgp " Shard.$\"
+          .
+          default
+            msgp " $QThe Crossing.$Q$\"
+          .
+        .
+        msgp "  You must find a guild and join it.  There are ten guilds$\"
+        msgp " to choose from.  Type HELP PROFESSION PAGE 1 to see$\"
+        msgp " a list of the guilds.  When you know which one you$\"
+        msgp " want to join, type DIR typeyourprofessionhere and$\"
+        msgp " you will be told how to get to that guild."
+        msgp "$R"
+        msgp "At any time you feel stuck and don't know what to do,$\"
+        msgp " type$\"
+        msgp " HELP or type ADVICE."
+        msgp ""
+      else
+        set a3 to (1+(nr8/1000000))   ! which province are we in?
+set b9 to nr8
+!msgrgm nr0 mode -1 "[debug] nr8=$B9"
+!msgrgm nr0 mode -1 "[debug] a3=$A3 (destination province)"
+        when np0:race
+          is 7  ! gnome
+            msgp "$RDissatisfied with life among the tyrannous Gorbesh,$\"
+            msgp " you joined a band of fellow Gnomes and brave Kaldar led by the$\"
+            msgp " prophet Trimbolt.  The memory of your long and harrowing$\"
+            msgp " journey is filled only with hunger, fear and above all,$\"
+            msgp " mortal weariness.$R"
+            msgp "But at last, you and your fellows have arrived here, at$\"
+            when a3
+              is 1
+                msgp " The Crossing$\"
+              .
+              is 2
+                msgp " Riverhaven$\"
+              .
+              is 3
+                msgp " Shard$\"
+              .
+            .
+            msgp " -- the promised land.  You have few possessions and only$\"
+            msgp " the few coins a guard loaned you, but in this place you are free$\"
+            msgp " to pursue your dreams and your destiny at one of the local Guilds.$R"
+          .
+          is 8  ! Kaldar
+            msgp "$RYour grandfather always said the Gorbesh Empire was once grand$\"
+            msgp " and glorious.  But during your lifetime, it has passed from one$\"
+            msgp " mad, grasping military dictator to another, each one worse than$\"
+            msgp " the last.  Fueled by the prophecies of the wise Gnome Trimbolt,$\"
+            msgp " you joined the Kaldar separatists in a journey$\"
+            msgp " that was part pilgramage, part exodus.$R"
+            when a3
+              is 1
+                msgp "Here in The Crossing$\"
+              .
+              is 2
+                msgp "Here in Riverhaven$\"
+              .
+              is 3
+                msgp "Here in Shard$\"
+              .
+            .
+            msgp ", local Guilds recruit adventurous$\"
+            msgp " souls to hone their skills and practice various arts of war and$\"
+            msgp " peace, but you can rest easy knowing that your destiny now lies$\"
+            msgp " in your own hands.  And though you have only the few coins a guard loaned$\"
+            msgp " you, the promise of riches and fame lies before you.$R"
+          .
+          is 9  ! prydaen
+            msgp "$RFleeing the hordes of undead that have ravaged your homeland,$\"
+            msgp " you and the hardiest of your people have finally earned a respite$\"
+            msgp " here in this town of$\"
+            when a3
+              is 1
+                msgp " The Crossing$\"
+              .
+              is 2
+                msgp " Riverhaven$\"
+              .
+              is 3
+                msgp " Shard$\"
+              .
+            .
+            msgp ".  Though the people are furless$\"
+            msgp " and strange, they are exceedingly interesting, and you learn they$\"
+            msgp " have much in common with your Prydaen brothers and sisters.  You$\"
+            msgp " will always long for the plains and deserts of home, but you could$\"
+            msgp " learn to like it here.$R"
+            msgp "You are particularly curious about these $QGuilds$Q you keep hearing$\"
+            msgp " about...$R"
+          .
+          is 10 ! rakash
+            msgp "$RThe tale-tellers know of no time more troubling to the Pack than$\"
+            msgp " the past few years.  Ancestors, loved ones, brothers returning from$\"
+            msgp " the Starry Fields, hunting and killing and destroying all life in the$\"
+            msgp " name of Lyras.  Most of your brothers did not make it here to these safe$\"
+            msgp " lands, but the Pack survives and so must you.$R"
+            msgp "Home is where the Pack is, and the Pack is at$\"
+            when a3
+              is 1
+                msgp " The Crossing$\"
+              .
+              is 2
+                msgp " Riverhaven$\"
+              .
+              is 3
+                msgp " Shard$\"
+              .
+            .
+            msgp ".  There are$\"
+            msgp " people here who look like the Pack, but do not hear its call and do not$\"
+            msgp " change under the light of Katamba.  There are other people here who look$\"
+            msgp " like nothing you have ever seen.  There are Guilds here, teaching-places$\"
+            msgp " where tale-tellers, warriors, and others learn to become heroes.  As you$\"
+            msgp " awaken in this strange sleeping-place, you think about joining one and$\"
+            msgp " bringing glory to the Pack...$R"
+          .  
+          default
+            msgp "$RBored with simple common life, you left your home seeking$\"
+            msgp " adventure!  Once you arrived, you realized just why the$\"
+            if (nr8=1019035) then
+              msgp " village of Riverhaven was renowned as a port city$\"
+            else
+              msgp " Crossing was synonymous with wisdom and knowledge$\"
+            .
+            msgp " -- it was huge!"
+            msgp "$RYou wandered aimlessly and finally arrived at an inn$\"
+            msgp " to rest your feet.  There you met a Guard who, seeing you lost$\"
+            msgp " and no little dazed, offered some advice.$R"
+            msgp "$QThere are nine Guilds in this town,$Q he said.  $QEach offers$\"
+            msgp " many advantages and skills.  Consider them well and$\"
+            msgp " then join the one that suits you.  You may change your$\"
+            msgp " mind while you are young, but join one you must if you$\"
+            msgp " truly intend to make your fortune.$Q"
+            msgp "$RHe handed you a map and some coins.  $QThe map is free,$\"
+            msgp " and the mayor keeps a fund to help new folk get started --$\"
+            msgp " the coins are a loan, not a gift, but you can pay back$\"
+            msgp " your debt at the town hall,$Q he said as he left.$R"
+            msgp "Now, you wonder, where are these guilds?$R"
+          .
+        .
+      .
+!      if (np0:clueless) then      ! LSH, 8/11/00
+!        set nr0 to 16202
+!      else
+!        set nr0 to 16201 
+!      .
+      set nr0 to nr8              ! LSH, 02-12-2002
+      clear nr9
+      clear np9
+      clear $error
+      clear a9
+      substring np0:mail from 1 to 2 for s9
+      set nr7 to 505
+      set t7 to np0:mail
+      msg nr7 "Address is set to *$T7*.  Prefix is set to *$S9*."
+      if ((s9="W_")|(s9="A_")|(s9="P_")|(s9="M_")) then
+        set nr5 to 505
+        set v5 to np0:startthisgame
+        if ((v5<1)&(s9="M_")) then
+          set np0:startthisgame to $time
+        .
+        if ((np0:startIFE<1)&(s9="M_")) then        
+          set np0:startIFE to $time
+        .
+        set t0 to np0:mail
+        set a0 to t0
+        substring np0:mail from (a0-2) to a0 for s9
+        stov s9 for a1
+        clear $match
+        if ((np0:startthisgame>($time-2592000))&(np0:startthisgame<>-1)) then
+          clear nr9
+          clear np9
+          clear $error
+          nextnode -1 nr9 for np9
+          loop ($error=0)
+            if (np9:m_level>0) then
+              underon np9
+              msg np9 "A picture of $P0 arriving at$\"
+              if ((nr0/1000)=16) then          ! LSH, 02-12-2002
+                msg np9 " the Tenderfoot Inn in the Crossing$\"
+              else_if ((nr0/1000000)=1) then
+                msg np9 " Aldamus House in Riverhaven$\"
+              .
+              msg np9 " flashes in your mind."
+              underoff np9
+              if ((np9:m_level>1)&(np0:m_protege<1)) then
+                underon np9
+                msg np9 "$P0G$^ looks like a protege candidate."
+                underoff np9
+              .
+              if (np9:access<3) then
+                set a9 to (a9+1)
+              else
+                if np8 then
+                  if np7 then
+                    set np6 to np9
+                  else
+                    set np7 to np9
+                  .
+                else
+                  set np8 to np9
+                .
+              .
+            .
+            clear $error
+            nextnode -1 nr9 for np9
+          .
+        .
+        if np6 then
+          msg np6 "MENTOR[Newplayer] $A9 mentors notified of $P0's arrival."
+        .
+        if np7 then
+          msg np7 "MENTOR[Newplayer] $A9 mentors notified of $P0's arrival."
+        .
+        if np8 then
+          msg np8 "MENTOR[Newplayer] $A9 mentors notified of $P0's arrival."
+        .
+      .
+!   .
+!   default
+!     goto default
+!     set nr0 to 10001 
+!   .
+! .
+  if (nr0 != 0) then
+    set no1:goroom to nr0
+!    clear nr1
+!    clear np9
+!    clear $error
+!    loop ($error=0)
+!      nextnode ground nr0 for np9
+!      ifnot $error then
+!        if np9:guidetimer then
+!          msgp "Mentor Monitor [$P0"
+!        .
+!      .
+!    .
+!    move np0 ground nr0
+!    dolook
+!    set $break to 1
+    !msggm "GM[EMERGE] $P0 has just emerged$\"
+    !msggm " into the real world!"
+    !
+!    move np0 ground nr0
+  else
+    !msggm "GM[SYSTEM] ** PROBLEM, UNABLE TO GET ROOM $V0 FOR NEW USER! **"
+    set nr0 to 6
+    move np0 ground nr0
+    msgp "$R*ERROR* There does not appear to be a room to log into.$\"  
+    msgp "  Please contact a GameMaster immediately.$R"
+    dolook
+    set $break to 1
+  .
+  clear np0:lifekeeping       ! LSH, 11-17-01
+  clear np0:haltbloodloss
+!  if ($GAMECODE="DRF") then
+!    glue 11007 to np0       !       LSH, 02-23-2002, add new player PS in DRF
+!    addeffect code 11007 value1 0 value2 0 flags 0 with np0 in 300 script 11007
+!    set np0:m_greet to 60    !     1 hour (60 minutes) protection
+!  .
+!
+! Set non-NDAed players to access level 1 outside of Prime
+!
+  if (np0:access = 2) then
+    set $MATCH to "$SET_HOST_CHAR_ACCESS"
+    call 7039
+    if ($GAMECODE!="DR") then
+      clear v0
+      bitget NP0:ubits from 19 to 20 for v0
+      if (v0 < 2) then
+        bitset 0 from 19 to 20 for np0:ubits
+        set np0:access to 1
+        addeffect code 11112 value1 1 value2 (np0:index) flags 0 with np0 in 0 script 3379
+        addeffect code 11112 value1 1 value2 (np0:index) flags 0 with np0 in 3 script 3379
+      .
+    .
+  .
+  clear $BREAK     ! let them pass through
+.
+!
+: "$DRAG"
+  set $break to 1
+  msgp "You cannot drag here."
+.
+!
+!
+! End of s868
+!
+!
+
+
+=== S00871 ===
+S00871
+!
+!S#871
+!
+! Room Script for raising stats via Train and Study
+!
+! Snappy Dialogue by Jim Penrose
+!
+! Just attach to room where you can train or Study and
+! add to the list below
+! Fixed a typo.  SDShaver 11/23/96 (Rowan)
+! SDShaver 03/20/97  Added in Shard.  (Rowan)
+! EPS      05-22-97 Added in logging for TDPs left over
+! PPak     07/09/97 Added check and block for those with 100k+ debts.
+! EPS      07/28/97 Added check for one time TDP bonus
+! BCH      06/27/98 Added info for Province 4
+! LSH      01-08-99 corrected Surleanis stamina value
+! PSM     10-18-00 Added in $REFIGURE call at the end of $GUILDJOIN
+! PSM       01-10-01 "added removevarfield newspells from np0" in $GUILDJOIN
+! JNK      08/05/02 After consideration, decided to leave the calculation in line
+!                   264 alone.  Any odd-numbered stat trained up will result in a
+!                   dropped remainder which makes the TDP and monetary cost 1 unit
+!                   cheaper.  No big deal; been that way since day 1.
+!
+removevarfield tempdata from np0
+: "$DIR"
+  removevarfield tempdata from np0
+.
+: "$FOLLOW"
+  removevarfield tempdata from np0
+.
+: "train"
+@ study
+  when nr0
+    is 19602
+      set v0 to 1  !strength
+    .
+    is 9101
+      set v0 to 1  !strength
+    .
+    is 1019151
+      set v0 to 1
+    .
+    is 9102
+      set v0 to 2  !reflex
+    .
+    is 1017445
+      set v0 to 2
+    .
+    is 9103
+      set v0 to 3  !agility
+    .
+    is 1017410
+      set v0 to 3
+    .
+    is 9104
+      set v0 to 4  !charisma
+    .
+    is 1018042
+      set v0 to 4
+    .
+    is 9105
+      set v0 to 5  !discipline
+    .
+    is 2018008
+      set v0 to 3  ! Agility
+    .
+    is 2018006     ! Strength
+      set v0 to 1
+    .
+    is 2018007     ! Discipline
+      set v0 to 5
+    .
+    is 2018009     ! Charisma
+      set v0 to 4
+    .
+    is 2018005     ! Intel
+      set v0 to 7
+    .
+    is 2018004
+      set v0 to 8  ! Stamina
+    .
+    is 2018002
+      set v0 to 6  ! Wisdom
+    .
+    is 2018001     ! Reflex
+      set v0 to 2
+    .
+    is 1018015
+      set v0 to 5  !discipline
+    .
+    is 12016
+      set v0 to 6  !wisdom
+    .
+    is 9106
+      set v0 to 6  !wisdom
+    .
+    is 1018043
+      set v0 to 6  !wisdom
+    .
+    is 12027
+      set v0 to 7  !intelligence
+    .
+    is 9107
+      set v0 to 7  !intelligence
+    .
+    is 1018044
+      set v0 to 7
+    .
+    is 9108
+      set v0 to 8  !stamina
+    .
+    is 1017302
+      set v0 to 8
+    .
+    is 3011291
+      set v0 to 1  !Ratha island strength
+    .
+    is 3011323
+      set v0 to 2  !Ratha island reflexes
+    .
+    is 3012090
+      set v0 to 3  !Ratha island agility
+    .
+    is 3021546
+      set v0 to 4  !Ratha island charisma
+    .
+    is 3021655
+      set v0 to 5  !Ratha island Discipline
+    .
+    is 3021001
+      set v0 to 6  !Ratha island Wisdom
+    .
+    is 3011239
+      set v0 to 7  !Ratha island Intelligence
+    .
+    is 3021376
+      set v0 to 8  !Ratha island Stamina
+    .
+    is 3102505
+      set v0 to 1  !Surlaenis island strength
+    .
+    is 3102510
+      set v0 to 8  !Surlaenis island stamina
+    .
+    is 3102515
+      set v0 to 3  !Surlaenis Island agility
+    .
+    is 3102520
+      set v0 to 2  !Surlaenis Island reflexes
+    .
+    is 3102525
+      set v0 to 6  !Surlaenis Island wisdom
+    .
+    is 3102530
+      set v0 to 7  !Surlaenis Island intelligence
+    .
+    is 3102535
+      set v0 to 5  !Surlaenis Island discipline
+    .
+    is 3102540
+      set v0 to 4  !Surlaenis Island charisma
+    .
+    default
+      stop
+    .
+  .
+!  if (np0:level>2) then
+!    fastpush
+!    set $match to "$ELIGIBLE?"
+!    call 4312
+!    when $error
+!      is 0
+!        set v1 to (((np0:level*np0:level)/2)-(np0:level*3))
+!        if (v1>0) then
+!          msgp "You have been granted a one time only bonus of $V1 TDPS"
+!        else
+!          clear v1
+!        .
+!        set v1 to (v1*1000)
+!        set np0:tdp to (np0:tdp+v1)
+!      .
+!      default
+!        set v1 to $error
+!      .
+!    .
+!    fastpop
+!  .
+  set $break to 1
+  ifnot np0:tdp then
+    msgp "You don't have enough time development points to $S0."
+    stop
+  .
+  when v0
+    is 1  !strength
+      set t9 to "strength"
+      set v1 to np0:pstrength
+      set $match to "$RACE"
+      call 1303
+    .
+    is 2  !reflex
+      set t9 to "reflex"
+      set v1 to np0:preflex
+      set $match to "$RACE"
+      call 1303
+    .
+    is 3  !agility
+      set t9 to "agility"
+      set v1 to np0:pagility
+      set $match to "$RACE"
+      call 1303
+    .
+    is 4  !charisma
+      set t9 to "charisma"
+      set v1 to np0:pcharisma
+      set $match to "$RACE"
+      call 1303
+    .
+    is 5  !discipline
+      set t9 to "discipline"
+      set v1 to np0:pdiscipline
+      set $match to "$RACE"
+      call 1303
+    .
+    is 6  !wisdom
+      set t9 to "wisdom"
+      set v1 to np0:pwisdom
+      set $match to "$RACE"
+      call 1303
+    .
+    is 7  !intelligence
+      set t9 to "intelligence"
+      set v1 to np0:pintelligence
+      set $match to "$RACE"
+      call 1303
+    .
+    is 8  !stamina
+      set t9 to "stamina"
+      set v1 to np0:pstamina
+      set $match to "$RACE"
+      call 1303
+    .
+    default
+      set a0 to nr0
+      msggm "GM[ABILITIES] (s871) ($A0) Called with v0 set to $V0, which is invalid!"
+      clear $break
+      STOP
+    .
+  .
+  !v1 is current stat, v3 is the racial bonus -2 to 2
+  !
+  !later if needed, the formulas can be tweaked according to below
+  !when v3
+  !  is 0
+  !  .
+  !  is 1
+  !  .
+  !  is 2
+  !  .
+  !  is -2
+  !  .
+  !  is -1
+  !  .
+  !.
+  !  Current stat / 2 will result in a remainder 1/2 the time.
+  set v4 to ((v1*3)+(v3*(v1/2)))
+  !
+  if (nr0<1000000) then
+    set v8 to 1 !kronars
+    set s9 to "Kronars"
+    set b9 to 1302 ! messaging subscript
+    set a8 to np0:debt
+  else
+    if (nr0<2000000) then !lirums
+      set v8 to 2 !lirums
+      set s9 to "Lirums"
+      set b9 to 1821 ! p2 messaging
+      set a8 to np0:debt2
+    else
+      if (nr0<3000000) then !dokoras
+        set v8 to 3 !dokoras
+        set s9 to "Dokoras"
+        set b9 to 3665 ! p3 messaging
+        set a8 to np0:debt3
+      else
+        if (nr0<4000000) then !lirums
+          set v8 to 2
+          set s9 to "Lirums"
+          set b9 to 5533 ! p4 messaging
+          set a8 to np0:debt4
+        .
+      .
+    .
+  .
+  set v5 to (np0:tdp/1000)
+  if (v5<v4) then
+    msgp "$RIt would take $V4 time development points to advance $T9$\"
+    msgp " one rank and you only have $V5.  You will need to gain$\"
+    msgp " more tdps before you can increase this stat.$R"
+    stop
+  else
+    ifnot (np0:tempdata) then
+  @ consult
+      set v9 to (v4*2)
+      msgp "$RYou consult with the teachers and together decide$\"
+      msgp " that it will take $V4 moon cycles until you$\"
+      msgp " successfully gain a rank in $T9.  There is also$\"
+      msgp " a fee of $V9 $S9 to complete this training.$R"
+      set v6 to ((np0:tdp-(v4*1000))/1000)
+      msgp "That would leave you $V6 time development points$\"
+      msgp " afterward.  If this is OK,$\"
+      msgp " you will need$\"
+      msgp " to STUDY once again to get your new rank."
+!      set np0:tempdata to $time
+      set np0:tempdata to nr0
+      addeffect code (nr0) value1 0 value2 0 flags 0 with np0 in 60 script 871
+      stop
+    else
+!      if ((np0:tempdata+60)<$time) then
+      if (np0:tempdata<>nr0) then
+        goto consult
+      .
+      removevarfield tempdata from np0
+      fastpush
+      set b1 to ((nr0/1000000)+1)
+      when b1
+        is 1
+          set b0 to np0:debt
+          set v8 to 1         ! Kronars
+          set s9 to "Kronars"
+        .
+        is 2
+          set b0 to np0:debt2
+          set v8 to 2         ! Lirums
+          set s9 to "Lirums"
+        .
+        is 3
+          set b0 to np0:debt3
+          set v8 to 3         ! Dokoras
+          set s9 to "Dokoras"
+        .
+        is 4
+          set b0 to np0:debt4
+          set v8 to 2         ! Lirums
+          set s9 to "Lirums"
+        .
+        is 5
+          set b0 to np0:debt5
+          set v8 to -1
+        .
+        default
+          clear b0
+          set v8 to -1
+        .
+      .
+      if (v8=-1) then
+        msggm "GM[s871] $P0 is stat training in P$B1.  What's the denomination?"
+      else
+        if (b0 >= 100000) then
+          clear v9
+          set np9 to np0
+          set v7 to 0
+          call 239
+          if a9 then
+            msgrgm nr0 mode 0 "[Collector is here for $P0's debt.]"
+            msgp "$RJust as you are about to pay for your session, a debt$\"
+            msgp " collector swoops in and snatches the money from your$\"
+            msgp " hands!  The debt collector jots a note$\"
+            msgp " into a thick ledger, bows, and goes on his way.$R"
+            msgrxp "$R$P0 extends a handful of money to $P0H instructor.$\"
+            msgrxp "  Suddenly, a debt collector swoops in and$\"
+            msgrxp " snatches the money from $P0H hands!  The debt$\"
+            msgrxp " collector jots a note into a thick ledger, bows,$\"
+            msgrxp " and goes on his way.$R"
+            if (a9 < b0) then
+              set v7 to 1
+              set v9 to (a9*-1)
+              msggm "GM[Stat Train] Taking $A9 $S9 from $P0,$\"
+              logmsg "[Stat Train] Taking $A9 $S9 from $P0,"
+              call 239
+              set b0 to (b0+v9)
+              msggm " leaving a debt of $B0."
+              logmsg " leaving a debt of $B0."
+              logto np0 code 15
+              when b1
+                is 1
+                  set np0:debt to b0
+                .
+                is 2
+                  set np0:debt2 to b0
+                .
+                is 3
+                  set np0:debt3 to b0
+                .
+                is 4
+                  set np0:debt4 to b0
+                .
+                is 5
+                  set np0:debt5 to b0
+                .
+                default
+                  msggm "GM[s871] Trying to update the debt, but what is P$B1?"
+                .
+              .
+            else
+              set v9 to (b0*-1)
+              set v7 to 1
+              call 239
+              msggm "GM[Stat Train] Colecting $P0's $B0 $S9 debt."
+              logmsg "[Stat Train] Collecting $P0's $B0 $S9 debt."
+              logto np0 code 15
+              clear b0
+              when b1
+                is 1
+                  removevarfield debt from np0
+                .
+                is 2
+                  removevarfield debt2 from np0
+                .
+                is 3
+                  removevarfield debt3 from np0
+                .
+                is 4
+                  removevarfield debt4 from np0
+                .
+                is 5
+                  removevarfield debt5 from np0
+                .
+                default
+                  msggm "GM[s871] Trying to clear the debt, but what is P$B1?"
+                .
+              .
+            .
+          .
+        else
+          if (b0<0) then
+            msggm "GM[s871] $P0 has a negative debt ($B0)!"
+          .
+        .
+      .
+      if (b0 >= 100000) then
+        msgrxp "Seeing that $P0 has no money, the instructor turns $P0I away."
+        msgp "Seeing that you have no money, the instructor turns you away.$\"
+        msgp "  Apparently your credit isn't any good around here."
+        msggm "GM[Stat Train] $P0 is trying to train with a P$B1 $B0 debt.  Stopping."
+        msgrgm nr0 mode 0 "[$P0 has a $B0 P$B1 debt, stopping his training.]"
+        fastpop
+        stop
+      .
+      fastpop
+  !    msgp "You $S0 in $T9 for $V4 moon cycles until you successfully$\"
+  !    msgp " gain a rank."
+      set np0:tdp to (np0:tdp-(v4*1000))
+      set v6 to (np0:tdp/1000)
+      set v7 to (np0:tdp%1000)
+      logmsg "Using $V4.000 TDPs  leaving $V6.$V7 total--$\"
+      msgp "(You now have $V6 time development points.)$R"
+      set $match to "$REFIGURE"
+      call 863
+      set v9 to (v4*2) !number of coins to charge
+      !Call Malcolms script...take from wealth and then debt automatically
+      set np9 to np0
+      set v7 to 0 !count coins
+      clear $match
+      fastpush
+        set a6 to a8
+        call 239
+        if ((np0:level<2) && (a6<2000)) then !debt greater than coins onhand
+          msgp "$RThe trainer notes how young you are and that you should$\"
+          msgp " keep some coins to help you get equipped.  So, the cost$\"
+          msgp " of $V9 $S9 is added to your Provincial debt.$R"
+          if (nr0<1000000) then
+            set np0:debt to (np0:debt + v9)
+          else
+            if (nr0<2000000) then !lirums
+              set np0:debt2 to (np0:debt2 + v9)
+            else
+              if (nr0<3000000) then !dokoras
+                set np0:debt3 to (np0:debt3 + v9)
+              else
+                if (nr0<4000000) then ! lirums
+                  set np0:debt4 to (np0:debt4 + v9)
+                .
+              .
+            .
+          .
+          msgp "(Your debt has increased by $V9 $S9.)$R"
+        else
+          if (a9<v9) then  !not that many coins
+            set v9 to (v9-a9)
+            ifnot a9 then
+              msgp "$RSince you aren't carrying any $S9, the cost of$\"
+              msgp " the training, $V9 $S9, is added to your debt."
+            else
+              msgp "$RYou make a partial payment of $A9 $S9 to your$\"
+              msgp " trainer, leaving $V9 $S9 which is added to$\"
+              msgp " your debt."
+            .
+            if (nr0<1000000) then
+              set np0:debt to (np0:debt + v9)
+            else
+              if (nr0<2000000) then !lirums
+                set np0:debt2 to (np0:debt2 + v9)
+              else
+                if (nr0<3000000) then !dokoras
+                  set np0:debt3 to (np0:debt3 + v9)
+                else
+                  if (nr0<4000000) then ! lirums
+                    set np0:debt4 to (np0:debt4 + v9)
+                  .
+                .
+              .
+            .
+            msgp "Your debt has increased by $V9 $S9."
+            set v9 to a9
+          else
+            msgp "You pay your trainer $V9 $S9."
+          .
+          set v9 to (v9*-1)
+          set v7 to 1 !subtract out the coins
+          call 239
+        .
+      fastpop
+    .
+  .
+  clear $match
+  call b9
+.
+: "study"
+  goto study
+.
+: "$GUILDTRAIN"  !Guilds should call this with NP0 set to the one needing
+                 !training and V9 set to the guild to train in.  This will
+                 !then train up the person to the minimum levels and *not*
+                 !lower any stats and only use up partial TDPs, though it's
+                 !more expensive than training yourself.
+                 !It reduces the TDPs for you and will allow TDPs to go
+                 !negative.  It sets V5 to the amount of TDPs needed and
+                 !subtracted.  It returns with training all done up to minimums
+                 !V9 is set to the number of coins to charge the player
+  call 877
+!  sets a0 to minimum strength level
+!  sets a1 to minimum reflex level
+!  sets a2 to minimum agility level
+!  sets a3 to minimum charisma level
+!  sets a4 to minimum wisdom level
+!  sets a5 to minimum intelligence level
+!  sets a6 to minimum stamina level
+  !get race bonus/fault
+  clear v3
+  set $match to "$RACE"
+  call 1303  !V3 is the modifier
+  clear v5 !counting total tdp costs
+  clear v9 !count coins
+  set v2 to np0:pstrength
+  loop (np0:pstrength<a0)
+    set v1 to np0:pstrength
+    set v4 to ((v1*3)+(v3*v1)) !formula for upping to next level
+    set v5 to (v5+v4)
+    set np0:pstrength to (np0:pstrength+1)
+    set v9 to (v9+(v4*3)) !number of coins to charge
+  .
+  set v2 to np0:preflex
+  loop (np0:preflex<a1)
+    set v1 to np0:preflex
+    set v4 to ((v1*3)+(v3*v1)) !formula for upping to next level
+    set v5 to (v5+v4)
+    set np0:preflex to (np0:preflex+1)
+    set v9 to (v9+(v4*3)) !number of coins to charge
+  .
+  set v2 to np0:pagility
+  loop (np0:pagility<a2)
+    set v1 to np0:pagility
+    set v4 to ((v1*3)+(v3*v1)) !formula for upping to next level
+    set v5 to (v5+v4)
+    set np0:pagility to (np0:pagility+1)
+    set v9 to (v9+(v4*3)) !number of coins to charge
+  .
+  set v2 to np0:pcharisma
+  loop (np0:pcharisma<a3)
+    set v1 to np0:pcharisma
+    set v4 to ((v1*3)+(v3*v1)) !formula for upping to next level
+    set v5 to (v5+v4)
+    set np0:pcharisma to (np0:pcharisma+1)
+    set v9 to (v9+(v4*3)) !number of coins to charge
+  .
+  loop (np0:pwisdom<a4)
+    set v1 to np0:pwisdom
+    set v4 to ((v1*3)+(v3*v1)) !formula for upping to next level
+    set v5 to (v5+v4)
+    set np0:pwisdom to (np0:pwisdom+1)
+    set v9 to (v9+(v4*3)) !number of coins to charge
+  .
+  loop (np0:pintelligence<a5)
+    set v1 to np0:pintelligence
+    set v4 to ((v1*3)+(v3*v1)) !formula for upping to next level
+    set v5 to (v5+v4)
+    set np0:pintelligence to (np0:pintelligence+1)
+    set v9 to (v9+(v4*3)) !number of coins to charge
+  .
+  loop (np0:pstamina<a6)
+    set v1 to np0:pstamina
+    set v4 to ((v1*3)+(v3*v1)) !formula for upping to next level
+    set v5 to (v5+v4)
+    set np0:pstamina to (np0:pstamina+1)
+    set v9 to (v9+(v4*3)) !number of coins to charge
+  .
+  !v5 at this point holds the total amount of TDPs used up
+  set np0:tdp to (np0:tdp-(v5*1000))
+  clear np0:spellbook1
+  clear np0:spellbook2
+  clear np0:spellbook3
+  clear np0:spellbook4
+  clear np0:spellbook5
+  clear np0:spellbook6
+  clear np0:spellbook7
+  clear np0:spellbook8
+  clear np0:spellbook9
+  clear np0:spellbook10
+  clear np0:spellbook11
+  clear np0:spellbook12
+  clear np0:spellbook13
+  clear np0:spellbook14
+  clear np0:spellbook15
+  clear np0:spellbook16
+  clear np0:spellbook17
+  clear np0:spellbook18
+  clear np0:spellbook19
+  clear np0:spellbook20
+   removevarfield newspells from np0
+!
+   set $match to "$REFIGURE"
+   call 863
+!
+.
+: "help"
+  set s9 to "training"
+  set $MATCH to "$HELP"
+  call 9049        ! context sensitive help
+.
+!
+!
+!
+! End of s871
+!
+
+

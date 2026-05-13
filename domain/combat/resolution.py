@@ -6,7 +6,13 @@ from enum import Enum
 import math
 import random
 
+from domain.combat.armor import ArmorReduction, apply_armor_reduction
+from domain.combat.cleanup import apply_cleanup
+from domain.combat.damage import RawDamage, compute_damage
+from domain.combat.hit_area import BodyPart, body_part_to_key, determine_hit_area
+from domain.combat.maneuvers import get_defense_scaling
 from domain.combat.rng import CombatRng
+from domain.combat.wounds import apply_wounds
 
 
 EARLY_GAME_DAMAGE_CLAMP_RATIO = 0.15
@@ -66,12 +72,14 @@ class EvasionDefenseFactor:
     reflex: int
     evasion_skill: int
     usable_evasion_pct: int
+    maneuver_scale_pct: int
     maneuver_mod_pct: int
     total: int = field(init=False)
 
     def __post_init__(self):
         total = max(0, int(self.reflex or 0) + int(self.evasion_skill or 0))
         total = total * max(0, int(self.usable_evasion_pct or 0)) // 100
+        total = total * max(0, int(self.maneuver_scale_pct or 0)) // 100
         total = total * max(0, int(self.maneuver_mod_pct or 0)) // 100
         object.__setattr__(self, "total", total)
 
@@ -97,6 +105,7 @@ class ParrySubcontest:
     leftover_of: int
     parry_percent: int
     block_pct: int
+    maneuver_scale_pct: int = 100
 
 
 @dataclass(frozen=True)
@@ -105,6 +114,7 @@ class ShieldSubcontest:
 
     shield_score: int
     block_pct: int
+    maneuver_scale_pct: int = 100
 
 
 class AttackResolution:
@@ -145,6 +155,13 @@ def _get_intoxication_pct(actor):
     if bool(getattr(getattr(actor, "db", None), "intoxicated", False)):
         return 80
     return 100
+
+
+def _get_last_maneuver_id(actor):
+    getter = getattr(actor, "get_last_maneuver", None)
+    if callable(getter):
+        return _coerce_int(getter())
+    return _coerce_int(getattr(getattr(actor, "db", None), "last_maneuver", 0))
 
 
 def _get_fatigue_pct(actor):
@@ -319,6 +336,7 @@ def compute_offensive_factor(attacker, target, context=None, *, combat_rng=None)
 
 def compute_edf(defender, attacker=None, context=None):
     context = context or {}
+    defense_scaling = get_defense_scaling(_get_last_maneuver_id(defender))
     reflex = _coerce_int(defender.get_stat("reflex") if hasattr(defender, "get_stat") else 0)
     agility = _coerce_int(defender.get_stat("agility") if hasattr(defender, "get_stat") else 0)
     evasion_skill = _coerce_int(defender.get_skill("evasion") if hasattr(defender, "get_skill") else 0) + agility
@@ -364,10 +382,11 @@ def compute_edf(defender, attacker=None, context=None):
         reflex=max(0, reflex),
         evasion_skill=max(0, evasion_skill),
         usable_evasion_pct=max(0, usable_evasion_pct),
+        maneuver_scale_pct=max(0, defense_scaling.evasion_pct),
         maneuver_mod_pct=max(0, maneuver_mod_pct),
     )
     if context.get("strong_ambush"):
-        return EvasionDefenseFactor(reflex=0, evasion_skill=0, usable_evasion_pct=0, maneuver_mod_pct=0)
+        return EvasionDefenseFactor(reflex=0, evasion_skill=0, usable_evasion_pct=0, maneuver_scale_pct=0, maneuver_mod_pct=0)
     return total
 
 
@@ -387,8 +406,9 @@ def compute_foi(attacker, context=None, *, rng=None):
 
 def compute_parry(defender, leftover_of, context=None):
     context = context or {}
+    defense_scaling = get_defense_scaling(_get_last_maneuver_id(defender))
     if leftover_of <= 0:
-        return ParrySubcontest(parry_score=0, leftover_of=leftover_of, parry_percent=0, block_pct=0)
+        return ParrySubcontest(parry_score=0, leftover_of=leftover_of, parry_percent=0, block_pct=0, maneuver_scale_pct=defense_scaling.parry_pct)
     defender_weapon_profile = defender.get_weapon_profile() if hasattr(defender, "get_weapon_profile") else {}
     parry_skill_name = str(defender_weapon_profile.get("skill") or context.get("skill_name") or "brawling")
     parry_skill = _coerce_int(defender.get_skill(parry_skill_name) if hasattr(defender, "get_skill") else 0)
@@ -396,6 +416,7 @@ def compute_parry(defender, leftover_of, context=None):
     reflex = _coerce_int(defender.get_stat("reflex") if hasattr(defender, "get_stat") else 0)
     balance = _coerce_int(defender_weapon_profile.get("balance", 50), 50)
     parry_score = max(0, parry_skill + reflex + agility + (balance // 5))
+    parry_score = max(0, parry_score * max(0, defense_scaling.parry_pct) // 100)
     parry_percent = (parry_score * 100) // max(1, leftover_of)
     if parry_percent < NO_PARRY_THRESHOLD:
         block_pct = 0
@@ -408,11 +429,13 @@ def compute_parry(defender, leftover_of, context=None):
         leftover_of=leftover_of,
         parry_percent=parry_percent,
         block_pct=max(0, min(100, block_pct)),
+        maneuver_scale_pct=defense_scaling.parry_pct,
     )
 
 
 def compute_shield(defender, leftover_of, context=None):
     context = context or {}
+    defense_scaling = get_defense_scaling(_get_last_maneuver_id(defender))
     equipment = {}
     if hasattr(defender, "get_equipment"):
         equipment = dict(defender.get_equipment() or {})
@@ -420,13 +443,14 @@ def compute_shield(defender, leftover_of, context=None):
         equipment = dict(getattr(getattr(defender, "db", None), "equipment", {}) or {})
     shield_items = list(equipment.get("shield", []) or [])
     if leftover_of <= 0 or not shield_items:
-        return ShieldSubcontest(shield_score=0, block_pct=0)
+        return ShieldSubcontest(shield_score=0, block_pct=0, maneuver_scale_pct=defense_scaling.shield_pct)
     shield_item = shield_items[0]
     shield_skill = _coerce_int(defender.get_skill("shield") if hasattr(defender, "get_skill") else 0)
     min_def = _coerce_int(getattr(getattr(shield_item, "db", None), "mindef", SHIELD_MIN_DEF), SHIELD_MIN_DEF)
     max_def = _coerce_int(getattr(getattr(shield_item, "db", None), "maxdef", SHIELD_MAX_DEF), SHIELD_MAX_DEF)
     shield_score = min(max_def, min_def + shield_skill)
-    return ShieldSubcontest(shield_score=shield_score, block_pct=max(0, min(100, shield_score)))
+    shield_score = max(0, shield_score * max(0, defense_scaling.shield_pct) // 100)
+    return ShieldSubcontest(shield_score=shield_score, block_pct=max(0, min(100, shield_score)), maneuver_scale_pct=defense_scaling.shield_pct)
 
 
 def _get_hit_location_options(target):
@@ -578,92 +602,144 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
     damage_type = context["damage_type"]
     snipe_config = dict(context.get("snipe_config") or {})
 
-    base = max(1, int(profile.get("damage") or 1)) if weapon else 1
-    if weapon:
-        damage_min = max(1, int(profile.get("damage_min") or base))
-        damage_max = max(damage_min, int(profile.get("damage_max") or damage_min))
-        base = max(base, rng.randint(damage_min, damage_max))
-    damage = base + int(skill_rank * 0.2) + int(suitability * 0.3)
-    if skill_rank > 30:
-        damage += 2
-    damage += int(weapon_effects.get("damage_bonus", 0))
-    damage -= min(25, attacker.get_hand_penalty())
-    damage += max(0, leftover_of // 12)
-    damage += max(0, post_defense_foi // 6)
     pressure = max(0, leftover_of) + max(0, post_defense_foi)
     quality = _quality_from_pressure(leftover_of, post_defense_foi)
-    if pressure > 120:
-        quality = "devastating"
-        damage = int(round(damage * 1.8))
-    elif pressure > 80:
-        quality = "solid"
-        damage = int(round(damage * 1.4))
-    elif pressure > 40:
-        quality = "good"
-        damage = int(round(damage * 1.1))
-    elif pressure > 0:
-        quality = "glancing"
-        damage = max(1, int(round(damage * 0.7)))
 
     critical = rng.randint(1, 100) < 5
     if snipe_active and hasattr(attacker, "get_wilderness_bond") and hasattr(attacker, "get_nature_focus"):
         if attacker.get_wilderness_bond() >= int(snipe_config.get("mastery_bond_threshold", 80) or 80) and attacker.get_nature_focus() >= int(snipe_config.get("mastery_focus_threshold", 60) or 60):
             critical = critical or rng.randint(1, 100) <= int(snipe_config.get("mastery_crit_bonus", 8) or 8)
-    if critical:
-        damage *= 2
+    hit_area = determine_hit_area(
+        rng=rng,
+        leftover_of=max(0, leftover_of),
+        original_of=max(1, _coerce_int(context.get("of_total", 1), 1)),
+        weapon_balance=max(1, _coerce_int(profile.get("balance", 50), 50)),
+        attacker_agility=_coerce_int(attacker.get_stat("agility") if hasattr(attacker, "get_stat") else 0),
+        defender_reflex=_coerce_int(target.get_stat("reflex") if hasattr(target, "get_stat") else 0),
+        defender_has_tail=bool(getattr(getattr(target, "db", None), "has_tail", False)),
+        verb=context.get("maneuver") or context.get("verb") or context.get("weapon_attack_verb") or "attack",
+        aimed_at=aimed_location,
+        defender_injuries=getattr(getattr(target, "db", None), "injuries", None),
+        is_brawling=not weapon or str(skill_name).lower() == "brawling",
+        attacker_grappled=bool(context.get("is_grapple")),
+        defender_prone=str(getattr(getattr(target, "db", None), "position", "")).lower() == "prone",
+    )
+    hit_location = body_part_to_key(hit_area.area)
+    location_name = target.format_body_part_name(hit_location) if hasattr(target, "format_body_part_name") else hit_location
 
+    raw_damage = compute_damage(
+        profile,
+        attacker_strength=_coerce_int(attacker.get_stat("strength") if hasattr(attacker, "get_stat") else 0),
+        leftover_of=max(0, leftover_of),
+        maneuver=context.get("maneuver") or context.get("verb") or context.get("weapon_attack_verb"),
+        rng=rng,
+        combat_rng=None,
+        ammo_profile=context.get("ammo_profile"),
+    )
+
+    damage_multiplier = 1.0
+    if critical:
+        damage_multiplier *= 2.0
     if is_ranged_weapon:
         if current_range == "melee":
-            damage = int(round(damage * 0.75))
+            damage_multiplier *= 0.75
         elif current_range == "near":
-            damage = int(round(damage * 1.05))
+            damage_multiplier *= 1.05
         elif current_range == "far":
-            damage = int(round(damage * 1.10))
+            damage_multiplier *= 1.10
         if ranger_aim_stacks:
-            damage = int(round(damage * (1 + (ranger_aim_stacks * float(snipe_config.get("aim_damage_per_stack", 0.05) or 0.05)))))
-
+            damage_multiplier *= 1 + (ranger_aim_stacks * float(snipe_config.get("aim_damage_per_stack", 0.05) or 0.05))
     if ambush:
-        damage = int(round(damage * ambush_damage_multiplier))
+        damage_multiplier *= ambush_damage_multiplier
     if attacker_tempo_state == "surging":
-        damage = int(round(damage * 1.10))
+        damage_multiplier *= 1.10
     elif attacker_tempo_state == "frenzied":
-        damage = int(round(damage * 1.20))
-    if isinstance(surge_state, dict):
-        damage += int(surge_state.get("damage", 0) or 0)
+        damage_multiplier *= 1.20
     if isinstance(crush_state, dict):
-        damage = int(round(damage * float(crush_state.get("damage_multiplier", 1.0) or 1.0)))
+        damage_multiplier *= float(crush_state.get("damage_multiplier", 1.0) or 1.0)
     if isinstance(frenzy_state, dict):
-        damage = int(round(damage * float(frenzy_state.get("damage_multiplier", 1.0) or 1.0)))
+        damage_multiplier *= float(frenzy_state.get("damage_multiplier", 1.0) or 1.0)
     if attacker_berserk:
-        damage = int(round(damage * float(attacker_berserk.get("damage_multiplier", 1.0) or 1.0)))
+        damage_multiplier *= float(attacker_berserk.get("damage_multiplier", 1.0) or 1.0)
     if isinstance(offensive_roar, dict):
-        damage = int(round(damage * 1.05))
+        damage_multiplier *= 1.05
     if isinstance(ranger_pounce, Mapping) and ranger_pounce.get("target_id") == target.id:
-        damage = int(round(damage * (1 + float(ranger_pounce.get("damage_bonus", 0) or 0.0))))
+        damage_multiplier *= 1 + float(ranger_pounce.get("damage_bonus", 0) or 0.0)
     if snipe_active:
-        damage = int(round(damage * float(ranger_snipe.get("damage_multiplier", 1.0) or 1.0)))
-
+        damage_multiplier *= float(ranger_snipe.get("damage_multiplier", 1.0) or 1.0)
     if getattr(target.db, "roughed", False):
-        damage = int(round(damage * 1.1))
+        damage_multiplier *= 1.1
+
+    flat_bonus = int(weapon_effects.get("damage_bonus", 0))
+    flat_bonus += max(0, leftover_of // 12)
+    flat_bonus += max(0, post_defense_foi // 6)
+    flat_bonus += int(suitability * 0.3)
+    flat_bonus += int(skill_rank * 0.2)
+    flat_bonus -= min(25, attacker.get_hand_penalty())
+    if skill_rank > 30:
+        flat_bonus += 2
+    if isinstance(surge_state, dict):
+        flat_bonus += int(surge_state.get("damage", 0) or 0)
     if aimed_part == "head":
-        damage += 2
+        flat_bonus += 2
     elif aimed_part == "arm":
-        damage += 1
+        flat_bonus += 1
 
-    if aimed_location:
-        hit_location = aimed_location
-        location_name = aimed_part
-    else:
-        # TODO(DRG-024a): Replace placeholder hit-location selection with S00047.
-        hit_location = _choose_hit_location(target, rng)
-        location_name = target.format_body_part_name(hit_location) if hasattr(target, "format_body_part_name") else str(hit_location)
+    scaled_raw = RawDamage(
+        puncture=max(0, int(round(raw_damage.puncture * damage_multiplier)) + flat_bonus),
+        slice=max(0, int(round(raw_damage.slice * damage_multiplier)) + flat_bonus),
+        impact=max(0, int(round(raw_damage.impact * damage_multiplier)) + flat_bonus),
+        fire=max(0, int(round(raw_damage.fire * damage_multiplier))),
+        cold=max(0, int(round(raw_damage.cold * damage_multiplier))),
+        electric=max(0, int(round(raw_damage.electric * damage_multiplier))),
+        multiplier_seed=raw_damage.multiplier_seed,
+    )
 
-    armor_list = target.get_armor_for_bodypart(hit_location) if hasattr(target, "get_armor_for_bodypart") else target.get_armor_covering(hit_location)
-    protection = target.get_total_armor_protection(hit_location) if hasattr(target, "get_total_armor_protection") else sum(target.get_armor_protection_value(armor) for armor in armor_list)
+    armor_list = target.get_armor_for_bodypart(hit_location) if hasattr(target, "get_armor_for_bodypart") else []
+    reduced_damage = scaled_raw
     armor_absorbed = False
-    if protection:
-        damage = max(1, damage - int(round(protection)))
-        armor_absorbed = True
+    flat_reduction = [0, 0, 0]
+    pct_reduction = [0, 0, 0, 0, 0, 0]
+    for armor in armor_list:
+        if hasattr(armor, "get_armor_profile"):
+            armor_profile = armor.get_armor_profile() or {}
+        else:
+            armor_profile = {}
+        armor_skill_name = str(armor_profile.get("type") or "armor")
+        armor_skill = _coerce_int(target.get_skill(armor_skill_name) if hasattr(target, "get_skill") else 0)
+        reduction = apply_armor_reduction(
+            reduced_damage,
+            armor_profile,
+            armor_skill=armor_skill,
+            maneuver_mod=_coerce_int(context.get("maneuver_mod", 10), 10),
+            multi_armor_penalty=_coerce_int(context.get("multi_armor_penalty", max(0, len(armor_list) - 1) * 4), 0),
+            rng=rng,
+        )
+        armor_absorbed = armor_absorbed or reduction.total < reduced_damage.total
+        flat_reduction = [left + right for left, right in zip(flat_reduction, reduction.flat_reduction)]
+        pct_reduction = [left + right for left, right in zip(pct_reduction, reduction.percent_reduction)]
+        reduced_damage = RawDamage(
+            puncture=reduction.puncture,
+            slice=reduction.slice,
+            impact=reduction.impact,
+            fire=reduction.fire,
+            cold=reduction.cold,
+            electric=reduction.electric,
+            multiplier_seed=reduced_damage.multiplier_seed,
+        )
+
+    current_hp = _coerce_int(getattr(getattr(target, "db", None), "hp", 0) or getattr(getattr(target, "db", None), "cbhp", 0), 1)
+    max_hp = _coerce_int(getattr(getattr(target, "db", None), "max_hp", 0) or getattr(getattr(target, "db", None), "mbhp", 0), max(1, current_hp))
+    body_part = hit_area.area if isinstance(hit_area.area, BodyPart) else BodyPart.CHEST
+    wound_result = apply_wounds(
+        reduced_damage,
+        body_part=body_part,
+        max_hp=max_hp,
+        current_hp=max(1, current_hp),
+        rng=rng,
+    )
+    damage = wound_result.hp_damage
+
     if hasattr(attacker, "apply_death_sting_to_damage"):
         damage = attacker.apply_death_sting_to_damage(damage)
 
@@ -674,12 +750,25 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
 
     damage = max(0, int(damage))
     context["armor_absorbed"] = armor_absorbed
-    context["attack_context"] = {"damage_type": damage_type}
+    context["attack_context"] = {"damage_type": reduced_damage.dominant_type}
+    context["raw_damage"] = asdict(scaled_raw)
+    context["post_armor_damage"] = asdict(reduced_damage)
+    context["armor_flat_reduction"] = tuple(flat_reduction)
+    context["armor_percent_reduction"] = tuple(pct_reduction)
     context["critical"] = critical
     context["damage"] = damage
     context["hit_location"] = hit_location
     context["location_name"] = location_name
     context["quality"] = quality
+    context["damage_type"] = reduced_damage.dominant_type
+    context["hit_area_targeted"] = hit_area.was_targeted
+    context["hit_area_target_success"] = hit_area.targeting_succeeded
+    context["hit_area_retarget_count"] = hit_area.retarget_count
+    context["wound_level"] = wound_result.wound_level
+    context["external_wound_level"] = wound_result.external_wound_level
+    context["internal_wound_level"] = wound_result.internal_wound_level
+    context["destroyed_parts"] = wound_result.destroyed_parts
+    context["stamina_denominator"] = wound_result.stamina_denominator
     return damage
 
 
@@ -691,7 +780,11 @@ def calculate_roundtime(attacker, target, context=None):
     partial_ambush = context.get("partial_ambush", False)
     hit = context.get("hit", False)
 
-    action_roundtime = profile.get("speed", profile.get("roundtime", 3.0))
+    explicit_roundtime = context.get("verb_rt")
+    if explicit_roundtime is not None:
+        action_roundtime = float(explicit_roundtime)
+    else:
+        action_roundtime = profile.get("speed", profile.get("roundtime", 3.0))
     if attacker_berserk:
         action_roundtime = max(1.0, action_roundtime + float(attacker_berserk.get("roundtime_modifier", 0.0) or 0.0))
     if hasattr(attacker, "is_warrior_overextended") and attacker.is_warrior_overextended():
@@ -709,5 +802,17 @@ def calculate_roundtime(attacker, target, context=None):
                 action_roundtime -= 1
             action_roundtime = max(1, min(action_roundtime + 1, 5))
 
-    context["roundtime"] = action_roundtime
-    return action_roundtime
+    cleanup = apply_cleanup(
+        attacker,
+        target,
+        leftover_of=_coerce_int(context.get("leftover_of", 0), 0),
+        base_roundtime=action_roundtime,
+        fatigue_cost=_coerce_int(context.get("fatigue_cost", 0), 0),
+    )
+
+    context["roundtime"] = cleanup.roundtime
+    context["fatigue_cost"] = cleanup.fatigue_change
+    context["combat_cleanup_sentinel"] = cleanup.sentinel
+    context["attacker_mm"] = cleanup.attacker_mm
+    context["defender_mm"] = cleanup.defender_mm
+    return cleanup.roundtime

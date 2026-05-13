@@ -29,6 +29,8 @@ from commands.cmd_talk import CmdTalk
 from commands.cmd_assess import CmdAssess
 from commands.cmd_assessstance import CmdAssessStance
 from commands.cmd_attack import CmdAttack
+from commands.cmd_attack_verbs import CmdChop, CmdFeint, CmdJab, CmdLunge, CmdSlice, CmdSweep, CmdThrust
+from commands.cmd_defense_verbs import CmdDodge, CmdParry
 from commands.cmd_berserk import CmdBerserk
 from commands.cmd_beseech import CmdBeseech
 from commands.cmd_disguise import CmdDisguise
@@ -69,6 +71,7 @@ from commands.cmd_buy import CmdBuy
 from commands.cmd_charge import CmdCharge
 from commands.cmd_circle import CmdCircle
 from commands.cmd_climb import CmdClimb
+from commands.cmd_combatreset import CmdCombatReset
 from commands.cmd_companion import CmdCompanion
 from commands.cmd_compare import CmdCompare
 from commands.cmd_commune import CmdCommune
@@ -186,6 +189,7 @@ from commands.cmd_sacrifice import CmdSacrifice
 from commands.cmd_say import CmdSay
 from commands.cmd_whisper import CmdWhisper
 from commands.cmd_spawnnpc import CmdSpawnNPC
+from commands.cmd_spawndummy import CmdSpawnDummy
 from commands.cmd_spawnsheath import CmdSpawnSheath
 from commands.cmd_spawnwearable import CmdSpawnWearable
 from commands.cmd_spawnweapon import CmdSpawnWeapon
@@ -280,6 +284,15 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdAbilityNoMatch())
         self.add(CmdAmbush())
         self.add(CmdAttack())
+        self.add(CmdThrust())
+        self.add(CmdLunge())
+        self.add(CmdSlice())
+        self.add(CmdChop())
+        self.add(CmdSweep())
+        self.add(CmdFeint())
+        self.add(CmdJab())
+        self.add(CmdParry())
+        self.add(CmdDodge())
         self.add(CmdBalance())
         self.add(CmdBeseech())
         self.add(CmdBlend())
@@ -302,6 +315,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdClickVendor())
         self.add(CmdClickMove())
         self.add(CmdClimb())
+        self.add(CmdCombatReset())
         self.add(CmdCompanion())
         self.add(CmdCompare())
         self.add(CmdContact())
@@ -430,6 +444,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSkills())
         self.add(CmdSlots())
         self.add(CmdSpawnNPC())
+        self.add(CmdSpawnDummy())
         self.add(CmdSpawnSheath())
         self.add(CmdSpawnWearable())
         self.add(CmdSpawnBox())

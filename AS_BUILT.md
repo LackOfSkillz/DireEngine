@@ -41,12 +41,44 @@ Current extracted service/domain areas include:
 - `engine/services/result.py`
 - `engine/services/errors.py`
 - `engine/contracts/combat_result.py`
+- `domain/combat/hit_area.py`
+- `domain/combat/damage.py`
+- `domain/combat/armor.py`
+- `domain/combat/wounds.py`
+- `domain/combat/cleanup.py`
 - `domain/combat/rules.py`
 - `domain/wounds/constants.py`
 - `domain/wounds/models.py`
 - `domain/wounds/rules.py`
 
 This is still a transitional architecture. Not every gameplay surface has been extracted yet, but combat, state mutation, and wound handling now have a formal service/domain path.
+
+Combat now routes its post-penetration path through source-backed hit-area, damage, armor, wound, and cleanup helpers aligned to the verified GSL scripts for DRG-024a.
+Combat verb routing now also follows a canonical shared table in `domain/combat/verbs.py`, with command-layer dispatch flowing through `engine/services/attack_verb_service.py` into `CombatService.attack()`.
+Defensive stance routing now mirrors that pattern: `parry` and `dodge` flow through `commands/cmd_defense_verbs.py` and `engine/services/defense_verb_service.py`, persist canonical maneuver IDs on `Character`, and feed the S09449 defender-scaling table used by `domain/combat/resolution.py`.
+
+## Combat Test Infrastructure
+
+- `commands/cmd_spawndummy.py` adds an in-band combat smoke helper for live browser validation.
+- `spawndummy` creates an unarmored training dummy in the caller's room.
+- `spawndummy armored` creates an armored dummy using the existing `NPC` and `Armor` typeclasses, avoiding cross-process shell staging for browser combat tests.
+- Use these in live web-client validation instead of `python -m evennia shell` object creation when the goal is to verify browser-visible world state.
+- `commands/cmd_combatreset.py` adds `combatreset <character>` as an admin combat-state reset helper for dev testing.
+- `combatreset` resets a character to a clean combat baseline through `Character.combat_reset_state()`, clearing combat flags, wounds, roundtime, dead-state metadata, and linked corpse references.
+- `combatreset` now finishes through `Character.sync_state_to_client()`, an explicit wrapper over the existing structured browser sync path.
+- The permanent `drginfraadmin` account and `InfraAdmin` character exist as a secondary dev actor for cases where the primary browser session is impaired and cannot safely drive its own recovery commands.
+- Use `InfraAdmin` for in-band admin actions such as `combatreset`, `spawndummy`, and other out-of-band smoke control from a second session; keep the credential in private repo notes rather than public-facing docs.
+- The authoritative live sync path is `CombatService` and `StateService` mutating Character state through setters that call `Character.sync_client_state()`, which sends structured `character` and `subsystem` payloads consumed by the browser client.
+- Browser dead-state command gating is enforced by `Character.execute_cmd()` and `Character.can_execute_while_dead()`, so `combatreset` and `cmbreset` are allowlisted there as well as in the command base.
+- Live validation confirmed a dead browser session could be reset back to clean alive presentation in the same session, with no logout required, and could immediately execute `look` afterward.
+
+## DRG-024c - Player Defense Commands (Parry, Dodge)
+
+- Canonical maneuver IDs now live in `domain/combat/maneuvers.py`, including the S09449 defender scaling table keyed by the actor's persisted `last_maneuver`.
+- `Character` now persists `last_maneuver` across combat actions, and both attack and defense verb services update it when a maneuver is committed.
+- `parry` and `dodge` now exist as first-class combat commands with the canon-specific duplicate-stance guard messages and 3-4 second defensive positioning RT.
+- Combat resolution now applies defender last-maneuver scaling to evasion, parry, and shield calculations instead of treating those defenses as stance-agnostic.
+- Defense XP remains only partially ported relative to S00509: evasion defense XP already existed, and this dispatch adds a small parry-training bridge, but the full canon armor/shield defense-learning distribution still remains for a follow-on dispatch.
 
 ## Runtime Boot Behavior
 
@@ -106,9 +138,12 @@ Current state:
 Primary files:
 
 - `commands/cmd_attack.py`
+- `commands/cmd_attack_verbs.py`
 - `commands/cmd_advance.py`
 - `commands/cmd_retreat.py`
 - `commands/cmd_disengage.py`
+- `domain/combat/verbs.py`
+- `engine/services/attack_verb_service.py`
 - `engine/services/combat_service.py`
 - `engine/services/state_service.py`
 - `domain/combat/rules.py`
@@ -118,6 +153,11 @@ Implemented behavior:
 - target-based combat flow
 - range and engagement handling
 - roundtime pacing
+- canonical attack verbs for `thrust`, `lunge`, `slice`, `chop`, `sweep`, `feint`, and `jab`
+- verb-specific base roundtimes from S00031-S00037 threaded through `CombatService.attack()`
+- slice pre-hit defender hook support through `on_attack_attempt(..., verb="slice")`
+- chop terrain guard for `trees` and `vines` when no choppable room target exists
+- feint fallback to the caller's current engagement target when no explicit target is supplied
 - NPC combat behavior follows `event -> set target -> ai_tick acts on target`, where room-entry presence and damage hooks establish targets and the existing global NPC tick drives continued attacks and disengage cleanup
 - same-room guard assist is event-driven as well: assist-capable NPCs join when a nearby guard acquires a player target, then the existing target state and ai tick handle the rest
 - NPC threat tracking is layered on top of that same loop as runtime combat state: damage and assist add threat, ai tick can switch to the top valid threat, and threat is cleared when combat fully disengages

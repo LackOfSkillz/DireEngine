@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 
+from domain.combat.resolution import CombatOutcome
 from engine.services.combat_xp import CombatXP, DEFENSE_XP_MULT
 
 
@@ -10,6 +11,9 @@ class DummyActor:
 
     def get_skill(self, _name):
         return 10
+
+    def get_weapon_profile(self):
+        return {"skill": "light_edge"}
 
 
 class CombatXPTests(unittest.TestCase):
@@ -49,6 +53,27 @@ class CombatXPTests(unittest.TestCase):
             success=True,
             context_multiplier=DEFENSE_XP_MULT * 1.25,
         )
+
+    @patch("engine.services.combat_xp.SkillService.award_xp")
+    def test_successful_parry_awards_weapon_skill_defense_xp(self, award_xp):
+        attacker = DummyActor()
+        target = DummyActor()
+
+        CombatXP.award(
+            attacker,
+            target,
+            {
+                "leftover_of": 10,
+                "offensive_factor_total": 80,
+                "evasion_defense_factor_total": 40,
+                "combat_outcome": CombatOutcome.FULLY_PARRIED.value,
+                "parry": {"block_pct": 100},
+            },
+            hit=False,
+        )
+
+        self.assertEqual(award_xp.call_count, 2)
+        self.assertEqual(award_xp.call_args_list[1].args[1], "light_edge")
 
 
 if __name__ == "__main__":

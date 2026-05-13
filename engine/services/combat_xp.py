@@ -1,4 +1,5 @@
 from engine.services.skill_service import SkillService
+from domain.combat.resolution import CombatOutcome
 
 
 OFFENSE_XP_MULT = 1.15
@@ -36,6 +37,20 @@ class CombatXP:
                 max(10, int(offensive_total or 0)),
                 source={"mode": "difficulty"},
                 success=not bool(hit),
+                context_multiplier=DEFENSE_XP_MULT * difficulty_scale,
+            )
+
+        parry = dict(context.get("parry") or {})
+        parry_block_pct = int(parry.get("block_pct", 0) or 0)
+        if parry_block_pct > 0 and str(context.get("combat_outcome", "")) in {CombatOutcome.PARTIALLY_PARRIED.value, CombatOutcome.FULLY_PARRIED.value}:
+            weapon_profile = target.get_weapon_profile() if hasattr(target, "get_weapon_profile") else {}
+            parry_skill = str((weapon_profile or {}).get("skill") or "combat").strip().lower() or "combat"
+            SkillService.award_xp(
+                target,
+                parry_skill,
+                max(10, int(offensive_total or 0)),
+                source={"mode": "difficulty"},
+                success=True,
                 context_multiplier=DEFENSE_XP_MULT * difficulty_scale,
             )
 

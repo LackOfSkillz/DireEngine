@@ -14,7 +14,9 @@ from world.helpers.target_resolver import format_item_matches, resolve_item_targ
 
 DEAD_STATE_ALLOWED_COMMANDS = {
     "balance",
+    "cmbreset",
     "consent",
+    "combatreset",
     "corpse",
     "death",
     "deposit",

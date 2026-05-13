@@ -275,12 +275,14 @@ Tier 0 sub-bundles follow DRG-011's strict dependency order. Group dispatches na
 - Canon-correct core model is the OF minus EDF subtractive contest from S00041, S00042, S00043, S00046, S00091, S00092, with S00265 combat RNG applied inside OF
 - DRG-024 completed the combat-core rewrite in place under `domain/combat/resolution.py` and added `domain/combat/rng.py`
 - DRG-024 preserved the existing `AttackResolution.details` payload contract so `combat_service`, combat XP, and presenters could keep working while the math changed underneath
+- DRG-024b added the canonical base attack verb table at `domain/combat/verbs.py`, a shared routing seam in `engine/services/attack_verb_service.py`, and seven player-facing verbs wired through `CombatService.attack()` with explicit verb strings and base RT values from S00031-S00037
+- DRG-024b preserved the S00033 slice defender hook, the S00034 chop tree/vine guard, and the S00036 feint engagement-target fallback without re-implementing the whole S00131 parser surface
 - Follow-up work remains split as:
     - DRG-024a: hit area, damage tier, armor reduction, and wound-depth parity from S00047/S00048/S00066/S00072
-    - DRG-024b: attack verb routing and per-verb GSL parity for S00031-S00037
+    - DRG-024b: completed attack verb routing and per-verb GSL parity for S00031-S00037
     - DRG-024c: broader defense and equipment parity around richer parry/shield/weapon-force inputs
 
-Status: combat core complete and validated. Evennia restarted cleanly after the rewrite; focused combat tests and broader regression slices are green.
+Status: combat core plus base attack verbs complete and validated. Evennia restarts cleanly after the rewrite; focused combat tests and broader regression slices are green. Live browser smoke validated explicit thrust, slice, and chop text plus the chop terrain guard against `spawndummy` targets, while a disposable `AedanSmoke` death-state bleed loop prevented a clean all-seven browser pass in the same session.
 
 **DRG-024.5 - Tier 0 Magic overhaul (sub-bundles 32-35)**
 
