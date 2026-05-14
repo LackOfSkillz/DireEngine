@@ -6,12 +6,14 @@ from .definitions import (
     RACE_ALIASES,
     RACE_DEFINITIONS,
     RACE_LEARNING_CATEGORIES,
+    RACIAL_TDP_MODIFIERS,
     RACE_STATS,
 )
 
 
 LEARNING_CATEGORY_ALIASES = {
     "armor": "combat",
+    "defense": "combat",
 }
 
 
@@ -70,6 +72,14 @@ def get_race_stat_cap(race_name, stat):
     if normalized_stat not in RACE_STATS:
         return None
     return int(get_race_profile(race_name).get("stat_caps", {}).get(normalized_stat, 100) or 100)
+
+
+def get_racial_tdp_modifier(race_name, stat):
+    normalized_race = resolve_race_name(race_name, default=None)
+    normalized_stat = _normalize(stat)
+    if not normalized_race or not normalized_stat:
+        return 0
+    return int(RACIAL_TDP_MODIFIERS.get(normalized_race, {}).get(normalized_stat, 0) or 0)
 
 
 def get_race_learning_modifier(race_name, category):

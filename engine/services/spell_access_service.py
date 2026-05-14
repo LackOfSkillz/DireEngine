@@ -2,6 +2,7 @@ from collections.abc import Mapping
 
 from domain.spells.spell_definitions import SPELL_REGISTRY, Spell
 from engine.services.result import ActionResult
+from engine.services.slot_service import SlotService
 from engine.services.spellbook_service import SpellbookService
 
 
@@ -53,6 +54,36 @@ class SpellAccessService:
         return SpellbookService.has_spell(character, spell_id)
 
     @staticmethod
+    def _is_apprentice_accessible(character, spell):
+        if character is None or spell is None:
+            return False
+        apprentice_until_circle = getattr(spell, "apprentice_until_circle", None)
+        if apprentice_until_circle is None:
+            return False
+        if SlotService._get_magic_placement(character) is None:
+            return False
+        profession = SpellAccessService._get_profession(character)
+        allowed_professions = {
+            SpellAccessService._normalize_profession(entry) for entry in (spell.allowed_professions or [])
+        }
+        if allowed_professions and profession not in allowed_professions:
+            return False
+        if SpellbookService.has_spell(character, spell.id):
+            return False
+        return SpellAccessService._get_circle(character) <= int(apprentice_until_circle or 0)
+
+    @staticmethod
+    def get_apprentice_spells(character):
+        if SlotService._get_magic_placement(character) is None:
+            return []
+        apprentice_spells = [
+            spell
+            for spell in SPELL_REGISTRY.values()
+            if SpellAccessService._is_apprentice_accessible(character, spell)
+        ]
+        return sorted(apprentice_spells, key=lambda spell: (int(spell.min_circle or 0), spell.name.lower(), spell.id))
+
+    @staticmethod
     def can_use_spell(character, spell):
         if character is None:
             return SpellAccessService._fail("Missing character.")
@@ -69,7 +100,12 @@ class SpellAccessService:
                 data={"spell_id": spell.id, "profession": profession},
             )
 
-        if not SpellAccessService.has_spell(character, spell.id):
+        access_via = None
+        if SpellAccessService.has_spell(character, spell.id):
+            access_via = "permanent"
+        elif SpellAccessService._is_apprentice_accessible(character, spell):
+            access_via = "apprentice"
+        else:
             return SpellAccessService._fail(
                 "You have not learned that spell.",
                 data={"spell_id": spell.id},
@@ -94,6 +130,8 @@ class SpellAccessService:
                 "spell_id": spell.id,
                 "spell_name": spell.name,
                 "circle": circle,
+                "via": access_via,
+                "access_via": access_via,
             }
         )
 

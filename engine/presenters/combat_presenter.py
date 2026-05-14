@@ -1,4 +1,5 @@
 from engine.presenters.injury_presenter import InjuryPresenter
+from engine.services.messaging import send_action_messages
 from utils.survival_messaging import react_or_message_target
 
 
@@ -10,6 +11,52 @@ VERBS = {
 
 
 class CombatPresenter:
+
+    @staticmethod
+    def _append_barrier_messages(data, attacker_lines, target_lines, room_lines):
+        barrier_event = dict(data.get("barrier_event", {}) or {})
+        if not barrier_event:
+            return
+
+        target_name = str(data.get("target_name", "someone") or "someone")
+        absorbed = int(barrier_event.get("absorbed", 0) or 0)
+        event_type = str(barrier_event.get("type", "") or "").strip().lower()
+        if event_type == "shielded":
+            attacker_lines.append(f"Your attack rings off {target_name}'s shimmering barrier without effect.")
+            target_lines.append("An incoming blow rings off your barrier, leaving it undamaged.")
+            room_lines.append(f"The attack rings off {target_name}'s shimmering barrier.")
+            return
+        if event_type == "depleted":
+            attacker_lines.append(f"Your attack drives into {target_name}'s barrier, which absorbs the blow before shattering apart!")
+            target_lines.append(f"Your barrier absorbs {absorbed} points of damage, then shatters with a final shimmer, leaving you exposed!")
+            room_lines.append(f"{target_name}'s barrier shatters apart with a brilliant flash!")
+            return
+        if event_type == "weakened":
+            attacker_lines.append(f"Your attack drives into {target_name}'s shimmering barrier, which absorbs part of the blow and visibly weakens.")
+            target_lines.append(f"Your barrier absorbs {absorbed} points of incoming damage. It shimmers more dimly now.")
+            room_lines.append(f"{target_name}'s barrier absorbs part of the blow and dims visibly.")
+
+    @staticmethod
+    def _get_combat_outcome(data):
+        details = dict(data.get("details", {}) or {})
+        return str(data.get("combat_outcome") or details.get("combat_outcome") or "").strip().lower()
+
+    @staticmethod
+    def _impact_lines(quality):
+        normalized = str(quality or "").strip().lower()
+        if normalized == "devastating":
+            return (
+                "The impact lands with bone-jarring force.",
+                "The impact crashes into you with bone-jarring force.",
+                "The impact lands with a bone-jarring crack.",
+            )
+        if normalized == "solid":
+            return (
+                "The blow lands with satisfying force.",
+                "The blow jars you with solid force.",
+                "The blow lands with solid force.",
+            )
+        return (None, None, None)
 
     @staticmethod
     def conjugate(verb, is_player):
@@ -111,7 +158,20 @@ class CombatPresenter:
             weapon_phrase = CombatPresenter._get_weapon_phrase(data)
             weapon_name = CombatPresenter._get_weapon_display_name(data)
             range_phrase = str(data.get("range_phrase", "from nearby cover") or "from nearby cover")
-            if data.get("is_ranged_weapon"):
+            combat_outcome = CombatPresenter._get_combat_outcome(data)
+            if combat_outcome == "parried_full":
+                attacker_lines.append(f"Your {verb_player} at {target_name} rings off their guard.")
+                target_lines.append(f"You catch {attacker_name}'s {verb_player} on your guard and deflect it cleanly.")
+                room_lines.append(f"{target_name} turns aside {attacker_name}'s attack.")
+            elif combat_outcome == "shielded_full":
+                attacker_lines.append(f"Your {verb_player} crashes harmlessly into {target_name}'s shield.")
+                target_lines.append(f"You catch {attacker_name}'s attack on your shield.")
+                room_lines.append(f"{target_name}'s shield turns aside {attacker_name}'s attack.")
+            elif combat_outcome == "evaded":
+                attacker_lines.append(f"Your {verb_player} at {target_name} cuts through empty air.")
+                target_lines.append(f"You twist aside as {attacker_name} {verb_target} at you with {weapon_name}.")
+                room_lines.append(f"{target_name} twists aside, evading {attacker_name}'s attack.")
+            elif data.get("is_ranged_weapon"):
                 if data.get("snipe_active"):
                     attacker_lines.append("Your concealed shot misses its mark.")
                     target_lines.append("An arrow flies from nowhere and misses you.")
@@ -138,6 +198,7 @@ class CombatPresenter:
             quality = str(data.get("quality", "good") or "good")
             quality_phrase = f"critical {quality}" if data.get("critical") else quality
             weapon_phrase = CombatPresenter._get_weapon_phrase(data)
+            combat_outcome = CombatPresenter._get_combat_outcome(data)
             if data.get("is_ranged_weapon"):
                 if data.get("snipe_active"):
                     attacker_lines.append(f"You release a carefully placed shot from concealment and strike {target_name}'s {location_name}.")
@@ -157,8 +218,29 @@ class CombatPresenter:
                 target_lines.append(f"{attacker_name} {verb_target} your {location_name} with a {quality_phrase} hit.")
                 room_lines.append(f"{attacker_name} {verb_target} {target_name}'s {location_name} with a {quality_phrase} hit.")
 
+            if combat_outcome == "parried_partial":
+                attacker_lines.append(f"{target_name} deflects part of the blow, but it still gets through.")
+                target_lines.append("You deflect part of the attack, but the strike still gets through.")
+                room_lines.append(f"{target_name} deflects part of the attack, but the blow still lands.")
+            elif combat_outcome == "shielded_partial":
+                attacker_lines.append(f"{target_name}'s shield blunts some of the blow.")
+                target_lines.append("Your shield blunts part of the blow.")
+                room_lines.append(f"{target_name}'s shield blunts part of the blow.")
+
             if data.get("armor_absorbed"):
+                attacker_lines.append(f"{target_name}'s armor turns part of the blow.")
                 target_lines.append("Your armor absorbs part of the blow.")
+                room_lines.append(f"{target_name}'s armor blunts part of the impact.")
+
+            CombatPresenter._append_barrier_messages(data, attacker_lines, target_lines, room_lines)
+
+            actor_impact, target_impact, room_impact = CombatPresenter._impact_lines(quality)
+            if actor_impact:
+                attacker_lines.append(actor_impact)
+            if target_impact:
+                target_lines.append(target_impact)
+            if room_impact:
+                room_lines.append(room_impact)
             if data.get("sweep_resisted"):
                 attacker_lines.append(f"{target_name} resists your sweep and keeps their footing.")
                 target_lines.append("You absorb the sweep and keep your footing.")
@@ -184,16 +266,28 @@ class CombatPresenter:
     @staticmethod
     def present_attack(result, attacker, target):
         payload = CombatPresenter.render_attack(result, attacker, target)
-        for line in payload.get("attacker", []):
+        attacker_lines = list(payload.get("attacker", []) or [])
+        target_lines = list(payload.get("target", []) or [])
+        room_lines = list(payload.get("room", []) or [])
+        if attacker_lines or target_lines or room_lines:
+            send_action_messages(
+                actor=attacker,
+                target=target,
+                room=getattr(attacker, "location", None),
+                actor_message=attacker_lines.pop(0) if attacker_lines else None,
+                target_message=target_lines.pop(0) if target_lines else None,
+                room_message=room_lines.pop(0) if room_lines else None,
+            )
+        for line in attacker_lines:
             attacker.msg(line)
         if target:
             for reaction in payload.get("target_reactions", []):
                 react_or_message_target(target, player_text=reaction.get("text"), awareness=reaction.get("awareness"))
-            for line in payload.get("target", []):
+            for line in target_lines:
                 target.msg(line)
             InjuryPresenter.present_events(target, payload.get("injury_events", []))
         if getattr(attacker, "location", None):
-            for line in payload.get("room", []):
+            for line in room_lines:
                 attacker.location.msg_contents(line, exclude=[obj for obj in [attacker, target] if obj is not None])
         onboarding_feedback = str(getattr(result, "data", {}).get("onboarding_feedback", "") or "")
         if onboarding_feedback:

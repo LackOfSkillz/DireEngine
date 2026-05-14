@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from domain.spells.spell_definitions import get_spell
+from domain.spells.spell_definitions import SPELL_REGISTRY, get_spell
+from engine.services.mana_service import ManaService
 from engine.services.state_service import StateService
 from engine.services.spell_contest_service import SpellContestService
 from engine.services.spell_effect_service import SpellEffectService
@@ -18,6 +19,7 @@ class DummyCharacter:
         self.db.hp = hp
         self.db.max_hp = max_hp
         self.db.stats = {"reflex": 10, "magic_resistance": 10}
+        self.db.encumbrance_dirty = False
         self.ndb.spell_debug = False
         self.ndb.spell_debug_trace = []
         self.key = key
@@ -49,10 +51,11 @@ class DummyCharacter:
         return mapping.get(name, 100)
 
     def get_stat(self, name):
+        normalized = str(name or "").strip().lower().replace(" ", "_")
         if name in self.db.stats:
-            return self.db.stats[name]
+            return int(self.db.stats[name] or 0) + self.get_effect_stat_modifier(normalized)
         mapping = {"intelligence": 30, "discipline": 30, "wisdom": 30, "reflex": 10}
-        return mapping.get(name, 30)
+        return int(mapping.get(name, 30) or 30) + self.get_effect_stat_modifier(normalized)
 
     def get_empath_healing_modifier(self):
         return self.healing_modifier
@@ -73,6 +76,18 @@ class DummyCharacter:
             modifiers = dict(effect.get("modifiers") or {})
             total += float(effect.get("strength", 0) or 0) * float(modifiers.get(modifier_key, 0.0) or 0.0)
         return int(round(total))
+
+    def get_effect_stat_modifier(self, stat_name, category="debilitation"):
+        total = 0
+        for effect in dict((self.get_state("active_effects") or {}).get(category, {}) or {}).values():
+            total += int(dict(effect.get("stat_debuffs") or {}).get(stat_name, 0) or 0)
+        return total
+
+    def get_encumbrance_modifier(self, category="debilitation"):
+        total = 0
+        for effect in dict((self.get_state("active_effects") or {}).get(category, {}) or {}).values():
+            total += int(effect.get("encumbrance_modifier", 0) or 0)
+        return total
 
     def award_skill_experience(self, *args, **kwargs):
         _args = args
@@ -264,6 +279,43 @@ class SpellEffectServiceTests(unittest.TestCase):
         self.assertEqual(second_barrier["strength"], first_barrier["strength"])
         self.assertGreaterEqual(second_barrier["duration"], first_barrier["duration"])
 
+    def test_manifest_force_routes_through_physical_barrier_mirror(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Mage", profession="warrior_mage")
+        spell = get_spell("manifest_force")
+
+        result = SpellEffectService.apply_spell(caster, spell, 1.0, quality="normal")
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["effect_payload"]["barrier_strength"], 30)
+        self.assertEqual(result.data["effect_payload"]["duration"], 600)
+        self.assertTrue(bool(caster.get_state("physical_barrier")))
+        self.assertTrue(bool(caster.get_state("warding_barrier")))
+        self.assertTrue(bool(caster.get_state("physical_barrier").get("absorbs_physical", False)))
+
+    def test_manifest_force_scales_capacity_and_duration_from_mana(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Mage", profession="warrior_mage")
+        spell = get_spell("manifest_force")
+
+        mid = SpellEffectService.apply_spell(caster, spell, 50.0, quality="normal")
+        high = SpellEffectService.apply_spell(caster, spell, 100.0, quality="normal")
+
+        self.assertEqual(mid.data["effect_payload"]["barrier_strength"], 54)
+        self.assertEqual(high.data["effect_payload"]["barrier_strength"], 79)
+        self.assertGreater(mid.data["effect_payload"]["duration"], 600)
+        self.assertEqual(high.data["effect_payload"]["duration"], 2400)
+
+    def test_manifest_force_recast_replaces_remaining_capacity(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Mage", profession="warrior_mage")
+        spell = get_spell("manifest_force")
+
+        first = SpellEffectService.apply_spell(caster, spell, 50.0, quality="normal")
+        StateService.consume_ward(caster, "manifest_force", 20)
+        replaced = SpellEffectService.apply_spell(caster, spell, 10.0, quality="normal")
+
+        self.assertTrue(first.success)
+        self.assertTrue(replaced.success)
+        self.assertEqual(caster.get_state("physical_barrier")["strength"], 34)
+
     def test_shared_guard_routes_through_group_warding_without_character_mutation(self):
         caster = DummyCharacter(hp=100, max_hp=100, key="Cleric", profession="cleric")
         ally = DummyCharacter(hp=100, max_hp=100, key="Ally", profession="cleric")
@@ -293,6 +345,71 @@ class SpellEffectServiceTests(unittest.TestCase):
         self.assertEqual(result.data["effect_payload"]["utility_effect"], "light")
         self.assertIsNotNone(caster.get_state("utility_light"))
 
+    def test_gauge_flow_sets_capability_flag_and_expires(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Mage", profession="warrior_mage")
+        spell = get_spell("gauge_flow")
+
+        result = SpellEffectService.apply_spell(caster, spell, 20.0, quality="normal")
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["effect_payload"]["utility_effect"], "gauge_flow")
+        self.assertTrue(bool(getattr(caster.db, "gauge_flow_active", False)))
+        duration = int(result.data["effect_payload"]["duration"] or 0)
+        for _ in range(duration):
+            StateService.tick_active_effects(caster)
+        self.assertFalse(bool(getattr(caster.db, "gauge_flow_active", False)))
+
+    def test_cyclic_spell_prefers_held_mana_when_available(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Empath", profession="empath")
+        caster.db.feats = {"learned": ["raw_channeling"], "granted": []}
+        ManaService._set_attunement_state(caster, 100.0, 100.0)
+        ManaService._set_harnessed_mana_state(caster, 12)
+        spell = get_spell("regenerate")
+
+        result = SpellEffectService.apply_spell(caster, spell, 20.0, quality="normal", target=caster)
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["effect_payload"]["cyclic_state"]["sustain_source"], "held_mana")
+
+    def test_cyclic_spell_uses_attunement_with_raw_channeling_when_no_held_mana(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Empath", profession="empath")
+        caster.db.feats = {"learned": ["raw_channeling"], "granted": []}
+        ManaService._set_attunement_state(caster, 100.0, 100.0)
+        ManaService._set_harnessed_mana_state(caster, 0)
+        spell = get_spell("regenerate")
+
+        result = SpellEffectService.apply_spell(caster, spell, 20.0, quality="normal", target=caster)
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["effect_payload"]["cyclic_state"]["sustain_source"], "attunement")
+
+    def test_cyclic_spell_requires_harness_without_raw_channeling(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Empath", profession="empath")
+        caster.db.feats = {"learned": [], "granted": []}
+        ManaService._set_attunement_state(caster, 100.0, 100.0)
+        ManaService._set_harnessed_mana_state(caster, 0)
+        spell = get_spell("regenerate")
+
+        result = SpellEffectService.apply_spell(caster, spell, 20.0, quality="normal", target=caster)
+
+        self.assertFalse(result.success)
+        self.assertIn("Use HARNESS", result.errors[0])
+
+    def test_cyclic_spell_enforces_single_active_pattern(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Empath", profession="empath")
+        caster.db.feats = {"learned": ["raw_channeling"], "granted": []}
+        ManaService._set_attunement_state(caster, 100.0, 100.0)
+        ManaService._set_harnessed_mana_state(caster, 12)
+        StateService.apply_cyclic_effect(caster, "regenerate", {"spell_name": "Regenerate", "mana_per_tick": 2, "sustain_source": "held_mana"})
+        held_before = ManaService._get_harnessed_mana_state(caster)
+        spell = get_spell("storm_field")
+
+        result = SpellEffectService.apply_spell(caster, spell, 20.0, quality="normal", target=None)
+
+        self.assertFalse(result.success)
+        self.assertEqual((result.data or {}).get("reason"), "single_cyclic_enforced")
+        self.assertEqual(ManaService._get_harnessed_mana_state(caster), held_before)
+
     def test_cleanse_routes_mutation_through_state_service(self):
         caster = DummyCharacter(hp=100, max_hp=100, key="Cleric", profession="cleric")
         caster.set_state("exposed_magic", {"duration": 3})
@@ -318,6 +435,18 @@ class SpellEffectServiceTests(unittest.TestCase):
         self.assertTrue(result.success)
         self.assertEqual(result.data["spell_type"], "targeted_magic")
         self.assertEqual(result.data["effect_payload"]["effect_family"], "targeted_magic")
+
+    def test_strange_arrow_routes_mixed_damage_components(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Mage", profession="warrior_mage")
+        target = DummyCharacter(hp=100, max_hp=100, key="Target", profession="cleric")
+        spell = get_spell("strange_arrow")
+
+        result = SpellEffectService.apply_spell(caster, spell, 30.0, quality="strong", target=target)
+
+        self.assertTrue(result.success)
+        components = list(result.data["effect_payload"].get("damage_components", []) or [])
+        self.assertEqual([entry["damage_type"] for entry in components], ["puncture", "electrical"])
+        self.assertGreater(sum(float(entry["final_damage"]) for entry in components), 0.0)
 
     def test_arc_burst_routes_each_room_target_independently(self):
         caster = DummyCharacter(hp=100, max_hp=100, key="Mage", profession="warrior_mage")
@@ -482,6 +611,42 @@ class SpellEffectServiceTests(unittest.TestCase):
         active_effects = target.get_state("active_effects") or {}
         self.assertIn("debilitation", active_effects)
         self.assertIn("daze", active_effects["debilitation"])
+
+    def test_burden_applies_stat_and_encumbrance_debuffs(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Seer", profession="moon_mage")
+        target = DummyCharacter(hp=100, max_hp=100, key="Target", profession="cleric")
+        target.db.stats["strength"] = 20
+        spell = get_spell("burden")
+
+        result = SpellEffectService.apply_spell(caster, spell, 24.0, quality="strong", target=target)
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["effect_payload"]["effect_type"], "burden")
+        self.assertLess(target.get_stat("strength"), 20)
+        self.assertGreater(target.get_encumbrance_modifier(), 0)
+
+    def test_burden_expires_and_restores_strength_modifier(self):
+        caster = DummyCharacter(hp=100, max_hp=100, key="Seer", profession="moon_mage")
+        target = DummyCharacter(hp=100, max_hp=100, key="Target", profession="cleric")
+        target.db.stats["strength"] = 20
+        spell = get_spell("burden")
+
+        result = SpellEffectService.apply_spell(caster, spell, 24.0, quality="normal", target=target)
+
+        self.assertTrue(result.success)
+        duration = int(result.data["effect_payload"]["duration"] or 0)
+        for _ in range(duration):
+            StateService.tick_active_effects(target)
+        self.assertEqual(target.get_stat("strength"), 20)
+        self.assertEqual(target.get_encumbrance_modifier(), 0)
+
+    def test_registry_marks_seed_spells_canonical_and_prototypes_default(self):
+        self.assertEqual(get_spell("burden").canon_status, "canonical")
+        self.assertEqual(get_spell("gauge_flow").canon_status, "canonical")
+        self.assertEqual(get_spell("strange_arrow").canon_status, "canonical")
+        prototype_ids = [spell_id for spell_id, spell in SPELL_REGISTRY.items() if spell.canon_status == "prototype"]
+        self.assertIn("flare", prototype_ids)
+        self.assertIn("storm_field", prototype_ids)
 
     def test_daze_miss_does_not_mutate_state(self):
         caster = DummyCharacter(hp=100, max_hp=100, key="Seer", profession="moon_mage")

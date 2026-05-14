@@ -1,38 +1,16 @@
 from collections.abc import Mapping
 
 from commands.command import Command
+from domain.learning.mindstate import get_mindstate_name
+from domain.learning.skill_aliases import resolve_skill_alias
+from engine.services.circle_service import project_advancement
+from engine.services.rexp_service import get_rexp_display
 from world.systems.skills import MINDSTATE_MAX, base_pool, get_skill_display_name, is_active, rank_cost
-
-
-DISPLAY_NAME_OVERRIDES = {
-    "appraisal": "Appraisal",
-    "arcana": "Arcana",
-    "athletics": "Athletics",
-    "attunement": "Attunement",
-    "brawling": "Hand-To-Hand",
-    "chain_armor": "Chain Armor",
-    "debilitation": "Debilitation",
-    "evasion": "Evasion",
-    "first_aid": "First Aid",
-    "light_armor": "Light Armor",
-    "light_edge": "Light-Edged",
-    "locksmithing": "Lockpicking",
-    "perception": "Perception",
-    "plate_armor": "Plate Armor",
-    "scholarship": "Scholarship",
-    "stealth": "Stealth",
-    "targeted_magic": "Targeted Magic",
-}
 
 
 def format_skill_display_name(skill_name):
     normalized = str(skill_name or "").strip().lower().replace(" ", "_")
-    registry_name = get_skill_display_name(normalized)
-    if registry_name and registry_name != normalized.replace("_", " ").title():
-        return registry_name
-    if normalized in DISPLAY_NAME_OVERRIDES:
-        return DISPLAY_NAME_OVERRIDES[normalized]
-    return normalized.replace("_", " ").title()
+    return get_skill_display_name(normalized)
 
 
 def calculate_rank_percent(skill, displayed_rank):
@@ -63,6 +41,8 @@ class CmdExperience(Command):
         exp
         experience all
         exp all
+        exp le
+        exp circle
     """
 
     key = "experience"
@@ -79,8 +59,14 @@ class CmdExperience(Command):
             return
 
         mode = str(self.args or "").strip().lower()
+        if mode == "help":
+            caller.msg(self.__doc__)
+            return
+        if mode == "circle":
+            self._show_circle_progress(caller)
+            return
         if mode and mode != "all":
-            caller.msg("Usage: experience [all]")
+            self._show_skill_detail(caller, mode)
             return
         show_all = mode == "all"
 
@@ -153,4 +139,50 @@ class CmdExperience(Command):
             )
         lines.append("")
         lines.append(f"Total Ranks Displayed: {sum(entry['displayed_rank'] for entry in skill_rows)}")
+        lines.append(f"Time Development Points: {int(getattr(caller.db, 'tdp', 0) or 0)}")
+        rexp = get_rexp_display(caller)
+        lines.append(
+            f"Rested EXP Stored: {rexp['banked']}    Usable This Cycle: {rexp['usable_this_cycle']}    Cycle Refreshes: {rexp['cycle_refreshes_in']}"
+        )
+        lines.append(f"Current State: {rexp['sleep_state']}")
+        caller.msg("\n".join(lines))
+
+    def _show_skill_detail(self, caller, query):
+        skill_id = resolve_skill_alias(query) or str(query or "").strip().lower().replace("-", "_").replace(" ", "_")
+        detail = caller.get_skill_detail_entry(skill_id) if hasattr(caller, "get_skill_detail_entry") else None
+        if not detail:
+            caller.msg(f"Unknown skill: '{query}'. Try 'exp help' for syntax.")
+            return
+
+        exp_skill = caller._sync_exp_skill_state(skill_id, ((caller.db.skills or {}) if isinstance(caller.db.skills, Mapping) else {}).get(skill_id, {})) if hasattr(caller, "_sync_exp_skill_state") else None
+        display_name = format_skill_display_name(skill_id)
+        displayed_rank = int(detail.get("rank", 0) or 0)
+        displayed_pool = int(round(float(getattr(exp_skill, "pool", 0.0) or 0.0))) if exp_skill else 0
+        displayed_max_pool = int(round(float(getattr(exp_skill, "max_pool", 0.0) or 0.0))) if exp_skill else int(round(float(base_pool(displayed_rank, str(getattr(exp_skill, 'skillset', 'primary') if exp_skill else 'primary') or 'primary') or 0.0)))
+        lines = [
+            display_name,
+            f"  Current rank: {displayed_rank}",
+            f"  Learning: {displayed_pool}/{displayed_max_pool}",
+            f"  Mindstate: {get_mindstate_name(int(detail.get('mindstate', 0) or 0))} ({int(detail.get('mindstate', 0) or 0)}/{int(detail.get('cap', MINDSTATE_MAX) or MINDSTATE_MAX)})",
+            f"  Bits to next rank: {max(0, displayed_max_pool - displayed_pool)}",
+            f"  Skill group: {str(detail.get('category', 'general') or 'general').title()}",
+        ]
+        caller.msg("\n".join(lines))
+
+    def _show_circle_progress(self, caller):
+        projection = project_advancement(caller)
+        lines = [
+            f"Profession: {str(projection['profession'] or 'commoner').replace('_', ' ').title()}",
+            f"Current Circle: {int(projection['current_circle'] or 0)}",
+            f"Next Circle: {int(projection['target_circle'] or 0)}",
+            f"Guildhall: {projection['guildhall_room_key'] or 'Not yet available'}",
+            f"Required Skill Ranks: {int(projection['skill_rank_total'] or 0)}/{int(projection['requirements']['skill_rank_total_required'] or 0)}",
+            f"Required Coins: {int(projection['coins'] or 0)}/{int(projection['requirements']['money_coins_required'] or 0)}",
+            f"TDP Grant On Advance: {int(projection['tdp_grant_preview'] or 0)}",
+        ]
+        if projection.get("missing"):
+            lines.append("Missing:")
+            lines.extend([f"  {entry}" for entry in projection["missing"]])
+        else:
+            lines.append("You meet the current placeholder requirements for advancement.")
         caller.msg("\n".join(lines))

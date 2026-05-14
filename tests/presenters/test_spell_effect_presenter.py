@@ -68,6 +68,22 @@ class SpellEffectPresenterTests(unittest.TestCase):
 
         self.assertEqual(line, "Cleric draws a barrier tight around themselves.")
 
+    def test_render_manifest_force_messages(self):
+        result = ActionResult.ok(data={"spell_id": "manifest_force", "effect_payload": {"effect_family": "warding", "barrier_strength": 34, "duration": 781, "self_target": True, "target_key": "Mage"}})
+
+        self.assertEqual(
+            SpellEffectPresenter.render_self(result),
+            ["You complete the cast. A faintly shimmering barrier of pure force coalesces around you, ready to absorb incoming blows."],
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_room(result, "Mage"),
+            "Mage completes a spell. A faintly shimmering barrier of pure force coalesces around them.",
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_expiration({"effect_family": "warding", "spell_id": "manifest_force"}),
+            ["The shimmering barrier of force around you fades and dissipates as its spell ends."],
+        )
+
     def test_render_group_warding(self):
         result = ActionResult.ok(data={"effect_payload": {"effect_family": "warding", "group_target": True, "target_count": 2}})
 
@@ -86,6 +102,18 @@ class SpellEffectPresenterTests(unittest.TestCase):
 
         self.assertEqual(SpellEffectPresenter.render_self(result), ["You feel lingering effects wash away."])
         self.assertEqual(SpellEffectPresenter.render_room(result, "Cleric"), "A cleansing wash passes over Cleric.")
+
+    def test_render_gauge_flow_messages(self):
+        result = ActionResult.ok(data={"spell_id": "gauge_flow", "effect_payload": {"effect_family": "utility", "utility_effect": "gauge_flow", "self_target": True}})
+
+        self.assertEqual(
+            SpellEffectPresenter.render_self(result),
+            ["You complete the cast. Your senses extend outward, perceiving the flow of magical energies around you."],
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_room(result, "Jekar"),
+            "Jekar completes a spell. Their gaze becomes distant, attuned to something beyond the visible.",
+        )
 
     def test_render_targeted_magic_miss(self):
         result = ActionResult.ok(data={"effect_payload": {"effect_family": "targeted_magic", "hit": False, "target_key": "Target", "final_damage": 0.0, "absorbed_by_ward": 0.0}})
@@ -110,6 +138,27 @@ class SpellEffectPresenterTests(unittest.TestCase):
 
         self.assertEqual(line, "Mage's spell strikes Target, but a barrier catches part of it.")
 
+    def test_render_strange_arrow_messages(self):
+        result = ActionResult.ok(
+            data={
+                "spell_id": "strange_arrow",
+                "effect_payload": {"effect_family": "targeted_magic", "hit": True, "target_key": "Target", "final_damage": 11.0, "absorbed_by_ward": 0.0, "caster_key": "Jekar"},
+            }
+        )
+
+        self.assertEqual(
+            SpellEffectPresenter.render_self(result),
+            ["You complete the cast at Target. A jagged arrow of crackling energy lances out and strikes them for 11 damage!"],
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_target(result),
+            ["Jekar's spell completes at you. A jagged arrow of crackling energy lances into you, dealing 11 damage!"],
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_room(result, "Jekar"),
+            "Jekar's spell completes at Target. A jagged arrow of crackling energy strikes Target with a sharp crack of thunder.",
+        )
+
     def test_render_debilitation_hit(self):
         result = ActionResult.ok(data={"effect_payload": {"effect_family": "debilitation", "effect_type": "daze", "hit": True, "ignored": False, "target_key": "Target"}})
 
@@ -133,6 +182,26 @@ class SpellEffectPresenterTests(unittest.TestCase):
 
         self.assertEqual(lines, ["You shake off the daze."])
 
+    def test_render_burden_messages_and_expiration(self):
+        result = ActionResult.ok(data={"spell_id": "burden", "effect_payload": {"effect_family": "debilitation", "effect_type": "burden", "hit": True, "target_key": "Target"}})
+
+        self.assertEqual(
+            SpellEffectPresenter.render_self(result),
+            ["You complete the cast at Target. A weight settles onto them, dragging at them."],
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_room(result, "Jekar"),
+            "Jekar's spell completes at Target. Target sags visibly, looking suddenly burdened.",
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_expiration({"effect_family": "debilitation", "effect_type": "burden"}),
+            ["The weight burdening you lifts. You feel your strength returning."],
+        )
+        self.assertEqual(
+            SpellEffectPresenter.render_expiration_room({"effect_family": "debilitation", "effect_type": "burden"}, "Target"),
+            "Target straightens up, looking less burdened.",
+        )
+
     def test_render_cyclic_start(self):
         result = ActionResult.ok(data={"effect_payload": {"effect_family": "cyclic", "target_key": "Empath", "cyclic_state": {"started": True}}})
 
@@ -151,6 +220,12 @@ class SpellEffectPresenterTests(unittest.TestCase):
         lines = SpellEffectPresenter.render_expiration({"effect_family": "utility", "effect_type": "light"})
 
         self.assertEqual(lines, ["The soft light around you fades."])
+
+    def test_render_gauge_flow_expiration_room(self):
+        self.assertEqual(
+            SpellEffectPresenter.render_expiration_room({"effect_family": "utility", "effect_type": "gauge_flow"}, "Jekar"),
+            "Jekar's distant gaze refocuses on the present.",
+        )
 
     def test_render_aoe_start(self):
         result = ActionResult.ok(data={"effect_payload": {"effect_family": "aoe", "target_count": 3, "targets": []}})

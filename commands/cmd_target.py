@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.messaging import send_action_messages, send_untargeted_action
 
 
 class CmdTarget(Command):
@@ -40,8 +41,18 @@ class CmdTarget(Command):
             if not target:
                 return
             self.caller.set_target(target)
-            self.caller.msg(f"You focus on {target.key}.")
+            send_action_messages(
+                actor=self.caller,
+                target=target,
+                actor_message=f"You focus on {target.key}.",
+                target_message=f"{self.caller.key} focuses on you.",
+                room_message=f"{self.caller.key} fixes attention on {target.key}.",
+            )
             return
 
         self.caller.db.target_body_part = part
-        self.caller.msg(f"You focus your attacks on the {part}.")
+        send_untargeted_action(
+            self.caller,
+            actor_message=f"You focus your attacks on the {part}.",
+            room_message=f"{self.caller.key} shifts into a more precise stance.",
+        )

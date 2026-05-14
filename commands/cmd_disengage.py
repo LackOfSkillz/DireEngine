@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.messaging import send_action_messages, send_untargeted_action
 
 
 class CmdDisengage(Command):
@@ -35,15 +36,22 @@ class CmdDisengage(Command):
 
         if target and target.db.target == self.caller:
             target.set_target(None)
-            target.msg(f"{self.caller.key} breaks away from the fight.")
 
         if hasattr(self.caller, "break_combat_rhythm"):
             self.caller.break_combat_rhythm(show_message=True)
 
         self.caller.set_roundtime(3)
-        self.caller.msg("You step back and disengage.")
-        if self.caller.location:
-            self.caller.location.msg_contents(
-                f"{self.caller.key} steps back from the fight.",
-                exclude=self.caller,
+        if target:
+            send_action_messages(
+                actor=self.caller,
+                target=target,
+                actor_message="You step back and disengage.",
+                target_message=f"{self.caller.key} disengages from you.",
+                room_message=f"{self.caller.key} disengages from {target.key}.",
+            )
+        else:
+            send_untargeted_action(
+                self.caller,
+                actor_message="You step back and disengage.",
+                room_message=f"{self.caller.key} steps back from the fight.",
             )

@@ -2,6 +2,10 @@ from commands.command import Command
 from engine.services.spell_access_service import SpellAccessService
 
 
+def _format_spell_type(spell):
+    return str(getattr(spell, "spell_type", "") or "utility").replace("_", " ").title()
+
+
 class CmdSpellbook(Command):
     """
     Inspect the current learned spell state.
@@ -33,4 +37,44 @@ class CmdSpellbook(Command):
             learned_via = str(entry.get("learned_via", "unknown") or "unknown")
             circle_learned = entry.get("circle_learned", "?")
             lines.append(f"{spell.name} ({spell.id}) - via {learned_via}, circle {circle_learned}")
+        caller.msg("\n".join(lines))
+
+
+class CmdSpells(Command):
+    """Show your permanently memorized and apprentice-access spells."""
+
+    key = "spells"
+    aliases = ["spell"]
+    locks = "cmd:all()"
+    help_category = "Magic"
+
+    def func(self):
+        caller = self.caller
+        if hasattr(caller, "ensure_core_defaults"):
+            caller.ensure_core_defaults()
+
+        known_spells = SpellAccessService.list_known_spells(caller)
+        apprentice_spells = SpellAccessService.get_apprentice_spells(caller)
+
+        if not known_spells and not apprentice_spells:
+            caller.msg("You do not currently have any accessible spells.")
+            return
+
+        lines = ["Your Spells:"]
+        if known_spells:
+            lines.append("Permanently Memorized:")
+            for spell in known_spells:
+                suffix = "slot" if int(getattr(spell, "slot_cost", 0) or 0) == 1 else "slots"
+                lines.append(
+                    f"  {spell.name} ({_format_spell_type(spell)}) [{int(getattr(spell, 'slot_cost', 0) or 0)} {suffix}]"
+                )
+
+        if apprentice_spells:
+            if known_spells:
+                lines.append("")
+            expire_circle = max(int(spell.apprentice_until_circle or 0) + 1 for spell in apprentice_spells)
+            lines.append(f"Apprentice Access (expires at circle {expire_circle}):")
+            for spell in apprentice_spells:
+                lines.append(f"  {spell.name} ({_format_spell_type(spell)})")
+
         caller.msg("\n".join(lines))

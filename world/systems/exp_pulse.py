@@ -6,6 +6,7 @@ from weakref import WeakSet
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
 
+from domain.learning.skill_groups import CANONICAL_PULSE_GROUPS
 from world.systems.metrics import increment_counter, record_event
 from world.systems.time_model import SHARED_TICKER
 
@@ -18,13 +19,7 @@ EXP_PULSE_OWNER = "global-exp-pulse"
 MAX_SKILLS_PER_TICK = 10
 _ACTIVE_EXP_CHARACTERS = WeakSet()
 
-SKILL_GROUP_OFFSETS = {
-    100: 0,
-    120: 20,
-    140: 40,
-    160: 60,
-    180: 80,
-}
+SKILL_GROUP_OFFSETS = {group.offset_seconds: group.offset_seconds for group in CANONICAL_PULSE_GROUPS}
 
 
 def get_active_characters():

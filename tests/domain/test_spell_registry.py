@@ -22,6 +22,26 @@ class SpellRegistryTests(unittest.TestCase):
         self.assertEqual(spell.name, "Heal")
         self.assertEqual(spell.allowed_professions, ["empath"])
 
+    def test_analogous_patterns_seed_metadata_matches_canon(self):
+        burden = get_spell("burden")
+        gauge_flow = get_spell("gauge_flow")
+        strange_arrow = get_spell("strange_arrow")
+        manifest_force = get_spell("manifest_force")
+
+        self.assertEqual(burden.slot_cost, 1)
+        self.assertEqual(burden.apprentice_until_circle, 10)
+        self.assertNotIn("apprentice", burden.acquisition_methods)
+        self.assertEqual(gauge_flow.slot_cost, 2)
+        self.assertIsNone(gauge_flow.apprentice_until_circle)
+        self.assertNotIn("apprentice", gauge_flow.acquisition_methods)
+        self.assertEqual(strange_arrow.slot_cost, 1)
+        self.assertEqual(strange_arrow.apprentice_until_circle, 10)
+        self.assertNotIn("apprentice", strange_arrow.acquisition_methods)
+        self.assertEqual(manifest_force.slot_cost, 1)
+        self.assertEqual(manifest_force.apprentice_until_circle, 10)
+        self.assertEqual(manifest_force.acquisition_methods, ["scroll"])
+        self.assertIn("trader", burden.allowed_professions)
+
     def test_all_structured_spells_define_required_fields(self):
         for spell_id, spell in SPELL_REGISTRY.items():
             with self.subTest(spell_id=spell_id):

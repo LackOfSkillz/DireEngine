@@ -4,8 +4,12 @@ Skill system — core data structures (no logic yet)
 
 import time
 
+from domain.learning.mindstate import MINDSTATE_BANDS, get_mindstate_band, get_mindstate_name as get_canonical_mindstate_name
+from domain.learning.pool_size import total_pool_size, wisdom_pulse_multiplier
+from domain.learning.skill_groups import get_skill_group_for_skill
 from engine.bundles.builtin_skills import LEGACY_SKILL_PULSE_GROUPS, normalize_skill_registry_key
 from engine.bundles.skill_registry import skill_registry
+from engine.services.messaging import send_untargeted_action
 
 
 VALID_SKILLSETS = ("primary", "secondary", "tertiary")
@@ -18,24 +22,7 @@ GRACE_WINDOW = 30
 FEEDBACK_THRESHOLD = 5
 FEEDBACK_COOLDOWN = 10
 
-MINDSTATE_NAMES = {
-    0: "clear",
-    1: "dabbling",
-    2: "perusing",
-    3: "learning",
-    4: "thoughtful",
-    5: "thinking",
-    6: "considering",
-    7: "pondering",
-    8: "ruminating",
-    9: "concentrating",
-    10: "attentive",
-    15: "engaged",
-    20: "absorbed",
-    25: "focused",
-    30: "riveted",
-    34: "mind lock",
-}
+MINDSTATE_NAMES = {value: band.name for value, band in MINDSTATE_BANDS.items()}
 
 LEGACY_SKILL_ALIASES = {
     "hand_to_hand": "brawling",
@@ -72,14 +59,12 @@ TEMPLATE_EXP_SKILLS = (
 
 DRAIN_RATES = {
     "primary": 0.067,
-    "secondary": 0.050,
-    "tertiary": 0.035,
+    "secondary": 0.05025,
+    "tertiary": 0.0335,
 }
 
-BASE_POOL_NUMERATOR = 15000.0
-BASE_POOL_OFFSET = 900.0
-BASE_POOL_FLOOR = 1000.0
-MINDSTATE_CURVE_EXPONENT = 0.7
+MAJOR_MINDSTATE_THRESHOLDS = {25, 30, 33, 34}
+MIND_LOCK_NOTIFICATION_WINDOW_SECONDS = 1800
 
 SKILL_GAIN_MODIFIERS = {
     "perception": 0.40,
@@ -137,6 +122,15 @@ def get_skill_display_name(name):
     display_name = str(definition.get("display_name") or "").strip()
     if display_name:
         return display_name
+    try:
+        from typeclasses.characters import SKILL_REGISTRY  # Local import avoids module-cycle load order issues.
+
+        metadata = dict(SKILL_REGISTRY.get(resolve_skill_registry_key(name), {}))
+        display_name = str(metadata.get("display_name") or "").strip()
+        if display_name:
+            return display_name
+    except Exception:
+        pass
     return normalize_skill_name(name).replace("_", " ").title()
 
 
@@ -160,6 +154,9 @@ def list_skill_groups():
 
 
 def get_skill_pulse_group(name):
+    canonical_group = get_skill_group_for_skill(name)
+    if canonical_group is not None:
+        return int(canonical_group.offset_seconds or 0)
     definition = get_skill_definition(name) or {}
     if definition.get("pulse_group") is not None:
         return int(definition.get("pulse_group") or 100)
@@ -181,21 +178,16 @@ def calculate_mindstate(pool, max_pool):
     if max_pool <= 0:
         return 0
     ratio = max(0.0, min(1.0, float(pool) / float(max_pool)))
-    return max(0, min(MINDSTATE_MAX, int(MINDSTATE_MAX * (ratio ** MINDSTATE_CURVE_EXPONENT))))
+    return max(0, min(MINDSTATE_MAX, int(MINDSTATE_MAX * ratio)))
 
 
 def get_mindstate_name(value):
-    current = "clear"
-    for threshold in sorted(MINDSTATE_NAMES):
-        if int(value or 0) >= threshold:
-            current = MINDSTATE_NAMES[threshold]
-    return current
+    return get_canonical_mindstate_name(int(value or 0))
 
 
 def base_pool(rank, skillset):
     normalized_rank = max(0, int(rank or 0))
-    normalize_skillset(skillset)
-    return (BASE_POOL_NUMERATOR * normalized_rank / (normalized_rank + BASE_POOL_OFFSET)) + BASE_POOL_FLOOR
+    return total_pool_size(normalized_rank, normalize_skillset(skillset), 10, 10)
 
 
 def pool_stat_modifier(owner):
@@ -210,8 +202,11 @@ def pool_stat_modifier(owner):
         intelligence = 10.0
         discipline = 10.0
 
-    modifier = 1.0 + (((intelligence - 10.0) + (discipline - 10.0)) * 0.005)
-    return max(0.75, min(1.5, modifier))
+    baseline_pool = total_pool_size(100, "primary", 10, 10)
+    if baseline_pool <= 0:
+        return 1.0
+    modified_pool = total_pool_size(100, "primary", intelligence, discipline)
+    return max(0.1, float(modified_pool) / float(baseline_pool))
 
 
 def rank_cost(rank):
@@ -221,6 +216,7 @@ def rank_cost(rank):
 def award_xp(skill, amount):
     skill.recalc_pool()
     if skill.mindstate >= MIND_LOCK:
+        notify_mind_lock_blocked_xp(skill)
         return 0.0
 
     gained_amount = max(0.0, float(amount or 0.0))
@@ -347,41 +343,62 @@ def send_feedback(skill):
 
 def handle_mindstate_change(skill, new_name, now=None):
     current_time = float(now if now is not None else time.time())
-    if str(new_name or "") == str(getattr(skill, "last_mindstate_name", "clear") or "clear"):
+    old_value = int(getattr(skill, "last_mindstate_sent", getattr(skill, "mindstate", 0)) or 0)
+    new_value = int(getattr(skill, "mindstate", 0) or 0)
+    if new_value == old_value:
         return False
 
     owner = getattr(skill, "owner", None)
-    if owner is None or not hasattr(owner, "msg"):
+    if owner is None:
+        skill.last_mindstate_sent = new_value
         return False
     if not bool(getattr(getattr(owner, "db", None), "exp_feedback", True)):
+        skill.last_mindstate_sent = new_value
         return False
 
     last_feedback_time = float(getattr(skill, "last_feedback_time", 0.0) or 0.0)
     if current_time - last_feedback_time < FEEDBACK_COOLDOWN:
         return False
 
-    if new_name == "mind lock":
-        owner.msg(f"Your {skill.name} is fully absorbed. You can learn no more.")
-    elif new_name == "clear":
-        owner.msg(f"Your {skill.name} clears from your mind.")
-    else:
-        owner.msg(f"You feel your {skill.name} settling into {new_name}.")
+    if new_value <= old_value:
+        skill.last_mindstate_sent = new_value
+        return False
+    crossed_thresholds = sorted(threshold for threshold in MAJOR_MINDSTATE_THRESHOLDS if old_value < threshold <= new_value)
+    if not crossed_thresholds:
+        skill.last_mindstate_sent = new_value
+        return False
 
-    skill.last_mindstate_sent = int(skill.mindstate)
+    threshold = crossed_thresholds[-1]
+    band = get_mindstate_band(threshold)
+    if threshold >= MIND_LOCK:
+        actor_message = (
+            f"Your mind locks with {get_skill_display_name(skill.name)}. "
+            f"You cannot absorb more experience in this skill until the pool drains."
+        )
+    else:
+        actor_message = f"Your mind reaches a {band.name} state with {get_skill_display_name(skill.name)}."
+    send_untargeted_action(actor=owner, actor_message=actor_message)
+
+    skill.last_mindstate_sent = new_value
     skill.last_feedback_time = current_time
     return True
 
 
 def wisdom_modifier(wis):
-    return 1 + (float(wis or 0.0) - 30.0) * 0.003
+    return float(wisdom_pulse_multiplier(wis or 10.0))
 
 
-def drain_skill(skill, wisdom=30):
+def normalized_mindstate_drain_modifier(mindstate):
+    raw_modifier = float(get_mindstate_band(int(mindstate or 0)).pulse_modifier or 1.0)
+    return 1.0 + ((raw_modifier - 1.0) * 0.30)
+
+
+def drain_skill(skill, wisdom=30, drain_multiplier=1.0):
     skill.recalc_pool()
     skill.rank_progress = max(0.0, float(getattr(skill, "rank_progress", 0.0) or 0.0))
     rate = float(DRAIN_RATES.get(skill.skillset, DRAIN_RATES["primary"]))
-    mod = wisdom_modifier(wisdom)
-    drain = skill.max_pool * rate * mod
+    mod = wisdom_modifier(wisdom) * normalized_mindstate_drain_modifier(skill.mindstate)
+    drain = skill.max_pool * rate * mod * max(0.0, float(drain_multiplier or 0.0))
     drain = min(drain, skill.pool)
 
     skill.pool -= drain
@@ -398,10 +415,14 @@ def drain_skill(skill, wisdom=30):
 def process_rank(skill):
     skill.rank_progress = max(0.0, float(getattr(skill, "rank_progress", 0.0) or 0.0))
     cost = rank_cost(skill.rank)
+    owner = getattr(skill, "owner", None)
 
     while skill.rank_progress >= cost:
         skill.rank_progress -= cost
+        previous_rank = int(skill.rank or 0)
         skill.rank += 1
+        if owner is not None and hasattr(owner, "on_skill_rank_gained"):
+            owner.on_skill_rank_gained(skill.name, previous_rank, int(skill.rank or 0), 1)
         skill.recalc_pool()
         cost = rank_cost(skill.rank)
 
@@ -419,6 +440,25 @@ def resolve_wisdom(skill, wisdom=None):
     return 30
 
 
+def notify_mind_lock_blocked_xp(skill, now=None):
+    owner = getattr(skill, "owner", None)
+    if owner is None:
+        return False
+    current_time = float(now if now is not None else time.time())
+    notification_store = getattr(getattr(owner, "ndb", None), "mind_lock_notifications", None) or {}
+    last_notification = float(notification_store.get(skill.name, 0.0) or 0.0)
+    if current_time - last_notification < MIND_LOCK_NOTIFICATION_WINDOW_SECONDS:
+        return False
+    notification_store = dict(notification_store)
+    notification_store[skill.name] = current_time
+    owner.ndb.mind_lock_notifications = notification_store
+    send_untargeted_action(
+        actor=owner,
+        actor_message=f"Your mind is too saturated with {get_skill_display_name(skill.name)} to absorb more right now.",
+    )
+    return True
+
+
 def persist_skill_state(skill):
     owner = getattr(skill, "owner", None)
     if owner is not None and hasattr(owner, "_persist_exp_skill_state"):
@@ -426,9 +466,9 @@ def persist_skill_state(skill):
     return skill
 
 
-def pulse(skill, wisdom=None):
+def pulse(skill, wisdom=None, drain_multiplier=1.0):
     wisdom = resolve_wisdom(skill, wisdom=wisdom)
-    drained = drain_skill(skill, wisdom=wisdom)
+    drained = drain_skill(skill, wisdom=wisdom, drain_multiplier=drain_multiplier)
     process_rank(skill)
     return drained
 
@@ -463,7 +503,14 @@ class SkillState:
         self.skillset = normalize_skillset(self.skillset)
         self.rank = max(0, int(self.rank or 0))
         self.rank_progress = max(0.0, float(getattr(self, "rank_progress", 0.0) or 0.0))
-        self.max_pool = base_pool(self.rank, self.skillset) * pool_stat_modifier(self.owner)
+        stats = getattr(getattr(self.owner, "db", None), "stats", None)
+        if isinstance(stats, dict):
+            intelligence = float(stats.get("intelligence", 10.0) or 10.0)
+            discipline = float(stats.get("discipline", 10.0) or 10.0)
+        else:
+            intelligence = 10.0
+            discipline = 10.0
+        self.max_pool = total_pool_size(self.rank, self.skillset, intelligence, discipline)
         self.pool = max(0.0, min(float(self.pool or 0.0), float(self.max_pool or 0.0)))
         self.update_mindstate()
         persist_skill_state(self)

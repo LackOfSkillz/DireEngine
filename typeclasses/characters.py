@@ -504,44 +504,47 @@ MINDSTATE_LEVELS = [
 ]
 
 SKILL_REGISTRY = {
-    "attack": {"category": "combat", "visibility": "shared", "description": "general offensive combat training", "starter_rank": 0},
-    "arcana": {"category": "magic", "visibility": "shared", "description": "ability to use magical devices and tools", "starter_rank": 1},
-    "athletics": {"category": "survival", "visibility": "shared", "description": "climbing, swimming, and physical traversal", "starter_rank": 1},
-    "backstab": {"category": "survival", "visibility": "guild_locked", "description": "precision attack from stealth", "starter_rank": 0},
-    "blunt": {"category": "combat", "visibility": "shared", "description": "fighting with blunt weapons", "starter_rank": 0},
-    "brigandine": {"category": "armor", "visibility": "shared", "description": "training in brigandine armor use", "starter_rank": 0},
-    "brawling": {"category": "combat", "visibility": "shared", "description": "unarmed fighting", "starter_rank": 0},
-    "chain_armor": {"category": "armor", "visibility": "shared", "description": "training in chain armor use", "starter_rank": 0},
-    "combat": {"category": "combat", "visibility": "shared", "description": "general combat sense and technique", "starter_rank": 0},
-    "debilitation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "hindering and control magic", "starter_rank": 0},
-    "disengage": {"category": "combat", "visibility": "shared", "description": "breaking away from combat pressure", "starter_rank": 0},
-    "empathy": {"category": "magic", "visibility": "shared", "description": "transferring and reading wounds through empathy", "starter_rank": 0},
-    "attunement": {"category": "magic", "visibility": "shared", "description": "ability to perceive and channel radiance", "starter_rank": 1},
-    "evasion": {"category": "survival", "visibility": "shared", "description": "avoiding incoming attacks", "starter_rank": 1},
-    "first_aid": {"category": "survival", "visibility": "shared", "description": "stabilizing wounds and suppressing bleeding", "starter_rank": 0},
-    "heavy_edge": {"category": "combat", "visibility": "shared", "description": "fighting with heavy edged weapons", "starter_rank": 0},
-    "instinct": {"category": "survival", "visibility": "guild_locked", "description": "survival intuition / danger sense placeholder", "starter_rank": 0},
-    "light_armor": {"category": "armor", "visibility": "shared", "description": "training in light armor use", "starter_rank": 0},
-    "light_edge": {"category": "combat", "visibility": "shared", "description": "fighting with light edged weapons", "starter_rank": 0},
-    "locksmithing": {"category": "survival", "visibility": "shared", "description": "picking locks and disarming traps", "starter_rank": 0},
-    "mechanical_lore": {"category": "lore", "visibility": "shared", "description": "understanding tools, rigs, and practical systems", "starter_rank": 0},
-    "outdoorsmanship": {"category": "survival", "visibility": "shared", "description": "foraging, wilderness interaction, and natural gathering", "starter_rank": 0},
-    "perception": {"category": "survival", "visibility": "shared", "description": "noticing hidden threats, traps, and subtle details", "starter_rank": 1},
-    "plate_armor": {"category": "armor", "visibility": "shared", "description": "training in plate armor use", "starter_rank": 0},
-    "polearm": {"category": "combat", "visibility": "shared", "description": "fighting with polearms", "starter_rank": 0},
-    "appraisal": {"category": "lore", "visibility": "shared", "description": "evaluating items, creatures, and value", "starter_rank": 1},
-    "scholarship": {"category": "lore", "visibility": "shared", "description": "improves learning and knowledge systems", "starter_rank": 0},
-    "tactics": {"category": "lore", "visibility": "shared", "description": "improves combat awareness and positioning", "starter_rank": 0},
-    "theurgy": {"category": "magic", "visibility": "guild_locked", "guilds": ("cleric",), "description": "ritual practice, communes, and divine mediation", "starter_rank": 0},
-    "targeted_magic": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "direct offensive spellcasting", "starter_rank": 0},
-    "trading": {"category": "lore", "visibility": "shared", "description": "improves buying and selling prices", "starter_rank": 1},
-    "utility": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "general purpose magical effects", "starter_rank": 0},
-    "augmentation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "beneficial enhancement magic", "starter_rank": 0},
-    "warding": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "description": "protective and defensive magic", "starter_rank": 0},
-    "skinning": {"category": "survival", "visibility": "shared", "description": "harvesting useful parts from slain creatures", "starter_rank": 0},
-    "stealth": {"category": "survival", "visibility": "shared", "description": "hiding, sneaking, and stalking unseen", "starter_rank": 0},
-    "thanatology": {"category": "survival", "visibility": "guild_locked", "description": "death/body handling placeholder", "starter_rank": 0},
-    "thievery": {"category": "survival", "visibility": "guild_locked", "description": "illicit manipulation / theft placeholder", "starter_rank": 0},
+    "appraisal": {"category": "lore", "visibility": "shared", "display_name": "Appraisal", "description": "evaluating items, creatures, and value", "starter_rank": 1},
+    "arcana": {"category": "magic", "visibility": "shared", "display_name": "Arcana", "description": "ability to use magical devices and tools", "starter_rank": 1},
+    "attack": {"category": "combat", "visibility": "shared", "display_name": "Attack", "description": "general offensive combat training", "starter_rank": 0},
+    "athletics": {"category": "survival", "visibility": "shared", "display_name": "Athletics", "description": "climbing, swimming, and physical traversal", "starter_rank": 1},
+    "attunement": {"category": "magic", "visibility": "shared", "display_name": "Attunement", "description": "ability to perceive and channel radiance", "starter_rank": 1},
+    "augmentation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Augmentation", "description": "beneficial enhancement magic", "starter_rank": 0},
+    "backstab": {"category": "survival", "visibility": "guild_locked", "display_name": "Backstab", "description": "precision attack from stealth", "starter_rank": 0},
+    "blunt": {"category": "combat", "visibility": "shared", "display_name": "Blunt Weapons", "description": "fighting with blunt weapons", "starter_rank": 0},
+    "brigandine": {"category": "armor", "visibility": "shared", "display_name": "Brigandine", "description": "training in brigandine armor use", "starter_rank": 0},
+    "brawling": {"category": "combat", "visibility": "shared", "display_name": "Hand-To-Hand", "description": "unarmed fighting", "starter_rank": 0},
+    "chain_armor": {"category": "armor", "visibility": "shared", "display_name": "Chain Armor", "description": "training in chain armor use", "starter_rank": 0},
+    "combat": {"category": "combat", "visibility": "shared", "display_name": "Combat", "description": "general combat sense and technique", "starter_rank": 0},
+    "debilitation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Debilitation", "description": "hindering and control magic", "starter_rank": 0},
+    "disengage": {"category": "combat", "visibility": "shared", "display_name": "Disengage", "description": "breaking away from combat pressure", "starter_rank": 0},
+    "empathy": {"category": "magic", "visibility": "shared", "display_name": "Empathy", "description": "transferring and reading wounds through empathy", "starter_rank": 0},
+    "evasion": {"category": "survival", "visibility": "shared", "display_name": "Evasion", "description": "avoiding incoming attacks", "starter_rank": 1},
+    "first_aid": {"category": "survival", "visibility": "shared", "display_name": "First Aid", "description": "stabilizing wounds and suppressing bleeding", "starter_rank": 0},
+    "heavy_edge": {"category": "combat", "visibility": "shared", "display_name": "Heavy Edged Weapons", "description": "fighting with heavy edged weapons", "starter_rank": 0},
+    "instinct": {"category": "survival", "visibility": "guild_locked", "display_name": "Instinct", "description": "survival intuition / danger sense placeholder", "starter_rank": 0},
+    "light_armor": {"category": "armor", "visibility": "shared", "display_name": "Light Armor", "description": "training in light armor use", "starter_rank": 0},
+    "light_edge": {"category": "combat", "visibility": "shared", "display_name": "Light Edged Weapons", "description": "fighting with light edged weapons", "starter_rank": 0},
+    "locksmithing": {"category": "survival", "visibility": "shared", "display_name": "Locksmithing", "description": "picking locks and disarming traps", "starter_rank": 0},
+    "mechanical_lore": {"category": "lore", "visibility": "shared", "display_name": "Mechanical Lore", "description": "understanding tools, rigs, and practical systems", "starter_rank": 0},
+    "multiple_engaged_opponent": {"category": "defense", "visibility": "shared", "display_name": "Multiple Opponents", "description": "maintaining combat effectiveness when fighting multiple opponents at once", "starter_rank": 0},
+    "outdoorsmanship": {"category": "survival", "visibility": "shared", "display_name": "Outdoorsmanship", "description": "foraging, wilderness interaction, and natural gathering", "starter_rank": 0},
+    "parry_ability": {"category": "defense", "visibility": "shared", "display_name": "Parry Ability", "description": "parrying incoming melee attacks with a weapon", "starter_rank": 0},
+    "perception": {"category": "survival", "visibility": "shared", "display_name": "Perception", "description": "noticing hidden threats, traps, and subtle details", "starter_rank": 1},
+    "plate_armor": {"category": "armor", "visibility": "shared", "display_name": "Plate Armor", "description": "training in plate armor use", "starter_rank": 0},
+    "polearm": {"category": "combat", "visibility": "shared", "display_name": "Polearms", "description": "fighting with polearms", "starter_rank": 0},
+    "scholarship": {"category": "lore", "visibility": "shared", "display_name": "Scholarship", "description": "improves learning and knowledge systems", "starter_rank": 0},
+    "shield_usage": {"category": "defense", "visibility": "shared", "display_name": "Shield Usage", "description": "using a shield to deflect attacks and reduce incoming damage", "starter_rank": 0},
+    "skinning": {"category": "survival", "visibility": "shared", "display_name": "Skinning", "description": "harvesting useful parts from slain creatures", "starter_rank": 0},
+    "stealth": {"category": "survival", "visibility": "shared", "display_name": "Stealth", "description": "hiding, sneaking, and stalking unseen", "starter_rank": 0},
+    "tactics": {"category": "lore", "visibility": "shared", "display_name": "Tactics", "description": "improves combat awareness and positioning", "starter_rank": 0},
+    "targeted_magic": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Targeted Magic", "description": "direct offensive spellcasting", "starter_rank": 0},
+    "thanatology": {"category": "survival", "visibility": "guild_locked", "display_name": "Thanatology", "description": "death/body handling placeholder", "starter_rank": 0},
+    "theurgy": {"category": "magic", "visibility": "guild_locked", "guilds": ("cleric",), "display_name": "Theurgy", "description": "ritual practice, communes, and divine mediation", "starter_rank": 0},
+    "thievery": {"category": "survival", "visibility": "guild_locked", "display_name": "Thievery", "description": "illicit manipulation / theft placeholder", "starter_rank": 0},
+    "trading": {"category": "lore", "visibility": "shared", "display_name": "Trading", "description": "improves buying and selling prices", "starter_rank": 1},
+    "utility": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Utility", "description": "general purpose magical effects", "starter_rank": 0},
+    "warding": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Warding", "description": "protective and defensive magic", "starter_rank": 0},
 }
 
 STARTER_SKILLS = tuple(
@@ -1243,6 +1246,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.attunement = 100
         self.db.max_attunement = 100
         self.db.spellbook = {"known_spells": {}}
+        self.db.feats = {"learned": [], "granted": []}
+        self.db.magic_slot_pool = None
         self.db.bleed_state = "none"
         self.db.roundtime_end = 0
         self.db.coins = 0
@@ -1265,6 +1270,8 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.last_death_time = 0.0
         self.db.death_analytics = {}
         self.db.death_protection = True
+        self.db.tdp = 600
+        self.db.tdp_pool = 0
         self.db.skills = {}
         self.db.stance = {"offense": 50, "defense": 50}
         self.db.position = "standing"
@@ -1344,6 +1351,7 @@ class Character(ObjectParent, DefaultCharacter):
     def at_post_puppet(self, *args, **kwargs):
         super().at_post_puppet(*args, **kwargs)
         self.ensure_core_defaults()
+        self.ensure_sleep_defaults()
         self.refresh_death_sting(emit_message=False)
         spawned_from_web = self._apply_web_new_player_spawn()
         if not spawned_from_web:
@@ -1357,6 +1365,12 @@ class Character(ObjectParent, DefaultCharacter):
             pass
         self.get_subsystem()
         sync_subject_interest(self)
+        try:
+            from engine.services.rexp_service import apply_offline_drain
+
+            apply_offline_drain(self)
+        except Exception:
+            pass
         self.sync_client_state(include_map=True)
         ManaService.bootstrap_scheduled_effects(self)
         if self.is_dead():
@@ -1364,6 +1378,8 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_post_unpuppet(self, *args, **kwargs):
         super().at_post_unpuppet(*args, **kwargs)
+        self.ensure_sleep_defaults()
+        self.db.rexp_last_offline = time.time()
         if bool(getattr(self.ndb, "is_fishing", False)) or getattr(self.ndb, "fishing_session", None) is not None:
             from world.systems.fishing import cancel_fishing_session
 
@@ -1377,6 +1393,50 @@ class Character(ObjectParent, DefaultCharacter):
         if refresh or not isinstance(handler, SkillHandler) or getattr(handler, "obj", None) is not self:
             self.exp_skills = SkillHandler(self)
         return self.exp_skills
+
+    def ensure_sleep_defaults(self):
+        if getattr(self.db, "sleep_state", None) is None:
+            self.db.sleep_state = "awake"
+        if getattr(self.db, "rexp_banked_seconds", None) is None:
+            self.db.rexp_banked_seconds = 0
+        if getattr(self.db, "rexp_cycle_start", None) is None:
+            self.db.rexp_cycle_start = time.time()
+        if getattr(self.db, "rexp_used_this_cycle_seconds", None) is None:
+            self.db.rexp_used_this_cycle_seconds = 0
+        if getattr(self.db, "rexp_last_active_check", None) is None:
+            self.db.rexp_last_active_check = time.time()
+        if getattr(self.db, "rexp_last_offline", None) is None:
+            self.db.rexp_last_offline = None
+
+    def is_awake(self):
+        self.ensure_sleep_defaults()
+        return str(getattr(self.db, "sleep_state", "awake") or "awake") == "awake"
+
+    def is_in_light_sleep(self):
+        self.ensure_sleep_defaults()
+        return str(getattr(self.db, "sleep_state", "awake") or "awake") == "light_sleep"
+
+    def is_in_deep_sleep(self):
+        self.ensure_sleep_defaults()
+        return str(getattr(self.db, "sleep_state", "awake") or "awake") == "deep_sleep"
+
+    def is_asleep(self):
+        return self.is_in_light_sleep() or self.is_in_deep_sleep()
+
+    def auto_wake_if_sleeping(self, reason="activity"):
+        if not self.is_asleep():
+            return False
+        from engine.services.messaging import send_untargeted_action
+
+        self.db.sleep_state = "awake"
+        send_untargeted_action(
+            actor=self,
+            actor_message="Your activity stirs you from your rest. You are awake.",
+            room_message=f"{self.key} stirs from rest as their activity rouses them.",
+        )
+        if hasattr(self, "sync_client_state"):
+            self.sync_client_state()
+        return True
 
     def _sync_exp_skill_state(self, skill_name, legacy_entry=None):
         handler = self._ensure_exp_skill_handler()
@@ -1448,14 +1508,17 @@ class Character(ObjectParent, DefaultCharacter):
         return skill
 
     def get_exp_skillset_tier(self, skill_name):
+        from world.professions.professions import get_skillset_tier_for_skill
+
         normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
-        if normalized in EXP_SKILLSET_TIER_OVERRIDES:
-            return EXP_SKILLSET_TIER_OVERRIDES[normalized]
         metadata = self.get_skill_metadata(normalized)
-        category = str(metadata.get("category", "") or "").strip().lower()
-        if category in {"primary", "secondary", "tertiary"}:
-            return category
-        return "primary"
+        profession = str(getattr(self.db, "profession", "commoner") or "commoner")
+        return get_skillset_tier_for_skill(
+            profession,
+            skill_name=normalized,
+            skill_category=metadata.get("category"),
+            default=EXP_SKILLSET_TIER_OVERRIDES.get(normalized, "primary"),
+        )
 
     # SKILL_GAIN_ENTRYPOINT
     # DEPRECATED: use SkillService
@@ -2277,6 +2340,12 @@ class Character(ObjectParent, DefaultCharacter):
         if not self.attributes.has("last_disarmed_trap_source"):
             self.db.last_disarmed_trap_source = None
 
+    def ensure_tdp_defaults(self):
+        if self.db.tdp is None:
+            self.db.tdp = 600
+        if self.db.tdp_pool is None:
+            self.db.tdp_pool = 0
+
     def ensure_combat_defaults(self):
         current_stance = self.db.stance
         if not isinstance(self.db.stance, Mapping):
@@ -2434,10 +2503,13 @@ class Character(ObjectParent, DefaultCharacter):
         self.ensure_stat_defaults()
         self.ensure_race_defaults()
         self.ensure_resource_defaults()
+        self.ensure_tdp_defaults()
         self.ensure_combat_defaults()
         self.ensure_equipment_defaults()
         self.ensure_injury_defaults()
         self.ensure_spellbook_defaults()
+        self.ensure_feat_defaults()
+        self.ensure_magic_slot_pool_defaults()
         self.ensure_starter_skills()
         self.ensure_skill_defaults()
         self._seed_template_exp_skills()
@@ -2617,6 +2689,51 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.unabsorbed_xp = max(0, self.get_unabsorbed_xp() + int(amount or 0))
         self.sync_client_state()
         return self.db.unabsorbed_xp
+
+    def grant_tdp(self, amount, reason=""):
+        self.ensure_tdp_defaults()
+        granted_amount = int(amount or 0)
+        if granted_amount <= 0:
+            return 0
+        self.db.tdp = int(getattr(self.db, "tdp", 0) or 0) + granted_amount
+        self.sync_client_state()
+        return granted_amount
+
+    def spend_tdp(self, amount, reason=""):
+        self.ensure_tdp_defaults()
+        spent_amount = int(amount or 0)
+        if spent_amount <= 0:
+            return False
+        current = int(getattr(self.db, "tdp", 0) or 0)
+        if current < spent_amount:
+            return False
+        self.db.tdp = current - spent_amount
+        self.sync_client_state()
+        return True
+
+    def on_skill_rank_gained(self, skill_id, old_rank, new_rank, ranks_gained):
+        self.ensure_tdp_defaults()
+
+        previous_rank = int(old_rank or 0)
+        current_rank = int(new_rank or 0)
+        gained_ranks = int(ranks_gained or 0)
+        if gained_ranks <= 0 or current_rank <= previous_rank:
+            return 0
+
+        pool = int(getattr(self.db, "tdp_pool", 0) or 0)
+        tdps_granted = 0
+
+        for rank_value in range(previous_rank + 1, current_rank + 1):
+            pool += rank_value
+            while pool >= 200:
+                pool -= 200
+                tdps_granted += 1
+
+        self.db.tdp_pool = pool
+        if tdps_granted > 0:
+            self.db.tdp = int(getattr(self.db, "tdp", 0) or 0) + tdps_granted
+        self.sync_client_state()
+        return tdps_granted
 
     def spend_unabsorbed_xp(self, amount):
         cost = max(0, int(amount or 0))
@@ -8756,6 +8873,7 @@ class Character(ObjectParent, DefaultCharacter):
         stat_name = str(name or "").strip().lower()
         default_value = _default_stats().get(stat_name, 0)
         current_value = int(self.db.stats.get(stat_name, default_value) or default_value)
+        current_value += int(self.get_effect_stat_modifier(stat_name) or 0)
         cap = self.get_race_stat_cap(stat_name)
         if cap is not None and current_value > int(cap):
             self.set_stat(stat_name, cap)
@@ -10264,6 +10382,7 @@ class Character(ObjectParent, DefaultCharacter):
             total += self.get_object_total_weight(item)
         for item in self.get_worn_items():
             total += self.get_object_total_weight(item)
+        total += float(self.get_encumbrance_modifier() or 0.0)
         return float(total)
 
     def update_encumbrance_state(self):
@@ -11855,6 +11974,18 @@ class Character(ObjectParent, DefaultCharacter):
                     options.append({"value": category_name, "label": self._label_vendor_utility_category(category_name), "count": count})
                 return {"view": "utility_categories", "state": state, "entries": utility_catalog, "options": options, "breadcrumb": "General Goods"}
 
+                prep_time_defaults = {
+                    "augmentation": 3.0,
+                    "aoe": 2.5,
+                    "cyclic": 4.0,
+                    "debilitation": 2.5,
+                    "healing": 2.0,
+                    "targeted_magic": 2.0,
+                    "utility": 2.0,
+                    "warding": 3.0,
+                }
+                min_prep_time = max(0.0, float(getattr(spell, "min_prep_time", 0.0) or (prep_time_defaults.get(category, 2.0) + max(0, tier - 1) * 0.25)))
+                expiry_window = max(min_prep_time, float(getattr(spell, "expiry_window", 0.0) or (90.0 + tier * 15.0)))
             category_entries = [entry for entry in utility_catalog if entry.get("utility_category") == selected_category]
             category_entries.sort(key=lambda entry: (str(entry.get("functional_type") or ""), str(entry.get("display_name") or "")))
             state["level"] = "item_list"
@@ -13159,7 +13290,17 @@ class Character(ObjectParent, DefaultCharacter):
             return False
 
         realm = self.get_mana_realm()
-        result = ManaService.prepare_spell(self, getattr(self, "location", None), realm, mana, mana_min, mana_max)
+        result = ManaService.prepare_spell(
+            self,
+            getattr(self, "location", None),
+            realm,
+            mana,
+            mana_min,
+            mana_max,
+            spell_id=spell_def.get("id"),
+            min_prep_time=spell_def.get("min_prep_time"),
+            expiry_window=spell_def.get("expiry_window"),
+        )
         if not result.success:
             for line in ManaPresenter.render_prepare(result):
                 self.msg(line)
@@ -13173,28 +13314,127 @@ class Character(ObjectParent, DefaultCharacter):
             prepared_mana["base_difficulty"] = float(
                 spell_def.get("base_difficulty", 10 + int(spell_def.get("tier", 1) or 1) * 3)
             )
+            prepared_mana["spell_id"] = str(spell_def.get("id") or spell_name)
             ManaService._set_prepared_mana_state(self, prepared_mana)
 
         stability = self.calculate_preparation_stability(mana, spell_def["category"])
         self.set_state(
             "prepared_spell",
             {
+                "spell_id": str(spell_def.get("id") or spell_name),
                 "name": spell_name,
                 "mana": mana,
                 "realm": realm,
                 "category": spell_def["category"],
                 "stability": stability,
                 "target_mode": spell_def.get("target_mode", "self"),
+                "ready": bool((prepared_mana or {}).get("ready", True)),
+                "held_mana": int((prepared_mana or {}).get("held_mana", 0) or 0),
+                "prep_started_at": float((prepared_mana or {}).get("prep_started_at", 0.0) or 0.0),
+                "min_prep_time": float(spell_def.get("min_prep_time", 0.0) or 0.0),
+                "expiry_at": float((prepared_mana or {}).get("expiry_at", 0.0) or 0.0),
             },
         )
+        self._sync_prepared_spell_state_from_mana(prepared_mana)
         for line in ManaPresenter.render_prepare(
-            result.__class__.ok(data=dict(result.data) | {"spell_name": spell_name})
+            result.__class__.ok(data=dict(result.data) | {"spell_name": spell_def.get("name", spell_name), "prepared_mana": dict(prepared_mana or {})})
         ):
             self.msg(line)
         self.use_skill("attunement", apply_roundtime=False, emit_placeholder=False, require_known=False)
         if self.is_profession("cleric"):
             self.use_skill("theurgy", apply_roundtime=False, emit_placeholder=False, require_known=False, difficulty=self.get_theurgy_training_difficulty(max(8, mana)))
         return True
+
+    def harness_spell(self, args):
+        text = str(args or "").strip()
+        if not text:
+            maximum = ManaService.compute_max_harnessable(self)
+            self.msg(f"You can harness up to {maximum} mana right now.")
+            return False
+        try:
+            amount = int(text)
+        except ValueError:
+            self.msg("You must specify a whole number of mana to harness.")
+            return False
+        if amount <= 0:
+            self.msg("You must harness at least some mana.")
+            return False
+        result = ManaService.harness_mana(self, amount, self.get_skill("attunement"), self.get_skill("arcana"))
+        if not result.success:
+            for line in ManaPresenter.render_harness(result):
+                self.msg(line)
+            return False
+        self._sync_prepared_spell_state_from_mana()
+        for line in ManaPresenter.render_harness(result):
+            self.msg(line)
+        return True
+
+    def release_magic(self, args=None):
+        mode = str(args or "").strip().lower().replace("-", "_")
+        prepared_spell = self.get_state("prepared_spell")
+        held_mana = ManaService._get_harnessed_mana_state(self)
+        active_cyclic = self.get_active_cyclic_effects()
+
+        if mode in {"", "auto", "default"}:
+            if prepared_spell:
+                ManaService.clear_prepared_mana(self)
+                self.clear_state("prepared_spell")
+                self.msg("You release the prepared spell pattern.")
+                return True
+            if held_mana > 0:
+                ManaService.release_harnessed_mana(self)
+                self.msg("You let the held mana bleed away.")
+                return True
+            if active_cyclic:
+                self.stop_cyclic_spell()
+                self.msg("You release the cyclic pattern.")
+                return True
+            if hasattr(self, "remove_empath_link") and self.remove_empath_link():
+                self.msg("You release your empathic connection.")
+                return True
+            self.msg("You are not holding a prepared spell, harnessed mana, cyclic effect, or empathic connection.")
+            return False
+
+        if mode in {"spell", "prepared", "pattern"}:
+            if not prepared_spell:
+                self.msg("You have no prepared spell to release.")
+                return False
+            ManaService.clear_prepared_mana(self)
+            self.clear_state("prepared_spell")
+            self.msg("You release the prepared spell pattern.")
+            return True
+
+        if mode in {"mana", "held", "held_mana"}:
+            if held_mana <= 0:
+                self.msg("You are not holding any harnessed mana.")
+                return False
+            ManaService.release_harnessed_mana(self)
+            self.msg("You let the held mana bleed away.")
+            return True
+
+        if mode in {"cyclic", "cyclics"} or mode in active_cyclic:
+            if not active_cyclic:
+                self.msg("You are not sustaining a cyclic spell.")
+                return False
+            spell_id = None if mode in {"cyclic", "cyclics"} else mode
+            if not self.stop_cyclic_spell(spell_id=spell_id):
+                self.msg("You fail to release that cyclic spell.")
+                return False
+            if spell_id:
+                self.msg(f"You release the cyclic pattern of {spell_id}.")
+            else:
+                self.msg("You release the cyclic pattern.")
+            return True
+
+        if mode in {"link", "connection", "empath", "empathic"}:
+            if hasattr(self, "remove_empath_link") and self.remove_empath_link():
+                self.msg("You release your empathic connection.")
+                return True
+            self.msg("You are not maintaining an empathic connection.")
+            return False
+
+        self.msg("Release what? Try SPELL, MANA, CYCLIC, or LINK.")
+        return False
 
     def cast_spell(self, target_name=None):
         data = self.get_state("prepared_spell")
@@ -13230,12 +13470,14 @@ class Character(ObjectParent, DefaultCharacter):
         realm = str(data.get("realm", "") or "").strip().lower()
         primary_magic_skill = self.get_skill(category)
         profession_cast_modifier = self.get_cleric_magic_modifier() if self.is_profession("cleric") else 1.0
+        additional_mana = 0 if spell_metadata.get("spell_type") == "cyclic" else None
         cast_result = ManaService._cast_spell(
             self,
             realm,
             primary_magic_skill,
             profession_cast_modifier=profession_cast_modifier,
             clear_prepared=False,
+            additional_mana=additional_mana,
         )
         if not cast_result.success:
             for line in ManaPresenter.render_cast(cast_result):
@@ -13245,7 +13487,7 @@ class Character(ObjectParent, DefaultCharacter):
         success_band = str(cast_result.data.get("success_band", "solid") or "solid").strip().lower()
         if success_band in {"failure", "backlash"}:
             for line in ManaPresenter.render_cast(
-                cast_result.__class__.ok(data=dict(cast_result.data) | {"spell_name": spell_name})
+                cast_result.__class__.ok(data=dict(cast_result.data) | {"spell_name": spell_metadata.get("name", spell_name)})
             ):
                 self.msg(line)
             ManaService.clear_prepared_mana(self)
@@ -13300,7 +13542,7 @@ class Character(ObjectParent, DefaultCharacter):
                 require_known=False,
             )
         for line in ManaPresenter.render_cast(
-            cast_result.__class__.ok(data=dict(cast_result.data) | {"spell_name": spell_name})
+            cast_result.__class__.ok(data=dict(cast_result.data) | {"spell_name": spell_metadata.get("name", spell_name)})
         ):
             self.msg(line)
         ManaService.clear_prepared_mana(self)
@@ -15403,6 +15645,19 @@ class Character(ObjectParent, DefaultCharacter):
             total += float(effect.get("strength", 0) or 0) * scale
         return int(round(total))
 
+    def get_effect_stat_modifier(self, stat_name, category="debilitation"):
+        normalized = str(stat_name or "").strip().lower().replace(" ", "_")
+        total = 0
+        for effect in self.get_active_effects(category).values():
+            total += int(dict(effect.get("stat_debuffs") or {}).get(normalized, 0) or 0)
+        return total
+
+    def get_encumbrance_modifier(self, category="debilitation"):
+        total = 0
+        for effect in self.get_active_effects(category).values():
+            total += int(effect.get("encumbrance_modifier", 0) or 0)
+        return total
+
     def has_skill(self, skill_name):
         self.ensure_core_defaults()
         return skill_name in (self.db.skills or {})
@@ -15443,12 +15698,17 @@ class Character(ObjectParent, DefaultCharacter):
         return 0
 
     def format_skill_name(self, skill_name):
+        normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        display_name = str((SKILL_REGISTRY.get(normalized) or {}).get("display_name") or "").strip()
+        if display_name:
+            return display_name
         return str(skill_name).replace("_", " ").title()
 
     def get_skill_metadata(self, skill_name):
         metadata = dict(SKILL_REGISTRY.get(skill_name, {}))
         metadata.setdefault("category", None)
         metadata.setdefault("visibility", "shared")
+        metadata.setdefault("display_name", str(skill_name or "").replace("_", " ").title())
         metadata.setdefault("guilds", None)
         metadata.setdefault("description", "No description is available yet.")
         metadata.setdefault("starter_rank", 0)
@@ -15555,17 +15815,23 @@ class Character(ObjectParent, DefaultCharacter):
         return len(reasons) == 0, reasons, status
 
     def advance_circle(self, enforce_location=None):
+        from engine.services.circle_service import collect_circle_advancement_private_messages
+
         can_advance, reasons, status = self.can_advance_circle(enforce_location=enforce_location)
         if not can_advance:
             if reasons and status and status.get("missing_requirements"):
                 return False, ["You are not yet ready to circle.", *reasons], status
             return False, reasons, status
+        old_circle = self.get_circle()
         next_circle = int(status.get("next_circle", self.get_circle() + 1) or (self.get_circle() + 1))
         self.db.circle = max(1, next_circle)
+        self.ensure_feat_defaults()
+        self.ensure_magic_slot_pool_defaults()
         if hasattr(self, "sync_client_state"):
             self.sync_client_state()
         lines = [f"You advance to Empath Circle {self.db.circle}."]
         lines.append("Your formal circle rises, but your techniques remain tied to your Empathy skill.")
+        lines.extend(collect_circle_advancement_private_messages(self, old_circle, self.db.circle))
         return True, lines, status
 
     def set_ranger_circle(self, value):
@@ -17748,6 +18014,20 @@ class Character(ObjectParent, DefaultCharacter):
     def ensure_spellbook_defaults(self):
         return SpellbookService.ensure_spellbook_defaults(self)
 
+    def ensure_feat_defaults(self):
+        from engine.services.feat_service import FeatService
+
+        return FeatService.ensure_feat_defaults(self)
+
+    def ensure_magic_slot_pool_defaults(self):
+        from engine.services.slot_service import SlotService
+
+        pool = SlotService.get_pool(self)
+        if pool is None:
+            self.db.magic_slot_pool = None
+            return None
+        return pool
+
     def has_spell(self, spell_id):
         return SpellbookService.has_spell(self, spell_id)
 
@@ -17772,6 +18052,8 @@ class Character(ObjectParent, DefaultCharacter):
         return None
 
     def _build_structured_spell_metadata(self, spell):
+        from engine.services.feat_service import FeatService
+
         spell_type_to_category = {
             "aoe": "aoe",
             "augmentation": "augmentation",
@@ -17794,8 +18076,19 @@ class Character(ObjectParent, DefaultCharacter):
                 target_mode = "room"
             else:
                 target_mode = "single" if str(spell.cast_style or "").strip().lower() == "targeted" else "self"
-        mana_max = max(int(spell.safe_mana or 1), int(spell.safe_mana or 1) * 2)
+        mana_min = max(1, int(getattr(spell, "mana_min", 1) or 1))
+        configured_mana_max = int(getattr(spell, "mana_max", 0) or 0)
+        mana_max = max(mana_min, configured_mana_max) if configured_mana_max > 0 else max(int(spell.safe_mana or 1), int(spell.safe_mana or 1) * 2)
         tier = max(1, int((int(spell.min_circle or 1) - 1) / 25) + 1)
+        min_prep_time = max(0.0, float(getattr(spell, "min_prep_time", 10.0) or 10.0))
+        cast_style = str(getattr(spell, "cast_style", "") or "").strip().lower()
+        spell_type = str(getattr(spell, "spell_type", "") or "").strip().lower()
+        if cast_style == "standard":
+            min_prep_time += float(FeatService.get_modifier(self, "standard_prep_time_delta_seconds") or 0.0)
+        elif cast_style in {"targeted", "room"} or spell_type in {"targeted_magic", "debilitation", "aoe"}:
+            min_prep_time += float(FeatService.get_modifier(self, "battle_prep_time_delta_seconds") or 0.0)
+        min_prep_time = max(1.0 if min_prep_time > 0.0 else 0.0, min_prep_time)
+        expiry_window = max(min_prep_time, float(getattr(spell, "expiry_window", 300.0) or 300.0))
         return {
             "id": spell.id,
             "name": spell.name,
@@ -17804,20 +18097,48 @@ class Character(ObjectParent, DefaultCharacter):
             "spell_type": spell.spell_type,
             "cast_style": spell.cast_style,
             "guilds": tuple(spell.allowed_professions),
-            "mana_min": 1,
+            "mana_min": mana_min,
             "mana_max": mana_max,
             "safe_mana": int(spell.safe_mana or 1),
             "base_difficulty": float(spell.base_difficulty or 0),
             "tier": tier,
+            "min_prep_time": min_prep_time,
+            "expiry_window": expiry_window,
             "cyclic": str(spell.spell_type or "").strip().lower() == "cyclic" or str(spell.cast_style or "").strip().lower() == "cyclic",
             "ritual": str(spell.cast_style or "").strip().lower() == "ritual",
             "targeted": category in {"targeted_magic", "debilitation", "aoe"},
             "target_mode": target_mode,
             "spellbook": spell.spellbook,
             "acquisition_methods": list(spell.acquisition_methods),
+            "canon_status": str(getattr(spell, "canon_status", "prototype") or "prototype"),
             "flags": list(spell.flags),
             "description": f"{spell.name} is managed by the structured spell registry.",
         }
+
+    def _sync_prepared_spell_state_from_mana(self, prepared_mana=None):
+        prepared_spell = self.get_state("prepared_spell")
+        if prepared_mana is None:
+            prepared_mana = ManaService._get_prepared_mana_state(self)
+        if prepared_mana is None:
+            if prepared_spell:
+                self.clear_state("prepared_spell")
+            return None
+        if not prepared_spell:
+            return None
+        updated = dict(prepared_spell)
+        updated["mana"] = int(prepared_mana.get("intended_mana", prepared_mana.get("mana_input", updated.get("mana", 0))) or 0)
+        updated["ready"] = bool(prepared_mana.get("ready", updated.get("ready", True)))
+        updated["held_mana"] = int(prepared_mana.get("held_mana", ManaService._get_harnessed_mana_state(self)) or 0)
+        if prepared_mana.get("spell_id") is not None:
+            updated["spell_id"] = str(prepared_mana.get("spell_id") or "").strip().lower()
+        if prepared_mana.get("prep_started_at") is not None:
+            updated["prep_started_at"] = float(prepared_mana.get("prep_started_at") or 0.0)
+        if prepared_mana.get("min_prep_time") is not None:
+            updated["min_prep_time"] = float(prepared_mana.get("min_prep_time") or 0.0)
+        if prepared_mana.get("expiry_at") is not None:
+            updated["expiry_at"] = float(prepared_mana.get("expiry_at") or 0.0)
+        self.set_state("prepared_spell", updated)
+        return updated
 
     def get_safe_mana_limit(self, category=None):
         attunement = self.get_skill("attunement")
@@ -17975,6 +18296,19 @@ class Character(ObjectParent, DefaultCharacter):
         return True
 
     def apply_ward_absorption(self, target, damage):
+        from engine.services.state_service import StateService
+
+        active_warding = dict((target.get_state("active_effects") or {}).get("warding", {}) or {}) if hasattr(target, "get_state") else {}
+        magic_ward = StateService.get_strongest_magic_ward(target)
+        if magic_ward and magic_ward.get("spell_id"):
+            absorbed = min(max(0, int(damage)), int(magic_ward.get("strength", 0) or 0))
+            if absorbed > 0:
+                StateService.consume_ward(target, magic_ward.get("spell_id"), absorbed)
+                return max(0, int(damage) - absorbed)
+
+        if active_warding:
+            return damage
+
         ward = target.get_state("warding_barrier")
         if not ward:
             return damage
@@ -18007,14 +18341,19 @@ class Character(ObjectParent, DefaultCharacter):
         for expired in list((effect_tick.data or {}).get("expired_effects", []) or []):
             for line in SpellEffectPresenter.render_expiration(expired):
                 self.msg(line)
+            room_line = SpellEffectPresenter.render_expiration_room(expired, self.key)
+            if room_line and getattr(self, "location", None) is not None and hasattr(self.location, "msg_contents"):
+                self.location.msg_contents(room_line, exclude=[self])
 
-        for key in ["augmentation_buff", "warding_barrier", "utility_light", "exposed_magic"]:
+        for key in ["augmentation_buff", "warding_barrier", "physical_barrier", "utility_light", "exposed_magic"]:
             data = self.get_state(key)
             if not data:
                 continue
             if key == "augmentation_buff" and dict((self.get_state("active_effects") or {}).get("augmentation", {}) or {}):
                 continue
             if key == "warding_barrier" and dict((self.get_state("active_effects") or {}).get("warding", {}) or {}):
+                continue
+            if key == "physical_barrier" and dict((self.get_state("active_effects") or {}).get("warding", {}) or {}):
                 continue
             if key == "utility_light" and dict((self.get_state("active_effects") or {}).get("utility", {}) or {}):
                 continue

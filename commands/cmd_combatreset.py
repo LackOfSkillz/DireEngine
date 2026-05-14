@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.messaging import send_action_messages, send_untargeted_action
 
 
 class CmdCombatReset(Command):
@@ -29,6 +30,18 @@ class CmdCombatReset(Command):
             return
 
         target.combat_reset_state()
-        caller.msg(f"You reset {target.key}'s combat state.")
         if target != caller:
-            target.msg("A restoring force clears your combat state and lingering wounds.")
+            send_action_messages(
+                actor=caller,
+                target=target,
+                room=getattr(target, "location", None) or getattr(caller, "location", None),
+                actor_message=f"You reset {target.key}'s combat state.",
+                target_message="A restoring force clears your combat state and lingering wounds.",
+                room_message=f"{target.key} suddenly looks refreshed and at ease.",
+            )
+            return
+        send_untargeted_action(
+            caller,
+            actor_message=f"You reset {target.key}'s combat state.",
+            room_message=f"{target.key} suddenly looks refreshed and at ease.",
+        )

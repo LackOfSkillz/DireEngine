@@ -21,7 +21,14 @@ class Spell:
     scaling: str
     spellbook: str
     acquisition_methods: list[str]
+    slot_cost: int = 0
+    apprentice_until_circle: int | None = None
+    mana_min: int = 1
+    mana_max: int = 0
     target_type: str = "self"
+    min_prep_time: int = 10
+    expiry_window: int = 300
+    canon_status: str = "prototype"
     flags: list[str] = field(default_factory=list)
     effect_profile: dict[str, object] = field(default_factory=dict)
 
@@ -36,6 +43,7 @@ SPELLCASTING_PROFESSIONS = [
     "necromancer",
     "paladin",
     "ranger",
+    "trader",
     "warrior_mage",
 ]
 
@@ -411,6 +419,138 @@ SPELL_REGISTRY["cleanse"] = Spell(
     acquisition_methods=["npc", "player", "book"],
     effect_profile={
         "effect_type": "cleanse",
+    },
+)
+
+SPELL_REGISTRY["burden"] = Spell(
+    id="burden",
+    name="Burden",
+    abbr="bur",
+    mana_type="lunar",
+    spell_type="debilitation",
+    cast_style="targeted",
+    allowed_professions=list(SPELLCASTING_PROFESSIONS),
+    min_circle=1,
+    min_skill={"primary_magic": 10},
+    safe_mana=33,
+    mana_min=1,
+    mana_max=33,
+    base_difficulty=20,
+    scaling="linear",
+    spellbook="Analogous Patterns",
+    acquisition_methods=["scroll", "book"],
+    slot_cost=1,
+    apprentice_until_circle=10,
+    target_type="single",
+    min_prep_time=3,
+    expiry_window=180,
+    canon_status="canonical",
+    effect_profile={
+        "effect_type": "burden",
+        "base_strength": 2,
+        "strength_scale": 0.08,
+        "base_duration": 600,
+        "duration_scale": 0.0,
+        "contest_modifiers": {},
+        "stat_debuffs": {"strength": -2},
+        "encumbrance_modifier": 5,
+        "stacking": "non_stacking",
+    },
+)
+
+SPELL_REGISTRY["gauge_flow"] = Spell(
+    id="gauge_flow",
+    name="Gauge Flow",
+    abbr="gf",
+    mana_type="lunar",
+    spell_type="utility",
+    cast_style="standard",
+    allowed_professions=list(SPELLCASTING_PROFESSIONS),
+    min_circle=1,
+    min_skill={"primary_magic": 10},
+    safe_mana=100,
+    mana_min=5,
+    mana_max=100,
+    base_difficulty=18,
+    scaling="linear",
+    spellbook="Analogous Patterns",
+    acquisition_methods=["scroll", "book"],
+    slot_cost=2,
+    target_type="self",
+    min_prep_time=8,
+    expiry_window=300,
+    canon_status="canonical",
+    effect_profile={
+        "effect_type": "gauge_flow",
+        "base_duration": 1800,
+        "duration_scale": 6.0,
+        "utility_behavior": "gauge_flow",
+        "capability_flag": "gauge_flow_active",
+        "potency_scaling": "research_time_reduction",
+    },
+)
+
+SPELL_REGISTRY["strange_arrow"] = Spell(
+    id="strange_arrow",
+    name="Strange Arrow",
+    abbr="sa",
+    mana_type="lunar",
+    spell_type="targeted_magic",
+    cast_style="targeted",
+    allowed_professions=list(SPELLCASTING_PROFESSIONS),
+    min_circle=1,
+    min_skill={"primary_magic": 10},
+    safe_mana=50,
+    mana_min=1,
+    mana_max=50,
+    base_difficulty=20,
+    scaling="linear",
+    spellbook="Analogous Patterns",
+    acquisition_methods=["scroll", "book"],
+    slot_cost=1,
+    apprentice_until_circle=10,
+    target_type="single",
+    min_prep_time=3,
+    expiry_window=120,
+    canon_status="canonical",
+    effect_profile={
+        "damage_components": [["puncture", 8], ["electrical", 6]],
+        "mana_scaling": "linear",
+        "roundtime_seconds": 1,
+    },
+)
+
+SPELL_REGISTRY["manifest_force"] = Spell(
+    id="manifest_force",
+    name="Manifest Force",
+    abbr="maf",
+    mana_type="analogous_patterns",
+    spell_type="warding",
+    cast_style="standard",
+    allowed_professions=list(SPELLCASTING_PROFESSIONS),
+    min_circle=1,
+    min_skill={"primary_magic": 0},
+    safe_mana=100,
+    mana_min=1,
+    mana_max=100,
+    base_difficulty=18,
+    scaling="linear",
+    spellbook="Analogous Patterns",
+    acquisition_methods=["scroll"],
+    slot_cost=1,
+    apprentice_until_circle=10,
+    target_type="self",
+    min_prep_time=1,
+    expiry_window=600,
+    canon_status="canonical",
+    effect_profile={
+        "absorbs_physical": True,
+        "min_capacity": 30,
+        "capacity_per_mana": 0.5,
+        "base_duration": 600,
+        "max_duration": 2400,
+        "refresh_behavior": "replace",
+        "ward_slot_cost": 1,
     },
 )
 

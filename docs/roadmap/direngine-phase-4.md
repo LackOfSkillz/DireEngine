@@ -4,13 +4,32 @@ Type: Big-picture planning artifact
 
 Canonical status: Standing reference for all DireEngine Phase 4 dispatches
 
-Last validated: 2026-05-12
+Last validated: 2026-05-13
 
 ## What this document is
 
 This is the agent's standing reference for DireEngine Phase 4 work. Every implementation dispatch below references it. When the agent is uncertain about ordering, modular boundaries, profession assignments, or architectural direction, this document is the source of truth.
 
 The authoritative bundle catalog lives in DireLore at `docs/architecture/BUNDLE-CATALOG.md` (built by DRG-011). This DireEngine-side document references that catalog and translates it into engineering sequence.
+
+## Current learning-system status
+
+- DRG-LEARN-001 is complete: TDP persistence, hidden-pool accrual, `tdp`, and `experience` surfacing are live.
+- DRG-LEARN-002a is complete: the parallel eight-stat racial TDP modifier table, TDP cost utilities, The Landing stat trainer hub, fresh `StatTrainerNPC` / `GuildLeaderNPC` infrastructure, and the guildhall locator registry are live.
+- DRG-LEARN-002b is complete: player-facing stat commands, `exp <skill>`, `exp circle`, stat trainer consult/commit flow, and guildleader circle projection/commit behavior are live.
+- DRG-LEARN-003a and DRG-LEARN-003b are complete as a closed split: the canonical data layer landed first, and the live EXP runtime now consumes the 35-band mindstate table, canonical 10-group pulse rotation, canonical pool formulas, wisdom helpers, and profession skillset placement data.
+- DRG-LEARN-004 is complete: sleep state, rested EXP banking and consumption, offline drain, and sleep-aware learning gates now run on top of the canonical live pulse runtime.
+- DRG-LEARN-006 is complete: combat resolution now reads canonical defense identities directly, combat XP now trains `parry_ability`, `shield_usage`, and opportunistic `multiple_engaged_opponent`, and the learning arc is closed for the current combat/EXP integration surface.
+- DRG-SKILL-001 is complete: the live skill registry, aliases, and pulse groups are aligned; defense skills now have first-class runtime identities; registry-backed `display_name` metadata is authoritative for player-facing skill presentation; and group 9 is reserved empty for future profession-specific skill dispatches.
+- DRG-MSG-001 is complete for current learning and combat interaction surfaces: shared actor/target/room helper plumbing now exists in `engine/services/messaging.py`, room-visible training and advancement messages are live, and combat-facing verbs/presenter narration no longer collapse all non-hit outcomes into generic miss text.
+- The learning arc is complete for the current phase. Canonical per-guild circle requirements remain a later follow-on scope, and the next major implementation phase is DRG-024.5 tier-0 magic.
+
+## Current messaging discipline
+
+- Commands and presenters own audience splitting. Services may return `message`, `target_message`, and `room_message`, but they do not directly broadcast to objects.
+- Public action surfaces should specify three intentional audiences whenever canon or player readability benefits from it: actor, direct target, and room observers.
+- Actor-only informational surfaces remain valid for private progression and admin-detail output such as TDP totals, internal error detail, and similar non-public state.
+- Shared plumbing lives in `engine/services/messaging.py`, which is the default implementation seam for action messaging rather than ad hoc `msg()` plus `msg_contents()` duplication.
 
 ## DireLore connection - primary data source
 
@@ -291,6 +310,8 @@ Status: combat core plus base attack verbs complete and validated. Evennia resta
 - Backlash from GSL
 - Cast contest mechanics
 - All circles register via extension API; specific spell content ships in profession bundles
+
+Status: DRG-024.5a canon reconciliation, DRG-024.5b starter spell catalog seeding, DRG-024.5c Manifest Force physical barrier integration, DRG-024.5d-1 spell-slot foundation plus apprentice expiration, DRG-024.5d-2 magical feats starter-set integration, DRG-024.5d-3a cyclic canon correction, and the inserted DRG-WEBCLIENT-001 session-lifecycle maintenance dispatch are complete. The live magic loop now forms prepared patterns without spending attunement, draws attunement on cast, exposes public `harness`, `release`, `spells`, `slots`, and `feats` surfaces, carries scheduler-backed full-prep plus prepared-expiry seams through the existing runtime, ships canonical starter coverage for `burden`, `gauge_flow`, `strange_arrow`, and `manifest_force`, and now sustains cyclic spells from held mana by default with explicit `sustain_source` plus `sustain_ref` state, Raw Channeling-gated attunement sustain, single-active-cyclic enforcement, and a clean cambrinth defer-until-024.5d-4 path. Physical wards now absorb post-armor physical damage through the combat resolver while prototype wards remain magic-only, the shared `magic_slot_pool` now gates both permanent memorization and learned feats, apprentice access still derives through circle 10 with private warning and expiration messaging at circles 10 and 11, the first feat trainer plus free profession feat grant path are wired into The Landing runtime, and browser-side session recovery now uses canonical `localhost` plus authenticated `/play` recovery instead of a blocked reconnect surface or console-only websocket call. DRG-024.5d-3b ritual casting foundations is next.
 
 **DRG-024.6 - Tier 0 Economy + Crafting + Outdoorsmanship overhauls (sub-bundles 41-48)**
 

@@ -3,19 +3,19 @@ from commands.command import Command
 
 class CmdRelease(Command):
     """
-    Release your active empathic link.
+    Release a prepared spell, held mana, cyclic spell, or empathic link.
 
     Examples:
         release
+        release spell
+        release mana
+        release cyclic
+        release link
     """
 
     key = "release"
     locks = "cmd:all()"
-    help_category = "Character"
+    help_category = "Magic"
 
     def func(self):
-        caller = self.caller
-        if hasattr(caller, "remove_empath_link") and caller.remove_empath_link():
-            caller.msg("You release your connection.")
-            return
-        caller.msg("You are not maintaining a connection.")
+        self.caller.release_magic(self.args)

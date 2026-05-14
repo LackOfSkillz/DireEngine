@@ -110,7 +110,12 @@ class DefenseVerbServiceTests(unittest.TestCase):
 
         self.assertTrue(execution.result.success)
         award_xp.assert_called_once()
-        self.assertEqual(award_xp.call_args.args[1], "light_edge")
+        self.assertEqual(award_xp.call_args.args[1], "parry_ability")
+
+    def test_get_parry_skill_name_ignores_weapon_profile(self):
+        defender = DummyDefender(weapon_skill="polearm")
+
+        self.assertEqual(DefenseVerbService._get_parry_skill_name(defender), "parry_ability")
 
     def test_dodge_does_not_award_remedial_parry_training(self):
         defender = DummyDefender(skill_rank=1, circle=10)

@@ -152,6 +152,23 @@ Summary:
 - preserved the three canon-specific branches called out in DireLore verification: S00033 slice defender hook, S00034 chop terrain guard, S00036 feint engagement-target fallback
 - kept generic `attack` live as a sensible default attack path while removing conflicting `slice` and `jab` aliases from `cmd_attack.py`
 
+## DRG-LEARN-002b - Stat Training And Circle Advancement Mechanics
+
+Filed: `domain/learning/skill_aliases.py`, `engine/services/stat_training_service.py`, `engine/services/circle_service.py`, `commands/cmd_stat_info.py`
+
+Summary:
+
+- player-facing learning mechanics now consume the 002a infrastructure rather than stopping at room and NPC bootstrap
+- `experience` supports deterministic skill aliases (`exp le`, `exp tm`, `exp parry`, `exp circle`) and detailed single-skill views derived from persisted `db.exp_skill_state`
+- stat training now spends real TDPs through `Character.spend_tdp()` and a consult/commit flow tied to `StatTrainerNPC`
+- guildleader advancement now projects and commits placeholder circle gains through a dedicated service that consumes the guildhall locator and the real persisted currency field `db.coins`
+
+Known intentional limits after 002b:
+
+- dedicated Parry Ability and Shield Usage learning tracks are still deferred; `exp parry` and `exp shield` are explicit bridge views over the current combat track so the surface exists without inventing nonexistent underlying skills
+- circle requirements remain placeholder totals (`circle * 50` ranks and `circle * 100` coins) rather than canon per-guild tables
+- stat-training consult windows and circle requirements are service-owned placeholders intended for LEARN-003+ replacement, not final canon timing or gate data
+
 Validation:
 
 - mandatory DireLore verification passed for S00031-S00037 and S00131 before edits
@@ -197,3 +214,52 @@ Honest residual scope:
 - `web/templates/website/index.html`, `web/templates/website/character_dashboard.html`, and `web/templates/base.html` still hardcode `localhost` play links while the local server config binds web and websocket interfaces to `127.0.0.1`.
 - This mismatch did not cause the DRG-024a browser smoke failure; the real issue was cross-process shell staging leaving the live websocket session with stale in-memory room contents.
 - Deferral reasoning: not causing the validated user-facing bug and not blocking DRG-024b, but it remains a deployment/configuration risk that should be cleaned up before any external deployment or host-sensitive packaging work.
+
+## DRG-LEARN-001 - TDP Foundation
+
+Filed: `typeclasses/characters.py`, `world/systems/skills.py`, `commands/cmd_tdp.py`, `commands/cmd_experience.py`
+
+Summary:
+
+- closed the highest-confidence progression gap from DRG-LEARN-AUDIT-EXT by adding modern DR Time Development Point persistence and accrual
+- `Character` now guarantees `db.tdp` and `db.tdp_pool` through both new-character creation and `ensure_core_defaults()` migration for existing characters
+- authoritative TDP accrual is wired at `world/systems/skills.py::process_rank()`, so each crossed rank contributes its reached rank value into a shared hidden pool and every 200 pool grants 1 spendable TDP
+- player-facing surfaces now include `tdp` and an added TDP summary line in `experience`; hidden pool visibility is intentionally limited to `Admin` and `Developer`
+
+Validation:
+
+- focused regression slice passed: `python -m unittest tests.test_tdp_foundation`
+- direct runtime snippet validation confirmed the canonical examples on top of the 600-starting-TDP baseline: rank 1-50 yields 6 spendable TDP with 75 pool remaining, and rank 1-100 yields 25 spendable TDP with 50 pool remaining
+
+Residual scope intentionally deferred:
+
+- no TDP spending / stat-training verbs yet
+- no circling TDP awards yet
+- no death-side TDP pool reduction yet
+- learning pulse cadence and drain behavior remain otherwise unchanged by this dispatch
+
+## DRG-LEARN-002a - Stat Training Infrastructure
+
+Filed: `world/races/definitions.py`, `world/races/utils.py`, `domain/learning/tdp_cost.py`, `typeclasses/npcs.py`, `world/areas/the_landing/stat_trainers/build.py`, `engine/services/guildhall_locator.py`
+
+Summary:
+
+- split LEARN-002 on the Step 0c infrastructure finding and shipped the under-the-floor stat-training pieces without changing any player-facing training behavior
+- added `RACIAL_TDP_MODIFIERS` as a parallel 11-race x 8-stat table so modern DR training-cost modifiers exist without widening the existing six-stat `RACE_STATS` chargen and validation contract
+- added the canonical TDP cost helpers in `domain/learning/tdp_cost.py`, matching GSL S00871's integer operation order where the stat value is halved before applying the racial modifier
+- added fresh `StatTrainerNPC` and `GuildLeaderNPC` typeclasses, leaving `EmpathGuildleader`, `ClericGuildmaster`, and `RangerGuildmaster` as direct `NPC` subclasses for now
+- added an eight-room stat trainer hub in The Landing plus a startup bootstrap hook, with one trainer NPC per room and stable `stat_trainer:<stat>` room tags
+- added `engine/services/guildhall_locator.py` as the forward registry for circling-location checks; only Empath, Cleric, and Ranger are registered today by design
+
+Validation:
+
+- focused LEARN-002a regression slice passed: `python -m unittest tests.learning.test_tdp_cost tests.learning.test_stat_trainer_npc tests.learning.test_guildhall_locator`
+- direct runtime validation confirmed all eight trainer rooms exist with `region_name = "The Landing"`, each contains exactly one `StatTrainerNPC`, and the guildhall locator resolves the three shipped guilds
+- canonical cost examples validated after correcting the operation order to match S00871: human `21 -> 22` costs `63`, Volgrin `21 -> 22` costs `33`, and human `60 -> 75` projects to `3015`
+
+Residual scope intentionally deferred:
+
+- no `train`, `study`, or `tdp project` command behavior changes yet
+- no player-facing stat consult / commit flow yet
+- no circle advancement service changes yet
+- LEARN-002b consumes this infrastructure for player-facing mechanics

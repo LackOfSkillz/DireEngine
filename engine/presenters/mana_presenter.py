@@ -33,12 +33,16 @@ class ManaPresenter:
             return ManaPresenter._render_errors(resolved)
         data = dict(resolved.data or {})
         mana_input = int(data.get("mana_input", 0))
-        prep_cost = int(data.get("prep_cost", 0))
         realm = str(data.get("realm", "mana") or "mana")
         spell_name = str(data.get("spell_name", "") or "").strip()
+        ready = bool(data.get("prepared_mana", {}).get("ready", data.get("ready", True)))
         if spell_name:
-            return [f"You shape {mana_input} {realm} mana into {spell_name} at a cost of {prep_cost} attunement."]
-        return [f"You shape {mana_input} {realm} mana into a prepared spell at a cost of {prep_cost} attunement."]
+            if ready:
+                return [f"You shape {mana_input} {realm} mana into {spell_name} without spending attunement yet."]
+            return [f"You shape {mana_input} {realm} mana into {spell_name}. The pattern is not yet at full preparation."]
+        if ready:
+            return [f"You shape {mana_input} {realm} mana into a prepared spell without spending attunement yet."]
+        return [f"You shape {mana_input} {realm} mana into a prepared spell. The pattern is not yet at full preparation."]
 
     @staticmethod
     def render_harness(result):
@@ -49,7 +53,7 @@ class ManaPresenter:
         requested = int(data.get("requested_harness", 0))
         spent = int(data.get("attunement_spent", 0))
         held = int(data.get("held_mana", 0))
-        return [f"You harness {requested} mana, spending {spent} attunement and raising held mana to {held}."]
+        return [f"You harness {requested} mana, spending {spent} attunement and raising your held mana to {held}."]
 
     @staticmethod
     def render_cast(result):
@@ -61,16 +65,17 @@ class ManaPresenter:
         backlash = float(data.get("backlash_chance", 0.0))
         realm = str(data.get("realm", "mana") or "mana")
         spell_name = str(data.get("spell_name", "") or "").strip()
+        spent = int(data.get("attunement_spent", 0))
         band = str(data.get("success_band", data.get("band", "solid")) or "solid").strip().lower()
         spell_label = spell_name or f"the prepared {realm} spell"
         if band == "excellent":
-            return [f"You cast {spell_label} with exceptional control at {power:.1f} power and {backlash:.1f}% backlash risk."]
+            return [f"You cast {spell_label} with exceptional control, drawing {spent} attunement for {power:.1f} power and {backlash:.1f}% backlash risk."]
         if band == "partial":
-            return [f"You cast {spell_label}, but the pattern forms weakly at {power:.1f} power."]
+            return [f"You cast {spell_label}, drawing {spent} attunement, but the pattern forms weakly at {power:.1f} power."]
         if band == "failure":
             return [f"{spell_label.capitalize()} fizzles before it can take hold."]
         if band == "backlash":
             return [f"Your control over {spell_label} breaks in a violent backlash."]
         if spell_name:
-            return [f"You cast {spell_name} with {power:.1f} final power and {backlash:.1f}% backlash risk."]
-        return [f"You cast the prepared {realm} spell with {power:.1f} final power and {backlash:.1f}% backlash risk."]
+            return [f"You cast {spell_name}, drawing {spent} attunement for {power:.1f} final power and {backlash:.1f}% backlash risk."]
+        return [f"You cast the prepared {realm} spell, drawing {spent} attunement for {power:.1f} final power and {backlash:.1f}% backlash risk."]

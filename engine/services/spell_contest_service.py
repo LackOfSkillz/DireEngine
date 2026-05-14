@@ -42,7 +42,7 @@ class SpellContestService:
         }
 
     @staticmethod
-    def resolve_targeted_magic(caster, target, final_spell_power, spell_id=None, quality="normal", wild_modifier=1.0):
+    def resolve_targeted_magic(caster, target, final_spell_power, spell_id=None, quality="normal", wild_modifier=1.0, effect_profile=None):
         if target is None or target == caster:
             return ActionResult.fail(
                 errors=["You need a valid target for that spell."],
@@ -111,15 +111,32 @@ class SpellContestService:
             multiplier *= 1.25
 
         raw_damage = max(1, int(effective_power * multiplier / 3.0))
-        resisted_damage = SpellContestService._apply_magic_resistance(target, raw_damage)
-        warded_damage = SpellContestService._apply_ward_absorption(caster, target, resisted_damage)
-        absorbed_by_ward = max(0, int(resisted_damage) - int(warded_damage))
-
-        damage_result = ActionResult.ok(data={"amount": 0})
-        if int(warded_damage or 0) > 0:
-            # RULE:
-            # HP mutation is owned by StateService when damage gets through.
-            damage_result = StateService.apply_damage(target, int(warded_damage), location="chest", damage_type="impact")
+        damage_components = SpellContestService._build_damage_components(raw_damage, dict(effect_profile or {}))
+        base_damage = 0
+        absorbed_by_ward = 0
+        final_damage = 0
+        injury_events = []
+        resolved_components = []
+        for damage_type, component_damage in damage_components:
+            resisted_damage = SpellContestService._apply_magic_resistance(target, component_damage)
+            warded_damage = SpellContestService._apply_ward_absorption(caster, target, resisted_damage)
+            absorbed = max(0, int(resisted_damage) - int(warded_damage))
+            damage_result = ActionResult.ok(data={"amount": 0})
+            if int(warded_damage or 0) > 0:
+                damage_result = StateService.apply_damage(target, int(warded_damage), location="chest", damage_type=damage_type, attacker=caster)
+            dealt = int((damage_result.data or {}).get("amount", 0) or 0)
+            base_damage += int(resisted_damage or 0)
+            absorbed_by_ward += absorbed
+            final_damage += dealt
+            injury_events.extend(list((damage_result.data or {}).get("injury_events", []) or []))
+            resolved_components.append(
+                {
+                    "damage_type": str(damage_type),
+                    "base_damage": float(int(resisted_damage or 0)),
+                    "absorbed_by_ward": float(absorbed),
+                    "final_damage": float(dealt),
+                }
+            )
 
         trace_payload = SpellContestService._record_targeted_magic_trace(
             caster,
@@ -127,9 +144,9 @@ class SpellContestService:
             target=target,
             hit=True,
             contest_margin=float(contest_margin),
-            base_damage=float(int(resisted_damage or 0)),
+            base_damage=float(base_damage),
             absorbed=float(absorbed_by_ward),
-            final_damage=float(int(warded_damage or 0)),
+            final_damage=float(final_damage),
         )
 
         return ActionResult.ok(
@@ -140,12 +157,13 @@ class SpellContestService:
                 "attack_score": float(attack_score),
                 "defense_score": float(defense_score),
                 "contest_margin": float(contest_margin),
-                "base_damage": float(int(resisted_damage or 0)),
-                "final_damage": float(int(warded_damage or 0)),
+                "base_damage": float(base_damage),
+                "final_damage": float(final_damage),
                 "absorbed_by_ward": float(absorbed_by_ward),
+                "damage_components": resolved_components,
                 "target_id": getattr(target, "id", None),
                 "target_key": getattr(target, "key", "someone"),
-                "injury_events": list((damage_result.data or {}).get("injury_events", []) or []),
+                "injury_events": list(injury_events),
                 "debug_trace": trace_payload,
             }
         )
@@ -231,6 +249,9 @@ class SpellContestService:
             contest_margin=float(contest_margin),
             source_spell=spell_id,
             modifiers=dict(profile.get("contest_modifiers") or {}),
+            stat_debuffs=SpellContestService._scale_stat_debuffs(dict(profile.get("stat_debuffs") or {}), strength, base_strength),
+            encumbrance_modifier=SpellContestService._scale_scalar_modifier(profile.get("encumbrance_modifier", 0), strength, base_strength),
+            stacking=str(profile.get("stacking", "replace_weaker") or "replace_weaker"),
         )
         effect_data = dict((apply_result.data or {}).get("effect") or {})
         trace_payload = SpellContestService._record_debilitation_trace(
@@ -255,11 +276,65 @@ class SpellContestService:
                 "applied": bool((apply_result.data or {}).get("applied", False)),
                 "replaced": bool((apply_result.data or {}).get("replaced", False)),
                 "ignored": bool((apply_result.data or {}).get("ignored", False)),
+                "stat_debuffs": dict(effect_data.get("stat_debuffs", {}) or {}),
+                "encumbrance_modifier": int(effect_data.get("encumbrance_modifier", 0) or 0),
                 "target_id": getattr(target, "id", None),
                 "target_key": getattr(target, "key", "someone"),
                 "debug_trace": trace_payload,
             }
         )
+
+    @staticmethod
+    def _build_damage_components(total_damage, effect_profile):
+        base_components = list(dict(effect_profile or {}).get("damage_components") or [])
+        total_damage = max(1, int(total_damage or 0))
+        if not base_components:
+            return [("impact", total_damage)]
+
+        normalized = []
+        total_weight = 0
+        for component in base_components:
+            if not isinstance(component, (list, tuple)) or len(component) != 2:
+                continue
+            damage_type = str(component[0] or "impact").strip().lower() or "impact"
+            amount = max(1, int(component[1] or 0))
+            total_weight += amount
+            normalized.append((damage_type, amount))
+        if not normalized or total_weight <= 0:
+            return [("impact", total_damage)]
+
+        resolved = []
+        allocated = 0
+        for index, (damage_type, amount) in enumerate(normalized):
+            if index == len(normalized) - 1:
+                scaled = max(1, total_damage - allocated)
+            else:
+                scaled = max(1, int(round(total_damage * (float(amount) / float(total_weight)))))
+                allocated += scaled
+            resolved.append((damage_type, scaled))
+        return resolved
+
+    @staticmethod
+    def _scale_stat_debuffs(stat_debuffs, strength, base_strength):
+        scaled = {}
+        ratio = float(strength or 0) / max(1.0, float(base_strength or 1.0))
+        for stat_name, modifier in dict(stat_debuffs or {}).items():
+            scaled_modifier = int(round(float(modifier or 0) * ratio))
+            if scaled_modifier == 0 and int(modifier or 0) != 0:
+                scaled_modifier = -1 if float(modifier or 0) < 0 else 1
+            if scaled_modifier != 0:
+                scaled[str(stat_name)] = scaled_modifier
+        return scaled
+
+    @staticmethod
+    def _scale_scalar_modifier(value, strength, base_strength):
+        if int(value or 0) == 0:
+            return 0
+        ratio = float(strength or 0) / max(1.0, float(base_strength or 1.0))
+        scaled = int(round(float(value or 0) * ratio))
+        if scaled == 0:
+            return 1 if float(value or 0) > 0 else -1
+        return scaled
 
     @staticmethod
     def resolve_cyclic_application(caster, target, final_spell_power, *, effect_profile=None, spell_id=None, quality="normal", wild_modifier=1.0):

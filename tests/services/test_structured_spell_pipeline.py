@@ -29,6 +29,7 @@ class DummyCharacter:
         self.db.hp = 100
         self.db.max_hp = 100
         self.db.stats = {"reflex": 10, "magic_resistance": 10}
+        self.db.encumbrance_dirty = False
         self.db.spellbook = {"known_spells": {}}
 
     def ensure_core_defaults(self):
@@ -70,10 +71,11 @@ class DummyCharacter:
         return mapping.get(name, 100)
 
     def get_stat(self, name):
+        normalized = str(name or "").strip().lower().replace(" ", "_")
         if name in self.db.stats:
-            return self.db.stats[name]
+            return int(self.db.stats[name] or 0) + self.get_effect_stat_modifier(normalized)
         mapping = {"intelligence": 30, "discipline": 30, "wisdom": 30, "reflex": 10}
-        return mapping.get(name, 30)
+        return int(mapping.get(name, 30) or 30) + self.get_effect_stat_modifier(normalized)
 
     def set_hp(self, value):
         self.db.hp = max(0, min(int(value), int(self.db.max_hp or 0)))
@@ -152,6 +154,18 @@ class DummyCharacter:
             modifiers = dict(effect.get("modifiers") or {})
             total += float(effect.get("strength", 0) or 0) * float(modifiers.get(modifier_key, 0.0) or 0.0)
         return int(round(total))
+
+    def get_effect_stat_modifier(self, stat_name, category="debilitation"):
+        total = 0
+        for effect in dict((self.get_state("active_effects") or {}).get(category, {}) or {}).values():
+            total += int(dict(effect.get("stat_debuffs") or {}).get(stat_name, 0) or 0)
+        return total
+
+    def get_encumbrance_modifier(self, category="debilitation"):
+        total = 0
+        for effect in dict((self.get_state("active_effects") or {}).get(category, {}) or {}).values():
+            total += int(effect.get("encumbrance_modifier", 0) or 0)
+        return total
 
 
 class DummyRoom:
@@ -330,6 +344,52 @@ class StructuredSpellPipelineTests(unittest.TestCase):
             StateService.tick_active_effects(target)
 
         self.assertNotIn("daze", dict((target.get_state("active_effects") or {}).get("debilitation", {}) or {}))
+
+    def test_burden_prepare_cast_apply_tick_and_expire(self):
+        mage = DummyCharacter(profession="moon_mage")
+        target = DummyCharacter(profession="cleric")
+        target.db.stats["strength"] = 20
+        room = DummyRoom()
+        spell = get_spell("burden")
+
+        learned = SpellbookService.learn_spell(mage, spell.id, "book")
+        access = SpellAccessService.can_use_spell(mage, spell)
+        ManaService._set_attunement_state(mage, 100.0, 100.0)
+        prepared = ManaService.prepare_spell(mage, room, spell.mana_type, spell.base_difficulty, spell.mana_min, spell.mana_max)
+        cast = ManaService.cast_spell(mage, spell.mana_type, spell.base_difficulty)
+        effect = SpellEffectService.apply_spell(mage, spell, cast.data["final_spell_power"], quality="strong", target=target)
+
+        self.assertTrue(learned.success)
+        self.assertTrue(access.success)
+        self.assertTrue(prepared.success)
+        self.assertTrue(cast.success)
+        self.assertTrue(effect.success)
+        self.assertLess(target.get_stat("strength"), 20)
+        self.assertGreater(target.get_encumbrance_modifier(), 0)
+
+        duration = int(effect.data["effect_payload"]["duration"] or 0)
+        for _ in range(duration):
+            StateService.tick_active_effects(target)
+
+        self.assertEqual(target.get_stat("strength"), 20)
+        self.assertEqual(target.get_encumbrance_modifier(), 0)
+
+    def test_strange_arrow_prepare_cast_applies_mixed_damage(self):
+        mage = DummyCharacter(profession="warrior_mage")
+        target = DummyCharacter(profession="cleric")
+        room = DummyRoom()
+        spell = get_spell("strange_arrow")
+
+        SpellbookService.learn_spell(mage, spell.id, "book")
+        ManaService._set_attunement_state(mage, 100.0, 100.0)
+        ManaService.prepare_spell(mage, room, spell.mana_type, spell.base_difficulty, spell.mana_min, spell.mana_max)
+        cast = ManaService.cast_spell(mage, spell.mana_type, spell.base_difficulty)
+        effect = SpellEffectService.apply_spell(mage, spell, cast.data["final_spell_power"], quality="strong", target=target)
+
+        self.assertTrue(effect.success)
+        components = list(effect.data["effect_payload"].get("damage_components", []) or [])
+        self.assertEqual([entry["damage_type"] for entry in components], ["puncture", "electrical"])
+        self.assertLess(target.db.hp, target.db.max_hp)
 
     def test_slow_prepare_cast_apply_reuses_debilitation_handler(self):
         cleric = DummyCharacter(profession="cleric")

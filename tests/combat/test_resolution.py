@@ -88,6 +88,9 @@ class DummyActor:
     def get_state(self, name):
         return self._states.get(name)
 
+    def set_state(self, name, value):
+        self._states[name] = value
+
     def clear_state(self, name):
         self._states.pop(name, None)
 
@@ -168,7 +171,7 @@ class CombatResolutionTests(unittest.TestCase):
         )
         self.defender = DummyActor(
             stats={"agility": 20, "reflex": 22, "strength": 18},
-            skills={"evasion": 35, "light_edge": 30, "shield": 20},
+            skills={"evasion": 35, "parry_ability": 30, "shield_usage": 20},
             weapon=DummyWeapon(profile={"skill": "light_edge", "balance": 55, "damage": 4, "damage_min": 2, "damage_max": 5}),
         )
         self.context = {
@@ -257,7 +260,7 @@ class CombatResolutionTests(unittest.TestCase):
 
     def test_parry_below_threshold_blocks_nothing(self):
         """GSL S00043: parry_percent below 50 yields no block."""
-        weak_defender = DummyActor(stats={"agility": 1, "reflex": 1}, skills={"light_edge": 1}, weapon=self.defender._weapon)
+        weak_defender = DummyActor(stats={"agility": 1, "reflex": 1}, skills={"parry_ability": 1, "light_edge": 80}, weapon=self.defender._weapon)
         parry = compute_parry(weak_defender, leftover_of=200, context=self.context)
 
         self.assertLess(parry.parry_percent, NO_PARRY_THRESHOLD)
@@ -265,14 +268,14 @@ class CombatResolutionTests(unittest.TestCase):
 
     def test_parry_above_full_threshold_blocks_everything(self):
         """GSL S00043: parry_percent above 150 yields a full block."""
-        strong_defender = DummyActor(stats={"agility": 80, "reflex": 80}, skills={"light_edge": 120}, weapon=self.defender._weapon)
+        strong_defender = DummyActor(stats={"agility": 80, "reflex": 80}, skills={"parry_ability": 120, "light_edge": 1}, weapon=self.defender._weapon)
         parry = compute_parry(strong_defender, leftover_of=40, context=self.context)
 
         self.assertGreater(parry.parry_percent, FULL_PARRY_THRESHOLD)
         self.assertEqual(parry.block_pct, 100)
 
     def test_parry_scaling_uses_last_maneuver(self):
-        scaled_defender = DummyActor(stats={"agility": 80, "reflex": 80}, skills={"light_edge": 120}, weapon=self.defender._weapon)
+        scaled_defender = DummyActor(stats={"agility": 80, "reflex": 80}, skills={"parry_ability": 120, "light_edge": 1}, weapon=self.defender._weapon)
         scaled_defender.db.last_maneuver = int(ManeuverID.LUNGE)
         after_lunge = compute_parry(scaled_defender, leftover_of=60, context=self.context)
 
@@ -283,11 +286,22 @@ class CombatResolutionTests(unittest.TestCase):
         self.assertEqual(after_lunge.maneuver_scale_pct, 60)
         self.assertEqual(after_parry.maneuver_scale_pct, 100)
 
+    def test_parry_uses_parry_ability_not_weapon_skill(self):
+        defender = DummyActor(
+            stats={"agility": 10, "reflex": 10},
+            skills={"parry_ability": 5, "light_edge": 100},
+            weapon=self.defender._weapon,
+        )
+
+        parry = compute_parry(defender, leftover_of=100, context=self.context)
+
+        self.assertEqual(parry.parry_score, 28)
+
     def test_shield_uses_min_plus_skill_capped_by_max(self):
         """GSL S00046/S09449 bridge: shield score is capped, then scaled by last maneuver."""
         defender = DummyActor(
             stats={"agility": 20, "reflex": 20},
-            skills={"shield": 30},
+            skills={"shield_usage": 30},
             equipment={"shield": [DummyShield(mindef=12, maxdef=35)]},
         )
         shield = compute_shield(defender, leftover_of=50, context=self.context)
@@ -298,7 +312,7 @@ class CombatResolutionTests(unittest.TestCase):
     def test_shield_scaling_uses_last_maneuver(self):
         defender = DummyActor(
             stats={"agility": 20, "reflex": 20},
-            skills={"shield": 30},
+            skills={"shield_usage": 30},
             equipment={"shield": [DummyShield(mindef=12, maxdef=35)]},
         )
         defender.db.last_maneuver = int(ManeuverID.LUNGE)
@@ -310,6 +324,17 @@ class CombatResolutionTests(unittest.TestCase):
         self.assertLess(after_lunge.shield_score, after_dodge.shield_score)
         self.assertEqual(after_lunge.maneuver_scale_pct, 40)
         self.assertEqual(after_dodge.maneuver_scale_pct, 85)
+
+    def test_shield_uses_shield_usage_not_legacy_shield(self):
+        defender = DummyActor(
+            stats={"agility": 20, "reflex": 20},
+            skills={"shield": 30, "shield_usage": 5},
+            equipment={"shield": [DummyShield(mindef=12, maxdef=35)]},
+        )
+
+        shield = compute_shield(defender, leftover_of=50, context=self.context)
+
+        self.assertEqual(shield.shield_score, 13)
 
     def test_leftover_of_zero_yields_evasion_miss(self):
         """GSL S00092: leftover_OF <= 0 after OF-EDF subtraction means the attack is evaded."""
@@ -341,7 +366,7 @@ class CombatResolutionTests(unittest.TestCase):
         """GSL S00092/S00043: full parry after penetration turns the attack into a blocked miss."""
         parrying_defender = DummyActor(
             stats={"agility": 90, "reflex": 90},
-            skills={"evasion": 5, "light_edge": 140},
+            skills={"evasion": 5, "parry_ability": 140, "light_edge": 1},
             weapon=self.defender._weapon,
         )
         result = resolve_attack(self.attacker, parrying_defender, context=self.context, combat_rng=FixedCombatRng(130), rng=FixedRandom(5, 5, 5))
@@ -354,7 +379,7 @@ class CombatResolutionTests(unittest.TestCase):
         """GSL S00092/S00046: partial shield blocks reduce impact but do not necessarily negate the hit."""
         shielding_defender = DummyActor(
             stats={"agility": 5, "reflex": 5},
-            skills={"evasion": 1, "shield": 20},
+            skills={"evasion": 1, "shield_usage": 20},
             weapon=self.defender._weapon,
             equipment={"shield": [DummyShield(mindef=10, maxdef=25)]},
         )
@@ -414,6 +439,58 @@ class CombatResolutionTests(unittest.TestCase):
         self.assertGreater(damage, 0)
         self.assertIn(context["hit_location"], {"head", "neck", "chest", "back", "abdomen", "left_arm", "right_arm", "left_hand", "right_hand", "left_leg", "right_leg", "tail"})
         self.assertIn("stamina_denominator", context)
+
+    def test_manifest_force_absorbs_physical_damage_after_armor(self):
+        from engine.services.state_service import StateService
+
+        baseline_context = dict(self.context)
+        baseline_context.update({
+            "leftover_of": 30,
+            "post_defense_foi": 18,
+            "snipe_config": {},
+            "maneuver": "swing",
+        })
+        context = dict(baseline_context)
+        defender = DummyActor(
+            stats={"agility": 5, "reflex": 5},
+            skills={"evasion": 1},
+            weapon=self.defender._weapon,
+        )
+        baseline_defender = DummyActor(
+            stats={"agility": 5, "reflex": 5},
+            skills={"evasion": 1},
+            weapon=self.defender._weapon,
+        )
+        StateService.apply_warding_effect(defender, "manifest_force", strength=50, duration=20, absorbs_physical=True)
+
+        baseline_damage = calculate_damage(self.attacker, baseline_defender, baseline_context, rng=FixedRandom(8, 50, 20, 20, 20, 15, 15, 90, 90, 90, 90))
+        damage = calculate_damage(self.attacker, defender, context, rng=FixedRandom(8, 50, 20, 20, 20, 15, 15, 90, 90, 90, 90))
+
+        self.assertGreaterEqual(int(context["barrier_event"].get("absorbed", 0) or 0), 1)
+        self.assertLess(sum(int(v or 0) for v in context["post_armor_damage"].values() if isinstance(v, (int, float))), sum(int(v or 0) for v in baseline_context["post_armor_damage"].values() if isinstance(v, (int, float))))
+        self.assertLessEqual(damage, baseline_damage)
+        self.assertIn("post_armor_damage", context)
+
+    def test_magic_only_ward_does_not_absorb_physical_damage(self):
+        from engine.services.state_service import StateService
+
+        baseline_context = dict(self.context)
+        baseline_context.update({
+            "leftover_of": 30,
+            "post_defense_foi": 18,
+            "snipe_config": {},
+            "maneuver": "swing",
+        })
+        barrier_context = dict(baseline_context)
+        baseline_defender = DummyActor(stats={"agility": 5, "reflex": 5}, skills={"evasion": 1}, weapon=self.defender._weapon)
+        barrier_defender = DummyActor(stats={"agility": 5, "reflex": 5}, skills={"evasion": 1}, weapon=self.defender._weapon)
+        StateService.apply_warding_effect(barrier_defender, "minor_barrier", strength=50, duration=20, absorbs_physical=False)
+
+        baseline_damage = calculate_damage(self.attacker, baseline_defender, baseline_context, rng=FixedRandom(8, 50, 20, 20, 20, 15, 15, 90, 90, 90, 90))
+        barrier_damage = calculate_damage(self.attacker, barrier_defender, barrier_context, rng=FixedRandom(8, 50, 20, 20, 20, 15, 15, 90, 90, 90, 90))
+
+        self.assertEqual(baseline_damage, barrier_damage)
+        self.assertEqual(barrier_context["barrier_event"], {})
 
 
 if __name__ == "__main__":

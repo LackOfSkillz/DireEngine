@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch
 
+from domain.feats.feat_definitions import get_feat
 from domain.spells.spell_definitions import get_spell
 from engine.presenters.mana_presenter import ManaPresenter
 from engine.services.mana_service import ManaService
@@ -146,31 +147,96 @@ class ManaServiceTests(unittest.TestCase):
         ManaService._set_attunement_state(character, 100.0, 100.0)
         room = DummyRoom()
 
-        result = ManaService.prepare_spell(character, room, "holy", 20, 10, 30)
+        result = ManaService.prepare_spell(character, room, "holy", 20, 10, 30, spell_id="test_spell", min_prep_time=5, expiry_window=30)
 
         self.assertTrue(result.success)
         prepared = ManaService._get_prepared_mana_state(character)
         self.assertIsNotNone(prepared)
         self.assertEqual(prepared["realm"], "holy")
         self.assertEqual(prepared["mana_input"], 20)
+        self.assertEqual(prepared["intended_mana"], 20)
         self.assertEqual(prepared["held_mana"], 0)
+        self.assertFalse(prepared["ready"])
         self.assertTrue(ManaPresenter.render_prepare(result))
+
+    def test_prepare_spell_does_not_spend_attunement(self):
+        character = DummyCharacter()
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        room = DummyRoom()
+
+        result = ManaService.prepare_spell(character, room, "holy", 20, 10, 30)
+
+        self.assertTrue(result.success)
+        self.assertEqual(ManaService._get_attunement_state(character)["current"], 100.0)
 
     def test_harness_increases_held_mana_and_reduces_attunement(self):
         character = DummyCharacter()
         ManaService._set_attunement_state(character, 100.0, 100.0)
-        room = DummyRoom()
-        ManaService.prepare_spell(character, room, "holy", 20, 10, 30)
         attunement_before = ManaService._get_attunement_state(character)["current"]
 
         result = ManaService.harness_mana(character, 10, 100, 50)
 
         self.assertTrue(result.success)
-        prepared = ManaService._get_prepared_mana_state(character)
         attunement_after = ManaService._get_attunement_state(character)["current"]
-        self.assertEqual(prepared["held_mana"], 10)
+        self.assertEqual(ManaService._get_harnessed_mana_state(character), 10)
         self.assertLess(attunement_after, attunement_before)
         self.assertTrue(ManaPresenter.render_harness(result))
+
+    def test_consume_mana_for_cyclic_drains_held_mana(self):
+        character = DummyCharacter()
+        character.db.feats = {"learned": [], "granted": []}
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        ManaService._set_harnessed_mana_state(character, 10)
+
+        result = ManaService.consume_mana_for_cyclic(character, 4, "held_mana")
+
+        self.assertTrue(result.success)
+        self.assertEqual(ManaService._get_harnessed_mana_state(character), 6)
+        self.assertEqual(ManaService._get_attunement_state(character)["current"], 100.0)
+
+    def test_consume_mana_for_cyclic_applies_efficient_channeling_to_held_mana(self):
+        character = DummyCharacter()
+        character.db.feats = {"learned": ["efficient_channeling", "efficient_harnessing"], "granted": []}
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        ManaService._set_harnessed_mana_state(character, 10)
+
+        result = ManaService.consume_mana_for_cyclic(character, 10, "held_mana")
+
+        self.assertTrue(result.success)
+        self.assertEqual(int(result.data["consumed"]), 9)
+        self.assertEqual(ManaService._get_harnessed_mana_state(character), 1)
+        self.assertEqual(ManaService._get_attunement_state(character)["current"], 100.0)
+
+    def test_consume_mana_for_cyclic_applies_efficient_harnessing_only_to_attunement(self):
+        character = DummyCharacter()
+        character.db.feats = {"learned": ["efficient_channeling", "efficient_harnessing", "raw_channeling"], "granted": []}
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+
+        result = ManaService.consume_mana_for_cyclic(character, 10, "attunement")
+
+        self.assertTrue(result.success)
+        self.assertEqual(int(result.data["consumed"]), 8)
+        self.assertEqual(int(ManaService._get_attunement_state(character)["current"]), 92)
+
+    def test_consume_mana_for_cyclic_attunement_requires_raw_channeling(self):
+        character = DummyCharacter()
+        character.db.feats = {"learned": [], "granted": []}
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+
+        result = ManaService.consume_mana_for_cyclic(character, 4, "attunement")
+
+        self.assertFalse(result.success)
+        self.assertEqual((result.data or {}).get("reason"), "raw_channeling_lost")
+
+    def test_consume_mana_for_cyclic_cambrinth_is_stubbed(self):
+        character = DummyCharacter()
+        character.db.feats = {"learned": [], "granted": []}
+
+        result = ManaService.consume_mana_for_cyclic(character, 4, "cambrinth", sustain_ref=123)
+
+        self.assertFalse(result.success)
+        self.assertEqual((result.data or {}).get("reason"), "cambrinth_subsystem_not_yet_implemented")
+        self.assertEqual((result.data or {}).get("sustain_ref"), 123)
 
     def test_cast_spell_clears_prepared_state(self):
         character = DummyCharacter()
@@ -178,14 +244,78 @@ class ManaServiceTests(unittest.TestCase):
         room = DummyRoom()
         character.location = room
         ManaService.prepare_spell(character, room, "holy", 20, 10, 30)
+        attunement_before = ManaService._get_attunement_state(character)["current"]
 
         result = ManaService.cast_spell(character, "holy", 100)
 
         self.assertTrue(result.success)
         self.assertIsNone(ManaService._get_prepared_mana_state(character))
+        self.assertEqual(ManaService._get_attunement_state(character)["current"], attunement_before - 20)
         self.assertIn("final_spell_power", result.data)
         self.assertIn("backlash_chance", result.data)
         self.assertTrue(ManaPresenter.render_cast(result))
+
+    def test_transition_to_full_prep_marks_state_ready(self):
+        character = DummyCharacter()
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        room = DummyRoom()
+        ManaService.prepare_spell(character, room, "holy", 20, 10, 30, min_prep_time=5)
+
+        result = ManaService.transition_to_full_prep(character)
+
+        self.assertTrue(result.success)
+        self.assertTrue(ManaService._get_prepared_mana_state(character)["ready"])
+
+    def test_expire_prepared_spell_clears_state_without_refund(self):
+        character = DummyCharacter()
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        room = DummyRoom()
+        ManaService.prepare_spell(character, room, "holy", 20, 10, 30, expiry_window=30)
+
+        result = ManaService.expire_prepared_spell(character)
+
+        self.assertTrue(result.success)
+        self.assertTrue(result.data["expired"])
+        self.assertIsNone(ManaService._get_prepared_mana_state(character))
+        self.assertEqual(ManaService._get_attunement_state(character)["current"], 100.0)
+
+    def test_release_harnessed_mana_clears_held_pool(self):
+        character = DummyCharacter()
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        ManaService.harness_mana(character, 10, 100, 50)
+
+        result = ManaService.release_harnessed_mana(character)
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["released"], 10)
+        self.assertEqual(ManaService._get_harnessed_mana_state(character), 0)
+
+    def test_cast_spell_uses_requested_additional_mana_from_harness_pool(self):
+        character = DummyCharacter()
+        room = DummyRoom()
+        character.location = room
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        ManaService.prepare_spell(character, room, "holy", 20, 10, 30)
+        ManaService.harness_mana(character, 10, 100, 50)
+
+        result = ManaService.cast_spell(character, "holy", 100, additional_mana=6)
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["cast_mana"], 26)
+        self.assertEqual(ManaService._get_harnessed_mana_state(character), 4)
+
+    def test_cast_spell_fails_when_requested_additional_mana_exceeds_held_pool(self):
+        character = DummyCharacter()
+        room = DummyRoom()
+        character.location = room
+        ManaService._set_attunement_state(character, 100.0, 100.0)
+        ManaService.prepare_spell(character, room, "holy", 20, 10, 30)
+        ManaService.harness_mana(character, 5, 100, 50)
+
+        result = ManaService.cast_spell(character, "holy", 100, additional_mana=9)
+
+        self.assertFalse(result.success)
+        self.assertIn("not holding that much mana", result.errors[0].lower())
 
     def test_cleric_devotion_increases_effective_holy_access(self):
         cleric = DummyCharacter(profession="cleric")
@@ -295,7 +425,7 @@ class ManaServiceTests(unittest.TestCase):
 
     def test_cast_spell_can_trigger_backlash_payload(self):
         character = DummyCharacter(profession="warrior mage")
-        ManaService._set_attunement_state(character, 10.0, 100.0)
+        ManaService._set_attunement_state(character, 30.0, 100.0)
         room = DummyRoom({"elemental": 0.4, "holy": 1.0, "life": 1.0, "lunar": 1.0})
         character.location = room
         ManaService._set_prepared_mana_state(character, {"realm": "elemental", "mana_input": 20, "prep_cost": 5, "held_mana": 0, "min_prep": 10, "max_prep": 30, "safe_mana": 5, "tier": 6, "base_difficulty": 80.0})
@@ -381,10 +511,11 @@ class ManaServiceTests(unittest.TestCase):
         self.assertGreater(float(high_result.data["final_spell_power"]), float(low_result.data["final_spell_power"]))
         self.assertGreater(float(high_result.data["environmental_mana_modifier"]), float(low_result.data["environmental_mana_modifier"]))
 
-    def test_structured_cyclic_upkeep_drains_attunement_until_collapse(self):
+    def test_structured_cyclic_upkeep_drains_held_mana_until_collapse(self):
         caster = DummyCharacter(profession="empath")
         spell = get_spell("regenerate")
-        ManaService._set_attunement_state(caster, 2.0, 100.0)
+        ManaService._set_attunement_state(caster, 100.0, 100.0)
+        ManaService._set_harnessed_mana_state(caster, 2)
 
         started = SpellEffectService.apply_spell(caster, spell, 20.0, quality="strong", target=caster)
         self.assertTrue(started.success)
@@ -394,7 +525,14 @@ class ManaServiceTests(unittest.TestCase):
 
         self.assertEqual(len(list((first_tick.data or {}).get("processed_effects", []) or [])), 1)
         self.assertEqual(len(list((second_tick.data or {}).get("collapsed_effects", []) or [])), 1)
-        self.assertEqual(((second_tick.data or {}).get("collapsed_effects", [{}])[0] or {}).get("collapse_reason"), "insufficient_mana")
+        self.assertEqual(((second_tick.data or {}).get("collapsed_effects", [{}])[0] or {}).get("collapse_reason"), "insufficient_held_mana")
+
+    def test_raw_channeling_feat_is_registered_as_unlock_not_modifier(self):
+        feat = get_feat("raw_channeling")
+
+        self.assertIsNotNone(feat)
+        self.assertEqual(feat.unlock_payload, ["cyclic_attunement_sustain"])
+        self.assertEqual(feat.modifier_payload, {})
 
 
 if __name__ == "__main__":

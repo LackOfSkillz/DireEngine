@@ -34,6 +34,11 @@ class SpellEffectService:
 
         handler = getattr(SpellEffectService, handler_name)
         result = handler(caster, spell, final_spell_power, quality=quality, target=target)
+        if getattr(result, "success", False):
+            payload = dict((result.data or {}).get("effect_payload") or {})
+            if payload:
+                payload.setdefault("caster_key", getattr(caster, "key", "someone"))
+                result.data["effect_payload"] = payload
         SpellEffectService._attach_structured_effect_trace(caster, spell, handler_name, result)
         return result
 
@@ -212,6 +217,18 @@ class SpellEffectService:
         elif str(quality or "normal").strip().lower() == "strong":
             strength += 1
 
+        effect_profile = dict(getattr(spell, "effect_profile", {}) or {})
+        if spell.id == "manifest_force":
+            mana_min = int(getattr(spell, "mana_min", 1) or 1)
+            mana_max = max(mana_min, int(getattr(spell, "mana_max", mana_min) or mana_min))
+            intended_mana = min(mana_max, max(mana_min, int(round(float(final_spell_power or 0.0)))))
+            strength = int(effect_profile.get("min_capacity", 30) or 30)
+            strength += int(max(0, intended_mana - mana_min) * float(effect_profile.get("capacity_per_mana", 0.5) or 0.5))
+            min_duration = int(effect_profile.get("base_duration", 600) or 600)
+            max_duration = int(effect_profile.get("max_duration", 2400) or 2400)
+            mana_span = max(1, mana_max - mana_min)
+            duration = min_duration + int((max(0, intended_mana - mana_min) / float(mana_span)) * max(0, max_duration - min_duration))
+
         target_type = str(getattr(spell, "target_type", "self") or "self").strip().lower()
         if target_type == "group":
             recipients = SpellEffectService.get_valid_group_targets(getattr(caster, "location", None), caster)
@@ -219,7 +236,13 @@ class SpellEffectService:
                 return ActionResult.fail(errors=["There is no one here to protect."], data={"reason": "no_group_targets"})
             payload_targets = []
             for recipient in recipients:
-                barrier_result = StateService.apply_warding_effect(recipient, spell.id, strength, duration)
+                barrier_result = StateService.apply_warding_effect(
+                    recipient,
+                    spell.id,
+                    strength,
+                    duration,
+                    absorbs_physical=bool(effect_profile.get("absorbs_physical", False)),
+                )
                 barrier = dict((barrier_result.data or {}).get("effect", {}) or {})
                 payload_targets.append(
                     {
@@ -247,8 +270,16 @@ class SpellEffectService:
             )
 
         recipient = target or caster
+        if spell.id == "manifest_force":
+            StateService.remove_effect(recipient, "warding", spell.id)
 
-        barrier_result = StateService.apply_warding_effect(recipient, spell.id, strength, duration)
+        barrier_result = StateService.apply_warding_effect(
+            recipient,
+            spell.id,
+            strength,
+            duration,
+            absorbs_physical=bool(effect_profile.get("absorbs_physical", False)),
+        )
         barrier = dict((barrier_result.data or {}).get("effect", {}) or {})
 
         effect_payload = {
@@ -260,6 +291,7 @@ class SpellEffectService:
             "source_spell": str(barrier.get("name", spell.id) or spell.id),
             "self_target": recipient is caster,
             "source_mana_type": str(spell.mana_type or "").strip().lower(),
+            "absorbs_physical": bool(barrier.get("absorbs_physical", False)),
         }
         return ActionResult.ok(
             data={
@@ -276,6 +308,7 @@ class SpellEffectService:
         recipient = target or caster
         effect_profile = dict(getattr(spell, "effect_profile", {}) or {})
         effect_type = str(effect_profile.get("effect_type", spell.id) or spell.id).strip().lower()
+        utility_behavior = str(effect_profile.get("utility_behavior", effect_type) or effect_type).strip().lower()
 
         if effect_type == "cleanse":
             cleanse_result = StateService.apply_cleanse(recipient)
@@ -322,6 +355,40 @@ class SpellEffectService:
                 }
             )
 
+        if utility_behavior == "gauge_flow":
+            duration = int(effect_profile.get("base_duration", 1800) or 1800) + int(
+                round(float(final_spell_power or 0.0) * float(effect_profile.get("duration_scale", 0.0) or 0.0))
+            )
+            utility_result = StateService.apply_utility_effect(
+                recipient,
+                "gauge_flow",
+                duration,
+                source_spell=spell.id,
+                extra_data={
+                    "capability_flag": str(effect_profile.get("capability_flag", "gauge_flow_active") or "gauge_flow_active"),
+                    "potency_scaling": str(effect_profile.get("potency_scaling", "research_time_reduction") or "research_time_reduction"),
+                },
+            )
+            effect_data = dict((utility_result.data or {}).get("effect", {}) or {})
+            effect_payload = {
+                "effect_family": "utility",
+                "utility_effect": "gauge_flow",
+                "target_id": getattr(recipient, "id", None),
+                "target_key": getattr(recipient, "key", "someone"),
+                "duration": int(effect_data.get("duration", duration) or duration),
+                "capability_flag": str(effect_data.get("capability_flag", "gauge_flow_active") or "gauge_flow_active"),
+                "self_target": recipient is caster,
+                "source_mana_type": str(spell.mana_type or "").strip().lower(),
+            }
+            return ActionResult.ok(
+                data={
+                    "spell_id": spell.id,
+                    "spell_name": spell.name,
+                    "spell_type": str(spell.spell_type or "").strip().lower(),
+                    "effect_payload": effect_payload,
+                }
+            )
+
         return ActionResult.fail(
             errors=[f"No structured utility behavior exists for {spell.id}."],
             data={"spell_id": spell.id, "spell_type": str(spell.spell_type or "").strip().lower(), "reason": "unknown_utility_effect"},
@@ -336,6 +403,7 @@ class SpellEffectService:
             spell_id=getattr(spell, "id", None),
             quality=quality,
             wild_modifier=1.0,
+            effect_profile=dict(getattr(spell, "effect_profile", {}) or {}),
         )
         if not contest_result.success:
             return contest_result
@@ -357,6 +425,19 @@ class SpellEffectService:
         target_mode = str(profile.get("target_mode", "self") or "self")
         recipient = caster if target_mode != "single" else target
         room_ref = getattr(caster, "location", None)
+
+        active_cyclic = StateService.get_active_cyclic_effects(caster)
+        if active_cyclic:
+            active_id, active_payload = next(iter(active_cyclic.items()))
+            active_name = str(dict(active_payload or {}).get("spell_name") or dict(active_payload or {}).get("name") or active_id)
+            return ActionResult.fail(
+                errors=[f"You already sustain a cyclic spell: {active_name}. Release it first with RELEASE CYCLIC before casting another."],
+                data={"reason": "single_cyclic_enforced", "active_spell_id": active_id, "active_spell_name": active_name, "effect_family": "cyclic"},
+            )
+
+        sustain_source, sustain_ref, sustain_error = SpellEffectService._select_cyclic_sustain_source(caster, spell)
+        if sustain_source is None:
+            return ActionResult.fail(errors=[sustain_error], data={"reason": "invalid_sustain_source", "effect_family": "cyclic"})
 
         contest_payload = None
         if bool(profile.get("contest_required", False)):
@@ -390,6 +471,7 @@ class SpellEffectService:
             spell.id,
             {
                 "spell_id": spell.id,
+                "spell_name": spell.name,
                 "power": float(final_spell_power or 0.0),
                 "mana_per_tick": int(mana_per_tick),
                 "active": True,
@@ -406,10 +488,15 @@ class SpellEffectService:
                 "room_key": getattr(room_ref, "key", None),
                 "max_targets": int(profile.get("max_targets", 0) or 0),
                 "interrupt_on_debilitation": bool(profile.get("interrupt_on_debilitation", False)),
+                "sustain_source": sustain_source,
+                "sustain_ref": sustain_ref,
             },
         )
         if not start_result.success:
-            return ActionResult.fail(errors=list(start_result.errors or []), data={"reason": "already_active", "effect_family": "cyclic"})
+            return ActionResult.fail(
+                errors=list(start_result.errors or []),
+                data=dict(start_result.data or {}) | {"reason": str((start_result.data or {}).get("reason") or "already_active"), "effect_family": "cyclic"},
+            )
 
         effect_payload = dict(contest_payload or {})
         effect_payload.update(
@@ -425,6 +512,8 @@ class SpellEffectService:
                     "mana_per_tick": int(mana_per_tick),
                     "power": float(final_spell_power or 0.0),
                     "active": True,
+                    "sustain_source": sustain_source,
+                    "sustain_ref": sustain_ref,
                 },
             }
         )
@@ -436,6 +525,25 @@ class SpellEffectService:
                 "effect_payload": effect_payload,
             }
         )
+
+    @staticmethod
+    def _select_cyclic_sustain_source(caster, spell):
+        from engine.services.feat_service import FeatService
+        from engine.services.mana_service import ManaService
+
+        required_initial = max(1, int(getattr(spell, "mana_min", 1) or 1))
+        held_mana = ManaService._get_harnessed_mana_state(caster)
+        if held_mana >= required_initial:
+            return "held_mana", None, None
+
+        has_raw_channeling = FeatService.has_feat(caster, "raw_channeling") or FeatService.get_unlock(caster, "cyclic_attunement_sustain")
+        if has_raw_channeling:
+            attunement = ManaService._get_attunement_state(caster)
+            if ManaService._coerce_float(attunement.get("current"), default=0.0) >= float(required_initial):
+                return "attunement", None, None
+            return None, None, f"Your attunement is too low to sustain {spell.name}. Recover first or harness mana."
+
+        return None, None, f"You have insufficient held mana to sustain {spell.name}. Use HARNESS to gather mana into a held pool first."
 
     @staticmethod
     def _apply_debilitation_spell(caster, spell, final_spell_power, quality="normal", target=None):

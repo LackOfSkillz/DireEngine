@@ -117,9 +117,4 @@ class DefenseVerbService:
 
     @staticmethod
     def _get_parry_skill_name(defender) -> str:
-        if hasattr(defender, "get_weapon_profile"):
-            profile = dict(defender.get_weapon_profile() or {})
-            skill_name = str(profile.get("skill") or "").strip().lower()
-            if skill_name:
-                return skill_name
-        return "combat"
+        return "parry_ability"

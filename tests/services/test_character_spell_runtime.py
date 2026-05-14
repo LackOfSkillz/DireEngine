@@ -46,6 +46,8 @@ class RuntimeDummyCharacter(DummyCharacter):
     _ids = itertools.count(1)
 
     prepare_spell = Character.prepare_spell
+    harness_spell = Character.harness_spell
+    release_magic = Character.release_magic
     cast_spell = Character.cast_spell
     resolve_spell = Character.resolve_spell
     process_magic_states = Character.process_magic_states
@@ -55,12 +57,15 @@ class RuntimeDummyCharacter(DummyCharacter):
     get_spell_metadata = Character.get_spell_metadata
     _resolve_structured_spell = Character._resolve_structured_spell
     _build_structured_spell_metadata = Character._build_structured_spell_metadata
+    _sync_prepared_spell_state_from_mana = Character._sync_prepared_spell_state_from_mana
     get_active_effects = Character.get_active_effects
     get_active_cyclic_effects = Character.get_active_cyclic_effects
     get_mana_realm = Character.get_mana_realm
     calculate_preparation_stability = Character.calculate_preparation_stability
     resolve_cast_quality = Character.resolve_cast_quality
     resolve_cast_target = Character.resolve_cast_target
+    apply_ward_absorption = Character.apply_ward_absorption
+    apply_warding_barrier = Character.apply_warding_barrier
 
     def __init__(self, profession="cleric", key=None):
         super().__init__(profession=profession)
@@ -138,6 +143,79 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         self.assertTrue(effect_mock.called)
         self.assertGreater(patient.db.hp, 70)
         self.assertFalse(any("legacy" in line.lower() for line in cleric.messages))
+
+    def test_prepare_runtime_defers_attunement_spend_until_cast(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+        target = RuntimeDummyCharacter(profession="cleric", key="Target")
+        room = RuntimeDummyRoom()
+        room.add(mage, target)
+
+        self.assertTrue(self._learn(mage, "flare").success)
+        attunement_before = ManaService._get_attunement_state(mage)["current"]
+
+        self.assertTrue(mage.prepare_spell("flare 12"))
+        self.assertEqual(ManaService._get_attunement_state(mage)["current"], attunement_before)
+        self.assertTrue(mage.cast_spell(target_name="Target"))
+        self.assertEqual(ManaService._get_attunement_state(mage)["current"], attunement_before - 12)
+
+    def test_prepare_runtime_full_prep_transition_syncs_prepared_state(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        room = RuntimeDummyRoom()
+        room.add(cleric)
+
+        self.assertTrue(self._learn(cleric, "minor_barrier").success)
+        self.assertTrue(cleric.prepare_spell("minor_barrier 12"))
+        prepared_spell = dict(cleric.get_state("prepared_spell") or {})
+        self.assertFalse(bool(prepared_spell.get("ready", True)))
+
+        transition = ManaService.transition_to_full_prep(cleric)
+
+        self.assertTrue(transition.success)
+        self.assertTrue(bool((cleric.get_state("prepared_spell") or {}).get("ready", False)))
+
+    def test_harness_runtime_without_prepared_spell_and_release_mana(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+
+        self.assertTrue(mage.harness_spell("10"))
+        self.assertEqual(ManaService._get_harnessed_mana_state(mage), 10)
+        self.assertTrue(mage.release_magic("mana"))
+        self.assertEqual(ManaService._get_harnessed_mana_state(mage), 0)
+
+    def test_release_runtime_prefers_prepared_spell_before_held_mana(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+        room = RuntimeDummyRoom()
+        room.add(mage)
+
+        self.assertTrue(self._learn(mage, "bolster").success)
+        self.assertTrue(mage.harness_spell("10"))
+        self.assertTrue(mage.prepare_spell("bolster 10"))
+
+        self.assertTrue(mage.release_magic())
+        self.assertIsNone(mage.get_state("prepared_spell"))
+        self.assertEqual(ManaService._get_harnessed_mana_state(mage), 10)
+
+    def test_release_runtime_can_stop_cyclic_spell(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+        room = RuntimeDummyRoom()
+        room.add(mage)
+
+        self.assertTrue(self._learn(mage, "storm_field").success)
+        self.assertTrue(mage.harness_spell("16"))
+        self.assertTrue(mage.prepare_spell("storm_field 16"))
+        self.assertTrue(mage.cast_spell())
+        self.assertTrue(mage.get_active_cyclic_effects())
+
+        self.assertTrue(mage.release_magic("cyclic"))
+        self.assertFalse(mage.get_active_cyclic_effects())
+
+    def test_release_runtime_can_fall_back_to_empath_link(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+
+        with patch.object(RuntimeDummyCharacter, "remove_empath_link", return_value=True, create=True) as remove_link_mock:
+            self.assertTrue(empath.release_magic())
+
+        self.assertTrue(remove_link_mock.called)
+        self.assertTrue(any("empathic connection" in line.lower() for line in empath.messages))
 
     def test_prepare_cast_augment_runtime_avoids_legacy_resolver(self):
         mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
@@ -224,6 +302,26 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
             target.process_magic_states()
         self.assertNotIn("daze", dict((target.get_state("active_effects") or {}).get("debilitation", {}) or {}))
 
+    def test_prepare_cast_burden_runtime_applies_and_expires_strength_debuff(self):
+        seer = RuntimeDummyCharacter(profession="moon_mage", key="Seer")
+        target = RuntimeDummyCharacter(profession="cleric", key="Target")
+        target.db.stats["strength"] = 20
+        room = RuntimeDummyRoom()
+        room.add(seer, target)
+
+        self.assertTrue(self._learn(seer, "burden").success)
+        with patch.object(RuntimeDummyCharacter, "resolve_debilitation_spell", side_effect=AssertionError("legacy debilitation used"), create=True):
+            self.assertTrue(seer.prepare_spell("burden 12"))
+            self.assertTrue(seer.cast_spell(target_name="Target"))
+
+        self.assertLess(target.get_stat("strength"), 20)
+        self.assertGreater(target.get_encumbrance_modifier(), 0)
+        duration = int((((target.get_state("active_effects") or {}).get("debilitation", {}).get("burden", {}) or {}).get("duration", 0) or 0))
+        for _ in range(duration):
+            target.process_magic_states()
+        self.assertEqual(target.get_stat("strength"), 20)
+        self.assertEqual(target.get_encumbrance_modifier(), 0)
+
     def test_invalid_target_runtime_fails_before_contest(self):
         room = RuntimeDummyRoom()
         for profession, spell_id, resolver_name in (("warrior_mage", "flare", "resolve_targeted_magic"), ("moon_mage", "daze", "resolve_debilitation")):
@@ -290,6 +388,8 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
                     room.add(target)
                 self.assertTrue(self._learn(caster, spell_id).success)
                 with patch.object(RuntimeDummyCharacter, legacy_name, side_effect=AssertionError(f"legacy path {legacy_name} used"), create=True):
+                    if spell_id == "regenerate":
+                        self.assertTrue(caster.harness_spell("12"))
                     self.assertTrue(caster.prepare_spell(f"{spell_id} 12"))
                     self.assertTrue(caster.cast_spell(target_name=target_name))
 
@@ -308,6 +408,33 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         self.assertEqual(utility_mock.call_count, 1)
         self.assertIsNotNone(mage.get_state("utility_light"))
 
+    def test_prepare_cast_gauge_flow_runtime_sets_and_clears_capability_flag(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+        room = RuntimeDummyRoom()
+        room.add(mage)
+
+        self.assertTrue(self._learn(mage, "gauge_flow").success)
+        self.assertTrue(mage.prepare_spell("gauge_flow 10"))
+        self.assertTrue(mage.cast_spell())
+
+        self.assertTrue(bool(getattr(mage.db, "gauge_flow_active", False)))
+        duration = int((((mage.get_state("active_effects") or {}).get("utility", {}).get("gauge_flow", {}) or {}).get("duration", 0) or 0))
+        for _ in range(duration):
+            mage.process_magic_states()
+        self.assertFalse(bool(getattr(mage.db, "gauge_flow_active", False)))
+
+    def test_prepare_cast_strange_arrow_runtime_applies_mixed_damage_components(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+        target = RuntimeDummyCharacter(profession="cleric", key="Target")
+        room = RuntimeDummyRoom()
+        room.add(mage, target)
+
+        self.assertTrue(self._learn(mage, "strange_arrow").success)
+        self.assertTrue(mage.prepare_spell("strange_arrow 12"))
+        self.assertTrue(mage.cast_spell(target_name="Target"))
+
+        self.assertLess(target.db.hp, target.db.max_hp)
+
     def test_prepare_cast_group_warding_runtime_uses_structured_handler(self):
         cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
         ally = RuntimeDummyCharacter(profession="cleric", key="Ally")
@@ -324,6 +451,33 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         self.assertEqual(ward_mock.call_count, 2)
         self.assertIsNotNone(cleric.get_state("warding_barrier"))
         self.assertIsNotNone(ally.get_state("warding_barrier"))
+
+    def test_prepare_cast_manifest_force_runtime_sets_physical_barrier(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+        room = RuntimeDummyRoom()
+        room.add(mage)
+
+        self.assertTrue(self._learn(mage, "manifest_force").success)
+        self.assertTrue(mage.prepare_spell("manifest_force 10"))
+        self.assertTrue(mage.cast_spell())
+
+        self.assertIsNotNone(mage.get_state("physical_barrier"))
+        self.assertTrue(bool((mage.get_state("physical_barrier") or {}).get("absorbs_physical", False)))
+        self.assertGreaterEqual(int((mage.get_state("physical_barrier") or {}).get("strength", 0) or 0), 34)
+
+    def test_manifest_force_does_not_absorb_magic_when_magic_ward_is_absent(self):
+        mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
+        room = RuntimeDummyRoom()
+        room.add(mage)
+
+        self.assertTrue(self._learn(mage, "manifest_force").success)
+        self.assertTrue(mage.prepare_spell("manifest_force 10"))
+        self.assertTrue(mage.cast_spell())
+        before_strength = int((mage.get_state("physical_barrier") or {}).get("strength", 0) or 0)
+        remaining = mage.apply_ward_absorption(mage, 12)
+
+        self.assertEqual(int((mage.get_state("physical_barrier") or {}).get("strength", 0) or 0), before_strength)
+        self.assertEqual(remaining, 12)
 
     def test_prepare_cast_cleanse_runtime_uses_structured_state_service(self):
         cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
@@ -356,11 +510,12 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
 
         self.assertTrue(self._learn(empath, "regenerate").success)
         with patch.object(RuntimeDummyCharacter, "start_cyclic_spell", side_effect=AssertionError("legacy cyclic used"), create=True):
+            self.assertTrue(empath.harness_spell("12"))
             self.assertTrue(empath.prepare_spell("regenerate 12"))
             self.assertTrue(empath.cast_spell())
 
         self.assertIn("regenerate", empath.get_active_cyclic_effects())
-        self.assertTrue(any("begin sustaining" in line.lower() for line in empath.messages))
+        self.assertTrue(any("channel the cyclic spell of regenerate from your held mana" in line.lower() for line in empath.messages))
 
     def test_cyclic_tick_heals_and_drains_once(self):
         empath = RuntimeDummyCharacter(profession="empath", key="Empath")
@@ -369,14 +524,15 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         empath.db.hp = 60
 
         self.assertTrue(self._learn(empath, "regenerate").success)
+        self.assertTrue(empath.harness_spell("12"))
         self.assertTrue(empath.prepare_spell("regenerate 12"))
         self.assertTrue(empath.cast_spell())
-        mana_before_tick = float((ManaService._get_attunement_state(empath) or {}).get("current", 0.0) or 0.0)
+        mana_before_tick = ManaService._get_harnessed_mana_state(empath)
 
         with patch("engine.services.state_service.StateService.apply_healing", wraps=StateService.apply_healing) as heal_mock:
             empath.process_magic_states()
 
-        mana_after_tick = float((ManaService._get_attunement_state(empath) or {}).get("current", 0.0) or 0.0)
+        mana_after_tick = ManaService._get_harnessed_mana_state(empath)
         self.assertEqual(heal_mock.call_count, 1)
         self.assertGreater(empath.db.hp, 60)
         self.assertLess(mana_after_tick, mana_before_tick)
@@ -387,14 +543,15 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         room.add(empath)
 
         self.assertTrue(self._learn(empath, "regenerate").success)
+        self.assertTrue(empath.harness_spell("12"))
         self.assertTrue(empath.prepare_spell("regenerate 12"))
         self.assertTrue(empath.cast_spell())
-        ManaService._set_attunement_state(empath, 0.0, 100.0)
+        ManaService._set_harnessed_mana_state(empath, 0)
 
         empath.process_magic_states()
 
         self.assertNotIn("regenerate", empath.get_active_cyclic_effects())
-        self.assertTrue(any("lose control" in line.lower() for line in empath.messages))
+        self.assertTrue(any("held mana runs dry" in line.lower() for line in empath.messages))
 
     def test_cyclic_interrupts_when_debilitated(self):
         empath = RuntimeDummyCharacter(profession="empath", key="Empath")
@@ -402,6 +559,7 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         room.add(empath)
 
         self.assertTrue(self._learn(empath, "regenerate").success)
+        self.assertTrue(empath.harness_spell("12"))
         self.assertTrue(empath.prepare_spell("regenerate 12"))
         self.assertTrue(empath.cast_spell())
         StateService.apply_debilitation_effect(empath, "daze", 3, 2, source_spell="daze", modifiers={"magic_attack": 0.2})
@@ -418,6 +576,7 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         room.add(seer, target)
 
         self.assertTrue(self._learn(seer, "wither").success)
+        self.assertTrue(seer.harness_spell("14"))
         self.assertTrue(seer.prepare_spell("wither 14"))
         self.assertTrue(seer.cast_spell(target_name="Target"))
         before_hp = target.db.hp
@@ -436,6 +595,7 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         room.add(mage, first, second)
 
         self.assertTrue(self._learn(mage, "storm_field").success)
+        self.assertTrue(mage.harness_spell("16"))
         self.assertTrue(mage.prepare_spell("storm_field 16"))
         self.assertTrue(mage.cast_spell())
         before = {first.key: first.db.hp, second.key: second.db.hp}
@@ -455,6 +615,7 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         start_room.add(mage, target)
 
         self.assertTrue(self._learn(mage, "storm_field").success)
+        self.assertTrue(mage.harness_spell("16"))
         self.assertTrue(mage.prepare_spell("storm_field 16"))
         self.assertTrue(mage.cast_spell())
         next_room.add(mage)
@@ -472,6 +633,7 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         start_room.add(mage, first, second)
 
         self.assertTrue(self._learn(mage, "storm_field").success)
+        self.assertTrue(mage.harness_spell("16"))
         self.assertTrue(mage.prepare_spell("storm_field 16"))
         self.assertTrue(mage.cast_spell())
         mage.process_magic_states()
@@ -493,6 +655,7 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         room.add(mage, first)
 
         self.assertTrue(self._learn(mage, "storm_field").success)
+        self.assertTrue(mage.harness_spell("16"))
         self.assertTrue(mage.prepare_spell("storm_field 16"))
         self.assertTrue(mage.cast_spell())
         mage.process_magic_states()
@@ -517,6 +680,8 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
 
         self.assertTrue(self._learn(high_mage, "storm_field").success)
         self.assertTrue(self._learn(low_mage, "storm_field").success)
+        self.assertTrue(high_mage.harness_spell("16"))
+        self.assertTrue(low_mage.harness_spell("16"))
         self.assertTrue(high_mage.prepare_spell("storm_field 16"))
         self.assertTrue(low_mage.prepare_spell("storm_field 16"))
         self.assertTrue(high_mage.cast_spell())

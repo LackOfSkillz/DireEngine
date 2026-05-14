@@ -19,6 +19,14 @@ Use it to answer:
 - Secondary client surface: Godot client workspace with websocket bridge
 - World target: DragonRealms-inspired text gameplay with modern client support, structured state updates, and map-assisted play
 
+## Webclient Lifecycle Snapshot
+
+- The live browser client is a DireEngine-owned template and static override on top of Evennia's stock webclient routing, not a stock Evennia shell.
+- Loopback web navigation is now canonicalized to `localhost` from both the website base template and the webclient base template so dev browsing does not split Django session cookies across `127.x` variants.
+- Disconnected browser state now suppresses the draggable right rail before the reconnect controls render, which keeps the reconnect surface reachable in the narrow attached-browser viewport used for dispatch verification.
+- Browser-side recovery no longer depends on a JS console call. The client now treats the authenticated `/play` route as the canonical session recovery seam when reconnect attempts stall, which preserves the selected-character bridge used by the website dashboard and auto-puppet hooks.
+- The webclient still emits some startup-race noise if UI refresh requests fire while the websocket is still connecting, but the verified browser recovery path is now `localhost` plus `/play`, not `Evennia.connect()` from the console.
+
 ## Current Architecture
 
 The active architecture is no longer just `commands -> typeclasses`.
@@ -36,8 +44,46 @@ Current extracted service/domain areas include:
 - `engine/services/combat_service.py`
 - `engine/services/state_service.py`
 - `engine/services/skill_service.py`
+- `engine/services/rexp_service.py`
 - `engine/services/injury_service.py`
 - `engine/services/pulse_service.py`
+
+## Magic Runtime Snapshot
+
+- The structured spell registry in `domain/spells/spell_definitions.py` now distinguishes prototype fixtures from canonical catalog entries through `canon_status`, and spell data now carries explicit `mana_min`, `mana_max`, `min_prep_time`, and `expiry_window` metadata instead of relying on timing-only bridge defaults.
+- Canonical spell definitions now also carry `slot_cost` and `apprentice_until_circle`, so permanent memorization cost and derived apprentice access live in the registry rather than in ad hoc command logic.
+- DRG-024.5a's lifecycle remains authoritative: `prepare` forms the pattern without spending attunement, `cast` spends intended mana and any released harnessed mana, full-prep and prepared-expiry still run through the scheduler-backed `ManaService` seams, and `typeclasses/characters.py` continues to sync the player-facing prepared state from mana-state authority.
+- Four canonical Analogous Patterns starter spells are now live in the registry: `burden` (debilitation), `gauge_flow` (utility), `strange_arrow` (targeted magic), and `manifest_force` (warding).
+- The Analogous Patterns registrations now match canon instead of the earlier provisional model: Burden, Strange Arrow, and Manifest Force derive apprentice access through circle 10, Gauge Flow no longer does, and the four seeded spells currently in repo carry slot costs of 1/2/1/1 respectively.
+- Debilitation effects can now carry stat debuffs and encumbrance modifiers through the existing `active_effects["debilitation"]` model, so Burden reduces Strength and increases carried burden without introducing a parallel debuff store.
+- Utility effects can now carry capability-flag payloads through `engine/services/state_service.py`, which DRG-024.5b uses for Gauge Flow's `gauge_flow_active` state while the downstream magical-research system remains deferred.
+- Targeted magic now supports mixed typed damage payloads in `engine/services/spell_contest_service.py`, so Strange Arrow resolves as puncture plus electrical damage while still routing wound application through the existing typed damage path.
+- Physical warding now distinguishes magic-only and physical-only barriers inside the shared state model: Manifest Force stores `absorbs_physical`, mirrors into `physical_barrier`, and is consumed in `domain/combat/resolution.py` after armor reduction but before wound shaping, while existing prototype wards remain magic-only.
+- `engine/services/slot_service.py` now owns the generic `db.magic_slot_pool` surface. Max slots are derived from profession magic-skillset placement and circle, allocations are keyed by category, and spells are only the first consumer of the shared pool ahead of deferred magical feats.
+- DRG-024.5d-2 is now live on that shared pool: `domain/feats/feat_definitions.py` registers a dedicated feat catalog, `engine/services/feat_training_service.py` allocates learned feats into `allocations["feats"]`, and profession-granted feats remain slot-free in `db.feats["granted"]`.
+- Eight magical feats are now implemented end-to-end: the original starter set (`deep_attunement`, `efficient_harnessing`, `focused_preparation`, `faster_battle_preparations`, `faster_matrices`, `cautious_casting`, and `efficient_channeling`) plus `raw_channeling` as the first capability-unlock feat in the catalog.
+- Passive feat modifiers are threaded through the existing live seams rather than through a parallel buff system: attunement regeneration, harness/cast attunement spend, prepared expiry, prep-time metadata, cyclic upkeep drain, and backlash vitality loss all now consult `engine/services/feat_service.py` and preserve identity behavior when no feats are known.
+- DRG-024.5d-3a corrects cyclic upkeep to the canon sustain model: active cyclic payloads now carry `sustain_source` and optional `sustain_ref`, cyclic casts prefer held harnessed mana by default, attunement-direct sustain only becomes legal through Raw Channeling, and cambrinth sustain is schema-supported but currently returns a clean deferred-subsystem error until the item-side subsystem lands.
+- Cyclic upkeep no longer routes through generic attunement spend. `ManaService.consume_mana_for_cyclic()` now dispatches by sustain source, applies Efficient Channeling regardless of source, applies Efficient Harnessing only for attunement-direct sustain, and collapses cyclic effects with source-specific reasons when held mana, attunement, or Raw Channeling availability runs out.
+- The live cyclic runtime now enforces canon's single-active-cyclic rule. Starting a second cyclic fails privately before cast-time mana spend or prepared-state clearing, and explicit `release cyclic` remains the authority surface for changing sustained patterns.
+- Player-facing feat surfaces are now live: `feats` lists learned, granted, and currently available feats; `learn feat <name>` and `forget feat <name>` transact through the first Landing feat trainer, `Instructor Sariel`, in `The Hall of Arcane Refinement` off Town Green NE.
+- Permanent spell learning is now slot-gated in `engine/services/spellbook_service.py`, while `engine/services/spell_access_service.py` derives apprentice access fresh from profession plus circle plus spell metadata instead of persisting apprentice spells into `db.spellbook`.
+- Circle advancement now recomputes slot maxima and privately communicates apprentice transitions: magic users receive a circle-10 warning for unmemorized apprentice spells and lose derived access at circle 11 unless the spell was permanently memorized.
+- Player-facing slot visibility now exists through `slots` and `spells`: `commands/cmd_slots.py` reports max/used/available pool state and per-category allocations, and `commands/cmd_spellbook.py::CmdSpells` distinguishes permanent memorization from apprentice access.
+- Existing prototype spells such as `flare` and `storm_field` remain in place as regression fixtures and are now explicitly distinguishable from the canonical seed catalog rather than being silently treated as equivalent content.
+
+## Learning Runtime Snapshot
+
+- Live EXP persistence remains the existing `SkillState` plus `Character.db.exp_skill_state` seam; newer learning work does not introduce a parallel `db.skill_states` model.
+- The canonical 20-second EXP pulse still flows through `world/systems/exp_pulse.py` into `engine/services/pulse_service.py`, now with sleep-aware handling: Light Sleep continues absorption, Deep Sleep suspends pulse drain, and rested EXP can triple a draining group's absorption rate when banked time is available.
+- `engine/services/rexp_service.py` owns rested EXP banking, the 4-hour cap, the 23.5-hour consumption cycle, and static offline drain on login via `Character.at_post_puppet()` / `at_post_unpuppet()` timestamps.
+- Player-facing sleep state now lives on `Character.db.sleep_state` with `sleep` and `awake` commands, automatic wake-on-action for most commands, and rested EXP visibility on the `experience` command.
+- `typeclasses/characters.py::SKILL_REGISTRY` is now the authoritative live skill-identity table: every entry carries `category`, `visibility`, `display_name`, `description`, and `starter_rank`, with lowercase underscore keys used as the runtime skill IDs.
+- Defense learning identities now exist as first-class skills: `shield_usage`, `parry_ability`, and `multiple_engaged_opponent` live under the `defense` category and drain through the canonical pulse rotation like other non-guild-locked skills.
+- `domain/learning/skill_aliases.py` and `domain/learning/skill_groups.py` are aligned against that registry, so pulse groups no longer silently no-op on missing skill IDs and group 9 is intentionally reserved empty for future profession-specific skill dispatches.
+- `engine/services/stat_training_service.py`
+- `engine/services/circle_service.py`
+- `engine/services/messaging.py`
 - `engine/services/result.py`
 - `engine/services/errors.py`
 - `engine/contracts/combat_result.py`
@@ -50,6 +96,11 @@ Current extracted service/domain areas include:
 - `domain/wounds/constants.py`
 - `domain/wounds/models.py`
 - `domain/wounds/rules.py`
+- `domain/learning/skill_aliases.py`
+- `domain/learning/mindstate.py`
+- `domain/learning/skill_groups.py`
+- `domain/learning/pool_size.py`
+- `domain/learning/tdp_cost.py`
 
 This is still a transitional architecture. Not every gameplay surface has been extracted yet, but combat, state mutation, and wound handling now have a formal service/domain path.
 
@@ -78,7 +129,7 @@ Defensive stance routing now mirrors that pattern: `parry` and `dodge` flow thro
 - `Character` now persists `last_maneuver` across combat actions, and both attack and defense verb services update it when a maneuver is committed.
 - `parry` and `dodge` now exist as first-class combat commands with the canon-specific duplicate-stance guard messages and 3-4 second defensive positioning RT.
 - Combat resolution now applies defender last-maneuver scaling to evasion, parry, and shield calculations instead of treating those defenses as stance-agnostic.
-- Defense XP remains only partially ported relative to S00509: evasion defense XP already existed, and this dispatch adds a small parry-training bridge, but the full canon armor/shield defense-learning distribution still remains for a follow-on dispatch.
+- Defense XP now follows the canonical defense identities instead of the older bridge: parry results train `parry_ability`, shield results train `shield_usage`, and opportunistic multi-opponent pressure trains `multiple_engaged_opponent` off the transient `incoming_attackers` counter while preserving the existing combat messaging and attacker miss-XP behavior.
 
 ## Runtime Boot Behavior
 
@@ -130,8 +181,35 @@ Current state:
 
 - centralized persistent-field backfill through `ensure_core_defaults()` and related helpers
 - stats, skills, resources, profession, death, injury, and subsystem state stored on Character
+- spendable TDP progression now persists on Character, with `grant_tdp()` for rank and circle rewards and `spend_tdp()` for stat training
 - custom condition, equipment, and character-state presentation
 - structured sync hooks for browser and client state updates
+
+### Learning, Stat Training, And Circle Projection
+
+Primary files:
+
+- `commands/cmd_experience.py`
+- `commands/cmd_stat_info.py`
+- `commands/cmd_train.py`
+- `commands/cmd_study.py`
+- `engine/services/stat_training_service.py`
+- `engine/services/circle_service.py`
+- `domain/learning/skill_aliases.py`
+
+Current state:
+
+- the direct stat commands (`strength`, `stamina`, `agility`, `reflex`, `charisma`, `discipline`, `wisdom`, `intelligence`) now expose current stat value, racial training modifier, next-rank TDP cost, and a short gameplay-facing effect summary
+- `train` and `study` are now location-sensitive learning verbs: in The Landing stat trainer rooms they consult and commit TDP-based stat raises, while at active guild leaders they project and commit circle advancement
+- trainer consults, trainer commits, guildleader circle previews, and circle commits now emit explicit room-visible observer lines through the shared action-messaging helper instead of staying actor-only
+- `experience` remains the authoritative learning surface and now supports `exp <skill>` detail lookups plus `exp circle` projection
+- the live EXP runtime now consumes canonical learning helpers: the full 35 mindstates in `domain/learning/mindstate.py`, the canonical 10 pulse groups in `domain/learning/skill_groups.py`, and the modern pool-size plus wisdom helpers in `domain/learning/pool_size.py`
+- the live skill identity layer now routes `exp` display through registry-backed `display_name` metadata, so merged abstractions such as `light_edge` present as `Light Edged Weapons` and defense aliases resolve to dedicated defense skills instead of the older combat bridge
+- profession metadata now carries the authoritative primary/secondary/tertiary skillset placement tables in `world/professions/professions.py`, and transient EXP tier routing now consumes those tables directly instead of the older override-first fallback
+- the old 10-second global learning ticker has been reduced to teaching-only work in `server/conf/at_server_startstop.py`; the retired `process_learning_pulse()` branch is no longer invoked during server startup wiring
+- EXP pulses now run on the canonical 10-group 200-second rotation, private mindstate milestone notifications fire at higher absorption thresholds, and mind-locked skills reject new XP while still draining through the normal pulse
+- `exp parry`, `exp shield`, and `exp moe` now resolve to `parry_ability`, `shield_usage`, and `multiple_engaged_opponent`, and live combat resolution plus combat XP routing now feed those same canonical defense identities directly
+- circle advancement currently uses explicit placeholder requirements keyed to total skill ranks plus `db.coins`; the service is structured so canon per-guild requirement tables can replace the placeholder math without changing command routing
 
 ### Combat And Action Pacing
 
@@ -142,11 +220,14 @@ Primary files:
 - `commands/cmd_advance.py`
 - `commands/cmd_retreat.py`
 - `commands/cmd_disengage.py`
+- `commands/cmd_target.py`
+- `commands/cmd_combatreset.py`
 - `domain/combat/verbs.py`
 - `engine/services/attack_verb_service.py`
 - `engine/services/combat_service.py`
 - `engine/services/state_service.py`
 - `domain/combat/rules.py`
+- `engine/presenters/combat_presenter.py`
 
 Implemented behavior:
 
@@ -161,6 +242,8 @@ Implemented behavior:
 - NPC combat behavior follows `event -> set target -> ai_tick acts on target`, where room-entry presence and damage hooks establish targets and the existing global NPC tick drives continued attacks and disengage cleanup
 - same-room guard assist is event-driven as well: assist-capable NPCs join when a nearby guard acquires a player target, then the existing target state and ai tick handle the rest
 - NPC threat tracking is layered on top of that same loop as runtime combat state: damage and assist add threat, ai tick can switch to the top valid threat, and threat is cleared when combat fully disengages
+- action-facing combat messaging now uses a shared three-audience helper for command and presenter surfaces, so actor, defender, and observers can receive intentionally distinct lines without duplicating room-broadcast plumbing
+- presenter miss messaging now distinguishes full parries, full shield blocks, evasions, and generic misses; hit narration also adds observer-visible armor mitigation and higher-force impact lines
 
 ### Vendors And Stock Generation
 
@@ -248,6 +331,9 @@ Implemented behavior:
 - central skill registry
 - skill rank and mindstate tracking
 - delayed learning conversion
+- modern DR TDP persistence with a shared hidden 200-point pool
+- rank-up TDP accrual wired at the authoritative `process_rank()` seam
+- player-facing `tdp` command plus TDP totals shown in `experience`
 - XP debt support
 - skill math tests and active-set pulse behavior
 
@@ -255,6 +341,15 @@ Current state:
 
 - live and used by gameplay loops
 - learning cadence is now treated as a performance-sensitive runtime system
+- current TDP scope now includes infrastructure as well as foundation: rank-gain accrual, persistence, display, the parallel eight-stat racial TDP modifier table, TDP cost utilities, a Landing trainer hub, and a guildhall locator registry are live; player-facing stat-training spend, circling, and death-side TDP pool loss remain follow-on work
+
+Stat Training Infrastructure snapshot:
+
+- `world/races/definitions.py` now carries `RACIAL_TDP_MODIFIERS` as a parallel eight-stat training-cost table instead of extending the existing six-stat `RACE_STATS` balance model
+- `domain/learning/tdp_cost.py` provides the canonical integer-math helpers for single-step and projected TDP spend
+- `world/areas/the_landing/stat_trainers/build.py` bootstraps eight dedicated trainer rooms off the Landing hub, each tagged with `region_name = "The Landing"` and `stat_trainer:<stat>`
+- `typeclasses/npcs.py` now exposes `StatTrainerNPC` and a fresh `GuildLeaderNPC` base for future profession dispatches, while the current Empath, Cleric, and Ranger guildleaders remain untouched
+- `engine/services/guildhall_locator.py` is the forward registry for profession guildhall lookups; today it resolves Empath, Cleric, and Ranger only, and future profession dispatches extend it as their guildhalls ship
 
 ### Equipment, Inventory, And Item Handling
 

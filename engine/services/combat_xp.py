@@ -43,15 +43,37 @@ class CombatXP:
         parry = dict(context.get("parry") or {})
         parry_block_pct = int(parry.get("block_pct", 0) or 0)
         if parry_block_pct > 0 and str(context.get("combat_outcome", "")) in {CombatOutcome.PARTIALLY_PARRIED.value, CombatOutcome.FULLY_PARRIED.value}:
-            weapon_profile = target.get_weapon_profile() if hasattr(target, "get_weapon_profile") else {}
-            parry_skill = str((weapon_profile or {}).get("skill") or "combat").strip().lower() or "combat"
             SkillService.award_xp(
                 target,
-                parry_skill,
+                "parry_ability",
                 max(10, int(offensive_total or 0)),
                 source={"mode": "difficulty"},
                 success=True,
                 context_multiplier=DEFENSE_XP_MULT * difficulty_scale,
+            )
+
+        shield = dict(context.get("shield") or {})
+        shield_block_pct = int(shield.get("block_pct", 0) or 0)
+        if shield_block_pct > 0 and str(context.get("combat_outcome", "")) in {CombatOutcome.PARTIALLY_SHIELDED.value, CombatOutcome.FULLY_SHIELDED.value}:
+            SkillService.award_xp(
+                target,
+                "shield_usage",
+                max(10, int(offensive_total or 0)),
+                source={"mode": "difficulty"},
+                success=True,
+                context_multiplier=DEFENSE_XP_MULT * difficulty_scale,
+            )
+
+        incoming_attackers = int(getattr(target, "incoming_attackers", 0) or 0)
+        if should_award_defense and incoming_attackers > 1:
+            moe_amount = max(5, int((offensive_total or 0) * 0.3))
+            SkillService.award_xp(
+                target,
+                "multiple_engaged_opponent",
+                moe_amount,
+                source={"mode": "difficulty"},
+                success=True,
+                context_multiplier=(DEFENSE_XP_MULT * difficulty_scale * 0.6),
             )
 
         if not hit:

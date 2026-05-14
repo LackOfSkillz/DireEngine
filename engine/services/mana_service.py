@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import random
+import time
 from collections.abc import Mapping
 
 from domain.mana.constants import (
@@ -41,6 +42,8 @@ from engine.services.result import ActionResult
 _SCHEDULER_CALLBACKS_REGISTERED = False
 MANA_REGEN_EVENT = "mana_regen"
 MANA_DEVOTION_EVENT = "mana_devotion"
+MANA_PREPARED_READY_EVENT = "prepared_ready"
+MANA_PREPARED_EXPIRE_EVENT = "prepared_expire"
 
 
 def _get_scheduler_api():
@@ -60,6 +63,8 @@ def _ensure_scheduler_callbacks_registered():
 
     register_event_callback("mana:process_regen", _callback_process_mana_regen)
     register_event_callback("mana:process_devotion", _callback_process_devotion)
+    register_event_callback("mana:prepared_ready", _callback_transition_prepared_spell)
+    register_event_callback("mana:prepared_expire", _callback_expire_prepared_spell)
     _SCHEDULER_CALLBACKS_REGISTERED = True
     return True
 
@@ -85,6 +90,14 @@ class ManaService:
         if value is None:
             return int(default)
         return int(value)
+
+    @staticmethod
+    def _apply_integer_multiplier(base_amount, multiplier):
+        amount = max(0, ManaService._coerce_int(base_amount, default=0))
+        if amount <= 0:
+            return 0
+        scaled = int(float(amount) * float(multiplier or 1.0))
+        return max(1, scaled)
 
     @staticmethod
     def _get_db_holder(obj):
@@ -144,15 +157,28 @@ class ManaService:
         realm = str(prepared_map.get("realm", "") or "").strip().lower()
         if realm not in MANA_REALMS:
             return None
-        mana_input = ManaService._coerce_int(prepared_map.get("mana_input"), default=0)
+        mana_input = ManaService._coerce_int(
+            prepared_map.get("intended_mana", prepared_map.get("mana_input")),
+            default=0,
+        )
         prep_cost = ManaService._coerce_int(prepared_map.get("prep_cost"), default=0)
         held_mana = ManaService._coerce_int(prepared_map.get("held_mana"), default=0)
         normalized = {
             "realm": realm,
             "mana_input": max(0, mana_input),
+            "intended_mana": max(0, mana_input),
             "prep_cost": max(0, prep_cost),
             "held_mana": max(0, held_mana),
+            "ready": bool(prepared_map.get("ready", True)),
         }
+        if prepared_map.get("spell_id") is not None:
+            normalized["spell_id"] = str(prepared_map.get("spell_id") or "").strip().lower()
+        if prepared_map.get("prep_started_at") is not None:
+            normalized["prep_started_at"] = max(0.0, ManaService._coerce_float(prepared_map.get("prep_started_at"), default=0.0))
+        if prepared_map.get("min_prep_time") is not None:
+            normalized["min_prep_time"] = max(0.0, ManaService._coerce_float(prepared_map.get("min_prep_time"), default=0.0))
+        if prepared_map.get("expiry_at") is not None:
+            normalized["expiry_at"] = max(0.0, ManaService._coerce_float(prepared_map.get("expiry_at"), default=0.0))
         if prepared_map.get("min_prep") is not None:
             normalized["min_prep"] = max(0, ManaService._coerce_int(prepared_map.get("min_prep"), default=0))
         if prepared_map.get("max_prep") is not None:
@@ -241,6 +267,23 @@ class ManaService:
         if prepared is None:
             return None
         return ManaService._set_mapping_attr(ndb_holder, "prepared_mana", prepared)
+
+    @staticmethod
+    def _get_harnessed_mana_state(character):
+        db_holder = ManaService._get_db_holder(character)
+        if db_holder is None:
+            return 0
+        amount = max(0, ManaService._coerce_int(getattr(db_holder, "harnessed_mana", 0), default=0))
+        setattr(db_holder, "harnessed_mana", amount)
+        return amount
+
+    @staticmethod
+    def _set_harnessed_mana_state(character, amount):
+        db_holder = ManaService._get_db_holder(character)
+        normalized = max(0, ManaService._coerce_int(amount, default=0))
+        if db_holder is not None:
+            setattr(db_holder, "harnessed_mana", normalized)
+        return normalized
 
     @staticmethod
     def _get_devotion_percent(character):
@@ -394,6 +437,8 @@ class ManaService:
 
     @staticmethod
     def _apply_backlash_payload(character, backlash_payload):
+        from engine.services.feat_service import FeatService
+
         payload = dict(backlash_payload or {})
         attunement_state = ManaService._get_attunement_state(character)
         attunement_loss = int(
@@ -406,6 +451,11 @@ class ManaService:
             ManaService.spend_attunement(character, attunement_loss)
 
         vitality_loss = max(0, ManaService._coerce_int(payload.get("vitality_loss"), default=0))
+        if vitality_loss > 0:
+            vitality_loss = ManaService._apply_integer_multiplier(
+                vitality_loss,
+                FeatService.get_modifier(character, "backlash_injury_multiplier"),
+            )
         if vitality_loss > 0 and character is not None and hasattr(character, "set_hp"):
             current_hp = ManaService._coerce_int(getattr(getattr(character, "db", None), "hp", None), default=0)
             character.set_hp(current_hp - vitality_loss)
@@ -440,7 +490,7 @@ class ManaService:
         }
 
     @staticmethod
-    def can_prepare_spell(character, room, realm, mana_input, min_prep, max_prep):
+    def can_prepare_spell(character, room, realm, mana_input, min_prep, max_prep, spell_id=None, min_prep_time=None, expiry_window=None):
         normalized_realm = str(realm or "").strip().lower()
         if character is None:
             return ActionResult.fail(errors=["Missing character."], data={"realm": normalized_realm})
@@ -482,7 +532,7 @@ class ManaService:
                 },
             )
 
-        if ManaService._coerce_float(attunement.get("current"), default=0.0) < float(prep_cost):
+        if ManaService._coerce_float(attunement.get("current"), default=0.0) < float(mana_input_value):
             return ActionResult.fail(
                 errors=["Not enough attunement."],
                 data={
@@ -492,16 +542,20 @@ class ManaService:
                     "environmental_mana_modifier": environmental_modifier,
                     "ambient_floor_required": ambient_floor_required,
                     "prep_cost": prep_cost,
+                    "required_attunement": mana_input_value,
                     "attunement_current": ManaService._coerce_float(attunement.get("current"), default=0.0),
                 },
             )
 
         return ActionResult.ok(
             data={
+                "spell_id": spell_id,
                 "realm": normalized_realm,
                 "mana_input": mana_input_value,
                 "min_prep": min_prep_value,
                 "max_prep": max_prep_value,
+                "min_prep_time": max(0.0, ManaService._coerce_float(min_prep_time, default=0.0)),
+                "expiry_window": max(0.0, ManaService._coerce_float(expiry_window, default=0.0)),
                 "effective_env_mana": effective_env_mana,
                 "environmental_mana_modifier": environmental_modifier,
                 "ambient_floor_required": ambient_floor_required,
@@ -535,9 +589,66 @@ class ManaService:
 
     @staticmethod
     def clear_prepared_mana(character):
+        ManaService.cancel_prepared_spell_timers(character)
         ndb_holder = ManaService._get_ndb_holder(character)
         if ndb_holder is not None:
             setattr(ndb_holder, "prepared_mana", None)
+        sync_state = getattr(character, "_sync_prepared_spell_state_from_mana", None)
+        if callable(sync_state):
+            sync_state(None)
+
+    @staticmethod
+    def transition_to_full_prep(character, payload=None):
+        _payload = dict(payload or {})
+        prepared = ManaService._get_prepared_mana_state(character)
+        if prepared is None:
+            return ActionResult.ok(data={"transitioned": False, "reason": "missing_prepared_spell"})
+        if bool(prepared.get("ready", False)):
+            return ActionResult.ok(data={"transitioned": False, "reason": "already_ready", "prepared_mana": dict(prepared)})
+        prepared["ready"] = True
+        updated = ManaService._set_prepared_mana_state(character, prepared)
+        sync_state = getattr(character, "_sync_prepared_spell_state_from_mana", None)
+        if callable(sync_state):
+            sync_state(updated)
+        return ActionResult.ok(data={"transitioned": True, "prepared_mana": dict(updated or {})})
+
+    @staticmethod
+    def expire_prepared_spell(character, payload=None):
+        _payload = dict(payload or {})
+        prepared = ManaService._get_prepared_mana_state(character)
+        if prepared is None:
+            return ActionResult.ok(data={"expired": False, "reason": "missing_prepared_spell"})
+        expired = dict(prepared)
+        ManaService.clear_prepared_mana(character)
+        return ActionResult.ok(data={"expired": True, "prepared_mana": expired})
+
+    @staticmethod
+    def release_harnessed_mana(character):
+        released = ManaService._get_harnessed_mana_state(character)
+        ManaService._set_harnessed_mana_state(character, 0)
+        prepared = ManaService._get_prepared_mana_state(character)
+        if prepared is not None:
+            prepared["held_mana"] = 0
+            updated = ManaService._set_prepared_mana_state(character, prepared)
+            sync_state = getattr(character, "_sync_prepared_spell_state_from_mana", None)
+            if callable(sync_state):
+                sync_state(updated)
+        return ActionResult.ok(data={"released": released, "held_mana": 0})
+
+    @staticmethod
+    def compute_max_harnessable(character, attunement_skill=None, arcana_skill=None):
+        if attunement_skill is None and character is not None and hasattr(character, "get_skill"):
+            attunement_skill = character.get_skill("attunement")
+        if arcana_skill is None and character is not None and hasattr(character, "get_skill"):
+            arcana_skill = character.get_skill("arcana")
+        efficiency = calculate_harness_efficiency(
+            ManaService._coerce_float(attunement_skill, default=0.0),
+            ManaService._coerce_float(arcana_skill, default=0.0),
+        )
+        attunement = ManaService._get_attunement_state(character)
+        current = ManaService._coerce_float(attunement.get("current"), default=0.0)
+        max_requested = int(math.floor(current * efficiency))
+        return max(0, max_requested)
 
     @staticmethod
     def calculate_cyclic_tick_cost(safe_mana, final_spell_power, effect_profile=None):
@@ -548,6 +659,112 @@ class ManaService:
             max(1.0, ManaService._coerce_float(final_spell_power, default=1.0)),
         )
         return max(1, int(round(baseline * scale)))
+
+    @staticmethod
+    def consume_mana_for_cyclic(character, amount, sustain_source, sustain_ref=None):
+        from engine.services.feat_service import FeatService
+
+        requested_cost = max(0, ManaService._coerce_int(amount, default=0))
+        source = str(sustain_source or "").strip().lower().replace("-", "_").replace(" ", "_")
+        cost = ManaService._apply_integer_multiplier(
+            requested_cost,
+            FeatService.get_modifier(character, "cyclic_drain_multiplier"),
+        )
+        if source == "attunement":
+            cost = ManaService._apply_integer_multiplier(
+                cost,
+                FeatService.get_modifier(character, "harness_attunement_cost_multiplier"),
+            )
+
+        if source == "held_mana":
+            held_current = ManaService._get_harnessed_mana_state(character)
+            if held_current < cost:
+                return ActionResult.fail(
+                    errors=["Not enough held mana to sustain that cyclic spell."],
+                    data={
+                        "requested": cost,
+                        "requested_base_cost": requested_cost,
+                        "remaining_mana": held_current,
+                        "remaining_held_mana": held_current,
+                        "sustain_source": "held_mana",
+                        "sustain_ref": sustain_ref,
+                        "reason": "insufficient_held_mana",
+                    },
+                )
+            remaining = ManaService._set_harnessed_mana_state(character, held_current - cost)
+            prepared = ManaService._get_prepared_mana_state(character)
+            if prepared is not None:
+                prepared["held_mana"] = remaining
+                updated = ManaService._set_prepared_mana_state(character, prepared)
+                sync_state = getattr(character, "_sync_prepared_spell_state_from_mana", None)
+                if callable(sync_state):
+                    sync_state(updated)
+            return ActionResult.ok(
+                data={
+                    "consumed": cost,
+                    "requested_base_cost": requested_cost,
+                    "remaining_mana": remaining,
+                    "remaining_held_mana": remaining,
+                    "sustain_source": "held_mana",
+                    "sustain_ref": sustain_ref,
+                },
+            )
+
+        if source == "attunement":
+            if not FeatService.has_feat(character, "raw_channeling") and not FeatService.get_unlock(character, "cyclic_attunement_sustain"):
+                return ActionResult.fail(
+                    errors=["Raw Channeling is required to sustain cyclic spells from attunement."],
+                    data={
+                        "requested": cost,
+                        "requested_base_cost": requested_cost,
+                        "remaining_mana": ManaService._coerce_float(ManaService._get_attunement_state(character).get("current"), default=0.0),
+                        "sustain_source": "attunement",
+                        "sustain_ref": sustain_ref,
+                        "reason": "raw_channeling_lost",
+                    },
+                )
+            result = ManaService.consume_mana(character, cost)
+            if not result.success:
+                result.data.update(
+                    {
+                        "requested_base_cost": requested_cost,
+                        "sustain_source": "attunement",
+                        "sustain_ref": sustain_ref,
+                        "reason": "insufficient_attunement",
+                    }
+                )
+                return result
+            result.data.update(
+                {
+                    "requested_base_cost": requested_cost,
+                    "sustain_source": "attunement",
+                    "sustain_ref": sustain_ref,
+                }
+            )
+            return result
+
+        if source == "cambrinth":
+            return ActionResult.fail(
+                errors=["Cambrinth sustain is not yet available. Use harnessed mana or Raw Channeling."],
+                data={
+                    "requested": cost,
+                    "requested_base_cost": requested_cost,
+                    "sustain_source": "cambrinth",
+                    "sustain_ref": sustain_ref,
+                    "reason": "cambrinth_subsystem_not_yet_implemented",
+                },
+            )
+
+        return ActionResult.fail(
+            errors=["Unknown cyclic sustain source."],
+            data={
+                "requested": cost,
+                "requested_base_cost": requested_cost,
+                "sustain_source": source,
+                "sustain_ref": sustain_ref,
+                "reason": "unknown_sustain_source",
+            },
+        )
 
     @staticmethod
     def consume_mana(character, amount):
@@ -571,26 +788,53 @@ class ManaService:
         return None
 
     @staticmethod
-    def prepare_spell(character, room, realm, mana_input, min_prep, max_prep):
-        result = ManaService.can_prepare_spell(character, room, realm, mana_input, min_prep, max_prep)
+    def prepare_spell(character, room, realm, mana_input, min_prep, max_prep, spell_id=None, min_prep_time=None, expiry_window=None):
+        from engine.services.feat_service import FeatService
+
+        result = ManaService.can_prepare_spell(
+            character,
+            room,
+            realm,
+            mana_input,
+            min_prep,
+            max_prep,
+            spell_id=spell_id,
+            min_prep_time=min_prep_time,
+            expiry_window=expiry_window,
+        )
         if not result.success:
             return result
 
         prep_cost = ManaService._coerce_int(result.data.get("prep_cost"), default=0)
-        attunement = ManaService.spend_attunement(character, prep_cost)
+        now = time.time()
+        min_prep_time_value = max(0.0, ManaService._coerce_float(result.data.get("min_prep_time"), default=0.0))
+        expiry_window_value = max(0.0, ManaService._coerce_float(result.data.get("expiry_window"), default=0.0))
+        expiry_window_value += float(FeatService.get_modifier(character, "prepared_expiry_bonus_seconds") or 0.0)
+        expiry_window_value = max(min_prep_time_value, expiry_window_value)
+        ManaService.clear_prepared_mana(character)
         prepared = ManaService._set_prepared_mana_state(
             character,
             {
                 "realm": str(result.data.get("realm", "") or ""),
+                "spell_id": result.data.get("spell_id"),
                 "mana_input": ManaService._coerce_int(result.data.get("mana_input"), default=0),
                 "min_prep": ManaService._coerce_int(result.data.get("min_prep"), default=0),
                 "max_prep": ManaService._coerce_int(result.data.get("max_prep"), default=0),
                 "safe_mana": ManaService._coerce_int(result.data.get("mana_input"), default=0),
                 "tier": 1,
                 "prep_cost": prep_cost,
-                "held_mana": 0,
+                "held_mana": ManaService._get_harnessed_mana_state(character),
+                "prep_started_at": now,
+                "min_prep_time": min_prep_time_value,
+                "ready": min_prep_time_value <= 0.0,
+                "expiry_at": (now + expiry_window_value) if expiry_window_value > 0.0 else None,
             },
         )
+        if prepared is not None and not bool(prepared.get("ready", True)):
+            ManaService.schedule_prepared_spell_transition(character, min_prep_time_value)
+        if prepared is not None and expiry_window_value > 0.0:
+            ManaService.schedule_prepared_spell_expiry(character, expiry_window_value)
+        attunement = ManaService._get_attunement_state(character)
         return ActionResult.ok(
             data=dict(result.data) | {
                 "attunement_current": ManaService._coerce_float(attunement.get("current"), default=0.0),
@@ -600,13 +844,15 @@ class ManaService:
 
     @staticmethod
     def harness_mana(character, amount, attunement_skill, arcana_skill):
-        prepared = ManaService._get_prepared_mana_state(character)
-        if prepared is None:
-            return ActionResult.fail(errors=["No spell is currently prepared."])
+        from engine.services.feat_service import FeatService
 
         requested = max(0, ManaService._coerce_int(amount, default=0))
         efficiency = calculate_harness_efficiency(attunement_skill, arcana_skill)
         attunement_spent = calculate_harness_cost(requested, efficiency)
+        attunement_spent = ManaService._apply_integer_multiplier(
+            attunement_spent,
+            FeatService.get_modifier(character, "harness_attunement_cost_multiplier"),
+        )
         attunement = ManaService._get_attunement_state(character)
         current = ManaService._coerce_float(attunement.get("current"), default=0.0)
         if current < float(attunement_spent):
@@ -621,25 +867,40 @@ class ManaService:
             )
 
         updated_attunement = ManaService.spend_attunement(character, attunement_spent)
-        prepared["held_mana"] = max(0, ManaService._coerce_int(prepared.get("held_mana"), default=0) + requested)
-        ManaService._set_prepared_mana_state(character, prepared)
+        held_total = ManaService._set_harnessed_mana_state(character, ManaService._get_harnessed_mana_state(character) + requested)
+        prepared = ManaService._get_prepared_mana_state(character)
+        if prepared is not None:
+            prepared["held_mana"] = held_total
+            updated = ManaService._set_prepared_mana_state(character, prepared)
+            sync_state = getattr(character, "_sync_prepared_spell_state_from_mana", None)
+            if callable(sync_state):
+                sync_state(updated)
         return ActionResult.ok(
             data={
-                "realm": prepared["realm"],
+                "realm": (prepared or {}).get("realm", ""),
                 "requested_harness": requested,
                 "harness_efficiency": efficiency,
                 "attunement_spent": attunement_spent,
-                "held_mana": prepared["held_mana"],
+                "held_mana": held_total,
                 "attunement_current": ManaService._coerce_float(updated_attunement.get("current"), default=0.0),
             }
         )
 
     @staticmethod
-    def cast_spell(character, realm, primary_magic_skill, profession_cast_modifier=1.0):
-        return ManaService._cast_spell(character, realm, primary_magic_skill, profession_cast_modifier=profession_cast_modifier, clear_prepared=True)
+    def cast_spell(character, realm, primary_magic_skill, profession_cast_modifier=1.0, additional_mana=None):
+        return ManaService._cast_spell(
+            character,
+            realm,
+            primary_magic_skill,
+            profession_cast_modifier=profession_cast_modifier,
+            clear_prepared=True,
+            additional_mana=additional_mana,
+        )
 
     @staticmethod
-    def _cast_spell(character, realm, primary_magic_skill, profession_cast_modifier=1.0, clear_prepared=True):
+    def _cast_spell(character, realm, primary_magic_skill, profession_cast_modifier=1.0, clear_prepared=True, additional_mana=None):
+        from engine.services.feat_service import FeatService
+
         prepared = ManaService._get_prepared_mana_state(character)
         normalized_realm = str(realm or "").strip().lower()
         if prepared is None:
@@ -650,13 +911,36 @@ class ManaService:
         attunement = ManaService._get_attunement_state(character)
         current = ManaService._coerce_float(attunement.get("current"), default=0.0)
         maximum = ManaService._coerce_float(attunement.get("max"), default=0.0)
+        intended_mana = max(0, ManaService._coerce_int(prepared.get("intended_mana", prepared.get("mana_input")), default=0))
+        attunement_spent = ManaService._apply_integer_multiplier(
+            intended_mana,
+            FeatService.get_modifier(character, "spell_attunement_cost_multiplier"),
+        )
+        if current < float(attunement_spent):
+            return ActionResult.fail(
+                errors=["Not enough attunement."],
+                data={
+                    "realm": normalized_realm,
+                    "required_attunement": attunement_spent,
+                    "attunement_current": current,
+                },
+            )
+        held_pool = ManaService._get_harnessed_mana_state(character)
+        held_to_use = held_pool if additional_mana is None else max(0, ManaService._coerce_int(additional_mana, default=0))
+        if held_to_use > held_pool:
+            return ActionResult.fail(
+                errors=["You are not holding that much mana."],
+                data={"requested_additional_mana": held_to_use, "held_mana": held_pool},
+            )
+        updated_attunement = ManaService.spend_attunement(character, attunement_spent)
+        remaining_held = ManaService._set_harnessed_mana_state(character, held_pool - held_to_use)
         effective_env_mana = 1.0
         room = getattr(character, "location", None)
         if room is not None:
             effective_env_mana = ManaService._get_effective_env_mana(character, room, prepared["realm"])
         environmental_modifier = ManaService.get_environmental_modifier(room, prepared["realm"])
         cast_modifier = ManaService._coerce_float(profession_cast_modifier, default=1.0) * ManaService._get_profession_cast_modifier(character, prepared["realm"])
-        cast_mana = prepared["mana_input"] + max(0, ManaService._coerce_int(prepared.get("held_mana"), default=0))
+        cast_mana = intended_mana + held_to_use
         spell_profile = ManaService._get_spell_profile(character, prepared, primary_magic_skill, effective_env_mana)
         control_context = ManaService._build_control_context(character, primary_magic_skill, attunement)
         random_roll = random.uniform(-10.0, 10.0)
@@ -680,10 +964,13 @@ class ManaService:
         backlash_severity = calculate_backlash_severity(spell_profile, cast_mana, cast_margin)
         payload = {
             "realm": prepared["realm"],
-            "mana_input": prepared["mana_input"],
+            "mana_input": intended_mana,
             "cast_mana": cast_mana,
             "prep_cost": prepared["prep_cost"],
-            "held_mana": prepared["held_mana"],
+            "held_mana": held_to_use,
+            "harnessed_mana_remaining": remaining_held,
+            "attunement_spent": attunement_spent,
+            "attunement_current": ManaService._coerce_float(updated_attunement.get("current"), default=0.0),
             "effective_env_mana": effective_env_mana,
             "environmental_mana_modifier": environmental_modifier,
             "spell_difficulty": spell_difficulty,
@@ -716,6 +1003,8 @@ class ManaService:
 
     @staticmethod
     def regenerate_attunement(character, attunement_skill=None, wisdom=None, regen_modifiers=1.0):
+        from engine.services.feat_service import FeatService
+
         if attunement_skill is None and character is not None and hasattr(character, "get_skill"):
             attunement_skill = character.get_skill("attunement")
         if wisdom is None and character is not None and hasattr(character, "get_stat"):
@@ -726,7 +1015,7 @@ class ManaService:
             attunement.get("max"),
             ManaService._coerce_float(attunement_skill, default=0.0),
             ManaService._coerce_float(wisdom, default=0.0),
-            regen_modifiers=regen_modifiers,
+            regen_modifiers=float(regen_modifiers or 1.0) * FeatService.get_modifier(character, "attunement_regen_multiplier"),
         )
         updated = ManaService.restore_attunement(character, regen)
         return ActionResult.ok(data={"regen": regen, "attunement_current": updated["current"], "attunement_max": updated["max"]})
@@ -828,9 +1117,66 @@ class ManaService:
         return ManaService.sync_scheduled_effects(character)
 
     @staticmethod
+    def schedule_prepared_spell_transition(character, delay):
+        if character is None or not getattr(character, "pk", None):
+            return None
+        if not _ensure_scheduler_callbacks_registered():
+            return None
+        _, _, schedule_event = _get_scheduler_api()
+        return schedule_event(
+            MANA_PREPARED_READY_EVENT,
+            character,
+            delay,
+            "mana:prepared_ready",
+            metadata={"system": "mana", "type": "prepared-ready", "timing_mode": "scheduled-expiry"},
+        )
+
+    @staticmethod
+    def cancel_prepared_spell_transition(character):
+        if character is None:
+            return None
+        try:
+            cancel_event, _, _ = _get_scheduler_api()
+        except Exception:
+            return None
+        return cancel_event(MANA_PREPARED_READY_EVENT, character)
+
+    @staticmethod
+    def schedule_prepared_spell_expiry(character, delay):
+        if character is None or not getattr(character, "pk", None):
+            return None
+        if not _ensure_scheduler_callbacks_registered():
+            return None
+        _, _, schedule_event = _get_scheduler_api()
+        return schedule_event(
+            MANA_PREPARED_EXPIRE_EVENT,
+            character,
+            delay,
+            "mana:prepared_expire",
+            metadata={"system": "mana", "type": "prepared-expire", "timing_mode": "scheduled-expiry"},
+        )
+
+    @staticmethod
+    def cancel_prepared_spell_expiry(character):
+        if character is None:
+            return None
+        try:
+            cancel_event, _, _ = _get_scheduler_api()
+        except Exception:
+            return None
+        return cancel_event(MANA_PREPARED_EXPIRE_EVENT, character)
+
+    @staticmethod
+    def cancel_prepared_spell_timers(character):
+        ManaService.cancel_prepared_spell_transition(character)
+        ManaService.cancel_prepared_spell_expiry(character)
+        return True
+
+    @staticmethod
     def cancel_scheduled_effects(character):
         ManaService.cancel_mana_regen(character)
         ManaService.cancel_devotion_pulse(character)
+        ManaService.cancel_prepared_spell_timers(character)
         return True
 
 
@@ -840,3 +1186,11 @@ def _callback_process_mana_regen(owner, payload=None):
 
 def _callback_process_devotion(owner, payload=None):
     return ManaService.handle_devotion_pulse(owner, payload)
+
+
+def _callback_transition_prepared_spell(owner, payload=None):
+    return ManaService.transition_to_full_prep(owner, payload)
+
+
+def _callback_expire_prepared_spell(owner, payload=None):
+    return ManaService.expire_prepared_spell(owner, payload)

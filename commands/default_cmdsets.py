@@ -30,6 +30,7 @@ from commands.cmd_assess import CmdAssess
 from commands.cmd_assessstance import CmdAssessStance
 from commands.cmd_attack import CmdAttack
 from commands.cmd_attack_verbs import CmdChop, CmdFeint, CmdJab, CmdLunge, CmdSlice, CmdSweep, CmdThrust
+from commands.cmd_awake import CmdAwake
 from commands.cmd_defense_verbs import CmdDodge, CmdParry
 from commands.cmd_berserk import CmdBerserk
 from commands.cmd_beseech import CmdBeseech
@@ -85,6 +86,9 @@ from commands.cmd_endteach import CmdEndTeach
 from commands.cmd_engine import CmdEngine
 from commands.cmd_enterpassage import CmdEnterPassage
 from commands.cmd_experience import CmdExperience
+from commands.cmd_feats import CmdFeats
+from commands.cmd_forget_feat import CmdForgetFeat
+from commands.cmd_tdp import CmdTDP
 from commands.cmd_findpassage import CmdFindPassage
 from commands.cmd_fire import CmdFire
 from commands.cmd_fishing import CmdBait, CmdFish, CmdPull, CmdRig, CmdUntangle
@@ -99,6 +103,8 @@ from commands.cmd_guild import CmdGuild
 from commands.cmd_harvest import CmdHarvest
 from commands.cmd_khri import CmdKhri
 from commands.cmd_haggle import CmdHaggle
+from commands.cmd_harness import CmdHarness
+from commands.cmd_learn_feat import CmdLearnFeat
 from commands.cmd_hunt import CmdHunt
 from commands.cmd_disengage import CmdDisengage
 from commands.cmd_diagnose import CmdDiagnose
@@ -197,8 +203,9 @@ from commands.cmd_spawnbox import CmdSpawnBox
 from commands.cmd_spawnlockpick import CmdSpawnLockpick
 from commands.cmd_sneak import CmdSneak
 from commands.cmd_spawnvendor import CmdSpawnVendor
-from commands.cmd_spellbook import CmdSpellbook
+from commands.cmd_spellbook import CmdSpellbook, CmdSpells
 from commands.cmd_stats import CmdStats
+from commands.cmd_stat_info import CmdStatInfo
 from commands.cmd_stabilize import CmdStabilize
 from commands.cmd_steal import CmdSteal
 from commands.cmd_stow import CmdStow
@@ -224,6 +231,7 @@ from commands.cmd_track import CmdTrack
 from commands.cmd_stopcast import CmdStopCast
 from commands.cmd_study import CmdStudy
 from commands.cmd_study_anatomy import CmdStudyAnatomy
+from commands.cmd_sleep import CmdSleep
 from commands.cmd_unhide import CmdUnhide
 from commands.cmd_unity import CmdUnity
 from commands.cmd_unwield import CmdUnwield
@@ -276,6 +284,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdAsk())
         self.add(CmdAssess())
         self.add(CmdAssessStance())
+        self.add(CmdAwake())
         self.add(CmdShift())
         self.add(CmdAdvance())
         self.add(CmdAim())
@@ -359,6 +368,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdGet())
         self.add(CmdGo())
         self.add(CmdGuild())
+        self.add(CmdHarness())
         self.add(CmdHarvest())
         self.add(CmdHaggle())
         self.add(CmdHeal())
@@ -374,6 +384,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdKhri())
         self.add(CmdLanguage())
         self.add(CmdLayLow())
+        self.add(CmdLearnFeat())
         self.add(CmdLink())
         self.add(CmdLook())
         self.add(CmdLoad())
@@ -435,7 +446,10 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSetRace())
         self.add(CmdTalk())
         self.add(CmdExperience())
+        self.add(CmdFeats())
+        self.add(CmdTDP())
         self.add(CmdSkillDebug())
+        self.add(CmdSleep())
         self.add(CmdRetreat())
         self.add(CmdSacrifice())
         self.add(CmdSay())
@@ -451,10 +465,12 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdSpawnLockpick())
         self.add(CmdSpawnVendor())
         self.add(CmdSpawnWeapon())
+        self.add(CmdSpells())
         self.add(CmdSpellbook())
         self.add(CmdSneak())
         self.add(CmdSlip())
         self.add(CmdStats())
+        self.add(CmdStatInfo())
         self.add(CmdStabilize())
         self.add(CmdSteal())
         self.add(CmdStore())
@@ -487,6 +503,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdUncurse())
         self.add(CmdUnwield())
         self.add(CmdUseSkill())
+        self.add(CmdForgetFeat())
         self.add(CmdWithdraw())
         self.add(CmdXP())
         self.add(CmdWear())

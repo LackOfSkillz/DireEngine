@@ -45,6 +45,8 @@
     reconnectTimer: null,
     reconnectCountdown: 0,
     reconnectAttempts: 0,
+    reconnectAttemptInFlight: false,
+    reconnectReloaded: false,
     commandHistory: [],
     commandHistoryIndex: -1,
     commandHistoryDraft: "",
@@ -266,6 +268,10 @@
 
   function isBuilderPage() {
     return Boolean(byId("builder-layout"));
+  }
+
+  function recoverPlaySession() {
+    window.location.assign("/play");
   }
 
   function getBuilderPageMode() {
@@ -7799,31 +7805,60 @@
       return;
     }
     state.reconnectAttempts += 1;
-    state.reconnectCountdown = Math.min(10, 2 + state.reconnectAttempts);
-    setSessionStatus(`Reconnecting in ${state.reconnectCountdown}s`);
-    state.reconnectTimer = window.setInterval(() => {
-      state.reconnectCountdown -= 1;
-      if (state.reconnectCountdown > 0) {
-        setSessionStatus(`Reconnecting in ${state.reconnectCountdown}s`);
+    const delaySeconds = Math.min(10, 2 + state.reconnectAttempts);
+    state.reconnectCountdown = delaySeconds;
+    setSessionStatus(`Reconnecting in ${delaySeconds}s`);
+    state.reconnectTimer = window.setTimeout(() => {
+      state.reconnectTimer = null;
+      if (window.Evennia && typeof Evennia.isConnected === "function" && Evennia.isConnected()) {
+        cancelReconnect();
+        updateConnection(true);
+        setSessionStatus("Connected");
         return;
       }
-      window.clearInterval(state.reconnectTimer);
-      state.reconnectTimer = null;
-      setSessionStatus("Attempting reconnect");
-      if (window.Evennia && typeof Evennia.connect === "function") {
-        Evennia.connect();
-        playTone("reconnect");
+      if (state.reconnectAttemptInFlight) {
+        return;
       }
-    }, 1000);
+      state.reconnectAttemptInFlight = true;
+      setSessionStatus("Attempting reconnect");
+      try {
+        if (window.Evennia && typeof Evennia.connect === "function") {
+          Evennia.connect();
+          playTone("reconnect");
+        }
+      } catch (_) {
+        state.reconnectAttemptInFlight = false;
+        scheduleReconnect();
+        return;
+      }
+      window.setTimeout(() => {
+        if (window.Evennia && typeof Evennia.isConnected === "function" && Evennia.isConnected()) {
+          cancelReconnect();
+          updateConnection(true);
+          setSessionStatus("Connected");
+          return;
+        }
+        if (!state.reconnectReloaded) {
+          state.reconnectReloaded = true;
+          setSessionStatus("Recovering session");
+          recoverPlaySession();
+          return;
+        }
+        state.reconnectAttemptInFlight = false;
+        scheduleReconnect();
+      }, 3000);
+    }, delaySeconds * 1000);
   }
 
   function cancelReconnect() {
     if (state.reconnectTimer) {
-      window.clearInterval(state.reconnectTimer);
+      window.clearTimeout(state.reconnectTimer);
       state.reconnectTimer = null;
     }
     state.reconnectCountdown = 0;
     state.reconnectAttempts = 0;
+    state.reconnectAttemptInFlight = false;
+    state.reconnectReloaded = false;
   }
 
   function isLikelyChatText(text, kwargs) {
@@ -8045,6 +8080,7 @@
 
   function updateConnection(open) {
     const indicator = byId("connection-indicator");
+    document.body.classList.toggle("connection-disconnected", !open);
     if (!indicator) return;
     indicator.textContent = open ? "Connected" : "Disconnected";
     indicator.classList.toggle("connection-open", open);
@@ -9802,10 +9838,8 @@
     });
     byId("reconnect-button")?.addEventListener("click", () => {
       cancelReconnect();
-      setSessionStatus("Manual reconnect");
-      if (window.Evennia && typeof Evennia.connect === "function") {
-        Evennia.connect();
-      }
+      setSessionStatus("Recovering session");
+      recoverPlaySession();
     });
     byId("audio-toggle")?.addEventListener("click", () => {
       state.audioEnabled = !state.audioEnabled;

@@ -1614,32 +1614,41 @@ def process_status_tick():
 
 
 def process_learning_tick():
+    return process_teaching_tick()
+
+
+def process_teaching_tick():
     if not getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
         return
 
-    # Learning is intentionally frequency-separated from combat/status work so
-    # rank progression cannot starve the reactor during busy combat periods.
+    # Teaching remains frequency-separated from combat/status work so the live
+    # instructional pulse cannot starve the reactor during busy combat periods.
     started_at = time.perf_counter()
 
     for character in _iter_tick_characters():
         if bool(getattr(character.db, "is_npc", False)):
             continue
-        skills = character.db.skills or {}
-        has_learning = any((skill_data or {}).get("mindstate", 0) > 0 for skill_data in skills.values())
         states = getattr(character.db, "states", None) or {}
         has_teaching = bool(states.get("learning_from"))
-        if not has_learning and not has_teaching:
-            continue
-        if hasattr(character, "process_learning_pulse"):
-            character.process_learning_pulse()
         if has_teaching and hasattr(character, "process_teaching_pulse"):
             character.process_teaching_pulse()
 
     _log_slow_tick(
-        "process_learning_tick",
+        "process_teaching_tick",
         started_at,
         getattr(settings, "LEARNING_TICK_WARN_SECONDS", 0.01),
     )
+
+
+def process_rexp_banking_tick():
+    if not getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
+        return
+    from engine.services.rexp_service import update_rexp_banking
+
+    for character in _iter_tick_characters():
+        if bool(getattr(character.db, "is_npc", False)):
+            continue
+        update_rexp_banking(character)
 
 
 def _ensure_global_guard_patrol_script():
@@ -1940,6 +1949,20 @@ def _run_deferred_server_start_bootstrap_after_character_init():
         )
         _append_guard_startup_trace("at_server_start", "bootstrap_after_build_landing", deferred=True)
         try:
+            from world.areas.the_landing import ensure_the_landing_stat_trainers
+
+            ensure_the_landing_stat_trainers()
+        except Exception:
+            logger.log_warn("Landing stat trainer bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_stat_trainers", deferred=True)
+        try:
+            from world.areas.the_landing.feat_trainers import ensure_the_landing_feat_trainers
+
+            ensure_the_landing_feat_trainers()
+        except Exception:
+            logger.log_warn("Landing feat trainer bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_feat_trainers", deferred=True)
+        try:
             primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map", "ranger-guild-map"])
             if primed_zones:
                 logger.log_info(f"Primed AreaForge zone map cache: {', '.join(primed_zones)}")
@@ -2165,6 +2188,18 @@ def at_server_start():
             pass
 
         try:
+            TICKER_HANDLER.remove(10, process_teaching_tick, idstring="global_learning_tick", persistent=True)
+            unregister_ticker_metadata(10, idstring="global_learning_tick", persistent=True)
+        except Exception:
+            pass
+
+        try:
+            TICKER_HANDLER.remove(60, process_rexp_banking_tick, idstring="global_rexp_banking_tick", persistent=True)
+            unregister_ticker_metadata(60, idstring="global_rexp_banking_tick", persistent=True)
+        except Exception:
+            pass
+
+        try:
             TICKER_HANDLER.remove(1, process_status_tick, idstring="global_bleed_tick", persistent=True)
             unregister_ticker_metadata(1, idstring="global_bleed_tick", persistent=True)
         except Exception:
@@ -2212,7 +2247,8 @@ def at_server_start():
 
         if getattr(settings, "ENABLE_GLOBAL_STATUS_TICK", True):
             TICKER_HANDLER.add(1, process_status_tick, idstring="global_status_tick", persistent=True)
-            TICKER_HANDLER.add(10, process_learning_tick, idstring="global_learning_tick", persistent=True)
+            TICKER_HANDLER.add(10, process_teaching_tick, idstring="global_learning_tick", persistent=True)
+            TICKER_HANDLER.add(60, process_rexp_banking_tick, idstring="global_rexp_banking_tick", persistent=True)
             if _guard_patrol_owner_enabled("ticker"):
                 TICKER_HANDLER.add(GUARD_TICK_INTERVAL, _run_guard_ticker_tick, idstring="global_guard_tick", persistent=True)
             elif _guard_patrol_owner_enabled("global_script"):
@@ -2232,11 +2268,19 @@ def at_server_start():
             )
             register_ticker_metadata(
                 10,
-                process_learning_tick,
+                process_teaching_tick,
                 idstring="global_learning_tick",
                 persistent=True,
                 system="world.learning_tick",
-                reason="Frequency-separated learning and teaching pulse processing.",
+                reason="Legacy learning ticker migrated to teaching-only pulse processing.",
+            )
+            register_ticker_metadata(
+                60,
+                process_rexp_banking_tick,
+                idstring="global_rexp_banking_tick",
+                persistent=True,
+                system="world.rexp_banking",
+                reason="Rested EXP banking checks for idle, deep-sleeping, and online characters.",
             )
             if _guard_patrol_owner_enabled("ticker"):
                 register_ticker_metadata(

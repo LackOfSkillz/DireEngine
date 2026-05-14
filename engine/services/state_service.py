@@ -20,6 +20,15 @@ class StateService:
         return ranked[0][1] if ranked else None
 
     @staticmethod
+    def _pick_primary_effect_by(effect_map, predicate):
+        filtered = {}
+        for name, data in dict(effect_map or {}).items():
+            payload = dict(data or {})
+            if predicate(payload):
+                filtered[str(name)] = payload
+        return StateService._pick_primary_effect(filtered)
+
+    @staticmethod
     def _sync_legacy_state_views(target, active_effects, previous_active_effects=None):
         setter = getattr(target, "set_state", None)
         clearer = getattr(target, "clear_state", None)
@@ -39,6 +48,15 @@ class StateService:
             setter("warding_barrier", dict(ward))
         elif callable(clearer) and "warding" in previous_active_effects:
             clearer("warding_barrier")
+
+        physical_ward = StateService._pick_primary_effect_by(
+            dict(active_effects.get("warding") or {}),
+            lambda payload: bool(payload.get("absorbs_physical", False)),
+        )
+        if physical_ward and callable(setter):
+            setter("physical_barrier", dict(physical_ward))
+        elif callable(clearer) and "warding" in previous_active_effects:
+            clearer("physical_barrier")
 
         utility_effects = dict(active_effects.get("utility") or {})
         utility_light = None
@@ -84,6 +102,8 @@ class StateService:
             return {}
         if callable(setter):
             setter("active_effects", normalized)
+        if hasattr(getattr(target, "db", None), "encumbrance_dirty"):
+            target.db.encumbrance_dirty = True
         StateService._sync_legacy_state_views(target, normalized, previous_active_effects=previous_active_effects)
         return normalized
 
@@ -121,16 +141,19 @@ class StateService:
         return ActionResult.ok(data={"effect": effect_data, "ignored": False})
 
     @staticmethod
-    def apply_warding_effect(target, source_spell, strength, duration):
+    def apply_warding_effect(target, source_spell, strength, duration, absorbs_physical=False, extra_data=None):
         active_effects = StateService._get_active_effects(target)
         warding_effects = dict(active_effects.get("warding") or {})
         effect_key = str(source_spell or "warding").strip().lower().replace(" ", "_")
         incoming_strength = max(1, int(strength or 0))
         incoming_duration = max(1, int(duration or 0))
+        normalized_extra = {str(key): value for key, value in dict(extra_data or {}).items()}
         existing = dict(warding_effects.get(effect_key) or {})
         if existing:
             existing["strength"] = max(int(existing.get("strength", 0) or 0), incoming_strength)
             existing["duration"] = max(int(existing.get("duration", 0) or 0), incoming_duration)
+            existing["absorbs_physical"] = bool(existing.get("absorbs_physical", False) or absorbs_physical)
+            existing.update(normalized_extra)
             warding_effects[effect_key] = existing
             active_effects["warding"] = warding_effects
             StateService._set_active_effects(target, active_effects)
@@ -138,13 +161,70 @@ class StateService:
 
         effect_data = {
             "name": effect_key,
+            "spell_id": effect_key,
             "strength": incoming_strength,
             "duration": incoming_duration,
+            "absorbs_physical": bool(absorbs_physical),
         }
+        effect_data.update(normalized_extra)
         warding_effects[effect_key] = effect_data
         active_effects["warding"] = warding_effects
         StateService._set_active_effects(target, active_effects)
         return ActionResult.ok(data={"effect": effect_data, "refreshed": False})
+
+    @staticmethod
+    def get_strongest_physical_ward(target):
+        getter = getattr(target, "get_state", None)
+        if callable(getter):
+            mirrored = getter("physical_barrier")
+            if isinstance(mirrored, dict) and mirrored:
+                return dict(mirrored)
+        return StateService._pick_primary_effect_by(
+            dict(StateService._get_active_effects(target).get("warding") or {}),
+            lambda payload: bool(payload.get("absorbs_physical", False)),
+        )
+
+    @staticmethod
+    def get_strongest_magic_ward(target):
+        warding_effects = dict(StateService._get_active_effects(target).get("warding") or {})
+        strongest = StateService._pick_primary_effect_by(
+            warding_effects,
+            lambda payload: not bool(payload.get("absorbs_physical", False)),
+        )
+        if strongest:
+            return strongest
+        if warding_effects:
+            return None
+        getter = getattr(target, "get_state", None)
+        if callable(getter):
+            mirrored = getter("warding_barrier")
+            if isinstance(mirrored, dict) and mirrored:
+                return dict(mirrored)
+        return None
+
+    @staticmethod
+    def consume_ward(target, spell_id, absorbed):
+        active_effects = StateService._get_active_effects(target)
+        warding_effects = dict(active_effects.get("warding") or {})
+        effect_key = str(spell_id or "").strip().lower().replace(" ", "_")
+        ward = dict(warding_effects.get(effect_key) or {})
+        if not ward:
+            return ActionResult.fail(data={"reason": "missing_ward", "spell_id": effect_key})
+
+        absorbed_amount = max(0, int(absorbed or 0))
+        ward["strength"] = max(0, int(ward.get("strength", 0) or 0) - absorbed_amount)
+        depleted = int(ward.get("strength", 0) or 0) <= 0
+        if depleted:
+            warding_effects.pop(effect_key, None)
+        else:
+            warding_effects[effect_key] = ward
+
+        if warding_effects:
+            active_effects["warding"] = warding_effects
+        else:
+            active_effects.pop("warding", None)
+        StateService._set_active_effects(target, active_effects)
+        return ActionResult.ok(data={"effect": ward, "depleted": depleted, "absorbed": absorbed_amount})
 
     @staticmethod
     def apply_utility_effect(target, effect_name, duration, source_spell=None, extra_data=None):
@@ -163,6 +243,7 @@ class StateService:
         utility_effects[effect_key] = effect_data
         active_effects["utility"] = utility_effects
         StateService._set_active_effects(target, active_effects)
+        StateService._sync_utility_capability_flags(target, effect_data)
         return ActionResult.ok(data={"effect": effect_data})
 
     @staticmethod
@@ -183,13 +264,27 @@ class StateService:
         return ActionResult.ok(data={"removed": removed, "removed_effects": removed_effects})
 
     @staticmethod
-    def apply_debilitation_effect(target, effect_type, strength, duration, applied_by=None, contest_margin=0.0, source_spell=None, modifiers=None):
+    def apply_debilitation_effect(
+        target,
+        effect_type,
+        strength,
+        duration,
+        applied_by=None,
+        contest_margin=0.0,
+        source_spell=None,
+        modifiers=None,
+        stat_debuffs=None,
+        encumbrance_modifier=0,
+        stacking="replace_weaker",
+    ):
         active_effects = StateService._get_active_effects(target)
         debilitation_effects = dict(active_effects.get("debilitation") or {})
         effect_key = str(effect_type or "debilitation").strip().lower().replace(" ", "_")
         incoming_strength = max(1, int(strength or 0))
         incoming_duration = max(1, int(duration or 0))
         normalized_modifiers = {str(key): float(value or 0.0) for key, value in dict(modifiers or {}).items()}
+        normalized_stat_debuffs = {str(key): int(value or 0) for key, value in dict(stat_debuffs or {}).items() if int(value or 0) != 0}
+        normalized_encumbrance = int(encumbrance_modifier or 0)
         existing = dict(debilitation_effects.get(effect_key) or {})
         if existing:
             existing_strength = max(1, int(existing.get("strength", 0) or 0))
@@ -208,8 +303,13 @@ class StateService:
                 refreshed["contest_margin"] = float(contest_margin)
                 refreshed["applied_by"] = applied_by
                 refreshed["source_spell"] = source_spell
+                refreshed["stacking"] = str(stacking or "replace_weaker")
                 if normalized_modifiers:
                     refreshed["modifiers"] = dict(normalized_modifiers)
+                if normalized_stat_debuffs:
+                    refreshed["stat_debuffs"] = dict(normalized_stat_debuffs)
+                if normalized_encumbrance:
+                    refreshed["encumbrance_modifier"] = int(normalized_encumbrance)
                 debilitation_effects[effect_key] = refreshed
                 active_effects["debilitation"] = debilitation_effects
                 StateService._set_active_effects(target, active_effects)
@@ -229,7 +329,10 @@ class StateService:
             "applied_by": applied_by,
             "contest_margin": float(contest_margin),
             "source_spell": source_spell,
+            "stacking": str(stacking or "replace_weaker"),
             "modifiers": dict(normalized_modifiers),
+            "stat_debuffs": dict(normalized_stat_debuffs),
+            "encumbrance_modifier": int(normalized_encumbrance),
         }
         debilitation_effects[effect_key] = effect_data
         active_effects["debilitation"] = debilitation_effects
@@ -252,6 +355,13 @@ class StateService:
         active_effects = StateService._get_active_effects(target)
         cyclic_effects = dict(active_effects.get("cyclic") or {})
         effect_key = str(spell_id or "cyclic").strip().lower().replace(" ", "_")
+        if cyclic_effects and effect_key not in cyclic_effects:
+            active_id, active_payload = next(iter(cyclic_effects.items()))
+            active_name = str(dict(active_payload or {}).get("spell_name") or dict(active_payload or {}).get("name") or active_id)
+            return ActionResult.fail(
+                errors=[f"You already sustain a cyclic spell: {active_name}. Release it first with RELEASE CYCLIC before casting another."],
+                data={"started": False, "reason": "single_cyclic_enforced", "active_spell_id": active_id, "active_spell_name": active_name},
+            )
         if cyclic_effects.get(effect_key):
             return ActionResult.fail(
                 errors=["That cyclic spell is already active."],
@@ -262,6 +372,8 @@ class StateService:
         effect_payload.setdefault("active", True)
         effect_payload.setdefault("duration", None)
         effect_payload.setdefault("tick_count", 0)
+        effect_payload.setdefault("sustain_source", "held_mana")
+        effect_payload.setdefault("sustain_ref", None)
         cyclic_effects[effect_key] = effect_payload
         active_effects["cyclic"] = cyclic_effects
         StateService._set_active_effects(target, active_effects)
@@ -313,6 +425,7 @@ class StateService:
                     expired_payload = dict(effect_data or {})
                     expired_payload["effect_family"] = str(category)
                     expired_payload["effect_type"] = str(effect_name)
+                    StateService._expire_effect_side_effects(target, str(category), expired_payload)
                     expired_effects.append(expired_payload)
                     continue
                 category_updates[str(effect_name)] = updated
@@ -321,6 +434,25 @@ class StateService:
 
         StateService._set_active_effects(target, updated_effects)
         return ActionResult.ok(data={"expired_effects": expired_effects, "active_effects": updated_effects})
+
+    @staticmethod
+    def _sync_utility_capability_flags(target, effect_data):
+        capability_flag = str(dict(effect_data or {}).get("capability_flag", "") or "").strip()
+        if not capability_flag:
+            return
+        setattr(target.db, capability_flag, True)
+        setattr(target.db, f"{capability_flag}_expires_in", int(dict(effect_data or {}).get("duration", 0) or 0))
+
+    @staticmethod
+    def _expire_effect_side_effects(target, category, effect_data):
+        if str(category or "") == "utility":
+            capability_flag = str(dict(effect_data or {}).get("capability_flag", "") or "").strip()
+            if capability_flag:
+                setattr(target.db, capability_flag, False)
+                setattr(target.db, f"{capability_flag}_expires_in", 0)
+            return
+        if str(category or "") == "debilitation" and hasattr(getattr(target, "db", None), "encumbrance_dirty"):
+            target.db.encumbrance_dirty = True
 
     @staticmethod
     def apply_healing(target, amount):
@@ -339,6 +471,7 @@ class StateService:
     @staticmethod
     def process_cyclic_effects(target):
         from engine.services.mana_service import ManaService
+        from engine.services.feat_service import FeatService
         from engine.services.spell_contest_service import SpellContestService
 
         active_effects = StateService._get_active_effects(target)
@@ -373,12 +506,18 @@ class StateService:
                 updated_effects.pop(effect_name, None)
                 continue
 
-            mana_result = ManaService.consume_mana(target, updated.get("mana_per_tick", 0))
+            mana_per_tick = max(0, ManaService._coerce_int(updated.get("mana_per_tick"), default=0))
+            mana_result = ManaService.consume_mana_for_cyclic(
+                target,
+                mana_per_tick,
+                updated.get("sustain_source", "held_mana"),
+                sustain_ref=updated.get("sustain_ref"),
+            )
             if not mana_result.success:
                 collapsed = dict(updated)
                 collapsed["effect_family"] = "cyclic"
                 collapsed["effect_type"] = str(effect_name)
-                collapsed["collapse_reason"] = "insufficient_mana"
+                collapsed["collapse_reason"] = str((mana_result.data or {}).get("reason") or "insufficient_mana")
                 collapsed["remaining_mana"] = float((mana_result.data or {}).get("remaining_mana", 0.0) or 0.0)
                 collapsed_effects.append(collapsed)
                 updated_effects.pop(effect_name, None)
@@ -397,11 +536,14 @@ class StateService:
                 "effect_family": "cyclic",
                 "effect_type": str(effect_name),
                 "tick_count": tick_count,
-                "mana_per_tick": float(updated.get("mana_per_tick", 0.0) or 0.0),
+                "mana_per_tick": float((mana_result.data or {}).get("consumed", mana_per_tick) or 0.0),
+                "requested_base_cost": float((mana_result.data or {}).get("requested_base_cost", mana_per_tick) or 0.0),
                 "remaining_mana": float((mana_result.data or {}).get("remaining_mana", 0.0) or 0.0),
                 "target_id": updated.get("target_id"),
                 "target_key": updated.get("target_key"),
                 "environmental_mana_modifier": float(environmental_modifier),
+                "sustain_source": str(updated.get("sustain_source", "held_mana") or "held_mana"),
+                "sustain_ref": updated.get("sustain_ref"),
             }
 
             tick_effect = str(updated.get("tick_effect", "healing") or "healing")

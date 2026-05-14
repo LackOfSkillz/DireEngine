@@ -573,6 +573,37 @@ class EmpathGuildleader(NPC):
         return super().handle_inquiry(actor, topic)
 
 
+class StatTrainerNPC(NPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.is_trainer = True
+        self.db.trains_stat = None
+        self.db.greeting = (
+            "The trainer regards you thoughtfully, ready to assess your potential for improvement."
+        )
+
+    def handle_inquiry(self, actor, topic):
+        if topic is None:
+            return self.db.greeting
+        return f"The {self.key} listens but says nothing in response to that yet."
+
+
+class GuildLeaderNPC(NPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.is_guild_leader = True
+        self.db.guild_role = "leader"
+        self.db.leads_profession = None
+        self.db.greeting = (
+            "The guild leader inclines their head in greeting, appraising you with experienced eyes."
+        )
+
+    def handle_inquiry(self, actor, topic):
+        if topic is None:
+            return self.db.greeting
+        return "The guild leader listens but says nothing in response to that yet."
+
+
 class HealerNPC(NPC):
     def at_object_creation(self):
         super().at_object_creation()

@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 import time
 
+from engine.services.rexp_service import notify_sleep_blocks_xp
 from world.systems.skills import MINDSTATE_MAX, award_xp as award_skill_pool_xp, calculate_mindstate as calculate_skill_mindstate, normalize_skill_name, train
 
 from engine.services.result import ActionResult
@@ -46,10 +47,17 @@ class SkillService:
             return ActionResult.fail(errors=["Missing character."])
         if hasattr(character, "ensure_core_defaults"):
             character.ensure_core_defaults()
+        if hasattr(character, "ensure_sleep_defaults"):
+            character.ensure_sleep_defaults()
 
         normalized_skill = normalize_skill_name(skill)
         source_data = SkillService._normalize_source(source)
         mode = str(source_data.get("mode", "flat") or "flat").strip().lower()
+
+        if hasattr(character, "is_asleep") and character.is_asleep():
+            notify_sleep_blocks_xp(character)
+            return ActionResult.ok(data={"amount": 0.0, "skill": normalized_skill, "source": source_data})
+
         exp_skill = SkillService._get_exp_skill(character, normalized_skill)
 
         if mode == "difficulty":

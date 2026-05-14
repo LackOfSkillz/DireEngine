@@ -410,7 +410,7 @@ def compute_parry(defender, leftover_of, context=None):
     if leftover_of <= 0:
         return ParrySubcontest(parry_score=0, leftover_of=leftover_of, parry_percent=0, block_pct=0, maneuver_scale_pct=defense_scaling.parry_pct)
     defender_weapon_profile = defender.get_weapon_profile() if hasattr(defender, "get_weapon_profile") else {}
-    parry_skill_name = str(defender_weapon_profile.get("skill") or context.get("skill_name") or "brawling")
+    parry_skill_name = "parry_ability"
     parry_skill = _coerce_int(defender.get_skill(parry_skill_name) if hasattr(defender, "get_skill") else 0)
     agility = _coerce_int(defender.get_stat("agility") if hasattr(defender, "get_stat") else 0)
     reflex = _coerce_int(defender.get_stat("reflex") if hasattr(defender, "get_stat") else 0)
@@ -445,7 +445,7 @@ def compute_shield(defender, leftover_of, context=None):
     if leftover_of <= 0 or not shield_items:
         return ShieldSubcontest(shield_score=0, block_pct=0, maneuver_scale_pct=defense_scaling.shield_pct)
     shield_item = shield_items[0]
-    shield_skill = _coerce_int(defender.get_skill("shield") if hasattr(defender, "get_skill") else 0)
+    shield_skill = _coerce_int(defender.get_skill("shield_usage") if hasattr(defender, "get_skill") else 0)
     min_def = _coerce_int(getattr(getattr(shield_item, "db", None), "mindef", SHIELD_MIN_DEF), SHIELD_MIN_DEF)
     max_def = _coerce_int(getattr(getattr(shield_item, "db", None), "maxdef", SHIELD_MAX_DEF), SHIELD_MAX_DEF)
     shield_score = min(max_def, min_def + shield_skill)
@@ -552,6 +552,90 @@ def _quality_from_pressure(leftover_of, post_defense_foi):
     if pressure >= 25:
         return "good"
     return "glancing"
+
+
+def _scale_raw_damage(raw_damage, target_total):
+    if target_total >= raw_damage.total:
+        return raw_damage
+    if target_total <= 0 or raw_damage.total <= 0:
+        return RawDamage(0, 0, 0, 0, 0, 0, multiplier_seed=raw_damage.multiplier_seed)
+
+    components = {
+        "puncture": int(raw_damage.puncture or 0),
+        "slice": int(raw_damage.slice or 0),
+        "impact": int(raw_damage.impact or 0),
+        "fire": int(raw_damage.fire or 0),
+        "cold": int(raw_damage.cold or 0),
+        "electric": int(raw_damage.electric or 0),
+    }
+    total = max(1, int(raw_damage.total or 0))
+    scaled = {}
+    remainders = []
+    allocated = 0
+    for key, value in components.items():
+        scaled_value = (value * int(target_total)) // total
+        scaled[key] = scaled_value
+        allocated += scaled_value
+        remainders.append(((value * int(target_total)) % total, key, value))
+
+    leftover = int(target_total) - allocated
+    for _remainder, key, source_value in sorted(remainders, reverse=True):
+        if leftover <= 0:
+            break
+        if source_value <= 0:
+            continue
+        scaled[key] += 1
+        leftover -= 1
+
+    return RawDamage(
+        puncture=max(0, scaled["puncture"]),
+        slice=max(0, scaled["slice"]),
+        impact=max(0, scaled["impact"]),
+        fire=max(0, scaled["fire"]),
+        cold=max(0, scaled["cold"]),
+        electric=max(0, scaled["electric"]),
+        multiplier_seed=raw_damage.multiplier_seed,
+    )
+
+
+def _consume_physical_barrier(target, reduced_damage, context=None):
+    context = context if context is not None else {}
+    if reduced_damage.total <= 0:
+        return reduced_damage, None
+
+    try:
+        from engine.services.state_service import StateService
+    except Exception:
+        return reduced_damage, None
+
+    barrier = StateService.get_strongest_physical_ward(target)
+    if not barrier:
+        return reduced_damage, None
+
+    absorbed = min(max(0, int(reduced_damage.total or 0)), int(barrier.get("strength", 0) or 0))
+    if absorbed <= 0:
+        return reduced_damage, None
+
+    remaining_total = max(0, int(reduced_damage.total or 0) - absorbed)
+    consume_result = StateService.consume_ward(target, barrier.get("spell_id") or barrier.get("name"), absorbed)
+    depleted = bool((consume_result.data or {}).get("depleted", False)) if consume_result.success else False
+    remaining_capacity = int((((consume_result.data or {}).get("effect", {}) or {}).get("strength", 0) or 0)) if consume_result.success else max(0, int(barrier.get("strength", 0) or 0) - absorbed)
+    event_type = "weakened"
+    if depleted:
+        event_type = "depleted"
+    elif remaining_total <= 0:
+        event_type = "shielded"
+
+    barrier_event = {
+        "type": event_type,
+        "spell_id": str(barrier.get("spell_id", barrier.get("name", "manifest_force")) or "manifest_force"),
+        "spell_name": str(barrier.get("name", "manifest_force") or "manifest_force"),
+        "absorbed": absorbed,
+        "remaining_capacity": remaining_capacity,
+    }
+    if context is not None:
+        context["barrier_event"] = dict(barrier_event)
+    return _scale_raw_damage(reduced_damage, remaining_total), barrier_event
 
 
 def resolve_attack(attacker, target, context=None, *, combat_rng=None, rng=None):
@@ -728,6 +812,8 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
             multiplier_seed=reduced_damage.multiplier_seed,
         )
 
+    reduced_damage, barrier_event = _consume_physical_barrier(target, reduced_damage, context)
+
     current_hp = _coerce_int(getattr(getattr(target, "db", None), "hp", 0) or getattr(getattr(target, "db", None), "cbhp", 0), 1)
     max_hp = _coerce_int(getattr(getattr(target, "db", None), "max_hp", 0) or getattr(getattr(target, "db", None), "mbhp", 0), max(1, current_hp))
     body_part = hit_area.area if isinstance(hit_area.area, BodyPart) else BodyPart.CHEST
@@ -753,6 +839,7 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
     context["attack_context"] = {"damage_type": reduced_damage.dominant_type}
     context["raw_damage"] = asdict(scaled_raw)
     context["post_armor_damage"] = asdict(reduced_damage)
+    context["barrier_event"] = dict(barrier_event or {})
     context["armor_flat_reduction"] = tuple(flat_reduction)
     context["armor_percent_reduction"] = tuple(pct_reduction)
     context["critical"] = critical

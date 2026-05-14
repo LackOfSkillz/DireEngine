@@ -1711,6 +1711,32 @@ body {
   flex: 0 0 auto;
 }
 
+body.connection-disconnected #player-panel,
+body.connection-disconnected #inventory-panel,
+body.connection-disconnected #equipment-panel,
+body.connection-disconnected #debug-panel {
+  pointer-events: none;
+}
+
+body.connection-disconnected #right-sidebar,
+body.connection-disconnected #right-sidebar > * {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+body.connection-disconnected #session-status,
+body.connection-disconnected #reconnect-button,
+body.connection-disconnected .character-summary-actions,
+body.connection-disconnected .character-summary-actions * {
+  pointer-events: auto;
+  position: relative;
+  z-index: 20;
+}
+
+body.connection-disconnected #reconnect-button {
+  z-index: 30;
+}
+
 #map-panel.is-highlighted,
 #inventory-panel.is-highlighted {
   box-shadow: 0 0 0 1px rgba(155, 194, 255, 0.45), 0 12px 24px rgba(0, 0, 0, 0.35);
@@ -4353,6 +4379,10 @@ body {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
+  }
+
+  body.connection-disconnected #right-sidebar {
+    display: none !important;
   }
 
   #feed-body {

@@ -511,6 +511,7 @@ class CombatService:
             "ambush_announced": bool(details.get("ambush_announced", False)),
             "armor_absorbed": bool(details.get("armor_absorbed", False)),
             "attacker_name": getattr(attacker, "key", "Someone"),
+            "barrier_event": dict(details.get("barrier_event", {}) or {}),
             "critical": bool(details.get("critical", False)),
             "damage": int(damage_result.amount if resolution.hit else 0),
             "damage_type": str(details.get("damage_type", "impact") or "impact"),

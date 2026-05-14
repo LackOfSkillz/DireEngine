@@ -14,6 +14,7 @@ class DummyCharacter:
         self.db = DummyHolder()
         self.profession = profession
         self.db.circle = circle
+        self.db.magic_slot_pool = None
         self.skills = dict(skills or {"primary_magic": 100})
 
     def get_profession(self):
@@ -21,6 +22,9 @@ class DummyCharacter:
 
     def get_skill(self, skill_name):
         return self.skills.get(skill_name, 0)
+
+    def get_circle(self):
+        return self.db.circle
 
     def ensure_core_defaults(self):
         SpellbookService.ensure_spellbook_defaults(self)
@@ -69,6 +73,7 @@ class SpellAccessServiceTests(unittest.TestCase):
 
         self.assertTrue(result.success)
         self.assertEqual(result.data["spell_id"], "empath_heal")
+        self.assertEqual(result.data["via"], "permanent")
 
     def test_learn_spell_validates_acquisition_method(self):
         character = DummyCharacter(profession="cleric", circle=1)
@@ -124,6 +129,69 @@ class SpellAccessServiceTests(unittest.TestCase):
         self.assertTrue(after.success)
         self.assertFalse(wrong_after.success)
         self.assertIn("You cannot comprehend that spell.", wrong_after.errors)
+
+    def test_apprentice_spell_is_available_without_memorization(self):
+        character = DummyCharacter(profession="cleric", circle=5, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+
+        result = SpellAccessService.can_use_spell(character, get_spell("burden"))
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["via"], "apprentice")
+
+    def test_gauge_flow_is_not_apprentice_accessible(self):
+        character = DummyCharacter(profession="cleric", circle=5, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+
+        result = SpellAccessService.can_use_spell(character, get_spell("gauge_flow"))
+
+        self.assertFalse(result.success)
+        self.assertIn("You have not learned that spell.", result.errors)
+
+    def test_manifest_force_is_apprentice_accessible(self):
+        character = DummyCharacter(profession="cleric", circle=5, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+
+        result = SpellAccessService.can_use_spell(character, get_spell("manifest_force"))
+
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["via"], "apprentice")
+
+    def test_apprentice_access_expires_at_circle_eleven(self):
+        character = DummyCharacter(profession="cleric", circle=11, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+
+        result = SpellAccessService.can_use_spell(character, get_spell("burden"))
+
+        self.assertFalse(result.success)
+        self.assertIn("You have not learned that spell.", result.errors)
+
+    def test_permanently_memorized_apprentice_spell_survives_expiration(self):
+        character = DummyCharacter(profession="cleric", circle=10, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+        learned = SpellbookService.learn_spell(character, "burden", "book")
+        character.db.circle = 11
+
+        result = SpellAccessService.can_use_spell(character, get_spell("burden"))
+
+        self.assertTrue(learned.success)
+        self.assertTrue(result.success)
+        self.assertEqual(result.data["via"], "permanent")
+
+    def test_get_apprentice_spells_returns_only_current_nonmemorized_access(self):
+        character = DummyCharacter(profession="cleric", circle=5, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+        SpellbookService.learn_spell(character, "manifest_force", "scroll")
+
+        apprentice_ids = [spell.id for spell in SpellAccessService.get_apprentice_spells(character)]
+
+        self.assertEqual(apprentice_ids, ["burden", "strange_arrow"])
+
+    def test_non_magic_profession_has_no_apprentice_access(self):
+        character = DummyCharacter(profession="barbarian", circle=5, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+
+        self.assertEqual(SpellAccessService.get_apprentice_spells(character), [])
 
 
 if __name__ == "__main__":

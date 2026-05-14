@@ -19,6 +19,13 @@
   <body>
     <header class="site-header">
       <div class="site-header-wrap">
+    <script>
+      (function () {
+        if (window.location.hostname.startsWith('127.')) {
+          window.location.replace(`http://localhost:${window.location.port}${window.location.pathname}${window.location.search}${window.location.hash}`);
+        }
+      })();
+    </script>
       <div class="site-header-inner panel brass-panel">
         <a class="site-brand" href="/">
           <img class="site-brand-logo" src="{% static 'website/images/dragons_ire_logo.png' %}" alt="Dragons Ire logo">

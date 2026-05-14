@@ -14,10 +14,11 @@ from typeclasses.characters import Character, DEAD_STATE_ALLOWED_COMMANDS as CHA
 
 
 class DummyCaller:
-    def __init__(self, target=None):
+    def __init__(self, target=None, room=None):
         self._target = target
         self.messages = []
         self.last_search = None
+        self.location = room
 
     def msg(self, text):
         self.messages.append(text)
@@ -28,10 +29,11 @@ class DummyCaller:
 
 
 class DummyTarget:
-    def __init__(self, key="AedanSmoke"):
+    def __init__(self, key="AedanSmoke", room=None):
         self.key = key
         self.messages = []
         self.reset_calls = 0
+        self.location = room
 
     def combat_reset_state(self):
         self.reset_calls += 1
@@ -135,8 +137,9 @@ class CombatResetCommandTests(unittest.TestCase):
         self.assertEqual(caller.messages, ["Combat reset whom?"])
 
     def test_combatreset_uses_global_search_and_resets_target(self):
-        target = DummyTarget()
-        caller = DummyCaller(target=target)
+        room = SimpleNamespace(messages=[], msg_contents=lambda message, exclude=None: room.messages.append({"message": message, "exclude": exclude}))
+        target = DummyTarget(room=room)
+        caller = DummyCaller(target=target, room=room)
         command = CmdCombatReset()
         command.caller = caller
         command.args = "AedanSmoke"
@@ -147,6 +150,7 @@ class CombatResetCommandTests(unittest.TestCase):
         self.assertEqual(target.reset_calls, 1)
         self.assertEqual(caller.messages, ["You reset AedanSmoke's combat state."])
         self.assertEqual(target.messages, ["A restoring force clears your combat state and lingering wounds."])
+        self.assertEqual(room.messages, [{"message": "AedanSmoke suddenly looks refreshed and at ease.", "exclude": [caller, target]}])
 
     def test_combatreset_rejects_nonresettable_target(self):
         caller = DummyCaller(target=SimpleNamespace(key="rock"))

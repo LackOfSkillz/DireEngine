@@ -35,8 +35,33 @@ DEAD_STATE_ALLOWED_COMMANDS = {
     "score",
     "sta",
     "stats",
+    "tdp",
     "withdraw",
     "whisper",
+    "xp",
+}
+
+SLEEP_NO_WAKE_COMMANDS = {
+    "awake",
+    "exp",
+    "experience",
+    "help",
+    "l",
+    "look",
+    "score",
+    "sleep",
+    "sta",
+    "stats",
+    "strength",
+    "stamina",
+    "agility",
+    "reflex",
+    "charisma",
+    "discipline",
+    "wisdom",
+    "intelligence",
+    "tdp",
+    "who",
     "xp",
 }
 
@@ -63,10 +88,12 @@ class Command(BaseCommand):
         caller = getattr(self, "caller", None)
         if caller is None or not hasattr(caller, "is_dead"):
             return super().at_pre_cmd()
+        command_name = str(getattr(self, "cmdstring", "") or getattr(self, "key", "")).strip().lower()
         if not caller.is_dead():
+            if hasattr(caller, "is_asleep") and caller.is_asleep() and command_name not in SLEEP_NO_WAKE_COMMANDS:
+                caller.auto_wake_if_sleeping(reason=command_name)
             return super().at_pre_cmd()
 
-        command_name = str(getattr(self, "key", "") or getattr(self, "cmdstring", "")).strip().lower()
         if command_name in DEAD_STATE_ALLOWED_COMMANDS:
             return super().at_pre_cmd()
 
