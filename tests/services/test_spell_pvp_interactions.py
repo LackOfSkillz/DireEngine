@@ -17,7 +17,10 @@ class SpellPvPInteractionTests(unittest.TestCase):
         return SpellbookService.learn_spell(character, spell.id, learned_via)
 
     def _prepare_and_cast(self, caster, spell_id, room, *, target_name=None, mana=12):
+        spell = get_spell(spell_id)
         self.assertTrue(self._learn(caster, spell_id).success)
+        if str(spell.spell_type or "").strip().lower() == "cyclic":
+            self.assertTrue(caster.harness_spell(str(mana)))
         self.assertTrue(caster.prepare_spell(f"{spell_id} {mana}"))
         self.assertTrue(caster.cast_spell(target_name=target_name))
 

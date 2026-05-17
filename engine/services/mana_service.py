@@ -185,6 +185,14 @@ class ManaService:
             normalized["max_prep"] = max(0, ManaService._coerce_int(prepared_map.get("max_prep"), default=0))
         if prepared_map.get("safe_mana") is not None:
             normalized["safe_mana"] = max(0, ManaService._coerce_int(prepared_map.get("safe_mana"), default=0))
+        if prepared_map.get("mana_min") is not None:
+            normalized["mana_min"] = max(0, ManaService._coerce_int(prepared_map.get("mana_min"), default=0))
+        if prepared_map.get("mana_max") is not None:
+            normalized["mana_max"] = max(0, ManaService._coerce_int(prepared_map.get("mana_max"), default=0))
+        if prepared_map.get("diff_per_extra_mana") is not None:
+            normalized["diff_per_extra_mana"] = max(0.0, ManaService._coerce_float(prepared_map.get("diff_per_extra_mana"), default=0.0))
+        if prepared_map.get("provenance") is not None:
+            normalized["provenance"] = str(prepared_map.get("provenance", "") or "")
         if prepared_map.get("tier") is not None:
             normalized["tier"] = max(0, ManaService._coerce_int(prepared_map.get("tier"), default=0))
         if prepared_map.get("base_difficulty") is not None:
@@ -423,17 +431,47 @@ class ManaService:
         prepared_map = dict(prepared or {})
         tier = max(1, ManaService._coerce_int(prepared_map.get("tier"), default=1))
         mana_input = max(0, ManaService._coerce_int(prepared_map.get("mana_input"), default=0))
+        spell_id = str(prepared_map.get("spell_id", "") or "").strip().lower()
+        base_difficulty = ManaService._coerce_float(prepared_map.get("base_difficulty"), default=10.0 + tier * 3.0)
+        difficulty_modifier = ManaService._coerce_int(
+            prepared_map.get("spell_difficulty_modifier"),
+            default=ManaService._get_spell_difficulty_modifier(character, spell_id),
+        )
         return {
-            "base_difficulty": ManaService._coerce_float(prepared_map.get("base_difficulty"), default=10.0 + tier * 3.0),
+            "base_difficulty": max(0.0, base_difficulty + float(difficulty_modifier)),
+            "base_difficulty_unmodified": base_difficulty,
             "safe_mana": max(1, ManaService._coerce_int(prepared_map.get("safe_mana"), default=max(1, mana_input))),
+            "mana_min": max(1, ManaService._coerce_int(prepared_map.get("mana_min"), default=max(1, mana_input))),
+            "mana_max": max(1, ManaService._coerce_int(prepared_map.get("mana_max"), default=max(1, mana_input))),
+            "diff_per_extra_mana": max(0.0, ManaService._coerce_float(prepared_map.get("diff_per_extra_mana"), default=0.0)),
             "tier": tier,
             "mana_input": mana_input,
+            "spell_id": spell_id,
+            "spell_difficulty_modifier": int(difficulty_modifier),
             "realm": prepared_map.get("realm", ""),
             "profession": ManaService._get_profession_name(character),
             "primary_magic_skill": ManaService._coerce_float(primary_magic_skill, default=0.0),
             "effective_env_mana": ManaService._coerce_float(effective_env_mana, default=1.0),
             "spell_category": str(prepared_map.get("spell_category", prepared_map.get("category", "utility")) or "utility"),
+            "min_prep_time": ManaService._coerce_float(prepared_map.get("min_prep_time"), default=0.0),
+            "provenance": str(prepared_map.get("provenance", "") or ""),
         }
+
+    @staticmethod
+    def _get_spell_difficulty_modifier(character, spell_id):
+        normalized_spell_id = str(spell_id or "").strip().lower()
+        if not normalized_spell_id:
+            return 0
+        try:
+            from domain.spells.spell_definitions import get_spell
+            from engine.services.ranger_saf_service import RangerSafService
+        except Exception:
+            return 0
+
+        spell = get_spell(normalized_spell_id)
+        if spell is None:
+            return 0
+        return int(RangerSafService.get_spellcasting_modifier(character, spell) or 0)
 
     @staticmethod
     def _apply_backlash_payload(character, backlash_payload):
@@ -943,12 +981,26 @@ class ManaService:
         cast_mana = intended_mana + held_to_use
         spell_profile = ManaService._get_spell_profile(character, prepared, primary_magic_skill, effective_env_mana)
         control_context = ManaService._build_control_context(character, primary_magic_skill, attunement)
-        random_roll = random.uniform(-10.0, 10.0)
+        control_context["fully_prepped"] = bool(prepared.get("ready", True))
+        control_context["prep_seconds_waited"] = ManaService._coerce_float(prepared.get("min_prep_time"), default=0.0)
+        control_context["current_concentration"] = 100.0
+        control_context["max_concentration"] = 100.0
+        control_context["current_fatigue"] = 100.0
+        control_context["max_fatigue"] = 100.0
+        control_context["current_body_hp"] = 100.0
+        control_context["max_body_hp"] = 100.0
+        control_context["nervous_injury"] = 0.0
+        random_roll = 0.0
         spell_difficulty = calculate_spell_difficulty(spell_profile, cast_mana, effective_env_mana)
         control_score = calculate_control_score(control_context, spell_profile)
         strain_penalty = calculate_strain_penalty(current, maximum)
         cast_margin = calculate_cast_margin(control_score, spell_difficulty, strain_penalty, random_roll)
-        success_band = resolve_success_band(cast_margin)
+        success_band = resolve_success_band(
+            cast_margin,
+            control_score=control_score,
+            difficulty=spell_difficulty,
+            base_difficulty=ManaService._coerce_float(spell_profile.get("base_difficulty"), default=0.0) * 100.0,
+        )
         final_power = calculate_final_spell_power(
             cast_mana,
             primary_magic_skill,
@@ -960,8 +1012,23 @@ class ManaService:
         final_power *= ManaService.BAND_MULTIPLIERS.get(success_band, 1.0)
         if ManaService._get_profession_name(character) == "cleric" and prepared["realm"] == "holy":
             final_power *= 1.0 + (ManaService._get_devotion_percent(character) * 0.25)
-        backlash = calculate_margin_backlash_chance(spell_profile, cast_mana, cast_margin, effective_env_mana)
-        backlash_severity = calculate_backlash_severity(spell_profile, cast_mana, cast_margin)
+        backlash = calculate_margin_backlash_chance(
+            spell_profile,
+            cast_mana,
+            cast_margin,
+            effective_env_mana,
+            control_score=control_score,
+            difficulty=spell_difficulty,
+            base_difficulty=ManaService._coerce_float(spell_profile.get("base_difficulty"), default=0.0) * 100.0,
+        )
+        backlash_severity = calculate_backlash_severity(
+            spell_profile,
+            cast_mana,
+            cast_margin,
+            control_score=control_score,
+            difficulty=spell_difficulty,
+            base_difficulty=ManaService._coerce_float(spell_profile.get("base_difficulty"), default=0.0) * 100.0,
+        )
         payload = {
             "realm": prepared["realm"],
             "mana_input": intended_mana,
@@ -973,6 +1040,9 @@ class ManaService:
             "attunement_current": ManaService._coerce_float(updated_attunement.get("current"), default=0.0),
             "effective_env_mana": effective_env_mana,
             "environmental_mana_modifier": environmental_modifier,
+            "spell_difficulty_modifier": int(spell_profile.get("spell_difficulty_modifier", 0) or 0),
+            "base_difficulty_unmodified": ManaService._coerce_float(spell_profile.get("base_difficulty_unmodified"), default=0.0),
+            "base_difficulty_modified": ManaService._coerce_float(spell_profile.get("base_difficulty"), default=0.0),
             "spell_difficulty": spell_difficulty,
             "control_score": control_score,
             "strain_penalty": strain_penalty,
@@ -985,8 +1055,6 @@ class ManaService:
         }
 
         should_apply_backlash = success_band == "backlash"
-        if success_band == "failure" and random.random() * 100.0 < backlash:
-            should_apply_backlash = True
 
         if should_apply_backlash:
             backlash_payload = resolve_backlash_payload(control_context, backlash_severity, dict(spell_profile) | {"mana_input": cast_mana})

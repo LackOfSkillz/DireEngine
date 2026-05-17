@@ -22,12 +22,20 @@ class FakeActor:
         self._alive = alive
         self.id = actor_id
         self.messages = []
+        self.state = {}
+        self.db = types.SimpleNamespace(innocence_active=False)
 
     def is_alive(self):
         return self._alive
 
     def msg(self, message):
         self.messages.append(message)
+
+    def get_state(self, key):
+        return self.state.get(key)
+
+    def set_state(self, key, value):
+        self.state[key] = value
 
     def get_profession_reaction_message(self, context="presence", observer=None):
         return None
@@ -188,6 +196,29 @@ class NPCAggroTests(unittest.TestCase):
         NPC.react_to(npc, actor, context="presence")
 
         self.assertEqual(room.messages, ["training goblin snarls and attacks player123!"])
+
+    def test_innocence_prevents_auto_engage_for_non_undead_npcs(self):
+        room = FakeRoom()
+        npc = FakeNPC(room)
+        actor = FakeActor("player123", room, actor_id=42)
+        actor.set_state("active_effects", {"utility": {"innocence": {"duration": 20}}})
+        room.contents = [npc, actor]
+
+        result = npc.should_auto_engage_actor(actor)
+
+        self.assertFalse(result)
+
+    def test_innocence_does_not_prevent_auto_engage_for_undead_npcs(self):
+        room = FakeRoom()
+        npc = FakeNPC(room, key="restless skeleton")
+        npc.db.creature_type = "undead"
+        actor = FakeActor("player123", room, actor_id=42)
+        actor.set_state("active_effects", {"utility": {"innocence": {"duration": 20}}})
+        room.contents = [npc, actor]
+
+        result = npc.should_auto_engage_actor(actor)
+
+        self.assertTrue(result)
 
     def test_apply_damage_notifies_target_about_attacker(self):
         room = FakeRoom()

@@ -70,6 +70,9 @@ PROFESSION_PROFILES = {
         "guild_tag": "bard_guildhall",
         "social": "Welcome",
     },
+    # DRG-CLERIC-01: Cleric profession identity is directengine_canon per
+    # DRG-CANON-POLICY-001. Grandfathered from the existing DireEngine
+    # implementation rather than rebuilt around 2004-GSL numeric profession ids.
     "cleric": {
         "display": "Cleric",
         "description": "Disciples of sacred mysteries whose strength lies in devotion, warding, and disciplined magic.",
@@ -82,6 +85,12 @@ PROFESSION_PROFILES = {
         "guild_tag": "cleric_guildhall",
         "social": "Trusted",
     },
+    # DRG-EMPATH-01: Empath profession identity remains a grandfathered
+    # directengine_canon string-keyed profile per DRG-CANON-POLICY-001.
+    # The category layout stays lore-primary at the profession-profile seam;
+    # the canonical Empathy-first training identity is enforced at the EXP
+    # skill-tier seam instead of replacing the inherited profile shape.
+    # provenance: directengine_canon
     PROF_EMPATH: {
         "display": "Empath",
         "description": "Healers who carry the pain of others and move through the world with restorative calm.",
@@ -136,12 +145,15 @@ PROFESSION_PROFILES = {
     "ranger": {
         "display": "Ranger",
         "description": "Hunters and pathfinders who favor the wild, patient observation, and steady arms.",
-        "primary": "survival",
+        # DRG-RANGER-RECONCILE-PROFESSION-001: canonical primary advancement
+        # axis is Primary Magic per S00485 / Ranger canon memory Gap 5 closeout.
+        # provenance: gsl_2004
+        "primary": "magic",
         "secondary": "weapons",
-        "tertiary": "magic",
-        "primary_skillsets": _skillset_tuple("survival"),
+        "tertiary": "survival",
+        "primary_skillsets": _skillset_tuple("magic"),
         "secondary_skillsets": _skillset_tuple("weapons", "armor"),
-        "tertiary_skillsets": _skillset_tuple("magic", "lore"),
+        "tertiary_skillsets": _skillset_tuple("survival", "lore"),
         "guild_tag": "ranger_guildhall",
         "social": "Respected",
     },

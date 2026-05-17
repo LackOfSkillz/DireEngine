@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 
 from engine.services.slot_service import SlotService
 
@@ -10,14 +11,17 @@ class DummyHolder:
 class DummyCharacter:
     def __init__(self, profession="commoner", circle=1):
         self.db = DummyHolder()
+        self.circle = circle
         self.db.profession = profession
         self.db.circle = circle
         self.db.magic_slot_pool = None
+        self.get_circle_calls = 0
 
     def get_profession(self):
         return self.db.profession
 
     def get_circle(self):
+        self.get_circle_calls += 1
         return self.db.circle
 
 
@@ -30,6 +34,17 @@ class SlotServiceTests(unittest.TestCase):
 
     def test_primary_curve_matches_canonical_checkpoints(self):
         character = DummyCharacter(profession="cleric", circle=1)
+        self.assertEqual(SlotService.get_pool(character)["max"], 1)
+        character.db.circle = 10
+        self.assertEqual(SlotService.get_pool(character)["max"], 10)
+        character.db.circle = 50
+        self.assertEqual(SlotService.get_pool(character)["max"], 50)
+        character.db.circle = 100
+        self.assertEqual(SlotService.get_pool(character)["max"], 75)
+
+    def test_ranger_now_uses_primary_magic_slot_curve(self):
+        character = DummyCharacter(profession="ranger", circle=1)
+
         self.assertEqual(SlotService.get_pool(character)["max"], 1)
         character.db.circle = 10
         self.assertEqual(SlotService.get_pool(character)["max"], 10)
@@ -104,6 +119,48 @@ class SlotServiceTests(unittest.TestCase):
         paladin = DummyCharacter(profession="paladin", circle=50)
 
         self.assertGreater(SlotService.get_pool(cleric)["max"], SlotService.get_pool(paladin)["max"])
+
+    def test_get_circle_reads_db_circle_directly(self):
+        character = DummyCharacter(profession="cleric", circle=50)
+
+        self.assertEqual(SlotService._get_circle(character), 50)
+        self.assertEqual(character.get_circle_calls, 0)
+
+    def test_get_circle_returns_one_when_circle_is_none(self):
+        character = DummyCharacter(profession="cleric", circle=1)
+        character.db.circle = None
+
+        self.assertEqual(SlotService._get_circle(character), 1)
+
+    def test_get_circle_returns_one_when_circle_is_not_an_integer(self):
+        character = DummyCharacter(profession="cleric", circle=1)
+        character.db.circle = "10"
+
+        self.assertEqual(SlotService._get_circle(character), 1)
+
+    def test_get_circle_returns_one_when_circle_is_below_one(self):
+        character = DummyCharacter(profession="cleric", circle=1)
+        character.db.circle = 0
+
+        self.assertEqual(SlotService._get_circle(character), 1)
+
+    def test_get_circle_returns_valid_circle_checkpoints_verbatim(self):
+        for value in (1, 10, 50, 100):
+            character = DummyCharacter(profession="cleric", circle=value)
+            self.assertEqual(SlotService._get_circle(character), value)
+
+    def test_get_circle_does_not_call_character_get_circle(self):
+        character = DummyCharacter(profession="cleric", circle=10)
+        character.get_circle = Mock(return_value=999)
+
+        self.assertEqual(SlotService._get_circle(character), 10)
+        character.get_circle.assert_not_called()
+
+    def test_get_circle_uses_character_circle_attribute_when_db_missing(self):
+        character = DummyCharacter(profession="cleric", circle=25)
+        del character.db
+
+        self.assertEqual(SlotService._get_circle(character), 25)
 
 
 if __name__ == "__main__":

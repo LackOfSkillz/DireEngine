@@ -69,8 +69,10 @@ class SpellCommandTests(unittest.TestCase):
 
         output = caller.messages[-1]
         self.assertIn("Permanently Memorized:", output)
+        self.assertIn("Analogous Patterns:", output)
         self.assertIn("Manifest Force (Warding) [1 slot]", output)
         self.assertIn("Apprentice Access (expires at circle 11):", output)
+        self.assertIn("Analogous Patterns:", output)
         self.assertIn("Burden (Debilitation)", output)
         self.assertIn("Strange Arrow (Targeted Magic)", output)
         self.assertNotIn("Manifest Force (Warding)\n", output)
@@ -93,6 +95,28 @@ class SpellCommandTests(unittest.TestCase):
         output = caller.messages[-1]
         self.assertIn("Permanently Memorized:", output)
         self.assertNotIn("Apprentice Access", output)
+
+    def test_spells_command_groups_empath_spells_by_sub_book_and_marks_hybrids(self):
+        caller = _MagicCaller(profession="empath", circle=13)
+        SpellbookService.learn_spell(caller, "empath_heal", "npc")
+        SpellbookService.learn_spell(caller, "vitality_healing", "npc")
+        SpellbookService.learn_spell(caller, "flush_poisons", "npc")
+        SpellbookService.learn_spell(caller, "refresh", "npc")
+        SpellbookService.learn_spell(caller, "innocence", "npc")
+        command = SimpleNamespace(caller=caller)
+
+        CmdSpells.func(command)
+
+        output = caller.messages[-1]
+        self.assertIn("Healing:", output)
+        self.assertIn("Cleansing:", output)
+        self.assertIn("Vitality:", output)
+        self.assertIn("Protection:", output)
+        self.assertIn("Heal [Hybrid] (Healing) [0 slots]", output)
+        self.assertIn("Vitality Healing (Healing) [1 slot]", output)
+        self.assertIn("Flush Poisons (Utility) [1 slot]", output)
+        self.assertIn("Refresh (Utility) [1 slot]", output)
+        self.assertIn("Innocence (Utility) [1 slot]", output)
 
 
 if __name__ == "__main__":

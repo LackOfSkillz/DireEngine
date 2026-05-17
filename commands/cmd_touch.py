@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.wound_transfer_service import WoundTransferService
 from systems.chargen.mirror import cycle_current_option, is_chargen_active
 
 
@@ -43,6 +44,6 @@ class CmdTouch(Command):
             target = caller.search(self.args.strip(), location=caller.location)
         if not target:
             return
-        ok, lines = caller.touch_empath_target(target) if hasattr(caller, "touch_empath_target") else (False, ["You fail to form a diagnostic link."])
-        for line in lines:
+        result = WoundTransferService.touch(caller, target)
+        for line in result.messages or result.errors:
             caller.msg(line)

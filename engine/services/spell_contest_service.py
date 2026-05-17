@@ -54,14 +54,22 @@ class SpellContestService:
                 data={"reason": "invalid_target", "effect_family": "targeted_magic"},
             )
 
+        profile = dict(effect_profile or {})
+        primary_skill = str(profile.get("contest_primary_skill", "targeted_magic") or "targeted_magic")
+        defense_skill = str(profile.get("contest_defense_skill", "evasion") or "evasion")
+        defense_stat = str(profile.get("contest_defense_stat", "reflex") or "reflex")
+        exposed_bonus = int(profile.get("exposed_bonus", 5) or 0)
+        damage_location = str(profile.get("damage_location", "chest") or "chest")
+        critical = bool(profile.get("critical", False))
+
         contest = SpellContestService._resolve_spell_contest(
             caster,
             target,
             final_spell_power,
-            primary_skill="targeted_magic",
-            defense_skill="evasion",
-            defense_stat="reflex",
-            exposed_bonus=5,
+            primary_skill=primary_skill,
+            defense_skill=defense_skill,
+            defense_stat=defense_stat,
+            exposed_bonus=exposed_bonus,
             wild_modifier=wild_modifier,
         )
         attack_score = float(contest["attack_score"])
@@ -72,9 +80,9 @@ class SpellContestService:
         effective_power = float(contest["effective_power"])
 
         if hasattr(caster, "award_skill_experience"):
-            caster.award_skill_experience("targeted_magic", max(10, int(defense_score)), success=hit)
+            caster.award_skill_experience(primary_skill, max(10, int(defense_score)), success=hit)
         if hasattr(target, "award_skill_experience"):
-            target.award_skill_experience("evasion", max(10, int(attack_score)), success=not hit)
+            target.award_skill_experience(defense_skill, max(10, int(attack_score)), success=not hit)
 
         if not hit:
             trace_payload = SpellContestService._record_targeted_magic_trace(
@@ -111,7 +119,7 @@ class SpellContestService:
             multiplier *= 1.25
 
         raw_damage = max(1, int(effective_power * multiplier / 3.0))
-        damage_components = SpellContestService._build_damage_components(raw_damage, dict(effect_profile or {}))
+        damage_components = SpellContestService._build_damage_components(raw_damage, profile)
         base_damage = 0
         absorbed_by_ward = 0
         final_damage = 0
@@ -123,7 +131,14 @@ class SpellContestService:
             absorbed = max(0, int(resisted_damage) - int(warded_damage))
             damage_result = ActionResult.ok(data={"amount": 0})
             if int(warded_damage or 0) > 0:
-                damage_result = StateService.apply_damage(target, int(warded_damage), location="chest", damage_type=damage_type, attacker=caster)
+                damage_result = StateService.apply_damage(
+                    target,
+                    int(warded_damage),
+                    location=damage_location,
+                    damage_type=damage_type,
+                    critical=critical,
+                    attacker=caster,
+                )
             dealt = int((damage_result.data or {}).get("amount", 0) or 0)
             base_damage += int(resisted_damage or 0)
             absorbed_by_ward += absorbed
@@ -137,6 +152,11 @@ class SpellContestService:
                     "final_damage": float(dealt),
                 }
             )
+
+        stunned = False
+        if final_damage > 0 and bool(profile.get("on_hit_stun", False)):
+            setattr(target.db, "stunned", True)
+            stunned = True
 
         trace_payload = SpellContestService._record_targeted_magic_trace(
             caster,
@@ -161,6 +181,8 @@ class SpellContestService:
                 "final_damage": float(final_damage),
                 "absorbed_by_ward": float(absorbed_by_ward),
                 "damage_components": resolved_components,
+                "damage_location": damage_location,
+                "stunned": bool(stunned),
                 "target_id": getattr(target, "id", None),
                 "target_key": getattr(target, "key", "someone"),
                 "injury_events": list(injury_events),

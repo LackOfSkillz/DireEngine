@@ -17,6 +17,18 @@ from tools.diretest.core.runner import run_scenario
 from tools.diretest.core.seed import set_seed
 
 SCENARIO_REGISTRY = {}
+_DEPRECATED_RANGER_GUILD_SCENARIOS = {
+    "ranger-join",
+    "ranger-npc-inquiry",
+    "ranger-advance-fail",
+    "ranger-advance-success",
+    "ranger-advance-feedback",
+    "ranger-forage-scaling",
+    "ranger-forage-variation",
+    "ranger-skin-fail",
+    "ranger-skin-success",
+    "ranger-high-hide-shop",
+}
 
 
 def register_scenario(name, metadata=None, aliases=None, **extra_metadata):
@@ -41,7 +53,13 @@ def register_scenario(name, metadata=None, aliases=None, **extra_metadata):
 
 
 def get_scenario_handler(name):
+    _prune_deprecated_ranger_guild_scenarios()
     return SCENARIO_REGISTRY.get(str(name or "").strip())
+
+
+def _prune_deprecated_ranger_guild_scenarios():
+    for scenario_name in _DEPRECATED_RANGER_GUILD_SCENARIOS:
+        SCENARIO_REGISTRY.pop(scenario_name, None)
 
 
 def _get_registered_scenario(name):
@@ -18155,7 +18173,7 @@ def run_ranger_high_hide_shop_scenario(args):
         character = _build_exp_test_character(ctx, key="TEST_HIGH_HIDE_SHOPPER")
         character.db.coins = 80
         character.move_to(ctx.room, move_hooks=True)
-        lysa = create_object("typeclasses.npcs.LysaWindstep", key="Lysa Windstep", location=ctx.room, home=ctx.room)
+        lysa = create_object("typeclasses.vendor.Vendor", key="Lysa Windstep", location=ctx.room, home=ctx.room)
         lysa.db.is_vendor = True
         lysa.db.is_shopkeeper = True
         lysa.db.inventory = ["balanced climbing gloves", "lightweight ranger cloak", "reinforced rope", "fine skinning knife"]
@@ -18165,6 +18183,10 @@ def run_ranger_high_hide_shop_scenario(args):
             "reinforced rope": 14,
             "fine skinning knife": 18,
         }
+        lysa.db.shop_intro_lines = [
+            "Lysa unrolls a compact spread of field-tuned gear and taps the pieces built for real climbs.",
+            "Nothing here is ornamental. Every piece looks worn into usefulness.",
+        ]
 
         intro_lines = lysa.get_vendor_interaction_lines(character, action="shop")
         if not intro_lines or "field-tuned gear" not in "\n".join(intro_lines):
@@ -19172,6 +19194,7 @@ def build_parser():
     scenario_parser.add_argument("--tag")
     scenario_parser.set_defaults(cli_handler=_execute_cli_scenario)
     scenario_subparsers = scenario_parser.add_subparsers(dest="scenario_name", required=False)
+    _prune_deprecated_ranger_guild_scenarios()
 
     list_parser = subparsers.add_parser("list")
     list_parser.add_argument("--json", action="store_true")
@@ -19811,38 +19834,11 @@ def build_parser():
     empath_tutorial_parser = _add_common_scenario_args(scenario_subparsers.add_parser("empath-tutorial"))
     empath_tutorial_parser.set_defaults(handler=run_empath_tutorial_scenario)
 
-    ranger_join_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-join"))
-    ranger_join_parser.set_defaults(handler=run_ranger_join_scenario)
-
     cleric_join_parser = _add_common_scenario_args(scenario_subparsers.add_parser("cleric-join"))
     cleric_join_parser.set_defaults(handler=run_cleric_join_scenario)
 
-    ranger_npc_inquiry_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-npc-inquiry"))
-    ranger_npc_inquiry_parser.set_defaults(handler=run_ranger_npc_inquiry_scenario)
-
     ranger_circle_default_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-circle-default"))
     ranger_circle_default_parser.set_defaults(handler=run_ranger_circle_default_scenario)
-
-    ranger_advance_fail_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-advance-fail"))
-    ranger_advance_fail_parser.set_defaults(handler=run_ranger_advance_fail_scenario)
-
-    ranger_advance_success_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-advance-success"))
-    ranger_advance_success_parser.set_defaults(handler=run_ranger_advance_success_scenario)
-
-    ranger_advance_feedback_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-advance-feedback"))
-    ranger_advance_feedback_parser.set_defaults(handler=run_ranger_advance_feedback_scenario)
-
-    ranger_forage_scaling_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-forage-scaling"))
-    ranger_forage_scaling_parser.set_defaults(handler=run_ranger_forage_scaling_scenario)
-
-    ranger_forage_variation_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-forage-variation"))
-    ranger_forage_variation_parser.set_defaults(handler=run_ranger_forage_variation_scenario)
-
-    ranger_skin_fail_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-skin-fail"))
-    ranger_skin_fail_parser.set_defaults(handler=run_ranger_skin_fail_scenario)
-
-    ranger_skin_success_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-skin-success"))
-    ranger_skin_success_parser.set_defaults(handler=run_ranger_skin_success_scenario)
 
     recovery_orderly_parser = _add_common_scenario_args(scenario_subparsers.add_parser("recovery-orderly"))
     recovery_orderly_parser.set_defaults(handler=run_recovery_orderly_scenario)
@@ -20008,9 +20004,6 @@ def build_parser():
 
     ranger_quartermaster_shop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-quartermaster-shop"))
     ranger_quartermaster_shop_parser.set_defaults(handler=run_ranger_quartermaster_shop_scenario)
-
-    ranger_high_hide_shop_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-high-hide-shop"))
-    ranger_high_hide_shop_parser.set_defaults(handler=run_ranger_high_hide_shop_scenario)
 
     ranger_resource_visibility_parser = _add_common_scenario_args(scenario_subparsers.add_parser("ranger-resource-visibility"))
     ranger_resource_visibility_parser.set_defaults(handler=run_ranger_resource_visibility_scenario)

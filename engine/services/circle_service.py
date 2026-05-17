@@ -21,7 +21,45 @@ class AdvancementResult:
     tdps_granted: int = 0
 
 
+def _get_skill_rank(character, skill_name):
+    normalized = str(skill_name or "").strip().lower()
+    exp_store = getattr(getattr(character, "db", None), "exp_skill_state", None)
+    if isinstance(exp_store, Mapping):
+        entry = exp_store.get(normalized)
+        if isinstance(entry, Mapping):
+            return max(0, int(entry.get("rank", 0) or 0))
+    skills = getattr(getattr(character, "db", None), "skills", None)
+    if isinstance(skills, Mapping):
+        entry = skills.get(normalized)
+        if isinstance(entry, Mapping):
+            return max(0, int(entry.get("rank", 0) or 0))
+    getter = getattr(character, "get_skill", None)
+    if callable(getter):
+        return max(0, int(getter(normalized) or 0))
+    return 0
+
+
+def _get_cleric_circle_requirements(target_circle):
+    # DRG-CLERIC-09: DirectEngine's resumed Cleric progression uses explicit
+    # Primary Magic + Theurgy gates instead of the shared placeholder totals.
+    circle = max(1, int(target_circle or 1))
+    required_rank = max(25, (circle - 1) * 25)
+    return {
+        "skill_rank_total_required": required_rank * 2,
+        "money_coins_required": circle * 100,
+        "skill_requirements": {
+            "primary_magic": required_rank,
+            "theurgy": required_rank,
+        },
+        "profession_specific_notes": (
+            f"Esuin requires Primary Magic {required_rank} and Theurgy {required_rank} before marking Cleric circle {circle}."
+        ),
+    }
+
+
 def get_placeholder_circle_requirements(profession, target_circle):
+    if str(profession or "").strip().lower() == "cleric":
+        return _get_cleric_circle_requirements(target_circle)
     circle = max(1, int(target_circle or 1))
     return {
         "skill_rank_total_required": circle * 50,
@@ -44,9 +82,9 @@ def calculate_circle_tdp_grant(new_circle):
 def find_guild_leader_for_profession(character, profession):
     if not getattr(character, "location", None):
         return None
-    from typeclasses.npcs import GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildmaster
+    from typeclasses.npcs import GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildleader
 
-    leader_types = (GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildmaster)
+    leader_types = (GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildleader)
     wanted = str(profession or "").strip().lower()
     for obj in list(getattr(character.location, "contents", []) or []):
         if not isinstance(obj, leader_types):
@@ -142,7 +180,13 @@ def project_advancement(character):
     total_ranks = sum(_iter_skill_ranks(character))
     coins = int(getattr(character.db, "coins", 0) or 0)
     missing = []
-    if total_ranks < int(requirements["skill_rank_total_required"] or 0):
+    skill_requirements = dict(requirements.get("skill_requirements") or {})
+    if skill_requirements:
+        for skill_name, required_rank in skill_requirements.items():
+            current_rank = _get_skill_rank(character, skill_name)
+            if current_rank < int(required_rank or 0):
+                missing.append(f"{skill_name.replace('_', ' ').title()}: {current_rank}/{int(required_rank or 0)}")
+    elif total_ranks < int(requirements["skill_rank_total_required"] or 0):
         missing.append(f"Skill ranks: {total_ranks}/{int(requirements['skill_rank_total_required'] or 0)}")
     if coins < int(requirements["money_coins_required"] or 0):
         missing.append(f"Coins: {coins}/{int(requirements['money_coins_required'] or 0)}")

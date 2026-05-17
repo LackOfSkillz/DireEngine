@@ -38,7 +38,10 @@
     subsystem: null,
     inventoryLookup: new Map(),
     abilityLookup: new Map(),
+    pendingCommands: [],
+    pendingCommandDrainTimer: null,
     initialRefreshSent: false,
+    initialRefreshPending: false,
     recentCharacters: [],
     audioEnabled: true,
     rightRailOrder: ["map", "inventory", "equipment", "debug"],
@@ -7682,6 +7685,10 @@
     }
   }
 
+  function isTransportConnected() {
+    return Boolean(window.Evennia && typeof Evennia.isConnected === "function" && Evennia.isConnected());
+  }
+
   function updateAudioToggleLabel() {
     const button = byId("audio-toggle");
     if (button) {
@@ -8015,11 +8022,78 @@
   }
 
   function requestInitialRefresh() {
-    if (state.initialRefreshSent) return;
+    if (state.initialRefreshSent) return 0;
+    if (!isTransportConnected()) {
+      state.initialRefreshPending = true;
+      return 0;
+    }
+    state.initialRefreshPending = false;
     state.initialRefreshSent = true;
-    window.setTimeout(() => sendCommand("help"), 50);
-    window.setTimeout(() => sendCommand("look"), 150);
-    window.setTimeout(() => sendCommand("inventory"), 250);
+    const bootstrapPlan = [
+      { command: "help", delay: 50 },
+      { command: "look", delay: 150 },
+      { command: "inventory", delay: 250 },
+    ];
+    bootstrapPlan.forEach(({ command, delay }) => {
+      window.setTimeout(() => {
+        if (!isTransportConnected()) {
+          state.initialRefreshSent = false;
+          state.initialRefreshPending = true;
+          return;
+        }
+        deliverCommand(command, { echo: false, updateStatus: false });
+      }, delay);
+    });
+    return bootstrapPlan[bootstrapPlan.length - 1].delay + 50;
+  }
+
+  function queuePendingCommand(command) {
+    const normalized = String(command || "").trim();
+    if (!normalized) return false;
+    state.pendingCommands.push({ command: normalized });
+    setFooterStatus(`Queued ${normalized}`);
+    setSessionStatus("Queued; reconnecting...");
+    toast(`Queued; reconnecting... (${normalized})`);
+    return true;
+  }
+
+  function deliverCommand(command, options = {}) {
+    const normalized = String(command || "").trim();
+    if (!normalized) return false;
+    if (!window.Evennia || typeof Evennia.msg !== "function") return false;
+    if (options.echo !== false) {
+      echoCommand(normalized);
+    }
+    if (options.updateStatus !== false) {
+      setFooterStatus(`Sent ${normalized}`);
+    }
+    Evennia.msg("text", [normalized], {});
+    return true;
+  }
+
+  function drainPendingCommands(delayMs = 0) {
+    if (state.pendingCommandDrainTimer) {
+      window.clearTimeout(state.pendingCommandDrainTimer);
+      state.pendingCommandDrainTimer = null;
+    }
+
+    const runDrain = () => {
+      state.pendingCommandDrainTimer = null;
+      while (state.pendingCommands.length && isTransportConnected()) {
+        const next = state.pendingCommands.shift();
+        deliverCommand(next.command, { echo: true, updateStatus: true });
+      }
+      if (state.pendingCommands.length && !isTransportConnected()) {
+        setSessionStatus("Queued; reconnecting...");
+      }
+    };
+
+    if (delayMs > 0) {
+      state.pendingCommandDrainTimer = window.setTimeout(runDrain, delayMs);
+      return;
+    }
+
+    runDrain();
   }
 
   function updateDebugSummary(message) {
@@ -8049,11 +8123,15 @@
   function sendCommand(command) {
     const normalized = (command || "").trim();
     if (!normalized) return;
-    echoCommand(normalized);
-    setFooterStatus(`Sent ${normalized}`);
+    if (!isTransportConnected()) {
+      queuePendingCommand(normalized);
+      return;
+    }
     if (window.Evennia && typeof Evennia.msg === "function") {
-      Evennia.msg("text", [normalized], {});
+      deliverCommand(normalized, { echo: true, updateStatus: true });
     } else if (window.plugin_handler && typeof window.plugin_handler.onSend === "function") {
+      echoCommand(normalized);
+      setFooterStatus(`Sent ${normalized}`);
       window.plugin_handler.onSend(normalized);
     }
   }
@@ -9715,22 +9793,31 @@
       updateSubsystemUI(payload);
       return true;
     });
-    Evennia.emitter.on("logged_in", () => {
+    const handleConnectionReady = (statusText, playReadyTone = false) => {
       cancelReconnect();
       updateConnection(true);
-      setFooterStatus("Logged in");
+      setFooterStatus(statusText);
       setSessionStatus("Connected");
-      playTone("ready");
-      requestInitialRefresh();
+      if (playReadyTone) {
+        playTone("ready");
+      }
+      const bootstrapDelay = requestInitialRefresh();
+      drainPendingCommands(bootstrapDelay);
+    };
+
+    Evennia.emitter.on("logged_in", () => {
+      handleConnectionReady("Logged in", true);
     });
     Evennia.emitter.on("connection_open", () => {
-      cancelReconnect();
-      updateConnection(true);
-      setFooterStatus("Connection open");
-      setSessionStatus("Connected");
-      requestInitialRefresh();
+      handleConnectionReady("Connection open");
     });
     Evennia.emitter.on("connection_close", () => {
+      if (state.pendingCommandDrainTimer) {
+        window.clearTimeout(state.pendingCommandDrainTimer);
+        state.pendingCommandDrainTimer = null;
+      }
+      state.initialRefreshSent = false;
+      state.initialRefreshPending = true;
       updateConnection(false);
       setFooterStatus("Connection closed");
       setSessionStatus("Disconnected");

@@ -175,6 +175,8 @@ class SpellSystemInteractionTests(unittest.TestCase):
             source_spell="daze",
             modifiers={"magic_attack": 1.0},
         )
+        for caster in (baseline_caster, buffed_caster, weakened_caster):
+            ManaService._set_harnessed_mana_state(caster, 40)
 
         _ = room
         self.assertTrue(SpellEffectService.apply_spell(baseline_caster, wither, 40.0, quality="strong", target=baseline_target).success)

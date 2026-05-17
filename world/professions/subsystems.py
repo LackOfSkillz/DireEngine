@@ -1,3 +1,5 @@
+from engine.services.ranger_saf_service import RangerSafService
+
 from .professions import get_profession_display_name, get_profession_profile, resolve_profession_name
 
 
@@ -175,8 +177,9 @@ class WarriorSubsystem(ProfessionSubsystem):
 class RangerSubsystem(ProfessionSubsystem):
     def get_state(self, character):
         state = super().get_state(character)
+        state["saf_percent"] = RangerSafService.get_display_percent(character)
         if hasattr(character, "get_wilderness_bond"):
-            state["wilderness_bond"] = character.get_wilderness_bond()
+            state["wilderness_bond"] = RangerSafService.get_display_percent(character)
         if hasattr(character, "get_wilderness_bond_state"):
             state["bond_state"] = character.get_wilderness_bond_state()
         if hasattr(character, "get_ranger_instinct"):

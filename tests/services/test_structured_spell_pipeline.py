@@ -219,6 +219,113 @@ class StructuredSpellPipelineTests(unittest.TestCase):
         self.assertIsNotNone(mage.get_state("augmentation_buff"))
         self.assertEqual(mage.get_state("augmentation_buff")["name"], "bolster")
 
+    def test_wolf_scent_prepare_cast_and_apply_sets_utility_state(self):
+        ranger = DummyCharacter(profession="ranger")
+        room = DummyRoom()
+        spell = get_spell("wolf_scent")
+
+        learned = SpellbookService.learn_spell(ranger, spell.id, "npc")
+        access = SpellAccessService.can_use_spell(ranger, spell)
+        ManaService._set_attunement_state(ranger, 100.0, 100.0)
+        prepared = ManaService.prepare_spell(ranger, room, spell.mana_type, spell.base_difficulty, spell.safe_mana, 30)
+        cast = ManaService.cast_spell(ranger, spell.mana_type, spell.base_difficulty)
+        effect = SpellEffectService.apply_spell(ranger, spell, cast.data["final_spell_power"], quality="strong")
+
+        self.assertTrue(learned.success)
+        self.assertTrue(access.success)
+        self.assertTrue(prepared.success)
+        self.assertTrue(cast.success)
+        self.assertTrue(effect.success)
+        self.assertEqual(effect.data["effect_payload"]["effect_family"], "utility")
+        active_utility = dict((ranger.get_state("active_effects") or {}).get("utility", {}) or {})
+        self.assertIn("wolf_scent", active_utility)
+        self.assertTrue(bool(getattr(ranger.db, "wolf_scent_active", False)))
+
+    def test_hands_of_lirisa_prepare_cast_and_apply_sets_utility_state(self):
+        ranger = DummyCharacter(profession="ranger")
+        room = DummyRoom()
+        spell = get_spell("hands_of_lirisa")
+        prep_mana = max(int(spell.safe_mana or 0), int(spell.mana_min or 0))
+
+        learned = SpellbookService.learn_spell(ranger, spell.id, "npc")
+        access = SpellAccessService.can_use_spell(ranger, spell)
+        ManaService._set_attunement_state(ranger, 100.0, 100.0)
+        prepared = ManaService.prepare_spell(ranger, room, spell.mana_type, prep_mana, spell.mana_min, spell.mana_max)
+        cast = ManaService.cast_spell(ranger, spell.mana_type, spell.base_difficulty)
+        effect = SpellEffectService.apply_spell(ranger, spell, cast.data["final_spell_power"], quality="strong")
+
+        self.assertTrue(learned.success)
+        self.assertTrue(access.success)
+        self.assertTrue(prepared.success)
+        self.assertTrue(cast.success)
+        self.assertTrue(effect.success)
+        self.assertEqual(effect.data["effect_payload"]["effect_family"], "utility")
+        active_utility = dict((ranger.get_state("active_effects") or {}).get("utility", {}) or {})
+        self.assertIn("hands_of_lirisa", active_utility)
+        self.assertTrue(bool(getattr(ranger.db, "hands_of_lirisa_active", False)))
+
+    def test_compost_prepare_cast_and_apply_sets_room_effect_state(self):
+        ranger = DummyCharacter(profession="ranger")
+        room = DummyRoom()
+        ranger.location = room
+        spell = get_spell("compost")
+        prep_mana = max(int(spell.safe_mana or 0), int(spell.mana_min or 0))
+
+        learned = SpellbookService.learn_spell(ranger, spell.id, "npc")
+        access = SpellAccessService.can_use_spell(ranger, spell)
+        ManaService._set_attunement_state(ranger, 100.0, 100.0)
+        prepared = ManaService.prepare_spell(ranger, room, spell.mana_type, prep_mana, spell.mana_min, spell.mana_max)
+        cast = ManaService.cast_spell(ranger, spell.mana_type, spell.base_difficulty)
+        effect = SpellEffectService.apply_spell(ranger, spell, cast.data["final_spell_power"], quality="strong")
+
+        self.assertTrue(learned.success)
+        self.assertTrue(access.success)
+        self.assertTrue(prepared.success)
+        self.assertTrue(cast.success)
+        self.assertTrue(effect.success)
+        self.assertEqual(effect.data["effect_payload"]["utility_effect"], "compost")
+        self.assertEqual(getattr(room.db, "compost", {}).get("spell_id"), "compost")
+
+    def test_haraweps_bonds_prepare_cast_and_apply_sets_debilitation_state(self):
+        ranger = DummyCharacter(profession="ranger")
+        ranger.db.circle = 10
+        target = DummyCharacter(profession="cleric")
+        room = DummyRoom()
+        ranger.location = room
+        target.location = room
+        spell = get_spell("haraweps_bonds")
+        prep_mana = max(int(spell.safe_mana or 0), int(spell.mana_min or 0))
+
+        learned = SpellbookService.learn_spell(ranger, spell.id, "npc")
+        access = SpellAccessService.can_use_spell(ranger, spell)
+        ManaService._set_attunement_state(ranger, 100.0, 100.0)
+        prepared = ManaService.prepare_spell(ranger, room, spell.mana_type, prep_mana, spell.mana_min, spell.mana_max)
+        cast = ManaService.cast_spell(ranger, spell.mana_type, spell.base_difficulty)
+        effect = SpellEffectService.apply_spell(ranger, spell, cast.data["final_spell_power"], quality="strong", target=target)
+
+        self.assertTrue(learned.success)
+        self.assertTrue(access.success)
+        self.assertTrue(prepared.success)
+        self.assertTrue(cast.success)
+        self.assertTrue(effect.success)
+        self.assertEqual(effect.data["effect_payload"]["effect_family"], "debilitation")
+        active_debuffs = dict((target.get_state("active_effects") or {}).get("debilitation", {}) or {})
+        self.assertIn("haraweps_bonds", active_debuffs)
+
+    def test_grizzly_claw_requires_other_target(self):
+        ranger = DummyCharacter(profession="ranger")
+        ally = DummyCharacter(profession="ranger")
+        spell = get_spell("grizzly_claw")
+
+        self.assertFalse(SpellEffectService.apply_spell(ranger, spell, 30, quality="normal").success)
+
+        effect = SpellEffectService.apply_spell(ranger, spell, 30, quality="normal", target=ally)
+
+        self.assertTrue(effect.success)
+        self.assertEqual(effect.data["effect_payload"]["effect_family"], "augmentation")
+        active_augmentation = dict((ally.get_state("active_effects") or {}).get("augmentation", {}) or {})
+        self.assertIn("grizzly_claw", active_augmentation)
+
     def test_minor_barrier_prepare_cast_and_apply_sets_barrier_state(self):
         cleric = DummyCharacter(profession="cleric")
         room = DummyRoom()

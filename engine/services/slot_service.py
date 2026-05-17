@@ -47,13 +47,17 @@ class SlotService:
 
     @staticmethod
     def _get_circle(character):
-        if character is None:
-            return 0
-        getter = getattr(character, "get_circle", None)
-        if callable(getter):
-            return max(0, int(getter() or 0))
+        """Return the persisted circle without re-entering character bootstrap.
+
+        Slot pool initialization runs inside Character.ensure_core_defaults(). Calling
+        Character.get_circle() from here would re-enter that bootstrap path and can
+        recurse when legacy magic users still have magic_slot_pool=None.
+        """
         db = getattr(character, "db", None)
-        return max(0, int(getattr(db, "circle", getattr(character, "circle", 0)) or 0))
+        raw_circle = getattr(db, "circle", getattr(character, "circle", None))
+        if not isinstance(raw_circle, int) or raw_circle < 1:
+            return 1
+        return raw_circle
 
     @staticmethod
     def _get_magic_placement(character):

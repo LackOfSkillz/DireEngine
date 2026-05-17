@@ -38,6 +38,8 @@ class GenerationContextSchemaTests(unittest.TestCase):
                 "mood": ["bustling", "tense"],
                 "climate": "coastal",
                 "voice": "Gritty and practical.",
+                "emotional_tone": None,
+                "cultural_signature": None,
                 "banned_phrases": ["the air is thick", "ancient stones"],
             },
         )

@@ -3,6 +3,7 @@ import random
 import time
 
 from engine.services.combat_xp import CombatXP
+from engine.services.empath_saf_service import EmpathSafService
 from engine.services.result import ActionResult
 from engine.services.state_service import StateService
 from engine.services.stealth_service import StealthService
@@ -47,6 +48,13 @@ class CombatService:
                 critical=bool(details.get("critical", False)),
                 attacker=attacker,
             )
+        EmpathSafService.register_offense(
+            attacker,
+            target,
+            hit=bool(resolution.hit),
+            damage=int((damage_result.data or {}).get("amount", 0) or 0),
+            killed=bool(resolution.hit and int(getattr(getattr(target, "db", None), "hp", 0) or 0) <= 0),
+        )
 
         CombatService._apply_post_resolution_state(attacker, target, details, resolution.hit)
         CombatService._resolve_ranged_ammo_outcome(attacker, target, details, resolution.hit)
@@ -149,9 +157,6 @@ class CombatService:
             return ActionResult.fail(data={"error_code": "needs_ammo", "outcome": "blocked"})
         if not is_ranged_weapon and current_range != "melee":
             return ActionResult.fail(data={"error_code": "too_far_melee", "outcome": "blocked"})
-
-        if hasattr(attacker, "register_empath_offensive_action"):
-            attacker.register_empath_offensive_action(target=target, context="attack", amount=15)
         if hasattr(target, "check_room_traps_for_enemy"):
             target.check_room_traps_for_enemy(attacker)
 
@@ -173,10 +178,12 @@ class CombatService:
         current_range = attacker.get_range(target)
         weapon_range_type = str(profile.get("weapon_range_type") or "").strip().lower()
         is_ranged_weapon = bool(weapon and (getattr(weapon.db, "is_ranged", False) or weapon_range_type))
-        ranger_snipe = attacker.get_state("ranger_snipe") if hasattr(attacker, "get_state") else None
+        prepared_snipe = attacker.get_state("prepared_snipe") if hasattr(attacker, "get_state") else None
+        if not isinstance(prepared_snipe, Mapping) and hasattr(attacker, "get_state"):
+            prepared_snipe = attacker.get_state("ranger_snipe")
         ranger_aim_stacks = attacker.get_ranger_aim_stacks(target) if hasattr(attacker, "get_ranger_aim_stacks") else 0
         ranger_mark = target.get_ranger_mark_effect_on() if hasattr(target, "get_ranger_mark_effect_on") else None
-        snipe_active = isinstance(ranger_snipe, Mapping) and ranger_snipe.get("target_id") == target.id
+        snipe_active = isinstance(prepared_snipe, Mapping) and prepared_snipe.get("target_id") == target.id
 
         ambush_context = CombatService._resolve_ambush(attacker, target)
         if ambush_context.get("failed"):
@@ -258,7 +265,7 @@ class CombatService:
             "profile": profile,
             "ranger_aim_stacks": ranger_aim_stacks,
             "ranger_mark": ranger_mark,
-            "ranger_snipe": ranger_snipe,
+            "prepared_snipe": prepared_snipe,
             "skill_name": skill_name,
             "snipe_active": snipe_active,
             "snipe_config": dict(RANGER_SNIPE_CONFIG or {}),
@@ -483,9 +490,9 @@ class CombatService:
         target_awareness = target.get_awareness() if hasattr(target, "get_awareness") else "normal"
         awareness_penalty = {"alert": 20, "normal": 10, "unaware": 0}.get(target_awareness, 10)
         ranger_aim_stacks = int(details.get("ranger_aim_stacks", 0) or 0)
-        ranger_snipe = dict(details.get("ranger_snipe") or {})
+        prepared_snipe = dict(details.get("prepared_snipe") or details.get("ranger_snipe") or {})
         chance = 25 + bond_bonus + (ranger_aim_stacks * 8) - awareness_penalty
-        chance += int(ranger_snipe.get("stealth_bonus", 0) or 0)
+        chance += int(prepared_snipe.get("stealth_bonus", 0) or 0)
         if hit:
             chance -= 5
         chance = max(5, min(90, chance))
@@ -494,6 +501,7 @@ class CombatService:
         if not details["remained_concealed"]:
             StealthService.break_stealth(attacker)
         if hasattr(attacker, "clear_state"):
+            attacker.clear_state("prepared_snipe")
             attacker.clear_state("ranger_snipe")
 
     @staticmethod

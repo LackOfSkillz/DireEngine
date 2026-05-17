@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.wound_transfer_service import WoundTransferService
 
 
 class CmdLink(Command):
@@ -67,6 +68,6 @@ class CmdLink(Command):
             target = caller.search(target_name, location=caller.location)
         if not target:
             return
-        ok, lines = caller.link_empath_target(target, persistent=persistent) if hasattr(caller, "link_empath_target") else (False, ["You fail to deepen the bond."])
-        for line in lines if isinstance(lines, list) else [str(lines)]:
+        result = WoundTransferService.link(caller, target, persistent=persistent)
+        for line in result.messages or result.errors:
             caller.msg(line)

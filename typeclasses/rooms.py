@@ -14,6 +14,7 @@ from django.utils.text import slugify
 from evennia.objects.objects import DefaultRoom
 from evennia.utils.search import search_object
 from evennia.utils.utils import iter_to_str
+from engine.services.ranger_saf_service import RangerSafService
 from server.systems.ammo_runtime import format_ammo_label, merge_ammo_stacks
 from world.helpers.display_aggregation import aggregate_object_labels
 from world.helpers.target_resolver import mark_item_arrival
@@ -420,8 +421,7 @@ class Room(ObjectParent, DefaultRoom):
         if not direction:
             return
         bond_strength = 50
-        if hasattr(moved_obj, "get_wilderness_bond"):
-            bond_strength += int((moved_obj.get_wilderness_bond() - 50) / 5)
+        bond_strength += int((RangerSafService.get_display_percent(moved_obj) - 50) / 5)
         if hasattr(moved_obj, "is_hidden") and moved_obj.is_hidden():
             bond_strength -= 10
         moved_states = getattr(getattr(moved_obj, "db", None), "states", None)

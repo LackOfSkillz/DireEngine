@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.ranger_saf_service import RangerSafService
 
 
 def _bond_flavor(profile_label):
@@ -125,10 +126,10 @@ class CmdStats(Command):
             if active_berserk:
                 lines.insert(8, f"Active Berserk: {str(active_berserk.get('name') or active_berserk.get('key') or '').title()}")
         elif hasattr(char, "is_profession") and char.is_profession("ranger"):
-            bond_profile = char.get_wilderness_bond_profile().get('label', 'Attuned')
+            saf_percent = RangerSafService.get_display_percent(char)
             nature_focus = char.get_nature_focus() if hasattr(char, "get_nature_focus") else 0
             lines.insert(2, f"Circle: {char.get_circle()}")
-            lines.insert(3, f"Wilderness Bond: {char.get_wilderness_bond()}/100 ({_bond_flavor(bond_profile)})")
+            lines.insert(3, f"SAF: {saf_percent}%")
             lines.insert(4, f"Instinct: {char.get_ranger_instinct()}")
             if hasattr(char, "get_nature_focus"):
                 lines.insert(5, f"Nature Focus: {nature_focus}/100 ({_nature_focus_flavor(nature_focus)})")

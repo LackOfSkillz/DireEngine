@@ -1,6 +1,12 @@
+import os
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
+
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
+django.setup()
 
 from domain.combat.damage import MANEUVER_DAMAGE_MODS
 from domain.combat.resolution import calculate_roundtime

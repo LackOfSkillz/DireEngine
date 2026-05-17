@@ -388,7 +388,7 @@ class ManaServiceTests(unittest.TestCase):
         character.location = room
         ManaService.prepare_spell(character, room, "holy", 20, 10, 30)
 
-        with patch("engine.services.mana_service.random.uniform", return_value=10.0), patch("engine.services.mana_service.random.random", return_value=1.0):
+        with patch("domain.mana.backlash.random.randint", return_value=90), patch("engine.services.mana_service.random.random", return_value=1.0):
             result = ManaService.cast_spell(character, "holy", 220)
 
         self.assertEqual(result.data["success_band"], "excellent")
@@ -400,9 +400,9 @@ class ManaServiceTests(unittest.TestCase):
         ManaService._set_attunement_state(character, 80.0, 100.0)
         room = DummyRoom({"holy": 0.5, "life": 0.5, "elemental": 0.5, "lunar": 0.5})
         character.location = room
-        ManaService._set_prepared_mana_state(character, {"realm": "holy", "mana_input": 20, "prep_cost": 5, "held_mana": 0, "min_prep": 10, "max_prep": 30, "safe_mana": 12, "tier": 4, "base_difficulty": 50.0})
+        ManaService._set_prepared_mana_state(character, {"realm": "holy", "mana_input": 20, "prep_cost": 5, "held_mana": 0, "min_prep": 10, "max_prep": 30, "safe_mana": 12, "mana_min": 12, "mana_max": 30, "diff_per_extra_mana": 0, "tier": 4, "base_difficulty": 50.0})
 
-        with patch("engine.services.mana_service.random.uniform", return_value=2.0), patch("engine.services.mana_service.random.random", return_value=1.0):
+        with patch("domain.mana.backlash.random.randint", return_value=40), patch("engine.services.mana_service.random.random", return_value=1.0):
             result = ManaService.cast_spell(character, "holy", 60)
 
         self.assertEqual(result.data["success_band"], "partial")
@@ -414,9 +414,9 @@ class ManaServiceTests(unittest.TestCase):
         ManaService._set_attunement_state(character, 80.0, 100.0)
         room = DummyRoom({"holy": 0.6, "life": 0.6, "elemental": 0.6, "lunar": 0.6})
         character.location = room
-        ManaService._set_prepared_mana_state(character, {"realm": "holy", "mana_input": 20, "prep_cost": 5, "held_mana": 0, "min_prep": 10, "max_prep": 30, "safe_mana": 5, "tier": 5, "base_difficulty": 58.0})
+        ManaService._set_prepared_mana_state(character, {"realm": "holy", "mana_input": 20, "prep_cost": 5, "held_mana": 0, "min_prep": 10, "max_prep": 30, "safe_mana": 5, "mana_min": 5, "mana_max": 30, "diff_per_extra_mana": 0, "tier": 5, "base_difficulty": 90.0})
 
-        with patch("engine.services.mana_service.random.uniform", return_value=-9.0), patch("engine.services.mana_service.random.random", return_value=0.99):
+        with patch("domain.mana.backlash.random.randint", return_value=40), patch("engine.services.mana_service.random.random", return_value=0.99):
             result = ManaService.cast_spell(character, "holy", 100)
 
         self.assertEqual(result.data["success_band"], "failure")
@@ -428,9 +428,9 @@ class ManaServiceTests(unittest.TestCase):
         ManaService._set_attunement_state(character, 30.0, 100.0)
         room = DummyRoom({"elemental": 0.4, "holy": 1.0, "life": 1.0, "lunar": 1.0})
         character.location = room
-        ManaService._set_prepared_mana_state(character, {"realm": "elemental", "mana_input": 20, "prep_cost": 5, "held_mana": 0, "min_prep": 10, "max_prep": 30, "safe_mana": 5, "tier": 6, "base_difficulty": 80.0})
+        ManaService._set_prepared_mana_state(character, {"realm": "elemental", "mana_input": 20, "prep_cost": 5, "held_mana": 0, "min_prep": 10, "max_prep": 30, "safe_mana": 5, "mana_min": 5, "mana_max": 30, "diff_per_extra_mana": 8, "tier": 6, "base_difficulty": 20.0})
 
-        with patch("engine.services.mana_service.random.uniform", return_value=-10.0), patch("engine.services.mana_service.random.random", return_value=0.0):
+        with patch("domain.mana.backlash.random.randint", return_value=40), patch("engine.services.mana_service.random.random", return_value=0.0):
             result = ManaService.cast_spell(character, "elemental", 10)
 
         self.assertEqual(result.data["success_band"], "backlash")
@@ -438,6 +438,65 @@ class ManaServiceTests(unittest.TestCase):
         self.assertGreater(result.data["warrior_mage_self_hit"], 0)
         self.assertLess(character.hp, 100)
         self.assertIn("violent backlash", ManaPresenter.render_cast(result)[0])
+
+    def test_ranger_saf_modifier_adjusts_structured_spell_difficulty_when_spell_id_is_present(self):
+        spell = get_spell("earth_meld")
+        ranger = DummyCharacter(profession="ranger")
+        ranger.db.canonical_saf = -100
+        ranger.location = DummyRoom()
+        ManaService._set_attunement_state(ranger, 100.0, 100.0)
+        ManaService.prepare_spell(
+            ranger,
+            ranger.location,
+            spell.mana_type,
+            spell.safe_mana,
+            spell.mana_min,
+            spell.mana_max,
+            spell_id=spell.id,
+        )
+
+        ranger_result = ManaService.cast_spell(ranger, spell.mana_type, 100)
+
+        non_ranger = DummyCharacter(profession="cleric")
+        non_ranger.location = DummyRoom()
+        ManaService._set_attunement_state(non_ranger, 100.0, 100.0)
+        ManaService.prepare_spell(
+            non_ranger,
+            non_ranger.location,
+            spell.mana_type,
+            spell.safe_mana,
+            spell.mana_min,
+            spell.mana_max,
+            spell_id=spell.id,
+        )
+
+        non_ranger_result = ManaService.cast_spell(non_ranger, spell.mana_type, 100)
+
+        self.assertEqual(ranger_result.data["spell_difficulty_modifier"], -2)
+        self.assertEqual(non_ranger_result.data["spell_difficulty_modifier"], 2)
+        self.assertLess(ranger_result.data["base_difficulty_modified"], ranger_result.data["base_difficulty_unmodified"])
+        self.assertGreater(non_ranger_result.data["base_difficulty_modified"], non_ranger_result.data["base_difficulty_unmodified"])
+
+    def test_ranger_saf_modifier_adjusts_defense_spell_difficulty_when_spell_id_is_present(self):
+        spell = get_spell("branch_break")
+        ranger = DummyCharacter(profession="ranger")
+        ranger.db.canonical_saf = -100
+        ranger.location = DummyRoom()
+        ManaService._set_attunement_state(ranger, 100.0, 100.0)
+        ManaService.prepare_spell(
+            ranger,
+            ranger.location,
+            spell.mana_type,
+            spell.safe_mana,
+            spell.mana_min,
+            spell.mana_max,
+            spell_id=spell.id,
+        )
+
+        ranger_result = ManaService.cast_spell(ranger, spell.mana_type, 100)
+
+        self.assertEqual(ranger_result.data["spell_difficulty_modifier"], -2)
+        self.assertLess(ranger_result.data["base_difficulty_modified"], ranger_result.data["base_difficulty_unmodified"])
 
     def test_profession_specific_backlash_payloads_are_reported(self):
         empath = DummyCharacter(profession="empath")

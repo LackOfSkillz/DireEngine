@@ -1,3 +1,7 @@
+# DRG-CLERIC-01 / DRG-EMPATH-01: Holy and Life remain the canonical named
+# mana-realm registrations for Cleric and Empath routing. The project keeps
+# the existing named realms instead of replacing them with raw GSL numeric ids.
+# provenance: gsl_2004 (Life/Empath alignment), directengine_canon (named-realm registry form)
 MANA_REALMS = ("holy", "life", "elemental", "lunar")
 
 MANA_MIN = 0.0

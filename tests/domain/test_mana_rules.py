@@ -80,12 +80,11 @@ class ManaRulesTests(unittest.TestCase):
         self.assertLessEqual(high, 75.0)
 
     def test_spell_difficulty_rises_when_overpushing_mana(self):
-        spell = {"base_difficulty": 12, "safe_mana": 10, "tier": 2}
+        spell = {"base_difficulty": 12, "mana_min": 10, "diff_per_extra_mana": 3}
         safe = calculate_spell_difficulty(spell, 10, 1.0)
         overpush = calculate_spell_difficulty(spell, 25, 1.0)
-        poor_env = calculate_spell_difficulty(spell, 10, 0.4)
         self.assertGreater(overpush, safe)
-        self.assertGreater(poor_env, safe)
+        self.assertEqual(safe, 1200.0)
 
     def test_control_and_margin_resolve_bands(self):
         control = calculate_control_score(
@@ -104,11 +103,14 @@ class ManaRulesTests(unittest.TestCase):
         self.assertIn(resolve_success_band(margin), {"excellent", "solid", "partial"})
 
     def test_margin_backlash_and_severity_rise_under_pressure(self):
-        spell = {"safe_mana": 10, "mana_input": 30}
-        mild = calculate_margin_backlash_chance(spell, 12, -2, 1.0)
-        severe = calculate_margin_backlash_chance(spell, 30, -20, 0.4)
+        spell = {"mana_min": 10, "diff_per_extra_mana": 3, "mana_input": 30}
+        mild = calculate_margin_backlash_chance(spell, 12, -2, 1.0, control_score=920, difficulty=950, base_difficulty=500)
+        severe = calculate_margin_backlash_chance(spell, 30, -20, 0.4, control_score=500, difficulty=1200, base_difficulty=500)
         self.assertGreater(severe, mild)
-        self.assertGreaterEqual(calculate_backlash_severity(spell, 30, -20), 1)
+        self.assertGreaterEqual(
+            calculate_backlash_severity(spell, 30, -20, control_score=500, difficulty=1200, base_difficulty=500),
+            1,
+        )
 
     def test_backlash_payload_preserves_zero_safe_edges(self):
         payload = resolve_backlash_payload({"profession": "cleric"}, 2, {"mana_input": 0, "safe_mana": 0})

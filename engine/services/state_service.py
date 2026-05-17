@@ -65,9 +65,17 @@ class StateService:
             if str(effect_payload.get("effect_type", "") or "") == "light":
                 utility_light = effect_payload
                 break
+        if utility_light is None:
+            luminous_ward = StateService._pick_primary_effect_by(
+                dict(active_effects.get("warding") or {}),
+                lambda payload: bool(payload.get("emits_light", False)),
+            )
+            if luminous_ward:
+                utility_light = dict(luminous_ward)
+                utility_light.setdefault("effect_type", "light")
         if utility_light and callable(setter):
             setter("utility_light", utility_light)
-        elif callable(clearer) and "utility" in previous_active_effects:
+        elif callable(clearer) and ("utility" in previous_active_effects or "warding" in previous_active_effects):
             clearer("utility_light")
 
     @staticmethod
@@ -247,6 +255,40 @@ class StateService:
         return ActionResult.ok(data={"effect": effect_data})
 
     @staticmethod
+    def apply_uncurse(target, power=0):
+        cleanse_result = StateService.apply_cleanse(target)
+        cleanse_data = dict(cleanse_result.data or {})
+        removed = bool(cleanse_data.get("removed", False))
+        legacy_states = []
+        clearer = getattr(target, "clear_state", None)
+        getter = getattr(target, "get_state", None)
+        if callable(clearer) and callable(getter):
+            for state_name in ("cursed", "hexed", "jinxed"):
+                if getter(state_name):
+                    clearer(state_name)
+                    removed = True
+                    legacy_states.append(state_name)
+
+        death_sting_relieved = False
+        death_sting_message = None
+        reducer = getattr(target, "reduce_death_sting", None)
+        if callable(reducer):
+            sting_ok, sting_message = reducer(max(10, int(power or 0)))
+            death_sting_relieved = bool(sting_ok)
+            death_sting_message = sting_message if sting_ok else None
+            removed = removed or death_sting_relieved
+
+        return ActionResult.ok(
+            data={
+                "removed": removed,
+                "removed_effects": dict(cleanse_data.get("removed_effects", {}) or {}),
+                "removed_legacy_states": legacy_states,
+                "death_sting_relieved": death_sting_relieved,
+                "death_sting_message": death_sting_message,
+            }
+        )
+
+    @staticmethod
     def apply_cleanse(target):
         active_effects = StateService._get_active_effects(target)
         removed_effects = dict(active_effects.pop("debilitation", {}) or {})
@@ -388,13 +430,19 @@ class StateService:
             return ActionResult.ok(data={"removed": False, "effects": {}})
 
         if effect_name is None:
+            if category_key == "utility":
+                for removed_effect in effect_map.values():
+                    StateService._clear_utility_capability_flags(target, removed_effect)
             active_effects.pop(category_key, None)
             StateService._set_active_effects(target, active_effects)
             return ActionResult.ok(data={"removed": True, "effects": {}})
 
         effect_key = str(effect_name or "").strip().lower().replace(" ", "_")
         removed = effect_key in effect_map
+        removed_effect = dict(effect_map.get(effect_key) or {})
         effect_map.pop(effect_key, None)
+        if removed and category_key == "utility":
+            StateService._clear_utility_capability_flags(target, removed_effect)
         if effect_map:
             active_effects[category_key] = effect_map
         else:
@@ -444,12 +492,17 @@ class StateService:
         setattr(target.db, f"{capability_flag}_expires_in", int(dict(effect_data or {}).get("duration", 0) or 0))
 
     @staticmethod
+    def _clear_utility_capability_flags(target, effect_data):
+        capability_flag = str(dict(effect_data or {}).get("capability_flag", "") or "").strip()
+        if not capability_flag:
+            return
+        setattr(target.db, capability_flag, False)
+        setattr(target.db, f"{capability_flag}_expires_in", 0)
+
+    @staticmethod
     def _expire_effect_side_effects(target, category, effect_data):
         if str(category or "") == "utility":
-            capability_flag = str(dict(effect_data or {}).get("capability_flag", "") or "").strip()
-            if capability_flag:
-                setattr(target.db, capability_flag, False)
-                setattr(target.db, f"{capability_flag}_expires_in", 0)
+            StateService._clear_utility_capability_flags(target, effect_data)
             return
         if str(category or "") == "debilitation" and hasattr(getattr(target, "db", None), "encumbrance_dirty"):
             target.db.encumbrance_dirty = True

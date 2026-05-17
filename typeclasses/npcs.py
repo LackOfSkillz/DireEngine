@@ -5,10 +5,89 @@ import importlib.util
 from pathlib import Path
 
 from django.utils.text import slugify
+from evennia.utils.search import search_object
 
+from domain.spells.spell_definitions import SPELL_REGISTRY
+from engine.services.result import ActionResult
+from engine.services.ranger_saf_service import RangerSafService
+from engine.services.spellbook_service import SpellbookService
 from server.systems.loot.loot_runtime import on_npc_defeated
 
 from typeclasses.characters import Character
+from world.systems.ranger.companion import (
+    COMPANION_STATE_DISMISSED,
+    COMPANION_STATE_PRESENT,
+    COMPANION_STATE_RETURNING,
+    COMPANION_STATE_SEARCHING,
+    COMPANION_STATE_WANDERING,
+    get_companion_profile,
+    normalize_ranger_companion,
+    resolve_companion_type_id,
+    validate_companion_type,
+)
+
+
+def _normalize_spell_query(value):
+    return str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+
+
+# DRG-CLERIC-09: Esuin teaches the shipped canonical Cleric spellbook only.
+_CLERIC_CANONICAL_TEACHING_IDS = {
+    "aesrela_everild", "bless", "divine_radiance", "halo", "hand_of_tenemlor",
+    "holy_light", "major_physical_protection", "mass_rejuvenation", "minor_physical_protection",
+    "protection_from_evil", "rejuvenation", "revelation", "spirit_beacon", "uncurse",
+}
+
+# DRG-EMPATH-FOUNDATION-001: Merla teaches the current Empath-only registry rows.
+_EMPATH_CANONICAL_TEACHING_IDS = {
+    spell.id
+    for spell in SPELL_REGISTRY.values()
+    if {SpellbookService._normalize_profession(entry) for entry in (spell.allowed_professions or [])} == {"empath"}
+}
+
+_RANGER_CANONICAL_TEACHING_IDS = {
+    spell.id
+    for spell in SPELL_REGISTRY.values()
+    if {SpellbookService._normalize_profession(entry) for entry in (spell.allowed_professions or [])} == {"ranger"}
+}
+
+
+def _resolve_teachable_spell(spell_name, profession):
+    query = _normalize_spell_query(spell_name)
+    wanted_profession = SpellbookService._normalize_profession(profession)
+    for spell in SPELL_REGISTRY.values():
+        allowed = {SpellbookService._normalize_profession(entry) for entry in (spell.allowed_professions or [])}
+        if allowed and wanted_profession not in allowed:
+            continue
+        if query in {_normalize_spell_query(spell.id), _normalize_spell_query(spell.name)}:
+            return spell
+    return None
+
+
+def _teach_guild_spell(teacher, actor, spell_name, *, taught_spell_ids=None, enforce_circle=False):
+    profession = getattr(getattr(teacher, "db", None), "trains_profession", None) or getattr(getattr(teacher, "db", None), "leads_profession", None)
+    if profession and (not hasattr(actor, "is_profession") or not actor.is_profession(profession)):
+        profession_name = str(profession).replace("_", " ").title()
+        return ActionResult.fail(
+            messages=[f"Only {profession_name}s may train here."],
+            errors=[f"Only {profession_name}s may train here."],
+        )
+    spell = _resolve_teachable_spell(spell_name, profession)
+    taught_ids = {str(spell_id or "").strip().lower() for spell_id in (taught_spell_ids or ())}
+    if spell is None or (taught_ids and spell.id not in taught_ids):
+        return ActionResult.fail(
+            messages=[f"I do not teach a spell called '{spell_name}'."],
+            errors=[f"I do not teach a spell called '{spell_name}'."],
+        )
+    if enforce_circle:
+        actor_circle = SpellbookService._get_circle(actor)
+        required_circle = max(1, int(getattr(spell, "min_circle", 1) or 1))
+        if actor_circle < required_circle:
+            return ActionResult.fail(
+                messages=[f"You are not yet ready for {spell.name}. Return when you have reached Circle {required_circle}."],
+                errors=[f"You are not yet ready for {spell.name}. Return when you have reached Circle {required_circle}."],
+            )
+    return SpellbookService.learn_spell(actor, spell.id, "npc")
 
 
 class NPC(Character):
@@ -255,6 +334,21 @@ class NPC(Character):
         if getattr(actor, "location", None) != self.location or self.location is None:
             return False
         if hasattr(actor, "is_alive") and not actor.is_alive():
+            return False
+        active_effects = actor.get_state("active_effects") if hasattr(actor, "get_state") else {}
+        utility_effects = dict((active_effects or {}).get("utility", {}) or {}) if isinstance(active_effects, Mapping) else {}
+        searchable = " ".join(
+            [
+                str(getattr(self, "key", "") or "").lower(),
+                str(getattr(getattr(self, "db", None), "desc", "") or "").lower(),
+                str(getattr(getattr(self, "db", None), "creature_type", "") or "").lower(),
+                str(getattr(getattr(self, "db", None), "npc_type", "") or "").lower(),
+                str(getattr(getattr(self, "db", None), "species", "") or "").lower(),
+                str(getattr(getattr(self, "db", None), "race", "") or "").lower(),
+            ]
+        )
+        is_undead = any(keyword in searchable for keyword in ("undead", "zombie", "skeleton", "ghost", "wraith"))
+        if not is_undead and (utility_effects.get("innocence") or bool(getattr(getattr(actor, "db", None), "innocence_active", False))):
             return False
         return True
 
@@ -558,6 +652,10 @@ class NPC(Character):
 
 
 class EmpathGuildleader(NPC):
+    # DRG-EMPATH-03: Merla is the grandfathered directengine_canon Empath
+    # guildmaster seam for The Crossing guildhall. DRG-EMPATH-FOUNDATION-001
+    # repaired the teaching allowlist; DRG-EMPATH-03 verified the world
+    # content placement and preserved metadata.
     def at_object_creation(self):
         super().at_object_creation()
         self.db.guild_role = "guildmaster"
@@ -571,6 +669,411 @@ class EmpathGuildleader(NPC):
         if normalized in {"patient", "training", "lesson"}:
             return "Merla says, 'The patient is in the training room. Touch the patient, read the wound, take it cleanly, then bear what you chose.'"
         return super().handle_inquiry(actor, topic)
+
+    def teach_spell(self, actor, spell_name):
+        return _teach_guild_spell(
+            self,
+            actor,
+            spell_name,
+            taught_spell_ids=_EMPATH_CANONICAL_TEACHING_IDS,
+            enforce_circle=True,
+        )
+
+
+class RangerGuildleader(NPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.key = "Kalika"
+        for alias in ["guildleader", "ranger guildleader", "kalika", "leader"]:
+            self.aliases.add(alias)
+        self.db.guild_role = "guildmaster"
+        self.db.trains_profession = "ranger"
+        self.db.default_inquiry_response = "Kalika says, 'Ask plainly. The wild does not waste breath, and neither will I.'"
+
+    def handle_inquiry(self, actor, topic):
+        normalized = str(topic or "").strip().lower()
+        if normalized in {"join", "joining", "guild", "ranger"}:
+            return (
+                "Kalika says, 'Rangers aren't your run-of-the-mill types. Mostly we don't much like the city, since we have dedicated ourselves to the world outside of civilization. Ya see, when everyone got together and started building places like this city, there were a few -- a very rare few -- who saw that if everyone got together and huddled inside their villages and towns, there'd be no one to keep back the very things outside that they were running from.'\n\n"
+                "Kalika says, 'So some of us gave up the water wells, the firesides, the feather beds and instead took it unto ourselves to preserve the glory of the meadows and the silent beauty of the forests. Our mattresses are the soft moss between the roots of the great oaks, our hearths a roaring campfire, our wells the rushing streams. Those of us who have become accustomed to the world outside of the city limits have grown to love it, and many have fought, and died, to preserve that which we have sworn to protect... even if it means that we sacrifice our very souls to save the soul of the wild lands.'\n\n"
+                "Kalika says, 'Above all else, we are free. More free than the Trader forced to be ever moving, more free than the Empath bound to their patients. We are the wind, the hawk on the wing, the soaring spirit of the sky and the patient spirit of the earth. Our gold is sunlight, our gems are flowers, and our life... is the world's.'"
+            )
+        if normalized in {"advancement", "advance", "circle", "training"}:
+            if not hasattr(actor, "is_profession") or not actor.is_profession("ranger"):
+                return "Kalika says, 'The next trail can wait. First decide whether you mean to stand with us at all.'"
+            eligible, reasons = actor.can_advance_ranger() if hasattr(actor, "can_advance_ranger") else (False, ["You are not ready."])
+            if not eligible:
+                detail = "; ".join(str(reason) for reason in (reasons or []) if str(reason).strip())
+                return f"Kalika says, 'Not yet. {detail}'"
+            current_circle = max(1, int(getattr(getattr(actor, 'db', None), 'circle', 1) or 1))
+            actor.db.circle = current_circle + 1
+            actor.db.ranger_circle = max(current_circle + 1, int(getattr(getattr(actor, 'db', None), 'ranger_circle', 1) or 1))
+            return "Kalika says, 'Good. You have taken the first true step. Keep gathering from the wild and sharpen your awareness, because the land favors those who keep listening.'"
+        if normalized in {"magic", "spell", "spells", "old ways"}:
+            return "Kalika says, 'A Ranger's magic is the old ways remembered rather than mastered. Learn the land before you try to command anything within it.'"
+        return super().handle_inquiry(actor, topic)
+
+    def teach_spell(self, actor, spell_name):
+        return _teach_guild_spell(
+            self,
+            actor,
+            spell_name,
+            taught_spell_ids=_RANGER_CANONICAL_TEACHING_IDS,
+            enforce_circle=True,
+        )
+
+
+class RangerCompanion(NPC):
+    """provenance: gsl_2004 — companion canonical model via DireLore audit (DRG-RANGER-COMPANION-CANON-AUDIT-001)"""
+
+    ASSIST_SAME_ROOM_ONLY = False
+
+    def __init__(self, *args, species=None, type_id=None, **kwargs):
+        if species is not None:
+            validate_companion_type(species)
+        if type_id is not None:
+            validate_companion_type(type_id)
+        super().__init__(*args, **kwargs)
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        profile = get_companion_profile()
+        self.db.is_ranger_companion = True
+        self.db.companion_type_id = profile["type_id"]
+        self.db.companion_state = COMPANION_STATE_DISMISSED
+        self.db.owner_id = None
+        self.db.bond = 50
+        self.db.last_room_id = None
+        self.db.companion_birth_time = time.time()
+        self.db.companion_age = 0
+        self.db.hunger = 0
+        self.db.loneliness = 0
+        self.db.assist = False
+        self.db.aggressive = False
+        self.db.follow_owner = True
+        self.db.posture = "standing"
+        self.db.is_hidden_companion = False
+        self.db.last_owner_room_id = None
+        self.db.last_search_target_id = None
+        self.db.last_corpse_id = None
+        self.key = profile["label"]
+
+    def get_owner(self):
+        owner_id = getattr(getattr(self, "db", None), "owner_id", None)
+        if not owner_id:
+            return None
+        result = search_object(f"#{int(owner_id)}")
+        return result[0] if result else None
+
+    def set_owner(self, owner):
+        self.db.owner_id = getattr(owner, "id", None) if owner is not None else None
+        return self.get_owner()
+
+    def clear_owner(self):
+        self.db.owner_id = None
+        self.db.companion_state = COMPANION_STATE_DISMISSED
+
+    def set_companion_type(self, value):
+        type_id = validate_companion_type(value)
+        profile = get_companion_profile(type_id)
+        self.db.companion_type_id = type_id
+        self.key = profile["label"]
+        return profile
+
+    def set_companion_state(self, state):
+        record = normalize_ranger_companion({"state": state, "type_id": getattr(self.db, "companion_type_id", None), "bond": getattr(self.db, "bond", 50)})
+        self.db.companion_state = record["state"]
+        return self.db.companion_state
+
+    def configure_companion(self, *, owner, type_id, bond=50, state=COMPANION_STATE_PRESENT):
+        profile = self.set_companion_type(type_id)
+        self.set_owner(owner)
+        self.db.bond = max(0, min(100, int(bond or 0)))
+        self.set_companion_state(state)
+        self.db.last_room_id = getattr(getattr(owner, "location", None), "id", None)
+        self.db.last_owner_room_id = getattr(getattr(owner, "location", None), "id", None)
+        self.db.follow_owner = True
+        self.db.posture = "standing"
+        self.db.is_hidden_companion = False
+        self.db.assist = True
+        self.db.aggressive = profile["type"] == "wolf"
+        return profile
+
+    def get_companion_record(self):
+        return normalize_ranger_companion(
+            {
+                "type_id": getattr(self.db, "companion_type_id", None),
+                "state": getattr(self.db, "companion_state", None),
+                "bond": getattr(self.db, "bond", None),
+                "entity_id": getattr(self, "id", None),
+                "owner_id": getattr(self.db, "owner_id", None),
+            }
+        )
+
+    def at_after_move(self, source_location, **kwargs):
+        super().at_after_move(source_location, **kwargs)
+        self.db.last_room_id = getattr(getattr(self, "location", None), "id", None)
+
+    def can_assist(self):
+        return bool(getattr(self.db, "assist", False)) and self.get_owner() is not None
+
+    def get_profile(self):
+        return get_companion_profile(getattr(self.db, "companion_type_id", None))
+
+    def is_following_owner(self):
+        return bool(getattr(self.db, "follow_owner", True))
+
+    def set_follow_owner(self, value):
+        self.db.follow_owner = bool(value)
+        return self.db.follow_owner
+
+    def _matches_owner(self, actor):
+        owner = self.get_owner()
+        return owner is not None and getattr(owner, "id", None) == getattr(actor, "id", None)
+
+    def _is_present_and_available(self):
+        if self.is_dead():
+            return False
+        state = str(getattr(self.db, "companion_state", "") or "").strip().lower()
+        return state != COMPANION_STATE_DISMISSED
+
+    def _move_to_room(self, room, *, move_type="companion"):
+        if room is None:
+            return False
+        if getattr(self, "location", None) == room:
+            return True
+        return bool(self.move_to(room, quiet=True, move_type=move_type))
+
+    def _find_named_object(self, collection, query):
+        normalized = str(query or "").strip().lower()
+        if not normalized:
+            return None
+        for obj in list(collection or []):
+            names = {str(getattr(obj, "key", "") or "").strip().lower()}
+            aliases = getattr(obj, "aliases", None)
+            if aliases is not None:
+                try:
+                    names.update(str(alias or "").strip().lower() for alias in aliases.all())
+                except Exception:
+                    pass
+            if normalized in names:
+                return obj
+            if any(normalized in name for name in names if name):
+                return obj
+        return None
+
+    def _find_tease_item(self, actor):
+        inventory = actor.get_visible_carried_items() if hasattr(actor, "get_visible_carried_items") else list(getattr(actor, "contents", []) or [])
+        required = str(self.get_profile().get("bait_item", "") or "").strip().lower()
+        if not required:
+            return None
+        for item in list(inventory or []):
+            key = str(getattr(item, "key", "") or "").strip().lower()
+            if required in key:
+                return item
+        return None
+
+    def get_command_record(self):
+        record = self.get_companion_record()
+        record["following_owner"] = self.is_following_owner()
+        record["posture"] = str(getattr(self.db, "posture", "standing") or "standing")
+        record["hidden"] = bool(getattr(self.db, "is_hidden_companion", False))
+        return record
+
+    def command_follow(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        if not self._is_present_and_available():
+            return False, "Your companion cannot answer you right now."
+        self.set_follow_owner(True)
+        self.db.is_hidden_companion = False
+        self.set_companion_state(COMPANION_STATE_PRESENT)
+        self.db.last_owner_room_id = getattr(getattr(actor, "location", None), "id", None)
+        self._move_to_room(getattr(actor, "location", None), move_type="follow")
+        return True, self.get_profile()["follow_message"]
+
+    def command_stay(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        if not self._is_present_and_available():
+            return False, "Your companion cannot answer you right now."
+        self.set_follow_owner(False)
+        self.set_companion_state(COMPANION_STATE_PRESENT)
+        return True, self.get_profile()["stay_message"]
+
+    def command_return(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        if not self._is_present_and_available():
+            return False, "Your companion cannot answer you right now."
+        self.set_follow_owner(True)
+        self.db.is_hidden_companion = False
+        self.set_companion_state(COMPANION_STATE_RETURNING)
+        self._move_to_room(getattr(actor, "location", None), move_type="return")
+        self.set_companion_state(COMPANION_STATE_PRESENT)
+        self.db.last_owner_room_id = getattr(getattr(actor, "location", None), "id", None)
+        return True, self.get_profile()["return_message"]
+
+    def command_whistle(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the whistle."
+        if not self._is_present_and_available():
+            return False, "No answering movement comes from the wild."
+        return self.command_return(actor)
+
+    def command_find(self, actor, target=None):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        if not self._is_present_and_available():
+            return False, "Your companion cannot answer you right now."
+
+        destination = None
+        subject = target or actor
+        if subject == actor and hasattr(actor, "is_dead") and actor.is_dead() and hasattr(actor, "get_death_corpse"):
+            corpse = actor.get_death_corpse()
+            if corpse is not None:
+                subject = corpse
+        destination = getattr(subject, "location", None)
+        if destination is None:
+            return False, "Your companion has nothing to track there."
+
+        self.set_follow_owner(False)
+        self.set_companion_state(COMPANION_STATE_SEARCHING)
+        self.db.last_search_target_id = getattr(subject, "id", None)
+        self._move_to_room(destination, move_type="find")
+        target_name = getattr(subject, "key", "your trail")
+        return True, f"Your {self.get_profile()['type']} ranges out and finds {target_name}."
+
+    def command_sit(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        self.db.posture = "sitting"
+        return True, self.get_profile()["sit_message"]
+
+    def command_stand(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        self.db.posture = "standing"
+        return True, self.get_profile()["stand_message"]
+
+    def command_hide(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        self.db.is_hidden_companion = True
+        return True, self.get_profile()["hide_message"]
+
+    def command_unhide(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        self.db.is_hidden_companion = False
+        return True, self.get_profile()["unhide_message"]
+
+    def command_hunt(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        self.set_follow_owner(False)
+        self.set_companion_state(COMPANION_STATE_WANDERING)
+        return True, self.get_profile()["hunt_message"]
+
+    def command_get(self, actor, item_name):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        item = self._find_named_object(list(getattr(getattr(actor, "location", None), "contents", []) or []), item_name)
+        if item is None or item == self or item == actor:
+            return False, "Your companion cannot find that here."
+        item.move_to(self, quiet=True, move_type="companion_get")
+        return True, f"Your {self.get_profile()['type']} picks up {item.key}."
+
+    def command_drop(self, actor, item_name):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        item = self._find_named_object(list(getattr(self, "contents", []) or []), item_name)
+        if item is None:
+            return False, "Your companion is not carrying that."
+        item.move_to(getattr(actor, "location", None) or getattr(self, "location", None), quiet=True, move_type="companion_drop")
+        return True, f"Your {self.get_profile()['type']} drops {item.key}."
+
+    def command_give(self, actor, item_name, recipient=None):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        item = self._find_named_object(list(getattr(self, "contents", []) or []), item_name)
+        if item is None:
+            return False, "Your companion is not carrying that."
+        recipient = recipient or actor
+        if getattr(recipient, "location", None) != getattr(self, "location", None):
+            return False, "Your companion cannot reach that target."
+        item.move_to(recipient, quiet=True, move_type="companion_give")
+        return True, f"Your {self.get_profile()['type']} brings {item.key} to {recipient.key}."
+
+    def assist_owner(self, target, *, owner=None, reason="attack"):
+        owner = owner or self.get_owner()
+        if owner is None or not self._matches_owner(owner):
+            return False, "Your companion has no bond to answer."
+        if not self._is_present_and_available():
+            return False, "Your companion cannot enter the fight."
+        if target is None or target == self:
+            return False, "Your companion needs a living target."
+        if hasattr(target, "is_alive") and not target.is_alive():
+            return False, "Your companion needs a living target."
+        if getattr(target, "location", None) != getattr(owner, "location", None):
+            return False, "Your companion cannot reach that target."
+
+        self._move_to_room(getattr(owner, "location", None), move_type="assist")
+        self.db.is_hidden_companion = False
+        self.set_companion_state(COMPANION_STATE_PRESENT)
+        self.add_threat(target, 15 if self.get_profile()["type"] == "wolf" else 8)
+        self.set_target(target)
+        if hasattr(self, "set_range"):
+            self.set_range(target, "melee")
+        return True, self.get_profile()["attack_message"].format(target=getattr(target, "key", "your foe"))
+
+    def command_attack(self, actor, target):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores the order."
+        return self.assist_owner(target, owner=actor, reason="command")
+
+    def command_tease(self, actor):
+        if not self._matches_owner(actor):
+            return False, "Your companion ignores you."
+        profile = self.get_profile()
+        if not RangerSafService.is_companion_tease_enabled(actor):
+            return False, profile["tease_blocked_message"]
+        item = self._find_tease_item(actor)
+        if item is None:
+            return False, profile["tease_wrong_item_message"]
+        self.db.bond = max(0, min(100, int(getattr(self.db, "bond", 50) or 50) + 1))
+        return True, f"{profile['tease_ready_message']} {item.key.title()} disappears in a quick snap of jaws or paws."
+
+    def handle_owner_move(self, owner, *, origin=None, destination=None):
+        if not self._matches_owner(owner):
+            return False
+        self.db.last_owner_room_id = getattr(destination, "id", None)
+        if not self.is_following_owner():
+            return False
+        if str(getattr(self.db, "companion_state", "") or "") == COMPANION_STATE_WANDERING:
+            return False
+        if destination is None or self.is_dead():
+            return False
+        self._move_to_room(destination, move_type="follow")
+        self.set_companion_state(COMPANION_STATE_PRESENT)
+        return True
+
+    def handle_owner_death(self, owner, *, corpse=None):
+        if not self._matches_owner(owner):
+            return False, "Your companion does not answer that loss."
+        if not self._is_present_and_available():
+            return False, "No companion remains to search for you."
+        subject = corpse or (owner.get_death_corpse() if hasattr(owner, "get_death_corpse") else None) or owner
+        destination = getattr(subject, "location", None)
+        if destination is None:
+            return False, "Your companion cannot find your trail."
+        self.set_follow_owner(False)
+        self.set_companion_state(COMPANION_STATE_SEARCHING)
+        self.db.last_corpse_id = getattr(subject, "id", None)
+        self._move_to_room(destination, move_type="rescue")
+        if destination is not None:
+            destination.msg_contents(self.get_profile()["rescue_message"], exclude=[self])
+        return True, self.get_profile()["rescue_message"]
 
 
 class StatTrainerNPC(NPC):
@@ -603,8 +1106,14 @@ class GuildLeaderNPC(NPC):
             return self.db.greeting
         return "The guild leader listens but says nothing in response to that yet."
 
+    def teach_spell(self, actor, spell_name):
+        return _teach_guild_spell(self, actor, spell_name)
+
 
 class HealerNPC(NPC):
+    # DRG-EMPATH-03: House healers are grandfathered directengine_canon
+    # support NPCs used by the Empath guildhall's recovery and triage
+    # spaces, not a separate canonical class-progression seam.
     def at_object_creation(self):
         super().at_object_creation()
         self.db.is_house_healer = True
@@ -682,62 +1191,9 @@ class EmpathTutorialPatient(NPC):
         )
 
 
-class RangerGuildmaster(NPC):
-    def at_object_creation(self):
-        super().at_object_creation()
-        self.key = "Elarion"
-        for alias in ["guildmaster", "ranger guildmaster", "elarion"]:
-            self.aliases.add(alias)
-        self.db.is_trainer = True
-        self.db.trains_profession = "ranger"
-        self.db.guild_role = "guildmaster"
-        self.db.desc = (
-            "A weathered ranger stands with the unhurried stillness of someone who has spent more time reading wind and brush than walls. "
-            "Nothing about Elarion is ornate, but every tool and motion looks deliberate."
-        )
-        self.db.default_inquiry_response = "The wild answers patience better than hurry. Ask plainly if you want useful counsel."
-
-    def handle_inquiry(self, actor, topic):
-        normalized = str(topic or "").strip().lower()
-        if not normalized:
-            return super().handle_inquiry(actor, topic)
-
-        if normalized in {"join", "joining", "guild", "ranger", "oath"}:
-            if hasattr(actor, "is_profession") and actor.is_profession("ranger"):
-                return "You already wear the path. Keep your eyes open, your hands useful, and your word clean."
-            return (
-                "If you're going to stand with us, do it clean.\n"
-                "Elarion gives you a brief, measuring look.\n"
-                "You're close enough. Say it, and mean it."
-            )
-
-        if normalized in {"training", "train", "practice"}:
-            return "Start with the land itself. Forage, scout, learn to notice what others miss, and keep a weapon close enough to finish what you find."
-
-        if normalized in {"advancement", "advance", "circle", "promotion"}:
-            if not hasattr(actor, "can_advance_ranger"):
-                return "Join us first. Advancement means nothing to someone still outside the path."
-            can_advance, reason = actor.can_advance_ranger()
-            if not can_advance:
-                if isinstance(reason, list):
-                    return "\n".join(str(entry) for entry in reason if str(entry).strip())
-                return reason or "You are not ready to advance."
-            if hasattr(actor, "set_ranger_circle"):
-                actor.set_ranger_circle(max(2, int(getattr(actor.db, "ranger_circle", 1) or 1)))
-            else:
-                actor.db.circle = 2
-                actor.db.ranger_circle = 2
-                if hasattr(actor, "sync_client_state"):
-                    actor.sync_client_state()
-            return (
-                "Elarion studies you for a long moment.\n"
-                "\"You have taken your first true step into the wilds.\"\n"
-                "You feel your understanding deepen."
-            )
-
-        return super().handle_inquiry(actor, topic)
-
-
+# DRG-CLERIC-03: ClericGuildmaster is directengine_canon per
+# DRG-CANON-POLICY-001. This is the grandfathered guildmaster seam for
+# the Crossing Cleric guildhall and remains the live training anchor.
 class ClericGuildmaster(NPC):
     def at_object_creation(self):
         super().at_object_creation()
@@ -774,102 +1230,14 @@ class ClericGuildmaster(NPC):
 
         return super().handle_inquiry(actor, topic)
 
-
-class RangerMentor(NPC):
-    domain = None
-    inquiry_topics = ()
-    mentor_aliases = ()
-    mentor_desc = ""
-    mentor_default_inquiry = "Ask about training if you want field-ready counsel."
-
-    def at_object_creation(self):
-        super().at_object_creation()
-        self.db.is_trainer = True
-        self.db.trains_profession = "ranger"
-        self.db.guild_role = "mentor"
-        self.db.mentor_domain = self.domain
-        if self.mentor_desc:
-            self.db.desc = self.mentor_desc
-        if self.mentor_default_inquiry:
-            self.db.default_inquiry_response = self.mentor_default_inquiry
-        for alias in list(self.mentor_aliases or []):
-            self.aliases.add(alias)
-
-    def get_inquiry_topics(self):
-        topics = {str(self.domain or "").strip().lower()}
-        for topic in list(self.inquiry_topics or []):
-            normalized = str(topic or "").strip().lower()
-            if normalized:
-                topics.add(normalized)
-        return {topic for topic in topics if topic}
-
-    def handle_inquiry(self, actor, topic):
-        normalized = str(topic or "").strip().lower()
-        if not normalized:
-            return super().handle_inquiry(actor, topic)
-
-        if normalized in {"training", "train", "practice"} | self.get_inquiry_topics():
-            return self.training_response(actor)
-
-        return super().handle_inquiry(actor, topic)
-
-    def training_response(self, speaker):
-        return "You should not see this."
-
-
-class BramThornhand(RangerMentor):
-    domain = "survival"
-    inquiry_topics = ("forage", "foraging", "skin", "skinning")
-    mentor_aliases = ("bram", "thornhand")
-    mentor_desc = "A broad-shouldered ranger with scarred hands and an easy stance watches the guild court like a man who has spent years learning what land will give and what it will take."
-    mentor_default_inquiry = "If you want survival counsel, ask plain and expect work instead of shortcuts."
-
-    def training_response(self, speaker):
-        return "The wild provides, if you know how to listen. Start with forage. Learn what grows beneath your feet, and do not waste the hide of anything you bring down."
-
-
-class SerikVale(RangerMentor):
-    domain = "hunting"
-    inquiry_topics = ("hunt", "bow", "bows", "aim", "ranged")
-    mentor_aliases = ("serik", "vale")
-    mentor_desc = "A lean ranger keeps his bow close and his words spare, every motion measured like a shot he has already decided to take."
-    mentor_default_inquiry = "If you want hunting advice, ask before you loose something you cannot call back."
-
-    def training_response(self, speaker):
-        return "A clean shot ends suffering quickly. Practice your aim, learn your distance, and respect your prey enough to finish the work cleanly."
-
-
-class LysaWindstep(RangerMentor):
-    domain = "scouting"
-    inquiry_topics = ("scout", "stealth", "hidden", "movement")
-    mentor_aliases = ("lysa", "windstep")
-    mentor_desc = "A wiry ranger studies the lanes beyond the guild with patient attention, as if she is tracking movement no one else has noticed yet."
-    mentor_default_inquiry = "If you want scouting counsel, ask before you blunder loud enough to warn the whole street."
-
-    def training_response(self, speaker):
-        return "You are loud. The forest hears you coming, and so does any quarry worth catching. Learn to scout, move without being noticed, and trust what your eyes tell you before your pride does."
-
-    def get_vendor_interaction_lines(self, actor, action="shop"):
-        if str(action or "shop").strip().lower() == "shop":
-            return [
-                "Lysa unrolls a compact spread of field-tuned gear and taps the pieces built for real climbs.",
-                "Nothing here is ornamental. Every piece looks worn into usefulness.",
-            ]
-        return super().get_vendor_interaction_lines(actor, action=action)
-
-    def get_vendor_purchase_message(self, actor, item_name, price):
-        return f"Lysa passes you {item_name} and says, 'If you trust it, use it hard.'"
-
-
-class OrrenMossbinder(RangerMentor):
-    domain = "lore"
-    inquiry_topics = ("magic", "spells", "nature", "ritual")
-    mentor_aliases = ("orren", "mossbinder")
-    mentor_desc = "A quiet ranger tends bundled herbs and field notes with the care of someone who treats old knowledge as a tool instead of a trophy."
-    mentor_default_inquiry = "If you want lore, ask with intention. The old ways do not answer idle mouths."
-
-    def training_response(self, speaker):
-        return "There is power in the old ways, but power without understanding just leaves wreckage. Learn the names of things first. Control comes after."
+    def teach_spell(self, actor, spell_name):
+        return _teach_guild_spell(
+            self,
+            actor,
+            spell_name,
+            taught_spell_ids=_CLERIC_CANONICAL_TEACHING_IDS,
+            enforce_circle=True,
+        )
 
 
 def _load_guard_npc_class():

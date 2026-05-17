@@ -6,6 +6,28 @@ def _format_spell_type(spell):
     return str(getattr(spell, "spell_type", "") or "utility").replace("_", " ").title()
 
 
+def _format_spell_name(spell):
+    name = str(getattr(spell, "name", "") or getattr(spell, "id", "") or "Unknown Spell")
+    if str(getattr(spell, "provenance", "") or "").strip().lower() == "hybrid_design":
+        return f"{name} [Hybrid]"
+    return name
+
+
+def _group_spells_by_spellbook(spells):
+    grouped = {}
+    for spell in spells:
+        spellbook = str(getattr(spell, "spellbook", "") or "Miscellaneous").strip() or "Miscellaneous"
+        grouped.setdefault(spellbook, []).append(spell)
+    return {key: grouped[key] for key in sorted(grouped)}
+
+
+def _append_grouped_spell_lines(lines, spells, formatter):
+    for spellbook, grouped_spells in _group_spells_by_spellbook(spells).items():
+        lines.append(f"{spellbook}:")
+        for spell in grouped_spells:
+            lines.append(formatter(spell))
+
+
 class CmdSpellbook(Command):
     """
     Inspect the current learned spell state.
@@ -63,18 +85,24 @@ class CmdSpells(Command):
         lines = ["Your Spells:"]
         if known_spells:
             lines.append("Permanently Memorized:")
-            for spell in known_spells:
-                suffix = "slot" if int(getattr(spell, "slot_cost", 0) or 0) == 1 else "slots"
-                lines.append(
-                    f"  {spell.name} ({_format_spell_type(spell)}) [{int(getattr(spell, 'slot_cost', 0) or 0)} {suffix}]"
-                )
+            _append_grouped_spell_lines(
+                lines,
+                known_spells,
+                lambda spell: (
+                    f"  {_format_spell_name(spell)} ({_format_spell_type(spell)}) "
+                    f"[{int(getattr(spell, 'slot_cost', 0) or 0)} {'slot' if int(getattr(spell, 'slot_cost', 0) or 0) == 1 else 'slots'}]"
+                ),
+            )
 
         if apprentice_spells:
             if known_spells:
                 lines.append("")
             expire_circle = max(int(spell.apprentice_until_circle or 0) + 1 for spell in apprentice_spells)
             lines.append(f"Apprentice Access (expires at circle {expire_circle}):")
-            for spell in apprentice_spells:
-                lines.append(f"  {spell.name} ({_format_spell_type(spell)})")
+            _append_grouped_spell_lines(
+                lines,
+                apprentice_spells,
+                lambda spell: f"  {_format_spell_name(spell)} ({_format_spell_type(spell)})",
+            )
 
         caller.msg("\n".join(lines))

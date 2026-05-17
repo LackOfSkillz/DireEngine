@@ -26,7 +26,12 @@ class CmdSnipe(Command):
         if not args:
             caller.msg("Snipe whom?")
             return
-        ok, message, should_attack = caller.prepare_ranger_snipe(args) if hasattr(caller, "prepare_ranger_snipe") else (False, "You are not properly positioned to snipe.", False)
+        if hasattr(caller, "prepare_snipe"):
+            ok, message, should_attack = caller.prepare_snipe(args)
+        elif hasattr(caller, "prepare_ranger_snipe"):
+            ok, message, should_attack = caller.prepare_ranger_snipe(args)
+        else:
+            ok, message, should_attack = (False, "You are not properly positioned to snipe.", False)
         caller.msg(message)
         if should_attack:
             caller.execute_cmd(f"attack {args}")

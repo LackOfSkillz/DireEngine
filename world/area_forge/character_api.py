@@ -1,5 +1,7 @@
 import time
+from collections.abc import Mapping
 
+from engine.services.ranger_saf_service import RangerSafService
 from tools.diretest.core.runtime import record_payload_timing, suppress_client_payloads
 from typeclasses.abilities import get_ability_map
 from world.area_forge.utils.messages import send_structured
@@ -150,8 +152,7 @@ def _get_status_list(character):
             if active_berserk:
                 statuses.append(f"Berserk: {str(active_berserk.get('name') or active_berserk.get('key') or '').title()}")
     elif hasattr(character, "is_profession") and character.is_profession("ranger"):
-        if hasattr(character, "get_wilderness_bond_profile"):
-            statuses.append(f"Bond: {character.get_wilderness_bond_profile().get('label', 'Attuned')}")
+        statuses.append(f"SAF: {RangerSafService.get_display_percent(character)}%")
         if hasattr(character, "get_nature_focus"):
             statuses.append(f"Focus: {character.get_nature_focus()}")
         if getattr(character, "location", None) and hasattr(character.location, "get_environment_type"):
@@ -227,10 +228,12 @@ def _get_cooldowns(character):
             continue
         cooldown_key = key_str.replace("cooldown_", "", 1)
         duration = 0
-        if isinstance(value, dict):
-            duration = int(value.get("duration", 0) or 0)
-        elif value is not None:
-            duration = int(value or 0)
+        if isinstance(value, Mapping):
+            raw_duration = value.get("duration", 0)
+            if isinstance(raw_duration, (int, float)):
+                duration = int(raw_duration)
+        elif isinstance(value, (int, float)):
+            duration = int(value)
         cooldowns[cooldown_key] = max(0, duration)
 
     runtime_cooldowns = getattr(getattr(character, "ndb", None), "cooldowns", None)
@@ -345,7 +348,8 @@ def get_character_payload(character):
         "war_tempo": int(character.get_war_tempo() if hasattr(character, "get_war_tempo") else 0),
         "max_war_tempo": int(character.get_max_war_tempo() if hasattr(character, "get_max_war_tempo") else 0),
         "war_tempo_state": character.get_war_tempo_state() if hasattr(character, "get_war_tempo_state") else None,
-        "wilderness_bond": int(character.get_wilderness_bond() if hasattr(character, "get_wilderness_bond") else 0),
+        "ranger_saf_percent": int(RangerSafService.get_display_percent(character)),
+        "wilderness_bond": int(RangerSafService.get_display_percent(character)),
         "wilderness_bond_state": character.get_wilderness_bond_state() if hasattr(character, "get_wilderness_bond_state") else None,
         "ranger_instinct": int(character.get_ranger_instinct() if hasattr(character, "get_ranger_instinct") else 0),
         "nature_focus": int(character.get_nature_focus() if hasattr(character, "get_nature_focus") else 0),

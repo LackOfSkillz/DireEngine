@@ -208,6 +208,7 @@ from commands.cmd_stats import CmdStats
 from commands.cmd_stat_info import CmdStatInfo
 from commands.cmd_stabilize import CmdStabilize
 from commands.cmd_steal import CmdSteal
+from commands.cmd_woundadmin import CmdWoundAdmin
 from commands.cmd_stow import CmdStow
 from commands.cmd_survivaldebug import CmdSurvivalDebug
 from commands.cmd_swim import CmdSwim
@@ -473,6 +474,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdStatInfo())
         self.add(CmdStabilize())
         self.add(CmdSteal())
+        self.add(CmdWoundAdmin())
         self.add(CmdStore())
         self.add(CmdStow())
         self.add(CmdSurrender())

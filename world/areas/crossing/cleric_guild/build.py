@@ -2,6 +2,11 @@ from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_object
 
 
+# DRG-CLERIC-03: Cleric guildhall world content is directengine_canon
+# per DRG-CANON-POLICY-001. Grandfathered from the existing
+# implementation as the canonical Cleric guildhall for The Crossing.
+# Bootstrap entry point is ensure_crossing_cleric_guildhall().
+
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
 NPC_TYPECLASS = "typeclasses.npcs.NPC"
@@ -267,10 +272,16 @@ def ensure_crossing_cleric_guildhall():
         room.db.cleric_guild_room = spec["room_tag"]
         room.db.map_x = spec["coords"][0]
         room.db.map_y = spec["coords"][1]
+        room.db.is_shrine = room_key == "chapel"
         _clear_room_tags(room, [CANONICAL_TAG, ENTRY_TAG])
         room.tags.add(AREA_SPACE_TAG)
         room.tags.add(JOIN_SITE_TAG)
         room.tags.add(MAP_BUILD_TAG, category="build")
+        if room_key == "chapel":
+            # DRG-CLERIC-03: The guild chapel is the grandfathered
+            # directengine_canon Cleric shrine surface for prayer-based
+            # devotion/favor interactions.
+            room.tags.add("shrine")
         if room_key == "main_hall":
             room.tags.add(CANONICAL_TAG)
             room.tags.add(ENTRY_TAG)

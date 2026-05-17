@@ -35,6 +35,7 @@ from engine.presenters.mana_presenter import ManaPresenter
 from engine.presenters.spell_effect_presenter import SpellEffectPresenter
 from engine.services.injury_service import InjuryService
 from engine.services.mana_service import ManaService
+from engine.services.ranger_saf_service import RangerSafService
 from engine.services.spell_effect_service import SpellEffectService
 from engine.services.result import ActionResult
 from engine.services.spell_access_service import SpellAccessService
@@ -107,7 +108,6 @@ from world.systems.warrior import (
     get_warrior_tempo_state,
 )
 from world.systems.ranger import (
-    ENVIRONMENT_BOND_DELTAS,
     ENVIRONMENT_NATURE_FOCUS_DELTAS,
     NATURAL_TERRAIN_TYPES,
     NATURE_FOCUS_ACTION_GAINS,
@@ -124,11 +124,15 @@ from world.systems.ranger import (
     get_wilderness_bond_profile,
 )
 from world.systems.ranger.companion import (
+    call_ranger_companion as summon_ranger_companion_entity,
+    dismiss_ranger_companion as dismiss_ranger_companion_entity,
     get_companion_awareness_bonus,
     get_companion_label,
     get_companion_tracking_bonus,
+    get_owner_companion_entity,
     is_companion_active,
     normalize_ranger_companion,
+    sync_owner_companion_record,
 )
 from world.systems.ranger.beseech import get_beseech_kinds, get_beseech_profile
 from world.systems.wounds import WOUND_RULES, apply_poison_tick, describe_wound, get_disease_penalty
@@ -482,6 +486,11 @@ SKILLSET_ALIASES = {
     "weapons": "weapons",
 }
 
+# DRG-EMPATH-01: The grandfathered Empath profession profile stays lore-primary
+# at the category level, but the live EXP tier seam must still reflect the
+# canonical Empathy-first identity plus the established healer-scholar support
+# skills. These are skill-specific tier overrides, not a profession-profile
+# rewrite. provenance: hybrid_design
 EXP_SKILLSET_TIER_OVERRIDES = {
     "empathy": "primary",
     "first_aid": "secondary",
@@ -516,11 +525,15 @@ SKILL_REGISTRY = {
     "brawling": {"category": "combat", "visibility": "shared", "display_name": "Hand-To-Hand", "description": "unarmed fighting", "starter_rank": 0},
     "chain_armor": {"category": "armor", "visibility": "shared", "display_name": "Chain Armor", "description": "training in chain armor use", "starter_rank": 0},
     "combat": {"category": "combat", "visibility": "shared", "display_name": "Combat", "description": "general combat sense and technique", "starter_rank": 0},
+    "cyclic": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Cyclic", "description": "sustaining ongoing cyclic spell patterns", "starter_rank": 0},
     "debilitation": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Debilitation", "description": "hindering and control magic", "starter_rank": 0},
     "disengage": {"category": "combat", "visibility": "shared", "display_name": "Disengage", "description": "breaking away from combat pressure", "starter_rank": 0},
+    # DRG-EMPATH-01: Empathy is the canonical Empath identity skill and remains
+    # a first-class live runtime skill. provenance: gsl_2004
     "empathy": {"category": "magic", "visibility": "shared", "display_name": "Empathy", "description": "transferring and reading wounds through empathy", "starter_rank": 0},
     "evasion": {"category": "survival", "visibility": "shared", "display_name": "Evasion", "description": "avoiding incoming attacks", "starter_rank": 1},
     "first_aid": {"category": "survival", "visibility": "shared", "display_name": "First Aid", "description": "stabilizing wounds and suppressing bleeding", "starter_rank": 0},
+    "healing": {"category": "magic", "visibility": "guild_locked", "guilds": SPELLCASTING_PROFESSIONS, "display_name": "Healing", "description": "restorative and curative spellcasting", "starter_rank": 0},
     "heavy_edge": {"category": "combat", "visibility": "shared", "display_name": "Heavy Edged Weapons", "description": "fighting with heavy edged weapons", "starter_rank": 0},
     "instinct": {"category": "survival", "visibility": "guild_locked", "display_name": "Instinct", "description": "survival intuition / danger sense placeholder", "starter_rank": 0},
     "light_armor": {"category": "armor", "visibility": "shared", "display_name": "Light Armor", "description": "training in light armor use", "starter_rank": 0},
@@ -1128,6 +1141,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.profession = "commoner"
         self.db.profession_rank = 1
         self.db.circle = 1
+        self.db.canonical_saf = 0
         self.db.wilderness_bond = 50
         self.db.ranger_instinct = 0
         self.db.nature_focus = 0
@@ -1511,6 +1525,8 @@ class Character(ObjectParent, DefaultCharacter):
         from world.professions.professions import get_skillset_tier_for_skill
 
         normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if normalized in EXP_SKILLSET_TIER_OVERRIDES:
+            return EXP_SKILLSET_TIER_OVERRIDES[normalized]
         metadata = self.get_skill_metadata(normalized)
         profession = str(getattr(self.db, "profession", "commoner") or "commoner")
         return get_skillset_tier_for_skill(
@@ -1918,6 +1934,11 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.profession_rank = 1
         if self.db.life_state is None:
             self.db.life_state = LIFE_STATE_ALIVE
+        if getattr(self.db, "canonical_saf", None) is None:
+            # DRG-RANGER-RECONCILE-IDENTITY-001a: canonical Ranger SAF is a
+            # single integer state per S00264 / Gap 8 and must remain separate
+            # from the grandfathered wilderness_bond transition seam.
+            self.db.canonical_saf = 0
         if self.db.wilderness_bond is None:
             self.db.wilderness_bond = 50
         if self.db.ranger_instinct is None:
@@ -1928,6 +1949,12 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.ranger_companion = normalize_ranger_companion()
         if self.db.empath_shock is None:
             self.db.empath_shock = 0
+        if getattr(self.db, "empath_saf_duration", None) is None:
+            self.db.empath_saf_duration = 0
+        if getattr(self.db, "empath_saf_burden", None) is None:
+            self.db.empath_saf_burden = 0
+        if getattr(self.db, "empath_permashock", None) is None:
+            self.db.empath_permashock = False
         if getattr(self.db, "empath_rank", None) is None:
             self.db.empath_rank = 0
         if getattr(self.db, "empath_xp", None) is None:
@@ -2356,6 +2383,8 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.target_body_part = None
         if not self.attributes.has("stunned"):
             self.db.stunned = False
+        if not self.attributes.has("stunned_until"):
+            self.db.stunned_until = 0.0
         if not self.attributes.has("equipped_weapon"):
             self.db.equipped_weapon = None
         if not self.attributes.has("preferred_sheath"):
@@ -7911,6 +7940,8 @@ class Character(ObjectParent, DefaultCharacter):
 
     # MANA BACKFILL TARGET
     def take_empath_wound(self, wound_type, amount_spec="", target=None, selector=None, requested_fraction=None, requested_rate=None, learning_action=None):
+        normalized_learning_action = str(learning_action or "").strip().lower()
+        suppress_legacy_transfer_learning = normalized_learning_action == "canonical_progression"
         if not self.is_empath():
             return False, "You cannot draw another's wounds into yourself."
         allowed, message = self.can_use_empath_ability("take")
@@ -7990,7 +8021,8 @@ class Character(ObjectParent, DefaultCharacter):
         if self.is_empath_tutorial_active():
             target.set_empath_wound(wound_key, target_amount - amount)
             self.set_empath_wound(wound_key, self.get_empath_wound(wound_key) + amount)
-            self.award_field_xp("take", success=True, outcome="success", context_multiplier=min(2.0, 1.0 + (amount / 20.0)))
+            if not suppress_legacy_transfer_learning:
+                self.award_field_xp("take", success=True, outcome="success", context_multiplier=min(2.0, 1.0 + (amount / 20.0)))
             self.complete_empath_tutorial_if_ready(target=target)
             if requested_fraction is not None:
                 if selector_key:
@@ -8087,12 +8119,13 @@ class Character(ObjectParent, DefaultCharacter):
         if self.get_empath_circle_members(include_self=False, validate=True):
             self.msg("You share in the burden.")
         self.ndb.empath_recent_healing_until = time.time() + 20.0
-        self.award_field_xp(
-            "take",
-            success=True,
-            outcome="success",
-            context_multiplier=min(2.0, 0.75 + (amount / 25.0) + (0.15 if unity else 0.0)),
-        )
+        if not suppress_legacy_transfer_learning:
+            self.award_field_xp(
+                "take",
+                success=True,
+                outcome="success",
+                context_multiplier=min(2.0, 0.75 + (amount / 25.0) + (0.15 if unity else 0.0)),
+            )
         if target.is_medically_critical() if hasattr(target, "is_medically_critical") else False:
             self.adjust_empath_reputation(1, reason="critical_help")
         risk_after = self.get_empath_transfer_risk_state()
@@ -8507,6 +8540,8 @@ class Character(ObjectParent, DefaultCharacter):
         return True, "You carefully tend to the corpse, slowing its decay."
 
     def process_empath_tick(self):
+        from engine.services.empath_saf_service import EmpathSafService
+
         if not self.is_empath() or not getattr(self, "location", None):
             return False
         now = time.time()
@@ -8519,6 +8554,8 @@ class Character(ObjectParent, DefaultCharacter):
         broken = [entry for target_id, entry in before_links.items() if target_id not in after_links]
         if broken:
             self.msg("Your connection slips away.")
+            changed = True
+        if EmpathSafService.tick(self, now=now):
             changed = True
         shock_tick_at = float(getattr(self.ndb, "next_empath_shock_decay_at", 0) or 0)
         if now >= shock_tick_at and self.get_empath_shock() > 0:
@@ -8643,13 +8680,24 @@ class Character(ObjectParent, DefaultCharacter):
 
     def is_stunned(self):
         self.ensure_core_defaults()
-        return bool(self.db.stunned)
+        stunned_until = float(getattr(self.db, "stunned_until", 0.0) or 0.0)
+        if stunned_until and time.time() >= stunned_until:
+            self.db.stunned = False
+            self.db.stunned_until = 0.0
+            return False
+        return bool(self.db.stunned) or stunned_until > time.time()
 
     def consume_stun(self):
         self.ensure_core_defaults()
+        stunned_until = float(getattr(self.db, "stunned_until", 0.0) or 0.0)
+        if stunned_until and time.time() < stunned_until:
+            return True
         if self.db.stunned:
             self.db.stunned = False
+            self.db.stunned_until = 0.0
             return True
+        if stunned_until and time.time() >= stunned_until:
+            self.db.stunned_until = 0.0
         return False
 
     def renew_state(self):
@@ -13224,7 +13272,13 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_mana_realm(self):
         profession_to_realm = {
+            # DRG-CLERIC-01: Cleric -> Holy routing is directengine_canon per
+            # DRG-CANON-POLICY-001. The existing routing seam is grandfathered
+            # as the live Cleric cast foundation for later canonical spell adds.
             "cleric": "holy",
+            # DRG-EMPATH-01: Empath -> Life routing matches canonical realm
+            # identity directly and stays authoritative at this seam.
+            # provenance: gsl_2004
             "empath": "life",
             "ranger": "life",
             "warrior_mage": "elemental",
@@ -13461,6 +13515,19 @@ class Character(ObjectParent, DefaultCharacter):
             self.msg("Your luminar flares as it feeds power into the spell.")
             if self.location:
                 self.location.msg_contents(f"{self.key}'s luminar flares brightly.", exclude=[self])
+
+        if target_mode == "self" and target_name:
+            normalized_target_name = str(target_name or "").strip().lower().replace("-", "_").replace(" ", "_")
+            self_aliases = {
+                "self",
+                "me",
+                str(self.key or "").strip().lower().replace("-", "_").replace(" ", "_"),
+            }
+            if normalized_target_name not in self_aliases:
+                explicit_target = self.search(str(target_name).strip())
+                if explicit_target is not self:
+                    self.msg("You can only cast that spell on yourself.")
+                    return False
 
         target = self.resolve_cast_target(target_name, spell_metadata)
         if target_mode == "single" and not target:
@@ -15165,6 +15232,7 @@ class Character(ObjectParent, DefaultCharacter):
         self.db.aiming = None
         self.clear_state("aiming")
         self.clear_state("ranger_aiming")
+        self.clear_state("prepared_snipe")
         self.clear_state("ranger_snipe")
         clear_direct_interest(self, channel="aim")
 
@@ -15842,8 +15910,20 @@ class Character(ObjectParent, DefaultCharacter):
             self.sync_client_state()
         return amount
 
+    def _ensure_canonical_ranger_identity(self):
+        if bool(getattr(self.db, "ranger_identity_migrated", False)):
+            return
+        legacy_bond = getattr(self.db, "wilderness_bond", None)
+        current_saf = getattr(self.db, "canonical_saf", None)
+        if legacy_bond is not None and current_saf in {None, 0}:
+            RangerSafService.set_saf(self, 0 - max(0, min(100, int(legacy_bond or 0))))
+        elif current_saf is None:
+            RangerSafService.set_saf(self, 0)
+        self.db.ranger_identity_migrated = True
+
     def get_wilderness_bond(self):
-        return max(0, min(100, int(getattr(self.db, "wilderness_bond", 50) or 0)))
+        self._ensure_canonical_ranger_identity()
+        return max(0, min(100, int(RangerSafService.get_display_percent(self) or 0)))
 
     def get_wilderness_bond_profile(self):
         return get_wilderness_bond_profile(self.get_wilderness_bond())
@@ -15878,6 +15958,9 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_ranger_companion(self):
         companion = normalize_ranger_companion(getattr(self.db, "ranger_companion", None))
+        entity = get_owner_companion_entity(self)
+        if entity is not None:
+            companion = sync_owner_companion_record(self, entity=entity)
         self.db.ranger_companion = companion
         return companion
 
@@ -15898,6 +15981,75 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_ranger_companion_label(self):
         return get_companion_label(self.get_ranger_companion())
+
+    def get_ranger_companion_entity(self):
+        return get_owner_companion_entity(self)
+
+    def command_ranger_companion(self, action, *, target=None, item_name=None, recipient=None):
+        entity = self.get_ranger_companion_entity()
+        if entity is None:
+            return False, "Your companion is not currently with you."
+        normalized = str(action or "").strip().lower()
+        method_name = {
+            "follow": "command_follow",
+            "stay": "command_stay",
+            "stop": "command_stay",
+            "return": "command_return",
+            "whistle": "command_whistle",
+            "recall": "command_whistle",
+            "find": "command_find",
+            "sit": "command_sit",
+            "stand": "command_stand",
+            "hide": "command_hide",
+            "unhide": "command_unhide",
+            "hunt": "command_hunt",
+            "get": "command_get",
+            "drop": "command_drop",
+            "give": "command_give",
+            "attack": "command_attack",
+            "tease": "command_tease",
+        }.get(normalized)
+        if not method_name or not hasattr(entity, method_name):
+            return False, "You cannot give that command to your companion."
+        method = getattr(entity, method_name)
+        kwargs = {"actor": self}
+        if normalized == "find":
+            kwargs["target"] = target
+        elif normalized in {"get", "drop"}:
+            kwargs["item_name"] = item_name
+        elif normalized == "give":
+            kwargs["item_name"] = item_name
+            kwargs["recipient"] = recipient
+        elif normalized == "attack":
+            kwargs["target"] = target
+        ok, message = method(**kwargs)
+        sync_owner_companion_record(self, entity=entity)
+        self.sync_client_state()
+        return ok, message
+
+    def notify_ranger_companion_owner_moved(self, origin, destination):
+        entity = self.get_ranger_companion_entity()
+        if entity is None or not hasattr(entity, "handle_owner_move"):
+            return False
+        moved = bool(entity.handle_owner_move(self, origin=origin, destination=destination))
+        sync_owner_companion_record(self, entity=entity)
+        return moved
+
+    def notify_ranger_companion_engagement(self, target, *, reason="attack"):
+        entity = self.get_ranger_companion_entity()
+        if entity is None or not hasattr(entity, "assist_owner"):
+            return False
+        ok, _message = entity.assist_owner(target, owner=self, reason=reason)
+        sync_owner_companion_record(self, entity=entity)
+        return ok
+
+    def notify_ranger_companion_owner_death(self, corpse=None):
+        entity = self.get_ranger_companion_entity()
+        if entity is None or not hasattr(entity, "handle_owner_death"):
+            return False
+        ok, _message = entity.handle_owner_death(self, corpse=corpse)
+        sync_owner_companion_record(self, entity=entity)
+        return ok
 
     def get_active_ranger_beseech(self, kind=None):
         if kind:
@@ -16183,8 +16335,10 @@ class Character(ObjectParent, DefaultCharacter):
         return after - before
 
     def set_wilderness_bond(self, value, emit_messages=True):
+        self._ensure_canonical_ranger_identity()
         previous = self.get_wilderness_bond_profile()
         amount = max(0, min(100, int(value or 0)))
+        RangerSafService.set_saf(self, 0 - amount)
         self.db.wilderness_bond = amount
         current = self.get_wilderness_bond_profile()
         if emit_messages and current.get("key") != previous.get("key") and self.is_profession("ranger"):
@@ -16210,32 +16364,26 @@ class Character(ObjectParent, DefaultCharacter):
         if not self.is_profession("ranger"):
             return False
         room = getattr(self, "location", None)
-        if not room or not hasattr(room, "get_environment_type"):
+        if not room:
             return False
-        environment = room.get_environment_type()
-        delta = int(ENVIRONMENT_BOND_DELTAS.get(environment, 0) or 0)
+        self._ensure_canonical_ranger_identity()
+        environment = self.get_ranger_environment_type()
         focus_delta = int(ENVIRONMENT_NATURE_FOCUS_DELTAS.get(environment, 0) or 0)
         if hasattr(room, "get_terrain_type"):
             terrain = room.get_terrain_type()
-            if terrain in NATURAL_TERRAIN_TYPES and delta > 0:
-                delta += 1
-                if focus_delta > 0:
-                    focus_delta += 1
-            elif terrain == "urban" and delta < 0:
-                delta -= 1
-                if focus_delta < 0:
-                    focus_delta -= 1
+            if terrain in NATURAL_TERRAIN_TYPES and focus_delta > 0:
+                focus_delta += 1
+            elif terrain == "urban" and focus_delta < 0:
+                focus_delta -= 1
         if self.has_active_ranger_companion():
-            if delta > 0:
-                delta += 1
-            elif delta < 0:
-                delta += 1
+            focus_delta += 1 if focus_delta >= 0 else -1
         if focus_delta > 0:
             focus_delta += self.get_ranger_focus_gain_bonus()
         elif focus_delta < 0 and self.get_wilderness_bond() >= 80:
             focus_delta += 1
         before = self.get_wilderness_bond()
-        after = self.set_wilderness_bond(before + delta) if delta else before
+        RangerSafService.tick_drift(self, urbanclass=8 if self.is_hostile_ranger_terrain() else 0)
+        after = self.get_wilderness_bond()
         before_focus = self.get_nature_focus()
         after_focus = self.set_nature_focus(before_focus + focus_delta) if focus_delta else before_focus
         now = time.time()
@@ -16246,6 +16394,8 @@ class Character(ObjectParent, DefaultCharacter):
                 continue
             if now >= float(data.get("expires_at", 0) or 0):
                 self.clear_state(state_key)
+        if before != after and before_focus == after_focus:
+            self.sync_client_state()
         return before != after or before_focus != after_focus
 
     def resolve_ranger_track_target(self, target_name):
@@ -16966,29 +17116,25 @@ class Character(ObjectParent, DefaultCharacter):
         self.gain_ranger_nature_focus("read_land")
         return True, lines
 
-    def call_ranger_companion(self):
+    def call_ranger_companion(self, species=None):
         if not self.is_profession("ranger"):
             return False, "You have no bond to call upon."
-        if self.is_hostile_ranger_terrain():
-            return False, "The press of the city keeps your companion away."
-        companion = self.get_ranger_companion()
-        if companion.get("state") == "active":
-            return False, f"Your {self.get_ranger_companion_label().lower()} is already with you."
-        companion["state"] = "active"
+        ok, message, companion = summon_ranger_companion_entity(self, species=species)
+        if not ok:
+            return ok, message
         companion["bond"] = min(100, int(companion.get("bond", 50) or 0) + 2)
         self.set_ranger_companion(companion)
         self.adjust_wilderness_bond(2)
-        return True, f"A {self.get_ranger_companion_label().lower()} emerges from the brush and joins you."
+        return True, message
 
     def dismiss_ranger_companion(self):
         if not self.is_profession("ranger"):
             return False, "You have no companion to dismiss."
-        companion = self.get_ranger_companion()
-        if companion.get("state") != "active":
-            return False, "Your companion is not currently with you."
-        companion["state"] = "inactive"
+        ok, message, companion = dismiss_ranger_companion_entity(self)
+        if not ok:
+            return ok, message
         self.set_ranger_companion(companion)
-        return True, f"Your {self.get_ranger_companion_label().lower()} slips back into the wild."
+        return True, message
 
     def attempt_ranger_reposition(self):
         if not self.is_profession("ranger"):
@@ -17016,11 +17162,43 @@ class Character(ObjectParent, DefaultCharacter):
             return True, f"You shift your footing and keep {target.key} from closing fully."
         return False, f"You fail to carve out a better firing lane against {target.key}."
 
-    def prepare_ranger_snipe(self, target_name):
-        if not self.is_profession("ranger"):
-            return False, "You do not know how to snipe.", False
-        if not self.is_hidden():
-            return False, "You are not properly positioned to snipe.", False
+    def _get_snipe_training_status(self):
+        if self.is_profession("thief"):
+            thieftrix = int(getattr(getattr(self, "db", None), "thieftrix", 0) or 0)
+            thieftrix2 = int(getattr(getattr(self, "db", None), "thieftrix2", 0) or 0)
+            trained = bool(thieftrix & (1 << 31))
+            banned = bool(thieftrix2 & 1)
+            if banned:
+                return False, "You seem to have forgotten the intricacies of sniping."
+            if not trained:
+                return False, "You are not trained to properly use the deadly skill of sniping."
+            return True, ""
+        if self.is_profession("ranger"):
+            guild1 = int(getattr(getattr(self, "db", None), "guild1", 0) or 0)
+            trained = bool(guild1 & 1)
+            banned = bool(guild1 & (1 << 1))
+            if banned:
+                return False, "You seem to have forgotten the intricacies of sniping."
+            if not trained:
+                return False, "You are not trained to properly use the deadly skill of sniping."
+            return True, ""
+        return False, "You have not been trained in the ways of sniping."
+
+    def _is_canonically_positioned_to_snipe(self):
+        if self.is_hidden():
+            return True
+        if bool(getattr(getattr(self, "db", None), "stealthed", False)):
+            return True
+        if bool(getattr(getattr(self, "db", None), "invisible", False)):
+            return True
+        return bool(self.get_state("invisible"))
+
+    def prepare_snipe(self, target_name):
+        trained, message = self._get_snipe_training_status()
+        if not trained:
+            return False, message, False
+        if not self._is_canonically_positioned_to_snipe():
+            return False, "How can you snipe if you are not hidden?", False
         weapon = self.get_equipped_ranged_weapon()
         if not weapon or not bool(getattr(weapon.db, "ammo_loaded", False)):
             return False, "You are not properly positioned to snipe.", False
@@ -17028,21 +17206,31 @@ class Character(ObjectParent, DefaultCharacter):
         target = self.search(str(target_name or "").strip(), candidates=getattr(room, "contents", None)) if room else None
         if not target:
             return False, "Snipe whom?", False
-        aim_stacks = self.get_ranger_aim_stacks(target)
-        accuracy_bonus = 25 + (aim_stacks * 8) + self.get_ranger_bond_accuracy_bonus() + self.get_ranger_aim_focus_accuracy_bonus()
-        damage_multiplier = (1.35 + (aim_stacks * 0.1)) * self.get_ranger_aim_focus_damage_multiplier()
+        aim_stacks = self.get_ranger_aim_stacks(target) if self.is_profession("ranger") else 0
+        accuracy_bonus = 25 + (aim_stacks * 8)
+        damage_multiplier = 1.35 + (aim_stacks * 0.1)
+        stealth_bonus = 10 + (aim_stacks * 8)
+        if self.is_profession("ranger"):
+            accuracy_bonus += self.get_ranger_bond_accuracy_bonus() + self.get_ranger_aim_focus_accuracy_bonus()
+            damage_multiplier *= self.get_ranger_aim_focus_damage_multiplier()
         self.set_target(target)
+        self.clear_state("ranger_snipe")
         self.set_state(
-            "ranger_snipe",
+            "prepared_snipe",
             {
                 "target_id": target.id,
                 "accuracy_bonus": accuracy_bonus,
                 "damage_multiplier": damage_multiplier,
-                "stealth_bonus": 10 + (aim_stacks * 8),
+                "stealth_bonus": stealth_bonus,
+                "profession": str(getattr(self, "profession", getattr(getattr(self, "db", None), "profession", "")) or "").strip().lower(),
+                "overlay": "ranger_directengine_canon" if self.is_profession("ranger") else "shared_gsl_2004",
                 "timestamp": time.time(),
             },
         )
         return True, "You release a carefully placed shot from concealment.", True
+
+    def prepare_ranger_snipe(self, target_name):
+        return self.prepare_snipe(target_name)
 
     def apply_ranger_mark(self, target):
         if not self.is_profession("ranger"):
@@ -17679,7 +17867,7 @@ class Character(ObjectParent, DefaultCharacter):
         return ", ".join(f"{label} {minimum}" for _, minimum, label in RANGER_JOIN_REQUIREMENTS)
 
     def get_ranger_join_success_message(self, guide=None):
-        guide_name = getattr(guide, "key", "Elarion") if guide else "Elarion"
+        guide_name = getattr(guide, "key", "The ranger guildleader") if guide else "The ranger guildleader"
         return (
             f"{guide_name} inclines their head. \"Then stand with us. Mind the land, learn its signs, and do not waste what it gives.\"\n"
             "You are now recognized as a Ranger."
@@ -17689,7 +17877,7 @@ class Character(ObjectParent, DefaultCharacter):
         joined = "; ".join(str(entry) for entry in list(missing_requirements or []) if str(entry).strip())
         if not joined:
             joined = self.get_ranger_join_requirement_text()
-        return f"Elarion studies you for a long moment. \"Not yet. A Ranger must show at least {joined}.\""
+        return f"The ranger guildleader studies you for a long moment. \"Not yet. A Ranger must show at least {joined}.\""
 
     def get_cleric_join_success_message(self, guide=None):
         guide_name = getattr(guide, "key", "Esuin") if guide else "Esuin"
@@ -17760,6 +17948,9 @@ class Character(ObjectParent, DefaultCharacter):
         self.set_profession(profession)
         self.set_guild(profession)
         if profession == "ranger":
+            from engine.services.ranger_saf_service import RangerSafService
+
+            RangerSafService.clear_on_guild_commitment(self)
             self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
             self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
             self.db.ranger_joined_at = time.time()
@@ -17828,7 +18019,9 @@ class Character(ObjectParent, DefaultCharacter):
             self.sync_warrior_progression(emit_messages=True)
             self.update_war_tempo_state()
         elif normalized == "ranger":
+            RangerSafService.clear_on_guild_commitment(self)
             self.db.wilderness_bond = max(0, min(100, int(getattr(self.db, "wilderness_bond", 50) or 50)))
+            self.db.ranger_identity_migrated = False
             self.db.ranger_instinct = max(0, int(getattr(self.db, "ranger_instinct", 0) or 0))
             self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
             self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
@@ -17891,10 +18084,10 @@ class Character(ObjectParent, DefaultCharacter):
         }
 
         if before.get("key") == "ranger" and after.get("key") == "ranger":
-            before_bond = int(before.get("wilderness_bond", 0) or 0)
-            after_bond = int(after.get("wilderness_bond", 0) or 0)
-            if before_bond != after_bond:
-                return f"Wilderness Bond: {before_bond} -> {after_bond}"
+            before_saf = int(before.get("saf_percent", before.get("wilderness_bond", 0)) or 0)
+            after_saf = int(after.get("saf_percent", after.get("wilderness_bond", 0)) or 0)
+            if before_saf != after_saf:
+                return f"SAF: {before_saf} -> {after_saf}"
 
         for key, (label, _max_key) in resource_map.items():
             before_value = before.get(key)
@@ -18060,6 +18253,7 @@ class Character(ObjectParent, DefaultCharacter):
             "cyclic": "cyclic",
             "debilitation": "debilitation",
             "targeted_magic": "targeted_magic",
+            "resurrection": "utility",
             "warding": "warding",
             "utility": "utility",
             "healing": "healing",
@@ -18069,7 +18263,11 @@ class Character(ObjectParent, DefaultCharacter):
         target_mode = "single" if category in {"healing", "targeted_magic", "debilitation"} else "self"
         if normalized_target_type in {"room", "group", "single"}:
             target_mode = normalized_target_type
-        elif normalized_target_type == "self" and category not in {"healing", "targeted_magic", "debilitation"}:
+        elif normalized_target_type == "self_or_other":
+            target_mode = "single"
+        elif normalized_target_type == "self" and category == "healing":
+            # DRG-EMPATH-04B: explicit self-target metadata must survive the
+            # structured adapter so bare `cast` defaults to self correctly.
             target_mode = "self"
         if category == "cyclic":
             if str(getattr(spell, "target_type", "") or "").strip().lower() == "room":
@@ -18099,6 +18297,7 @@ class Character(ObjectParent, DefaultCharacter):
             "guilds": tuple(spell.allowed_professions),
             "mana_min": mana_min,
             "mana_max": mana_max,
+            "diff_per_extra_mana": int(getattr(spell, "diff_per_extra_mana", 0) or 0),
             "safe_mana": int(spell.safe_mana or 1),
             "base_difficulty": float(spell.base_difficulty or 0),
             "tier": tier,
@@ -18108,9 +18307,11 @@ class Character(ObjectParent, DefaultCharacter):
             "ritual": str(spell.cast_style or "").strip().lower() == "ritual",
             "targeted": category in {"targeted_magic", "debilitation", "aoe"},
             "target_mode": target_mode,
+            "default_self_target": normalized_target_type == "self_or_other",
             "spellbook": spell.spellbook,
             "acquisition_methods": list(spell.acquisition_methods),
             "canon_status": str(getattr(spell, "canon_status", "prototype") or "prototype"),
+            "provenance": str(getattr(spell, "provenance", "gsl_2004") or "gsl_2004"),
             "flags": list(spell.flags),
             "description": f"{spell.name} is managed by the structured spell registry.",
         }
@@ -18233,6 +18434,9 @@ class Character(ObjectParent, DefaultCharacter):
 
         if target_name:
             return self.search(str(target_name).strip())
+
+        if bool(spell_def.get("default_self_target", False)):
+            return self
 
         if hasattr(self, "get_target"):
             return self.get_target()
@@ -18481,7 +18685,13 @@ class Character(ObjectParent, DefaultCharacter):
                 }
             )
 
-        entries.sort(key=lambda entry: (entry["category"], not entry["active"], entry["display"].lower()))
+        entries.sort(
+            key=lambda entry: (
+                str(entry.get("category") or ""),
+                not entry["active"],
+                str(entry.get("display") or entry.get("skill") or "").lower(),
+            )
+        )
         return entries
 
     def get_active_learning_entries(self):
@@ -18831,6 +19041,8 @@ class Character(ObjectParent, DefaultCharacter):
         if target is None:
             self.db.aiming = None
         self.sync_client_state()
+        if target is not None and old_target != target:
+            self.notify_ranger_companion_engagement(target, reason="attack")
 
     def get_target(self):
         self.ensure_core_defaults()
@@ -18844,6 +19056,11 @@ class Character(ObjectParent, DefaultCharacter):
     def is_engaged_with(self, target):
         self.ensure_core_defaults()
         return self.get_target() == target and bool(self.db.in_combat)
+
+    def at_attacked(self, attacker):
+        if attacker is None or attacker == self:
+            return
+        self.notify_ranger_companion_engagement(attacker, reason="defend")
 
     def break_aim_for_movement(self, emit_message=True):
         if self.db.aiming is None and not self.get_state("ranger_aiming"):
@@ -18878,6 +19095,8 @@ class Character(ObjectParent, DefaultCharacter):
                 return_borrowed_gear(self, source_location=origin, direction=travel_direction)
             except Exception:
                 LOGGER.exception("Failed to return borrowed fishing gear for %s", getattr(self, "key", self))
+        if moved and origin and destination and destination != origin:
+            self.notify_ranger_companion_owner_moved(origin, destination)
         return moved
 
     def at_pre_move(self, destination, **kwargs):

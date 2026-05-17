@@ -2,6 +2,11 @@ from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_object
 
 
+# DRG-EMPATH-03: Empath guildhall world content is grandfathered as
+# directengine_canon per DRG-CANON-POLICY-001 and the B-decision from
+# DRG-CLERIC-10. Bootstrap entry point is
+# ensure_crossing_empath_guildhall().
+
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
 NPC_TYPECLASS = "typeclasses.npcs.NPC"
@@ -13,6 +18,11 @@ MAP_BUILD_TAG = "empath-guild-map"
 CANONICAL_TAG = "guild_empath"
 ENTRY_TAG = "guild_empath_entry"
 JOIN_SITE_TAG = "empath_guildhall"
+# DRG-EMPATH-03: The existing infirmary and sitting room already form the
+# directengine_canon recovery-space equivalent for the Empath guildhall.
+# The audit found no separate shrine-like mechanic to wire here, so the
+# preserved runtime surface is recovery-zone tagging rather than a new
+# room attribute.
 ZONE_TAGS = {
     "recovery": "empath_zone_recovery",
     "training": "empath_zone_training",
@@ -255,6 +265,9 @@ def _ensure_npc(typeclass, key, room, aliases=None, desc=""):
 
 
 def _ensure_ambient_npcs(rooms):
+    # DRG-EMPATH-03: The ambient Empath guild roster is grandfathered as
+    # directengine_canon world content for The Crossing and intentionally
+    # remains a lightweight support cast around Merla's guildmaster seam.
     entry_hall = rooms["entry_hall"]
     hall = rooms["main_hall"]
     infirmary = rooms["infirmary"]
@@ -389,6 +402,9 @@ def ensure_crossing_empath_guildhall():
         )
         west_arch_to_lane.db.exit_display_name = "Crossing"
 
+    # DRG-EMPATH-03: Guildleader Merla and the supporting healerie NPCs
+    # are the grandfathered directengine_canon Empath guild roster for
+    # The Crossing.
     leader = _ensure_npc(
         GUILDLEADER_TYPECLASS,
         "Guildleader Merla",

@@ -9,6 +9,13 @@ def handle_death(character, cause=None, death_type="vitality"):
     if getattr(character.db, "life_state", None) == "dead" or bool(getattr(character.db, "is_dead", False)):
         return character.get_death_corpse() if hasattr(character, "get_death_corpse") else None
 
+    if getattr(character.db, "spirit_beacon", None) is not None:
+        character.db.spirit_beacon = None
+        if hasattr(character, "get_state"):
+            from engine.services.state_service import StateService
+
+            StateService.remove_effect(character, "utility", "spirit_beacon")
+
     death_type = "spirit" if str(death_type or "vitality").lower() == "spirit" else "vitality"
     death_time = time.time()
     death_location = getattr(getattr(character, "location", None), "id", None)
@@ -66,6 +73,8 @@ def handle_death(character, cause=None, death_type="vitality"):
     if hasattr(character, "move_carried_items_to_corpse"):
         character.move_carried_items_to_corpse(corpse)
     lost_coins = character.move_coins_to_corpse(corpse) if hasattr(character, "move_coins_to_corpse") else 0
+    if hasattr(character, "notify_ranger_companion_owner_death"):
+        character.notify_ranger_companion_owner_death(corpse=corpse)
 
     if bool(getattr(character.db, "is_npc", False)) and hasattr(character, "generate_npc_loot"):
         character.generate_npc_loot()

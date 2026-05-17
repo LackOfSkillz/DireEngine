@@ -1,5 +1,7 @@
 import unittest
 
+from engine.services.state_service import StateService
+
 from domain.combat.maneuvers import ManeuverID
 from domain.combat.resolution import (
     CombatOutcome,
@@ -491,6 +493,91 @@ class CombatResolutionTests(unittest.TestCase):
 
         self.assertEqual(baseline_damage, barrier_damage)
         self.assertEqual(barrier_context["barrier_event"], {})
+
+    def test_bless_adds_accuracy_and_damage_against_undead_targets(self):
+        blessed_attacker = DummyActor(
+            stats={"agility": 30, "reflex": 25, "strength": 28},
+            skills={"light_edge": 60, "tactics": 20},
+            weapon=self.weapon,
+        )
+        undead_defender = DummyActor(
+            stats={"agility": 5, "reflex": 5, "strength": 18},
+            skills={"evasion": 1},
+            weapon=self.defender._weapon,
+        )
+        undead_defender.key = "Restless Skeleton"
+        undead_defender.db.creature_type = "undead"
+        StateService.apply_utility_effect(
+            blessed_attacker,
+            "bless",
+            20,
+            source_spell="bless",
+            extra_data={"strength": 3, "undead_accuracy_bonus": 6, "undead_damage_bonus": 3},
+        )
+
+        baseline_of = compute_offensive_factor(self.attacker, undead_defender, self.context, combat_rng=FixedCombatRng(100))
+        blessed_of = compute_offensive_factor(blessed_attacker, undead_defender, self.context, combat_rng=FixedCombatRng(100))
+
+        baseline_context = dict(self.context)
+        baseline_context.update({"leftover_of": 30, "post_defense_foi": 18, "snipe_config": {}, "maneuver": "swing"})
+        blessed_context = dict(baseline_context)
+        baseline_damage = calculate_damage(self.attacker, undead_defender, baseline_context, rng=FixedRandom(8, 50, 20, 20, 20, 15, 15, 90, 90, 90, 90))
+        blessed_damage = calculate_damage(blessed_attacker, undead_defender, blessed_context, rng=FixedRandom(8, 50, 20, 20, 20, 15, 15, 90, 90, 90, 90))
+
+        self.assertGreater(blessed_of.total, baseline_of.total)
+        self.assertGreater(blessed_damage, baseline_damage)
+
+    def test_protection_from_evil_adds_evasion_bonus_against_undead_attackers(self):
+        undead_attacker = DummyActor(
+            stats={"agility": 30, "reflex": 25, "strength": 28},
+            skills={"light_edge": 60, "tactics": 20},
+            weapon=self.weapon,
+        )
+        undead_attacker.key = "Shadow Hound"
+        undead_attacker.db.creature_type = "undead"
+        protected_defender = DummyActor(
+            stats={"agility": 20, "reflex": 22, "strength": 18},
+            skills={"evasion": 35, "parry_ability": 30, "shield_usage": 20},
+            weapon=self.defender._weapon,
+        )
+        StateService.apply_warding_effect(
+            protected_defender,
+            "protection_from_evil",
+            strength=3,
+            duration=20,
+            extra_data={"undead_evasion_bonus": 6},
+        )
+
+        baseline = compute_edf(self.defender, undead_attacker, self.context)
+        protected = compute_edf(protected_defender, undead_attacker, self.context)
+
+        self.assertGreater(protected.total, baseline.total)
+
+    def test_divine_radiance_adds_evasion_bonus_against_undead_attackers(self):
+        undead_attacker = DummyActor(
+            stats={"agility": 30, "reflex": 25, "strength": 28},
+            skills={"light_edge": 60, "tactics": 20},
+            weapon=self.weapon,
+        )
+        undead_attacker.key = "Restless Dead"
+        undead_attacker.db.creature_type = "undead"
+        radiant_defender = DummyActor(
+            stats={"agility": 20, "reflex": 22, "strength": 18},
+            skills={"evasion": 35, "parry_ability": 30, "shield_usage": 20},
+            weapon=self.defender._weapon,
+        )
+        StateService.apply_warding_effect(
+            radiant_defender,
+            "divine_radiance",
+            strength=2,
+            duration=20,
+            extra_data={"undead_evasion_bonus": 2},
+        )
+
+        baseline = compute_edf(self.defender, undead_attacker, self.context)
+        protected = compute_edf(radiant_defender, undead_attacker, self.context)
+
+        self.assertGreater(protected.total, baseline.total)
 
 
 if __name__ == "__main__":

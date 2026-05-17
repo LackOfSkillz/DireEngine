@@ -148,6 +148,16 @@ class SpellAccessServiceTests(unittest.TestCase):
         self.assertFalse(result.success)
         self.assertIn("You have not learned that spell.", result.errors)
 
+    def test_cleric_04_low_circle_spells_are_apprentice_accessible(self):
+        character = DummyCharacter(profession="cleric", circle=5, skills={"primary_magic": 20})
+        character.ensure_core_defaults()
+
+        apprentice_ids = [spell.id for spell in SpellAccessService.get_apprentice_spells(character)]
+
+        self.assertIn("bless", apprentice_ids)
+        self.assertIn("protection_from_evil", apprentice_ids)
+        self.assertIn("holy_light", apprentice_ids)
+
     def test_manifest_force_is_apprentice_accessible(self):
         character = DummyCharacter(profession="cleric", circle=5, skills={"primary_magic": 20})
         character.ensure_core_defaults()
@@ -185,13 +195,54 @@ class SpellAccessServiceTests(unittest.TestCase):
 
         apprentice_ids = [spell.id for spell in SpellAccessService.get_apprentice_spells(character)]
 
-        self.assertEqual(apprentice_ids, ["burden", "strange_arrow"])
+        self.assertEqual(
+            apprentice_ids,
+            ["bless", "burden", "strange_arrow", "holy_light", "protection_from_evil"],
+        )
 
     def test_non_magic_profession_has_no_apprentice_access(self):
         character = DummyCharacter(profession="barbarian", circle=5, skills={"primary_magic": 20})
         character.ensure_core_defaults()
 
         self.assertEqual(SpellAccessService.get_apprentice_spells(character), [])
+
+    def test_cleric_05_ward_spells_are_not_apprentice_accessible(self):
+        character = DummyCharacter(profession="cleric", circle=20, skills={"primary_magic": 300})
+        character.ensure_core_defaults()
+
+        apprentice_ids = [spell.id for spell in SpellAccessService.get_apprentice_spells(character)]
+
+        self.assertNotIn("major_physical_protection", apprentice_ids)
+        self.assertNotIn("halo", apprentice_ids)
+        self.assertNotIn("divine_radiance", apprentice_ids)
+
+    def test_cleric_06_resurrection_spells_are_not_apprentice_accessible(self):
+        character = DummyCharacter(profession="cleric", circle=20, skills={"primary_magic": 300})
+        character.ensure_core_defaults()
+
+        apprentice_ids = [spell.id for spell in SpellAccessService.get_apprentice_spells(character)]
+
+        self.assertNotIn("rejuvenation", apprentice_ids)
+        self.assertNotIn("mass_rejuvenation", apprentice_ids)
+
+    def test_cleric_07_divine_intervention_spells_are_not_apprentice_accessible(self):
+        character = DummyCharacter(profession="cleric", circle=20, skills={"primary_magic": 300})
+        character.ensure_core_defaults()
+
+        apprentice_ids = [spell.id for spell in SpellAccessService.get_apprentice_spells(character)]
+
+        self.assertNotIn("aesrela_everild", apprentice_ids)
+        self.assertNotIn("revelation", apprentice_ids)
+        self.assertNotIn("hand_of_tenemlor", apprentice_ids)
+
+    def test_cleric_08_utility_spells_are_not_apprentice_accessible(self):
+        character = DummyCharacter(profession="cleric", circle=20, skills={"primary_magic": 300})
+        character.ensure_core_defaults()
+
+        apprentice_ids = [spell.id for spell in SpellAccessService.get_apprentice_spells(character)]
+
+        self.assertNotIn("spirit_beacon", apprentice_ids)
+        self.assertNotIn("uncurse", apprentice_ids)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ django.setup()
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_object
 
-from typeclasses.npcs import ClericGuildmaster, EmpathGuildleader, GuildLeaderNPC, NPC, RangerGuildmaster, StatTrainerNPC
+from typeclasses.npcs import ClericGuildmaster, EmpathGuildleader, GuildLeaderNPC, NPC, StatTrainerNPC
 from world.areas.the_landing.stat_trainers import ensure_the_landing_stat_trainers
 
 
@@ -64,7 +64,6 @@ class StatTrainerNpcTests(unittest.TestCase):
     def test_existing_guildleaders_remain_direct_npc_subclasses(self):
         self.assertEqual(EmpathGuildleader.__bases__, (NPC,))
         self.assertEqual(ClericGuildmaster.__bases__, (NPC,))
-        self.assertEqual(RangerGuildmaster.__bases__, (NPC,))
 
     def test_all_eight_stat_trainer_rooms_exist(self):
         rooms = ensure_the_landing_stat_trainers()

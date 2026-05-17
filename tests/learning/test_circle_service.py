@@ -90,6 +90,11 @@ class CircleServiceTests(unittest.TestCase):
         self.assertEqual(requirements["skill_rank_total_required"], 200)
         self.assertEqual(requirements["money_coins_required"], 400)
 
+    def test_cleric_requirements_use_primary_magic_and_theurgy(self):
+        requirements = get_placeholder_circle_requirements("cleric", 4)
+        self.assertEqual(requirements["skill_requirements"], {"primary_magic": 75, "theurgy": 75})
+        self.assertEqual(requirements["money_coins_required"], 400)
+
     def test_find_guild_leader_for_profession(self):
         caller = _CircleCharacter(self.room)
         self.assertEqual(find_guild_leader_for_profession(caller, "empath"), self.leader)
@@ -135,7 +140,7 @@ class CircleServiceTests(unittest.TestCase):
             profession="cleric",
             circle=9,
             coins=2000,
-            exp_skill_state={"theology": {"rank": 600}},
+            exp_skill_state={"primary_magic": {"rank": 600}, "theurgy": {"rank": 600}},
         )
 
         result = commit_advancement(caller)
@@ -153,11 +158,14 @@ class CircleServiceTests(unittest.TestCase):
             profession="cleric",
             circle=9,
             coins=2000,
-            exp_skill_state={"theology": {"rank": 600}},
+            exp_skill_state={"primary_magic": {"rank": 600}, "theurgy": {"rank": 600}},
         )
         caller.db.spellbook["known_spells"] = {
+            "bless": {"learned_via": "book", "circle_learned": 1},
             "burden": {"learned_via": "book", "circle_learned": 9},
+            "holy_light": {"learned_via": "book", "circle_learned": 2},
             "manifest_force": {"learned_via": "scroll", "circle_learned": 9},
+            "protection_from_evil": {"learned_via": "book", "circle_learned": 3},
             "strange_arrow": {"learned_via": "book", "circle_learned": 9},
         }
 
@@ -173,15 +181,18 @@ class CircleServiceTests(unittest.TestCase):
             profession="cleric",
             circle=10,
             coins=3000,
-            exp_skill_state={"theology": {"rank": 700}},
+            exp_skill_state={"primary_magic": {"rank": 700}, "theurgy": {"rank": 700}},
         )
 
         result = commit_advancement(caller)
 
         self.assertTrue(result.ok)
         self.assertIn("Your apprentice access has expired", result.message)
+        self.assertIn("Bless", result.message)
         self.assertIn("Burden", result.message)
+        self.assertIn("Holy Light", result.message)
         self.assertIn("Manifest Force", result.message)
+        self.assertIn("Protection from Evil", result.message)
         self.assertIn("Strange Arrow", result.message)
 
     def test_circle_eleven_expiration_suppressed_when_all_apprentice_spells_memorized(self):
@@ -191,11 +202,14 @@ class CircleServiceTests(unittest.TestCase):
             profession="cleric",
             circle=10,
             coins=3000,
-            exp_skill_state={"theology": {"rank": 700}},
+            exp_skill_state={"primary_magic": {"rank": 700}, "theurgy": {"rank": 700}},
         )
         caller.db.spellbook["known_spells"] = {
+            "bless": {"learned_via": "book", "circle_learned": 1},
             "burden": {"learned_via": "book", "circle_learned": 9},
+            "holy_light": {"learned_via": "book", "circle_learned": 2},
             "manifest_force": {"learned_via": "scroll", "circle_learned": 9},
+            "protection_from_evil": {"learned_via": "book", "circle_learned": 3},
             "strange_arrow": {"learned_via": "book", "circle_learned": 9},
         }
 
@@ -211,7 +225,7 @@ class CircleServiceTests(unittest.TestCase):
             profession="cleric",
             circle=49,
             coins=6000,
-            exp_skill_state={"theology": {"rank": 2600}},
+            exp_skill_state={"primary_magic": {"rank": 2600}, "theurgy": {"rank": 2600}},
         )
 
         result = commit_advancement(caller)
@@ -219,6 +233,22 @@ class CircleServiceTests(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertEqual(caller.db.circle, 50)
         self.assertEqual(caller.db.magic_slot_pool["max"], 50)
+
+    def test_cleric_projection_reports_skill_specific_missing_lines(self):
+        self.leader.db.leads_profession = "cleric"
+        caller = _CircleCharacter(
+            self.room,
+            profession="cleric",
+            circle=4,
+            coins=1000,
+            exp_skill_state={"primary_magic": {"rank": 80}, "theurgy": {"rank": 50}},
+        )
+
+        projection = project_advancement(caller)
+
+        self.assertFalse(projection["requirements_met"])
+        self.assertIn("Primary Magic: 80/100", projection["missing"])
+        self.assertIn("Theurgy: 50/100", projection["missing"])
 
     def test_commit_failure_for_missing_requirements_has_no_room_message(self):
         caller = _CircleCharacter(self.room, exp_skill_state={"empathy": {"rank": 10}}, coins=50)

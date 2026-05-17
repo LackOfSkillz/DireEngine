@@ -16,6 +16,7 @@ from engine.services.spell_contest_service import SpellContestService
 from engine.services.state_service import StateService
 from tests.services.test_structured_spell_pipeline import DummyCharacter, DummyHolder
 from typeclasses.characters import Character
+from world.systems.death import handle_death
 
 
 class RuntimeDummyRoom:
@@ -119,6 +120,34 @@ class RuntimeDummyCharacter(DummyCharacter):
         self._target = target
 
 
+class RuntimeDummyCorpse:
+    def __init__(self, owner=None, key="corpse"):
+        self.db = DummyHolder()
+        self.db.is_corpse = True
+        self.id = next(RuntimeDummyCharacter._ids)
+        self.pk = self.id
+        self.key = key
+        self._owner = owner
+        self.location = None
+
+    def get_owner(self):
+        return self._owner
+
+
+class RuntimeHiddenTarget(RuntimeDummyCharacter):
+    def __init__(self, profession="cleric", key="HiddenTarget"):
+        super().__init__(profession=profession, key=key)
+        self.db.stealthed = True
+        self.set_state("hidden", {"strength": 20})
+
+    def is_hidden(self):
+        return bool(self.get_state("hidden")) or bool(getattr(self.db, "stealthed", False))
+
+    def reveal(self):
+        self.db.stealthed = False
+        self.clear_state("hidden")
+
+
 class CharacterSpellRuntimeTests(unittest.TestCase):
     def _learn(self, character, spell_id):
         spell = character._resolve_structured_spell(spell_id)
@@ -217,6 +246,48 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         self.assertTrue(remove_link_mock.called)
         self.assertTrue(any("empathic connection" in line.lower() for line in empath.messages))
 
+    def test_innocence_runtime_rejects_explicit_other_target(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        patient = RuntimeDummyCharacter(profession="cleric", key="Patient")
+        empath.db.circle = 11
+        room = RuntimeDummyRoom()
+        room.add(empath, patient)
+
+        self.assertTrue(self._learn(empath, "innocence").success)
+        self.assertTrue(empath.prepare_spell("innocence 10"))
+
+        self.assertFalse(empath.cast_spell(target_name="Patient"))
+        self.assertTrue(any("only cast that spell on yourself" in line.lower() for line in empath.messages))
+
+    def test_zone_of_protection_runtime_wards_group_slice(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        patient = RuntimeDummyCharacter(profession="cleric", key="Patient")
+        empath.db.circle = 11
+        room = RuntimeDummyRoom()
+        room.add(empath, patient)
+
+        self.assertTrue(self._learn(empath, "zone_of_protection").success)
+        self.assertTrue(empath.prepare_spell("zone_of_protection 15"))
+        self.assertTrue(empath.cast_spell())
+
+        caster_ward = dict((empath.get_state("active_effects") or {}).get("warding", {}).get("zone_of_protection", {}) or {})
+        patient_ward = dict((patient.get_state("active_effects") or {}).get("warding", {}).get("zone_of_protection", {}) or {})
+        self.assertGreater(int(caster_ward.get("strength", 0) or 0), 0)
+        self.assertGreater(int(patient_ward.get("strength", 0) or 0), 0)
+
+    def test_zone_of_protection_runtime_rejects_explicit_other_target(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        patient = RuntimeDummyCharacter(profession="cleric", key="Patient")
+        empath.db.circle = 11
+        room = RuntimeDummyRoom()
+        room.add(empath, patient)
+
+        self.assertTrue(self._learn(empath, "zone_of_protection").success)
+        self.assertTrue(empath.prepare_spell("zone_of_protection 15"))
+
+        self.assertFalse(empath.cast_spell(target_name="Patient"))
+        self.assertTrue(any("only cast that spell on yourself" in line.lower() for line in empath.messages))
+
     def test_prepare_cast_augment_runtime_avoids_legacy_resolver(self):
         mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
         room = RuntimeDummyRoom()
@@ -229,6 +300,20 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
 
         self.assertEqual(mage.get_state("augmentation_buff")["name"], "bolster")
         self.assertTrue(any("bolster" in line.lower() for line in mage.messages))
+
+    def test_prepare_cast_bless_runtime_can_target_an_ally(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        target = RuntimeDummyCharacter(profession="cleric", key="Guard")
+        room = RuntimeDummyRoom()
+        room.add(cleric, target)
+
+        self.assertTrue(self._learn(cleric, "bless").success)
+        self.assertTrue(cleric.prepare_spell("bless 10"))
+        self.assertTrue(cleric.cast_spell(target_name="Guard"))
+
+        bless_state = dict((target.get_state("active_effects") or {}).get("utility", {}).get("bless", {}) or {})
+        self.assertTrue(bool(bless_state))
+        self.assertTrue(any("holy radiance" in line.lower() for line in cleric.messages))
 
     def test_prepare_cast_ward_runtime_updates_authoritative_barrier(self):
         cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
@@ -247,6 +332,89 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         second_barrier = dict(cleric.get_state("warding_barrier") or {})
         self.assertEqual(second_barrier["name"], "minor_barrier")
         self.assertGreaterEqual(int(second_barrier["strength"]), int(first_barrier["strength"]))
+
+    def test_prepare_cast_protection_from_evil_runtime_targets_patient(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        patient = RuntimeDummyCharacter(profession="cleric", key="Patient")
+        room = RuntimeDummyRoom()
+        room.add(cleric, patient)
+
+        self.assertTrue(self._learn(cleric, "protection_from_evil").success)
+        self.assertTrue(cleric.prepare_spell("protection_from_evil 20"))
+        self.assertTrue(cleric.cast_spell(target_name="Patient"))
+
+        self.assertEqual(patient.get_state("warding_barrier")["name"], "protection_from_evil")
+        augmentation = dict((patient.get_state("active_effects") or {}).get("augmentation", {}).get("protection_from_evil", {}) or {})
+        self.assertTrue(bool(augmentation))
+
+    def test_prepare_cast_holy_light_runtime_sets_light_effect(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        room = RuntimeDummyRoom()
+        room.add(cleric)
+
+        self.assertTrue(self._learn(cleric, "holy_light").success)
+        self.assertTrue(cleric.prepare_spell("holy_light 5"))
+        self.assertTrue(cleric.cast_spell())
+
+        utility_light = dict(cleric.get_state("utility_light") or {})
+        self.assertEqual(utility_light.get("name"), "holy_light")
+        self.assertTrue(any("holy light" in line.lower() for line in cleric.messages))
+
+    def test_prepare_cast_major_physical_protection_runtime_sets_stronger_physical_barrier(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        room = RuntimeDummyRoom()
+        room.add(cleric)
+
+        self.assertTrue(self._learn(cleric, "major_physical_protection").success)
+        self.assertTrue(cleric.prepare_spell("major_physical_protection 15"))
+        self.assertTrue(cleric.cast_spell())
+
+        self.assertTrue(bool((cleric.get_state("physical_barrier") or {}).get("absorbs_physical", False)))
+        self.assertGreaterEqual(int((cleric.get_state("physical_barrier") or {}).get("strength", 0) or 0), 4)
+
+    def test_prepare_cast_divine_radiance_runtime_sets_ward_and_light(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        room = RuntimeDummyRoom()
+        room.add(cleric)
+
+        self.assertTrue(self._learn(cleric, "divine_radiance").success)
+        self.assertTrue(cleric.prepare_spell("divine_radiance 5"))
+        self.assertTrue(cleric.cast_spell())
+
+        self.assertEqual((cleric.get_state("warding_barrier") or {}).get("name"), "divine_radiance")
+        self.assertEqual((cleric.get_state("utility_light") or {}).get("spell_id"), "divine_radiance")
+
+    def test_prepare_cast_halo_runtime_sets_bounded_defensive_aura(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        cleric.db.circle = 20
+        original_get_skill = cleric.get_skill
+        cleric.get_skill = lambda name, _original=original_get_skill: 300 if name == "primary_magic" else _original(name)
+        room = RuntimeDummyRoom()
+        room.add(cleric)
+
+        self.assertTrue(self._learn(cleric, "halo").success)
+        self.assertTrue(cleric.prepare_spell("halo 20"))
+        self.assertTrue(cleric.cast_spell())
+
+        self.assertEqual((cleric.get_state("warding_barrier") or {}).get("name"), "halo")
+        augmentation = dict((cleric.get_state("active_effects") or {}).get("augmentation", {}).get("halo", {}) or {})
+        self.assertEqual(dict(augmentation.get("modifiers") or {}).get("magic_defense"), 1.0)
+
+    def test_prepare_cast_rejuvenation_runtime_targets_corpse_and_delegates_to_revive_hook(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        fallen = RuntimeDummyCharacter(profession="cleric", key="Fallen")
+        corpse = RuntimeDummyCorpse(owner=fallen, key="corpse")
+        room = RuntimeDummyRoom()
+        room.add(cleric, corpse)
+        calls = []
+        cleric.perform_cleric_revive = lambda target: calls.append(target) or (True, "revived")
+
+        self.assertTrue(self._learn(cleric, "rejuvenation").success)
+        self.assertTrue(cleric.prepare_spell("rejuvenation 5"))
+        self.assertTrue(cleric.cast_spell(target_name="corpse"))
+
+        self.assertEqual(calls, [corpse])
+        self.assertTrue(any("calling them back from death" in line.lower() for line in cleric.messages))
 
     def test_prepare_cast_targeted_runtime_uses_contest_and_state_service(self):
         mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
@@ -435,6 +603,45 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
 
         self.assertLess(target.db.hp, target.db.max_hp)
 
+    def test_prepare_cast_aesrela_everild_runtime_stuns_target(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        target = RuntimeDummyCharacter(profession="cleric", key="Target")
+        cleric.db.circle = 20
+        room = RuntimeDummyRoom()
+        room.add(cleric, target)
+
+        self.assertTrue(self._learn(cleric, "aesrela_everild").success)
+        self.assertTrue(cleric.prepare_spell("aesrela_everild 20"))
+        self.assertTrue(cleric.cast_spell(target_name="Target"))
+
+        self.assertTrue(bool(target.db.stunned))
+
+    def test_prepare_cast_revelation_runtime_reveals_hidden_target(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        target = RuntimeHiddenTarget(profession="cleric", key="HiddenTarget")
+        cleric.db.circle = 20
+        room = RuntimeDummyRoom()
+        room.add(cleric, target)
+
+        self.assertTrue(self._learn(cleric, "revelation").success)
+        self.assertTrue(cleric.prepare_spell("revelation 9"))
+        self.assertTrue(cleric.cast_spell(target_name="HiddenTarget"))
+
+        self.assertFalse(target.is_hidden())
+
+    def test_prepare_cast_hand_of_tenemlor_runtime_burns_target(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        target = RuntimeDummyCharacter(profession="cleric", key="Target")
+        cleric.db.circle = 20
+        room = RuntimeDummyRoom()
+        room.add(cleric, target)
+
+        self.assertTrue(self._learn(cleric, "hand_of_tenemlor").success)
+        self.assertTrue(cleric.prepare_spell("hand_of_tenemlor 16"))
+        self.assertTrue(cleric.cast_spell(target_name="Target"))
+
+        self.assertLess(target.db.hp, target.db.max_hp)
+
     def test_prepare_cast_group_warding_runtime_uses_structured_handler(self):
         cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
         ally = RuntimeDummyCharacter(profession="cleric", key="Ally")
@@ -496,6 +703,50 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
         self.assertEqual(cleanse_mock.call_count, 1)
         self.assertIsNone(cleric.get_state("exposed_magic"))
         self.assertEqual(dict((cleric.get_state("active_effects") or {}).get("debilitation", {}) or {}), {})
+
+    def test_prepare_cast_spirit_beacon_runtime_sets_anchor_and_clears_on_death(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        cleric.db.circle = 20
+        room = RuntimeDummyRoom()
+        room.id = 17
+        room.key = "Pilgrim Chapel"
+        room.add(cleric)
+        cleric.home = room
+        cleric.get_favor = lambda: 0
+        cleric.get_nearest_recovery_point = lambda room=None: room or cleric.location
+        cleric.get_exp_debt = lambda: 0
+
+        self.assertTrue(self._learn(cleric, "spirit_beacon").success)
+        self.assertTrue(cleric.prepare_spell("spirit_beacon 4"))
+        self.assertTrue(cleric.cast_spell())
+        self.assertEqual(getattr(cleric.db, "spirit_beacon", {}).get("room_key"), "Pilgrim Chapel")
+        self.assertTrue(bool(getattr(cleric.db, "spirit_beacon_active", False)))
+
+        corpse = handle_death(cleric)
+
+        self.assertIsNone(corpse)
+        self.assertIsNone(getattr(cleric.db, "spirit_beacon", None))
+        self.assertFalse(bool(getattr(cleric.db, "spirit_beacon_active", False)))
+
+    def test_prepare_cast_uncurse_runtime_uses_structured_state_service(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        target = RuntimeDummyCharacter(profession="cleric", key="Target")
+        room = RuntimeDummyRoom()
+        room.add(cleric, target)
+        target.set_state("exposed_magic", {"duration": 3})
+        target.set_state("active_effects", {"debilitation": {"burden": {"duration": 3, "strength": 2}}})
+        target.reduce_death_sting = lambda power: (power >= 10, "Death's Sting loosens its grip.")
+
+        self.assertTrue(self._learn(cleric, "uncurse").success)
+        with patch.object(RuntimeDummyCharacter, "resolve_cleanse_spell", side_effect=AssertionError("legacy uncurse used"), create=True), patch(
+            "engine.services.spell_effect_service.StateService.apply_uncurse", wraps=StateService.apply_uncurse
+        ) as uncurse_mock:
+            self.assertTrue(cleric.prepare_spell("uncurse 10"))
+            self.assertTrue(cleric.cast_spell(target_name="Target"))
+
+        self.assertEqual(uncurse_mock.call_count, 1)
+        self.assertIsNone(target.get_state("exposed_magic"))
+        self.assertEqual(dict((target.get_state("active_effects") or {}).get("debilitation", {}) or {}), {})
 
     def test_unregistered_spell_raises_in_resolve_path(self):
         mage = RuntimeDummyCharacter(profession="warrior_mage", key="Mage")
@@ -568,6 +819,172 @@ class CharacterSpellRuntimeTests(unittest.TestCase):
 
         self.assertNotIn("regenerate", empath.get_active_cyclic_effects())
         self.assertTrue(any("breaks under interference" in line.lower() for line in empath.messages))
+
+    def test_self_target_healing_defaults_bare_cast_to_self(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        room = RuntimeDummyRoom()
+        room.add(empath)
+        empath.db.injuries = {
+            "head": {"external": 6, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 100, "vital": True},
+            "chest": {"external": 0, "internal": 0, "bruise": 0, "bleed": 0, "scar": 0, "tended": False, "tend": {"strength": 0, "duration": 0, "last_applied": 0.0, "min_until": 0.0}, "max": 120, "vital": True},
+        }
+        empath.db.wounds = {"vitality": 6, "bleeding": 0, "poison": 0, "disease": 0, "fatigue": 0}
+        empath.db.injuries["head"]["external"] = 6
+
+        self.assertTrue(self._learn(empath, "external_wound_healing").success)
+        self.assertTrue(empath.prepare_spell("external_wound_healing 10"))
+        self.assertTrue(empath.cast_spell())
+
+        self.assertLess(empath.db.injuries["head"]["external"], 6)
+        self.assertTrue(any("external injuries closed" in line.lower() for line in empath.messages))
+
+    def test_self_target_healing_rejects_explicit_other_target(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        patient = RuntimeDummyCharacter(profession="empath", key="Patient")
+        room = RuntimeDummyRoom()
+        room.add(empath, patient)
+
+        self.assertTrue(self._learn(empath, "vitality_healing").success)
+        self.assertTrue(empath.prepare_spell("vitality_healing 10"))
+        self.assertFalse(empath.cast_spell(target_name="Patient"))
+        self.assertTrue(any("only cast that spell on yourself" in line.lower() for line in empath.messages))
+
+    def test_self_target_healing_still_accepts_explicit_self_target(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        room = RuntimeDummyRoom()
+        room.add(empath)
+        empath.db.hp = 60
+
+        self.assertTrue(self._learn(empath, "vitality_healing").success)
+        self.assertTrue(empath.prepare_spell("vitality_healing 10"))
+        self.assertTrue(empath.cast_spell(target_name="Empath"))
+        self.assertGreater(empath.db.hp, 60)
+
+    def test_non_self_target_spell_still_requires_target(self):
+        cleric = RuntimeDummyCharacter(profession="cleric", key="Cleric")
+        room = RuntimeDummyRoom()
+        room.add(cleric)
+
+        self.assertTrue(self._learn(cleric, "cleric_minor_heal").success)
+        self.assertTrue(cleric.prepare_spell("cleric_minor_heal 10"))
+        self.assertFalse(cleric.cast_spell())
+        self.assertTrue(any("must specify a target" in line.lower() for line in cleric.messages))
+
+    def test_self_target_flush_poisons_defaults_bare_cast_to_self(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        empath.db.circle = 10
+        room = RuntimeDummyRoom()
+        room.add(empath)
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "poison": 15, "disease": 0, "fatigue": 0}
+
+        self.assertTrue(self._learn(empath, "flush_poisons").success)
+        self.assertTrue(empath.prepare_spell("flush_poisons 10"))
+        self.assertTrue(empath.cast_spell())
+
+        self.assertEqual(int((empath.db.wounds or {}).get("poison", 0) or 0), 0)
+        self.assertTrue(any("driving venom out of your blood" in line.lower() for line in empath.messages))
+
+    def test_self_target_cure_disease_rejects_explicit_other_target(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        empath.db.circle = 10
+        patient = RuntimeDummyCharacter(profession="empath", key="Patient")
+        room = RuntimeDummyRoom()
+        room.add(empath, patient)
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "poison": 0, "disease": 12, "fatigue": 0}
+
+        self.assertTrue(self._learn(empath, "cure_disease").success)
+        self.assertTrue(empath.prepare_spell("cure_disease 12"))
+        self.assertFalse(empath.cast_spell(target_name="Patient"))
+        self.assertTrue(any("only cast that spell on yourself" in line.lower() for line in empath.messages))
+
+    def test_self_target_cure_disease_defaults_bare_cast_to_self(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        empath.db.circle = 10
+        room = RuntimeDummyRoom()
+        room.add(empath)
+        empath.db.wounds = {"vitality": 0, "bleeding": 0, "poison": 0, "disease": 12, "fatigue": 0}
+
+        self.assertTrue(self._learn(empath, "cure_disease").success)
+        self.assertTrue(empath.prepare_spell("cure_disease 12"))
+        self.assertTrue(empath.cast_spell())
+
+        self.assertEqual(int((empath.db.wounds or {}).get("disease", 0) or 0), 0)
+        self.assertTrue(any("illness gives way" in line.lower() for line in empath.messages))
+
+    def test_refresh_defaults_bare_cast_to_self_and_reduces_fatigue(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        empath.db.circle = 10
+        empath.db.fatigue = 25
+        empath.db.max_fatigue = 100
+        room = RuntimeDummyRoom()
+        room.add(empath)
+
+        self.assertTrue(self._learn(empath, "refresh").success)
+        self.assertTrue(empath.prepare_spell("refresh 10"))
+        self.assertTrue(empath.cast_spell())
+
+        self.assertLess(int(empath.db.fatigue or 0), 25)
+        self.assertTrue(any("easing away weariness" in line.lower() for line in empath.messages))
+
+    def test_refresh_runtime_can_target_another_character(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        patient = RuntimeDummyCharacter(profession="empath", key="Patient")
+        empath.db.circle = 10
+        patient.db.fatigue = 25
+        patient.db.max_fatigue = 100
+        room = RuntimeDummyRoom()
+        room.add(empath, patient)
+
+        self.assertTrue(self._learn(empath, "refresh").success)
+        self.assertTrue(empath.prepare_spell("refresh 10"))
+        self.assertTrue(empath.cast_spell(target_name="Patient"))
+
+        self.assertLess(int(patient.db.fatigue or 0), 25)
+        self.assertTrue(any("calls a bright restorative pulse over Patient" in line for line in room.messages))
+
+    def test_raise_power_runtime_boosts_room_mana_and_drains_fatigue(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        ally = RuntimeDummyCharacter(profession="empath", key="Ally")
+        empath.db.circle = 10
+        empath.db.fatigue = 20
+        empath.db.max_fatigue = 100
+        ally.db.fatigue = 5
+        ally.db.max_fatigue = 100
+        room = RuntimeDummyRoom()
+        room.add(empath, ally)
+
+        self.assertTrue(self._learn(empath, "raise_power").success)
+        self.assertTrue(empath.prepare_spell("raise_power 10"))
+        self.assertTrue(empath.cast_spell())
+
+        self.assertGreater(float(room.db.mana["life"]), 1.0)
+        self.assertEqual(int(empath.db.fatigue or 0), 100)
+        self.assertEqual(int(ally.db.fatigue or 0), 100)
+
+    def test_gift_of_life_rejects_explicit_other_target(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        patient = RuntimeDummyCharacter(profession="empath", key="Patient")
+        empath.db.circle = 10
+        room = RuntimeDummyRoom()
+        room.add(empath, patient)
+
+        self.assertTrue(self._learn(empath, "gift_of_life").success)
+        self.assertTrue(empath.prepare_spell("gift_of_life 10"))
+        self.assertFalse(empath.cast_spell(target_name="Patient"))
+        self.assertTrue(any("only cast that spell on yourself" in line.lower() for line in empath.messages))
+
+    def test_gift_of_life_defaults_bare_cast_to_self_and_sets_buff(self):
+        empath = RuntimeDummyCharacter(profession="empath", key="Empath")
+        empath.db.circle = 10
+        room = RuntimeDummyRoom()
+        room.add(empath)
+
+        self.assertTrue(self._learn(empath, "gift_of_life").success)
+        self.assertTrue(empath.prepare_spell("gift_of_life 10"))
+        self.assertTrue(empath.cast_spell())
+
+        self.assertTrue(bool(((empath.get_state("active_effects") or {}).get("utility") or {}).get("gift_of_life")))
+        self.assertTrue(bool(getattr(empath.db, "gift_of_life_active", False)))
 
     def test_targeted_cyclic_tick_uses_damage_path_once(self):
         seer = RuntimeDummyCharacter(profession="moon_mage", key="Seer")

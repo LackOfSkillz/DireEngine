@@ -1,4 +1,5 @@
 ﻿from commands.command import Command
+from engine.services.circle_service import commit_advancement, project_advancement
 from world.helpers.target_resolver import format_item_matches, resolve_target
 
 
@@ -19,7 +20,29 @@ class CmdCircle(Command):
     help_category = "Character"
 
     def func(self):
-        run_empath_circle_command(self.caller, self.args)
+        if hasattr(self.caller, "is_profession") and self.caller.is_profession("empath"):
+            run_empath_circle_command(self.caller, self.args)
+            return
+        run_profession_circle_command(self.caller, self.args)
+
+
+def run_profession_circle_command(caller, raw_args=""):
+    args = str(raw_args or "").strip().lower()
+    if args in {"advance", "up", "next"}:
+        caller.msg(commit_advancement(caller).message)
+        return True
+    if args:
+        caller.msg("Usage: circle or circle advance")
+        return True
+    projection = project_advancement(caller)
+    caller.msg(f"{projection['profession'].replace('_', ' ').title()} Circle: {int(projection['current_circle'] or 0)}")
+    caller.msg(f"Next Circle: {int(projection['target_circle'] or 0)}")
+    notes = str(projection["requirements"].get("profession_specific_notes", "") or "").strip()
+    if notes:
+        caller.msg(notes)
+    for line in projection.get("missing", []) or []:
+        caller.msg(line)
+    return True
 
 
 def _build_empath_circle_lines(caller):

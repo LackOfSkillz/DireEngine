@@ -13,6 +13,7 @@ from domain.combat.hit_area import BodyPart, body_part_to_key, determine_hit_are
 from domain.combat.maneuvers import get_defense_scaling
 from domain.combat.rng import CombatRng
 from domain.combat.wounds import apply_wounds
+from engine.services.ranger_saf_service import RangerSafService
 
 
 EARLY_GAME_DAMAGE_CLAMP_RATIO = 0.15
@@ -201,6 +202,81 @@ def _get_weapon_power(profile, weapon):
     return max(10, damage * 12 + max(0, balance - 30))
 
 
+def _get_active_effect(actor, category, effect_name):
+    getter = getattr(actor, "get_state", None)
+    if not callable(getter):
+        return {}
+    active_effects = getter("active_effects") or {}
+    if not isinstance(active_effects, Mapping):
+        return {}
+    effect_map = active_effects.get(str(category or "").strip().lower(), {}) or {}
+    if not isinstance(effect_map, Mapping):
+        return {}
+    payload = effect_map.get(str(effect_name or "").strip().lower().replace(" ", "_"), {}) or {}
+    return dict(payload) if isinstance(payload, Mapping) else {}
+
+
+def _get_augmentation_modifier(actor, modifier_key):
+    getter = getattr(actor, "get_state", None)
+    if not callable(getter):
+        return 0
+    buff = getter("augmentation_buff") or {}
+    if not isinstance(buff, Mapping):
+        return 0
+    modifiers = dict(buff.get("modifiers") or {})
+    scale = _coerce_float(modifiers.get(str(modifier_key or "").strip().lower().replace(" ", "_"), 0.0))
+    if scale <= 0.0:
+        return 0
+    return max(0, int(round(_coerce_float(buff.get("strength", 0)) * scale)))
+
+
+def _is_undead_target(target):
+    trait_values = [
+        str(getattr(getattr(target, "db", None), key, "") or "").strip().lower()
+        for key in ("creature_type", "npc_type", "species", "race")
+    ]
+    searchable = " ".join([
+        str(getattr(target, "key", "") or "").lower(),
+        str(getattr(getattr(target, "db", None), "desc", "") or "").lower(),
+        *trait_values,
+    ])
+    return any(keyword in searchable for keyword in ("undead", "zombie", "skeleton", "ghost", "wraith"))
+
+
+def _get_bless_accuracy_bonus(actor, target):
+    if not _is_undead_target(target):
+        return 0
+    bless = _get_active_effect(actor, "utility", "bless")
+    return max(0, _coerce_int(bless.get("undead_accuracy_bonus", 0)))
+
+
+def _get_bless_damage_bonus(actor, target):
+    if not _is_undead_target(target):
+        return 0
+    bless = _get_active_effect(actor, "utility", "bless")
+    return max(0, _coerce_int(bless.get("undead_damage_bonus", 0)))
+
+
+def _get_protection_from_evil_bonus(defender, attacker):
+    if not _is_undead_target(attacker):
+        return 0
+    getter = getattr(defender, "get_state", None)
+    if not callable(getter):
+        return 0
+    active_effects = getter("active_effects") or {}
+    if not isinstance(active_effects, Mapping):
+        return 0
+    warding_effects = active_effects.get("warding", {}) or {}
+    if not isinstance(warding_effects, Mapping):
+        return 0
+    best_bonus = 0
+    for payload in warding_effects.values():
+        if not isinstance(payload, Mapping):
+            continue
+        best_bonus = max(best_bonus, max(0, _coerce_int(payload.get("undead_evasion_bonus", 0))))
+    return best_bonus
+
+
 def compute_offensive_factor(attacker, target, context=None, *, combat_rng=None):
     context = context or {}
     combat_rng = combat_rng or CombatRng()
@@ -217,6 +293,8 @@ def compute_offensive_factor(attacker, target, context=None, *, combat_rng=None)
     base += 10 + (tactics // 10)
     base += _coerce_int(context.get("suitability", 0))
     base += _coerce_int(weapon_effects.get("accuracy", 0))
+    base += _get_augmentation_modifier(attacker, "accuracy")
+    base += _get_bless_accuracy_bonus(attacker, target)
 
     if hasattr(attacker, "is_staggered") and attacker.is_staggered():
         base -= 10
@@ -286,8 +364,8 @@ def compute_offensive_factor(attacker, target, context=None, *, combat_rng=None)
     if isinstance(ranger_pounce, Mapping) and ranger_pounce.get("target_id") == getattr(target, "id", None):
         base += _coerce_int(ranger_pounce.get("accuracy_bonus", 0))
     if bool(context.get("snipe_active")):
-        ranger_snipe = dict(context.get("ranger_snipe") or {})
-        base += _coerce_int(ranger_snipe.get("accuracy_bonus", 0))
+        prepared_snipe = dict(context.get("prepared_snipe") or context.get("ranger_snipe") or {})
+        base += _coerce_int(prepared_snipe.get("accuracy_bonus", 0))
     ranger_mark = context.get("ranger_mark")
     if isinstance(ranger_mark, Mapping):
         base += _coerce_int(ranger_mark.get("accuracy_bonus", 0))
@@ -370,6 +448,8 @@ def compute_edf(defender, attacker=None, context=None):
         target_debilitation = defender.get_state("debilitated") if hasattr(defender, "get_state") else None
         if target_debilitation and target_debilitation.get("type") == "evasion":
             usable_evasion_pct -= _coerce_int(target_debilitation.get("penalty", 0))
+    usable_evasion_pct += _get_augmentation_modifier(defender, "evasion")
+    usable_evasion_pct += _get_protection_from_evil_bonus(defender, attacker)
 
     if hasattr(defender, "apply_death_sting_to_contest_value"):
         evasion_skill = defender.apply_death_sting_to_contest_value(evasion_skill)
@@ -680,7 +760,7 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
     offensive_roar = context["offensive_roar"]
     ranger_pounce = context.get("ranger_pounce")
     snipe_active = context["snipe_active"]
-    ranger_snipe = context["ranger_snipe"]
+    prepared_snipe = context.get("prepared_snipe") or context.get("ranger_snipe") or {}
     aimed_part = context["aimed_part"]
     aimed_location = context["aimed_location"]
     damage_type = context["damage_type"]
@@ -690,8 +770,8 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
     quality = _quality_from_pressure(leftover_of, post_defense_foi)
 
     critical = rng.randint(1, 100) < 5
-    if snipe_active and hasattr(attacker, "get_wilderness_bond") and hasattr(attacker, "get_nature_focus"):
-        if attacker.get_wilderness_bond() >= int(snipe_config.get("mastery_bond_threshold", 80) or 80) and attacker.get_nature_focus() >= int(snipe_config.get("mastery_focus_threshold", 60) or 60):
+    if snipe_active and hasattr(attacker, "is_profession") and attacker.is_profession("ranger") and hasattr(attacker, "get_nature_focus"):
+        if RangerSafService.get_display_percent(attacker) >= int(snipe_config.get("mastery_bond_threshold", 80) or 80) and attacker.get_nature_focus() >= int(snipe_config.get("mastery_focus_threshold", 60) or 60):
             critical = critical or rng.randint(1, 100) <= int(snipe_config.get("mastery_crit_bonus", 8) or 8)
     hit_area = determine_hit_area(
         rng=rng,
@@ -750,7 +830,7 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
     if isinstance(ranger_pounce, Mapping) and ranger_pounce.get("target_id") == target.id:
         damage_multiplier *= 1 + float(ranger_pounce.get("damage_bonus", 0) or 0.0)
     if snipe_active:
-        damage_multiplier *= float(ranger_snipe.get("damage_multiplier", 1.0) or 1.0)
+        damage_multiplier *= float(prepared_snipe.get("damage_multiplier", 1.0) or 1.0)
     if getattr(target.db, "roughed", False):
         damage_multiplier *= 1.1
 
@@ -828,6 +908,7 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
 
     if hasattr(attacker, "apply_death_sting_to_damage"):
         damage = attacker.apply_death_sting_to_damage(damage)
+    damage += _get_bless_damage_bonus(attacker, target)
 
     target_evasion = int(target.get_skill("evasion") or 0) if hasattr(target, "get_skill") else 0
     if skill_rank <= EARLY_GAME_DAMAGE_CLAMP_RANK and target_evasion <= EARLY_GAME_DAMAGE_CLAMP_RANK:

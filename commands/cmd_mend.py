@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.wound_transfer_service import WoundTransferService
 
 
 class CmdMend(Command):
@@ -19,5 +20,5 @@ class CmdMend(Command):
         if args not in {"", "self", "me"}:
             caller.msg("For now you can only 'mend self'.")
             return
-        ok, message = caller.mend_empath_self() if hasattr(caller, "mend_empath_self") else (False, "You cannot mend yourself.")
-        caller.msg(message)
+        result = WoundTransferService.mend_self(caller)
+        caller.msg((result.messages or result.errors)[0])

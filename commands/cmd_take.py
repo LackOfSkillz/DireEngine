@@ -1,4 +1,5 @@
 from commands.command import Command
+from engine.services.wound_transfer_service import WoundTransferService
 
 
 class CmdTake(Command):
@@ -46,8 +47,8 @@ class CmdTake(Command):
                 target = caller.search(target_name, location=caller.location)
             if not target:
                 return
-            ok, message = caller.take_empath_shock(target) if hasattr(caller, "take_empath_shock") else (False, "You cannot take that burden right now.")
-            caller.msg(message)
+            result = WoundTransferService.transfer(caller, patient=target, wound_type="shock")
+            caller.msg((result.messages or result.errors)[0])
             return
         if wound_type.endswith("%") or wound_type.lower() in {"slow", "fast"}:
             requested_fraction = None
@@ -76,45 +77,25 @@ class CmdTake(Command):
                 caller.msg("Partial take only supports one modifier followed by an optional selector.")
                 return
 
-            ok, message = caller.take_empath_wound(
-                "",
-                "all",
+            result = WoundTransferService.transfer(
+                caller,
+                wound_type="",
                 selector=selector or None,
                 requested_fraction=requested_fraction,
                 requested_rate=requested_rate,
-            ) if hasattr(caller, "take_empath_wound") else (False, "You cannot take that wound right now.")
-            caller.msg(message)
-            if ok:
-                link_state = caller.get_empath_link_state(require_local=True, emit_break_messages=False) if hasattr(caller, "get_empath_link_state") else None
-                patient = link_state.get("target") if isinstance(link_state, dict) else None
-                if patient:
-                    if requested_fraction is not None:
-                        patient.msg("You feel only part of your pain lessen.")
-                    elif requested_rate == "slow":
-                        patient.msg("You feel your pain ease in a slow, careful draw.")
-                    else:
-                        patient.msg("You feel your pain wrench sharply away.")
+            )
+            caller.msg((result.messages or result.errors)[0])
             return
         selector = caller.normalize_empath_take_selector(wound_type) if hasattr(caller, "normalize_empath_take_selector") else ""
         if selector:
             if len(parts) > 1:
                 caller.msg("Selective take uses your active link and draws the whole injury for now.")
                 return
-            ok, message = caller.take_empath_wound(wound_type, "", selector=selector) if hasattr(caller, "take_empath_wound") else (False, "You cannot take that wound right now.")
-            caller.msg(message)
-            if ok:
-                link_state = caller.get_empath_link_state(require_local=True, emit_break_messages=False) if hasattr(caller, "get_empath_link_state") else None
-                patient = link_state.get("target") if isinstance(link_state, dict) else None
-                if patient:
-                    patient.msg("You feel a focused thread of pain lessen.")
+            result = WoundTransferService.transfer(caller, wound_type=wound_type, selector=selector)
+            caller.msg((result.messages or result.errors)[0])
             return
         amount = ""
         if len(parts) > 1:
             amount = parts[1]
-        ok, message = caller.take_empath_wound(wound_type, amount) if hasattr(caller, "take_empath_wound") else (False, "You cannot take that wound right now.")
-        caller.msg(message)
-        if ok:
-            link_state = caller.get_empath_link_state(require_local=True, emit_break_messages=False) if hasattr(caller, "get_empath_link_state") else None
-            patient = link_state.get("target") if isinstance(link_state, dict) else None
-            if patient:
-                patient.msg("You feel your pain lessen.")
+        result = WoundTransferService.transfer(caller, wound_type=wound_type, amount=amount)
+        caller.msg((result.messages or result.errors)[0])
