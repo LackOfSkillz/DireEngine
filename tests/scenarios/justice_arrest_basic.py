@@ -1,15 +1,13 @@
 import time
 from evennia.utils.create import create_object
 
+from tests.fixtures.safe_smoke_delete import safe_smoke_delete
 from world.systems import guards, justice
 
 
 def _clear_inventory(actor):
     for item in list(getattr(actor, "contents", []) or []):
-        try:
-            item.delete()
-        except Exception:
-            continue
+        safe_smoke_delete(item)
 
 
 def scenario(ctx):

@@ -94,6 +94,10 @@ class Command(BaseCommand):
                 caller.auto_wake_if_sleeping(reason=command_name)
             return super().at_pre_cmd()
 
+        account = getattr(caller, "account", None)
+        if account and (account.check_permstring("Admin") or account.check_permstring("Developer")):
+            return super().at_pre_cmd()
+
         if command_name in DEAD_STATE_ALLOWED_COMMANDS:
             return super().at_pre_cmd()
 

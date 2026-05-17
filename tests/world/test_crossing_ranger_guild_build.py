@@ -10,6 +10,7 @@ django.setup()
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_object
 
+from tests.fixtures.safe_smoke_delete import safe_smoke_delete
 from typeclasses.rooms import Room
 from world.areas.crossing.ranger_guild import build
 
@@ -26,17 +27,9 @@ class CrossingRangerGuildBuildTests(unittest.TestCase):
     def tearDown(self):
         build.LANE_DBREF = self.original_lane_dbref
         build.LANE_KEY = self.original_lane_key
-        for obj in reversed(self.created):
-            try:
-                obj.delete()
-            except Exception:
-                pass
+        safe_smoke_delete(*self.created)
         cleanup_keys = [spec["key"] for spec in build.ROOM_SPECS.values()] + ["Kalika"]
-        for obj in list(ObjectDB.objects.filter(db_key__in=cleanup_keys)):
-            try:
-                obj.delete()
-            except Exception:
-                pass
+        safe_smoke_delete(*list(ObjectDB.objects.filter(db_key__in=cleanup_keys)))
 
     def _create(self, typeclass, key, **kwargs):
         obj = create_object(typeclass, key=key, nohome=True, **kwargs)

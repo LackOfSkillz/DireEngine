@@ -4,6 +4,7 @@ _GUILDHALL_REGISTRY = {
     # DRG-EMPATH-03: The Crossing Empath guildhall remains the
     # directengine_canon locator entry for Empath progression and
     # world-content discovery.
+    "barbarian": "Barbarian Guild",
     "empath": "Empath Guild",
     "cleric": "Cleric Guild",
     "ranger": "Ranger Guild",

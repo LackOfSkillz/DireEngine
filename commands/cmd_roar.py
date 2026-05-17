@@ -1,18 +1,15 @@
 from commands.command import Command
-
-from world.systems.warrior import ROAR_DATA, format_roar_name
+from engine.services.roar_service import RoarService
 
 
 class CmdRoar(Command):
     """
-    Use a warrior roar.
+        Use a canonical Barbarian roar.
 
     Examples:
       roar
-      roar intimidate
-      roar disrupt goblin
-      roar challenge raider
-      roar rallying
+            roar kuniyo
+            roar everild
     """
 
     key = "roar"
@@ -21,28 +18,9 @@ class CmdRoar(Command):
 
     def func(self):
         caller = self.caller
-        if not hasattr(caller, "is_profession") or not caller.is_profession("warrior"):
-            caller.msg("You are not following the Warrior path.")
-            return
-
-        args = str(self.args or "").strip()
-        if not args:
-            available = []
-            if hasattr(caller, "get_available_warrior_roars"):
-                available = caller.get_available_warrior_roars()
-            if not available:
-                caller.msg("You do not yet know any roars.")
-                return
-            caller.msg(f"Available roars: {', '.join(format_roar_name(name) for name in available)}.")
-            return
-
-        roar_name, _, target_name = args.partition(" ")
-        roar_name = roar_name.strip().lower()
-        target_name = target_name.strip()
-
-        if roar_name not in ROAR_DATA:
-            caller.msg("Unknown roar.")
-            return
-
-        ok, message = caller.activate_warrior_roar(roar_name, target_name=target_name)
-        caller.msg(message)
+        args = str(self.args or "").strip().lower()
+        result = RoarService.invoke(caller, args or None)
+        for message in list(result.messages or []):
+            caller.msg(message)
+        for error in list(result.errors or []):
+            caller.msg(error)

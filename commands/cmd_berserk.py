@@ -1,17 +1,13 @@
 from commands.command import Command
-
-from world.systems.warrior import BERSERK_DATA, format_berserk_name
+from engine.services.berserk_service import BerserkService
 
 
 class CmdBerserk(Command):
     """
-    Enter a warrior berserk state.
+        Enter the canonical Barbarian berserk.
 
     Examples:
-      berserk power
-      berserk stone
-      berserk speed
-      berserk stop
+            berserk
     """
 
     key = "berserk"
@@ -20,34 +16,26 @@ class CmdBerserk(Command):
 
     def func(self):
         caller = self.caller
-        if not hasattr(caller, "is_profession") or not caller.is_profession("warrior"):
-            caller.msg("You are not following the Warrior path.")
+        if not hasattr(caller, "is_profession") or not caller.is_profession("barbarian"):
+            caller.msg("You do not have the facilities to properly channel your rage.")
             return
 
         args = str(self.args or "").strip().lower()
-        active = caller.get_active_warrior_berserk() if hasattr(caller, "get_active_warrior_berserk") else None
-
         if not args:
-            options = ", ".join(format_berserk_name(key) for key in sorted(BERSERK_DATA))
-            if active:
-                caller.msg(f"Active berserk: {format_berserk_name(active.get('key'))}. Available: {options}.")
-            else:
-                caller.msg(f"Available berserks: {options}.")
+            result = BerserkService.berserk(caller)
+            for message in list(result.messages or []):
+                caller.msg(message)
+            for error in list(result.errors or []):
+                caller.msg(error)
             return
 
-        if args in {"stop", "cancel", "end"}:
-            if hasattr(caller, "clear_warrior_berserk") and caller.clear_warrior_berserk(show_message=True):
-                return
-            caller.msg("You are not sustaining a berserk.")
+        caller.msg("Currently there's only one Berserk available to Barbarians, and it's learned automatically at 2nd level.")
+        if args not in {"berserk", "fury", "rage"}:
+            caller.msg("Use BERSERK with no modifier for the canonical Barbarian berserk.")
             return
 
-        if args not in BERSERK_DATA:
-            caller.msg("Unknown berserk. Try power, stone, or speed.")
-            return
-
-        ok, message = caller.activate_warrior_berserk(args)
-        if not ok:
+        result = BerserkService.berserk(caller)
+        for message in list(result.messages or []):
             caller.msg(message)
-            return
-
-        caller.msg(message)
+        for error in list(result.errors or []):
+            caller.msg(error)

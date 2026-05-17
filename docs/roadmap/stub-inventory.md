@@ -388,7 +388,7 @@ Sample canon validation performed during this walk:
 - `world/professions/professions.py:16` hardcodes all professions, including paid ones, in `PROFESSION_PROFILES`
 - `engine/services/mana_service.py:304` and `355` already know about `warrior mage` and `moon mage`
 - `commands/cmd_berserk.py:23`, `cmd_roar.py:24`, `cmd_recover.py:44`, and `cmd_thug.py:68` gate profession-specific behavior directly in commands
-**Notes:** This is the biggest DRG-022.5 work surface. Paid professions are present on disk today even though the Phase 4 directive forbids that end state.
+**Notes:** This is the biggest DRG-022.5 work surface. Paid professions are present on disk today even though the Phase 4 directive forbids that end state. DRG-BARBARIAN-CLOSEOUT re-audited the Warrior-placeholder concentrations before final Barbarian closeout and found no direct Barbarian regression requiring local repair; the remaining Warrior/paid-profession cleanup stays explicitly deferred to this broader scaffold surface rather than being widened into the Barbarian program.
 
 **System / Module:** Paid race registry scaffolding
 **Primary location:** `world/races/definitions.py`

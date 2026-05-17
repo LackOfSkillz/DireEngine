@@ -45,15 +45,20 @@ PROFESSION_PROFILES = {
         "guild_tag": "commoner_guildhall",
         "social": "Neutral",
     },
+    # DRG-BARBARIAN-PROFESSION-001: Barbarian profession identity stays on the
+    # existing string-keyed profile seam, but the canonical axis is profession
+    # id 1 with anti-magic Inner Fire instead of a spell-slot path.
     "barbarian": {
         "display": "Barbarian",
         "description": "Fury-driven warriors who prize raw endurance, battle instinct, and intimidating presence.",
+        "profession_id": 1,
+        "anti_magic": True,
         "primary": "weapons",
         "secondary": "survival",
         "tertiary": "lore",
         "primary_skillsets": _skillset_tuple("weapons"),
         "secondary_skillsets": _skillset_tuple("survival", "armor"),
-        "tertiary_skillsets": _skillset_tuple("lore", "magic"),
+        "tertiary_skillsets": _skillset_tuple("lore"),
         "guild_tag": "barbarian_guildhall",
         "social": "Respected",
         "presence_text": "Raw physical power seems to roll ahead of them.",
@@ -261,6 +266,9 @@ def get_profession_skillset_placement(profession_name):
 
 def get_profession_skillset_tier(profession_name, skill_category, default="primary"):
     canonical_category = _canonicalize_skill_category(skill_category)
+    profile = get_profession_profile(profession_name)
+    if canonical_category == "magic" and bool(profile.get("anti_magic", False)):
+        return default
     for tier, categories in get_profession_skillset_placement(profession_name).items():
         if canonical_category in categories:
             return tier

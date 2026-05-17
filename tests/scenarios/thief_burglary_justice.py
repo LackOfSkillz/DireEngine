@@ -1,6 +1,7 @@
 import random
 import time
 
+from tests.fixtures.safe_smoke_delete import safe_smoke_delete
 from world.systems.burglary import add_burgle_heat, attempt_entry, get_burgle_heat
 from world.systems.theft import can_use_passage, request_contact_service
 
@@ -91,7 +92,7 @@ def scenario(ctx):
     locked_gate.db.burglary_destination = interior
     for item in list(getattr(thief, "contents", []) or []):
         if bool(getattr(getattr(item, "db", None), "is_lockpick", False)):
-            item.delete()
+            safe_smoke_delete(item)
     output_start = len(ctx.output_log)
     ctx.cmd("burgle TEST_LOCKED_GATE")
     missing_tool_messages = ctx.output_log[output_start:]

@@ -1,3 +1,4 @@
+from engine.services.barbarian_saf_service import BarbarianSafService
 from engine.services.ranger_saf_service import RangerSafService
 
 from .professions import get_profession_display_name, get_profession_profile, resolve_profession_name
@@ -76,9 +77,18 @@ class ClericSubsystem(ProfessionSubsystem):
 
 
 class BarbarianSubsystem(ProfessionSubsystem):
-    resource_key = "fire"
-    max_key = "max_fire"
-    default_max = 10
+    def get_state(self, character):
+        state = super().get_state(character)
+        current = BarbarianSafService.get_inner_fire(character)
+        state["fire"] = current
+        state["inner_fire"] = current
+        state["berserk_available"] = BarbarianSafService.is_berserk_available(character)
+        return state
+
+    def tick(self, character):
+        before = BarbarianSafService.get_inner_fire(character)
+        after = BarbarianSafService.tick_inner_fire_recovery(character)
+        return after != before
 
 
 class ThiefSubsystem(ProfessionSubsystem):

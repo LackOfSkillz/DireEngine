@@ -65,6 +65,7 @@ class DummyActor:
         self.id = 1
         self.location = None
         self.incoming_attackers = 1
+        self._roar_penalties = {}
 
     def get_stat(self, name):
         return self._stats.get(name, 0)
@@ -124,6 +125,9 @@ class DummyActor:
 
     def get_last_maneuver(self):
         return int(getattr(self.db, "last_maneuver", 0) or 0)
+
+    def get_barbarian_roar_offense_penalty(self, name):
+        return int(self._roar_penalties.get(name, 0) or 0)
 
 
 class FixedCombatRng:
@@ -221,6 +225,14 @@ class CombatResolutionTests(unittest.TestCase):
         self.assertEqual(resolution.damage, 3)
         self.assertEqual(resolution.roundtime, 2)
         self.assertEqual(resolution.details["outcome"], "hit")
+
+    def test_melee_roar_penalty_reduces_offensive_factor(self):
+        baseline = compute_offensive_factor(self.attacker, self.defender, self.context, combat_rng=FixedCombatRng(100))
+        self.attacker._roar_penalties["melee_accuracy"] = 15
+
+        penalized = compute_offensive_factor(self.attacker, self.defender, self.context, combat_rng=FixedCombatRng(100))
+
+        self.assertLess(penalized.total, baseline.total)
 
     def test_offensive_factor_uses_rng_inside_total(self):
         """GSL S00041/S00265: OF includes the combat RNG multiplier inside OF itself."""

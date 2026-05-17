@@ -1,0 +1,4 @@
+from domain.abilities.dances.shared import build_dance_definition
+
+
+DragonDance = build_dance_definition(bit_index=8, name="dragon", canonical_display_name="Dragon", required_level=60, canonical_pit_master="Uthranalak", canonical_pit_room=3140206, offense_bonuses={"melee_accuracy": 10, "melee_damage": 12, "missile_accuracy": 10, "missile_damage": 12}, defense_bonuses={"melee": 10, "parry": 10, "shield": 10, "missile": 10}, stat_modifiers={"strength": 6, "stamina": 6, "agility": 6, "reflex": 6}, skill_modifiers={"multiple_engaged_opponent": 15}, engagement_speed_bonus=12, roar_power_modifiers={"intimidation": 110})

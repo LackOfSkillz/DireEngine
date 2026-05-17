@@ -41,6 +41,8 @@ class CmdRetreat(Command):
         player_score -= (self.caller.db.fatigue or 0) * 0.2
         player_score += (self.caller.db.balance or 0) * 0.1
         player_score -= self.caller.get_leg_penalty()
+        if hasattr(self.caller, "get_barbarian_dance_engagement_speed_bonus"):
+            player_score += self.caller.get_barbarian_dance_engagement_speed_bonus()
         if hasattr(self.caller, "get_ranger_keep_distance_bonus"):
             player_score += self.caller.get_ranger_keep_distance_bonus()
 

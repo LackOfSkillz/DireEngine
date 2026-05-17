@@ -22,9 +22,11 @@ class GuildhallLocatorTests(unittest.TestCase):
     def test_ranger_guildhall_registered(self):
         self.assertEqual(get_guildhall_room_key("ranger"), "Ranger Guild")
 
+    def test_barbarian_guildhall_registered(self):
+        self.assertEqual(get_guildhall_room_key("barbarian"), "Barbarian Guild")
+
     def test_unbuilt_professions_return_none(self):
         for profession in [
-            "barbarian",
             "bard",
             "moon_mage",
             "necromancer",
@@ -45,7 +47,8 @@ class GuildhallLocatorTests(unittest.TestCase):
 
     def test_list_available_guildhalls_returns_snapshot(self):
         available = list_available_guildhalls()
+        self.assertIn("barbarian", available)
         self.assertIn("empath", available)
         self.assertIn("cleric", available)
         self.assertIn("ranger", available)
-        self.assertGreaterEqual(len(available), 3)
+        self.assertGreaterEqual(len(available), 4)

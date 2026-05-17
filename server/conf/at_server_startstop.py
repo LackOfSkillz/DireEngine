@@ -927,6 +927,8 @@ def _deprecate_ranger_guildhall_installation(threshold_rooms):
 def _ensure_new_player_tutorial():
     from typeclasses.objects import ChargenMirror, Object
     from systems import aftermath
+    from world.areas.crossing.barbarian_pits import ensure_crossing_barbarian_pits
+    from world.areas.crossing.barbarian_guild import ensure_crossing_barbarian_guildhall
     from world.areas.crossing.cleric_guild import ensure_crossing_cleric_guildhall
     from world.areas.crossing.empath_guild import ensure_crossing_empath_guildhall
 
@@ -991,6 +993,8 @@ def _ensure_new_player_tutorial():
     empath_guild.db.desc = aftermath.append_guild_triage_detail(str(getattr(empath_guild.db, "desc", "") or ""))
     aftermath.ensure_empath_orderly(empath_guild)
 
+    ensure_crossing_barbarian_guildhall()
+    ensure_crossing_barbarian_pits()
     ensure_crossing_cleric_guildhall()
 
     _deprecate_ranger_guildhall_installation(threshold_rooms)

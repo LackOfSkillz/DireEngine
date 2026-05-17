@@ -1,6 +1,157 @@
 # Changelog
 
 ## 2026-05-17
+### DRG-BARBARIAN-CLOSEOUT
+
+- Closed the Barbarian content program with the remaining canonical teaching and placement surface instead of widening the profession substrate. `typeclasses/npcs.py` now gives T'Kiel a full registry-driven `$ASK <roar>` teaching path for all 26 roars and adds a generic configured `BarbarianPitMaster` typeclass for dance instruction.
+- Shipped the Crossing Barbarian pit area as a compact builder at `world/areas/crossing/barbarian_pits/build.py`, producing the eight canonical dance rooms and eight configured pit masters while preserving idempotent world-build behavior. Startup bootstrap now ensures the pits alongside the existing guildhall.
+- Kept the closeout bounded under the requested final-pass constraints. The repo now models the eight pit masters as configured NPC objects rather than eight bespoke classes, and the previously cached Warrior placeholder concentrations remain explicitly deferred to the larger paid-profession scaffold cleanup because this closeout surfaced no direct Barbarian runtime defect in that seam.
+- Added focused regressions for the new closeout surface: `tests/typeclasses/test_tkiel_teaching.py`, `tests/typeclasses/test_pit_masters.py`, and `tests/world/test_crossing_barbarian_pits_build.py`.
+
+Validation:
+- Focused closeout slice passed: `11 passed, 50 subtests passed`.
+- Broader Barbarian regression cluster passed: `134 passed, 50 subtests passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django closeout matrix passed `77/77` scenarios with `orphan_before: 0`, `orphan_after: 0`, and `orphan_delta: 0`, covering pit-builder idempotence, T'Kiel roster and alias inquiry surfaces, all 26 roar teachings, all 26 roar invocations, all 8 pit-master dance teachings, all 8 dance activations, and the bounded Cobra/Panther/Badger/Wolverine/Eagle interaction seams.
+
+### DRG-BARBARIAN-DANCES-001
+
+- Shipped the eight canonical Barbarian combat dances as a new sibling ability category to roars on `spellbook2` bits `1-8`: `Swan`, `Cobra`, `Badger`, `Eagle`, `Bear`, `Wolverine`, `Panther`, and `Dragon`.
+- Kept the work bounded on a dedicated dance seam instead of widening roar or berserk ownership. `engine/services/dance_service.py` now owns dance begin/tick/end lifecycle, single-active mutex, canonical `3387100` / `3387001` effect-state tracking, and the S03387 duration formula using local `ccp`, armor-penalty, and encumbrance adapters on `typeclasses/characters.py`.
+- Stored the canonical teaching surface as metadata only. `domain/abilities/dances/registry.py` maps each dance to its S12052 level gate, pit master, and pit room while deferring actual pit-master NPC and room construction to Barbarian closeout.
+- Threaded dance bonuses through existing consumers instead of widening architecture: `typeclasses/characters.py` now carries `spellbook2` helpers plus bounded dance stat/skill/balance/engagement adapters, `domain/combat/resolution.py` consumes dance offense and defense bonuses on existing OF/EDF/parry/shield seams, and `commands/cmd_dance.py` plus `commands/default_cmdsets.py` expose the new command surface.
+- Preserved the roar substrate and added only the bounded Dance-Roar interaction hook. `engine/services/roar_service.py` and `domain/abilities/roars/inspiration_shared.py` now apply the canonical S03089 power multipliers from active dance state: Wolverine/Dragon `11/10` and Panther/Cobra `105/100` for intimidations; Swan/Badger `105/100` and Eagle `11/10` for inspirations.
+
+Validation:
+- Focused DANCES-001 slice passed: `22 passed` across `tests/domain/test_barbarian_dances.py`, `tests/services/test_dance_service.py`, `tests/commands/test_cmd_dance.py`, and `tests/services/test_roar_inspiration_substrate.py`.
+- Adjacent Barbarian regression cluster passed: `114 passed` across the new dance tests plus Barbarian roar, vocal damage, combat resolution, SAF, berserk, and guild build slices.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django dance runtime matrix passed the requested `12/12` scenarios with `orphan_before: 0`, `orphan_after: 0`, and `orphan_delta: 0`, covering all eight dances, mutex behavior, duration degradation, Dance-Roar coexistence, and expiry cleanup.
+
+### DRG-BARBARIAN-ROARS-004
+
+- Shipped the eight canonical Barbarian Inspiration roars for `spellbook1` bits `18-25`: `Honor`, `Vengeance`, `Steadfastness`, `Pride`, `Nobility`, `Bravery`, `Bloodthirst`, and `Superiority`.
+- Kept the work bounded on the existing roar substrate. `engine/services/roar_service.py` gained category-aware recipient routing for Inspirations, bounded ally resolution through shared `group_id` markers or the existing room-account fallback, and a small set of generic ally-side readers for temporary HP, fear resistance, stun resistance, stat/skill modifiers, attack roundtime, defense bonuses, and Bloodthirst cleanup.
+- Preserved Berserk ownership. Bloodthirst reads existing Berserk state through `get_active_barbarian_berserk()` and applies canonical effect-code-aligned `8932001` state without widening into `berserk_service.py` or the `berserk` command path.
+- Threaded the new Inspiration effects through existing consumers instead of widening architecture: `typeclasses/characters.py` now folds Inspiration bonuses into HP caps, fear/stun reads, and existing stat/skill access; `domain/combat/resolution.py` keeps using the established offense/defense/roundtime seams, with Inspiration bonuses riding those same hooks.
+
+Validation:
+- Focused Inspiration substrate and per-roar slice passed: `11 passed` across `tests/domain/test_barbarian_inspiration_roars.py` and `tests/services/test_roar_inspiration_substrate.py`.
+- Barbarian roar regression cluster passed: `38 passed` across `tests/domain/test_barbarian_intimidation_roars.py`, `tests/domain/test_barbarian_inspiration_roars.py`, `tests/services/test_roar_service.py`, `tests/services/test_roar_inspiration_substrate.py`, and `tests/commands/test_cmd_roar.py`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django Inspiration runtime matrix passed the requested `12/12` scenarios with `orphan_before: 0`, `orphan_after: 0`, and `orphan_delta: 0`.
+
+### DRG-BARBARIAN-ROARS-003
+
+- Shipped the ten remaining canonical Barbarian intimidation roars for `spellbook1` bits `8-17`: `Mage's Lament`, `Caution of the Spider`, `Serpent's Hiss of Warning`, `Lash of Torment`, `Screech of Madness`, `Banshee's Wail`, `Insane Laughter`, `Weighted Justice`, `Anger the Earth`, and `Slash the Shadows`.
+- Kept the work bounded on the existing roar substrate. Each roar lives as its own definition under `domain/abilities/roars/`, while `engine/services/roar_service.py` only gained narrow shared readers for magic-resistance pressure, fear amplification, immobilization, attack roundtime penalties, balance recovery penalties, forced-return locks, and stealth disruption.
+- Threaded the new effects through existing consumers instead of widening architecture: `typeclasses/characters.py` now consumes the roar seam for movement lockouts, forced-return checks, skill penalties, magic penalties, and balance recovery; `domain/combat/resolution.py` now reads the bounded attack-roundtime penalty seam.
+- Live smoke surfaced a real command-path defect rather than a harness issue: apostrophe-bearing roar aliases were stored differently from lookup normalization, so `Serpent's Hiss of Warning` failed natural-name resolution. `domain/abilities/roars/registry.py` now normalizes aliases through the same `normalize_roar_name(...)` path used by lookup, which repaired the live command failure without widening the command surface.
+
+Validation:
+- Foundational roar-service and combat slice passed: `44 passed` across `tests/services/test_roar_service.py` and `tests/combat/test_resolution.py`.
+- Registry and existing Barbarian roar slice passed: `25 passed` across `tests/services/test_roar_service.py` and `tests/domain/test_barbarian_intimidation_roars.py`.
+- New focused ROARS-003 roar tests passed: `10 passed`.
+- Focused Barbarian slice passed: `52 passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django runtime matrix passed the exact requested `22/22` scenarios with `orphan_before: 0`, `orphan_after: 0`, and `orphan_delta: 0`.
+
+### DRG-ADMIN-DEAD-STATE-BYPASS-001
+
+- Added a bounded admin/developer bypass in `commands/command.py` so the shared dead-state prefilter no longer blocks admin verbs for dead callers. The player-facing `DEAD_STATE_ALLOWED_COMMANDS` allowlist remains unchanged.
+- Kept the fix at the owning seam instead of widening into command-specific exceptions. `CmdRenew` and the other admin verbs continue to own their own permission checks; the shared filter now only stops dead non-admin callers.
+- Added a focused regression file at `tests/commands/test_command_dead_state_filter.py` covering the required matrix: dead non-admin `renew` blocked, dead admin `renew` allowed, dead non-admin `look` allowed, and living admin `renew` allowed.
+
+Validation:
+- Focused dead-state filter slice passed: `4 passed` in `tests/commands/test_command_dead_state_filter.py`.
+- Live Evennia validation passed after restart: from a dead `Jekar` session, `@renew jekar` executed successfully with `You renew yourself completely.` and the old dead-state block message did not appear.
+- Post-command runtime state confirmed `Jekar.is_dead() == False` with `location_id = 7195` and `home_id = 7195`.
+
+### DRG-BARBARIAN-ROARS-002
+
+- Expanded the Barbarian roar registry from the original two shipped roars to the next six canonical intimidation techniques: `Trothfang's Butchery`, `Tempestuous Fury`, `Death's Embrace`, `Death's Lullaby`, `Death's Shriek`, and `Magic's Bane`.
+- Kept the dispatch bounded on the established roar seam. Each new roar now lives as a dedicated definition under `domain/abilities/roars/`, while `engine/services/roar_service.py` gained only a declarative prerequisite check plus narrow readers for roar-driven stat, offense, and anti-magic penalties.
+- Preserved the directly re-verified Death's Shriek learning chain locally: `Death's Shriek` now declares `Death's Embrace` as its prerequisite at the `spellbook1` bitfield layer, and off-prerequisite learning attempts fail with the existing instruction gate rather than inventing a separate teaching subsystem.
+- Threaded the new bounded combat/runtime effects through existing consumers instead of widening architecture: `typeclasses/characters.py` now folds Trothfang and Magic's Bane penalties into existing stat/skill/effect reads, while `domain/combat/resolution.py` now reads Tempestuous Fury and Death's Embrace from the existing OF/damage path.
+- Cached the outstanding Warrior-placeholder noise for later cleanup rather than reconciling it here. The largest remaining concentrations are still in `typeclasses/characters.py`, `engine/services/combat_service.py`, `world/professions/subsystems.py`, and `commands/cmd_stats.py`.
+
+Validation:
+- Focused ROARS-002 slice passed: `50 passed` across `tests/services/test_roar_service.py`, `tests/domain/test_barbarian_intimidation_roars.py`, and `tests/combat/test_resolution.py`.
+- Validation completed via DRG-DB-INTEGRITY-AUDIT-001-V2:
+- Preservation batch reran clean at `315 passed, 153 subtests passed`; the historical `314` anchor was stale by one added test, but no failures surfaced in the preserved slice.
+- Ranger-adjacent batch reran clean at the locked anchor: `92 passed, 138 subtests passed`.
+- DRG-DB-INTEGRITY-AUDIT-001-V2 also cleaned `15735` orphan `typeclasses_attribute` rows, repaired Jekar's stale `prelogout_location`, and confirmed live `ic jekar` room render in Wake Room `#7195` without traceback.
+- The original closeout's missing final summary did not reflect a hidden ROARS regression. After database cleanup, the same preserved validation slices completed with normal summary flush on the direct rerun path.
+
+
+### DRG-BARBARIAN-ROARS-001
+
+- Replaced the placeholder Warrior-only `roar` command path with a canonical Barbarian dispatcher in `commands/cmd_roar.py`, backed by a new `engine/services/roar_service.py` seam that owns preflight gates, `spellbook1` knowledge checks, roar-slot accounting, and per-roar dispatch.
+- Added `engine/services/vocal_damage_service.py` as the dedicated owner of canonical vocal strain state. The service now tracks intimidation and inspiration damage under effect-code-aligned state for `3089001` / `3089002`, applies the directly re-verified `S03089` duration floor and modifier bands, and reproduces the bare-`roar` exhaustion messages from `S03088`.
+- Installed the first bounded canonical roar registry under `domain/abilities/roars/` and shipped `Kuniyo's Spirit` plus `Everild's Rage` from the directly re-verified runtime authorities `S11807` / `S11808`. Kuniyo now applies live target-side `effect_2077001` stun-vulnerability state, while Everild applies live `effect_11808001` / `effect_11808002` defense-penalty state.
+- Added the minimal Barbarian character and progression hooks needed to keep the dispatch bounded: `spellbook1` helpers and roar adapters in `typeclasses/characters.py`, circle-based slot/auto-learn messaging in `engine/services/circle_service.py`, and a narrow combat integration in `domain/combat/resolution.py` so Everild feeds the existing EDF/parry/shield calculations instead of opening a new combat subsystem.
+- Preserved the local Step 0 boundary decisions from audit: room `3202` / PID `-26349` stay modeled as internal service bookkeeping rather than a literal world-room requirement, only `Kuniyo's Spirit` auto-learns at circle `>= 5` when no roars are known, and broader T'Kiel/manual teaching, inspirations, and later roar chains remain explicitly deferred.
+
+Validation:
+- Focused ROARS slice passed: `26 passed` across `tests/services/test_vocal_damage_service.py`, `tests/services/test_roar_service.py`, `tests/commands/test_cmd_roar.py`, `tests/domain/test_kuniyo_spirit.py`, and `tests/domain/test_everild_rage.py`.
+- Exact documented preservation batch passed unchanged: `314 passed, 153 subtests passed`.
+- Reconstructed Ranger-adjacent regression passed unchanged: `92 passed, 138 subtests passed` across `tests/world/test_ranger_companion.py`, `tests/world/test_ranger_companion_behavior.py`, `tests/test_npc_aggro.py`, `tests/services/test_ranger_saf_service.py`, `tests/services/test_ranger_identity_migration.py`, `tests/world/test_crossing_ranger_guild_build.py`, `tests/learning/test_guild_progression_commands.py`, `tests/learning/test_guildhall_locator.py`, `tests/domain/test_spell_registry.py`, and `tests/test_snipe_shared_mechanic.py`.
+
+Live smoke:
+- Direct runtime roar smoke passed `7/7` against live Evennia/Django objects: circle-15 Kuniyo auto-learn, second-slot Everild teach, bare-`roar` exhaustion readback, Kuniyo live effect application, Everild live effect application, Everild EDF reduction, and cumulative vocal-damage tracking.
+
+### DRG-BARBARIAN-BERSERK-001
+
+- Replaced the placeholder Warrior `berserk` command with the canonical Barbarian verb and routed it through a new dedicated `engine/services/berserk_service.py` seam instead of widening spell infrastructure. Step 0 audit re-verified `S00523` directly in DireLore before implementation, including the exact profession gate, melee-foe gate, refusal text, strength tiers, and post-berserk aftermath formula.
+- Corrected the live cached Berserk aftermath defect in `engine/services/barbarian_saf_service.py`. The earlier flat `+115` value is now replaced by the canonical `S00523` formula: `(discipline * 3) - stamina - charisma + 75`.
+- Implemented canonical Berserk preflight and runtime state on the existing Barbarian foundation: off-class/circle gating, silenced/safehaven/corruption/bloodthirst/dance/already-berserking gates, melee critter requirement, hidden reveal, stun-break support, strength-tier messaging, HP/MM/stat bonuses, expiry cleanup, and effect-state markers for `1740001` / `1740004`.
+- Wired circle-2 Berserk auto-learn through `collect_circle_advancement_private_messages(...)` and added the minimal character-side adapters needed for active Berserk bonus reads without widening into a larger profession refactor.
+- Direct runtime smoke uncovered and corrected two live-only seams the stubs did not expose: Evennia mapping-backed state payloads were being rejected by the Berserk state reader, and expiry cleanup initially recursed through the HP accessor. Both were fixed before closeout.
+
+Validation:
+- Focused Berserk + Barbarian foundation slice passed: `46 passed` across `tests/services/test_berserk_service.py`, `tests/commands/test_cmd_berserk.py`, `tests/services/test_barbarian_saf_service.py`, `tests/world/test_crossing_barbarian_guild_build.py`, `tests/learning/test_profession_skillsets.py`, and `tests/learning/test_guildhall_locator.py`.
+- Exact documented preservation batch passed unchanged: `314 passed, 153 subtests passed`.
+- Ranger-adjacent regression was rerun as the closest explicit reconstruction available from preserved repo history: `92 passed, 138 subtests passed` across `tests/world/test_ranger_companion.py`, `tests/world/test_ranger_companion_behavior.py`, `tests/test_npc_aggro.py`, `tests/services/test_ranger_saf_service.py`, `tests/services/test_ranger_identity_migration.py`, `tests/world/test_crossing_ranger_guild_build.py`, `tests/learning/test_guild_progression_commands.py`, `tests/learning/test_guildhall_locator.py`, `tests/domain/test_spell_registry.py`, and `tests/test_snipe_shared_mechanic.py`.
+
+Live smoke:
+- Direct runtime Berserk smoke passed `6/6` against live Evennia/Django objects: circle-2 auto-learn, no-melee-target refusal, successful Berserk activation, active-state persistence, `1740001` effect presence, and expiry cleanup back to baseline HP state.
+
+### DRG-BARBARIAN-PROFESSION-001
+
+- Began the Barbarian profession foundation on the existing profession/profile seam after Step 0 audit confirmed the repo already carried placeholder Barbarian state. The dispatch now pins the canonical profession axis locally: Barbarian remains the string-keyed profile for repo compatibility, but the profile records profession id `1`, carries an explicit anti-magic flag, and no longer advertises `magic` as a Barbarian skillset tier.
+- Added `engine/services/barbarian_saf_service.py` as the canonical Inner Fire owner on the shared `db.canonical_saf` field. The service implements the verified non-negative Barbarian SAF model from `S00264` and adjacent guild scripts: berserk aftermath `+115`, incoming magic `+mana`, self-cast magic `+(mana*5)`, GM praise reset to `0`, GM curse `+100`, non-Barbarian reads gated to `0`, and guild-commitment clear to `0`.
+- Rewired the live Barbarian-facing adapters without colliding with Ranger SAF. `typeclasses/characters.py` now migrates legacy `inner_fire` into canonical shared SAF for Barbarian characters, exposes `get_inner_fire(...)` / `set_inner_fire(...)` / `is_berserk_available(...)`, and normalizes the old placeholder `inner_fire` / `max_inner_fire` defaults to `0` instead of the earlier fabricated `10/10` baseline.
+- `world/professions/subsystems.py` now reports Barbarian state from the canonical service instead of the legacy standalone `inner_fire` pool and uses a bounded recovery tick that trends shared SAF back toward `0`.
+
+Validation:
+- Focused Barbarian foundation slice passed: `14 passed` across `tests/services/test_barbarian_saf_service.py` and `tests/learning/test_profession_skillsets.py`.
+
+### DRG-BARBARIAN-GUILDHALL-001
+
+- Installed the canonical Crossing Barbarian Guild on the existing Option C builder pattern at `world/areas/crossing/barbarian_guild/build.py`. The builder is idempotent, tags the main hall as `guild_barbarian`, and keeps the current free-tier placement decision local to the module rather than baking city-placement assumptions into profession logic.
+- Added `BarbarianGuildleader` in `typeclasses/npcs.py` and installed T'Kiel as the canonical Crossing Guildmistress. DireLore re-verification confirmed T'Kiel across 10+ canonical references, while the anti-magic guild speech comes from `S01403`. The generic-template gender mismatch in `S01403` is resolved in favor of the location-specific `S01402`/`S01419` authority, so T'Kiel ships with female pronouns while the in-quote canonical speech remains verbatim.
+- Wired the Barbarian commit-clear seam through the shipped profession path. `typeclasses/characters.py` now recognizes Barbarian guild commitment in `join_profession(...)` and `set_profession(...)`, invoking `BarbarianSafService.clear_on_guild_commitment(...)` so canonical shared SAF resets to `0` when a character joins the profession.
+- Hooked the guildhall into startup/bootstrap and progression support. `server/conf/at_server_startstop.py` now ensures the Barbarian guildhall during startup, `engine/services/guildhall_locator.py` now registers `barbarian -> Barbarian Guild`, and `engine/services/circle_service.py` now recognizes `BarbarianGuildleader` in-room.
+
+Validation:
+- Focused Barbarian guildhall + foundation slice passed: `30 passed` across `tests/world/test_crossing_barbarian_guild_build.py`, `tests/services/test_barbarian_saf_service.py`, `tests/learning/test_profession_skillsets.py`, and `tests/learning/test_guildhall_locator.py`.
+- Preservation batch: `314 passed, 153 subtests passed`.
+- Ranger-adjacent batch: `103 passed, 138 subtests passed`. The prior `102` anchor increased by one because the shared guildhall locator slice now includes Barbarian registration coverage alongside the preserved Ranger checks.
+
+Live smoke:
+- Direct runtime smoke passed `13/13` scenarios: guildhall install, T'Kiel presence, canonical speech delivery, guildhall locator registration, idempotent rebuild, in-room guildleader lookup, canonical room metadata, live lane placement at `Cedarcoil Lane, East Reach`, `SmokeClericLive` fixture availability, join-time clear to `canonical_saf = 0`, `join_handler(...)` clear to `0`, anti-magic eject to the live lane, and cross-class commitment refusal for already-professed characters.
 
 ### DRG-RANGER-CLOSEOUT
 

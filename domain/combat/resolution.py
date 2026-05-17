@@ -309,7 +309,6 @@ def compute_offensive_factor(attacker, target, context=None, *, combat_rng=None)
         debilitation = attacker.get_state("debilitated") if hasattr(attacker, "get_state") else None
         if debilitation:
             base -= _coerce_int(debilitation.get("penalty", 0))
-
     att_awareness = attacker.get_awareness() if hasattr(attacker, "get_awareness") else "normal"
     if att_awareness == "alert":
         base += 5
@@ -319,6 +318,12 @@ def compute_offensive_factor(attacker, target, context=None, *, combat_rng=None)
     is_ranged_weapon = bool(context.get("is_ranged_weapon", False))
     ranger_aim_stacks = _coerce_int(context.get("ranger_aim_stacks", 0))
     current_range = str(context.get("current_range", "melee") or "melee")
+    if hasattr(attacker, "get_barbarian_roar_offense_penalty"):
+        penalty_key = "missile_accuracy" if is_ranged_weapon else "melee_accuracy"
+        base -= _coerce_int(attacker.get_barbarian_roar_offense_penalty(penalty_key))
+    if hasattr(attacker, "get_barbarian_dance_offense_bonus"):
+        bonus_key = "missile_accuracy" if is_ranged_weapon else "melee_accuracy"
+        base += _coerce_int(attacker.get_barbarian_dance_offense_bonus(bonus_key))
     if getattr(getattr(attacker, "db", None), "aiming", None) == getattr(target, "id", None):
         base += 15 if not is_ranged_weapon else 10 + (ranger_aim_stacks * 5)
     if is_ranged_weapon:
@@ -448,6 +453,11 @@ def compute_edf(defender, attacker=None, context=None):
         target_debilitation = defender.get_state("debilitated") if hasattr(defender, "get_state") else None
         if target_debilitation and target_debilitation.get("type") == "evasion":
             usable_evasion_pct -= _coerce_int(target_debilitation.get("penalty", 0))
+    if hasattr(defender, "get_barbarian_roar_defense_penalty"):
+        usable_evasion_pct -= _coerce_int(defender.get_barbarian_roar_defense_penalty("evasion"))
+    if hasattr(defender, "get_barbarian_dance_defense_bonus"):
+        bonus_key = "missile" if bool(context.get("is_ranged_weapon")) else "melee"
+        usable_evasion_pct += _coerce_int(defender.get_barbarian_dance_defense_bonus(bonus_key))
     usable_evasion_pct += _get_augmentation_modifier(defender, "evasion")
     usable_evasion_pct += _get_protection_from_evil_bonus(defender, attacker)
 
@@ -496,6 +506,10 @@ def compute_parry(defender, leftover_of, context=None):
     reflex = _coerce_int(defender.get_stat("reflex") if hasattr(defender, "get_stat") else 0)
     balance = _coerce_int(defender_weapon_profile.get("balance", 50), 50)
     parry_score = max(0, parry_skill + reflex + agility + (balance // 5))
+    if hasattr(defender, "get_barbarian_roar_defense_penalty"):
+        parry_score = max(0, parry_score - _coerce_int(defender.get_barbarian_roar_defense_penalty("parry")))
+    if hasattr(defender, "get_barbarian_dance_defense_bonus"):
+        parry_score += _coerce_int(defender.get_barbarian_dance_defense_bonus("parry"))
     parry_score = max(0, parry_score * max(0, defense_scaling.parry_pct) // 100)
     parry_percent = (parry_score * 100) // max(1, leftover_of)
     if parry_percent < NO_PARRY_THRESHOLD:
@@ -529,6 +543,10 @@ def compute_shield(defender, leftover_of, context=None):
     min_def = _coerce_int(getattr(getattr(shield_item, "db", None), "mindef", SHIELD_MIN_DEF), SHIELD_MIN_DEF)
     max_def = _coerce_int(getattr(getattr(shield_item, "db", None), "maxdef", SHIELD_MAX_DEF), SHIELD_MAX_DEF)
     shield_score = min(max_def, min_def + shield_skill)
+    if hasattr(defender, "get_barbarian_roar_defense_penalty"):
+        shield_score = max(0, shield_score - _coerce_int(defender.get_barbarian_roar_defense_penalty("shield")))
+    if hasattr(defender, "get_barbarian_dance_defense_bonus"):
+        shield_score += _coerce_int(defender.get_barbarian_dance_defense_bonus("shield"))
     shield_score = max(0, shield_score * max(0, defense_scaling.shield_pct) // 100)
     return ShieldSubcontest(shield_score=shield_score, block_pct=max(0, min(100, shield_score)), maneuver_scale_pct=defense_scaling.shield_pct)
 
@@ -800,6 +818,16 @@ def calculate_damage(attacker, target, context=None, *, rng=None):
         combat_rng=None,
         ammo_profile=context.get("ammo_profile"),
     )
+    if hasattr(attacker, "get_barbarian_roar_offense_penalty"):
+        penalty_key = "missile_damage" if is_ranged_weapon else "melee_damage"
+        damage_penalty = _coerce_int(attacker.get_barbarian_roar_offense_penalty(penalty_key))
+        if damage_penalty > 0:
+            raw_damage = max(1, int(round(float(raw_damage) * max(0.0, (100.0 - float(damage_penalty))) / 100.0)))
+    if hasattr(attacker, "get_barbarian_dance_offense_bonus"):
+        bonus_key = "missile_damage" if is_ranged_weapon else "melee_damage"
+        damage_bonus = _coerce_int(attacker.get_barbarian_dance_offense_bonus(bonus_key))
+        if damage_bonus > 0:
+            raw_damage = max(1, int(round(float(raw_damage) * (100.0 + float(damage_bonus)) / 100.0)))
 
     damage_multiplier = 1.0
     if critical:
@@ -969,6 +997,8 @@ def calculate_roundtime(attacker, target, context=None):
             if getattr(attacker.db, "position_state", "neutral") == "advantaged":
                 action_roundtime -= 1
             action_roundtime = max(1, min(action_roundtime + 1, 5))
+    if hasattr(attacker, "get_barbarian_roar_attack_roundtime_penalty"):
+        action_roundtime += float(attacker.get_barbarian_roar_attack_roundtime_penalty() or 0.0)
 
     cleanup = apply_cleanup(
         attacker,

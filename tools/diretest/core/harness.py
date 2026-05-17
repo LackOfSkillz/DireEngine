@@ -27,6 +27,70 @@ def _is_already_deleted(error):
     return "already deleted" in str(error or "").lower()
 
 
+def _get_fresh_object(obj):
+    from evennia.objects.models import ObjectDB
+
+    object_id = int(getattr(obj, "id", 0) or 0)
+    if object_id <= 0:
+        return None
+    return ObjectDB.objects.filter(id=object_id).first()
+
+
+def _attribute_has_live_links(attribute):
+    for accessor in ("objectdb_set", "accountdb_set", "channeldb_set", "scriptdb_set"):
+        relation = getattr(attribute, accessor, None)
+        if relation is not None and relation.exists():
+            return True
+    return False
+
+
+def _detach_object_attributes(obj):
+    from evennia.typeclasses.models import Attribute
+
+    fresh_obj = _get_fresh_object(obj)
+    if fresh_obj is None:
+        return []
+
+    attribute_ids = [
+        int(attribute.id)
+        for attribute in list(fresh_obj.db_attributes.all())
+        if int(getattr(attribute, "id", 0) or 0) > 0
+    ]
+    if not attribute_ids:
+        return []
+
+    fresh_obj.db_attributes.remove(*attribute_ids)
+    for attribute in list(Attribute.objects.filter(id__in=attribute_ids)):
+        if _attribute_has_live_links(attribute):
+            continue
+        attribute.delete()
+    return attribute_ids
+
+
+def _iter_child_objects(obj):
+    from evennia.objects.models import ObjectDB
+
+    fresh_obj = _get_fresh_object(obj)
+    if fresh_obj is None:
+        return []
+
+    object_id = int(getattr(fresh_obj, "id", 0) or 0)
+    contents = list(getattr(fresh_obj, "contents", []) or [])
+    outgoing_exits = [child for child in contents if getattr(child, "db_destination", None)]
+    incoming_exits = list(ObjectDB.objects.filter(db_destination=fresh_obj).exclude(id=object_id))
+    nested_contents = [child for child in contents if not getattr(child, "db_destination", None)]
+
+    children = []
+    seen_ids = set()
+    for child in outgoing_exits + incoming_exits + nested_contents:
+        child_id = int(getattr(child, "id", 0) or 0)
+        if child_id <= 0 or child_id == object_id or child_id in seen_ids:
+            continue
+        seen_ids.add(child_id)
+        children.append(child)
+    return children
+
+
 def _ensure_evennia_command_aliases():
     import evennia
 
@@ -88,7 +152,7 @@ def cleanup_test_objects(target_ids=None, max_attempts=3, retry_delay=0.1):
     }
 
 
-def safe_delete(obj, max_attempts=3, retry_delay=0.1):
+def safe_delete(obj, max_attempts=3, retry_delay=0.1, recurse=True, _visited=None):
     """Delete a tracked object without stopping teardown on failure."""
 
     if obj is None:
@@ -98,13 +162,32 @@ def safe_delete(obj, max_attempts=3, retry_delay=0.1):
     if object_id <= 0:
         return True, None
 
+    if _visited is None:
+        _visited = set()
+    if object_id in _visited:
+        return True, None
+    _visited.add(object_id)
+
     if not _object_exists(obj):
         return True, None
+
+    if recurse:
+        for child in _iter_child_objects(obj):
+            ok, failure = safe_delete(
+                child,
+                max_attempts=max_attempts,
+                retry_delay=retry_delay,
+                recurse=True,
+                _visited=_visited,
+            )
+            if not ok:
+                return False, failure
 
     last_error = None
     for attempt in range(max_attempts):
         close_old_connections()
         try:
+            _detach_object_attributes(obj)
             obj.delete()
         except Exception as error:
             last_error = error
@@ -116,6 +199,7 @@ def safe_delete(obj, max_attempts=3, retry_delay=0.1):
             return False, {
                 "id": object_id,
                 "key": str(getattr(obj, "key", "") or ""),
+                "stage": "delete",
                 "error": str(error),
             }
 
@@ -129,6 +213,7 @@ def safe_delete(obj, max_attempts=3, retry_delay=0.1):
     return False, {
         "id": object_id,
         "key": str(getattr(obj, "key", "") or ""),
+        "stage": "delete",
         "error": str(last_error),
     }
 

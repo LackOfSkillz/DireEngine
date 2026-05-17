@@ -7,9 +7,14 @@ from pathlib import Path
 from django.utils.text import slugify
 from evennia.utils.search import search_object
 
+from domain.abilities.dances.registry import get_dance_definition
+from domain.abilities.roars.registry import ROAR_REGISTRY, get_roar_definition
 from domain.spells.spell_definitions import SPELL_REGISTRY
+from engine.services.barbarian_saf_service import BarbarianSafService
+from engine.services.dance_service import DanceService
 from engine.services.result import ActionResult
 from engine.services.ranger_saf_service import RangerSafService
+from engine.services.roar_service import RoarService
 from engine.services.spellbook_service import SpellbookService
 from server.systems.loot.loot_runtime import on_npc_defeated
 
@@ -88,6 +93,86 @@ def _teach_guild_spell(teacher, actor, spell_name, *, taught_spell_ids=None, enf
                 errors=[f"You are not yet ready for {spell.name}. Return when you have reached Circle {required_circle}."],
             )
     return SpellbookService.learn_spell(actor, spell.id, "npc")
+
+
+def _barbarian_result_message(result):
+    messages = list(getattr(result, "messages", None) or [])
+    if messages:
+        return str(messages[0])
+    errors = list(getattr(result, "errors", None) or [])
+    if errors:
+        return str(errors[0])
+    return None
+
+
+def _resolve_barbarian_roar_query(topic):
+    raw = str(topic or "").strip()
+    normalized = raw.lower()
+    if normalized in {"roar", "roars", "battlecry", "battlecries", "battle cry", "battle cries"}:
+        return "LIST"
+    for prefix in ("roar ", "battlecry ", "battle cry "):
+        if normalized.startswith(prefix):
+            raw = raw[len(prefix):].strip()
+            break
+    if not raw:
+        return None
+    return get_roar_definition(raw)
+
+
+def _teach_barbarian_roar(teacher, actor, roar_name):
+    definition = get_roar_definition(roar_name)
+    if definition is None:
+        return ActionResult.fail(errors=["T'Kiel says, 'Name the roar you want, not a rumor about it.'"])
+    if not hasattr(actor, "is_profession") or not actor.is_profession("barbarian"):
+        return ActionResult.fail(errors=["T'Kiel says, 'My roars are for Barbarians. Find another teacher.'"])
+    if RoarService.has_known_roar_bit(actor, definition.bit_index):
+        return ActionResult.fail(errors=[f"T'Kiel says, 'You already carry the shape of {definition.canonical_display_name} in your voice.'"])
+    if RoarService.get_remaining_slots(actor) < 1:
+        return ActionResult.fail(errors=["T'Kiel says, 'Your battle voice has no room for another roar yet. Grow into it first.'"])
+    missing_prerequisites = [
+        required_bit
+        for required_bit in tuple(getattr(definition, "prerequisite_bits", ()) or ())
+        if not RoarService.has_known_roar_bit(actor, required_bit)
+    ]
+    if missing_prerequisites:
+        return ActionResult.fail(errors=["T'Kiel says, 'Master Death's Embrace before you reach for that shriek.'"])
+    result = RoarService.set_known_roar(actor, definition.bit_index, enforce_slots=True)
+    if not result.success:
+        return ActionResult.fail(errors=[_barbarian_result_message(result) or "T'Kiel says, 'Not yet.'"])
+    return ActionResult.ok(messages=[f"T'Kiel says, 'Listen sharp. {definition.canonical_display_name} starts in the gut and ends in the room around you.'"])
+
+
+def _teach_barbarian_dance(teacher, actor):
+    taught_name = str(getattr(getattr(teacher, "db", None), "teaches_dance", "") or "").strip()
+    definition = get_dance_definition(taught_name)
+    if definition is None:
+        return ActionResult.fail(errors=["The lesson never quite takes shape."])
+    if not hasattr(actor, "is_profession") or not actor.is_profession("barbarian"):
+        return ActionResult.fail(errors=[f"{getattr(teacher, 'key', 'The pit master')} says, 'These steps are not for you.'"])
+    actor_circle = int(getattr(actor, "get_circle", lambda: getattr(getattr(actor, "db", None), "circle", 1))() or 1)
+    if actor_circle < int(definition.required_level):
+        return ActionResult.fail(errors=[f"{getattr(teacher, 'key', 'The pit master')} says, 'You are not seasoned enough for the {definition.canonical_display_name} dance yet.'"])
+    if DanceService.has_known_dance_bit(actor, definition.bit_index):
+        return ActionResult.fail(errors=[f"{getattr(teacher, 'key', 'The pit master')} says, 'You already know the {definition.canonical_display_name} dance. Use it.'"])
+    result = DanceService.set_known_dance(actor, definition.bit_index)
+    if not result.success:
+        return ActionResult.fail(errors=[_barbarian_result_message(result) or "The lesson slips away before it lands."])
+    return ActionResult.ok(messages=[f"{getattr(teacher, 'key', 'The pit master')} says, 'Good. Feel the {definition.canonical_display_name} settle into your feet before you try it in blood.'"])
+
+
+def _is_pit_master_dance_query(teacher, topic):
+    taught_name = str(getattr(getattr(teacher, "db", None), "teaches_dance", "") or "").strip()
+    definition = get_dance_definition(taught_name)
+    if definition is None:
+        return False
+    raw = str(topic or "").strip()
+    normalized = raw.lower()
+    if normalized == "dance":
+        return True
+    if normalized.startswith("dance "):
+        raw = raw[6:].strip()
+    queried = get_dance_definition(raw)
+    return queried is not None and queried.name == definition.name
 
 
 class NPC(Character):
@@ -723,6 +808,88 @@ class RangerGuildleader(NPC):
         )
 
 
+class BarbarianGuildleader(NPC):
+    """T'Kiel canonical Crossing Barbarian guildleader. provenance: gsl_2004"""
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.key = "T'Kiel"
+        for alias in ["guildleader", "barbarian guildleader", "tkiel", "leader"]:
+            self.aliases.add(alias)
+        self.db.guild_role = "guildmaster"
+        self.db.trains_profession = "barbarian"
+        self.db.profession_id = 1
+        self.db.gender = "female"
+        self.db.default_inquiry_response = "T'Kiel says, 'Speak straight. Barbarians have no use for soft words.'"
+        self.db.desc = (
+            "T'Kiel, the Guildmistress, stands with the compact force of someone used to making lessons hurt just enough to matter. She watches with a veteran's cold patience, as if measuring whether anyone in front of her is worth the breath it would take to answer."
+        )
+
+    def _get_eject_destination(self):
+        current_room = getattr(self, "location", None)
+        if current_room is None:
+            return None
+        for obj in list(getattr(current_room, "contents", []) or []):
+            if getattr(obj, "destination", None) is not None and str(getattr(obj, "key", "") or "").strip().lower() == "out":
+                return obj.destination
+        return None
+
+    def _eject_actor(self, actor):
+        destination = self._get_eject_destination()
+        if actor is None or destination is None:
+            return False
+        return bool(actor.move_to(destination, quiet=True, move_type="barbarian_eject"))
+
+    def get_guild_speech(self):
+        # provenance: gsl_2004 — verbatim in-quote canon from S01403 lines 297-313.
+        return (
+            "T'Kiel eyes you warily, her cold eyes sending a chill rippling down your spine.\n"
+            "She speaks, \"The Barbarian Guild has a simple task -- to turn soft and tender would-be adventurers into hard and dangerous warriors.\"\n\n"
+            "\"In here, if you make the grade, you shall learn to use your weapons in ways you never knew. We shall run you past the edge of endurance, then push you even further! You shall achieve TRUE victory, which for a Barbarian means victory over oneself as well as one's opponents.\"\n\n"
+            "She goes on, \"Steel and iron, speed and strength...these are our tools. No fancy spells, no calling on the Gods for help. It is you, your will and your weapons.\""
+        )
+
+    def get_magic_rebuke(self, actor):
+        base = (
+            "T'Kiel blinks at you incredulously and exclaims, \"Magic?! Barbarians don't need no stinkin' magic!! Off to one of those sissy guilds with you!\""
+        )
+        moved = self._eject_actor(actor)
+        if moved:
+            return base + " She grabs you by the shoulder and throws you back out into the street."
+        return base
+
+    def handle_inquiry(self, actor, topic):
+        normalized = str(topic or "").strip().lower()
+        roar_query = _resolve_barbarian_roar_query(topic)
+        if roar_query == "LIST":
+            teachable = ", ".join(
+                definition.canonical_display_name for definition in sorted(ROAR_REGISTRY.values(), key=lambda item: int(item.bit_index))
+            )
+            return f"T'Kiel says, 'I can teach {teachable}. Pick one and ask plainly.'"
+        if roar_query is not None:
+            return _barbarian_result_message(_teach_barbarian_roar(self, actor, roar_query.name))
+        if normalized in {"join", "joining", "guild", "barbarian", "profession"}:
+            if hasattr(actor, "is_profession") and actor.is_profession("barbarian"):
+                return "T'Kiel snorts, 'You are already one of us. Stop fishing for permission you already earned.'"
+            return self.get_guild_speech()
+        if normalized in {"magic", "mana", "spell", "spells"}:
+            return self.get_magic_rebuke(actor)
+        if normalized in {"training", "lesson", "endurance"}:
+            return "T'Kiel says, 'Steel, pain, and your own limits will teach you more than any sermon. Endure long enough to listen.'"
+        return super().handle_inquiry(actor, topic)
+
+    def teach_roar(self, actor, roar_name):
+        return _teach_barbarian_roar(self, actor, roar_name)
+
+    def join_handler(self, actor):
+        if actor is None:
+            return False, "No Barbarian stands before T'Kiel."
+        ok, message = actor.join_profession("barbarian") if hasattr(actor, "join_profession") else (False, "You cannot join right now.")
+        if ok:
+            BarbarianSafService.clear_on_guild_commitment(actor)
+        return ok, message
+
+
 class RangerCompanion(NPC):
     """provenance: gsl_2004 — companion canonical model via DireLore audit (DRG-RANGER-COMPANION-CANON-AUDIT-001)"""
 
@@ -1074,6 +1241,33 @@ class RangerCompanion(NPC):
         if destination is not None:
             destination.msg_contents(self.get_profile()["rescue_message"], exclude=[self])
         return True, self.get_profile()["rescue_message"]
+
+
+class BarbarianPitMaster(NPC):
+    """Canonical Barbarian dance trainer configured per room placement. provenance: gsl_2004"""
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.guild_role = "pit_master"
+        self.db.trains_profession = "barbarian"
+        self.db.default_inquiry_response = "The pit master waits for you to ask about the dance they keep."
+        self.db.teaches_dance = None
+        self.db.required_level = 1
+        self.db.canonical_room_id = 0
+
+    def handle_inquiry(self, actor, topic):
+        if _is_pit_master_dance_query(self, topic):
+            return _barbarian_result_message(_teach_barbarian_dance(self, actor))
+        normalized = str(topic or "").strip().lower()
+        if normalized in {"pit", "lesson", "training"}:
+            dance_name = str(getattr(getattr(self, "db", None), "teaches_dance", "") or "").strip()
+            definition = get_dance_definition(dance_name)
+            if definition is not None:
+                return f"{self.key} says, 'Ask me about the {definition.canonical_display_name} dance when you are ready to learn it.'"
+        return super().handle_inquiry(actor, topic)
+
+    def teach_dance(self, actor):
+        return _teach_barbarian_dance(self, actor)
 
 
 class StatTrainerNPC(NPC):

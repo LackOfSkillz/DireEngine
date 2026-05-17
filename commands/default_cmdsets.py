@@ -176,6 +176,7 @@ from commands.cmd_recover import CmdRecover
 from commands.cmd_rejuvenate import CmdRejuvenate
 from commands.cmd_renew import CmdRenew
 from commands.cmd_rework import CmdRework
+from commands.cmd_dance import CmdDance
 from commands.cmd_roar import CmdRoar
 from commands.cmd_scout import CmdScout
 from commands.cmd_retreat import CmdRetreat
@@ -436,6 +437,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdRes())
         self.add(CmdRenew())
         self.add(CmdRework())
+        self.add(CmdDance())
         self.add(CmdRoar())
         self.add(CmdScout())
         self.add(CmdSearch())

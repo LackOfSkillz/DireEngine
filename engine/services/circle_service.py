@@ -8,6 +8,8 @@ from domain.spells.spell_definitions import SPELL_REGISTRY
 from engine.services.feat_training_service import FeatTrainerService
 from engine.services.slot_service import SlotService
 from engine.services.spell_access_service import SpellAccessService
+from engine.services.berserk_service import BerserkService
+from engine.services.roar_service import RoarService
 from engine.services.guildhall_locator import get_guildhall_room_key
 
 
@@ -82,9 +84,9 @@ def calculate_circle_tdp_grant(new_circle):
 def find_guild_leader_for_profession(character, profession):
     if not getattr(character, "location", None):
         return None
-    from typeclasses.npcs import GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildleader
+    from typeclasses.npcs import BarbarianGuildleader, GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildleader
 
-    leader_types = (GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildleader)
+    leader_types = (GuildLeaderNPC, EmpathGuildleader, ClericGuildmaster, RangerGuildleader, BarbarianGuildleader)
     wanted = str(profession or "").strip().lower()
     for obj in list(getattr(character.location, "contents", []) or []):
         if not isinstance(obj, leader_types):
@@ -140,10 +142,29 @@ def _get_expiring_apprentice_spells(character, expired_circle):
 
 def collect_circle_advancement_private_messages(character, old_circle, new_circle):
     if SlotService._get_magic_placement(character) is None:
-        return []
+        messages = []
+        if str(getattr(getattr(character, "db", None), "profession", "") or "").strip().lower() == "barbarian":
+            if int(old_circle or 0) < 2 <= int(new_circle or 0) and BerserkService.ensure_berserk_learned(character):
+                messages.append("Your training hardens into something more dangerous. You can now BERSERK.")
+            old_slots = RoarService.get_total_slots_for_circle(int(old_circle or 0))
+            new_slots = RoarService.get_total_slots_for_circle(int(new_circle or 0))
+            if RoarService.ensure_kuniyo_auto_learned(character):
+                messages.append("Your battle voice awakens. You can now ROAR KUNIYO.")
+            elif new_slots > old_slots:
+                messages.append("Your battle voice expands, leaving room for another roar.")
+        return messages
 
     SlotService.recompute_max(character)
     messages = []
+    if str(getattr(getattr(character, "db", None), "profession", "") or "").strip().lower() == "barbarian":
+        if int(old_circle or 0) < 2 <= int(new_circle or 0) and BerserkService.ensure_berserk_learned(character):
+            messages.append("Your training hardens into something more dangerous. You can now BERSERK.")
+        old_slots = RoarService.get_total_slots_for_circle(int(old_circle or 0))
+        new_slots = RoarService.get_total_slots_for_circle(int(new_circle or 0))
+        if RoarService.ensure_kuniyo_auto_learned(character):
+            messages.append("Your battle voice awakens. You can now ROAR KUNIYO.")
+        elif new_slots > old_slots:
+            messages.append("Your battle voice expands, leaving room for another roar.")
     granted_feats = FeatTrainerService.grant_circle_profession_feats(character, new_circle)
     if granted_feats:
         messages.append(

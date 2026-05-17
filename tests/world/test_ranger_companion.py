@@ -10,6 +10,7 @@ django.setup()
 from evennia.utils.create import create_object
 from evennia.utils.search import search_object
 
+from tests.fixtures.safe_smoke_delete import safe_smoke_delete
 from typeclasses.characters import Character
 from typeclasses.npcs import RangerCompanion
 from typeclasses.rooms import Room
@@ -28,11 +29,7 @@ class RangerCompanionTests(unittest.TestCase):
         self.city_room.set_terrain_type("urban")
 
     def tearDown(self):
-        for obj in reversed(self.created):
-            try:
-                obj.delete()
-            except Exception:
-                pass
+        safe_smoke_delete(*self.created)
 
     def _create(self, typeclass, key, **kwargs):
         obj = create_object(typeclass, key=key, nohome=True, **kwargs)

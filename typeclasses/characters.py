@@ -33,13 +33,18 @@ from engine.bundles import get_default_stat_values, is_known_stat
 from engine.presenters.injury_presenter import InjuryPresenter
 from engine.presenters.mana_presenter import ManaPresenter
 from engine.presenters.spell_effect_presenter import SpellEffectPresenter
+from engine.services.barbarian_saf_service import BarbarianSafService
+from engine.services.berserk_service import BerserkService
+from engine.services.dance_service import DanceService
 from engine.services.injury_service import InjuryService
 from engine.services.mana_service import ManaService
 from engine.services.ranger_saf_service import RangerSafService
+from engine.services.roar_service import RoarService
 from engine.services.spell_effect_service import SpellEffectService
 from engine.services.result import ActionResult
 from engine.services.spell_access_service import SpellAccessService
 from engine.services.spellbook_service import SpellbookService
+from engine.services.vocal_damage_service import VocalDamageService
 from server.systems.ammo_runtime import find_matching_ammo_stack, format_ammo_label, merge_ammo_stacks, normalize_ammo_stack, split_ammo_stack
 from typeclasses.abilities import get_ability
 from typeclasses.box import Box
@@ -2331,9 +2336,9 @@ class Character(ObjectParent, DefaultCharacter):
         if self.db.max_attunement is None:
             self.db.max_attunement = 100
         if self.db.inner_fire is None:
-            self.db.inner_fire = 10
+            self.db.inner_fire = 0
         if self.db.max_inner_fire is None:
-            self.db.max_inner_fire = 10
+            self.db.max_inner_fire = 0
         if self.db.focus is None:
             self.db.focus = 10
         if self.db.max_focus is None:
@@ -2654,14 +2659,17 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_hp(self):
         self.ensure_core_defaults()
-        return self.db.hp, self.db.max_hp
+        bonus = self.get_barbarian_berserk_hp_bonus() if hasattr(self, "get_barbarian_berserk_hp_bonus") else 0
+        bonus += int(RoarService.get_temp_hp_bonus(self) or 0)
+        return self.db.hp, int(self.db.max_hp or 0) + bonus
 
     # CANDIDATE_FOR_EXTRACTION
     # MIXED: state mutation plus death/ritual side effects.
     def set_hp(self, value):
         self.ensure_core_defaults()
         old_hp = int(self.db.hp or 0)
-        self.db.hp = max(0, min(value, self.db.max_hp))
+        max_hp = int(self.db.max_hp or 0) + self.get_barbarian_berserk_hp_bonus() + int(RoarService.get_temp_hp_bonus(self) or 0)
+        self.db.hp = max(0, min(value, max_hp))
         if self.db.hp < old_hp:
             self.cancel_pending_cleric_ritual("Pain breaks your concentration.")
         if old_hp > 0 and (self.db.hp or 0) <= 0:
@@ -2678,7 +2686,9 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_balance(self):
         self.ensure_all_defaults()
-        return self.db.balance, self.db.max_balance
+        dance_bonus = int(DanceService.get_balance_bonus(self) or 0)
+        current = max(0, min(int(self.db.max_balance or 0), int(self.db.balance or 0) + dance_bonus))
+        return current, self.db.max_balance
 
     def get_last_maneuver(self):
         self.ensure_all_defaults()
@@ -8874,6 +8884,8 @@ class Character(ObjectParent, DefaultCharacter):
                 recovery = max(0, recovery - int(disrupt_effect.get("balance_recovery_penalty", 0) or 0))
             if hasattr(self, "get_exhaustion_balance_penalty"):
                 recovery = max(0, recovery - self.get_exhaustion_balance_penalty())
+            recovery = max(0, recovery - int(RoarService.get_balance_recovery_penalty(self) or 0))
+            recovery += int(DanceService.get_balance_bonus(self) or 0) // 4
             self.set_balance(self.db.balance + recovery)
 
     def recover_fatigue(self):
@@ -8922,10 +8934,13 @@ class Character(ObjectParent, DefaultCharacter):
         default_value = _default_stats().get(stat_name, 0)
         current_value = int(self.db.stats.get(stat_name, default_value) or default_value)
         current_value += int(self.get_effect_stat_modifier(stat_name) or 0)
+        current_value += int(RoarService.get_stat_modifier(self, stat_name) or 0)
+        current_value += int(DanceService.get_stat_modifier(self, stat_name) or 0)
         cap = self.get_race_stat_cap(stat_name)
         if cap is not None and current_value > int(cap):
             self.set_stat(stat_name, cap)
-            return int(cap)
+            current_value = int(cap)
+        current_value += self.get_barbarian_berserk_stat_bonus(stat_name)
         return current_value
 
     def set_stat(self, name, value, emit_cap_message=False):
@@ -15711,7 +15726,12 @@ class Character(ObjectParent, DefaultCharacter):
             if scale <= 0.0:
                 continue
             total += float(effect.get("strength", 0) or 0) * scale
+        if category == "debilitation" and modifier_name in {"magic_attack", "magic_defense"}:
+            total += float(RoarService.get_magic_penalty(self, modifier_name) or 0)
         return int(round(total))
+
+    def get_fear_modifier(self):
+        return int(RoarService.get_fear_amplification(self) or 0) - int(RoarService.get_fear_resistance(self) or 0)
 
     def get_effect_stat_modifier(self, stat_name, category="debilitation"):
         normalized = str(stat_name or "").strip().lower().replace(" ", "_")
@@ -15753,7 +15773,7 @@ class Character(ObjectParent, DefaultCharacter):
 
     def get_skill(self, skill_name):
         normalized = str(skill_name or "").strip().lower().replace("-", "_").replace(" ", "_")
-        return self.get_skill_rank(normalized) + self.get_empath_link_focus_bonus(normalized)
+        return self.get_skill_rank(normalized) + self.get_empath_link_focus_bonus(normalized) + RoarService.get_skill_modifier(self, normalized) + DanceService.get_skill_modifier(self, normalized)
 
     def get_progression_skill_rank(self, skill_name):
         self.ensure_core_defaults()
@@ -15920,6 +15940,163 @@ class Character(ObjectParent, DefaultCharacter):
         elif current_saf is None:
             RangerSafService.set_saf(self, 0)
         self.db.ranger_identity_migrated = True
+
+    def _ensure_canonical_barbarian_identity(self):
+        if bool(getattr(self.db, "barbarian_identity_migrated", False)):
+            return
+        legacy_fire = getattr(self.db, "inner_fire", None)
+        current_saf = getattr(self.db, "canonical_saf", None)
+        if self.is_profession("barbarian") and legacy_fire not in {None, 0} and current_saf in {None, 0}:
+            BarbarianSafService.set_inner_fire(self, legacy_fire)
+        elif current_saf is None:
+            self.db.canonical_saf = 0
+        self.db.inner_fire = BarbarianSafService.get_inner_fire(self)
+        self.db.max_inner_fire = 0
+        self.db.barbarian_identity_migrated = True
+
+    def get_inner_fire(self):
+        self._ensure_canonical_barbarian_identity()
+        return BarbarianSafService.get_inner_fire(self)
+
+    def set_inner_fire(self, value, emit_messages=True):
+        self._ensure_canonical_barbarian_identity()
+        amount = BarbarianSafService.set_inner_fire(self, value)
+        self.db.inner_fire = amount
+        self.db.max_inner_fire = 0
+        if emit_messages:
+            self.sync_client_state()
+        return amount
+
+    def is_berserk_available(self):
+        self._ensure_canonical_barbarian_identity()
+        return BarbarianSafService.is_berserk_available(self)
+
+    def get_spellbook1(self):
+        return max(0, int(getattr(self.db, "spellbook1", 0) or 0))
+
+    def set_spellbook1(self, value, emit_messages=True):
+        self.db.spellbook1 = max(0, int(value or 0))
+        if emit_messages and hasattr(self, "sync_client_state"):
+            self.sync_client_state()
+        return self.db.spellbook1
+
+    def has_spellbook1_bit(self, bit_index):
+        return bool(self.get_spellbook1() & (1 << int(bit_index)))
+
+    def set_spellbook1_bit(self, bit_index, emit_messages=True):
+        return self.set_spellbook1(self.get_spellbook1() | (1 << int(bit_index)), emit_messages=emit_messages)
+
+    def clear_spellbook1_bit(self, bit_index, emit_messages=True):
+        return self.set_spellbook1(self.get_spellbook1() & ~(1 << int(bit_index)), emit_messages=emit_messages)
+
+    def get_spellbook2(self):
+        return max(0, int(getattr(self.db, "spellbook2", 0) or 0))
+
+    def set_spellbook2(self, value, emit_messages=True):
+        self.db.spellbook2 = max(0, int(value or 0))
+        if emit_messages and hasattr(self, "sync_client_state"):
+            self.sync_client_state()
+        return self.db.spellbook2
+
+    def has_spellbook2_bit(self, bit_index):
+        return bool(self.get_spellbook2() & (1 << int(bit_index)))
+
+    def set_spellbook2_bit(self, bit_index, emit_messages=True):
+        return self.set_spellbook2(self.get_spellbook2() | (1 << int(bit_index)), emit_messages=emit_messages)
+
+    def clear_spellbook2_bit(self, bit_index, emit_messages=True):
+        return self.set_spellbook2(self.get_spellbook2() & ~(1 << int(bit_index)), emit_messages=emit_messages)
+
+    def get_barbarian_dance_ccp(self):
+        value = getattr(self.db, "ccp", None)
+        if value is None:
+            return 100
+        return max(1, int(value or 100))
+
+    def get_barbarian_dance_armor_penalty(self):
+        return max(0, min(100, int(getattr(self.db, "armor_penalty", 0) or 0)))
+
+    def get_barbarian_dance_encumbrance(self):
+        return max(0, int(getattr(self.db, "encumberance", getattr(self.db, "encumbrance", 0)) or 0))
+
+    def get_active_barbarian_berserk(self):
+        return BerserkService.get_active_berserk(self)
+
+    def get_barbarian_berserk_hp_bonus(self):
+        active = self.get_active_barbarian_berserk()
+        if not isinstance(active, Mapping):
+            return 0
+        return max(0, int(active.get("hp_bonus", 0) or 0))
+
+    def get_barbarian_berserk_stat_bonus(self, stat_name):
+        active = self.get_active_barbarian_berserk()
+        if not isinstance(active, Mapping):
+            return 0
+        bonuses = dict(active.get("stat_bonuses") or {})
+        return int(bonuses.get(str(stat_name or "").strip().lower(), 0) or 0)
+
+    def get_known_barbarian_roars(self):
+        return RoarService.get_known_roar_names(self)
+
+    def get_known_barbarian_dances(self):
+        return DanceService.get_known_dance_names(self)
+
+    def get_barbarian_roar_slots(self):
+        return RoarService.get_total_slots(self)
+
+    def get_active_barbarian_roars(self):
+        return RoarService.get_active_roars(self)
+
+    def get_active_barbarian_dance(self):
+        return DanceService.get_active_dance(self)
+
+    def get_barbarian_roar_defense_penalty(self, defense_name):
+        return RoarService.get_defense_penalty(self, defense_name)
+
+    def get_barbarian_dance_defense_bonus(self, defense_name):
+        return DanceService.get_defense_bonus(self, defense_name)
+
+    def get_barbarian_roar_offense_penalty(self, penalty_name):
+        return RoarService.get_offense_penalty(self, penalty_name)
+
+    def get_barbarian_dance_offense_bonus(self, bonus_name):
+        return DanceService.get_offense_bonus(self, bonus_name)
+
+    def get_barbarian_roar_stat_modifier(self, stat_name):
+        return RoarService.get_stat_modifier(self, stat_name)
+
+    def get_barbarian_dance_stat_modifier(self, stat_name):
+        return DanceService.get_stat_modifier(self, stat_name)
+
+    def get_barbarian_roar_skill_modifier(self, skill_name):
+        return RoarService.get_skill_modifier(self, skill_name)
+
+    def get_barbarian_dance_skill_modifier(self, skill_name):
+        return DanceService.get_skill_modifier(self, skill_name)
+
+    def get_barbarian_roar_magic_penalty(self, modifier_name):
+        return RoarService.get_magic_penalty(self, modifier_name)
+
+    def get_barbarian_roar_stun_modifier(self):
+        return int(RoarService.get_stun_susceptibility(self) or 0) - int(RoarService.get_stun_resistance_bonus(self) or 0)
+
+    def get_barbarian_roar_temp_hp_bonus(self):
+        return int(RoarService.get_temp_hp_bonus(self) or 0)
+
+    def get_barbarian_roar_fear_resistance(self):
+        return int(RoarService.get_fear_resistance(self) or 0)
+
+    def get_barbarian_roar_attack_roundtime_penalty(self):
+        return float(RoarService.get_attack_roundtime_penalty(self) or 0.0)
+
+    def get_barbarian_dance_balance_bonus(self):
+        return int(DanceService.get_balance_bonus(self) or 0)
+
+    def get_barbarian_dance_engagement_speed_bonus(self):
+        return int(DanceService.get_engagement_speed_bonus(self) or 0)
+
+    def get_barbarian_vocal_damage(self):
+        return VocalDamageService.get_total_vocal_damage(self)
 
     def get_wilderness_bond(self):
         self._ensure_canonical_ranger_identity()
@@ -17936,6 +18113,12 @@ class Character(ObjectParent, DefaultCharacter):
             eligible, missing_requirements = self.can_join_ranger()
             if not eligible:
                 return False, self.get_ranger_join_failure_message(missing_requirements)
+        if profession == "barbarian":
+            if not guide:
+                return False, "No Barbarian guildmistress is here to receive your oath."
+            current_profession = self.get_profession()
+            if current_profession not in {DEFAULT_PROFESSION, profession}:
+                return False, "T'Kiel fixes you with a hard stare. 'You already chose a profession. Now get out.'"
         if profession == "cleric":
             ready, ready_message = self.can_begin_profession_oath()
             if not ready:
@@ -17955,6 +18138,12 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
             self.db.ranger_joined_at = time.time()
             return True, self.get_ranger_join_success_message(guide=guide)
+        if profession == "barbarian":
+            BarbarianSafService.clear_on_guild_commitment(self)
+            self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
+            self.db.barbarian_joined_at = time.time()
+            guide_name = getattr(guide, "key", "T'Kiel") if guide else "T'Kiel"
+            return True, f"{guide_name} bares her teeth in a grim nod. \"Good. Now prove you can survive what comes next.\"\nYou are now recognized as a Barbarian."
         if profession == "cleric":
             self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
             self.db.cleric_joined_at = time.time()
@@ -18025,6 +18214,12 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.ranger_instinct = max(0, int(getattr(self.db, "ranger_instinct", 0) or 0))
             self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
             self.db.ranger_circle = max(1, int(getattr(self.db, "ranger_circle", 1) or 1))
+        elif normalized == "barbarian":
+            BarbarianSafService.clear_on_guild_commitment(self)
+            self.db.barbarian_identity_migrated = False
+            self.db.inner_fire = 0
+            self.db.max_inner_fire = 0
+            self.db.circle = max(1, int(getattr(self.db, "circle", 1) or 1))
         elif normalized == "cleric":
             self.db.devotion_max = int(CLERIC_DEVOTION_CONFIG["max_devotion"])
             self.db.max_devotion = self.db.devotion_max
@@ -19112,6 +19307,9 @@ class Character(ObjectParent, DefaultCharacter):
         if getattr(self.db, "is_captured", False):
             self.msg("You are restrained and cannot move.")
             return False
+        if RoarService.is_immobilized(self):
+            self.msg("Fear locks your limbs in place.")
+            return False
         if getattr(self.db, "in_stocks", False):
             self.msg("You are locked in the stocks.")
             return False
@@ -19121,6 +19319,13 @@ class Character(ObjectParent, DefaultCharacter):
         if self.get_encumbrance_ratio() >= 1.2:
             self.msg("You are too encumbered to move.")
             return False
+
+        flee_lock = RoarService.get_forced_return_block(self)
+        if destination and flee_lock:
+            origin_room_id = int(flee_lock.get("origin_room_id", 0) or 0)
+            if origin_room_id and int(getattr(destination, "id", 0) or 0) == origin_room_id:
+                self.msg("The memory of the hiss keeps you from returning just yet.")
+                return False
 
         if destination and hasattr(destination, "allows_profession") and not destination.allows_profession(self.get_profession()):
             self.msg("You are not permitted to enter there as a member of your profession.")

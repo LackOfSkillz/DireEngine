@@ -43,6 +43,17 @@ class ProfessionSkillsetTests(unittest.TestCase):
         self.assertEqual(ranger["secondary"], ("weapons", "armor"))
         self.assertEqual(ranger["tertiary"], ("survival", "lore"))
 
+    def test_barbarian_profile_uses_anti_magic_profession_axis(self):
+        barbarian = get_profession_profile("barbarian")
+        placement = get_profession_skillset_placement("barbarian")
+
+        self.assertEqual(barbarian["profession_id"], 1)
+        self.assertTrue(barbarian["anti_magic"])
+        self.assertEqual(placement["primary"], ("weapons",))
+        self.assertEqual(placement["secondary"], ("survival", "armor"))
+        self.assertEqual(placement["tertiary"], ("lore",))
+        self.assertIsNone(get_profession_skillset_tier("barbarian", "magic", default=None))
+
     def test_profession_skillset_tier_normalizes_combat_to_weapons(self):
         self.assertEqual(get_profession_skillset_tier("ranger", "combat"), "secondary")
         self.assertEqual(get_profession_skillset_tier("paladin", "armor"), "primary")

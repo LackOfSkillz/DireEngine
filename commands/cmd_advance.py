@@ -53,9 +53,11 @@ class CmdAdvance(Command):
         target.set_target(self.caller)
         desired_range = "near" if current_range == "far" else "melee"
         keep_distance_bonus = target.get_ranger_keep_distance_bonus() if hasattr(target, "get_ranger_keep_distance_bonus") else 0
+        pressure_roll = self.caller.get_stat("reflex") + 20
+        if hasattr(self.caller, "get_barbarian_dance_engagement_speed_bonus"):
+            pressure_roll += self.caller.get_barbarian_dance_engagement_speed_bonus()
         if desired_range == "melee" and keep_distance_bonus and target.has_ranged_weapon_equipped() and self.caller.get_range(target) != "melee":
             hold_roll = target.get_stat("agility") + keep_distance_bonus + 20
-            pressure_roll = self.caller.get_stat("reflex") + 20
             if hold_roll >= pressure_roll:
                 desired_range = "near"
 
