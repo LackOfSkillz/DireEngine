@@ -7,12 +7,14 @@ from evennia.utils.create import create_object
 from .import_canonical import (
     CANONICAL_ID_CATEGORY,
     DEFAULT_MAP_PATH,
+    LANDING_ZONE_NAME,
     PHASE1_ROOM_IDS,
     PHASE2_ROOM_IDS,
     PHASE3_ROOM_IDS,
     PHASE4_ROOM_IDS,
     PHASE5_ROOM_IDS,
     ROOM_TYPECLASS,
+    _apply_canonical_landing_metadata,
     _collect_imported_rooms,
     _drain_pending_exits,
     _find_room_by_map_id,
@@ -220,6 +222,8 @@ def _ensure_stub_room(entry, spec):
     room.db.is_canonical_guildhall_stub = True
     room.db.canonical_phase = GUILDHALL_STUB_PHASE
     room.db.canonical_source = "direlore:map-1777858104.json"
+    room.db.zone = LANDING_ZONE_NAME
+    _apply_canonical_landing_metadata(room, entry)
     room.tags.add(CANONICAL_AREA_TAG_GUILDHALL_STUB)
     room.tags.add(str(int(entry["id"])), category=CANONICAL_ID_CATEGORY)
     room.aliases.add(str(entry["canonical_title"] or "").lower())

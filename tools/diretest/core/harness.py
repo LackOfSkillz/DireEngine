@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import inspect
 import time
 from uuid import uuid4
 
 from django.conf import settings
 from django.db import close_old_connections
+from evennia.utils import logger
 
 from .leaks import detect_leaks
 from .snapshot_schema import LEAK_KEY_PREFIX
@@ -34,6 +36,54 @@ def _get_fresh_object(obj):
     if object_id <= 0:
         return None
     return ObjectDB.objects.filter(id=object_id).first()
+
+
+def _canonical_marker_details(obj):
+    source = _get_fresh_object(obj) or obj
+    db = getattr(source, "db", None)
+    return {
+        "canonical_map_id": getattr(db, "canonical_map_id", None),
+        "canonical_phase": getattr(db, "canonical_phase", None),
+        "canonical_source": getattr(db, "canonical_source", None),
+    }
+
+
+def _is_room_object(obj):
+    source = _get_fresh_object(obj) or obj
+    typeclass_path = str(getattr(source, "db_typeclass_path", "") or "")
+    return typeclass_path.endswith("typeclasses.rooms.Room") or typeclass_path.endswith("rooms.Room")
+
+
+def _is_canonical_room(obj):
+    return _is_room_object(obj) and _canonical_marker_details(obj)["canonical_map_id"] is not None
+
+
+def _is_canonical_protected(obj):
+    details = _canonical_marker_details(obj)
+    return _is_room_object(obj) and any(details.values())
+
+
+def _find_test_caller():
+    for frame_info in inspect.stack()[2:]:
+        filename = str(getattr(frame_info, "filename", "") or "")
+        if "\\tests\\" not in filename.lower() and "/tests/" not in filename.lower():
+            continue
+        function_name = str(getattr(frame_info, "function", "") or "")
+        if function_name.startswith("test_"):
+            return f"{filename}:{function_name}"
+    return "unknown test caller"
+
+
+def _log_canonical_protection(obj, source):
+    details = _canonical_marker_details(obj)
+    logger.log_warn(
+        "[DireTest] Skipping canonical-protected object during "
+        f"{source}: id={int(getattr(obj, 'id', 0) or 0)} "
+        f"key={str(getattr(obj, 'key', '') or '')!r} "
+        f"canonical_map_id={details['canonical_map_id']!r} "
+        f"canonical_phase={details['canonical_phase']!r} "
+        f"caller={_find_test_caller()}"
+    )
 
 
 def _attribute_has_live_links(attribute):
@@ -169,6 +219,10 @@ def safe_delete(obj, max_attempts=3, retry_delay=0.1, recurse=True, _visited=Non
     _visited.add(object_id)
 
     if not _object_exists(obj):
+        return True, None
+
+    if _is_canonical_protected(obj):
+        _log_canonical_protection(obj, "safe_delete")
         return True, None
 
     if recurse:

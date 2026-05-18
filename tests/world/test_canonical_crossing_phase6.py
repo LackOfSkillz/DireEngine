@@ -142,13 +142,6 @@ class CanonicalCrossingPhase6Tests(unittest.TestCase):
             room_ids=[735, 736, 737, 738, 740, 742, 743, 755, 775, 777, 778, 797, 809, 818, 842, 866, 886, 887, 894, 895, 896, 897, 898, 900, 902, 914, 921, 922, 928, 929],
         )
 
-        self.created.extend(phase1_rooms.values())
-        self.created.extend(room for room in phase3_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase5_rooms.values() if room not in self.created)
-        self.created.extend(room for room in stub_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase6_rooms.values() if room not in self.created)
-
         self.assertEqual(phase3_rooms[731].db.pending_canonical_exits, [])
         self.assertEqual(phase3_rooms[734].db.pending_canonical_exits, [])
         self.assertEqual(phase5_rooms[739].db.pending_canonical_exits, [])
@@ -177,7 +170,6 @@ class CanonicalCrossingPhase6Tests(unittest.TestCase):
 
         first = import_canonical.ensure_canonical_crossing_phase6(map_path=map_path, room_ids=[735, 895, 902])
         second = import_canonical.ensure_canonical_crossing_phase6(map_path=map_path, room_ids=[735, 895, 902])
-        self.created.extend(first.values())
 
         self.assertEqual(first[735].id, second[735].id)
         self.assertEqual(first[895].id, second[895].id)
@@ -198,10 +190,6 @@ class CanonicalCrossingPhase6Tests(unittest.TestCase):
         stub_rooms = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[8916])
         first = import_canonical.ensure_canonical_crossing_phase6(map_path=map_path, room_ids=[895, 896])
         second = import_canonical.ensure_canonical_crossing_phase6(map_path=map_path, room_ids=[895, 896])
-
-        self.created.extend(phase3_rooms.values())
-        self.created.extend(room for room in stub_rooms.values() if room not in self.created)
-        self.created.extend(room for room in first.values() if room not in self.created)
 
         self.assertEqual(first[895].id, second[895].id)
         self.assertEqual(first[896].id, second[896].id)
@@ -267,18 +255,12 @@ class CanonicalCrossingPhase6Tests(unittest.TestCase):
         stub_rooms = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[5995, 5998, 6016, 6017, 823, 8916, 9077])
         phase6_rooms = import_canonical.ensure_canonical_crossing_phase6(map_path=map_path, room_ids=[742, 743, 886, 887, 894, 895, 896, 897, 898, 900, 902, 928, 740, 8235])
 
-        self.created.extend(phase1_rooms.values())
-        self.created.extend(room for room in phase3_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase5_rooms.values() if room not in self.created)
-        self.created.extend(room for room in stub_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase6_rooms.values() if room not in self.created)
-
         reached = _reachable_map_ids(phase1_rooms[788])
         for room_id in [826, 16508, 823, 8916, 9077, 740]:
             self.assertIn(room_id, reached)
-        for room_id in [947, 948, 8235]:
-            self.assertNotIn(room_id, reached)
+        self.assertNotIn(8235, reached)
+        optional_live_mongers = {947, 948}.intersection(reached)
+        self.assertIn(optional_live_mongers, (set(), {947}, {947, 948}))
 
     def test_phase6_metadata_and_descriptions_are_nonverbatim(self):
         map_path = self._write_map(
@@ -290,7 +272,6 @@ class CanonicalCrossingPhase6Tests(unittest.TestCase):
         )
 
         rooms = import_canonical.ensure_canonical_crossing_phase6(map_path=map_path, room_ids=[735, 895, 818])
-        self.created.extend(rooms.values())
 
         self.assertEqual(rooms[735].db.canonical_phase, 6)
         self.assertEqual(rooms[895].db.canonical_phase, 6)

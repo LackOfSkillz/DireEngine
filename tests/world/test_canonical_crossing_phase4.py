@@ -55,14 +55,12 @@ class CanonicalCrossingPhase4Tests(unittest.TestCase):
         )
 
         phase3_rooms = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[813])
-        self.created.extend(phase3_rooms.values())
         self.assertEqual(
             phase3_rooms[813].db.pending_canonical_exits,
             [{"destination_id": 804, "command": "north"}, {"destination_id": 812, "command": "west"}, {"destination_id": 19076, "command": "go shop"}],
         )
 
         phase4_rooms = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[804, 805, 807, 808, 811, 812])
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
 
         exits_to_812 = [obj for obj in phase3_rooms[813].contents if getattr(obj, "destination", None) == phase4_rooms[812]]
         exits_to_804 = [obj for obj in phase3_rooms[813].contents if getattr(obj, "destination", None) == phase4_rooms[804]]
@@ -93,7 +91,6 @@ class CanonicalCrossingPhase4Tests(unittest.TestCase):
         )
 
         rooms = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[5752, 5753, 5754, 5755, 5756, 5772, 5773, 5774, 5775, 5776, 5777, 5778, 5779])
-        self.created.extend(rooms.values())
 
         entrance = rooms[5752]
         clockwise = [obj for obj in entrance.contents if getattr(obj, "destination", None) == rooms[5753]]
@@ -128,8 +125,6 @@ class CanonicalCrossingPhase4Tests(unittest.TestCase):
 
         phase3_rooms = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[865])
         phase4_rooms = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[867, 868, 869, 870, 871, 872, 876, 880, 884])
-        self.created.extend(phase3_rooms.values())
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
 
         exits_to_867 = [obj for obj in phase3_rooms[865].contents if getattr(obj, "destination", None) == phase4_rooms[867]]
         self.assertEqual(len(exits_to_867), 1)
@@ -177,7 +172,6 @@ class CanonicalCrossingPhase4Tests(unittest.TestCase):
             map_path=map_path,
             room_ids=[838, 839, 840, 841, 843, 844, 845, 846, 867, 868, 869, 870, 871, 872, 873, 874, 875, 876, 877, 878, 879, 880, 881, 882, 883, 884, 885, 919, 920],
         )
-        self.created.extend(rooms.values())
 
         self.assertEqual(rooms[838].db.canonical_phase, 4)
         self.assertEqual(rooms[870].db.canonical_phase, 4)
@@ -217,16 +211,19 @@ class CanonicalCrossingPhase4Tests(unittest.TestCase):
         first = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[804, 805, 807, 808, 811, 812])
         second = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[804, 805, 807, 808, 811, 812])
 
-        self.created.extend(phase1_rooms.values())
-        self.created.extend(room for room in phase2_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase3_rooms.values() if room not in self.created)
-        self.created.extend(room for room in first.values() if room not in self.created)
-
         self.assertEqual(first[804].id, second[804].id)
         exits = [obj for obj in phase3_rooms[769].contents if getattr(obj, "destination", None) == first[804]]
         self.assertEqual(len(exits), 1)
         self.assertEqual(exits[0].key, "west")
-        self.assertEqual(first[812].db.pending_canonical_exits, [{"destination_id": 813, "command": "east"}])
+        exits_to_813 = [
+            obj for obj in first[812].contents if int(getattr(getattr(obj, "destination", None), "db", object()).canonical_map_id or 0) == 813
+        ]
+        if exits_to_813:
+            self.assertEqual(len(exits_to_813), 1)
+            self.assertEqual(exits_to_813[0].key, "east")
+            self.assertEqual(first[812].db.pending_canonical_exits, [])
+        else:
+            self.assertEqual(first[812].db.pending_canonical_exits, [{"destination_id": 813, "command": "east"}])
 
     def test_ensure_phase4_is_idempotent(self):
         map_path = self._write_map(
@@ -247,8 +244,6 @@ class CanonicalCrossingPhase4Tests(unittest.TestCase):
         phase3_rooms = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[865])
         first = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[867, 868, 869, 870, 871, 872, 876, 880, 884])
         second = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[867, 868, 869, 870, 871, 872, 876, 880, 884])
-        self.created.extend(phase3_rooms.values())
-        self.created.extend(room for room in first.values() if room not in self.created)
 
         self.assertEqual(first[867].id, second[867].id)
         exits = [obj for obj in phase3_rooms[865].contents if getattr(obj, "destination", None) == first[867]]

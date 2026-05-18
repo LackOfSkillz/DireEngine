@@ -40,10 +40,10 @@ from world.systems.metrics import increment_counter, record_event
 from world.systems.timing_audit import register_ticker_metadata, unregister_ticker_metadata
 from world.systems.exp_pulse import EXP_TICKER_IDSTRING, PULSE_TICK, exp_pulse_tick, start_exp_ticker
 from world.systems.guards import GUARD_TICK_INTERVAL, LEGACY_GUARD_RUNTIME_BLOCK_MSG, cleanup_legacy_guard_behavior_scripts, ensure_landing_guards, get_guard_patrol_mode, get_last_guard_tick_time, guard_has_per_guard_ownership, has_guard_behavior_script, is_diresim_enabled, iter_active_guards, log_legacy_guard_runtime_block, process_guard_tick, sync_all_guard_behavior_scripts
-from world.the_landing import build_the_landing
 from world.area_forge.map_api import prime_zone_map_cache
 from world.areas.the_crossing import (
     ensure_canonical_guildhall_stubs,
+    ensure_full_canonical_crossing,
     ensure_canonical_crossing_phase1,
     ensure_canonical_crossing_phase2,
     ensure_canonical_crossing_phase3,
@@ -64,6 +64,7 @@ _SERVER_START_BOOTSTRAP_CHARACTER_BATCH_SIZE = 25
 IDLE_RECOVERY_INTERVAL = 2.0
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
 EXIT_TYPECLASS = "typeclasses.exits.Exit"
+CANONICAL_ARRIVAL_AUDIT_STUB_IDS = {7898, 5990, 5713, 7888, 823, 958, 7900, 9077}
 DIR_ALIASES = {
     "north": ["n"],
     "south": ["s"],
@@ -860,6 +861,9 @@ def _ensure_fishing_supplier_npc():
 
 def _resolve_landing_arrival_room():
     canonical_room = get_canonical_crossing_arrival_room()
+    if canonical_room is not None and not _canonical_arrival_reaches_required_stubs(canonical_room):
+        ensure_full_canonical_crossing()
+        canonical_room = get_canonical_crossing_arrival_room()
     if canonical_room is not None:
         return canonical_room
 
@@ -887,6 +891,26 @@ def _resolve_landing_arrival_room():
         legacy_landing_rooms.sort(key=_sort_key)
         return legacy_landing_rooms[0]
     return None
+
+
+def _canonical_arrival_reaches_required_stubs(start_room):
+    seen = set()
+    queue = [start_room]
+    reached = set()
+    while queue:
+        room = queue.pop(0)
+        room_id = getattr(room, "id", None)
+        if room_id is None or room_id in seen:
+            continue
+        seen.add(room_id)
+        canonical_map_id = getattr(getattr(room, "db", None), "canonical_map_id", None)
+        if canonical_map_id is not None:
+            reached.add(int(canonical_map_id))
+        for exit_obj in list(getattr(room, "exits", []) or []):
+            destination = getattr(exit_obj, "destination", None)
+            if destination is not None:
+                queue.append(destination)
+    return CANONICAL_ARRIVAL_AUDIT_STUB_IDS.issubset(reached)
 
 
 def _ensure_tutorial_goblin(room):
@@ -1809,17 +1833,7 @@ def _run_deferred_server_start_bootstrap_after_character_init():
 
         _ensure_limbo_training_dummy()
         _append_guard_startup_trace("at_server_start", "bootstrap_after_limbo_dummy", deferred=True)
-        build_the_landing(
-            area_id=LANDING_AREA_ID,
-            skip_if_built=True,
-            diag_hook=lambda stage, **details: _append_guard_startup_trace(
-                "at_server_start",
-                f"build_the_landing_{stage}",
-                deferred=True,
-                **details,
-            ),
-        )
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_build_landing", deferred=True)
+        _append_guard_startup_trace("at_server_start", "bootstrap_skip_build_landing", deferred=True, reason="canonical_landing_superseded")
         try:
             from world.areas.the_landing import ensure_the_landing_stat_trainers
 
@@ -1835,40 +1849,10 @@ def _run_deferred_server_start_bootstrap_after_character_init():
             logger.log_warn("Landing feat trainer bootstrap failed during server start.")
         _append_guard_startup_trace("at_server_start", "bootstrap_after_feat_trainers", deferred=True)
         try:
-            ensure_canonical_crossing_phase1()
+            ensure_full_canonical_crossing()
         except Exception:
-            logger.log_warn("Canonical Crossing phase 1 bootstrap failed during server start.")
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase1", deferred=True)
-        try:
-            ensure_canonical_crossing_phase2()
-        except Exception:
-            logger.log_warn("Canonical Crossing phase 2 bootstrap failed during server start.")
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase2", deferred=True)
-        try:
-            ensure_canonical_crossing_phase3()
-        except Exception:
-            logger.log_warn("Canonical Crossing phase 3 bootstrap failed during server start.")
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase3", deferred=True)
-        try:
-            ensure_canonical_crossing_phase4()
-        except Exception:
-            logger.log_warn("Canonical Crossing phase 4 bootstrap failed during server start.")
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase4", deferred=True)
-        try:
-            ensure_canonical_crossing_phase5()
-        except Exception:
-            logger.log_warn("Canonical Crossing phase 5 bootstrap failed during server start.")
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase5", deferred=True)
-        try:
-            ensure_canonical_guildhall_stubs()
-        except Exception:
-            logger.log_warn("Canonical Crossing guildhall stub bootstrap failed during server start.")
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_guildhall_stubs", deferred=True)
-        try:
-            ensure_canonical_crossing_phase6()
-        except Exception:
-            logger.log_warn("Canonical Crossing phase 6 bootstrap failed during server start.")
-        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase6", deferred=True)
+            logger.log_warn("Canonical Crossing full bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_full_import", deferred=True)
         try:
             from world.areas.the_landing import ensure_the_landing_streetlife
 
@@ -1877,7 +1861,7 @@ def _run_deferred_server_start_bootstrap_after_character_init():
             logger.log_warn("Landing streetlife bootstrap failed during server start.")
         _append_guard_startup_trace("at_server_start", "bootstrap_after_landing_streetlife", deferred=True)
         try:
-            primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map", "ranger-guild-map"])
+            primed_zones = prime_zone_map_cache(["the_landing", "new_landing", "empath-guild-map", "ranger-guild-map"])
             if primed_zones:
                 logger.log_info(f"Primed AreaForge zone map cache: {', '.join(primed_zones)}")
         except Exception:

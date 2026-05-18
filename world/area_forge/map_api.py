@@ -75,6 +75,18 @@ def _empty_map_payload():
     return {"rooms": [], "edges": [], "exits": [], "player_room_id": None, "zone": None}
 
 
+def _zone_label_for_room(room, fallback=None):
+    if not room:
+        return fallback
+    zone_label = str(getattr(getattr(room, "db", None), "zone", "") or "").strip()
+    if zone_label and zone_label != "default_region":
+        return zone_label
+    zone_id = str(getattr(getattr(room, "db", None), "zone_id", "") or "").strip()
+    if zone_id and zone_id != "default_region":
+        return zone_id
+    return fallback
+
+
 def _room_has_tag(room, tag_key, category=None):
     if not room or not hasattr(room, "tags") or not tag_key:
         return False
@@ -446,7 +458,7 @@ def get_local_map(character, radius=3):
         "edges": filtered_edges,
         "exits": filtered_edges,
         "player_room_id": origin.id,
-        "zone": "local",
+        "zone": _zone_label_for_room(origin, fallback="local"),
     }
     record_payload_timing((time.perf_counter() - started_at) * 1000.0)
     return payload
@@ -473,7 +485,7 @@ def get_zone_map(character, build_cache=True):
         "edges": template["edges"],
         "exits": template["edges"],
         "player_room_id": origin.id,
-        "zone": area_tag,
+        "zone": _zone_label_for_room(origin, fallback=area_tag),
     }
     record_payload_timing((time.perf_counter() - started_at) * 1000.0)
     return payload

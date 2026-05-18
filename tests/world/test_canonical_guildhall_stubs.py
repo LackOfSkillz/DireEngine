@@ -87,12 +87,6 @@ class CanonicalGuildhallStubTests(unittest.TestCase):
         phase4_rooms = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[821])
         stub_rooms = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[7898, 959, 958, 850, 851, 7900])
 
-        self.created.extend(phase1_rooms.values())
-        self.created.extend(room for room in phase2_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase3_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
-        self.created.extend(room for room in stub_rooms.values() if room not in self.created)
-
         bard_exit = [obj for obj in phase2_rooms[771].contents if getattr(obj, "destination", None) == stub_rooms[7898]]
         ranger_gate = [obj for obj in phase4_rooms[821].contents if getattr(obj, "destination", None) == stub_rooms[850]]
         self.assertEqual(len(bard_exit), 1)
@@ -116,7 +110,6 @@ class CanonicalGuildhallStubTests(unittest.TestCase):
         )
 
         rooms = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[5995, 5998, 6016, 6017, 9077])
-        self.created.extend(rooms.values())
 
         raven_foyer = rooms[5995]
         silver_walk = rooms[6017]
@@ -136,7 +129,6 @@ class CanonicalGuildhallStubTests(unittest.TestCase):
 
         first = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[7898, 7900])
         second = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[7898, 7900])
-        self.created.extend(first.values())
 
         self.assertEqual(first[7898].id, second[7898].id)
         self.assertEqual(first[7900].id, second[7900].id)
@@ -154,7 +146,6 @@ class CanonicalGuildhallStubTests(unittest.TestCase):
         )
 
         rooms = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[823, 9077])
-        self.created.extend(rooms.values())
 
         trader = next(obj for obj in rooms[823].contents if getattr(obj, "db_typeclass_path", "") == guildhall_stubs.STUB_GUILDLEADER_TYPECLASS)
         thief = next(obj for obj in rooms[9077].contents if getattr(obj, "db_typeclass_path", "") == guildhall_stubs.STUB_GUILDLEADER_TYPECLASS)
@@ -174,7 +165,6 @@ class CanonicalGuildhallStubTests(unittest.TestCase):
         )
 
         rooms = guildhall_stubs.ensure_canonical_guildhall_stubs(map_path=map_path, room_ids=[7898, 5990, 850])
-        self.created.extend(rooms.values())
 
         self.assertEqual(rooms[7898].db.canonical_phase, guildhall_stubs.GUILDHALL_STUB_PHASE)
         self.assertEqual(rooms[5990].db.canonical_phase, guildhall_stubs.GUILDHALL_STUB_PHASE)

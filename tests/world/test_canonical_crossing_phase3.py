@@ -54,11 +54,9 @@ class CanonicalCrossingPhase3Tests(unittest.TestCase):
         )
 
         phase2_rooms = import_canonical.ensure_canonical_crossing_phase2(map_path=map_path, room_ids=[768, 771, 819])
-        self.created.extend(phase2_rooms.values())
         self.assertEqual(phase2_rooms[768].db.pending_canonical_exits, [{"destination_id": 769, "command": "east"}])
 
         phase3_rooms = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[769, 770, 810])
-        self.created.extend(room for room in phase3_rooms.values() if room not in self.created)
 
         boulevard = phase2_rooms[768]
         exits_to_769 = [obj for obj in boulevard.contents if getattr(obj, "destination", None) == phase3_rooms[769]]
@@ -80,7 +78,6 @@ class CanonicalCrossingPhase3Tests(unittest.TestCase):
         )
 
         rooms = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[773, 774, 780, 782])
-        self.created.extend(rooms.values())
 
         self.assertEqual(rooms[774].key, "Lorethew Street")
         self.assertEqual(rooms[780].key, "Lorethew Street")
@@ -105,8 +102,6 @@ class CanonicalCrossingPhase3Tests(unittest.TestCase):
         phase2_rooms = import_canonical.ensure_canonical_crossing_phase2(map_path=map_path, room_ids=[768, 771])
         first = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[769, 770, 810])
         second = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[769, 770, 810])
-        self.created.extend(phase2_rooms.values())
-        self.created.extend(room for room in first.values() if room not in self.created)
 
         self.assertEqual(first[769].id, second[769].id)
         exits = [obj for obj in phase2_rooms[768].contents if getattr(obj, "destination", None) == first[769]]

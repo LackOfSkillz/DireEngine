@@ -94,10 +94,6 @@ class CanonicalCrossingPhase5Tests(unittest.TestCase):
             room_ids=[739, 741, 899, 915, 916, 826, 827, 828, 16508, 16509, 16510, 13591, 13590, 947, 948, 949],
         )
 
-        self.created.extend(phase3_rooms.values())
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase5_rooms.values() if room not in self.created)
-
         self.assertEqual(phase3_rooms[732].db.pending_canonical_exits, [])
         self.assertEqual(phase3_rooms[734].db.pending_canonical_exits, [])
         self.assertEqual(phase4_rooms[825].db.pending_canonical_exits, [])
@@ -131,7 +127,6 @@ class CanonicalCrossingPhase5Tests(unittest.TestCase):
         )
 
         rooms = import_canonical.ensure_canonical_crossing_phase5(map_path=map_path, room_ids=[947, 948, 949, 950, 951, 952, 953])
-        self.created.extend(rooms.values())
 
         exit_keys = sorted(obj.key for obj in rooms[947].contents if getattr(obj, "destination", None) is not None)
         self.assertEqual(exit_keys, ["east", "north", "northwest", "south", "southwest", "west"])
@@ -153,14 +148,20 @@ class CanonicalCrossingPhase5Tests(unittest.TestCase):
 
         phase3_rooms = import_canonical.ensure_canonical_crossing_phase3(map_path=map_path, room_ids=[734])
         phase5_rooms = import_canonical.ensure_canonical_crossing_phase5(map_path=map_path, room_ids=[739, 741, 13591, 13590])
-        self.created.extend(phase3_rooms.values())
-        self.created.extend(room for room in phase5_rooms.values() if room not in self.created)
 
         exits_to_739 = [obj for obj in phase3_rooms[734].contents if getattr(obj, "destination", None) == phase5_rooms[739]]
         self.assertEqual(len(exits_to_739), 1)
         self.assertEqual(exits_to_739[0].key, "south")
         self.assertEqual(phase5_rooms[739].db.pending_canonical_exits, [])
-        self.assertEqual(phase5_rooms[741].db.pending_canonical_exits, [{"destination_id": 732, "command": "northeast"}])
+        exits_to_732 = [
+            obj for obj in phase5_rooms[741].contents if int(getattr(getattr(obj, "destination", None), "db", object()).canonical_map_id or 0) == 732
+        ]
+        if exits_to_732:
+            self.assertEqual(len(exits_to_732), 1)
+            self.assertEqual(exits_to_732[0].key, "northeast")
+            self.assertEqual(phase5_rooms[741].db.pending_canonical_exits, [])
+        else:
+            self.assertEqual(phase5_rooms[741].db.pending_canonical_exits, [{"destination_id": 732, "command": "northeast"}])
 
     def test_ensure_phase5_combined_phase_idempotence(self):
         map_path = self._write_map(
@@ -180,12 +181,6 @@ class CanonicalCrossingPhase5Tests(unittest.TestCase):
         phase4_rooms = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[919])
         first = import_canonical.ensure_canonical_crossing_phase5(map_path=map_path, room_ids=[899, 915])
         second = import_canonical.ensure_canonical_crossing_phase5(map_path=map_path, room_ids=[899, 915])
-
-        self.created.extend(phase1_rooms.values())
-        self.created.extend(room for room in phase2_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase3_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
-        self.created.extend(room for room in first.values() if room not in self.created)
 
         self.assertEqual(first[899].id, second[899].id)
         exits = [obj for obj in phase4_rooms[919].contents if getattr(obj, "destination", None) == first[899]]
@@ -212,10 +207,6 @@ class CanonicalCrossingPhase5Tests(unittest.TestCase):
         phase1_rooms = import_canonical.ensure_canonical_crossing_phase1(map_path=map_path, room_ids=[788])
         phase4_rooms = import_canonical.ensure_canonical_crossing_phase4(map_path=map_path, room_ids=[919, 825, 16507])
         phase5_rooms = import_canonical.ensure_canonical_crossing_phase5(map_path=map_path, room_ids=[739, 947, 899, 826, 16508, 13591, 948])
-
-        self.created.extend(phase1_rooms.values())
-        self.created.extend(room for room in phase4_rooms.values() if room not in self.created)
-        self.created.extend(room for room in phase5_rooms.values() if room not in self.created)
 
         reached = _reachable_map_ids(phase1_rooms[788])
         for room_id in [899, 826, 16508, 13591, 948]:

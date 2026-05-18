@@ -1,5 +1,6 @@
 from .import_canonical import (
 	ensure_canonical_guildhall_stubs,
+	ensure_full_canonical_crossing,
 	ensure_canonical_crossing_phase1,
 	ensure_canonical_crossing_phase2,
 	ensure_canonical_crossing_phase3,
@@ -11,6 +12,7 @@ from .import_canonical import (
 
 __all__ = [
 	"ensure_canonical_guildhall_stubs",
+	"ensure_full_canonical_crossing",
 	"ensure_canonical_crossing_phase1",
 	"ensure_canonical_crossing_phase2",
 	"ensure_canonical_crossing_phase3",

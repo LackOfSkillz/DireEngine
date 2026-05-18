@@ -1,9 +1,14 @@
 import json
 import re
+import time
 from pathlib import Path
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import close_old_connections
 
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_object
+from world.area_forge.paths import area_namespace
 
 
 ROOM_TYPECLASS = "typeclasses.rooms.Room"
@@ -20,6 +25,9 @@ ARRIVAL_ROOM_ID = 788
 NEW_LANDING_AREA_NAME = "New Landing"
 DEPRECATION_NOTE = "Procedural New Landing is deprecated in favor of phased canonical Crossing imports."
 DEFAULT_MAP_PATH = Path(__file__).resolve().parents[3] / "data" / "canon" / "map-1777858104.json"
+LANDING_AREA_ID = "the_landing"
+LANDING_ZONE_NAME = "The Landing"
+LANDING_NAMESPACE = area_namespace(LANDING_AREA_ID)
 
 DIR_ALIASES = {
     "north": ["n"],
@@ -539,6 +547,15 @@ PHASE6_ROOM_SPECS = {
     8235: {"title": "Werfnen's Strole", "desc": "This isolated pocket of Werfnen's Strole feels like the end of a small internal spur, a quiet corner whose enclosure makes it read more like a tucked-away landing than a through street."},
 }
 
+_PHASE_ROOM_GROUPS = (
+    (1, CANONICAL_AREA_TAG, PHASE1_ROOM_IDS, PHASE1_ROOM_SPECS),
+    (2, CANONICAL_AREA_TAG_PHASE2, PHASE2_ROOM_IDS, PHASE2_ROOM_SPECS),
+    (3, CANONICAL_AREA_TAG_PHASE3, PHASE3_ROOM_IDS, PHASE3_ROOM_SPECS),
+    (4, CANONICAL_AREA_TAG_PHASE4, PHASE4_ROOM_IDS, PHASE4_ROOM_SPECS),
+    (5, CANONICAL_AREA_TAG_PHASE5, PHASE5_ROOM_IDS, PHASE5_ROOM_SPECS),
+    (6, CANONICAL_AREA_TAG_PHASE6, PHASE6_ROOM_IDS, PHASE6_ROOM_SPECS),
+)
+
 
 def load_canonical_crossing_map(map_path=DEFAULT_MAP_PATH):
     path = Path(map_path)
@@ -626,6 +643,40 @@ def _find_exit(source, key, aliases=None):
     return None
 
 
+def _iter_room_exits(source):
+    for obj in list(getattr(source, "contents", []) or []):
+        if getattr(obj, "db_typeclass_path", "") == EXIT_TYPECLASS:
+            yield obj
+
+
+def _with_locked_db_retry(action, *, attempts=4, retry_delay=0.1):
+    last_error = None
+    for attempt in range(attempts):
+        close_old_connections()
+        try:
+            return action()
+        except Exception as error:
+            last_error = error
+            if "database is locked" not in str(error or "").lower() or attempt + 1 >= attempts:
+                raise
+            time.sleep(retry_delay * (attempt + 1))
+    raise last_error
+
+
+def _delete_if_present(obj):
+    if obj is None:
+        return False
+
+    def _delete():
+        try:
+            obj.delete()
+        except ObjectDoesNotExist:
+            return False
+        return True
+
+    return _with_locked_db_retry(_delete)
+
+
 def _normalize_exit_command(command):
     text = str(command or "").strip()
     if not text:
@@ -661,10 +712,110 @@ def _ensure_room_with_spec(entry, spec, *, canonical_phase, area_tag):
     room.db.is_canonical_crossing = True
     room.db.canonical_phase = int(canonical_phase)
     room.db.canonical_source = "direlore:map-1777858104.json"
+    _apply_canonical_landing_metadata(room, entry)
     room.tags.add(area_tag)
     room.tags.add(str(int(entry["id"])), category=CANONICAL_ID_CATEGORY)
     room.aliases.add(str(entry["canonical_title"] or "").lower())
     return room
+
+
+def _apply_canonical_landing_metadata(room, entry):
+    room.db.zone = LANDING_ZONE_NAME
+    room.db.zone_id = LANDING_AREA_ID
+    room.db.area_id = LANDING_AREA_ID
+    room.db.builder_id = f"canonical_crossing_{int(entry['id'])}"
+    image_coords = list(entry.get("image_coords") or [])
+    if len(image_coords) >= 2:
+        try:
+            room.db.map_x = int(image_coords[0])
+            room.db.map_y = int(image_coords[1])
+        except (TypeError, ValueError):
+            pass
+    room.tags.add(*LANDING_NAMESPACE["area_tag"])
+    room.tags.add(*LANDING_NAMESPACE["area_version_tag"])
+    room.tags.add(str(int(entry["id"])), category=LANDING_NAMESPACE["node_category"])
+
+
+def _build_full_crossing_room_plan():
+    room_plan = {}
+    for canonical_phase, area_tag, room_ids, specs in _PHASE_ROOM_GROUPS:
+        for room_id in room_ids:
+            room_plan[int(room_id)] = {
+                "canonical_phase": canonical_phase,
+                "area_tag": area_tag,
+                "spec": specs[int(room_id)],
+            }
+    return room_plan
+
+
+def _select_full_crossing_entries(data, room_plan):
+    entries = extract_crossing_entries(data)
+    selected = {}
+    missing = []
+    for room_id, plan in room_plan.items():
+        entry = entries.get(room_id)
+        if entry is None:
+            missing.append(room_id)
+            continue
+        expected_title = plan["spec"]["title"]
+        if entry["canonical_title"] != expected_title:
+            raise ValueError(
+                f"Canonical room id {room_id} resolved to {entry['canonical_title']!r}, expected {expected_title!r}."
+            )
+        selected[room_id] = entry
+    if missing:
+        raise ValueError(f"Canonical Crossing full import room ids missing from map JSON: {missing}")
+    return selected
+
+
+def ensure_full_canonical_crossing(map_path=DEFAULT_MAP_PATH):
+    from .guildhall_stubs import (
+        CANONICAL_AREA_TAG_GUILDHALL_STUB,
+        GUILDHALL_STUB_NPC_SPECS,
+        GUILDHALL_STUB_PHASE,
+        GUILDHALL_STUB_ROOM_IDS,
+        GUILDHALL_STUB_ROOM_SPECS,
+        _ensure_stub_guildleader,
+        _ensure_stub_room,
+        guildhall_stub_entries_from_map,
+    )
+
+    data = load_canonical_crossing_map(map_path=map_path)
+    room_plan = _build_full_crossing_room_plan()
+    crossing_entries = _select_full_crossing_entries(data, room_plan)
+    rooms = {}
+    for room_id, entry in crossing_entries.items():
+        plan = room_plan[room_id]
+        rooms[room_id] = _ensure_room_with_spec(
+            entry,
+            plan["spec"],
+            canonical_phase=plan["canonical_phase"],
+            area_tag=plan["area_tag"],
+        )
+
+    stub_entries = guildhall_stub_entries_from_map(data, room_ids=GUILDHALL_STUB_ROOM_IDS)
+    for room_id, entry in stub_entries.items():
+        room = _ensure_stub_room(entry, GUILDHALL_STUB_ROOM_SPECS[room_id])
+        _apply_canonical_landing_metadata(room, entry)
+        room.tags.add(CANONICAL_AREA_TAG_GUILDHALL_STUB)
+        room.db.canonical_phase = GUILDHALL_STUB_PHASE
+        rooms[room_id] = room
+
+    imported_room_ids = list(room_plan.keys()) + list(GUILDHALL_STUB_ROOM_IDS)
+    imported_rooms = _collect_imported_rooms(imported_room_ids)
+    for room_id, entry in crossing_entries.items():
+        _populate_room_pending_exits(imported_rooms[room_id], entry, imported_rooms)
+    for room_id, entry in stub_entries.items():
+        _populate_room_pending_exits(imported_rooms[room_id], entry, imported_rooms)
+    _drain_pending_exits(imported_rooms, imported_rooms)
+
+    stub_room_ids = set(stub_entries)
+    for spec in GUILDHALL_STUB_NPC_SPECS:
+        if spec["room_id"] in stub_room_ids:
+            _ensure_stub_guildleader(spec, imported_rooms)
+
+    mark_new_landing_deprecated()
+    return imported_rooms
 
 
 def phase2_entries_from_map(data, room_ids=None):
@@ -777,6 +928,7 @@ def _collect_imported_rooms(room_ids):
 
 
 def _populate_room_pending_exits(room, entry, imported_rooms):
+    _sync_canonical_room_exits(room, entry, imported_rooms)
     pending = []
     for destination_id, command in dict(entry.get("wayto") or {}).items():
         try:
@@ -789,6 +941,36 @@ def _populate_room_pending_exits(room, entry, imported_rooms):
             continue
         _ensure_exit(room, destination, command)
     room.db.pending_canonical_exits = pending
+
+
+def _sync_canonical_room_exits(room, entry, imported_rooms):
+    desired_pairs = set()
+    desired_commands = set()
+    for destination_id, command in dict(entry.get("wayto") or {}).items():
+        command_text = str(command or "")
+        desired_commands.add(command_text)
+        try:
+            destination_id = int(destination_id)
+        except (TypeError, ValueError):
+            continue
+        desired_pairs.add((command_text, destination_id))
+
+    seen_pairs = set()
+    for exit_obj in list(_iter_room_exits(room)):
+        canonical_command = str(getattr(getattr(exit_obj, "db", None), "canonical_command", "") or "")
+        if not canonical_command:
+            continue
+        destination = getattr(exit_obj, "destination", None)
+        destination_id = getattr(getattr(destination, "db", None), "canonical_map_id", None)
+        try:
+            destination_id = int(destination_id)
+        except (TypeError, ValueError):
+            destination_id = None
+        pair = (canonical_command, destination_id)
+        if canonical_command not in desired_commands or pair not in desired_pairs or pair in seen_pairs:
+            _delete_if_present(exit_obj)
+            continue
+        seen_pairs.add(pair)
 
 
 def _drain_pending_exits(rooms, imported_rooms):
@@ -836,6 +1018,7 @@ def ensure_canonical_crossing_phase1(map_path=DEFAULT_MAP_PATH, room_ids=None):
     entries = phase1_entries_from_map(data, room_ids=room_ids)
     rooms = {room_id: _ensure_room(entry) for room_id, entry in entries.items()}
     for room_id, entry in entries.items():
+        _sync_canonical_room_exits(rooms[room_id], entry, rooms)
         pending = []
         for destination_id, command in dict(entry.get("wayto") or {}).items():
             try:
