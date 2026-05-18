@@ -378,6 +378,19 @@ class Account(DefaultAccount):
         if self.get_puppet(session):
             return
 
+        def _post_puppet_adjustments(character):
+            try:
+                from systems import onboarding
+                from systems.canonical_migration import migrate_character_to_canonical_arrival
+
+                migrate_character_to_canonical_arrival(
+                    character,
+                    session=session,
+                    fallback=lambda: onboarding._resolve_recovery_destination() or onboarding._recovery_room_fallback(),
+                )
+            except Exception:
+                return
+
         webclient_preferred = self.get_webclient_preferred_character(session)
         if self.is_webclient_session(session):
             candidates = []
@@ -390,6 +403,7 @@ class Account(DefaultAccount):
             for candidate in candidates:
                 try:
                     self.puppet_object(session, candidate)
+                    _post_puppet_adjustments(candidate)
                     self.db._last_puppet = candidate
                     self.set_webclient_preferred_character(session, candidate)
                     logger.log_info(
@@ -410,6 +424,7 @@ class Account(DefaultAccount):
                 try:
                     self.route_character_to_onboarding(candidate, create=True)
                     self.puppet_object(session, candidate)
+                    _post_puppet_adjustments(candidate)
                     self.db._last_puppet = candidate
                     logger.log_info(
                         f"Auto-puppet attached: account={self.key} character={candidate.key} id={candidate.id} session={getattr(session, 'sessid', 'unknown')}"

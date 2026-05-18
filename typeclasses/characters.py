@@ -1345,14 +1345,15 @@ class Character(ObjectParent, DefaultCharacter):
 
         try:
             from systems import onboarding
+            from systems.canonical_migration import resolve_canonical_arrival_room
             from systems.character.creation import apply_starting_gear, apply_starting_skills
 
-            guild_room = onboarding._resolve_empath_guild_room()
-            if not guild_room:
-                raise RuntimeError("Empath Guild room could not be resolved.")
+            destination, destination_source = resolve_canonical_arrival_room(fallback=onboarding._resolve_empath_guild_room)
+            if not destination:
+                raise RuntimeError("New-player arrival room could not be resolved.")
 
-            self.home = guild_room
-            self.move_to(guild_room, quiet=True, use_destination=False)
+            self.home = destination
+            self.move_to(destination, quiet=True, use_destination=False)
 
             apply_starting_gear(self)
             apply_starting_skills(self)
@@ -1360,8 +1361,11 @@ class Character(ObjectParent, DefaultCharacter):
             self.db.skip_chargen = False
             self.db.onboarding_step = None
             self.db.onboarding_complete = True
-            self.msg("You awaken within the Empaths' Guild.")
-            LOGGER.info("Web new-player spawn applied for %s", getattr(self, "key", self))
+            if destination_source == "canonical":
+                self.msg("You awaken beneath the open sky of the Crossing.")
+            else:
+                self.msg("You awaken within the Empaths' Guild.")
+            LOGGER.info("Web new-player spawn applied for %s via %s arrival", getattr(self, "key", self), destination_source)
             return True
         except Exception:
             LOGGER.exception("Failed web new-player spawn for %s", getattr(self, "key", self))

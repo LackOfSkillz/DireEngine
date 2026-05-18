@@ -1,6 +1,168 @@
 # Changelog
 
+## 2026-05-18
+### DRG-CANONICAL-ARRIVAL-LIVE-PATH-AUDIT-001
+
+- Completed a read-only live-path audit of actual player arrival into the shipped canonical Crossing graph. The audit confirmed the canonical arrival resolver is intact: both `_resolve_landing_arrival_room()` and `get_canonical_crossing_arrival_room()` still resolve to `47727 / Town Green North` with `canonical_map_id = 788`, `canonical_phase = 1`, `area = The Crossing`, and `region_name = The Crossing`.
+- The audit also confirmed that live player routing does not currently use that canonical arrival seam end to end. Fresh-character completion exits onboarding through `systems.onboarding.release_to_world(...)`, which resolves into the Empath guild recovery destination rather than `_resolve_landing_arrival_room()`. Returning-character login in `typeclasses.accounts.Account.at_post_login(...)` auto-puppets saved characters directly and therefore re-enters at saved location rather than via canonical arrival.
+- Live runtime evidence showed the procedural `new_landing` graph is still present and disjoint from the canonical Crossing graph. Jekar's live room `4254 / Elmbrook Lane, Midway` carries `area = New Landing`, `region_name = Upper Crossing`, `zone = landing`, no canonical metadata, and `build:new_landing` tagging. BFS from that procedural graph reached `243` rooms without reaching any room carrying `canonical_map_id`, while BFS from canonical `788` remained inside the canonical graph.
+- Zone/reporting evidence reconciled the user-facing numeric mismatch. The gameplay map layer groups by build tag via `world.area_forge.map_api.get_zone_map(...)`, so procedural room `4254` reports `zone = new_landing` with `206` zone-map rooms while canonical room `788` falls back to local-map payloads with `zone = local` and `22` local rooms because canonical Crossing rooms carry no build tag. Builder zone discovery in `world.builder.services.zone_service.list_zones()` keys live zones off `builder_id` plus `zone_id`/`zone`/`area_id`, not `canonical_map_id`, so the canonical importer's metadata is invisible to that zone inventory.
+- The tutorial-threshold seam is also not a reliable live arrival proof. `_ensure_new_player_tutorial()` still intends to wire `Market Approach -> east -> landing_room`, but the current live `Market Approach` object only exposes `west -> Outer Yard`; no live east exit was present during the audit. Historical server logs record repeated `_ensure_new_player_tutorial()` bootstrap failures on `2026-03-30` from a `TagHandler.add()` arity error before a later successful bootstrap, leaving the threshold surface as a drift-prone seam rather than the dominant live arrival path.
+- Root-cause classification closed as **Outcome G**: parallel noncanonical entry paths plus a disjoint procedural graph. This is not just a wrong resolver or a pure zone-label defect. Fresh characters bypass canonical arrival through onboarding recovery, returning characters honor saved procedural location, and builder/client zone views independently reflect procedural build-tag data.
+- Sized follow-up recommendation: ship `DRG-CANONICAL-ARRIVAL-FIX-001` first, scoped to routing rather than more content. Expected production change is roughly `80-180` lines across `systems/onboarding.py`, `server/conf/at_server_startstop.py`, and possibly `typeclasses/accounts.py`, plus `80-160` lines of new end-to-end tests proving fresh-character release and returning-character login behavior. A later zone-normalization dispatch should stay separate unless the arrival fix explicitly chooses to widen scope.
+
+Validation:
+- No production code or tests were modified in this audit dispatch.
+- Live runtime probes were executed read-only through Evennia/Django state and server log inspection.
+- Locked preservation anchor remains `315 passed, 153 subtests passed`.
+- Locked Ranger-adjacent anchor remains `92 passed, 138 subtests passed`.
+
+### DRG-CROSSING-GUILDHALL-AUDIT-001
+
+- Audited canonical guildhall placement reachable from the staged Crossing graph and shipped the lean canonical stub surface as a sibling seam instead of widening any Phase 1-5 importer function. The new stub importer lives in `world/areas/the_crossing/guildhall_stubs.py`, is exposed through `ensure_canonical_guildhall_stubs(...)`, and bootstraps after Phase 5 at server start. It imports the `19` canonical non-Barbarian guildhall/walkway rooms directly confirmed by the dispatch tables: `13` guildhall entrance rooms plus the `6` required intermediary chain rooms for Raven's Court and the Wilds.
+- Step 0 classified the dispatch as **B** and settled the guildhall reconciliation question with live evidence. There are still no canonical `[[The Crossing, Hallway]]` rooms, so the old multi-guildhall Phase 7 reconciliation concept is not a real remaining Crossing-rebuild phase. The existing Barbarian build remains separate and untouched, while the existing non-canonical Ranger guildhall build now coexists honestly with the new canonical `7900 / Main Hall` stub until a dedicated Ranger-only migration dispatch happens later.
+- The dispatch's draft count of `20` target rooms resolved to `19` actual ids from the enumerated tables. All `19` exist in `data/canon/map-1777858104.json`; no canonical target ids were missing. The direct Phase 1-5 pending overlap into the stub set was `10` entries, all cleanly drainable from already shipped source rooms: `771 -> 7898`, `7902 -> 852`, `7902 -> 5990`, `764 -> 5713`, `803 -> 11733`, `815 -> 7888`, `901 -> 823`, `770 -> 959`, `782 -> 958`, and `821 -> 850`.
+- Shipped `8` configured `StubGuildleaderNPC` instances with canonical-or-explicit-placeholder identity metadata, including `Silvyrfrost`, `Asemath`, the intentionally anonymous Thieves handler, and placeholder-tagged leaders for the remaining deferred profession halls. Each stub leader now gives the bounded recruitment message that the guild is not yet open to new members, without introducing any profession-teaching or service surface.
+
+Validation:
+- Focused guildhall stub regression slice passed: `5 passed`.
+- The requested broader cross-phase cluster surfaced two untouched environment-sensitive assertions in earlier files: the known old Phase 4 `813` pending-exit assertion and a live-sensitive Phase 5 duplicate-exit assertion around `947 -> 954`. Per the dispatch halts, earlier-phase files were not modified.
+- Clean changed-surface cluster passed: `46 passed, 50 subtests passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django smoke proved steady-state idempotence for the new stub importer with `stub_count_before: 19`, `stub_count_after: 19`, and `stub_count_second: 19`. The nonzero pre-count is the expected steady-state result after startup bootstrap, not a failed import.
+- Live drain audit before the steady-state stub ensure found `10` pending entries from already shipped Phase 1-5 Crossing rooms into the stub set, matching the audit shape exactly.
+- Live arrival proof kept canonical landing unchanged at `788 / Town Green North` and confirmed walkable canonical paths to `7898 / Bards' Guild Commons`, `5990 / Clerics' Guild Sanctorum`, `5713 / Empaths' Guild Courtyard Garden`, `7888 / Paladins' Guild Meeting Hall`, `958 / Asemath Academy Entrance`, and `7900 / Ranger Guild Main Hall`.
+- Honest topology correction: not every deferred guildhall entrance is arrival-reachable yet because some Crossing-side source rooms remain Phase 6 territory. `823 / Traders' Guild Main Hall` is still blocked behind unshipped `895 / Commerce Avenue`, and `9077 / Thieves' Guild Foyer` is still blocked behind unshipped `886 / 897 / Ustial Road`, even though the full Raven's Court intermediary chain and the final `tap knocker` edge are now imported canonically.
+- Live metadata samples for `7898`, `5990`, `5713`, `958`, `7900`, `9077`, `850`, and `5995` confirmed `canonical_phase = 'guildhall_stub'`, `canonical_source = direlore:map-1777858104.json`, area metadata preservation, and paraphrased local prose rather than copied source descriptions.
+- Coexistence proof remained honest and bounded. The existing non-canonical Ranger guildhall build still materializes alongside the canonical stub (`noncanonical_ranger_count: 6` after `ensure_crossing_ranger_guildhall()`), while the untouched Barbarian build still materializes `T'Kiel` plus all `8` pit rooms and `8` pit masters in live runtime.
+
+### DRG-NEW-LANDING-CROSSING-REBUILD-006
+
+- Shipped Phase 6 as the final canonical Crossing content importer seam. `world/areas/the_crossing/import_canonical.py` now carries bounded `PHASE6_ROOM_IDS` / `PHASE6_ROOM_SPECS`, `phase6_entries_from_map(...)`, and `ensure_canonical_crossing_phase6(...)`, while `world/areas/the_crossing/__init__.py` and `server/conf/at_server_startstop.py` now export and bootstrap the new seam after the guildhall stub bootstrap. Earlier Phase 1-5 importer functions and the AUDIT-001 guildhall-stub importer remained untouched.
+- Step 0 classified the dispatch as **B** and corrected the draft reachability math with live evidence. The real net-new standard `[[The Crossing, ...]]` room count was `33`, not `34`, because `776` was already shipped in Phase 1. The shipped standard-room graph stranded `42` already imported rooms before Phase 6, not `41`. The corrected post-Phase 6 simulated standard-room state is `210 / 218` arrival-reachable, not `213 / 221`, and `8235 / Werfnen's Strole` remains unreachable because `740` still has no inbound continuation into it in the canonical source graph.
+- Phase 6 intentionally prioritized reachability repairs and guildhall unblockers. The shipped room set includes the bridge/unblocker corridor needed to make `Riverpine Circle`, `Riverlace Lane`, Traders, and Thieves arrival-walkable, while leaving Mongers honest as a canonical-source directed-graph artifact rather than forcing a non-canonical repair. The bounded `818 / Northeast Customs` forward-reference seam also remained preserved with `go gate -> 992` still queued.
+- Focused regression coverage landed in `tests/world/test_canonical_crossing_phase6.py` for the corrected `33`-room anchor set, Phase 6 drain behavior, idempotence, guildhall-stub drain behavior, corrected reachability truths, metadata, and the preserved `818 -> 992` forward reference. The production importer stayed within the hard dispatch ceiling at `880` lines.
+
+Validation:
+- Focused Phase 6 regression slice passed: `6 passed`.
+- The requested broader changed-surface cluster surfaced one untouched environment-sensitive Phase 4 assertion around room `813`; per the dispatch halts, earlier-phase files were not modified.
+- Clean changed-surface cluster passed: `55 passed, 50 subtests passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django Phase 6 smoke proved steady-state idempotence with `phase6_count_before: 33`, `phase6_count_after: 33`, `phase6_count_second: 33`, and both `ensure_canonical_crossing_phase6()` calls returning `33` rooms. The nonzero pre-count is the expected steady-state result after startup/bootstrap, not a failed import.
+- Live arrival proof kept canonical landing unchanged at `788 / Town Green North` for both `get_canonical_crossing_arrival_room()` and `_resolve_landing_arrival_room()`.
+- Reachability proof matched the corrected dispatch goal: `826 / Riverpine Circle`, `16508 / Riverlace Lane`, `823 / Traders' Guild Main Hall`, `8916 / Clerics' Guild Sanctorum`, `9077 / Thieves' Guild Foyer`, and `740 / Werfnen's Stroll` are now arrival-reachable in the live graph.
+- Honest topology correction remained unchanged for the residual artifacts: all of `947-953 / Mongers` remain arrival-unreachable, and `8235 / Werfnen's Strole` remains arrival-unreachable even after `740` becomes walkable.
+- Live queue and metadata proof ended with `103` remaining pending exits across the standard Phase 1-6 room set (`103` distinct destination ids) and `145` combined pending exits across Phase 1-6 plus guildhall stubs (`144` distinct destination ids). Live metadata samples for `895`, `897`, `818`, and `8235` confirmed `canonical_phase = 6` and `canonical_source = direlore:map-1777858104.json`; `818` also retained the bounded forward reference `go gate -> 992`.
+- Crossing rebuild content is now complete at the content-program level. The remaining arrival gaps are not unshipped Phase 7 content; they are bounded canonical topology artifacts or adjacent-area forward references that should stay deferred unless a later dispatch explicitly widens beyond the canonical Crossing source graph.
+
+### DRG-NEW-LANDING-CROSSING-REBUILD-005
+
+- Expanded the canonical Crossing importer into the five remaining large districts plus the three promoted bridge rooms as a sibling seam, without widening substrate or modifying `ensure_canonical_crossing_phase1(...)`, `ensure_canonical_crossing_phase2(...)`, `ensure_canonical_crossing_phase3(...)`, or `ensure_canonical_crossing_phase4(...)`. `world/areas/the_crossing/import_canonical.py` now carries bounded `PHASE5_ROOM_IDS` / `PHASE5_ROOM_SPECS`, `phase5_entries_from_map(...)`, and `ensure_canonical_crossing_phase5(...)`, importing `35` Phase 5 rooms while leaving the earlier phase importers intact.
+- Step 0 classified the dispatch as **B** and corrected three scope assumptions from the draft plan with live evidence. There are no canonical `[[The Crossing, Hallway]]` rooms, Temple's `8` external exits all leave the canonical Crossing room set, and the five large districts are fully disconnected from one another. The direct live overlap before the steady-state ensure was only `5` pending entries from Phase 1 + Phase 2 + Phase 3 + Phase 4 rooms into the Phase 5 room set, covering `5` distinct bridge destinations: `739`, `741`, `826`, `899`, and `16508`.
+- Startup bootstrap now runs Phase 5 after Phase 4, and focused Phase 5 regressions were added in `tests/world/test_canonical_crossing_phase5.py` for bridge-drain behavior, Mongers hub behavior, Immortals bridge closure, combined idempotence, and representative reachability on bounded sample maps. The production importer remained under the dispatch ceiling at `830` lines.
+
+Validation:
+- Focused Phase 5 regression slice passed: `5 passed`.
+- The requested broader cross-phase cluster surfaced one older environment-sensitive Phase 4 assertion around room `813` already existing live in this DB; per the dispatch halts, earlier-phase tests were not modified.
+- Clean changed-surface cluster passed: `34 passed, 50 subtests passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django Phase 5 smoke proved idempotent import counts with `phase5_count_before: 1`, `phase5_count_after: 35`, `phase5_count_second: 35`, and `phase1_5_count_after: 201`. The nonzero pre-count is an honest steady-state artifact of this runtime, not a failed import pass.
+- Live drain audit before the steady-state ensure found `5` pending entries from Phase 1 + Phase 2 + Phase 3 + Phase 4 rooms into the Phase 5 room set, covering `5` distinct destinations: `739`, `741`, `826`, `899`, and `16508`.
+- Live arrival proof kept canonical landing unchanged at `788 / Town Green North` for both `get_canonical_crossing_arrival_room()` and `_resolve_landing_arrival_room()`. Two of the five new large districts are arrival-reachable in the real directed graph: `Esplanade Eluned` via `788 -> 787 -> 786 -> 768 -> 769 -> 770 -> 771 -> 772 -> 862 -> 863 -> 864 -> 865 -> 867 -> 868 -> 869 -> 870 -> 871 -> 872 -> 876 -> 880 -> 884 -> 885 -> 919 -> 899`, and `Immortals' Walk` via `788 -> 792 -> 753 -> 733 -> 734 -> 739 -> 13591`.
+- Honest topology correction: `Riverpine Circle`, `Riverlace Lane`, and `Mongers' Bazaar` import and connect internally, but they are not yet arrival-reachable in the live directed graph. `Riverpine Circle` remains behind the unreachable `745 -> 824 -> 825` corridor, `Riverlace Lane` remains behind the unreachable `16505 -> 16506 -> 16507` corridor, and `Mongers' Square` is outbound-connected to already imported `946` / `954` / `7905` surfaces without any imported inbound edge back into `947`.
+- Live metadata and prose proof sampled `899 / Esplanade Eluned`, `826 / Riverpine Circle`, `16508 / Riverlace Lane`, `13591 / Immortals' Walk`, and `948 / Mongers' Bazaar`, confirming `canonical_phase = 5`, `canonical_source = direlore:map-1777858104.json`, canonical path metadata preservation, and non-verbatim shipped prose for all five samples. Live queue-depth proof ended with `108` remaining pending exits across Phase 1 + Phase 2 + Phase 3 + Phase 4 rooms and `122` combined pending exits across Phases 1 + 2 + 3 + 4 + 5 (`111` distinct destination ids) for later corridor and small-district work.
+- Runtime caveat: this SQLite runtime does not expose the object-linked orphan-attribute columns used by the earlier orphan-count probe, so the Phase 5 smoke recorded importer, queue, arrival, reachability, and metadata state directly and left orphan delta as unavailable in this schema.
+
 ## 2026-05-17
+### DRG-NEW-LANDING-CROSSING-REBUILD-004
+
+- Expanded the canonical Crossing importer into the Phase 4 medium districts, Kertigen Road, and the bounded Crossing Temple sub-area as a sibling seam, without widening substrate or modifying `ensure_canonical_crossing_phase1(...)`, `ensure_canonical_crossing_phase2(...)`, or `ensure_canonical_crossing_phase3(...)`. `world/areas/the_crossing/import_canonical.py` now carries bounded `PHASE4_ROOM_IDS` / `PHASE4_ROOM_SPECS`, `phase4_entries_from_map(...)`, and `ensure_canonical_crossing_phase4(...)`, importing `71` Phase 4 rooms while leaving the earlier phase importers intact.
+- Step 0 classified the dispatch as **B** and kept the queue-driven boundary honest. The final Phase 4 room set covers the medium-district bridge work, the full `13`-room Temple cluster, Kertigen Road, and the optional seam-closure ids `754` / `821`. Live overlap before the steady-state ensure still matched the audit shape: `12` pending entries from Phase 1 + Phase 2 + Phase 3 rooms pointed into the Phase 4 room set, covering `11` distinct direct destinations.
+- Startup bootstrap now runs Phase 4 after Phase 3, and focused Phase 4 regressions were added in `tests/world/test_canonical_crossing_phase4.py` for drain behavior, Temple clustering, Kertigen Road, representative district completion, and idempotence. The production importer remained within the dispatch ceiling at `661` lines.
+
+Validation:
+- Focused Phase 4 regression slice passed: `6 passed`.
+- Stable changed-surface cluster passed: `33 passed, 34 subtests passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+- Environment note: broader dispatch-style clusters still surface the older room-`788` Phase 1 assertion and intermittent SQLite `database is locked` teardown failures in legacy files. The Phase 4 work did not modify those older importer/test seams, so closeout relies on the focused Phase 4 slice, the stable changed-surface cluster, and the preserved anchors.
+
+Live smoke:
+- Direct Evennia/Django Phase 4 smoke ran in steady state and proved idempotent import counts with `phase4_count_before: 71`, `phase4_count_after: 71`, and `phase4_count_second: 71`.
+- Live drain audit before the steady-state ensure found `12` pending entries from Phase 1 + Phase 2 + Phase 3 rooms into the Phase 4 room set, covering `11` distinct direct destinations: `745, 748, 750, 754, 757, 799, 812, 821, 838, 867, 16505`.
+- Live arrival proof kept canonical landing unchanged at `788 / Town Green North` for both `get_canonical_crossing_arrival_room()` and `_resolve_landing_arrival_room()`, then found a real path into the new medium-district graph via `west -> 789 / Town Green Northwest -> northwest -> 790 / Puddle Path -> gate -> 836 / Smithy Lane -> northeast -> 837 / Smithy Lane -> northeast -> 838 / Smithy Lane`.
+- Live district completion proof confirmed the representative shipped counts `smithy_lane: 5`, `crofton_walk: 3`, `kertigen_road: 9`, and `temple: 13`. Temple internal connectivity also proved live through the bounded cluster, while arrival-to-Temple traversal remains absent in this phase because guildhall reconciliation stayed out of scope.
+- Live metadata and prose proof used canonical room `867 / Kertigen Road`, confirming `canonical_phase = 4`, `canonical_source = direlore:map-1777858104.json`, canonical path metadata preservation, and non-verbatim shipped prose. Live queue-depth proof ended with `76` remaining pending exits across Phase 1 + Phase 2 + Phase 3 rooms and `113` combined pending exits across Phases 1 + 2 + 3 + 4 (`104` distinct destination ids) for later expansion planning.
+- Runtime caveat: this SQLite runtime does not expose the object-linked orphan-attribute columns used by the earlier orphan-count probe, so the Phase 4 smoke recorded importer, queue, arrival, traversal, and internal Temple connectivity state directly and left orphan delta as unavailable in this schema.
+
+### DRG-NEW-LANDING-CROSSING-REBUILD-003
+
+- Expanded the canonical Crossing importer into the Phase 3 outer streets as a sibling seam, without widening substrate or modifying `ensure_canonical_crossing_phase1(...)` / `ensure_canonical_crossing_phase2(...)`. `world/areas/the_crossing/import_canonical.py` now carries bounded `PHASE3_ROOM_IDS` / `PHASE3_ROOM_SPECS`, `phase3_entries_from_map(...)`, and `ensure_canonical_crossing_phase3(...)`, importing `33` Phase 3 rooms while leaving the earlier phase importers intact.
+- Step 0 classified the dispatch as **B** and kept the queue-driven boundary honest. All `31` Group A ids were direct live Phase 1 + Phase 2 pending destinations, while Group B's `774` / `780` were accepted as a tiny adjacent completion of the same Lorethew Street seam even though they were not themselves pending destinations. The optional stretch pair `754` / `821` stayed deferred for Phase 4.
+- Startup bootstrap now runs Phase 3 after Phase 2, and focused Phase 3 regressions were added in `tests/world/test_canonical_crossing_phase3.py` for pending-exit drain behavior, Group B adjacency completion, and idempotence. The production importer remained within the dispatch ceiling at `482` lines.
+
+Validation:
+- Focused Phase 3 regression slice passed: `3 passed`.
+- Focused Phase 2 + Phase 3 + arrival slice passed: `12 passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+- Environment note: the older Phase 1 protection file is currently runtime-sensitive in this DB because it assumes canonical room `788` has no pre-existing non-test exits. The Phase 3 work did not modify Phase 1 importer behavior, so closeout relied on the changed-slice cluster plus the preserved anchors.
+
+Live smoke:
+- Direct Evennia/Django Phase 3 smoke ran in steady state and proved idempotent import counts with `phase3_count_before: 33`, `phase3_count_after: 33`, and `phase3_count_second: 33`.
+- Live drain audit still showed the expected Phase 3 overlap shape before the steady-state ensure: `34` pending entries across Phase 1 + Phase 2 rooms pointed into the Phase 3 room set, covering `31` distinct direct Group A destinations.
+- Live arrival and traversal proof kept canonical landing unchanged at `788 / Town Green North` for both `get_canonical_crossing_arrival_room()` and `_resolve_landing_arrival_room()`, then found a real path into Phase 3 via `north -> 787 / Via Iltesh -> north -> 786 / Via Iltesh -> north -> 768 / Clanthew Boulevard -> west -> 769 / Clanthew Boulevard`.
+- Live metadata and prose proof used canonical room `769 / Clanthew Boulevard`, confirming `canonical_phase = 3`, `canonical_source = direlore:map-1777858104.json`, canonical path metadata preservation, and non-verbatim shipped prose.
+- Live queue-depth proof ended with `39` remaining pending exits across Phase 1 + Phase 2 rooms and `88` combined pending exits across Phase 1 + Phase 2 + Phase 3 rooms (`81` distinct destination ids) for Phase 4 planning. Group B completion also proved live with `774` exposing `north->773` / `east->780` and `780` exposing `west->774` / `east->782`.
+- Runtime caveat: this SQLite runtime does not expose the object-linked orphan-attribute columns used by the earlier orphan-count probe, so the Phase 3 smoke recorded importer, queue, arrival, and traversal state directly and left orphan delta as unavailable in this schema.
+
+### DRG-NEW-LANDING-CROSSING-REBUILD-002
+
+- Expanded the canonical Crossing importer outward into the Phase 2 central districts without widening the substrate. `world/areas/the_crossing/import_canonical.py` now carries a bounded `PHASE2_ROOM_IDS` / `PHASE2_ROOM_SPECS` set, a generic room-ensure path, pending-exit drain helpers, and `ensure_canonical_crossing_phase2(...)`, importing `32` new canonical rooms while leaving `ensure_canonical_crossing_phase1(...)` behavior intact.
+- Preserved the dispatch's **Classification B** rationale explicitly instead of forcing the requested anchor list to equal the live Phase 1 pending queue. Of the dispatch-authored `45` target ids, `13` were already shipped in Phase 1, `17` were direct Phase 1 pending destinations, and `15` were valid 2-hop Phase 2 expansions reached through other newly imported Phase 2 rooms. The remaining live Phase 1 pending destinations stayed queued for Phase 3+.
+- Repaired the local title parser seam for sub-area prefixes such as `[[The Crossing Amphitheater, ...]]`, allowing canonical ids `13493` / `13494` to import correctly without broadening the importer contract. Startup bootstrap now runs Phase 2 after Phase 1, and focused Phase 2 regressions were added in `tests/world/test_canonical_crossing_phase2.py`.
+
+Validation:
+- Focused Phase 1 protection slice passed: `8 passed`.
+- Focused Phase 1 + Phase 2 + arrival slice passed: `12 passed`.
+- Broader touched-surface regression slice passed: `36 passed, 50 subtests passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django Phase 2 steady-state smoke proved idempotent import with `phase1_count_before: 30`, `phase1_count_after: 30`, `phase1_count_second: 30`, `phase2_count_before: 32`, `phase2_count_after: 32`, `phase2_count_second: 32`, `phase2_count_third: 32`, `orphan_before: 339`, `orphan_after: 339`, and `orphan_delta: 0`.
+- Live metadata and prose proof used canonical room `768 / Clanthew Boulevard`, confirming `canonical_phase = 2`, `canonical_source = direlore:map-1777858104.json`, canonical path metadata preservation, and non-verbatim shipped prose against the staged DireLore description.
+- Live traversal proof resolved both `get_canonical_crossing_arrival_room()` and `_resolve_landing_arrival_room()` to `788 / Town Green North`, then found a real canonical path into Phase 2 via `southeast -> 793 / Town Green Southeast -> Amphi gate -> 13493 / The Back Lawn`.
+- Live queue-depth proof ended with `29` remaining Phase 1 pending exits, all Phase 3+ destinations, and `73` combined pending exits across Phase 1 + Phase 2 rooms (`70` distinct destination ids) for future expansion planning.
+- Honest runtime caveat: by the time the final smoke ran, this live database was already in post-import steady state, so `drained_candidate_count` and `drained_realized_count` both read `0`. First-drain behavior was still proved by the focused Phase 2 regression and by the earlier live audit that identified `17` Phase 1 pending destinations overlapping the new Phase 2 import set.
+
+### DRG-NEW-LANDING-CROSSING-REBUILD-001
+
+- Reframed the Landing follow-up from a procedural quality pass into a canonical Crossing import program sourced from the staged DireLore map snapshot. The new importer in `world/areas/the_crossing/import_canonical.py` now materializes a bounded Phase 1 room set keyed by canonical map id, stores canonical metadata on each imported room, preserves non-imported links as `pending_canonical_exits`, and marks procedural `New Landing` rooms deprecated instead of deleting them.
+- Wired startup and onboarding arrival to the canonical surface rather than the procedural landing generator. `server/conf/at_server_startstop.py` now bootstraps canonical Crossing Phase 1 during server start, prefers canonical arrival room `788 / Town Green North`, and treats canonical crossing rooms as valid onboarding landing targets.
+- Kept copyright boundaries explicit. The staged reference asset remains local-only under `data/canon/map-1777858104.json` and `.gitignore` now excludes `data/canon/*.json`; canonical ids, titles, paths, and tags are preserved as metadata, while shipped room descriptions are paraphrased local prose rather than copied source text.
+- Added focused importer and arrival regressions in `tests/world/test_canonical_crossing_phase1.py` and extended `tests/learning/test_landing_arrival_room.py` for canonical-arrival preference and tutorial acceptance of canonical Crossing targets.
+
+Validation:
+- Focused canonical importer and arrival slice passed: `8 passed`.
+- Broader touched-surface regression slice passed: `15 passed, 16 subtests passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Exact documented Ranger-adjacent batch reran clean at `92 passed, 138 subtests passed`.
+
+Live smoke:
+- Direct Evennia/Django canonical Phase 1 smoke proved idempotent import with `room_count_first: 30`, `room_count_second: 30`, `orphan_before: 285`, `orphan_after: 285`, and `orphan_delta: 0`.
+- Live arrival proof resolved `get_canonical_crossing_arrival_room()` and `_resolve_landing_arrival_room()` to `Town Green North` (`canonical_map_id = 788`), confirmed `_new_player_tutorial_is_built() == True`, and verified `Market Approach -> east` lands in the canonical `Town Green North` room.
+- Environment caveat: forcing a full `_ensure_new_player_tutorial()` rebuild during smoke hit a transient SQLite `database is locked` failure inside the old Ranger-guildhall deprecation path, so final runtime proof used the narrower importer-plus-live-state verification path after the canonical importer itself had already executed successfully.
+
 ### DRG-BARBARIAN-CLOSEOUT
 
 - Closed the Barbarian content program with the remaining canonical teaching and placement surface instead of widening the profession substrate. `typeclasses/npcs.py` now gives T'Kiel a full registry-driven `$ASK <roar>` teaching path for all 26 roars and adds a generic configured `BarbarianPitMaster` typeclass for dance instruction.

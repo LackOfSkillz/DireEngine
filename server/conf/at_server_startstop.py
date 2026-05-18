@@ -42,6 +42,16 @@ from world.systems.exp_pulse import EXP_TICKER_IDSTRING, PULSE_TICK, exp_pulse_t
 from world.systems.guards import GUARD_TICK_INTERVAL, LEGACY_GUARD_RUNTIME_BLOCK_MSG, cleanup_legacy_guard_behavior_scripts, ensure_landing_guards, get_guard_patrol_mode, get_last_guard_tick_time, guard_has_per_guard_ownership, has_guard_behavior_script, is_diresim_enabled, iter_active_guards, log_legacy_guard_runtime_block, process_guard_tick, sync_all_guard_behavior_scripts
 from world.the_landing import build_the_landing
 from world.area_forge.map_api import prime_zone_map_cache
+from world.areas.the_crossing import (
+    ensure_canonical_guildhall_stubs,
+    ensure_canonical_crossing_phase1,
+    ensure_canonical_crossing_phase2,
+    ensure_canonical_crossing_phase3,
+    ensure_canonical_crossing_phase4,
+    ensure_canonical_crossing_phase5,
+    ensure_canonical_crossing_phase6,
+    get_canonical_crossing_arrival_room,
+)
 
 
 _NPC_TICK_CACHE = {"expires_at": 0.0, "objects": []}
@@ -69,6 +79,9 @@ DIR_ALIASES = {
 
 LANDING_AREA_ID = "new_landing"
 LANDING_AREA_NAME = "New Landing"
+PROCEDURAL_CANONICAL_BRIDGE_ROOM_KEY = "Bellfound Steps"
+PROCEDURAL_CANONICAL_BRIDGE_EXIT_KEY = "green"
+PROCEDURAL_CANONICAL_BRIDGE_ALIASES = ["town green", "crossing"]
 
 _BROOKHOLLOW_LAWLESS_KEYS = {
     "Crooked Alley",
@@ -573,6 +586,59 @@ def _ensure_custom_exit(src, key, dest, aliases=None, desc=None, existing_keys=N
     return exit_obj
 
 
+def _room_is_canonical_arrival_target(room):
+    if not room:
+        return False
+    if getattr(getattr(room, "db", None), "canonical_map_id", None) is not None:
+        return True
+    return bool(getattr(getattr(room, "db", None), "is_canonical_crossing", False))
+
+
+def _room_is_landing_arrival_target(room):
+    if _room_is_canonical_arrival_target(room):
+        return True
+    area_name = str(getattr(getattr(room, "db", None), "area", None) or "").strip()
+    return area_name == LANDING_AREA_NAME
+
+
+def _find_procedural_canonical_bridge_room():
+    room = ObjectDB.objects.filter(db_key__iexact=PROCEDURAL_CANONICAL_BRIDGE_ROOM_KEY).first()
+    if room is None:
+        return None
+    area_name = str(getattr(getattr(room, "db", None), "area", None) or "").strip()
+    if area_name != LANDING_AREA_NAME:
+        return None
+    if _room_is_canonical_arrival_target(room):
+        return None
+    return room
+
+
+def _ensure_market_approach_canonical_exit(market_approach, landing_room):
+    if not market_approach or not landing_room:
+        return None
+    return _ensure_exit(market_approach, "east", landing_room)
+
+
+def _ensure_procedural_canonical_bridge(landing_room):
+    if not _room_is_canonical_arrival_target(landing_room):
+        return None
+    bridge_room = _find_procedural_canonical_bridge_room()
+    if not bridge_room:
+        return None
+    bridge_exit = _ensure_custom_exit(
+        bridge_room,
+        PROCEDURAL_CANONICAL_BRIDGE_EXIT_KEY,
+        landing_room,
+        aliases=PROCEDURAL_CANONICAL_BRIDGE_ALIASES,
+        desc="A steady stream of foot traffic draws toward the town green at the heart of the Crossing.",
+        existing_keys=PROCEDURAL_CANONICAL_BRIDGE_ALIASES,
+    )
+    bridge_exit.db.is_canonical_arrival_bridge = True
+    bridge_exit.db.bridge_kind = "procedural_to_canonical"
+    bridge_exit.db.bridge_target_canonical_map_id = getattr(getattr(landing_room, "db", None), "canonical_map_id", None)
+    return bridge_exit
+
+
 def _ensure_jekar_training_complex(workshop):
     room_specs = {
         "north": {
@@ -793,15 +859,34 @@ def _ensure_fishing_supplier_npc():
 
 
 def _resolve_landing_arrival_room():
-    preferred_regions = {"Central Crossing", "Upper Crossing", "North Crossing", "Lower Crossing"}
-    landing_rooms = []
+    canonical_room = get_canonical_crossing_arrival_room()
+    if canonical_room is not None:
+        return canonical_room
+
+    preferred_regions = ["Central Crossing", "Upper Crossing", "North Crossing", "Lower Crossing"]
+    current_landing_rooms = []
+    legacy_landing_rooms = []
     for room in ObjectDB.objects.filter(db_typeclass_path=ROOM_TYPECLASS):
-        if getattr(getattr(room, "db", None), "area", None) == "The Landing":
-            landing_rooms.append(room)
-    for room in landing_rooms:
-        if getattr(room.db, "region_name", None) in preferred_regions:
-            return room
-    return landing_rooms[0] if landing_rooms else None
+        area_name = str(getattr(getattr(room, "db", None), "area", None) or "").strip()
+        if area_name == LANDING_AREA_NAME:
+            current_landing_rooms.append(room)
+        elif area_name == "The Landing":
+            legacy_landing_rooms.append(room)
+
+    region_rank = {name: index for index, name in enumerate(preferred_regions)}
+
+    def _sort_key(room):
+        region_name = str(getattr(getattr(room, "db", None), "region_name", None) or "")
+        room_id = int(getattr(room, "id", 0) or 0)
+        return (region_rank.get(region_name, len(region_rank)), room_id)
+
+    if current_landing_rooms:
+        current_landing_rooms.sort(key=_sort_key)
+        return current_landing_rooms[0]
+    if legacy_landing_rooms:
+        legacy_landing_rooms.sort(key=_sort_key)
+        return legacy_landing_rooms[0]
+    return None
 
 
 def _ensure_tutorial_goblin(room):
@@ -1010,7 +1095,8 @@ def _ensure_new_player_tutorial():
     _ensure_exit(threshold_rooms["Market Approach"], "west", threshold_rooms["Outer Yard"])
     _ensure_exit(threshold_rooms["Side Passage"], "south", threshold_rooms["Outer Yard"])
     if landing_room:
-        _ensure_exit(threshold_rooms["Market Approach"], "east", landing_room)
+        _ensure_market_approach_canonical_exit(threshold_rooms["Market Approach"], landing_room)
+        _ensure_procedural_canonical_bridge(landing_room)
 
     guide_descriptions = {
         "Intake Chamber": "The Intake Guide watches new arrivals with calm, practiced attention and none of the patience required for wandering minds.",
@@ -1160,6 +1246,21 @@ def _new_player_tutorial_is_built():
     for room_key in required_room_keys:
         room = ObjectDB.objects.filter(db_key__iexact=room_key).first()
         if room is None:
+            return False
+    market_approach = ObjectDB.objects.filter(db_key__iexact="Market Approach").first()
+    landing_exit = _find_exit(market_approach, "east")
+    landing_room = getattr(landing_exit, "destination", None)
+    if not _room_is_landing_arrival_target(landing_room):
+        return False
+    bridge_room = _find_procedural_canonical_bridge_room()
+    if bridge_room:
+        bridge_exit = _find_exit(
+            bridge_room,
+            PROCEDURAL_CANONICAL_BRIDGE_EXIT_KEY,
+            *PROCEDURAL_CANONICAL_BRIDGE_ALIASES,
+        )
+        bridge_destination = getattr(bridge_exit, "destination", None)
+        if not _room_is_canonical_arrival_target(bridge_destination):
             return False
     return True
 
@@ -1733,6 +1834,48 @@ def _run_deferred_server_start_bootstrap_after_character_init():
         except Exception:
             logger.log_warn("Landing feat trainer bootstrap failed during server start.")
         _append_guard_startup_trace("at_server_start", "bootstrap_after_feat_trainers", deferred=True)
+        try:
+            ensure_canonical_crossing_phase1()
+        except Exception:
+            logger.log_warn("Canonical Crossing phase 1 bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase1", deferred=True)
+        try:
+            ensure_canonical_crossing_phase2()
+        except Exception:
+            logger.log_warn("Canonical Crossing phase 2 bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase2", deferred=True)
+        try:
+            ensure_canonical_crossing_phase3()
+        except Exception:
+            logger.log_warn("Canonical Crossing phase 3 bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase3", deferred=True)
+        try:
+            ensure_canonical_crossing_phase4()
+        except Exception:
+            logger.log_warn("Canonical Crossing phase 4 bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase4", deferred=True)
+        try:
+            ensure_canonical_crossing_phase5()
+        except Exception:
+            logger.log_warn("Canonical Crossing phase 5 bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase5", deferred=True)
+        try:
+            ensure_canonical_guildhall_stubs()
+        except Exception:
+            logger.log_warn("Canonical Crossing guildhall stub bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_guildhall_stubs", deferred=True)
+        try:
+            ensure_canonical_crossing_phase6()
+        except Exception:
+            logger.log_warn("Canonical Crossing phase 6 bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_phase6", deferred=True)
+        try:
+            from world.areas.the_landing import ensure_the_landing_streetlife
+
+            ensure_the_landing_streetlife()
+        except Exception:
+            logger.log_warn("Landing streetlife bootstrap failed during server start.")
+        _append_guard_startup_trace("at_server_start", "bootstrap_after_landing_streetlife", deferred=True)
         try:
             primed_zones = prime_zone_map_cache(["new_landing", "empath-guild-map", "ranger-guild-map"])
             if primed_zones:

@@ -3,7 +3,9 @@ from collections.abc import Mapping
 
 from evennia.objects.models import ObjectDB
 from evennia.utils.create import create_object
+from evennia.utils import logger
 
+from systems.canonical_migration import resolve_canonical_arrival_room
 from world.systems.scheduler import schedule_event
 
 
@@ -1383,14 +1385,25 @@ def can_exit_to_world(character):
     return False, INVALID_COMMAND_MESSAGE
 
 
+def _resolve_world_arrival_destination():
+    return resolve_canonical_arrival_room(fallback=lambda: _resolve_recovery_destination() or _recovery_room_fallback())
+
+
 def release_to_world(character):
     _cleanup_scripted_enemy(character)
     _set_between_state(character, False)
     _set_training_collapse(character, False)
     set_onboarding_step(character, STEP_COMPLETE)
-    destination = _resolve_recovery_destination() or _recovery_room_fallback()
+    destination, destination_source = _resolve_world_arrival_destination()
     if destination and getattr(character, "location", None) != destination:
         character.move_to(destination, quiet=True, use_destination=False)
+    if destination:
+        character.home = destination
+    if destination:
+        logger.log_info(
+            f"Onboarding release routed {getattr(character, 'key', 'unknown')} to {getattr(destination, 'key', 'unknown')}"
+            f"(#{getattr(destination, 'id', 'unknown')}) via {destination_source} arrival"
+        )
     try:
         from systems import aftermath
 

@@ -60,3 +60,4 @@ nosetests.xml
 artifacts/
 logs/
 debug/
+data/canon/*.json

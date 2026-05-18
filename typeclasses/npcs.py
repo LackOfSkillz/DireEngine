@@ -1304,6 +1304,24 @@ class GuildLeaderNPC(NPC):
         return _teach_guild_spell(self, actor, spell_name)
 
 
+class StubGuildleaderNPC(GuildLeaderNPC):
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.is_stub_guildleader = True
+        self.db.canonical_guild = None
+        self.db.guild_display_name = None
+        self.db.is_placeholder = True
+        self.db.default_inquiry_response = (
+            "The guildleader says, 'This guild is not yet open to new members. Check back as our recruitment expands.'"
+        )
+
+    def handle_inquiry(self, actor, topic):
+        normalized = str(topic or "").strip().lower()
+        if normalized in {"join", "joining", "guild", "member", "membership", "profession", "training"}:
+            return getattr(self.db, "default_inquiry_response", None)
+        return super().handle_inquiry(actor, topic)
+
+
 class HealerNPC(NPC):
     # DRG-EMPATH-03: House healers are grandfathered directengine_canon
     # support NPCs used by the Empath guildhall's recovery and triage

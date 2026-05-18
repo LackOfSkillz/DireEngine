@@ -1,4 +1,5 @@
 import time
+import re
 from collections import deque
 from pathlib import Path
 
@@ -84,6 +85,65 @@ MARKER_PALETTES = {
     "yellow": {(255, 255, 0)},
     "cyan": {(0, 255, 255)},
     "magenta": {(255, 0, 255)},
+}
+
+CURATED_NODE_OVERRIDES = {
+    "new_landing_666_432": {
+        "final_label": "Bellfound Steps",
+        "desc_final": (
+            "Broad civic steps lift this corner of the Landing just enough to let arrivals see how the district is put together: notice boards under iron cages, clerk-runners cutting between errands, and a steady current of city life flowing around anyone slow enough to stare. "
+            "The stone has been worn smooth by generations of boots and polished again by rain, but the place still feels watchful rather than welcoming. "
+            "From here the city seems to sort itself by purpose, sending trade one way, petitions another, and the uncertain straight into the noise of both."
+        ),
+    },
+    "new_landing_444_488": {
+        "final_label": "Crier's Ring",
+        "desc_final": (
+            "A round of open paving breaks the surrounding streets just enough for proclamations, arguments, and public errands to collect without fully becoming a square. "
+            "Messengers cut across the space at speed while nearby shopmen keep half an ear turned toward whatever news is being shouted today. "
+            "Everything about the ring feels temporary and permanent at once, as though the city never planned it but now relies on it daily."
+        ),
+    },
+    "new_landing_488_538": {
+        "final_label": "Lantern Court",
+        "desc_final": (
+            "Iron lantern hooks, posted guild notices, and the disciplined traffic of people with errands give this court a cleaner civic character than the lanes pressing in around it. "
+            "The paving stones are broader here, laid to survive carts, boots, and the kind of waiting that gathers around official business. "
+            "Even in daylight the place feels prepared for long evenings of petitions, appointments, and news passed hand to hand."
+        ),
+    },
+    "new_landing_92_362": {
+        "final_label": "West Gate Confluence",
+        "desc_final": (
+            "The road widens near the western approach into a hard-used meeting point of wagons, foot traffic, and the first real breath newcomers take after clearing the gateward press. "
+            "Dust, horse sweat, and market talk mingle in the air, while porters and drovers keep the center of the way in constant motion. "
+            "It feels like a place where the city measures every arrival before deciding whether to make room for them."
+        ),
+    },
+    "new_landing_42_920": {
+        "final_label": "Netter's Slip",
+        "desc_final": (
+            "The street loosens here into a river-worn slip of stone, damp boards, and hauling space where dock labor matters more than appearances. "
+            "Tar, fish oil, and wet rope cling to the air, and every nearby wall carries the rubbed shine of shoulders, crates, and nets dragged past in haste. "
+            "Nothing at the slip is ornamental, but the place has the exact competence of somewhere that still works before dawn and after dark."
+        ),
+    },
+    "new_landing_92_894": {
+        "final_label": "Ropewalk Mouth",
+        "desc_final": (
+            "This meeting of lane and dock-road feels like the mouth of the river district, where inland traffic gives way to cargo work, shouted counts, and the heavy patience of moored trade. "
+            "The stones are slick with old damp and marked by wheel scars that never quite dry out. "
+            "You can feel the pull of the water in every draft of air and in the way people here walk as though they are already balancing a load."
+        ),
+    },
+    "new_landing_92_670": {
+        "final_label": "Ledger Gate",
+        "desc_final": (
+            "The streets pinch tighter here beneath the prison quarter's watch, where clerks, debtors, and guards all seem to move with separate urgencies that keep colliding in the same narrow space. "
+            "Ironwork shows at the windows, notices gather under wax drips, and the stone underfoot is scrubbed more often than the surrounding lanes. "
+            "It is the sort of place where every conversation sounds as though it may become official if spoken too loudly."
+        ),
+    },
 }
 
 STREET_STEMS = [
@@ -1061,6 +1121,24 @@ def _room_key(node, road_meta):
     return f"{region_name} [{node['x']},{node['y']}]"
 
 
+def _looks_like_bad_ocr_label(label):
+    text = str(label or "").strip()
+    if not text:
+        return False
+    return bool(re.match(r"^\d+\)\s*\w", text))
+
+
+def apply_curated_landing_overrides(nodes):
+    for node in nodes:
+        override = CURATED_NODE_OVERRIDES.get(node.get("id"))
+        if override:
+            node.update(override)
+            continue
+        if _looks_like_bad_ocr_label(node.get("final_label")) and node.get("generated_name"):
+            node["final_label"] = node["generated_name"]
+    return nodes
+
+
 def _room_desc(node, road_meta):
     if node.get("desc_final"):
         return node["desc_final"]
@@ -1350,6 +1428,8 @@ def extract_the_landing_area_spec(
                 "style": style_settings or {},
             },
         )
+
+    area_spec["nodes"] = apply_curated_landing_overrides(area_spec.get("nodes", []))
 
     if ocr_bundle:
         print(f"OCR lines found: {len(ocr_bundle['lines'])}")
