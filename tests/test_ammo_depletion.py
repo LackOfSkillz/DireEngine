@@ -93,6 +93,21 @@ class DummyRoom:
         return None
 
 
+class CountingAmmoHolder:
+    def __init__(self, *, ground_ammo=None, loose_ammo=None):
+        object.__setattr__(self, "_write_counts", {"ground_ammo": 0, "loose_ammo": 0})
+        object.__setattr__(self, "ground_ammo", ground_ammo)
+        object.__setattr__(self, "loose_ammo", loose_ammo)
+
+    def __setattr__(self, name, value):
+        object.__setattr__(self, name, value)
+        if name in {"ground_ammo", "loose_ammo"}:
+            self._write_counts[name] = self._write_counts.get(name, 0) + 1
+
+    def writes_for(self, name):
+        return self._write_counts.get(name, 0)
+
+
 class DummyCorpse:
     get_ammo_inventory = Corpse.get_ammo_inventory
     set_ammo_inventory = Corpse.set_ammo_inventory
@@ -316,6 +331,54 @@ class AmmoDepletionTests(unittest.TestCase):
         )
 
         self.assertEqual(room.get_ground_ammo("arrow")["quantity"], 3)
+
+    def test_get_ground_ammo_does_not_persist_when_already_normalized(self):
+        room = DummyRoom()
+        normalized = [
+            {
+                "item_id": "practice_shortbow_arrows",
+                "quantity": 3,
+                "ammo_type": "arrow",
+                "ammo_class": "short_bow",
+                "tier": "average",
+                "name": "Practice shortbow arrows",
+            }
+        ]
+        room.db = CountingAmmoHolder(ground_ammo=list(normalized), loose_ammo=list(normalized))
+
+        self.assertEqual(room.get_ground_ammo(), normalized)
+        self.assertEqual(room.db.writes_for("ground_ammo"), 0)
+        self.assertEqual(room.db.writes_for("loose_ammo"), 0)
+
+    def test_get_ground_ammo_persists_when_normalization_changes_storage(self):
+        room = DummyRoom()
+        room.db = CountingAmmoHolder(
+            ground_ammo=[
+                {
+                    "item_id": "practice_shortbow_arrows",
+                    "quantity": 1,
+                    "ammo_type": "arrow",
+                    "ammo_class": "short_bow",
+                    "tier": "average",
+                    "name": "Practice shortbow arrows",
+                },
+                {
+                    "item_id": "practice_shortbow_arrows",
+                    "quantity": 2,
+                    "ammo_type": "arrow",
+                    "ammo_class": "short_bow",
+                    "tier": "average",
+                    "name": "Practice shortbow arrows",
+                },
+            ],
+            loose_ammo=None,
+        )
+
+        merged = room.get_ground_ammo()
+
+        self.assertEqual(merged[0]["quantity"], 3)
+        self.assertEqual(room.db.writes_for("ground_ammo"), 1)
+        self.assertEqual(room.db.writes_for("loose_ammo"), 1)
 
     def test_special_held_ammo_overrides_quiver(self):
         attacker = AmmoDummyCharacter()

@@ -1,8 +1,10 @@
 import os
 import time
 import unittest
+from unittest.mock import patch
 
 import django
+from django.core.exceptions import ObjectDoesNotExist
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
 django.setup()
@@ -127,6 +129,19 @@ class RangerCompanionBehaviorTests(unittest.TestCase):
         ok, message = ranger.command_ranger_companion("tease")
         self.assertFalse(ok)
         self.assertIn("turns away", message.lower())
+
+    def test_dismiss_tolerates_already_deleted_companion_entity(self):
+        ranger = self._create_character("Behavior Ranger Dismiss", profession="ranger", location=self.wild_room)
+        ok, _message = ranger.call_ranger_companion(species="raccoon")
+        self.assertTrue(ok)
+        companion = ranger.get_ranger_companion_entity()
+
+        with patch.object(companion, "delete", side_effect=ObjectDoesNotExist("This object was already deleted!")):
+            ok, message = ranger.dismiss_ranger_companion()
+
+        self.assertTrue(ok)
+        self.assertIn("slips back into the wild", message.lower())
+        self.assertEqual(ranger.get_ranger_companion()["state"], "dismissed")
 
     def test_companion_get_drop_and_give_item(self):
         ranger = self._create_character("Behavior Ranger Items", profession="ranger", location=self.wild_room)

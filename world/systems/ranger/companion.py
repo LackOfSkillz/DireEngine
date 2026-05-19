@@ -1,6 +1,7 @@
 import time
 from collections.abc import Mapping
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import close_old_connections
 
 from evennia.utils.create import create_object
@@ -282,6 +283,7 @@ def dismiss_ranger_companion(owner):
         return False, "Your companion is not currently with you.", record
 
     if entity is not None:
+        entity_id = getattr(entity, "id", None)
         if hasattr(entity, "clear_owner"):
             entity.clear_owner()
         delete_error = None
@@ -289,13 +291,24 @@ def dismiss_ranger_companion(owner):
             close_old_connections()
             try:
                 entity.delete()
+            except ObjectDoesNotExist:
                 delete_error = None
                 break
             except Exception as error:
                 delete_error = error
+                if "already deleted" in str(error or "").lower():
+                    delete_error = None
+                    break
                 if "database is locked" not in str(error or "").lower():
                     raise
                 time.sleep(0.1)
+                continue
+
+            if resolve_companion_entity(entity_id) is None:
+                delete_error = None
+                break
+            delete_error = RuntimeError(f"Companion entity #{entity_id} still exists after delete().")
+            time.sleep(0.1)
         if delete_error is not None:
             raise delete_error
 

@@ -1,6 +1,76 @@
 # Changelog
 
+## 2026-05-19
+### DRG-LANDING-GROUND-AMMO-READ-GUARD-001
+
+- Closed the immediate `look`-path failure at the owning room seam in `typeclasses/rooms.py`. `_get_ground_ammo_stacks()` no longer writes `ground_ammo` and `loose_ammo` back to AttributeDB on every read; it now persists only when stack normalization actually changes the stored ammo payload.
+- Preserved the existing backward-compatible dual-field behavior while removing the read-side write amplification. Rooms with already-normalized or empty ground ammo now avoid attribute writes during `look`, which removes the hot path that was surfacing the live `FOREIGN KEY constraint failed` error for stale room references.
+- Added focused regressions in `tests/test_ammo_depletion.py` proving normalized reads stay write-free while still persisting when legacy or unmerged stack state needs normalization.
+
+Validation:
+- Focused ammo regression slice: `16 passed` across `tests/test_ammo_depletion.py`.
+- Read-only SQLite integrity diagnostic (`PRAGMA foreign_key_check`) against `server/evennia.db3` found `0` FK violations, confirming the database is structurally clean at rest and ruling out persisted AttributeDB/ObjectDB corruption as the active cause.
+- Clean Evennia restart plus fresh webclient validation reproduced the intended post-fix behavior without recurrence: fresh-puppet gameplay rendered normally, repeated `look` calls succeeded across `Mongers' Bazaar` and `Cheopman Lane`, and no new `FOREIGN KEY constraint failed` or `IntegrityError` lines appeared in the current `server.log` / `portal.log` window for the validation timestamps.
+
+### DRG-LANDING-IN-GAME-MAP-FILTER-WIRING-001
+
+- Restored the shared Landing room-and-edge filter at the owning in-game cache seam in `world/area_forge/map_api.py`. `_get_cached_zone_template(...)` now re-filters `serialized_rooms` and `edges` through `filter_zone_rooms_and_edges(...)` before caching the zone template, so the in-game map path can no longer bypass the dominant-image and Manhattan-`80` constraints while the builder path stays filtered.
+- Added explicit cache-version invalidation for filter-logic changes. `_FILTER_LOGIC_VERSION = "v1"` now participates in `_zone_template_signature(...)`, forcing stale in-process templates to miss when the filtering behavior changes even if the raw room/edge signatures stay the same.
+- Closed the test gap that allowed helper-level parity without proving the cached in-game template seam. `tests/world/test_landing_v2_manifest_and_map_filter.py` now includes a synthetic multi-image cache-path regression proving `_get_cached_zone_template(...)` returns the filtered profile, plus a cache-signature regression proving filter-logic version changes invalidate the cached template key.
+- Step 0 live evidence matched the user-reported drift exactly before the fix: the active in-game webclient still showed `Town Green North`, `Rooms 253`, and `Exits 594`, while a fresh direct Python probe against the production path returned `{'rooms': 202, 'edges': 417, 'zone': 'The Landing', 'player_room_id': 48827}`. That probe-vs-live split narrowed the defect to stale cached-template wiring rather than the shared filter itself.
+- Post-fix live browser verification was blocked by an unrelated runtime failure in the character entry / room hydration path. Fresh webclient sessions could reconnect and puppet into character state, but room hydration stalled at `Awaiting room data`, and instrumented websocket/text output showed `look` triggering `django.db.utils.IntegrityError: FOREIGN KEY constraint failed` from `typeclasses/rooms.py` ground-ammo attribute persistence. Because of that separate live runtime defect, this dispatch closes with code-level and focused-test validation plus documented browser-blocker evidence, not a fresh post-fix `MAP DATA:` transcript.
+
+Validation:
+- Focused Landing regression file after cache-seam repair: `14 passed` across `tests/world/test_landing_v2_manifest_and_map_filter.py`.
+- Focused Landing regression file after adding the new cache-path tests: `16 passed` across `tests/world/test_landing_v2_manifest_and_map_filter.py`.
+- Direct post-fix in-game production probe confirmed the filtered Landing payload at `202` rooms and `417` rendered edges for canonical arrival room `48827 / Town Green North`.
+- Live browser audit reproduced the pre-fix stale in-game payload (`253` rooms / `594` exits) and then exposed the unrelated room-hydration blocker on fresh post-fix sessions: websocket/browser output showed `You become SmokeEmpathLive` followed by `Awaiting room data` and a `look`-path `django.db.utils.IntegrityError: FOREIGN KEY constraint failed`, preventing a trustworthy fresh `MAP DATA:` capture from the actual webclient surface.
+
+### DRG-LANDING-MAP-ORPHAN-RECOVERY-001
+
+- Followed the post-wiring orphan probe instead of widening the map architecture. The filtered Landing payload had `6` orphan rooms and `2` near-orphans, with no `should_have_rendered` cases; the probe split the problem cleanly into `3` within-image named-exit suppressions, `2` legitimate within-image compass edges above the old Manhattan `80` cutoff, and `1` room whose only exit led off the rendered image.
+- Relaxed the shared edge predicate at the owning seam in `world/area_forge/map_filtering.py`. The map filter now allows named exits when both endpoints survive room selection, raises the Manhattan cutoff from `80` to `160`, and prunes rooms whose every visible exit points to a destination outside the rendered room set. That recovers the legitimate within-image orphan streets while cleanly dropping off-image stubs like Mongers' Bazaar instead of leaving isolated dots on the map.
+- Restored builder parity for the new filter behavior without widening the export contract. `web/views.py` now keeps room exit metadata intact while the shared filter runs and merges YAML `special_exits` into the builder candidate-edge pool before filtering, so the builder payload sees the same named-exit graph as the in-game map path and then rebuilds its final `exits` dict from the filtered edges.
+- The live webclient mismatch after code landing was operational, not architectural. Restarting Evennia loaded the updated filter modules into the running server, and `world/area_forge/map_api.py` now bumps `_FILTER_LOGIC_VERSION` to `"v2"` so future filter-logic changes force cached zone templates to miss instead of silently serving the old in-memory profile.
+- The new steady-state filtered Landing profile is now `201` rooms and `476` rendered edges with max Manhattan `159`. The old orphan set resolves as intended: five within-image rooms regain visible connectivity, while the one room whose only destination is off-image is removed from the rendered set.
+
+Validation:
+- Direct in-game production probe after the orphan recovery pass: `201` rooms, `476` rendered edges, max Manhattan `159`.
+- Direct builder payload probe after the parity repair: `201` rooms, `476` rendered edges, max Manhattan `159`.
+- Clean Evennia restart plus fresh webclient verification now matches the post-fix probe on the actual live surface: `ROOMS 201`, `EXITS 476`, `ZONE THE LANDING`, with the view centered on `Hodierna Way` after `ic jekar` from a brand-new browser page.
+- Focused Landing regression reruns remained slow in this SQLite runtime and did not flush a final summary within the command timeout, but the exact changed assertions were reduced from hard failures to all-green partial output during rerun (`...........`) after the parity fix, and the direct code probes above matched the new intended profile on both surfaces.
+
 ## 2026-05-18
+### DRG-LANDING-V2-BUILDER-PAYLOAD-FILTER-001
+
+- Extracted the Landing map-edge rules into the shared module `world/area_forge/map_filtering.py` so the same dominant-image, compass-direction, and Manhattan-`80` predicate now drives both the in-game map surface and the V2 builder payload path. `world/area_forge/map_api.py` now imports the shared helpers instead of owning a separate inline copy, while preserving the existing in-game payload shape and cache invalidation behavior.
+- Closed the builder-side data gap that was preventing the shared predicate from working against exported YAML. `world/worlddata/services/export_zone_service.py` now exports each room's `canonical_image`, and the builder export seam now treats compass abbreviations (`n/s/e/w/u/d/ne/nw/se/sw`) as normal spatial exits rather than demoting them into `special_exits` where the V2 builder loader would drop them.
+- Applied the shared filter at the owning builder payload seam in `web/views.py`. Builder room normalization now preserves `canonical_image`, `_load_builder_zone_yaml(...)` now runs the shared room+edge filter before responding, and the returned V2 builder payload for `the_landing` now collapses to the same filtered profile as the in-game zone map: `202` rooms, `417` rendered edges, max Manhattan `80`, and retained compass abbreviations (`e: 6`, `n: 1`, `s: 4`, `w: 3`).
+- Expanded `tests/world/test_landing_v2_manifest_and_map_filter.py` to cover the additive export schema and the cross-surface parity target. The focused file now proves exported Landing YAML carries `canonical_image`, builder payload room count drops from raw `253` to filtered `202`, and the filtered builder payload matches the in-game Landing edge profile at `417` edges with max Manhattan `80`.
+- Corrected the closeout record from the earlier `DRG-LANDING-MAP-EDGE-FIDELITY-001` dispatch: that earlier work fixed the in-game map path only. Subsequent probes showed the V2 builder payload was still shipping the unfiltered `253`-room / `473`-edge graph until this dispatch landed the shared payload filter on the builder seam.
+
+Validation:
+- Focused builder parity regression: `1 passed` across `tests/world/test_landing_v2_manifest_and_map_filter.py -k builder_payload_matches_in_game_filtered_landing_profile`.
+- Focused Landing regression file: `14 passed` across `tests/world/test_landing_v2_manifest_and_map_filter.py`.
+- Direct post-fix builder payload probe from live code confirmed `builder_rooms = 202`, `builder_edges = 417`, `builder_max = 80`, and exact retained compass-abbreviation counts aligned with the in-game payload.
+- Live browser validation: opened `http://localhost:4001/builder/`, started the local Builder Launcher on `http://127.0.0.1:7777`, selected `The Landing (253)` in Builder V2, and captured fresh builder-page evidence from the live V2 surface after the payload fix.
+
+### DRG-LANDING-MAP-EDGE-FIDELITY-001
+
+- Tightened Landing map-edge rendering at the owning seam in `world/area_forge/map_api.py` instead of widening importer or builder code. The map layer now normalizes abbreviated compass directions through a local alias table mirroring the builder vocabulary (`n/s/e/w/u/d/ne/nw/se/sw` to full names), classifies compass adjacencies through `_COMPASS_DIRECTIONS`, and applies one shared `_edge_renders_on_map(...)` predicate to both cached zone-map edges and local-map BFS edges.
+- Lowered the canonical Landing Manhattan edge threshold from `200` to `80` and threaded that constant through the zone-template signature so cached zone maps invalidate when the threshold changes. Non-compass navigation commands are now excluded from spatial edge rendering entirely, while real compass abbreviations such as `e`, `n`, `s`, and `w` still render when their geometry stays within the threshold.
+- Preserved the earlier dominant-image room selection and then tightened only the remaining edge population. Live Step 0 probes on the dominant primary-image Landing subset found `199` coordinate-bearing canonical rooms and `474` candidate edges, with bucket distribution `11-20: 2`, `21-50: 321`, `51-100: 121`, `101-200: 26`, `>200: 4`. Distinct live direction names were `arch`, `bazaar`, `bridge`, `dock`, `down`, `e`, `east`, `gate`, `n`, `north`, `northeast`, `northwest`, `path`, `pier`, `ramp`, `s`, `south`, `southeast`, `southwest`, `square`, `stair`, `up`, `w`, and `west`; the non-compass set stayed inside the expected bare-noun navigation bucket with no new unknown forms.
+- Added focused regression coverage for the tightening dispatch and the adjacent dismissal hardening uncovered during anchor validation. `tests/world/test_landing_v2_manifest_and_map_filter.py` now covers direction normalization, non-compass edge suppression, compass-abbreviation preservation, long-edge dropping above threshold, inclusive threshold retention, and local-map parity with zone-map filtering. `world/systems/ranger/companion.py` now treats already-deleted companion entities as a successful dismiss path and verifies the companion entity is actually gone before reporting success, with new coverage in `tests/world/test_ranger_companion_behavior.py`.
+- Live runtime metrics after the new predicate landed confirmed the intended cut on the in-game map surface: canonical Landing zone-map rendering now uses threshold `80`, final rendered edge count is `417`, max rendered Manhattan is `80`, and abbreviated compass exits still survive in the rendered payload (`e: 6`, `n: 1`, `s: 4`, `w: 3`). Later probe work showed the V2 builder payload path was still unfiltered at this point; that builder-side drift was closed separately in `DRG-LANDING-V2-BUILDER-PAYLOAD-FILTER-001`.
+
+Validation:
+- Focused Landing map regression file: `13 passed` across `tests/world/test_landing_v2_manifest_and_map_filter.py`.
+- Focused ranger dismissal repair checks: `2 passed` across the exact tease + already-deleted companion behavior slice, and the exact dismiss-removes-entity test reran green at `1 passed`.
+- Exact documented preservation batch reran clean at `315 passed, 153 subtests passed`.
+- Ranger-adjacent anchor reran clean at `93 passed, 138 subtests passed`; the historical `92` anchor is now stale by one new dismissal regression added during this dispatch's validation hardening.
+- Live browser validation: a fresh webclient session bound to canonical `Town Green North` and showed `ZONE THE LANDING` in the in-game map panel during capture. Builder-surface cleanup was not yet true at this stage and was corrected later in `DRG-LANDING-V2-BUILDER-PAYLOAD-FILTER-001`.
+- Lesson 8: filter thresholds must be validated against the actual edge distribution, not a defensive default. The earlier `200` cutoff looked safe but kept the visible spaghetti population alive; the live bucket distribution made `80` the correct bounded cut once measured.
+
 ### DRG-CANONICAL-CROSSING-FULL-IMPORT-AND-RENAME-001
 
 - Shipped the consolidated canonical Crossing importer and Landing rename path. `world/areas/the_crossing/import_canonical.py` now exposes `ensure_full_canonical_crossing()`, materializing all historical phase rooms in one pass, preserving per-room `canonical_phase`, draining pending exits once against the completed import set, and applying AreaForge-compatible Landing metadata to canonical rooms. `world/areas/the_crossing/guildhall_stubs.py` now applies the same Landing metadata to guildhall stub rooms so the stub graph participates in the same zone/reporting surfaces.

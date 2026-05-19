@@ -4,6 +4,7 @@ import time
 from evennia.utils.search import search_tag
 
 from tools.diretest.core.runtime import record_payload_timing, suppress_client_payloads
+from world.area_forge.map_filtering import LANDING_MAP_EDGE_MAX_MANHATTAN, _COMPASS_DIRECTIONS, filter_zone_rooms_and_edges, normalize_exit_direction, select_zone_rooms, edge_renders_on_map as shared_edge_renders_on_map
 from world.area_forge.utils.messages import send_structured
 
 
@@ -68,6 +69,7 @@ _FALLBACK_VECTORS = [
     (-1, 1),
 ]
 
+_FILTER_LOGIC_VERSION = "v2"
 _ZONE_MAP_TEMPLATE_CACHE = {}
 
 
@@ -85,6 +87,12 @@ def _zone_label_for_room(room, fallback=None):
     if zone_id and zone_id != "default_region":
         return zone_id
     return fallback
+
+
+def _exit_is_visible_on_map(exit_obj):
+    # Keep map rendering aligned with Room.get_display_exits: hidden and secret exits stay off-map.
+    db = getattr(exit_obj, "db", None)
+    return not bool(getattr(db, "hidden_exit", False) or getattr(db, "secret", False))
 
 
 def _room_has_tag(room, tag_key, category=None):
@@ -139,6 +147,8 @@ def _zone_template_signature(zone_rooms):
             edge_signatures.append((room_id, destination_id, str(getattr(exit_obj, "key", "") or "")))
 
     return (
+        _FILTER_LOGIC_VERSION,
+        LANDING_MAP_EDGE_MAX_MANHATTAN,
         tuple(room_signatures),
         tuple(sorted(edge_signatures)),
     )
@@ -147,6 +157,11 @@ def _zone_template_signature(zone_rooms):
 def _get_cached_zone_template(area_tag, build_if_missing=True):
     tagged_objects = list(search_tag(area_tag, category="build"))
     zone_rooms = [obj for obj in tagged_objects if getattr(obj, "destination", None) is None and getattr(obj, "id", None) is not None]
+    if not zone_rooms:
+        _ZONE_MAP_TEMPLATE_CACHE.pop(area_tag, None)
+        return None
+
+    zone_rooms = _select_zone_template_rooms(zone_rooms)
     if not zone_rooms:
         _ZONE_MAP_TEMPLATE_CACHE.pop(area_tag, None)
         return None
@@ -174,6 +189,7 @@ def _get_cached_zone_template(area_tag, build_if_missing=True):
         x_offset=x_offset,
         y_offset=y_offset,
     )
+    serialized_rooms, edges = filter_zone_rooms_and_edges(serialized_rooms, edges)
     template = {
         "rooms": [
             {
@@ -232,6 +248,10 @@ def _direction_vector(direction):
     return _DIRECTION_VECTORS.get(_normalize_direction(direction))
 
 
+def _normalize_exit_direction(direction: str) -> str:
+    return normalize_exit_direction(direction)
+
+
 def _reverse_direction(direction):
     normalized = _normalize_direction(direction)
     return _REVERSE_DIRECTIONS.get(normalized)
@@ -243,6 +263,53 @@ def _room_relative_coordinates(room, *, x_offset=0, y_offset=0):
     if room_x is None or room_y is None:
         return None
     return room_x - x_offset, room_y - y_offset
+
+
+def _room_has_explicit_map_coordinates(room):
+    return _room_relative_coordinates(room) is not None
+
+
+def _room_canonical_image(room):
+    return str(getattr(getattr(room, "db", None), "canonical_image", "") or "").strip()
+
+
+def _exit_is_compass_adjacency(exit_obj):
+    return normalize_exit_direction(getattr(exit_obj, "key", "")) in _COMPASS_DIRECTIONS
+
+
+def _room_filter_payload(room):
+    return {
+        "id": getattr(room, "id", None),
+        "x": getattr(getattr(room, "db", None), "map_x", None),
+        "y": getattr(getattr(room, "db", None), "map_y", None),
+        "canonical_image": _room_canonical_image(room),
+    }
+
+
+def _select_zone_template_rooms(zone_rooms):
+    filtered_rooms, _ = select_zone_rooms([_room_filter_payload(room) for room in zone_rooms], primary_image=None), []
+    filtered_room_ids = {room["id"] for room in filtered_rooms}
+    return [room for room in zone_rooms if getattr(room, "id", None) in filtered_room_ids]
+
+
+def _edge_is_continuous_on_map(source_room, destination_room):
+    return shared_edge_renders_on_map(
+        _room_filter_payload(source_room),
+        {"dir": "north"},
+        _room_filter_payload(destination_room),
+        max_manhattan=LANDING_MAP_EDGE_MAX_MANHATTAN,
+    )
+
+
+def _edge_renders_on_map(source_room, exit_obj, destination_room):
+    if not _exit_is_visible_on_map(exit_obj):
+        return False
+    return shared_edge_renders_on_map(
+        _room_filter_payload(source_room),
+        {"dir": getattr(exit_obj, "key", "")},
+        _room_filter_payload(destination_room),
+        max_manhattan=LANDING_MAP_EDGE_MAX_MANHATTAN,
+    )
 
 
 def _find_open_position(preferred, used_positions):
@@ -359,11 +426,21 @@ def _serialize_room(room, *, x_offset=0, y_offset=0, current_room_id=None, fallb
     coordinates = _room_relative_coordinates(room, x_offset=x_offset, y_offset=y_offset)
     room_x, room_y = coordinates if coordinates is not None else (fallback_position or (0, 0))
     flags = _room_map_flags(room)
+    exits = {}
+    for exit_obj in getattr(room, "exits", []):
+        if not _exit_is_visible_on_map(exit_obj):
+            continue
+        destination = getattr(exit_obj, "destination", None)
+        destination_id = getattr(destination, "id", None)
+        if destination_id is None:
+            continue
+        exits[getattr(exit_obj, "key", "")] = {"target": destination_id}
     return {
         "id": room_id,
         "x": room_x,
         "y": room_y,
         "name": room.key,
+        "exits": exits,
         "current": room_id == current_room_id,
         "is_player": room_id == current_room_id,
         "has_poi": bool(flags["has_poi"]),
@@ -396,6 +473,8 @@ def _collect_room_edges(rooms_by_id):
             destination = getattr(exit_obj, "destination", None)
             destination_id = getattr(destination, "id", None)
             if destination_id not in rooms_by_id:
+                continue
+            if not _edge_renders_on_map(room, exit_obj, destination):
                 continue
             signature = (room_id, destination_id, exit_obj.key)
             if signature in seen:
@@ -437,6 +516,8 @@ def get_local_map(character, radius=3):
             destination = getattr(exit_obj, "destination", None)
             destination_id = getattr(destination, "id", None)
             if not destination or destination_id is None:
+                continue
+            if not _edge_renders_on_map(room, exit_obj, destination):
                 continue
 
             edges.append(

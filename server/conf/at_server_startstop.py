@@ -151,6 +151,61 @@ def _find_scripts_by_key(script_key):
         return []
 
 
+def _ensure_canonical_v2_manifest(zone_id="the_landing"):
+    normalized_zone_id = str(zone_id or "").strip().lower()
+    if not normalized_zone_id:
+        return None
+
+    try:
+        from web.views import _load_builder_zone_yaml
+        from world.builder.services.map_exporter import _rooms_for_zone
+        from world.worlddata.services.export_zone_service import write_zone_export
+
+        expected_room_count = len(list(_rooms_for_zone(normalized_zone_id)))
+        manifest_room_count = 0
+        manifest_ok = False
+
+        try:
+            manifest_payload = _load_builder_zone_yaml(normalized_zone_id)
+            manifest_room_count = len(list((manifest_payload or {}).get("rooms") or []))
+            manifest_ok = expected_room_count > 0 and manifest_room_count >= expected_room_count
+        except Exception:
+            manifest_ok = False
+
+        if not manifest_ok:
+            manifest_path = write_zone_export(normalized_zone_id)
+            manifest_payload = _load_builder_zone_yaml(normalized_zone_id)
+            manifest_room_count = len(list((manifest_payload or {}).get("rooms") or []))
+            logger.log_info(f"Regenerated V2 manifest for {normalized_zone_id} with {manifest_room_count} rooms at {manifest_path}.")
+            _append_guard_startup_trace(
+                "at_server_start",
+                "canonical_v2_manifest_regenerated",
+                zone_id=normalized_zone_id,
+                room_count=manifest_room_count,
+                expected_room_count=expected_room_count,
+            )
+            return manifest_payload
+
+        logger.log_info(f"Verified V2 manifest for {normalized_zone_id} with {manifest_room_count} rooms.")
+        _append_guard_startup_trace(
+            "at_server_start",
+            "canonical_v2_manifest_verified",
+            zone_id=normalized_zone_id,
+            room_count=manifest_room_count,
+            expected_room_count=expected_room_count,
+        )
+        return manifest_payload
+    except Exception as error:
+        logger.log_warn(f"Canonical Landing V2 manifest verification failed during server start: {error}")
+        _append_guard_startup_trace(
+            "at_server_start",
+            "canonical_v2_manifest_failed",
+            zone_id=normalized_zone_id,
+            error=str(error),
+        )
+        return None
+
+
 def _collect_guard_startup_counts():
     guards = list(iter_active_guards())
     return {
@@ -1853,6 +1908,7 @@ def _run_deferred_server_start_bootstrap_after_character_init():
         except Exception:
             logger.log_warn("Canonical Crossing full bootstrap failed during server start.")
         _append_guard_startup_trace("at_server_start", "bootstrap_after_canonical_crossing_full_import", deferred=True)
+        _ensure_canonical_v2_manifest("the_landing")
         try:
             from world.areas.the_landing import ensure_the_landing_streetlife
 

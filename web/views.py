@@ -20,6 +20,7 @@ from world.builder.services.anthropic_client import RoomDescriptionGenerator
 from server.systems.zone_room_item_assignments import normalize_room_item_entries
 from web.character_helpers import parse_request_data
 from world.area_forge import map_api
+from world.area_forge.map_filtering import filter_zone_rooms_and_edges
 from world.area_forge.paths import artifact_paths
 from world.area_forge.serializer import load_review_graph, save_review_graph
 from world.builder.schemas.generation_context_schema import load_zone_vocab, normalize_generation_context
@@ -289,11 +290,15 @@ def _normalize_builder_yaml_room(room_data, fallback_index=0):
     details = room_data.get("details") if isinstance(room_data.get("details"), dict) else {}
     room_states = room_data.get("room_states") if isinstance(room_data.get("room_states"), list) else []
     ambient = dict(room_data.get("ambient") or {}) if isinstance(room_data.get("ambient"), dict) else {}
-    raw_exits = dict(room_data.get("exits") or {})
+    raw_exits = {
+        **dict(room_data.get("special_exits") or {}),
+        **dict(room_data.get("exits") or {}),
+    }
     return {
         "id": normalized_room_id,
         "name": str(room_data.get("name") or normalized_room_id),
         "typeclass": str(room_data.get("typeclass") or DEFAULT_ROOM_TYPECLASS).strip() or DEFAULT_ROOM_TYPECLASS,
+        "canonical_image": str(room_data.get("canonical_image") or "").strip(),
         "short_desc": room_data.get("short_desc"),
         "desc": str(room_data.get("desc") or ""),
         "stateful_descs": {
@@ -358,6 +363,40 @@ def _normalize_builder_yaml_room(room_data, fallback_index=0):
     }
 
 
+def _filter_builder_zone_payload(payload):
+    rooms = [dict(room_data or {}) for room_data in list((payload or {}).get("rooms") or [])]
+    edges = []
+    edge_specs = {}
+
+    for room_data in rooms:
+        room_id = str(room_data.get("id") or "").strip()
+        exits = dict(room_data.get("exits") or {})
+        for direction, spec in exits.items():
+            normalized_direction = str(direction or "").strip().lower()
+            target_id = str((spec or {}).get("target") or "").strip()
+            if not normalized_direction or not target_id:
+                continue
+            edge_key = (room_id, target_id, normalized_direction)
+            edges.append({"from": room_id, "to": target_id, "dir": normalized_direction})
+            edge_specs[edge_key] = dict(spec or {})
+
+    filtered_rooms, filtered_edges = filter_zone_rooms_and_edges(rooms, edges)
+    filtered_rooms_by_id = {room_data["id"]: room_data for room_data in filtered_rooms}
+    for room_data in filtered_rooms:
+        room_data["exits"] = {}
+    for edge in filtered_edges:
+        edge_key = (edge.get("from"), edge.get("to"), edge.get("dir"))
+        source_room = filtered_rooms_by_id.get(edge.get("from"))
+        if not source_room:
+            continue
+        source_room.setdefault("exits", {})[edge.get("dir")] = dict(edge_specs.get(edge_key) or {})
+
+    for room_data in filtered_rooms:
+        room_data["exits"] = dict(sorted((room_data.get("exits") or {}).items()))
+
+    return {**payload, "rooms": filtered_rooms}
+
+
 def _normalize_builder_zone_payload(data, fallback_zone_id="", direbuilder_metadata=None):
     if not isinstance(data, dict):
         raise ValueError("Zone payload must be an object.")
@@ -406,6 +445,7 @@ def _load_builder_zone_yaml(zone_id):
         fallback_zone_id=zone_id,
         direbuilder_metadata=_build_direbuilder_metadata(data),
     )
+    payload = _filter_builder_zone_payload(payload)
     payload["area"] = payload["zone_id"]
     return payload
 

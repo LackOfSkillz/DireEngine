@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from collections.abc import Mapping
+from datetime import datetime
 
 import yaml
 from django.utils.text import slugify
@@ -25,6 +26,16 @@ ALLOWED_DIRECTIONS = {
     "southwest",
     "up",
     "down",
+    "n",
+    "s",
+    "e",
+    "w",
+    "ne",
+    "nw",
+    "se",
+    "sw",
+    "u",
+    "d",
 }
 
 
@@ -96,6 +107,10 @@ def _zones_dir() -> Path:
     return Path(__file__).resolve().parents[3] / "worlddata" / "zones"
 
 
+def _archive_zones_dir() -> Path:
+    return _zones_dir() / "_archive"
+
+
 def _titleize_zone_id(zone_id: str) -> str:
     return str(zone_id or "").replace("_", " ").strip().title() or "Untitled Zone"
 
@@ -141,6 +156,7 @@ def _extract_room_data(room) -> dict:
         "id": _ensure_world_id(room),
         "name": room.key,
         "typeclass": getattr(room, "db_typeclass_path", None),
+        "canonical_image": str(getattr(getattr(room, "db", None), "canonical_image", "") or "").strip(),
         "short_desc": getattr(getattr(room, "db", None), "short_desc", None),
         "desc": getattr(getattr(room, "db", None), "desc", None),
         "stateful_descs": _extract_stateful_descs(room),
@@ -282,3 +298,21 @@ def write_zone_export(zone_id: str) -> Path:
     with output_path.open("w", encoding="utf-8") as file_handle:
         yaml.safe_dump(zone_data, file_handle, sort_keys=False)
     return output_path
+
+
+def archive_zone_export(zone_id: str) -> Path | None:
+    normalized_zone_id = str(zone_id or "").strip()
+    if not normalized_zone_id:
+        raise ValueError("zone_id is required.")
+
+    source_path = _zones_dir() / f"{normalized_zone_id}.yaml"
+    if not source_path.exists():
+        return None
+
+    archive_dir = _archive_zones_dir()
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    destination_path = archive_dir / source_path.name
+    if destination_path.exists():
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        destination_path = archive_dir / f"{source_path.stem}.{timestamp}{source_path.suffix}"
+    return source_path.replace(destination_path)

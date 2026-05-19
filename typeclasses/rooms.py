@@ -106,9 +106,13 @@ class Room(ObjectParent, DefaultRoom):
         if ground_ammo is None:
             ground_ammo = getattr(self.db, "loose_ammo", None)
         ammo = merge_ammo_stacks(ground_ammo or [])
-        self.db.ground_ammo = list(ammo)
-        self.db.loose_ammo = list(ammo)
-        return list(ammo)
+        ammo_list = list(ammo)
+        current_ground = list(getattr(self.db, "ground_ammo", []) or [])
+        current_loose = list(getattr(self.db, "loose_ammo", []) or [])
+        if ammo_list != current_ground or ammo_list != current_loose:
+            self.db.ground_ammo = ammo_list
+            self.db.loose_ammo = ammo_list
+        return ammo_list
 
     def get_ground_ammo(self, ammo_type=None):
         ammo = self._get_ground_ammo_stacks()
